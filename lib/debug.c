@@ -3,15 +3,15 @@
  * it what you wish.
  */
 
-#include "debug.h"
+#अन्तर्भाव "debug.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#अन्तर्भाव <stdarg.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+शून्य ul_debug(ध्रुव वर्ण *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -20,66 +20,66 @@ void ul_debug(const char *mesg, ...)
 	fputc('\n', stderr);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
-		     const void *handle, unsigned mask)
+शून्य ul_debug_prefix(ध्रुव वर्ण *lib, ध्रुव वर्ण *flag,
+		     ध्रुव शून्य *handle, unsigned mask)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	सचे (handle && !(mask & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+unsigned ul_debug_parse_mask(ध्रुव संरचना ul_debug_maskname flagnames[],
+			     ध्रुव वर्ण *mask)
 {
 	unsigned res;
-	char *ptr;
+	वर्ण *ptr;
 
 	/* let's check for a numeric mask first */
 	res = strtoul(mask, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	सचे (ptr && *ptr && flagnames && flagnames[0].name) {
+		वर्ण *msbuf, *ms, *name;
 		res = 0;
 
 		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		सचे (!ms)
+			पटिनिवत्त res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		याव ((name = strtok_r(ms, ",", &ptr))) {
+			ध्रुव संरचना ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
+			अत्थाय (d = flagnames; d && d->name; d++) {
+				सचे (strcmp(name, d->name) == 0) {
 					res |= d->mask;
-					break;
+					भङ्ग;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			सचे (res == UL_DEBUG_ALL)
+				भङ्ग;
 		}
-		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+		मुक्त(msbuf);
+	} अञ्ञथा सचे (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	पटिनिवत्त res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+शून्य ul_debug_print_masks(ध्रुव वर्ण *env,
+			  ध्रुव संरचना ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	ध्रुव संरचना ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	सचे (!flagnames)
+		पटिनिवत्त;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
-			continue;
+	अत्थाय (d = flagnames; d && d->name; d++) {
+		सचे (!d->help)
+			अनुवर्त;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
 				d->name, d->mask, d->help);
 	}

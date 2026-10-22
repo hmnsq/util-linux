@@ -4,33 +4,33 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "color-names.h"
 
-#include <ctype.h>
+#अन्तर्भाव <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+संरचना ul_color_name {
+	ध्रुव वर्ण *name;
+	ध्रुव वर्ण *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+स्थिर पूर्णाङ्क cmp_color_name(ध्रुव शून्य *a0, ध्रुव शून्य *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	ध्रुव संरचना ul_color_name
+		*a = (ध्रुव संरचना ul_color_name *) a0,
+		*b = (ध्रुव संरचना ul_color_name *) b0;
+	पटिनिवत्त strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+ध्रुव वर्ण *color_sequence_from_colorname(ध्रुव वर्ण *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	स्थिर ध्रुव संरचना ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
@@ -54,122 +54,122 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	संरचना ul_color_name कुञ्चिका = { .name = str };
+	ध्रुव संरचना ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	सचे (!str)
+		पटिनिवत्त रिक्त;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&कुञ्चिका, basic_schemes, ARRAY_SIZE(basic_schemes),
+				परिमाण(संरचना ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	पटिनिवत्त res ? res->seq : रिक्त;
 }
 
 
-int color_is_sequence(const char *color)
+पूर्णाङ्क color_is_sequence(ध्रुव वर्ण *color)
 {
-	if (color && *color == 0x1B) {
+	सचे (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		सचे (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		पटिनिवत्त 1;
 	}
 
-	return 0;
+	पटिनिवत्त 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+स्थिर पूर्णाङ्क __color_canonicalize(ध्रुव वर्ण *str, वर्ण **seq)
 {
-	char *in, *out;
-	int len;
+	वर्ण *in, *out;
+	पूर्णाङ्क len;
 
-	if (!str)
-		return -EINVAL;
+	सचे (!str)
+		पटिनिवत्त -EINVAL;
 
-	*seq = NULL;
+	*seq = रिक्त;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	सचे (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+		ध्रुव वर्ण *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		सचे (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			पटिनिवत्त *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		पटिनिवत्त 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	सचे ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		पटिनिवत्त -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	अत्थाय (in = *seq, out = *seq; in && *in; in++) {
+		सचे (*in != '\\') {
 			*out++ = *in;
-			continue;
+			अनुवर्त;
 		}
-		switch(*(in + 1)) {
-		case 'a':
+		विकल्प(*(in + 1)) {
+		पक्ष 'a':
 			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
+			भङ्ग;
+		पक्ष 'b':
 			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
+			भङ्ग;
+		पक्ष 'e':
 			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
+			भङ्ग;
+		पक्ष 'f':
 			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
+			भङ्ग;
+		पक्ष 'n':
 			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
+			भङ्ग;
+		पक्ष 'r':
 			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
+			भङ्ग;
+		पक्ष 't':
 			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
+			भङ्ग;
+		पक्ष 'v':
 			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
+			भङ्ग;
+		पक्ष '\\':
 			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
+			भङ्ग;
+		पक्ष '_':
 			*out++ = ' ';	/* Space */
-			break;
-		case '#':
+			भङ्ग;
+		पक्ष '#':
 			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
+			भङ्ग;
+		पक्ष '?':
 			*out++ = '?';	/* Question mark */
-			break;
-		default:
+			भङ्ग;
+		स्वभाव:
 			*out++ = *in;
 			*out++ = *(in + 1);
-			break;
+			भङ्ग;
 		}
 		in++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
+	सचे (out) {
+		प्रतिज्ञा ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	पटिनिवत्त 0;
 }
 
-char *color_get_sequence(const char *color)
+वर्ण *color_get_sequence(ध्रुव वर्ण *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	वर्ण *seq = रिक्त;
+	पूर्णाङ्क rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	पटिनिवत्त rc ? रिक्त : seq;
 }

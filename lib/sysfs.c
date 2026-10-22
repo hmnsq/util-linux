@@ -4,30 +4,30 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2011]
  */
-#include <ctype.h>
-#include <inttypes.h>
-#include <libgen.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <libgen.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <unistd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "pathnames.h"
-#include "sysfs.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "debug.h"
-#include "strutils.h"
-#include "buffer.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "cctype.h"
+#अन्तर्भाव "pathnames.h"
+#अन्तर्भाव "sysfs.h"
+#अन्तर्भाव "fileutils.h"
+#अन्तर्भाव "all-io.h"
+#अन्तर्भाव "debug.h"
+#अन्तर्भाव "strutils.h"
+#अन्तर्भाव "buffer.h"
 
-static void sysfs_blkdev_deinit_path(struct path_cxt *pc);
-static int  sysfs_blkdev_enoent_redirect(struct path_cxt *pc, const char *path, int *dirfd);
+स्थिर शून्य sysfs_blkdev_deinit_path(संरचना path_cxt *pc);
+स्थिर पूर्णाङ्क  sysfs_blkdev_enoent_redirect(संरचना path_cxt *pc, ध्रुव वर्ण *path, पूर्णाङ्क *dirfd);
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulsysfs);
+स्थिर UL_DEBUG_DEFINE_MASK(ulsysfs);
 UL_DEBUG_DEFINE_MASKNAMES(ulsysfs) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULSYSFS_DEBUG_INIT	(1 << 1)
@@ -37,29 +37,29 @@ UL_DEBUG_DEFINE_MASKNAMES(ulsysfs) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulsysfs, ULSYSFS_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulsysfs, ULSYSFS_DEBUG_, m, x)
 
-void ul_sysfs_init_debug(void)
+शून्य ul_sysfs_init_debug(शून्य)
 {
-	if (ulsysfs_debug_mask)
-		return;
+	सचे (ulsysfs_debug_mask)
+		पटिनिवत्त;
 	__UL_INIT_DEBUG_FROM_ENV(ulsysfs, ULSYSFS_DEBUG_, 0, ULSYSFS_DEBUG);
 }
 
-struct path_cxt *ul_new_sysfs_path(dev_t devno, struct path_cxt *parent, const char *prefix)
+संरचना path_cxt *ul_new_sysfs_path(dev_t devno, संरचना path_cxt *parent, ध्रुव वर्ण *prefix)
 {
-	struct path_cxt *pc = ul_new_path(NULL);
+	संरचना path_cxt *pc = ul_new_path(रिक्त);
 
-	if (!pc)
-		return NULL;
-	if (prefix)
+	सचे (!pc)
+		पटिनिवत्त रिक्त;
+	सचे (prefix)
 		ul_path_set_prefix(pc, prefix);
 
-	if (sysfs_blkdev_init_path(pc, devno, parent) != 0) {
+	सचे (sysfs_blkdev_init_path(pc, devno, parent) != 0) {
 		ul_unref_path(pc);
-		return NULL;
+		पटिनिवत्त रिक्त;
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
-	return pc;
+	पटिनिवत्त pc;
 }
 
 /*
@@ -69,32 +69,32 @@ struct path_cxt *ul_new_sysfs_path(dev_t devno, struct path_cxt *parent, const c
  * The sysfs_blkdev_deinit_path() is automatically called by ul_unref_path().
  *
  */
-int sysfs_blkdev_init_path(struct path_cxt *pc, dev_t devno, struct path_cxt *parent)
+पूर्णाङ्क sysfs_blkdev_init_path(संरचना path_cxt *pc, dev_t devno, संरचना path_cxt *parent)
 {
-	struct sysfs_blkdev *blk;
-	int rc;
-	char buf[sizeof(_PATH_SYS_DEVBLOCK)
-		 + sizeof(stringify_value(UINT32_MAX)) * 2
+	संरचना sysfs_blkdev *blk;
+	पूर्णाङ्क rc;
+	वर्ण buf[परिमाण(_PATH_SYS_DEVBLOCK)
+		 + परिमाण(stringify_मानम्(UINT32_MAX)) * 2
 		 + 3];
 
 	/* define path to devno stuff */
-	snprintf(buf, sizeof(buf), _PATH_SYS_DEVBLOCK "/%u:%u", major(devno), minor(devno));
+	snprintf(buf, परिमाण(buf), _PATH_SYS_DEVBLOCK "/%u:%u", major(devno), minor(devno));
 	rc = ul_path_set_dir(pc, buf);
-	if (rc)
-		return rc;
+	सचे (rc)
+		पटिनिवत्त rc;
 
 	/* make sure path exists */
 	rc = ul_path_get_dirfd(pc);
-	if (rc < 0)
-		return rc;
+	सचे (rc < 0)
+		पटिनिवत्त rc;
 
 	/* initialize sysfs blkdev specific stuff */
 	blk = ul_path_get_dialect(pc);
-	if (!blk) {
+	सचे (!blk) {
 		DBG_OBJ(CXT, pc, ul_debug("alloc new sysfs handler"));
-		blk = calloc(1, sizeof(struct sysfs_blkdev));
-		if (!blk)
-			return -ENOMEM;
+		blk = calloc(1, परिमाण(संरचना sysfs_blkdev));
+		सचे (!blk)
+			पटिनिवत्त -ENOMEM;
 
 		ul_path_set_dialect(pc, blk, sysfs_blkdev_deinit_path);
 		ul_path_set_enoent_redirect(pc, sysfs_blkdev_enoent_redirect);
@@ -105,54 +105,54 @@ int sysfs_blkdev_init_path(struct path_cxt *pc, dev_t devno, struct path_cxt *pa
 	blk->devno = devno;
 	sysfs_blkdev_set_parent(pc, parent);
 
-	return 0;
+	पटिनिवत्त 0;
 }
 
-static void sysfs_blkdev_deinit_path(struct path_cxt *pc)
+स्थिर शून्य sysfs_blkdev_deinit_path(संरचना path_cxt *pc)
 {
-	struct sysfs_blkdev *blk;
+	संरचना sysfs_blkdev *blk;
 
-	if (!pc)
-		return;
+	सचे (!pc)
+		पटिनिवत्त;
 
 	DBG_OBJ(CXT, pc, ul_debug("deinit"));
 
 	blk = ul_path_get_dialect(pc);
-	if (!blk)
-		return;
+	सचे (!blk)
+		पटिनिवत्त;
 
 	ul_unref_path(blk->parent);
-	free(blk);
+	मुक्त(blk);
 
-	ul_path_set_dialect(pc, NULL, NULL);
+	ul_path_set_dialect(pc, रिक्त, रिक्त);
 }
 
-int sysfs_blkdev_set_parent(struct path_cxt *pc, struct path_cxt *parent)
+पूर्णाङ्क sysfs_blkdev_set_parent(संरचना path_cxt *pc, संरचना path_cxt *parent)
 {
-	struct sysfs_blkdev *blk = ul_path_get_dialect(pc);
+	संरचना sysfs_blkdev *blk = ul_path_get_dialect(pc);
 
-	if (!pc || !blk)
-		return -EINVAL;
+	सचे (!pc || !blk)
+		पटिनिवत्त -EINVAL;
 
-	if (blk->parent) {
+	सचे (blk->parent) {
 		ul_unref_path(blk->parent);
-		blk->parent = NULL;
+		blk->parent = रिक्त;
 	}
 
-	if (parent) {
+	सचे (parent) {
 		ul_ref_path(parent);
 		blk->parent = parent;
-	} else
-		blk->parent = NULL;
+	} अञ्ञथा
+		blk->parent = रिक्त;
 
 	DBG_OBJ(CXT, pc, ul_debug("new parent"));
-	return 0;
+	पटिनिवत्त 0;
 }
 
-struct path_cxt *sysfs_blkdev_get_parent(struct path_cxt *pc)
+संरचना path_cxt *sysfs_blkdev_get_parent(संरचना path_cxt *pc)
 {
-	struct sysfs_blkdev *blk = ul_path_get_dialect(pc);
-	return blk ? blk->parent : NULL;
+	संरचना sysfs_blkdev *blk = ul_path_get_dialect(pc);
+	पटिनिवत्त blk ? blk->parent : रिक्त;
 }
 
 /*
@@ -162,104 +162,104 @@ struct path_cxt *sysfs_blkdev_get_parent(struct path_cxt *pc)
  *	/sys/dev/block/8:1/queue/logical_block_size redirects to
  *	/sys/dev/block/8:0/queue/logical_block_size
  */
-static int sysfs_blkdev_enoent_redirect(struct path_cxt *pc, const char *path, int *dirfd)
+स्थिर पूर्णाङ्क sysfs_blkdev_enoent_redirect(संरचना path_cxt *pc, ध्रुव वर्ण *path, पूर्णाङ्क *dirfd)
 {
-	struct sysfs_blkdev *blk = ul_path_get_dialect(pc);
+	संरचना sysfs_blkdev *blk = ul_path_get_dialect(pc);
 
-	if (blk && blk->parent && path) {
+	सचे (blk && blk->parent && path) {
 		*dirfd = ul_path_get_dirfd(blk->parent);
-		if (*dirfd >= 0) {
+		सचे (*dirfd >= 0) {
 			DBG_OBJ(CXT, pc, ul_debug("%s redirected to parent", path));
-			return 0;
+			पटिनिवत्त 0;
 		}
 	}
-	return 1;	/* no redirect */
+	पटिनिवत्त 1;	/* no redirect */
 }
 
-char *sysfs_blkdev_get_name(struct path_cxt *pc, char *buf, size_t bufsiz)
+वर्ण *sysfs_blkdev_get_name(संरचना path_cxt *pc, वर्ण *buf, size_t bufsiz)
 {
-	char link[PATH_MAX];
-	char *name;
+	वर्ण link[PATH_MAX];
+	वर्ण *name;
 	ssize_t	sz;
 
 	/* read /sys/dev/block/<maj:min> link */
-	sz = ul_path_readlink(pc, link, sizeof(link), NULL);
-	if (sz < 0)
-		return NULL;
+	sz = ul_path_readlink(pc, link, परिमाण(link), रिक्त);
+	सचे (sz < 0)
+		पटिनिवत्त रिक्त;
 
 	name = strrchr(link, '/');
-	if (!name)
-		return NULL;
+	सचे (!name)
+		पटिनिवत्त रिक्त;
 
 	name++;
 	sz = strlen(name);
-	if ((size_t) sz + 1 > bufsiz)
-		return NULL;
+	सचे ((size_t) sz + 1 > bufsiz)
+		पटिनिवत्त रिक्त;
 
 	memcpy(buf, name, sz + 1);
 	sysfs_devname_sys_to_dev(buf);
-	return buf;
+	पटिनिवत्त buf;
 }
 
-int sysfs_blkdev_is_partition_dirent(DIR *dir, struct dirent *d, const char *parent_name)
+पूर्णाङ्क sysfs_blkdev_is_partition_dirent(DIR *dir, संरचना dirent *d, ध्रुव वर्ण *parent_name)
 {
-	char path[NAME_MAX + 6 + 1];
+	वर्ण path[NAME_MAX + 6 + 1];
 
 #ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_DIR &&
+	सचे (d->d_type != DT_DIR &&
 	    d->d_type != DT_LNK &&
 	    d->d_type != DT_UNKNOWN)
-		return 0;
+		पटिनिवत्त 0;
 #endif
 	size_t len = 0;
 
-	if (parent_name) {
-		const char *p = parent_name;
+	सचे (parent_name) {
+		ध्रुव वर्ण *p = parent_name;
 
 		/* /dev/sda --> "sda" */
-		if (*parent_name == '/') {
+		सचे (*parent_name == '/') {
 			p = strrchr(parent_name, '/');
-			if (!p)
-				return 0;
+			सचे (!p)
+				पटिनिवत्त 0;
 			p++;
 		}
 
 		len = strlen(p);
-		if ((strlen(d->d_name) <= len) || (strncmp(p, d->d_name, len) != 0))
+		सचे ((strlen(d->d_name) <= len) || (strncmp(p, d->d_name, len) != 0))
 			len = 0;
 	}
 
-	if (len > 0) {
+	सचे (len > 0) {
 		/* partitions subdir name is
 		 *	"<parent>[:digit:]" or "<parent>p[:digit:]"
 		 */
-		return ((*(d->d_name + len) == 'p' && isdigit(*(d->d_name + len + 1)))
+		पटिनिवत्त ((*(d->d_name + len) == 'p' && isdigit(*(d->d_name + len + 1)))
 			|| isdigit(*(d->d_name + len)));
 	}
 
 	/* Cannot use /partition file, not supported on old sysfs */
-	snprintf(path, sizeof(path), "%s/start", d->d_name);
+	snprintf(path, परिमाण(path), "%s/start", d->d_name);
 
-	return faccessat(dirfd(dir), path, R_OK, 0) == 0;
+	पटिनिवत्त faccessat(dirfd(dir), path, R_OK, 0) == 0;
 }
 
-int sysfs_blkdev_count_partitions(struct path_cxt *pc, const char *devname)
+पूर्णाङ्क sysfs_blkdev_गणनम्_partitions(संरचना path_cxt *pc, ध्रुव वर्ण *devname)
 {
 	DIR *dir;
-	struct dirent *d;
-	int r = 0;
+	संरचना dirent *d;
+	पूर्णाङ्क r = 0;
 
-	dir = ul_path_opendir(pc, NULL);
-	if (!dir)
-		return 0;
+	dir = ul_path_opendir(pc, रिक्त);
+	सचे (!dir)
+		पटिनिवत्त 0;
 
-	while ((d = xreaddir(dir))) {
-		if (sysfs_blkdev_is_partition_dirent(dir, d, devname))
+	याव ((d = xreaddir(dir))) {
+		सचे (sysfs_blkdev_is_partition_dirent(dir, d, devname))
 			r++;
 	}
 
 	closedir(dir);
-	return r;
+	पटिनिवत्त r;
 }
 
 /*
@@ -269,34 +269,34 @@ int sysfs_blkdev_count_partitions(struct path_cxt *pc, const char *devname)
  * Note that this code does not expect any special format of the
  * partitions devnames.
  */
-dev_t sysfs_blkdev_partno_to_devno(struct path_cxt *pc, int partno)
+dev_t sysfs_blkdev_partno_to_devno(संरचना path_cxt *pc, पूर्णाङ्क partno)
 {
 	DIR *dir;
-	struct dirent *d;
+	संरचना dirent *d;
 	dev_t devno = 0;
 
-	dir = ul_path_opendir(pc, NULL);
-	if (!dir)
-		return 0;
+	dir = ul_path_opendir(pc, रिक्त);
+	सचे (!dir)
+		पटिनिवत्त 0;
 
-	while ((d = xreaddir(dir))) {
-		int n;
+	याव ((d = xreaddir(dir))) {
+		पूर्णाङ्क n;
 
-		if (!sysfs_blkdev_is_partition_dirent(dir, d, NULL))
-			continue;
+		सचे (!sysfs_blkdev_is_partition_dirent(dir, d, रिक्त))
+			अनुवर्त;
 
-		if (ul_path_readf_s32(pc, &n, "%s/partition", d->d_name))
-			continue;
+		सचे (ul_path_readf_s32(pc, &n, "%s/partition", d->d_name))
+			अनुवर्त;
 
-		if (n == partno) {
-			if (ul_path_readf_majmin(pc, &devno, "%s/dev", d->d_name) == 0)
-				break;
+		सचे (n == partno) {
+			सचे (ul_path_readf_majmin(pc, &devno, "%s/dev", d->d_name) == 0)
+				भङ्ग;
 		}
 	}
 
 	closedir(dir);
-	DBG_OBJ(CXT, pc, ul_debug("partno (%d) -> devno (%d)", (int) partno, (int) devno));
-	return devno;
+	DBG_OBJ(CXT, pc, ul_debug("partno (%d) -> devno (%d)", (पूर्णाङ्क) partno, (पूर्णाङ्क) devno));
+	पटिनिवत्त devno;
 }
 
 
@@ -304,28 +304,28 @@ dev_t sysfs_blkdev_partno_to_devno(struct path_cxt *pc, int partno)
  * Returns slave name if there is only one slave, otherwise returns NULL.
  * The result should be deallocated by free().
  */
-char *sysfs_blkdev_get_slave(struct path_cxt *pc)
+वर्ण *sysfs_blkdev_get_slave(संरचना path_cxt *pc)
 {
 	DIR *dir;
-	struct dirent *d;
-	char *name = NULL;
+	संरचना dirent *d;
+	वर्ण *name = रिक्त;
 
 	dir = ul_path_opendir(pc, "slaves");
-	if (!dir)
-		return NULL;
+	सचे (!dir)
+		पटिनिवत्त रिक्त;
 
-	while ((d = xreaddir(dir))) {
-		if (name)
-			goto err;	/* more slaves */
+	याव ((d = xreaddir(dir))) {
+		सचे (name)
+			गच्छ err;	/* more slaves */
 		name = strdup(d->d_name);
 	}
 
 	closedir(dir);
-	return name;
+	पटिनिवत्त name;
 err:
-	free(name);
+	मुक्त(name);
 	closedir(dir);
-	return NULL;
+	पटिनिवत्त रिक्त;
 }
 
 
@@ -341,23 +341,23 @@ err:
  * basename of the readlink result, and remove the last subdirectory from the
  * <chain> path.
  */
-static char *get_subsystem(char *chain, char *buf, size_t bufsz)
+स्थिर वर्ण *get_subsystem(वर्ण *chain, वर्ण *buf, size_t bufsz)
 {
 	size_t len;
-	char *p;
+	वर्ण *p;
 
-	if (!chain || !*chain)
-		return NULL;
+	सचे (!chain || !*chain)
+		पटिनिवत्त रिक्त;
 
 	len = strlen(chain);
-	if (len + sizeof(SUBSYSTEM_LINKNAME) > PATH_MAX)
-		return NULL;
+	सचे (len + परिमाण(SUBSYSTEM_LINKNAME) > PATH_MAX)
+		पटिनिवत्त रिक्त;
 
-	do {
+	करोहि {
 		ssize_t sz;
 
 		/* append "/subsystem" to the path */
-		memcpy(chain + len, SUBSYSTEM_LINKNAME, sizeof(SUBSYSTEM_LINKNAME));
+		memcpy(chain + len, SUBSYSTEM_LINKNAME, परिमाण(SUBSYSTEM_LINKNAME));
 
 		/* try if subsystem symlink exists */
 		sz = readlink(chain, buf, bufsz - 1);
@@ -365,52 +365,52 @@ static char *get_subsystem(char *chain, char *buf, size_t bufsz)
 		/* remove last subsystem from chain */
 		chain[len] = '\0';
 		p = strrchr(chain, '/');
-		if (p) {
+		सचे (p) {
 			*p = '\0';
 			len = p - chain;
 		}
 
-		if (sz > 0) {
+		सचे (sz > 0) {
 			/* we found symlink to subsystem, return basename */
 			buf[sz] = '\0';
-			return basename(buf);
+			पटिनिवत्त basename(buf);
 		}
 
-	} while (p);
+	} याव (p);
 
-	return NULL;
+	पटिनिवत्त रिक्त;
 }
 
 /*
  * Returns complete path to the device, the path contains all subsystems
  * used for the device.
  */
-char *sysfs_blkdev_get_devchain(struct path_cxt *pc, char *buf, size_t bufsz)
+वर्ण *sysfs_blkdev_get_devchain(संरचना path_cxt *pc, वर्ण *buf, size_t bufsz)
 {
 	/* read /sys/dev/block/<maj>:<min> symlink */
 	ssize_t ssz;
 	size_t sz = 0;
-	struct ul_buffer tmp = UL_INIT_BUFFER;
-	const char *p;
-	char *res = NULL;
+	संरचना ul_buffer tmp = UL_INIT_BUFFER;
+	ध्रुव वर्ण *p;
+	वर्ण *res = रिक्त;
 
-	ssz = ul_path_readlink(pc, buf, bufsz, NULL);
-	if (ssz <= 0)
-		return NULL;
+	ssz = ul_path_readlink(pc, buf, bufsz, रिक्त);
+	सचे (ssz <= 0)
+		पटिनिवत्त रिक्त;
 
-	if ((p = ul_path_get_prefix(pc)))
+	सचे ((p = ul_path_get_prefix(pc)))
 		ul_buffer_append_string(&tmp, p);
 
 	ul_buffer_append_string(&tmp, _PATH_SYS_DEVBLOCK "/");
 	ul_buffer_append_data(&tmp, buf, ssz);
 
-	p = ul_buffer_get_string(&tmp, &sz, NULL);
-	if (p && sz <= bufsz) {
+	p = ul_buffer_get_string(&tmp, &sz, रिक्त);
+	सचे (p && sz <= bufsz) {
 		memcpy(buf, p, sz);
 		res = buf;
 	}
 	ul_buffer_free_data(&tmp);
-	return res;
+	पटिनिवत्त res;
 }
 
 /*
@@ -419,25 +419,25 @@ char *sysfs_blkdev_get_devchain(struct path_cxt *pc, char *buf, size_t bufsz)
  *
  * Returns: 0 in success, <0 on error, 1 on end of chain
  */
-int sysfs_blkdev_next_subsystem(struct path_cxt *pc __attribute__((unused)),
-			 char *devchain, char **subsys)
+पूर्णाङ्क sysfs_blkdev_next_subsystem(संरचना path_cxt *pc __attribute__((unused)),
+			 वर्ण *devchain, वर्ण **subsys)
 {
-	char subbuf[PATH_MAX];
-	char *sub;
+	वर्ण subbuf[PATH_MAX];
+	वर्ण *sub;
 
-	if (!subsys || !devchain)
-		return -EINVAL;
+	सचे (!subsys || !devchain)
+		पटिनिवत्त -EINVAL;
 
-	*subsys = NULL;
+	*subsys = रिक्त;
 
-	while ((sub = get_subsystem(devchain, subbuf, sizeof(subbuf)))) {
+	याव ((sub = get_subsystem(devchain, subbuf, परिमाण(subbuf)))) {
 		*subsys = strdup(sub);
-		if (!*subsys)
-			return -ENOMEM;
-		return 0;
+		सचे (!*subsys)
+			पटिनिवत्त -ENOMEM;
+		पटिनिवत्त 0;
 	}
 
-	return 1;
+	पटिनिवत्त 1;
 }
 
 #define REMOVABLE_FILENAME	"/removable"
@@ -448,40 +448,40 @@ int sysfs_blkdev_next_subsystem(struct path_cxt *pc __attribute__((unused)),
  * chain: /sys/dev/block/../../devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2/ \
  *                           1-1.2:1.0/host65/target65:0:0/65:0:0:0/block/sdb
  */
-static int sysfs_devchain_is_removable(char *chain)
+स्थिर पूर्णाङ्क sysfs_devchain_is_removable(वर्ण *chain)
 {
 	size_t len;
-	char buf[20];
-	char *p;
+	वर्ण buf[20];
+	वर्ण *p;
 
-	if (!chain || !*chain)
-		return 0;
+	सचे (!chain || !*chain)
+		पटिनिवत्त 0;
 
 	len = strlen(chain);
-	if (len + sizeof(REMOVABLE_FILENAME) > PATH_MAX)
-		return 0;
+	सचे (len + परिमाण(REMOVABLE_FILENAME) > PATH_MAX)
+		पटिनिवत्त 0;
 
-	do {
-		int fd, rc;
+	करोहि {
+		पूर्णाङ्क fd, rc;
 
 		/* append "/removable" to the path */
-		memcpy(chain + len, REMOVABLE_FILENAME, sizeof(REMOVABLE_FILENAME));
+		memcpy(chain + len, REMOVABLE_FILENAME, परिमाण(REMOVABLE_FILENAME));
 
 		/* root of device hierarchy */
-		if (strcmp(chain, "/sys/dev/block" REMOVABLE_FILENAME) == 0)
-			break;
+		सचे (strcmp(chain, "/sys/dev/block" REMOVABLE_FILENAME) == 0)
+			भङ्ग;
 
 		/* try to read it */
 		fd = open(chain, O_RDONLY | O_CLOEXEC);
-		if (fd != -1) {
-			rc = ul_read_all(fd, buf, sizeof(buf));
+		सचे (fd != -1) {
+			rc = ul_read_all(fd, buf, परिमाण(buf));
 			close(fd);
 
-			if (rc > 0) {
-				if (strncmp(buf, "fixed", min(rc, 5)) == 0) {
-					return 0;
-				} else if (strncmp(buf, "removable", min(rc, 9)) == 0) {
-					return 1;
+			सचे (rc > 0) {
+				सचे (strncmp(buf, "fixed", min(rc, 5)) == 0) {
+					पटिनिवत्त 0;
+				} अञ्ञथा सचे (strncmp(buf, "removable", min(rc, 9)) == 0) {
+					पटिनिवत्त 1;
 				}
 			}
 		}
@@ -489,79 +489,79 @@ static int sysfs_devchain_is_removable(char *chain)
 		/* remove last subsystem from chain */
 		chain[len] = '\0';
 		p = strrchr(chain, '/');
-		if (p) {
+		सचे (p) {
 			*p = '\0';
 			len = p - chain;
 		}
 
-	} while (p);
+	} याव (p);
 
-	return 0;
+	पटिनिवत्त 0;
 }
 
-int sysfs_blkdev_is_hotpluggable(struct path_cxt *pc)
+पूर्णाङ्क sysfs_blkdev_is_hotpluggable(संरचना path_cxt *pc)
 {
-	char buf[PATH_MAX], *chain;
+	वर्ण buf[PATH_MAX], *chain;
 
-	chain = sysfs_blkdev_get_devchain(pc, buf, sizeof(buf));
-	return sysfs_devchain_is_removable(chain);
+	chain = sysfs_blkdev_get_devchain(pc, buf, परिमाण(buf));
+	पटिनिवत्त sysfs_devchain_is_removable(chain);
 }
 
-int sysfs_blkdev_is_removable(struct path_cxt *pc)
+पूर्णाङ्क sysfs_blkdev_is_removable(संरचना path_cxt *pc)
 {
-	int rc = 0;
+	पूर्णाङ्क rc = 0;
 
 	// FIXME usb is not actually removable
 
 	/* check /sys/dev/block/<maj>:<min>/removable attribute */
-	if (ul_path_read_s32(pc, &rc, "removable") == 0)
-		return rc;
+	सचे (ul_path_read_s32(pc, &rc, "removable") == 0)
+		पटिनिवत्त rc;
 
-	return 0;
+	पटिनिवत्त 0;
 }
 
-static int get_dm_wholedisk(struct path_cxt *pc, char *diskname,
+स्थिर पूर्णाङ्क get_dm_wholedisk(संरचना path_cxt *pc, वर्ण *diskname,
                             size_t len, dev_t *diskdevno)
 {
-	int rc = 0;
-	char *name;
+	पूर्णाङ्क rc = 0;
+	वर्ण *name;
 
 	/* Note: sysfs_blkdev_get_slave() returns the first slave only;
 	 * if there are more slaves, it returns NULL.
 	 */
 	name = sysfs_blkdev_get_slave(pc);
-	if (!name)
-		return -1;
+	सचे (!name)
+		पटिनिवत्त -1;
 
-	if (diskname && len)
+	सचे (diskname && len)
 		xstrncpy(diskname, name, len);
 
-	if (diskdevno) {
-		*diskdevno = __sysfs_devname_to_devno(ul_path_get_prefix(pc), name, NULL);
-		if (!*diskdevno)
+	सचे (diskdevno) {
+		*diskdevno = __sysfs_devname_to_devno(ul_path_get_prefix(pc), name, रिक्त);
+		सचे (!*diskdevno)
 			rc = -1;
 	}
 
-	free(name);
-	return rc;
+	मुक्त(name);
+	पटिनिवत्त rc;
 }
 
 /*
  * Returns by @diskdevno whole disk device devno and (optionally) by
  * @diskname the whole disk device name.
  */
-int sysfs_blkdev_get_wholedisk(	struct path_cxt *pc,
-				char *diskname,
+पूर्णाङ्क sysfs_blkdev_get_wholedisk(	संरचना path_cxt *pc,
+				वर्ण *diskname,
 				size_t len,
 				dev_t *diskdevno)
 {
-	int is_part = 0;
+	पूर्णाङ्क is_part = 0;
 
-	if (!pc)
-		return -1;
+	सचे (!pc)
+		पटिनिवत्त -1;
 
 	is_part = ul_path_access(pc, F_OK, "partition") == 0;
-	if (!is_part) {
+	सचे (!is_part) {
 		/*
 		 * Extra case for partitions mapped by device-mapper.
 		 *
@@ -570,86 +570,86 @@ int sysfs_blkdev_get_wholedisk(	struct path_cxt *pc,
 		 * mapped by DM don't have such file, but they have "part"
 		 * prefix in DM UUID.
 		 */
-		char *uuid = NULL, *tmp, *prefix;
+		वर्ण *uuid = रिक्त, *tmp, *prefix;
 
 		ul_path_read_string(pc, &uuid, "dm/uuid");
 		tmp = uuid;
-		prefix = uuid ? strsep(&tmp, "-") : NULL;
+		prefix = uuid ? strsep(&tmp, "-") : रिक्त;
 
-		if (prefix && c_strncasecmp(prefix, "part", 4) == 0)
+		सचे (prefix && c_strncasecmp(prefix, "part", 4) == 0)
 			is_part = 1;
-		free(uuid);
+		मुक्त(uuid);
 
-		if (is_part &&
+		सचे (is_part &&
 			get_dm_wholedisk(pc, diskname, len, diskdevno) == 0)
 			/*
 			 * partitioned device, mapped by DM
 			 */
-			goto done;
+			गच्छ done;
 
 		is_part = 0;
 	}
 
-	if (!is_part) {
+	सचे (!is_part) {
 		/*
 		 * unpartitioned device
 		 */
-		if (diskname && !sysfs_blkdev_get_name(pc, diskname, len))
-			goto err;
-		if (diskdevno)
+		सचे (diskname && !sysfs_blkdev_get_name(pc, diskname, len))
+			गच्छ err;
+		सचे (diskdevno)
 			*diskdevno = sysfs_blkdev_get_devno(pc);
-	} else {
+	} अञ्ञथा {
 		/*
 		 * partitioned device
 		 *  - readlink /sys/dev/block/8:1   = ../../block/sda/sda1
 		 *  - dirname  ../../block/sda/sda1 = ../../block/sda
 		 *  - basename ../../block/sda	  = sda
 		 */
-		char linkpath[PATH_MAX];
-		char *name;
+		वर्ण linkpath[PATH_MAX];
+		वर्ण *name;
 		ssize_t	linklen;
 
-		linklen = ul_path_readlink(pc, linkpath, sizeof(linkpath), NULL);
-		if (linklen < 0)
-			goto err;
+		linklen = ul_path_readlink(pc, linkpath, परिमाण(linkpath), रिक्त);
+		सचे (linklen < 0)
+			गच्छ err;
 
 		stripoff_last_component(linkpath);	  /* dirname */
 		name = stripoff_last_component(linkpath);   /* basename */
-		if (!name)
-			goto err;
+		सचे (!name)
+			गच्छ err;
 
 		sysfs_devname_sys_to_dev(name);
-		if (diskname && len)
+		सचे (diskname && len)
 			xstrncpy(diskname, name, len);
 
-		if (diskdevno) {
-			*diskdevno = __sysfs_devname_to_devno(ul_path_get_prefix(pc), name, NULL);
-			if (!*diskdevno)
-				goto err;
+		सचे (diskdevno) {
+			*diskdevno = __sysfs_devname_to_devno(ul_path_get_prefix(pc), name, रिक्त);
+			सचे (!*diskdevno)
+				गच्छ err;
 		}
 	}
 
 done:
-	return 0;
+	पटिनिवत्त 0;
 err:
-	return -1;
+	पटिनिवत्त -1;
 }
 
-int sysfs_devno_to_wholedisk(dev_t devno, char *diskname,
+पूर्णाङ्क sysfs_devno_to_wholedisk(dev_t devno, वर्ण *diskname,
 		             size_t len, dev_t *diskdevno)
 {
-	struct path_cxt *pc;
-	int rc = 0;
+	संरचना path_cxt *pc;
+	पूर्णाङ्क rc = 0;
 
-	if (!devno)
-		return -EINVAL;
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		return -ENOMEM;
+	सचे (!devno)
+		पटिनिवत्त -EINVAL;
+	pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	सचे (!pc)
+		पटिनिवत्त -ENOMEM;
 
 	rc = sysfs_blkdev_get_wholedisk(pc, diskname, len, diskdevno);
 	ul_unref_path(pc);
-	return rc;
+	पटिनिवत्त rc;
 }
 
 /*
@@ -664,422 +664,422 @@ int sysfs_devno_to_wholedisk(dev_t devno, char *diskname,
  *
  * The @uuid (if not NULL) returns DM device UUID, use free() to deallocate.
  */
-int sysfs_devno_is_dm_hidden(dev_t devno, char **uuid,
-			     const struct ul_vfs_ops *vfs)
+पूर्णाङ्क sysfs_devno_is_dm_hidden(dev_t devno, वर्ण **uuid,
+			     ध्रुव संरचना ul_vfs_ops *vfs)
 {
-	struct path_cxt *pc = NULL;
-	char *id = NULL;
-	int rc = 0;
+	संरचना path_cxt *pc = रिक्त;
+	वर्ण *id = रिक्त;
+	पूर्णाङ्क rc = 0;
 
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		goto done;
+	pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	सचे (!pc)
+		गच्छ done;
 	ul_path_refer_vfs(pc, vfs);
-	if (ul_path_read_string(pc, &id, "dm/uuid") <= 0 || !id)
-		goto done;
+	सचे (ul_path_read_string(pc, &id, "dm/uuid") <= 0 || !id)
+		गच्छ done;
 
 	/* Private LVM devices use "LVM-<uuid>-<name>" uuid format (important
 	 * is the "LVM" prefix and "-<name>" postfix).
 	 */
-	if (strncmp(id, "LVM-", 4) == 0) {
-		char *p = strrchr(id + 4, '-');
+	सचे (strncmp(id, "LVM-", 4) == 0) {
+		वर्ण *p = strrchr(id + 4, '-');
 
-		if (p && *(p + 1))
+		सचे (p && *(p + 1))
 			rc = 1;
 	}
 done:
 	ul_unref_path(pc);
-	if (uuid)
+	सचे (uuid)
 		*uuid = id;
-	else
-		free(id);
-	return rc;
+	अञ्ञथा
+		मुक्त(id);
+	पटिनिवत्त rc;
 }
 
 /*
  * Returns 1 if the device is private device mapper device. The @uuid
  * (if not NULL) returns DM device UUID, use free() to deallocate.
  */
-int sysfs_devno_is_dm_private(dev_t devno, char **uuid,
-			      const struct ul_vfs_ops *vfs)
+पूर्णाङ्क sysfs_devno_is_dm_private(dev_t devno, वर्ण **uuid,
+			      ध्रुव संरचना ul_vfs_ops *vfs)
 {
-	struct path_cxt *pc = NULL;
-	char *id = NULL;
-	int rc = 0;
+	संरचना path_cxt *pc = रिक्त;
+	वर्ण *id = रिक्त;
+	पूर्णाङ्क rc = 0;
 
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		goto done;
+	pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	सचे (!pc)
+		गच्छ done;
 	ul_path_refer_vfs(pc, vfs);
-	if (ul_path_read_string(pc, &id, "dm/uuid") <= 0 || !id)
-		goto done;
+	सचे (ul_path_read_string(pc, &id, "dm/uuid") <= 0 || !id)
+		गच्छ done;
 
 	/* Private LVM devices use "LVM-<uuid>-<name>" uuid format (important
 	 * is the "LVM" prefix and "-<name>" postfix).
 	 */
-	if (strncmp(id, "LVM-", 4) == 0) {
-		char *p = strrchr(id + 4, '-');
+	सचे (strncmp(id, "LVM-", 4) == 0) {
+		वर्ण *p = strrchr(id + 4, '-');
 
-		if (p && *(p + 1))
+		सचे (p && *(p + 1))
 			rc = 1;
 
 	/* Private Stratis devices prefix the UUID with "stratis-1-private"
 	 */
-	} else if (strncmp(id, "stratis-1-private", 17) == 0) {
+	} अञ्ञथा सचे (strncmp(id, "stratis-1-private", 17) == 0) {
 		rc = 1;
 	}
 done:
 	ul_unref_path(pc);
-	if (uuid)
+	सचे (uuid)
 		*uuid = id;
-	else
-		free(id);
-	return rc;
+	अञ्ञथा
+		मुक्त(id);
+	पटिनिवत्त rc;
 }
 
 /*
  * Return 0 or 1, or < 0 in case of error
  */
-int sysfs_devno_is_wholedisk(dev_t devno)
+पूर्णाङ्क sysfs_devno_is_wholedisk(dev_t devno)
 {
 	dev_t disk;
 
-	if (sysfs_devno_to_wholedisk(devno, NULL, 0, &disk) != 0)
-		return -1;
+	सचे (sysfs_devno_to_wholedisk(devno, रिक्त, 0, &disk) != 0)
+		पटिनिवत्त -1;
 
-	return devno == disk;
+	पटिनिवत्त devno == disk;
 }
 
 
-int sysfs_blkdev_scsi_get_hctl(struct path_cxt *pc, int *h, int *c, int *t, int *l)
+पूर्णाङ्क sysfs_blkdev_scsi_get_hctl(संरचना path_cxt *pc, पूर्णाङ्क *h, पूर्णाङ्क *c, पूर्णाङ्क *t, पूर्णाङ्क *l)
 {
-	char buf[PATH_MAX], *hctl;
-	struct sysfs_blkdev *blk;
+	वर्ण buf[PATH_MAX], *hctl;
+	संरचना sysfs_blkdev *blk;
 	ssize_t len;
 
 	blk = ul_path_get_dialect(pc);
 
-	if (!blk || blk->hctl_error)
-		return -EINVAL;
-	if (blk->has_hctl)
-		goto done;
+	सचे (!blk || blk->hctl_error)
+		पटिनिवत्त -EINVAL;
+	सचे (blk->has_hctl)
+		गच्छ done;
 
 	blk->hctl_error = 1;
-	len = ul_path_readlink(pc, buf, sizeof(buf), "device");
-	if (len < 0)
-		return len;
+	len = ul_path_readlink(pc, buf, परिमाण(buf), "device");
+	सचे (len < 0)
+		पटिनिवत्त len;
 
 	hctl = strrchr(buf, '/');
-	if (!hctl)
-		return -1;
+	सचे (!hctl)
+		पटिनिवत्त -1;
 	hctl++;
 
-	if (sscanf(hctl, "%u:%u:%u:%u",	&blk->scsi_host, &blk->scsi_channel,
+	सचे (sscanf(hctl, "%u:%u:%u:%u",	&blk->scsi_host, &blk->scsi_channel,
 				&blk->scsi_target, &blk->scsi_lun) != 4)
-		return -1;
+		पटिनिवत्त -1;
 
 	blk->has_hctl = 1;
 done:
-	if (h)
+	सचे (h)
 		*h = blk->scsi_host;
-	if (c)
+	सचे (c)
 		*c = blk->scsi_channel;
-	if (t)
+	सचे (t)
 		*t = blk->scsi_target;
-	if (l)
+	सचे (l)
 		*l = blk->scsi_lun;
 
 	blk->hctl_error = 0;
-	return 0;
+	पटिनिवत्त 0;
 }
 
 
-static char *scsi_host_attribute_path(
-			struct path_cxt *pc,
-			const char *type,
-			char *buf,
+स्थिर वर्ण *scsi_host_attribute_path(
+			संरचना path_cxt *pc,
+			ध्रुव वर्ण *type,
+			वर्ण *buf,
 			size_t bufsz,
-			const char *attr)
+			ध्रुव वर्ण *attr)
 {
-	int len;
-	int host;
-	const char *prefix;
+	पूर्णाङ्क len;
+	पूर्णाङ्क host;
+	ध्रुव वर्ण *prefix;
 
-	if (sysfs_blkdev_scsi_get_hctl(pc, &host, NULL, NULL, NULL))
-		return NULL;
+	सचे (sysfs_blkdev_scsi_get_hctl(pc, &host, रिक्त, रिक्त, रिक्त))
+		पटिनिवत्त रिक्त;
 
 	prefix = ul_path_get_prefix(pc);
-	if (!prefix)
+	सचे (!prefix)
 		prefix = "";
 
-	if (attr)
+	सचे (attr)
 		len = snprintf(buf, bufsz, "%s%s/%s_host/host%d/%s",
 				prefix, _PATH_SYS_CLASS, type, host, attr);
-	else
+	अञ्ञथा
 		len = snprintf(buf, bufsz, "%s%s/%s_host/host%d",
 				prefix, _PATH_SYS_CLASS, type, host);
 
-	return (len < 0 || (size_t) len >= bufsz) ? NULL : buf;
+	पटिनिवत्त (len < 0 || (size_t) len >= bufsz) ? रिक्त : buf;
 }
 
-char *sysfs_blkdev_scsi_host_strdup_attribute(struct path_cxt *pc,
-			const char *type, const char *attr)
+वर्ण *sysfs_blkdev_scsi_host_strdup_attribute(संरचना path_cxt *pc,
+			ध्रुव वर्ण *type, ध्रुव वर्ण *attr)
 {
-	char buf[1024];
-	int rc;
+	वर्ण buf[1024];
+	पूर्णाङ्क rc;
 	FILE *f;
 
-	if (!attr || !type ||
-	    !scsi_host_attribute_path(pc, type, buf, sizeof(buf), attr))
-		return NULL;
+	सचे (!attr || !type ||
+	    !scsi_host_attribute_path(pc, type, buf, परिमाण(buf), attr))
+		पटिनिवत्त रिक्त;
 
-	if (!(f = fopen(buf, "r" UL_CLOEXECSTR)))
-		return NULL;
+	सचे (!(f = fopen(buf, "r" UL_CLOEXECSTR)))
+		पटिनिवत्त रिक्त;
 
 	rc = fscanf(f, "%1023[^\n]", buf);
 	fclose(f);
 
-	return rc == 1 ? strdup(buf) : NULL;
+	पटिनिवत्त rc == 1 ? strdup(buf) : रिक्त;
 }
 
-int sysfs_blkdev_scsi_host_is(struct path_cxt *pc, const char *type)
+पूर्णाङ्क sysfs_blkdev_scsi_host_is(संरचना path_cxt *pc, ध्रुव वर्ण *type)
 {
-	char buf[PATH_MAX];
-	struct stat st;
+	वर्ण buf[PATH_MAX];
+	संरचना stat st;
 
-	if (!type || !scsi_host_attribute_path(pc, type,
-				buf, sizeof(buf), NULL))
-		return 0;
+	सचे (!type || !scsi_host_attribute_path(pc, type,
+				buf, परिमाण(buf), रिक्त))
+		पटिनिवत्त 0;
 
-	return stat(buf, &st) == 0 && S_ISDIR(st.st_mode);
+	पटिनिवत्त stat(buf, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
-static char *scsi_attribute_path(struct path_cxt *pc,
-		char *buf, size_t bufsz, const char *attr)
+स्थिर वर्ण *scsi_attribute_path(संरचना path_cxt *pc,
+		वर्ण *buf, size_t bufsz, ध्रुव वर्ण *attr)
 {
-	int len, h, c, t, l;
-	const char *prefix;
+	पूर्णाङ्क len, h, c, t, l;
+	ध्रुव वर्ण *prefix;
 
-	if (sysfs_blkdev_scsi_get_hctl(pc, &h, &c, &t, &l) != 0)
-		return NULL;
+	सचे (sysfs_blkdev_scsi_get_hctl(pc, &h, &c, &t, &l) != 0)
+		पटिनिवत्त रिक्त;
 
 	prefix = ul_path_get_prefix(pc);
-	if (!prefix)
+	सचे (!prefix)
 		prefix = "";
 
-	if (attr)
+	सचे (attr)
 		len = snprintf(buf, bufsz, "%s%s/devices/%d:%d:%d:%d/%s",
 				prefix, _PATH_SYS_SCSI,
 				h,c,t,l, attr);
-	else
+	अञ्ञथा
 		len = snprintf(buf, bufsz, "%s%s/devices/%d:%d:%d:%d",
 				prefix, _PATH_SYS_SCSI,
 				h,c,t,l);
-	return (len < 0 || (size_t) len >= bufsz) ? NULL : buf;
+	पटिनिवत्त (len < 0 || (size_t) len >= bufsz) ? रिक्त : buf;
 }
 
-int sysfs_blkdev_scsi_has_attribute(struct path_cxt *pc, const char *attr)
+पूर्णाङ्क sysfs_blkdev_scsi_has_attribute(संरचना path_cxt *pc, ध्रुव वर्ण *attr)
 {
-	char path[PATH_MAX];
-	struct stat st;
+	वर्ण path[PATH_MAX];
+	संरचना stat st;
 
-	if (!scsi_attribute_path(pc, path, sizeof(path), attr))
-		return 0;
+	सचे (!scsi_attribute_path(pc, path, परिमाण(path), attr))
+		पटिनिवत्त 0;
 
-	return stat(path, &st) == 0;
+	पटिनिवत्त stat(path, &st) == 0;
 }
 
-int sysfs_blkdev_scsi_path_contains(struct path_cxt *pc, const char *pattern)
+पूर्णाङ्क sysfs_blkdev_scsi_path_contains(संरचना path_cxt *pc, ध्रुव वर्ण *pattern)
 {
-	char path[PATH_MAX], linkc[PATH_MAX];
-	struct stat st;
+	वर्ण path[PATH_MAX], linkc[PATH_MAX];
+	संरचना stat st;
 	ssize_t len;
 
-	if (!scsi_attribute_path(pc, path, sizeof(path), NULL))
-		return 0;
+	सचे (!scsi_attribute_path(pc, path, परिमाण(path), रिक्त))
+		पटिनिवत्त 0;
 
-	if (stat(path, &st) != 0)
-		return 0;
+	सचे (stat(path, &st) != 0)
+		पटिनिवत्त 0;
 
-	len = readlink(path, linkc, sizeof(linkc) - 1);
-	if (len < 0)
-		return 0;
+	len = readlink(path, linkc, परिमाण(linkc) - 1);
+	सचे (len < 0)
+		पटिनिवत्त 0;
 
 	linkc[len] = '\0';
-	return strstr(linkc, pattern) != NULL;
+	पटिनिवत्त strstr(linkc, pattern) != रिक्त;
 }
 
-static dev_t read_devno(const char *path)
+स्थिर dev_t read_devno(ध्रुव वर्ण *path)
 {
 	FILE *f;
-	int maj = 0, min = 0;
+	पूर्णाङ्क maj = 0, min = 0;
 	dev_t dev = 0;
 
 	f = fopen(path, "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	सचे (!f)
+		पटिनिवत्त 0;
 
-	if (fscanf(f, "%d:%d", &maj, &min) == 2)
+	सचे (fscanf(f, "%d:%d", &maj, &min) == 2)
 		dev = makedev(maj, min);
 	fclose(f);
-	return dev;
+	पटिनिवत्त dev;
 }
 
-int sysfs_devname_is_hidden(const char *prefix, const char *name)
+पूर्णाङ्क sysfs_devname_is_hidden(ध्रुव वर्ण *prefix, ध्रुव वर्ण *name)
 {
-	char buf[PATH_MAX];
-	int rc = 0, hidden = 0, len;
+	वर्ण buf[PATH_MAX];
+	पूर्णाङ्क rc = 0, hidden = 0, len;
 	FILE *f;
 
-	if (strncmp("/dev/", name, 5) == 0)
-		return 0;
+	सचे (strncmp("/dev/", name, 5) == 0)
+		पटिनिवत्त 0;
 
-	if (!prefix)
+	सचे (!prefix)
 		prefix = "";
 	/*
 	 * Create path to /sys/block/<name>/hidden
 	 */
-	len = snprintf(buf, sizeof(buf),
+	len = snprintf(buf, परिमाण(buf),
 			"%s" _PATH_SYS_BLOCK "/%s/hidden",
 			prefix, name);
 
-	if (len < 0 || (size_t) len + 1 > sizeof(buf))
-		return 0;
+	सचे (len < 0 || (size_t) len + 1 > परिमाण(buf))
+		पटिनिवत्त 0;
 
 	f = fopen(buf, "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	सचे (!f)
+		पटिनिवत्त 0;
 
 	rc = fscanf(f, "%d", &hidden);
 	fclose(f);
 
-	return rc == 1 ? hidden : 0;
+	पटिनिवत्त rc == 1 ? hidden : 0;
 }
 
 
-dev_t __sysfs_devname_to_devno(const char *prefix, const char *name, const char *parent)
+dev_t __sysfs_devname_to_devno(ध्रुव वर्ण *prefix, ध्रुव वर्ण *name, ध्रुव वर्ण *parent)
 {
-	char buf[PATH_MAX];
-	char *_name = NULL, *_parent = NULL;	/* name as encoded in sysfs */
+	वर्ण buf[PATH_MAX];
+	वर्ण *_name = रिक्त, *_parent = रिक्त;	/* name as encoded in sysfs */
 	dev_t dev = 0;
-	int len;
+	पूर्णाङ्क len;
 
-	if (!prefix)
+	सचे (!prefix)
 		prefix = "";
 
-	assert(name);
+	प्रतिज्ञा(name);
 
-	if (strncmp("/dev/", name, 5) == 0) {
+	सचे (strncmp("/dev/", name, 5) == 0) {
 		/*
 		 * Read from /dev
 		 */
-		struct stat st;
+		संरचना stat st;
 
-		if (stat(name, &st) == 0) {
+		सचे (stat(name, &st) == 0) {
 			dev = st.st_rdev;
-			goto done;
+			गच्छ done;
 		}
 		name += 5;	/* unaccessible, or not node in /dev */
 	}
 
 	_name = strdup(name);
-	if (!_name)
-		goto done;
+	सचे (!_name)
+		गच्छ done;
 	sysfs_devname_dev_to_sys(_name);
 
-	if (parent) {
+	सचे (parent) {
 		_parent = strdup(parent);
-		if (!_parent)
-			goto done;
+		सचे (!_parent)
+			गच्छ done;
 	}
 
-	if (parent && strncmp("dm-", name, 3) != 0) {
+	सचे (parent && strncmp("dm-", name, 3) != 0) {
 		/*
 		 * Create path to /sys/block/<parent>/<name>/dev
 		 */
 		sysfs_devname_dev_to_sys(_parent);
-		len = snprintf(buf, sizeof(buf),
+		len = snprintf(buf, परिमाण(buf),
 				"%s" _PATH_SYS_BLOCK "/%s/%s/dev",
 				prefix,	_parent, _name);
-		if (len < 0 || (size_t) len >= sizeof(buf))
-			goto done;
+		सचे (len < 0 || (size_t) len >= परिमाण(buf))
+			गच्छ done;
 
 		/* don't try anything else for dm-* */
 		dev = read_devno(buf);
-		goto done;
+		गच्छ done;
 	}
 
 	/*
 	 * Read from /sys/block/<sysname>/dev
 	 */
-	len = snprintf(buf, sizeof(buf),
+	len = snprintf(buf, परिमाण(buf),
 			"%s" _PATH_SYS_BLOCK "/%s/dev",
 			prefix, _name);
-	if (len < 0 || (size_t) len >= sizeof(buf))
-		goto done;
+	सचे (len < 0 || (size_t) len >= परिमाण(buf))
+		गच्छ done;
 	dev = read_devno(buf);
 
 	/*
 	 * Read from /sys/block/<parent>/<partition>/dev
 	 */
-	if (!dev && parent && ul_startswith(name, parent)) {
-		len = snprintf(buf, sizeof(buf),
+	सचे (!dev && parent && ul_startswith(name, parent)) {
+		len = snprintf(buf, परिमाण(buf),
 				"%s" _PATH_SYS_BLOCK "/%s/%s/dev",
 				prefix, _parent, _name);
-		if (len < 0 || (size_t) len >= sizeof(buf))
-			goto done;
+		सचे (len < 0 || (size_t) len >= परिमाण(buf))
+			गच्छ done;
 		dev = read_devno(buf);
 	}
 
 	/*
 	 * Read from /sys/block/<sysname>/device/dev
 	 */
-	if (!dev) {
-		len = snprintf(buf, sizeof(buf),
+	सचे (!dev) {
+		len = snprintf(buf, परिमाण(buf),
 				"%s" _PATH_SYS_BLOCK "/%s/device/dev",
 				prefix, _name);
-		if (len < 0 || (size_t) len >= sizeof(buf))
-			goto done;
+		सचे (len < 0 || (size_t) len >= परिमाण(buf))
+			गच्छ done;
 		dev = read_devno(buf);
 	}
 done:
-	free(_name);
-	free(_parent);
-	return dev;
+	मुक्त(_name);
+	मुक्त(_parent);
+	पटिनिवत्त dev;
 }
 
-dev_t sysfs_devname_to_devno(const char *name)
+dev_t sysfs_devname_to_devno(ध्रुव वर्ण *name)
 {
-	return __sysfs_devname_to_devno(NULL, name, NULL);
+	पटिनिवत्त __sysfs_devname_to_devno(रिक्त, name, रिक्त);
 }
 
-char *sysfs_blkdev_get_path(struct path_cxt *pc, char *buf, size_t bufsiz)
+वर्ण *sysfs_blkdev_get_path(संरचना path_cxt *pc, वर्ण *buf, size_t bufsiz)
 {
-	const char *name = sysfs_blkdev_get_name(pc, buf, bufsiz);
-	char *res = NULL;
+	ध्रुव वर्ण *name = sysfs_blkdev_get_name(pc, buf, bufsiz);
+	वर्ण *res = रिक्त;
 	size_t sz;
-	struct stat st;
+	संरचना stat st;
 
-	if (!name)
-		goto done;
+	सचे (!name)
+		गच्छ done;
 
 	sz = strlen(name);
-	if (sz + sizeof("/dev/") > bufsiz)
-		goto done;
+	सचे (sz + परिमाण("/dev/") > bufsiz)
+		गच्छ done;
 
 	/* create the final "/dev/<name>" string */
 	memmove(buf + 5, name, sz + 1);
 	memcpy(buf, "/dev/", 5);
 
-	if (!stat(buf, &st) && S_ISBLK(st.st_mode) && st.st_rdev == sysfs_blkdev_get_devno(pc))
+	सचे (!stat(buf, &st) && S_ISBLK(st.st_mode) && st.st_rdev == sysfs_blkdev_get_devno(pc))
 		res = buf;
 done:
-	return res;
+	पटिनिवत्त res;
 }
 
-dev_t sysfs_blkdev_get_devno(struct path_cxt *pc)
+dev_t sysfs_blkdev_get_devno(संरचना path_cxt *pc)
 {
-	return ((struct sysfs_blkdev *) ul_path_get_dialect(pc))->devno;
+	पटिनिवत्त ((संरचना sysfs_blkdev *) ul_path_get_dialect(pc))->devno;
 }
 
 /*
@@ -1087,138 +1087,138 @@ dev_t sysfs_blkdev_get_devno(struct path_cxt *pc)
  *
  * Please, use more robust blkid_devno_to_devname() in your applications.
  */
-char *sysfs_devno_to_devpath(dev_t devno, char *buf, size_t bufsiz)
+वर्ण *sysfs_devno_to_devpath(dev_t devno, वर्ण *buf, size_t bufsiz)
 {
-	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
-	char *res = NULL;
+	संरचना path_cxt *pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	वर्ण *res = रिक्त;
 
-	if (pc) {
+	सचे (pc) {
 		res = sysfs_blkdev_get_path(pc, buf, bufsiz);
 		ul_unref_path(pc);
 	}
-	return res;
+	पटिनिवत्त res;
 }
 
-char *sysfs_devno_to_devname(dev_t devno, char *buf, size_t bufsiz)
+वर्ण *sysfs_devno_to_devname(dev_t devno, वर्ण *buf, size_t bufsiz)
 {
-	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
-	char *res = NULL;
+	संरचना path_cxt *pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	वर्ण *res = रिक्त;
 
-	if (pc) {
+	सचे (pc) {
 		res = sysfs_blkdev_get_name(pc, buf, bufsiz);
 		ul_unref_path(pc);
 	}
-	return res;
+	पटिनिवत्त res;
 }
 
-int sysfs_devno_count_partitions(dev_t devno)
+पूर्णाङ्क sysfs_devno_गणनम्_partitions(dev_t devno)
 {
-	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
-	int n = 0;
+	संरचना path_cxt *pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	पूर्णाङ्क n = 0;
 
-	if (pc) {
-		char buf[PATH_MAX + 1];
-		char *name = sysfs_blkdev_get_name(pc, buf, sizeof(buf));
+	सचे (pc) {
+		वर्ण buf[PATH_MAX + 1];
+		वर्ण *name = sysfs_blkdev_get_name(pc, buf, परिमाण(buf));
 
-		n = sysfs_blkdev_count_partitions(pc, name);
+		n = sysfs_blkdev_गणनम्_partitions(pc, name);
 		ul_unref_path(pc);
 	}
-	return n;
+	पटिनिवत्त n;
 }
 
-char *sysfs_chrdev_devno_to_devname(dev_t devno, char *buf, size_t bufsiz)
+वर्ण *sysfs_chrdev_devno_to_devname(dev_t devno, वर्ण *buf, size_t bufsiz)
 {
-	char link[PATH_MAX];
-	struct path_cxt *pc;
-	char *name;
+	वर्ण link[PATH_MAX];
+	संरचना path_cxt *pc;
+	वर्ण *name;
 	ssize_t	sz;
 
 	pc = ul_new_path(_PATH_SYS_DEVCHAR "/%u:%u", major(devno), minor(devno));
-	if (!pc)
-		return NULL;
+	सचे (!pc)
+		पटिनिवत्त रिक्त;
 
 	/* read /sys/dev/char/<maj:min> link */
-	sz = ul_path_readlink(pc, link, sizeof(link), NULL);
+	sz = ul_path_readlink(pc, link, परिमाण(link), रिक्त);
 	ul_unref_path(pc);
 
-	if (sz < 0)
-		return NULL;
+	सचे (sz < 0)
+		पटिनिवत्त रिक्त;
 
 	name = strrchr(link, '/');
-	if (!name)
-		return NULL;
+	सचे (!name)
+		पटिनिवत्त रिक्त;
 
 	name++;
 	sz = strlen(name);
-	if ((size_t) sz + 1 > bufsiz)
-		return NULL;
+	सचे ((size_t) sz + 1 > bufsiz)
+		पटिनिवत्त रिक्त;
 
 	memcpy(buf, name, sz + 1);
 	sysfs_devname_sys_to_dev(buf);
-	return buf;
+	पटिनिवत्त buf;
 
 }
 
-enum sysfs_byteorder sysfs_get_byteorder(struct path_cxt *pc)
+गणना sysfs_byteorder sysfs_get_byteorder(संरचना path_cxt *pc)
 {
-	int rc;
-	char buf[BUFSIZ];
-	enum sysfs_byteorder ret;
+	पूर्णाङ्क rc;
+	वर्ण buf[BUFSIZ];
+	गणना sysfs_byteorder ret;
 
-	rc = ul_path_read_buffer(pc, buf, sizeof(buf), _PATH_SYS_CPU_BYTEORDER);
-	if (rc < 0)
-		goto unknown;
+	rc = ul_path_read_buffer(pc, buf, परिमाण(buf), _PATH_SYS_CPU_BYTEORDER);
+	सचे (rc < 0)
+		गच्छ unknown;
 
-	if (strncmp(buf, "little", sizeof(buf)) == 0) {
+	सचे (strncmp(buf, "little", परिमाण(buf)) == 0) {
 		ret = SYSFS_BYTEORDER_LITTLE;
-		goto out;
-	} else if (strncmp(buf, "big", sizeof(buf)) == 0) {
+		गच्छ out;
+	} अञ्ञथा सचे (strncmp(buf, "big", परिमाण(buf)) == 0) {
 		ret = SYSFS_BYTEORDER_BIG;
-		goto out;
+		गच्छ out;
 	}
 
 unknown:
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#सचे __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	ret = SYSFS_BYTEORDER_LITTLE;
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#नोचेद्यदि __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	ret = SYSFS_BYTEORDER_BIG;
-#else
+#अञ्ञथा
 #error Unknown byte order
 #endif
 
 out:
-	return ret;
+	पटिनिवत्त ret;
 }
 
-int sysfs_get_address_bits(struct path_cxt *pc)
+पूर्णाङ्क sysfs_get_address_bits(संरचना path_cxt *pc)
 {
-	int rc;
-	int address_bits;
+	पूर्णाङ्क rc;
+	पूर्णाङ्क address_bits;
 
 	rc = ul_path_scanf(pc, _PATH_SYS_ADDRESS_BITS, "%d", &address_bits);
-	if (rc < 0)
-		return rc;
-	if (address_bits < 0)
-		return -EINVAL;
-	return address_bits;
+	सचे (rc < 0)
+		पटिनिवत्त rc;
+	सचे (address_bits < 0)
+		पटिनिवत्त -EINVAL;
+	पटिनिवत्त address_bits;
 }
 
 
 #ifdef TEST_PROGRAM_SYSFS
-#include <errno.h>
-#include <stdlib.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <stdlib.h>
 
-int main(int argc, char *argv[])
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण *argv[])
 {
-	struct path_cxt *pc;
-	char *devname;
+	संरचना path_cxt *pc;
+	वर्ण *devname;
 	dev_t devno, disk_devno;
-	char path[PATH_MAX], *sub, *chain;
-	char diskname[32];
-	int i, is_part, rc = EXIT_SUCCESS;
+	वर्ण path[PATH_MAX], *sub, *chain;
+	वर्ण diskname[32];
+	पूर्णाङ्क i, is_part, rc = EXIT_SUCCESS;
 	uint64_t u64;
 
-	if (argc != 2)
+	सचे (argc != 2)
 		errx(EXIT_FAILURE, "usage: %s <devname>", argv[0]);
 
 	ul_sysfs_init_debug();
@@ -1226,37 +1226,37 @@ int main(int argc, char *argv[])
 	devname = argv[1];
 	devno = sysfs_devname_to_devno(devname);
 
-	if (!devno)
+	सचे (!devno)
 		err(EXIT_FAILURE, "failed to read devno");
 
 	printf("non-context:\n");
-	printf(" DEVNO:   %u (%u:%u)\n", (unsigned int) devno, major(devno), minor(devno));
-	printf(" DEVNAME: %s\n", sysfs_devno_to_devname(devno, path, sizeof(path)));
-	printf(" DEVPATH: %s\n", sysfs_devno_to_devpath(devno, path, sizeof(path)));
+	printf(" DEVNO:   %u (%u:%u)\n", (unsigned पूर्णाङ्क) devno, major(devno), minor(devno));
+	printf(" DEVNAME: %s\n", sysfs_devno_to_devname(devno, path, परिमाण(path)));
+	printf(" DEVPATH: %s\n", sysfs_devno_to_devpath(devno, path, परिमाण(path)));
 
-	sysfs_devno_to_wholedisk(devno, diskname, sizeof(diskname), &disk_devno);
-	printf(" WHOLEDISK-DEVNO:   %u (%u:%u)\n", (unsigned int) disk_devno, major(disk_devno), minor(disk_devno));
+	sysfs_devno_to_wholedisk(devno, diskname, परिमाण(diskname), &disk_devno);
+	printf(" WHOLEDISK-DEVNO:   %u (%u:%u)\n", (unsigned पूर्णाङ्क) disk_devno, major(disk_devno), minor(disk_devno));
 	printf(" WHOLEDISK-DEVNAME: %s\n", diskname);
 
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		goto done;
+	pc = ul_new_sysfs_path(devno, रिक्त, रिक्त);
+	सचे (!pc)
+		गच्छ done;
 
 	printf("context based:\n");
 	devno = sysfs_blkdev_get_devno(pc);
-	printf(" DEVNO:   %u (%u:%u)\n", (unsigned int) devno, major(devno), minor(devno));
-	printf(" DEVNAME: %s\n", sysfs_blkdev_get_name(pc, path, sizeof(path)));
-	printf(" DEVPATH: %s\n", sysfs_blkdev_get_path(pc, path, sizeof(path)));
+	printf(" DEVNO:   %u (%u:%u)\n", (unsigned पूर्णाङ्क) devno, major(devno), minor(devno));
+	printf(" DEVNAME: %s\n", sysfs_blkdev_get_name(pc, path, परिमाण(path)));
+	printf(" DEVPATH: %s\n", sysfs_blkdev_get_path(pc, path, परिमाण(path)));
 
-	sysfs_devno_to_wholedisk(devno, diskname, sizeof(diskname), &disk_devno);
-	printf(" WHOLEDISK-DEVNO: %u (%u:%u)\n", (unsigned int) disk_devno, major(disk_devno), minor(disk_devno));
+	sysfs_devno_to_wholedisk(devno, diskname, परिमाण(diskname), &disk_devno);
+	printf(" WHOLEDISK-DEVNO: %u (%u:%u)\n", (unsigned पूर्णाङ्क) disk_devno, major(disk_devno), minor(disk_devno));
 	printf(" WHOLEDISK-DEVNAME: %s\n", diskname);
 
 	is_part = ul_path_access(pc, F_OK, "partition") == 0;
 	printf(" PARTITION: %s\n", is_part ? "YES" : "NOT");
 
-	if (is_part && disk_devno) {
-		struct path_cxt *disk_pc =  ul_new_sysfs_path(disk_devno, NULL, NULL);
+	सचे (is_part && disk_devno) {
+		संरचना path_cxt *disk_pc =  ul_new_sysfs_path(disk_devno, रिक्त, रिक्त);
 		sysfs_blkdev_set_parent(pc, disk_pc);
 
 		ul_unref_path(disk_pc);
@@ -1264,39 +1264,39 @@ int main(int argc, char *argv[])
 
 	printf(" HOTPLUG: %s\n", sysfs_blkdev_is_hotpluggable(pc) ? "yes" : "no");
 	printf(" REMOVABLE: %s\n", sysfs_blkdev_is_removable(pc) ? "yes" : "no");
-	printf(" SLAVES: %d\n", ul_path_count_dirents(pc, "slaves"));
+	printf(" SLAVES: %d\n", ul_path_गणनम्_dirents(pc, "slaves"));
 
-	if (!is_part) {
+	सचे (!is_part) {
 		printf("First 5 partitions:\n");
-		for (i = 1; i <= 5; i++) {
+		अत्थाय (i = 1; i <= 5; i++) {
 			dev_t dev = sysfs_blkdev_partno_to_devno(pc, i);
-			if (dev)
+			सचे (dev)
 				printf("\t#%d %u:%u\n", i, major(dev), minor(dev));
 		}
 	}
 
-	if (ul_path_read_u64(pc, &u64, "size") != 0)
+	सचे (ul_path_read_u64(pc, &u64, "size") != 0)
 		printf(" (!) read SIZE failed\n");
-	else
+	अञ्ञथा
 		printf(" SIZE: %"PRIu64"\n", u64);
 
-	if (ul_path_read_s32(pc, &i, "queue/hw_sector_size"))
+	सचे (ul_path_read_s32(pc, &i, "queue/hw_sector_size"))
 		printf(" (!) read SECTOR failed\n");
-	else
+	अञ्ञथा
 		printf(" SECTOR: %d\n", i);
 
 
-	chain = sysfs_blkdev_get_devchain(pc, path, sizeof(path));
+	chain = sysfs_blkdev_get_devchain(pc, path, परिमाण(path));
 	printf(" SUBSYSTEMS:\n");
 
-	while (chain && sysfs_blkdev_next_subsystem(pc, chain, &sub) == 0) {
+	याव (chain && sysfs_blkdev_next_subsystem(pc, chain, &sub) == 0) {
 		printf("\t%s\n", sub);
-		free(sub);
+		मुक्त(sub);
 	}
 
 	rc = EXIT_SUCCESS;
 done:
 	ul_unref_path(pc);
-	return rc;
+	पटिनिवत्त rc;
 }
 #endif /* TEST_PROGRAM_SYSFS */

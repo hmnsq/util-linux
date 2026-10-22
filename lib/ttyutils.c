@@ -4,21 +4,21 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <ctype.h>
-#include <unistd.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <unistd.h>
 
 #ifdef HAVE_GETTTYNAM
 # include <ttyent.h>
 #endif
 
-#include "c.h"
-#include "ttyutils.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "ttyutils.h"
 
 #ifdef __linux__
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  सचे defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -26,14 +26,14 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#elif defined(__GNU__)
+#नोचेद्यदि defined(__GNU__)
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "hurd"
 #  endif
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#अञ्ञथा
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,179 +42,179 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+स्थिर पूर्णाङ्क get_env_int(ध्रुव वर्ण *name)
 {
-	const char *cp = getenv(name);
+	ध्रुव वर्ण *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	सचे (cp) {
+		वर्ण *end = रिक्त;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		सचे (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			पटिनिवत्त x;
 	}
 
-	return -1;
+	पटिनिवत्त -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+पूर्णाङ्क get_terminal_dimension(पूर्णाङ्क *cols, पूर्णाङ्क *पङ्क्तयः)
 {
-	int c = 0, l = 0;
+	पूर्णाङ्क c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#सचे defined(TIOCGWINSZ)
+	संरचना winsize	w_win;
+	सचे (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
-#elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+#नोचेद्यदि defined(TIOCGSIZE)
+	संरचना ttysize	t_win;
+	सचे (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
-		l = t_win.ts_lines;
+		l = t_win.ts_पङ्क्तयः;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	सचे (cols) {
+		सचे (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	सचे (पङ्क्तयः) {
+		सचे (l <= 0)
 			l = get_env_int("LINES");
-		*lines = l;
+		*पङ्क्तयः = l;
 	}
-	return 0;
+	पटिनिवत्त 0;
 }
 
-int get_terminal_width(int default_width)
+पूर्णाङ्क get_terminal_width(पूर्णाङ्क default_width)
 {
-	int width = 0;
+	पूर्णाङ्क width = 0;
 
-	get_terminal_dimension(&width, NULL);
+	get_terminal_dimension(&width, रिक्त);
 
-	return width > 0 ? width : default_width;
+	पटिनिवत्त width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+पूर्णाङ्क get_terminal_stdfd(शून्य)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	सचे (isatty(STDIN_FILENO))
+		पटिनिवत्त STDIN_FILENO;
+	सचे (isatty(STDOUT_FILENO))
+		पटिनिवत्त STDOUT_FILENO;
+	सचे (isatty(STDERR_FILENO))
+		पटिनिवत्त STDERR_FILENO;
 
-	return -EINVAL;
+	पटिनिवत्त -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+पूर्णाङ्क get_terminal_name(ध्रुव वर्ण **path,
+		      ध्रुव वर्ण **name,
+		      ध्रुव वर्ण **सङ्ख्या)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	ध्रुव वर्ण *tty;
+	ध्रुव वर्ण *p;
+	पूर्णाङ्क fd;
 
 
-	if (name)
-		*name = NULL;
-	if (path)
-		*path = NULL;
-	if (number)
-		*number = NULL;
+	सचे (name)
+		*name = रिक्त;
+	सचे (path)
+		*path = रिक्त;
+	सचे (सङ्ख्या)
+		*सङ्ख्या = रिक्त;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	सचे (fd < 0)
+		पटिनिवत्त fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	सचे (!tty)
+		पटिनिवत्त -1;
 
-	if (path)
+	सचे (path)
 		*path = tty;
-	if (name || number)
+	सचे (name || सङ्ख्या)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	सचे (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
-				*number = p;
-				break;
+	सचे (सङ्ख्या) {
+		अत्थाय (p = tty; p && *p; p++) {
+			सचे (isdigit(*p)) {
+				*सङ्ख्या = p;
+				भङ्ग;
 			}
 		}
 	}
-	return 0;
+	पटिनिवत्त 0;
 }
 
-int get_terminal_type(const char **type)
+पूर्णाङ्क get_terminal_type(ध्रुव वर्ण **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	सचे (*type)
+		पटिनिवत्त -EINVAL;
+	पटिनिवत्त 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+वर्ण *get_terminal_default_type(ध्रुव वर्ण *ttyname, पूर्णाङ्क is_serial)
 {
-	if (ttyname) {
+	सचे (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		संरचना ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		सचे (ent && ent->ty_type)
+			पटिनिवत्त strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#सचे defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		सचे (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			पटिनिवत्त strdup(DEFAULT_TTYS0);
+		अञ्ञथा सचे (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			पटिनिवत्त strdup(DEFAULT_TTY32);
+		अञ्ञथा सचे (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			पटिनिवत्त strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	पटिनिवत्त strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+पूर्णाङ्क main(शून्य)
 {
-	const char *path, *name, *num;
-	int c, l;
+	ध्रुव वर्ण *path, *name, *अङ्कः;
+	पूर्णाङ्क c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	सचे (get_terminal_name(&path, &name, &अङ्कः) == 0) {
+		वर्ण *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
-		fprintf(stderr, "tty number:    %s\n", num);
+		fprintf(stderr, "tty number:    %s\n", अङ्कः);
 
 		fprintf(stderr, "tty term:      %s\n", getenv("TERM"));
 
 		term = get_terminal_default_type(name, 0);
 		fprintf(stderr, "tty dflt term: %s\n", term);
-		free(term);
+		मुक्त(term);
 	}
 	get_terminal_dimension(&c, &l);
 	fprintf(stderr,         "tty cols:      %d\n", c);
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	पटिनिवत्त EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */
