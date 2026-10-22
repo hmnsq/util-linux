@@ -6,67 +6,67 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <ctype.h>
 
-#include "mangle.h"
-#include "c.h"
+#অন্তর্ভাব "mangle.h"
+#অন্তর্ভাব "c.h"
 
 #define isoctal(a)		(((a) & ~7) == '0')
 
 #define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+স্থির অন্তঃরেখ পূর্ণসংখ্যা is_unwanted_char(unsigned অক্ষর c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	ফেরত c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+অক্ষর *mangle(ধ্রুবক অক্ষর *s)
 {
-	char *ss, *sp;
+	অক্ষর *ss, *sp;
 
-	if (!s)
-		return NULL;
+	যদি (!s)
+		ফেরত ফাঁকা;
 
 	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	যদি (!sp)
+		ফেরত ফাঁকা;
+	যখন(1) {
+		যদি (!*s) {
 			*sp = '\0';
-			break;
+			বিরতি;
 		}
-		if (is_unwanted_char(*s)) {
+		যদি (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} অন্যথা
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	ফেরত ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+শূন্য unmangle_to_বাফার(ধ্রুবক অক্ষর *s, অক্ষর *buf, size_t len)
 {
 	size_t sz = 0;
 
-	if (!s)
-		return;
+	যদি (!s)
+		ফেরত;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	যখন(*s && sz < len - 1) {
+		যদি (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} অন্যথা {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,128 +74,128 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+size_t unhexmangle_to_বাফার(ধ্রুবক অক্ষর *s, অক্ষর *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	ধ্রুবক অক্ষর *buf0 = buf;
 
-	if (!s)
-		return 0;
+	যদি (!s)
+		ফেরত 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+	যখন(*s && sz < len - 1) {
+		যদি (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
 		    isxdigit(s[2]) && isxdigit(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} অন্যথা {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	ফেরত buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+size_t unescape_to_বাফার(ধ্রুবক অক্ষর *s, ধ্রুবক অক্ষর *wanted, অক্ষর *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	ধ্রুবক অক্ষর *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	যখন (*s && sz < len - 1) {
+		যদি (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} অন্যথা {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	ফেরত buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+স্থির অন্তঃরেখ ধ্রুবক অক্ষর *skip_nonspaces(ধ্রুবক অক্ষর *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	যখন (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	ফেরত s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+অক্ষর *unmangle(ধ্রুবক অক্ষর *s, ধ্রুবক অক্ষর **end)
 {
-	char *buf;
-	const char *e;
+	অক্ষর *buf;
+	ধ্রুবক অক্ষর *e;
 	size_t sz;
 
-	if (!s)
-		return NULL;
+	যদি (!s)
+		ফেরত ফাঁকা;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
+	যদি (end)
 		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	যদি (e == s)
+		ফেরত ফাঁকা;	/* empty string */
 
 	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	যদি (!buf)
+		ফেরত ফাঁকা;
 
-	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	unmangle_to_বাফার(s, buf, sz);
+	ফেরত buf;
 }
 
 #ifdef TEST_PROGRAM_MANGLE
-#include <errno.h>
-int main(int argc, char *argv[])
+#অন্তর্ভাব <errno.h>
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
+	অক্ষর *p = ফাঁকা;
+	যদি (argc < 3) {
 		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
 						program_invocation_short_name);
-		return EXIT_FAILURE;
+		ফেরত EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	যদি (!strcmp(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
 		printf("mangled: '%s'\n", p);
-		free(p);
+		মুক্ত(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	অন্যথা যদি (!strcmp(argv[1], "--unmangle")) {
+		অক্ষর *x = unmangle(argv[2], ফাঁকা);
 
-		if (x) {
+		যদি (x) {
 			printf("unmangled: '%s'\n", x);
-			free(x);
+			মুক্ত(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
-			unmangle_to_buffer(x, x, strlen(x) + 1);
+		যদি (x) {
+			unmangle_to_বাফার(x, x, strlen(x) + 1);
 
 			printf("self-unmangled: '%s'\n", x);
-			free(x);
+			মুক্ত(x);
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
-			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
+	অন্যথা যদি (!strcmp(argv[1], "--unescape")) {
+		অক্ষর *x = strdup(argv[2]);
+		যদি (x) {
+			unescape_to_বাফার(x, ",\"", x, strlen(x) + 1);
 
 			printf("self-unescaped: '%s'\n", x);
-			free(x);
+			মুক্ত(x);
 		}
 	}
 
-	return EXIT_SUCCESS;
+	ফেরত EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_MANGLE */

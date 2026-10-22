@@ -4,122 +4,122 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
+#অন্তর্ভাব <pwd.h>
+#অন্তর্ভাব <grp.h>
+#অন্তর্ভাব <sys/types.h>
 
-#include "c.h"
-#include "widechar.h"
-#include "idcache.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "widechar.h"
+#অন্তর্ভাব "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+কাঠামো identry *get_id(কাঠামো idcache *ic, unsigned long পূর্ণসংখ্যা id)
 {
-	struct identry *ent;
+	কাঠামো identry *ent;
 
-	if (!ic)
-		return NULL;
+	যদি (!ic)
+		ফেরত ফাঁকা;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	জন্য (ent = ic->ent; ent; ent = ent->পরবর্তী) {
+		যদি (ent->id == id)
+			ফেরত ent;
 	}
 
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
-struct idcache *new_idcache(void)
+কাঠামো idcache *new_idcache(শূন্য)
 {
-	return calloc(1, sizeof(struct idcache));
+	ফেরত calloc(1, আকার(কাঠামো idcache));
 }
 
-void free_idcache(struct idcache *ic)
+শূন্য free_idcache(কাঠামো idcache *ic)
 {
-	struct identry *ent;
+	কাঠামো identry *ent;
 
-	if (!ic)
-		return;
+	যদি (!ic)
+		ফেরত;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
-		free(ent->name);
-		free(ent);
-		ent = next;
+	যখন (ent) {
+		কাঠামো identry *পরবর্তী = ent->পরবর্তী;
+		মুক্ত(ent->name);
+		মুক্ত(ent);
+		ent = পরবর্তী;
 	}
 
-	free(ic);
+	মুক্ত(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+স্থির শূন্য add_id(কাঠামো idcache *ic, অক্ষর *name, unsigned long পূর্ণসংখ্যা id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	কাঠামো identry *ent, *x;
+	পূর্ণসংখ্যা w = 0;
 
-	if (!ic)
-		return;
+	যদি (!ic)
+		ফেরত;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = calloc(1, আকার(কাঠামো identry));
+	যদি (!ent)
+		ফেরত;
 	ent->id = id;
 
-	if (name) {
+	যদি (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		যদি (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		অন্যথা
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	যদি (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
-			free(ent);
-			return;
+		যদি (!ent->name) {
+			মুক্ত(ent);
+			ফেরত;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
-			free(ent);
-			return;
+	} অন্যথা {
+		যদি (asprintf(&ent->name, "%lu", id) < 0) {
+			মুক্ত(ent);
+			ফেরত;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	জন্য (x = ic->ent; x && x->পরবর্তী; x = x->পরবর্তী);
 
-	if (x)
-		x->next = ent;
-	else
+	যদি (x)
+		x->পরবর্তী = ent;
+	অন্যথা
 		ic->ent = ent;
 
-	if (w <= 0)
+	যদি (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+শূন্য add_uid(কাঠামো idcache *cache, unsigned long পূর্ণসংখ্যা id)
 {
-	struct identry *ent = get_id(cache, id);
+	কাঠামো identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
-		add_id(cache, pw ? pw->pw_name : NULL, id);
+	যদি (!ent) {
+		কাঠামো passwd *pw = getpwuid((uid_t) id);
+		add_id(cache, pw ? pw->pw_name : ফাঁকা, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+শূন্য add_gid(কাঠামো idcache *cache, unsigned long পূর্ণসংখ্যা id)
 {
-	struct identry *ent = get_id(cache, id);
+	কাঠামো identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
-		add_id(cache, gr ? gr->gr_name : NULL, id);
+	যদি (!ent) {
+		কাঠামো group *gr = getgrgid((gid_t) id);
+		add_id(cache, gr ? gr->gr_name : ফাঁকা, id);
 	}
 }
 

@@ -11,46 +11,46 @@
  *
  * Written by Pádraig Brady.
  */
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <ctype.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <limits.h>
+#অন্তর্ভাব <ctype.h>
 
-#include "c.h"
-#include "mbsalign.h"
-#include "strutils.h"
-#include "widechar.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "mbsalign.h"
+#অন্তর্ভাব "strutils.h"
+#অন্তর্ভাব "widechar.h"
 
 /* Return the byte after a complete ANSI escape sequence, or NULL. */
-static const char *skip_ansi_escape(const char *p, const char *end)
+স্থির ধ্রুবক অক্ষর *skip_ansi_escape(ধ্রুবক অক্ষর *p, ধ্রুবক অক্ষর *end)
 {
-	const char *q;
+	ধ্রুবক অক্ষর *q;
 
-	if (p >= end || (unsigned char) *p != '\033' || p + 1 >= end)
-		return NULL;
+	যদি (p >= end || (unsigned অক্ষর) *p != '\033' || p + 1 >= end)
+		ফেরত ফাঁকা;
 
 	q = p + 1;
-	if (*q == '[') {
+	যদি (*q == '[') {
 		q++;
 		/* CSI parameter bytes (0x30-0x3f) are followed by intermediate
 		 * bytes (0x20-0x2f) and a final byte (0x40-0x7e). None of them
 		 * occupies a cell.
 		 */
-		while (q < end && (unsigned char) *q >= 0x30
-				&& (unsigned char) *q <= 0x3f)
+		যখন (q < end && (unsigned অক্ষর) *q >= 0x30
+				&& (unsigned অক্ষর) *q <= 0x3f)
 			q++;
-		while (q < end && (unsigned char) *q >= 0x20
-				&& (unsigned char) *q <= 0x2f)
+		যখন (q < end && (unsigned অক্ষর) *q >= 0x20
+				&& (unsigned অক্ষর) *q <= 0x2f)
 			q++;
-		if (q < end && (unsigned char) *q >= 0x40
-				&& (unsigned char) *q <= 0x7e)
-			return q + 1;
-	} else if (*q && strchr("()*+", *q) && q + 1 < end)
-		return q + 2;
+		যদি (q < end && (unsigned অক্ষর) *q >= 0x40
+				&& (unsigned অক্ষর) *q <= 0x7e)
+			ফেরত q + 1;
+	} অন্যথা যদি (*q && strchr("()*+", *q) && q + 1 < end)
+		ফেরত q + 2;
 
-	return NULL;
+	ফেরত ফাঁকা;
 }
 
 /*
@@ -59,57 +59,57 @@ static const char *skip_ansi_escape(const char *p, const char *end)
  *
  * Returns: number of cells.
  */
-size_t mbs_nwidth(const char *buf, size_t bufsz)
+size_t mbs_nwidth(ধ্রুবক অক্ষর *buf, size_t bufsz)
 {
-	const char *p = buf, *last = buf;
+	ধ্রুবক অক্ষর *p = buf, *last = buf;
 	size_t width = 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, আকার(st));
 #endif
-	if (p && *p && bufsz)
+	যদি (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if (*p == '\033') {
-			const char *e = skip_ansi_escape(p, last + 1);
+	যখন (p && *p && p <= last) {
+		যদি (*p == '\033') {
+			ধ্রুবক অক্ষর *e = skip_ansi_escape(p, last + 1);
 
 			p = e ? e : p + 1;
-			continue;
+			চালু;
 		}
-		if (iscntrl((unsigned char) *p)) {
+		যদি (iscntrl((unsigned অক্ষর) *p)) {
 			p++;
-			continue;
+			চালু;
 		}
 #ifdef HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-		if (len == 0)
-			break;
-		if (len > 0 && iswprint(wc)) {
-			int x = wcwidth(wc);
-			if (x > 0)
+		যদি (len == 0)
+			বিরতি;
+		যদি (len > 0 && iswprint(wc)) {
+			পূর্ণসংখ্যা x = wcwidth(wc);
+			যদি (x > 0)
 				width += x;
-		} else if (len == (size_t) -1 || len == (size_t) -2)
+		} অন্যথা যদি (len == (size_t) -1 || len == (size_t) -2)
 			len = 1;
 		p += len;
-#else
-		if (isprint((unsigned char) *p))
+#অন্যথা
+		যদি (isprint((unsigned অক্ষর) *p))
 			width++;
 		p++;
 #endif
 	}
 
-	return width;
+	ফেরত width;
 }
 
-size_t mbs_width(const char *s)
+size_t mbs_width(ধ্রুবক অক্ষর *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_nwidth(s, strlen(s));
+	যদি (!s || !*s)
+		ফেরত 0;
+	ফেরত mbs_nwidth(s, strlen(s));
 }
 
 /*
@@ -119,69 +119,69 @@ size_t mbs_width(const char *s)
  *
  * Returns: number of cells, @sz returns number of bytes.
  */
-size_t mbs_safe_nwidth(const char *buf, size_t bufsz, size_t *sz)
+size_t mbs_safe_nwidth(ধ্রুবক অক্ষর *buf, size_t bufsz, size_t *sz)
 {
-	const char *p = buf, *last = buf;
+	ধ্রুবক অক্ষর *p = buf, *last = buf;
 	size_t width = 0, bytes = 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, আকার(st));
 #endif
-	if (p && *p && bufsz)
+	যদি (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if ((p < last && *p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
+	যখন (p && *p && p <= last) {
+		যদি ((p < last && *p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((unsigned অক্ষর) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		অন্যথা {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;
+			যদি (len == 0)
+				বিরতি;
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			যদি (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
-				if (isprint((unsigned char) *p))
+				যদি (isprint((unsigned অক্ষর) *p))
 					width += 1, bytes += 1;
-				else
+				অন্যথা
 					width += 4, bytes += 4;
 
-			} else if (!iswprint(wc)) {
+			} অন্যথা যদি (!iswprint(wc)) {
 				width += len * 4;	/* hex encode whole sequence */
 				bytes += len * 4;
-			} else {
+			} অন্যথা {
 				width += wcwidth(wc);	/* number of cells */
 				bytes += len;		/* number of bytes */
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
+#অন্যথা
+		অন্যথা যদি (!isprint((unsigned অক্ষর) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
-		} else {
+		} অন্যথা {
 			width++, bytes++;
 			p++;
 		}
 #endif
 	}
 
-	if (sz)
+	যদি (sz)
 		*sz = bytes;
-	return width;
+	ফেরত width;
 }
 
-size_t mbs_safe_width(const char *s)
+size_t mbs_safe_width(ধ্রুবক অক্ষর *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_safe_nwidth(s, strlen(s), NULL);
+	যদি (!s || !*s)
+		ফেরত 0;
+	ফেরত mbs_safe_nwidth(s, strlen(s), ফাঁকা);
 }
 
 /*
@@ -192,86 +192,86 @@ size_t mbs_safe_width(const char *s)
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz, const char *safechars)
+অক্ষর *mbs_safe_encode_to_বাফার(ধ্রুবক অক্ষর *s, size_t *width, অক্ষর *buf, size_t bufsiz, ধ্রুবক অক্ষর *safechars)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
+	ধ্রুবক অক্ষর *p = s;
+	অক্ষর *r;
+	পূর্ণসংখ্যা rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, আকার(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	যদি (!sz || !buf || !bufsiz)
+		ফেরত ফাঁকা;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (পূর্ণসংখ্যা) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
-		if (safechars && strchr(safechars, *p)) {
-			if (rsz < 2)
-				break;
+	যখন (p && *p) {
+		যদি (safechars && strchr(safechars, *p)) {
+			যদি (rsz < 2)
+				বিরতি;
 			*r++ = *p++;
 			rsz--;
-			continue;
+			চালু;
 		}
 
-		if ((*p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		যদি ((*p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((unsigned অক্ষর) *p)) {
+			যদি (rsz < 5)
+				বিরতি;
+			snprintf(r, rsz, "\\x%02x", (unsigned অক্ষর) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		অন্যথা {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;		/* end of string */
+			যদি (len == 0)
+				বিরতি;		/* end of string */
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			যদি (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
 				/*
 				 * Not valid multibyte sequence -- maybe it's
 				 * printable char according to the current locales.
 				 */
-				if (!isprint((unsigned char) *p)) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+				যদি (!isprint((unsigned অক্ষর) *p)) {
+					যদি (rsz < 5)
+						বিরতি;
+					snprintf(r, rsz, "\\x%02x", (unsigned অক্ষর) *p);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
-				} else {
-					if (rsz < 2)
-						break;
+				} অন্যথা {
+					যদি (rsz < 2)
+						বিরতি;
 					(*width)++;
 					*r++ = *p;
 					rsz--;
 				}
-			} else if (!iswprint(wc)) {
+			} অন্যথা যদি (!iswprint(wc)) {
 				size_t i;
-				for (i = 0; i < len; i++) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) p[i]);
+				জন্য (i = 0; i < len; i++) {
+					যদি (rsz < 5)
+						বিরতি;
+					snprintf(r, rsz, "\\x%02x", (unsigned অক্ষর) p[i]);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
 				}
-				if (i < len)
-					break;
-			} else {
-				if (rsz < (int)len + 1)
-					break;
+				যদি (i < len)
+					বিরতি;
+			} অন্যথা {
+				যদি (rsz < (পূর্ণসংখ্যা)len + 1)
+					বিরতি;
 				memcpy(r, p, len);
 				r += len;
 				rsz -= len;
@@ -279,18 +279,18 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+#অন্যথা
+		অন্যথা যদি (!isprint((unsigned অক্ষর) *p)) {
+			যদি (rsz < 5)
+				বিরতি;
+			snprintf(r, rsz, "\\x%02x", (unsigned অক্ষর) *p);
 			p++;
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < 2)
-				break;
+		} অন্যথা {
+			যদি (rsz < 2)
+				বিরতি;
 			*r++ = *p++;
 			rsz--;
 			(*width)++;
@@ -299,7 +299,7 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 	}
 
 	*r = '\0';
-	return buf;
+	ফেরত buf;
 }
 
 /*
@@ -309,65 +309,65 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz)
+অক্ষর *mbs_invalid_encode_to_বাফার(ধ্রুবক অক্ষর *s, size_t *width, অক্ষর *buf, size_t bufsiz)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
+	ধ্রুবক অক্ষর *p = s;
+	অক্ষর *r;
+	পূর্ণসংখ্যা rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, আকার(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	যদি (!sz || !buf || !bufsiz)
+		ফেরত ফাঁকা;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (পূর্ণসংখ্যা) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
+	যখন (p && *p) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
-#else
+#অন্যথা
 		size_t len = 1;
 #endif
 
-		if (len == 0)
-			break;		/* end of string */
+		যদি (len == 0)
+			বিরতি;		/* end of string */
 
-		if (len == (size_t) -1 || len == (size_t) -2) {
+		যদি (len == (size_t) -1 || len == (size_t) -2) {
 			len = 1;
 			/*
 			 * Not valid multibyte sequence -- maybe it's
 			 * printable char according to the current locales.
 			 */
-			if (!isprint((unsigned char) *p)) {
-				if (rsz < 5)
-					break;
-				snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+			যদি (!isprint((unsigned অক্ষর) *p)) {
+				যদি (rsz < 5)
+					বিরতি;
+				snprintf(r, rsz, "\\x%02x", (unsigned অক্ষর) *p);
 				r += 4;
 				rsz -= 4;
 				*width += 4;
-			} else {
-				if (rsz < 2)
-					break;
+			} অন্যথা {
+				যদি (rsz < 2)
+					বিরতি;
 				(*width)++;
 				*r++ = *p;
 				rsz--;
 			}
-		} else if (*p == '\\' && *(p + 1) == 'x') {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		} অন্যথা যদি (*p == '\\' && *(p + 1) == 'x') {
+			যদি (rsz < 5)
+				বিরতি;
+			snprintf(r, rsz, "\\x%02x", (unsigned অক্ষর) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < (int)len + 1)
-				break;
+		} অন্যথা {
+			যদি (rsz < (পূর্ণসংখ্যা)len + 1)
+				বিরতি;
 			r = mempcpy(r, p, len);
 			rsz -= len;
 			*width += wcwidth(wc);
@@ -376,171 +376,171 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
 	}
 
 	*r = '\0';
-	return buf;
+	ফেরত buf;
 }
 
 /*
  * Guess size
  */
-size_t mbs_safe_encode_size(size_t bytes)
+size_t mbs_safe_encode_আকার(size_t bytes)
 {
-	return (bytes * 4) + 1;
+	ফেরত (bytes * 4) + 1;
 }
 
 /*
  * Count size of the original string in bytes (count \x?? as one byte)
  */
-size_t mbs_safe_decode_size(const char *p)
+size_t mbs_safe_decode_আকার(ধ্রুবক অক্ষর *p)
 {
 	size_t bytes = 0;
 
-	while (p && *p) {
-		if (*p == '\\' && *(p + 1) == 'x' &&
+	যখন (p && *p) {
+		যদি (*p == '\\' && *(p + 1) == 'x' &&
 		    isxdigit(*(p + 2)) && isxdigit(*(p + 3)))
 			p += 4;
-		else
+		অন্যথা
 			p++;
 		bytes++;
 	}
-	return bytes;
+	ফেরত bytes;
 }
 
 /*
  * Returns allocated string where all control and non-printable chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_safe_encode(const char *s, size_t *width)
+অক্ষর *mbs_safe_encode(ধ্রুবক অক্ষর *s, size_t *width)
 {
 	size_t sz = s ? strlen(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	অক্ষর *buf, *ret = ফাঁকা;
 
-	if (!sz)
-		return NULL;
-	bufsz = mbs_safe_encode_size(sz);
+	যদি (!sz)
+		ফেরত ফাঁকা;
+	bufsz = mbs_safe_encode_আকার(sz);
 	buf = malloc(bufsz);
-	if (buf)
-		ret = mbs_safe_encode_to_buffer(s, width, buf, bufsz, NULL);
-	if (!ret)
-		free(buf);
-	return ret;
+	যদি (buf)
+		ret = mbs_safe_encode_to_বাফার(s, width, buf, bufsz, ফাঁকা);
+	যদি (!ret)
+		মুক্ত(buf);
+	ফেরত ret;
 }
 
 /*
  * Returns allocated string where all broken widechars chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_invalid_encode(const char *s, size_t *width)
+অক্ষর *mbs_invalid_encode(ধ্রুবক অক্ষর *s, size_t *width)
 {
 	size_t sz = s ? strlen(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	অক্ষর *buf, *ret = ফাঁকা;
 
-	if (!sz)
-		return NULL;
-	bufsz = mbs_safe_encode_size(sz);
+	যদি (!sz)
+		ফেরত ফাঁকা;
+	bufsz = mbs_safe_encode_আকার(sz);
 	buf = malloc(bufsz);
-	if (buf)
-		ret = mbs_invalid_encode_to_buffer(s, width, buf, bufsz);
-	if (!ret)
-		free(buf);
-	return ret;
+	যদি (buf)
+		ret = mbs_invalid_encode_to_বাফার(s, width, buf, bufsz);
+	যদি (!ret)
+		মুক্ত(buf);
+	ফেরত ret;
 }
 
 #ifdef HAVE_WIDECHAR
 
-static bool
+স্থির bool
 wc_ensure_printable (wchar_t *wchars)
 {
   bool replaced = false;
   wchar_t *wc = wchars;
-  while (*wc)
+  যখন (*wc)
     {
-      if (!iswprint ((wint_t) *wc))
+      যদি (!iswprint ((wint_t) *wc))
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           replaced = true;
         }
       wc++;
     }
-  return replaced;
+  ফেরত replaced;
 }
 
 /* Return the wchar after a complete ANSI escape sequence, or NULL. */
-static wchar_t *
+স্থির wchar_t *
 wc_skip_ansi_escape (wchar_t *wc)
 {
   wchar_t *p = wc + 1;
 
-  if (*wc != L'\033' || !*p)
-    return NULL;
+  যদি (*wc != L'\033' || !*p)
+    ফেরত ফাঁকা;
 
-  if (*p == L'[')
+  যদি (*p == L'[')
     {
       p++;
-      while (*p >= 0x30 && *p <= 0x3f)
+      যখন (*p >= 0x30 && *p <= 0x3f)
         p++;
-      while (*p >= 0x20 && *p <= 0x2f)
+      যখন (*p >= 0x20 && *p <= 0x2f)
         p++;
-      if (*p >= 0x40 && *p <= 0x7e)
-        return p + 1;
+      যদি (*p >= 0x40 && *p <= 0x7e)
+        ফেরত p + 1;
     }
-  else if ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
-    return p + 2;
+  অন্যথা যদি ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
+    ফেরত p + 2;
 
-  return NULL;
+  ফেরত ফাঁকা;
 }
 
 /* Truncate wchar string to width cells.
  * Returns number of cells used.  */
 
-static size_t
+স্থির size_t
 wc_truncate (wchar_t *wc, size_t width)
 {
   size_t cells = 0;
-  int next_cells = 0;
+  পূর্ণসংখ্যা পরবর্তী_cells = 0;
 
-  while (*wc)
+  যখন (*wc)
     {
       wchar_t *after_escape = wc_skip_ansi_escape (wc);
-      if (after_escape)
+      যদি (after_escape)
         {
           wc = after_escape;
-          continue;
+          চালু;
         }
 
-      next_cells = wcwidth (*wc);
-      if (next_cells == -1) /* non printable */
+      পরবর্তী_cells = wcwidth (*wc);
+      যদি (পরবর্তী_cells == -1) /* non printable */
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
-          next_cells = 1;
+          পরবর্তী_cells = 1;
         }
-      if (cells + next_cells > width)
-        break;
+      যদি (cells + পরবর্তী_cells > width)
+        বিরতি;
 
-      cells += next_cells;
+      cells += পরবর্তী_cells;
       wc++;
     }
   *wc = L'\0';
-  return cells;
+  ফেরত cells;
 }
 
-static int
-rpl_wcswidth (const wchar_t *s, size_t n)
+স্থির পূর্ণসংখ্যা
+rpl_wcswidth (ধ্রুবক wchar_t *s, size_t n)
 {
-  int ret = 0;
+  পূর্ণসংখ্যা ret = 0;
 
-  while (n-- > 0 && *s != L'\0')
+  যখন (n-- > 0 && *s != L'\0')
     {
-      int nwidth = wcwidth (*s++);
-      if (nwidth == -1)             /* non printable */
-        return -1;
-      if (ret > (INT_MAX - nwidth)) /* overflow */
-        return -1;
+      পূর্ণসংখ্যা nwidth = wcwidth (*s++);
+      যদি (nwidth == -1)             /* non printable */
+        ফেরত -1;
+      যদি (ret > (INT_MAX - nwidth)) /* overflow */
+        ফেরত -1;
       ret += nwidth;
     }
 
-  return ret;
+  ফেরত ret;
 }
 #endif /* HAVE_WIDECHAR */
 
@@ -549,41 +549,41 @@ rpl_wcswidth (const wchar_t *s, size_t n)
  * of cells.
  */
 size_t
-mbs_truncate(char *str, size_t *width)
+mbs_truncate(অক্ষর *str, size_t *width)
 {
 	ssize_t bytes = strlen(str);
 #ifdef HAVE_WIDECHAR
-	ssize_t sz = mbstowcs(NULL, str, 0);
-	wchar_t *wcs = NULL;
+	ssize_t sz = mbstowcs(ফাঁকা, str, 0);
+	wchar_t *wcs = ফাঁকা;
 
-	if (sz == (ssize_t) -1)
-		goto done;
+	যদি (sz == (ssize_t) -1)
+		যাও done;
 
-	wcs = calloc(1, (sz + 1) * sizeof(wchar_t));
-	if (!wcs)
-		goto done;
+	wcs = calloc(1, (sz + 1) * আকার(wchar_t));
+	যদি (!wcs)
+		যাও done;
 
-	if (!mbstowcs(wcs, str, sz))
-		goto done;
+	যদি (!mbstowcs(wcs, str, sz))
+		যাও done;
 	*width = wc_truncate(wcs, *width);
 	bytes = wcstombs(str, wcs, bytes);
 done:
-	free(wcs);
-#else
+	মুক্ত(wcs);
+#অন্যথা
 	{
-		const char *p = str;
-		const char *end = str + bytes;
+		ধ্রুবক অক্ষর *p = str;
+		ধ্রুবক অক্ষর *end = str + bytes;
 		size_t cells = 0;
 
-		while (p < end) {
-			const char *after_escape = skip_ansi_escape(p, end);
+		যখন (p < end) {
+			ধ্রুবক অক্ষর *after_escape = skip_ansi_escape(p, end);
 
-			if (after_escape) {
+			যদি (after_escape) {
 				p = after_escape;
-				continue;
+				চালু;
 			}
-			if (cells >= *width)
-				break;
+			যদি (cells >= *width)
+				বিরতি;
 			p++;
 			cells++;
 		}
@@ -591,9 +591,9 @@ done:
 		*width = cells;
 	}
 #endif
-	if (bytes >= 0)
+	যদি (bytes >= 0)
 		str[bytes] = '\0';
-	return bytes;
+	ফেরত bytes;
 }
 
 /* Write N_SPACES space characters to DEST while ensuring
@@ -601,20 +601,20 @@ done:
    is always added to DEST.
    A pointer to the terminating NUL is returned.  */
 
-static char*
-mbs_align_pad (char *dest, const char* dest_end, size_t n_spaces, int padchar)
+স্থির অক্ষর*
+mbs_align_pad (অক্ষর *dest, ধ্রুবক অক্ষর* dest_end, size_t n_spaces, পূর্ণসংখ্যা padchar)
 {
-  for (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
+  জন্য (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
     *dest++ = padchar;
   *dest = '\0';
-  return dest;
+  ফেরত dest;
 }
 
 size_t
-mbsalign (const char *src, char *dest, size_t dest_size,
-          size_t *width, mbs_align_t align, int flags)
+mbsalign (ধ্রুবক অক্ষর *src, অক্ষর *dest, size_t dest_আকার,
+          size_t *width, mbs_align_t align, পূর্ণসংখ্যা flags)
 {
-	return mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
+	ফেরত mbsalign_with_padding(src, dest, dest_আকার, width, align, flags, ' ');
 }
 
 /* Align a string, SRC, in a field of *WIDTH columns, handling multi-byte
@@ -631,23 +631,23 @@ mbsalign (const char *src, char *dest, size_t dest_size,
    Update *WIDTH to indicate how many columns were used before padding.  */
 
 size_t
-mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
+mbsalign_with_padding (ধ্রুবক অক্ষর *src, অক্ষর *dest, size_t dest_আকার,
 	               size_t *width, mbs_align_t align,
 #ifdef HAVE_WIDECHAR
-		       int flags,
-#else
-		       int flags __attribute__((__unused__)),
+		       পূর্ণসংখ্যা flags,
+#অন্যথা
+		       পূর্ণসংখ্যা flags __attribute__((__unused__)),
 #endif
-		       int padchar)
+		       পূর্ণসংখ্যা padchar)
 {
   size_t ret = -1;
-  size_t src_size = strlen (src) + 1;
-  char *newstr = NULL;
-  wchar_t *str_wc = NULL;
-  const char *str_to_print = src;
-  size_t n_cols = src_size - 1;
+  size_t src_আকার = strlen (src) + 1;
+  অক্ষর *newstr = ফাঁকা;
+  wchar_t *str_wc = ফাঁকা;
+  ধ্রুবক অক্ষর *str_to_print = src;
+  size_t n_cols = src_আকার - 1;
   size_t n_used_bytes = n_cols; /* Not including NUL */
-  size_t n_spaces = 0, space_left;
+  size_t n_spaces = 0, space_বাম;
 
 #ifdef HAVE_WIDECHAR
   bool conversion = false;
@@ -656,26 +656,26 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
   /* In multi-byte locales convert to wide characters
      to allow easy truncation. Also determine number
      of screen columns used.  */
-  if (MB_CUR_MAX > 1)
+  যদি (MB_CUR_MAX > 1)
     {
-      size_t src_chars = mbstowcs (NULL, src, 0);
-      if (src_chars == (size_t) -1)
+      size_t src_chars = mbstowcs (ফাঁকা, src, 0);
+      যদি (src_chars == (size_t) -1)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          যদি (flags & MBA_UNIBYTE_FALLBACK)
+            যাও mbsalign_unibyte;
+          অন্যথা
+            যাও mbsalign_cleanup;
         }
       src_chars += 1; /* make space for NUL */
-      str_wc = malloc (src_chars * sizeof (wchar_t));
-      if (str_wc == NULL)
+      str_wc = malloc (src_chars * আকার (wchar_t));
+      যদি (str_wc == ফাঁকা)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          যদি (flags & MBA_UNIBYTE_FALLBACK)
+            যাও mbsalign_unibyte;
+          অন্যথা
+            যাও mbsalign_cleanup;
         }
-      if (mbstowcs (str_wc, src, src_chars) != 0)
+      যদি (mbstowcs (str_wc, src, src_chars) != 0)
         {
           str_wc[src_chars - 1] = L'\0';
           wc_enabled = true;
@@ -686,37 +686,37 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 
   /* If we transformed or need to truncate the source string
      then create a modified copy of it.  */
-  if (wc_enabled && (conversion || (n_cols > *width)))
+  যদি (wc_enabled && (conversion || (n_cols > *width)))
     {
-        if (conversion)
+        যদি (conversion)
           {
              /* May have increased the size by converting
                 \t to \uFFFD for example.  */
-            src_size = wcstombs(NULL, str_wc, 0) + 1;
+            src_আকার = wcstombs(ফাঁকা, str_wc, 0) + 1;
           }
-        newstr = malloc (src_size);
-        if (newstr == NULL)
+        newstr = malloc (src_আকার);
+        যদি (newstr == ফাঁকা)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          যদি (flags & MBA_UNIBYTE_FALLBACK)
+            যাও mbsalign_unibyte;
+          অন্যথা
+            যাও mbsalign_cleanup;
         }
         str_to_print = newstr;
         n_cols = wc_truncate (str_wc, *width);
-        n_used_bytes = wcstombs (newstr, str_wc, src_size);
+        n_used_bytes = wcstombs (newstr, str_wc, src_আকার);
     }
 
 mbsalign_unibyte:
 #endif
 
-  if (n_cols > *width) /* Unibyte truncation required.  */
+  যদি (n_cols > *width) /* Unibyte truncation required.  */
     {
       n_cols = *width;
       n_used_bytes = n_cols;
     }
 
-  if (*width > n_cols) /* Padding required.  */
+  যদি (*width > n_cols) /* Padding required.  */
     n_spaces = *width - n_cols;
 
   /* indicate to caller how many cells needed (not including padding).  */
@@ -726,40 +726,40 @@ mbsalign_unibyte:
   ret = n_used_bytes + (n_spaces * 1);
 
   /* Write as much NUL terminated output to DEST as possible.  */
-  if (dest_size != 0)
+  যদি (dest_আকার != 0)
     {
-      char *dest_end = dest + dest_size - 1;
+      অক্ষর *dest_end = dest + dest_আকার - 1;
       size_t start_spaces;
       size_t end_spaces;
 
-      switch (align)
+      নির্বাচন (align)
         {
-        case MBS_ALIGN_CENTER:
+        ক্ষেত্র MBS_ALIGN_CENTER:
           start_spaces = n_spaces / 2 + n_spaces % 2;
           end_spaces = n_spaces / 2;
-          break;
-        case MBS_ALIGN_LEFT:
+          বিরতি;
+        ক্ষেত্র MBS_ALIGN_বাম:
           start_spaces = 0;
           end_spaces = n_spaces;
-          break;
-        case MBS_ALIGN_RIGHT:
+          বিরতি;
+        ক্ষেত্র MBS_ALIGN_ডান:
           start_spaces = n_spaces;
           end_spaces = 0;
-          break;
-	default:
+          বিরতি;
+	পূর্বনির্ধারিত:
 	  abort();
         }
 
       dest = mbs_align_pad (dest, dest_end, start_spaces, padchar);
-      space_left = dest_end - dest;
-      dest = mempcpy (dest, str_to_print, min (n_used_bytes, space_left));
+      space_বাম = dest_end - dest;
+      dest = mempcpy (dest, str_to_print, min (n_used_bytes, space_বাম));
       mbs_align_pad (dest, dest_end, end_spaces, padchar);
     }
 #ifdef HAVE_WIDECHAR
 mbsalign_cleanup:
 #endif
-  free (str_wc);
-  free (newstr);
+  মুক্ত (str_wc);
+  মুক্ত (newstr);
 
-  return ret;
+  ফেরত ret;
 }

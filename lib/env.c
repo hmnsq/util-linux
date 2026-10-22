@@ -4,29 +4,29 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
 #ifdef HAVE_SYS_PRCTL_H
-#include <sys/prctl.h>
-#else
+#অন্তর্ভাব <sys/prctl.h>
+#অন্যথা
 #define PR_GET_DUMPABLE 3
 #endif
-#if (!defined(HAVE_PRCTL) && defined(linux))
-#include <sys/syscall.h>
+#যদি (!defined(HAVE_PRCTL) && defined(linux))
+#অন্তর্ভাব <sys/syscall.h>
 #endif
-#include <unistd.h>
-#include <sys/types.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <sys/types.h>
 
-#include "env.h"
-#include "strv.h"
-#include "all-io.h"
+#অন্তর্ভাব "env.h"
+#অন্তর্ভাব "strv.h"
+#অন্তর্ভাব "all-io.h"
 
 #ifndef HAVE_ENVIRON_DECL
-extern char **environ;
+বাহ্যিক অক্ষর **environ;
 #endif
 
-static char * const forbid[] = {
+স্থির অক্ষর * ধ্রুবক forbid[] = {
 	"BASH_ENV=",    /* GNU creeping featurism strikes again... */
 	"ENV=",
 	"HOME=",
@@ -39,126 +39,126 @@ static char * const forbid[] = {
 	"PATH=",
 	"SHELL=",
 	"SHLIB_PATH=",
-	(char *) 0
+	(অক্ষর *) 0
 };
 
 /* these are allowed, but with no slashes inside
    (to work around security problems in GNU gettext) */
-static char * const noslash[] = {
+স্থির অক্ষর * ধ্রুবক noslash[] = {
 	"LANG=",
 	"LANGUAGE=",
 	"LC_",	  /* anything with the LC_ prefix */
-	(char *) 0
+	(অক্ষর *) 0
 };
 
 
-struct ul_env_list {
-	char	*name;
-	char	*value;
+কাঠামো ul_env_list {
+	অক্ষর	*name;
+	অক্ষর	*মান;
 
-	struct ul_env_list *next;
+	কাঠামো ul_env_list *পরবর্তী;
 };
 
 /*
  * Saves to the list and returns a pointer to the new head of the list.
  */
-static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
-					 const char *name, size_t namesz,
-					 const char *value, size_t valsz)
+স্থির কাঠামো ul_env_list *env_list_add( কাঠামো ul_env_list *ls0,
+					 ধ্রুবক অক্ষর *name, size_t namesz,
+					 ধ্রুবক অক্ষর *মান, size_t valsz)
 {
-	struct ul_env_list *ls;
+	কাঠামো ul_env_list *ls;
 
-	ls = calloc(1, sizeof(struct ul_env_list) + namesz + valsz + 2);
-	if (!ls)
-		return ls0;
+	ls = calloc(1, আকার(কাঠামো ul_env_list) + namesz + valsz + 2);
+	যদি (!ls)
+		ফেরত ls0;
 
-	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
-	ls->value = ls->name + namesz + 1;
+	ls->name = ((অক্ষর *) ls) + আকার(কাঠামো ul_env_list);
+	ls->মান = ls->name + namesz + 1;
 
 	memcpy(ls->name, name, namesz);
-	memcpy(ls->value, value, valsz);
+	memcpy(ls->মান, মান, valsz);
 
-	ls->next = ls0;
-	return ls;
+	ls->পরবর্তী = ls0;
+	ফেরত ls;
 }
 
 /*
  * Saves the @str (with the name=value string) to the @ls and returns a pointer
  * to the new head of the list.
  */
-static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
-						    const char *str)
+স্থির কাঠামো ul_env_list *env_list_add_from_string(কাঠামো ul_env_list *ls,
+						    ধ্রুবক অক্ষর *str)
 {
 	size_t namesz = 0, valsz = 0;
-	const char *val;
+	ধ্রুবক অক্ষর *val;
 
-	if (!str || !*str)
-		return ls;
+	যদি (!str || !*str)
+		ফেরত ls;
 
 	val = strchr(str, '=');
-	if (!val)
-		return ls;
+	যদি (!val)
+		ফেরত ls;
 	namesz = val - str;
 
 	val++;
 	valsz = strlen(val);
 
-	return env_list_add(ls, str, namesz, val, valsz);
+	ফেরত env_list_add(ls, str, namesz, val, valsz);
 }
 
 /*
  * Saves the @name and @value to @ls0 and returns a pointer to the new head of
  * the list.
  */
-struct ul_env_list *env_list_add_variable(
-				struct ul_env_list *ls,
-				const char *name, const char *value)
+কাঠামো ul_env_list *env_list_add_variable(
+				কাঠামো ul_env_list *ls,
+				ধ্রুবক অক্ষর *name, ধ্রুবক অক্ষর *মান)
 {
-	if (!name || !*name)
-		return ls;
+	যদি (!name || !*name)
+		ফেরত ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	ফেরত env_list_add(ls, name, strlen(name), মান, মান ? strlen(মান) : 0);
 }
 
 /*
  * Calls getenv() and adds the result to the list.
  */
-struct ul_env_list *env_list_add_getenv(struct ul_env_list *ls,
-				const char *name, const char *dflt)
+কাঠামো ul_env_list *env_list_add_getenv(কাঠামো ul_env_list *ls,
+				ধ্রুবক অক্ষর *name, ধ্রুবক অক্ষর *dflt)
 {
-	const char *val;
+	ধ্রুবক অক্ষর *val;
 
-	if (!name)
-		return ls;
+	যদি (!name)
+		ফেরত ls;
 
 	val = getenv(name);
-	if (!val)
+	যদি (!val)
 		val= dflt;
-	if (val)
+	যদি (val)
 		ls = env_list_add_variable(ls, name, val);
-	return ls;
+	ফেরত ls;
 }
 
 /*
  * Calls getenv() for each name (comma-separated) in @str and adds the results
  * to the list.
  */
-struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str)
+কাঠামো ul_env_list *env_list_add_getenvs(কাঠামো ul_env_list *ls, ধ্রুবক অক্ষর *str)
 {
-	char **all, **name;
+	অক্ষর **all, **name;
 
-	if (!str)
-		return ls;
+	যদি (!str)
+		ফেরত ls;
 
 	all = ul_strv_split(str, ",");
-	if (!all)
-		return ls;
+	যদি (!all)
+		ফেরত ls;
 
 	UL_STRV_FOREACH(name, all)
-		ls = env_list_add_getenv(ls, *name, NULL);
+		ls = env_list_add_getenv(ls, *name, ফাঁকা);
 
 	ul_strv_free(all);
-	return ls;
+	ফেরত ls;
 }
 
 /*
@@ -166,49 +166,49 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
  *
  * @fd must be /proc/<pid>/environ file.
 */
-struct ul_env_list *env_list_from_fd(int fd)
+কাঠামো ul_env_list *env_list_from_fd(পূর্ণসংখ্যা fd)
 {
-	char *buf = NULL, *p;
+	অক্ষর *buf = ফাঁকা, *p;
 	ssize_t rc = 0;
-	struct ul_env_list *ls = NULL;
+	কাঠামো ul_env_list *ls = ফাঁকা;
 
 	errno = 0;
-	if ((rc = ul_read_all_alloc(fd, &buf)) < 1)
-		return NULL;
+	যদি ((rc = ul_read_all_alloc(fd, &buf)) < 1)
+		ফেরত ফাঁকা;
 	buf[rc] = '\0';
 	p = buf;
 
-	while (rc > 0) {
+	যখন (rc > 0) {
 		ls = env_list_add_from_string(ls, p);
 		p += strlen(p) + 1;
 		rc -= strlen(p) + 1;
 	}
 
-	free(buf);
-	return ls;
+	মুক্ত(buf);
+	ফেরত ls;
 }
 
 /*
  * Use setenv() for all stuff in @ls.
  */
-int env_list_setenv(struct ul_env_list *ls, int overwrite)
+পূর্ণসংখ্যা env_list_setenv(কাঠামো ul_env_list *ls, পূর্ণসংখ্যা overwrite)
 {
-	int rc = 0;
+	পূর্ণসংখ্যা rc = 0;
 
-	while (ls && rc == 0) {
-		if (ls->name && ls->value)
-			rc = setenv(ls->name, ls->value, overwrite);
-		ls = ls->next;
+	যখন (ls && rc == 0) {
+		যদি (ls->name && ls->মান)
+			rc = setenv(ls->name, ls->মান, overwrite);
+		ls = ls->পরবর্তী;
 	}
-	return rc;
+	ফেরত rc;
 }
 
-void env_list_free(struct ul_env_list *ls)
+শূন্য env_list_free(কাঠামো ul_env_list *ls)
 {
-	while (ls) {
-		struct ul_env_list *x = ls;
-		ls = ls->next;
-		free(x);
+	যখন (ls) {
+		কাঠামো ul_env_list *x = ls;
+		ls = ls->পরবর্তী;
+		মুক্ত(x);
 	}
 }
 
@@ -216,84 +216,84 @@ void env_list_free(struct ul_env_list *ls)
  * Removes unwanted variables from environ[]. If @org is not NULL than stores
  * unwnated variables to the list.
  */
-void __sanitize_env(struct ul_env_list **org)
+শূন্য __sanitize_env(কাঠামো ul_env_list **org)
 {
-	char **envp = environ;
-	char * const *bad;
-	char **cur;
-	int last = 0;
+	অক্ষর **envp = environ;
+	অক্ষর * ধ্রুবক *bad;
+	অক্ষর **cur;
+	পূর্ণসংখ্যা last = 0;
 
-	for (cur = envp; *cur; cur++)
+	জন্য (cur = envp; *cur; cur++)
 		last++;
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = forbid; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) == 0) {
-				if (org)
+	জন্য (cur = envp; *cur; cur++) {
+		জন্য (bad = forbid; *bad; bad++) {
+			যদি (strncmp(*cur, *bad, strlen(*bad)) == 0) {
+				যদি (org)
 					*org = env_list_add_from_string(*org, *cur);
 				last = ul_remove_entry(envp, cur - envp, last);
 				cur--;
-				break;
+				বিরতি;
 			}
 		}
 	}
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = noslash; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) != 0)
-				continue;
-			if (!strchr(*cur, '/'))
-				continue;  /* OK */
-			if (org)
+	জন্য (cur = envp; *cur; cur++) {
+		জন্য (bad = noslash; *bad; bad++) {
+			যদি (strncmp(*cur, *bad, strlen(*bad)) != 0)
+				চালু;
+			যদি (!strchr(*cur, '/'))
+				চালু;  /* OK */
+			যদি (org)
 				*org = env_list_add_from_string(*org, *cur);
 			last = ul_remove_entry(envp, cur - envp, last);
 			cur--;
-			break;
+			বিরতি;
 		}
 	}
 }
 
-void sanitize_env(void)
+শূন্য sanitize_env(শূন্য)
 {
-	__sanitize_env(NULL);
+	__sanitize_env(ফাঁকা);
 }
 
-char *safe_getenv(const char *arg)
+অক্ষর *safe_getenv(ধ্রুবক অক্ষর *arg)
 {
-	if (is_privileged_execution())
-		return NULL;
+	যদি (is_privileged_execution())
+		ফেরত ফাঁকা;
 #ifdef HAVE_PRCTL
-	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#else
-#if (defined(linux) && defined(SYS_prctl))
-	if (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
+	যদি (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		ফেরত ফাঁকা;
+#অন্যথা
+#যদি (defined(linux) && defined(SYS_prctl))
+	যদি (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		ফেরত ফাঁকা;
 #endif
 #endif
 #ifdef HAVE_SECURE_GETENV
-return secure_getenv(arg);
-#elif HAVE___SECURE_GETENV
-	return __secure_getenv(arg);
-#else
-	return getenv(arg);
+ফেরত secure_getenv(arg);
+#নতুবা_যদি HAVE___SECURE_GETENV
+	ফেরত __secure_getenv(arg);
+#অন্যথা
+	ফেরত getenv(arg);
 #endif
 }
 
 #ifdef TEST_PROGRAM_ENV
-int main(void)
+পূর্ণসংখ্যা প্রধান(শূন্য)
 {
-	char *const *bad;
-	char copy[32];
-	char *p;
-	int retval = EXIT_SUCCESS;
-	struct ul_env_list *removed = NULL;
+	অক্ষর *ধ্রুবক *bad;
+	অক্ষর copy[32];
+	অক্ষর *p;
+	পূর্ণসংখ্যা retval = EXIT_SUCCESS;
+	কাঠামো ul_env_list *removed = ফাঁকা;
 
 	/* define env. */
-	for (bad = forbid; *bad; bad++) {
+	জন্য (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		যদি (p)
 			*p = '\0';
 		setenv(copy, "abc", 1);
 	}
@@ -302,13 +302,13 @@ int main(void)
 	__sanitize_env(&removed);
 
 	/* check removal */
-	for (bad = forbid; *bad; bad++) {
+	জন্য (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		যদি (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (p) {
+		যদি (p) {
 			warnx("%s was not removed", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -318,13 +318,13 @@ int main(void)
 	env_list_setenv(removed, 0);
 
 	/* check restore */
-	for (bad = forbid; *bad; bad++) {
+	জন্য (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		যদি (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (!p) {
+		যদি (!p) {
 			warnx("%s was not restored", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -332,6 +332,6 @@ int main(void)
 
 	env_list_free(removed);
 
-	return retval;
+	ফেরত retval;
 }
 #endif

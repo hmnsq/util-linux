@@ -2,21 +2,21 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#অন্তর্ভাব <dlfcn.h>
 
-#include "c.h"
-#include "dl-selinux.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "dl-selinux.h"
 
-#if defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
+#যদি defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
 
 UL_ELF_NOTE_DLOPEN("selinux",
 		    "Support for SELinux",
 		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
 		    "libselinux.so.1");
 
-struct ul_selinux_opers ul_selinux;
+কাঠামো ul_selinux_opers ul_selinux;
 
-static const struct ul_dlsym ul_selinux_symbols[] =
+স্থির ধ্রুবক কাঠামো ul_dlsym ul_selinux_symbols[] =
 {
 	UL_DLSYM( ul_selinux_opers, is_selinux_enabled ),
 
@@ -59,25 +59,25 @@ static const struct ul_dlsym ul_selinux_symbols[] =
 	UL_DLSYM( ul_selinux_opers, context_free ),
 };
 
-int ul_dlopen_libselinux(void)
+পূর্ণসংখ্যা ul_dlopen_libselinux(শূন্য)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	স্থির পূর্ণসংখ্যা status = 0;
+	স্থির শূন্য *dl = ফাঁকা;
+	পূর্ণসংখ্যা flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	যদি (status)
+		ফেরত status > 0 ? 0 : -ENOSYS;
 
 #ifdef RTLD_NODELETE
 	flags |= RTLD_NODELETE;
 #endif
 	status = ul_dlopen_symbols("libselinux.so.1", flags,
 				   ul_selinux_symbols,
-				   ARRAY_SIZE(ul_selinux_symbols),
+				   ARRAY_আকার(ul_selinux_symbols),
 				   &ul_selinux, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	ফেরত status > 0 ? 0 : -ENOSYS;
 }
 
 #endif /* HAVE_LIBSELINUX && USE_DLOPEN_SELINUX */

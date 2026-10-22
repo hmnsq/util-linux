@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <sys/stat.h>
+#অন্তর্ভাব <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#অন্তর্ভাব "nls.h"
+#অন্তর্ভাব "strutils.h"
+#অন্তর্ভাব "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+পূর্ণসংখ্যা ul_parse_pid_str(অক্ষর *pidstr, pid_t *pid_অঙ্ক, uint64_t *pfd_ino, পূর্ণসংখ্যা flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	পূর্ণসংখ্যা rc;
+	অক্ষর *end = ফাঁকা;
+	int64_t অঙ্ক = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	যদি (!pidstr || !*pidstr || !pid_অঙ্ক)
+		ফেরত -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	অঙ্ক = strtoimax(pidstr, &end, 10);
+	যদি (অঙ্ক == 0 && end == pidstr)
+		ফেরত -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	যদি (errno == ERANGE || অঙ্ক < SINT_MIN(pid_t) || অঙ্ক > SINT_MAX(pid_t))
+		ফেরত -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	যদি (অঙ্ক == 0 && !(flags & UL_PID_ZERO))
+		ফেরত -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	যদি (অঙ্ক < 0 && !(flags & UL_PID_NEGATIVE))
+		ফেরত -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_অঙ্ক = (pid_t) অঙ্ক;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	যদি (*end == ':' && pfd_ino && অঙ্ক > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		যদি (rc < 0)
+			ফেরত rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		যদি (*pfd_ino == 0)
+			ফেরত -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	যদি (end && *end != '\0')
+		ফেরত -(errno = EINVAL);
+	ফেরত 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+শূন্য ul_parse_pid_str_or_err(অক্ষর *pidstr, pid_t *pid_অঙ্ক, uint64_t *pfd_ino, পূর্ণসংখ্যা flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	যদি (ul_parse_pid_str(pidstr, pid_অঙ্ক, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -92,9 +92,9 @@ void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, in
 
 #ifdef TEST_PROGRAM_PARSEPID
 
-#include <getopt.h>
+#অন্তর্ভাব <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+স্থির শূন্য __attribute__((__noreturn__)) usage(শূন্য)
 {
 	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
 	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+পূর্ণসংখ্যা প্রধান(পূর্ণসংখ্যা argc, অক্ষর **argv)
 {
-	int c, flags = 0, rc = 0;
+	পূর্ণসংখ্যা c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_অঙ্ক = 0;
+	অক্ষর *str = ফাঁকা;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	স্থির ধ্রুবক কাঠামো option longopts[] = {
+		{ "zero",	0, ফাঁকা, 'z' },
+		{ "negative",	0, ফাঁকা, 'n' },
+		{ "help",       0, ফাঁকা, 'h' },
+		{ ফাঁকা, 0, ফাঁকা, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	যখন((c = getopt_long(argc, argv, "nhz", longopts, ফাঁকা)) != -1) {
+		নির্বাচন(c) {
+		ক্ষেত্র 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			বিরতি;
+		ক্ষেত্র 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			বিরতি;
+		ক্ষেত্র 'h':
 			usage();
-			break;
-		default:
+			বিরতি;
+		পূর্বনির্ধারিত:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	যদি (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	rc = ul_parse_pid_str(str, &pid_অঙ্ক, &pidfd_ino, flags);
+	যদি (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	printf("PID: %d\n", pid_অঙ্ক);
+	যদি (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	ফেরত EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */
