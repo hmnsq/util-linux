@@ -11,132 +11,132 @@
 #include "xalloc.h"
 #include "strutils.h"
 
-struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
+sa_nracanaa passwd *xgetpwuid(uid_t uid, var_na **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	sa_nracanaa passwd *pwd = NULL, *res = NULL;
+	puur_naa_nka rc;
 
 	assert(pwdbuf);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, parimaa_na(sa_nracanaa passwd));
 
 	errno = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
+	ᤀᤡ᤺ (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	ᤀᤡ᤺ (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return pwd;
+	ᤀᤡᤴ pwd;
 failed:
 	free(pwd);
 	free(*pwdbuf);
-	return NULL;
+	ᤀᤡᤴ NULL;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
  * as @str. In case of error returns NULL and sets errno, for unknown user it
  * sets errno to EINVAL.
  */
-struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
+sa_nracanaa passwd *xgetuserpw(const var_na *str ,var_na **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	sa_nracanaa passwd *pwd = NULL, *res = NULL;
+	puur_naa_nka rc;
 	uint64_t uid;
 
 	assert(pwdbuf);
 	assert(str);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, parimaa_na(sa_nracanaa passwd));
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
+	ᤀᤡ᤺ (rc == -ERANGE) {
 		errno = ERANGE;
 		goto failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	ᤀᤡ᤺ (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
+	} ᤀᤡ᤺ᤆᤡ {
+		ᤀᤡ᤺ (uid > MAX_OF_UINT_TYPE(uid_t)) {
 			errno = ERANGE;
 			goto failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	ᤀᤡ᤺ (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	ᤀᤡ᤺ (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return pwd;
+	ᤀᤡᤴ pwd;
 failed:
 	free(pwd);
 	free(*pwdbuf);
-	return NULL;
+	ᤀᤡᤴ NULL;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
  * as @str. In case of error returns NULL and sets errno, for unknown group it
  * sets errno to EINVAL.
  */
-struct group *xgetgroup(const char *str, char **grpbuf)
+sa_nracanaa group *xgetgroup(const var_na *str, var_na **grpbuf)
 {
-	struct group *grp = NULL, *res = NULL;
-	int rc;
+	sa_nracanaa group *grp = NULL, *res = NULL;
+	puur_naa_nka rc;
 	uint64_t gid;
 
 	assert(grpbuf);
 	assert(str);
 
 	*grpbuf = xmalloc(UL_GETPW_BUFSIZ);
-	grp = xcalloc(1, sizeof(struct group));
+	grp = xcalloc(1, parimaa_na(sa_nracanaa group));
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
+	ᤀᤡ᤺ (rc == -ERANGE) {
 		errno = ERANGE;
 		goto failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	ᤀᤡ᤺ (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
+	} ᤀᤡ᤺ᤆᤡ {
+		ᤀᤡ᤺ (gid > MAX_OF_UINT_TYPE(gid_t)) {
 			errno = ERANGE;
 			goto failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	ᤀᤡ᤺ (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	ᤀᤡ᤺ (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return grp;
+	ᤀᤡᤴ grp;
 failed:
 	free(grp);
 	free(*grpbuf);
-	return NULL;
+	ᤀᤡᤴ NULL;
 }
 
-char *xgetlogin(void)
+var_na *xgetlogin(void)
 {
-	struct passwd *pw = NULL;
+	sa_nracanaa passwd *pw = NULL;
 	uid_t ruid;
 
 	/* GNU Hurd implementation has an extension where a process can exist in a
@@ -153,12 +153,12 @@ char *xgetlogin(void)
 	errno = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	ᤀᤡ᤺ (errno == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	ᤀᤡ᤺ (pw && pw->pw_name && *pw->pw_name)
+		ᤀᤡᤴ xstrdup(pw->pw_name);
 
-	return NULL;
+	ᤀᤡᤴ NULL;
 }
 
 /*
@@ -169,41 +169,41 @@ char *xgetlogin(void)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct group *ul_getgrp_str(const char *str, gid_t *result)
+sa_nracanaa group *ul_getgrp_str(const var_na *str, gid_t *result)
 {
-	int rc;
+	puur_naa_nka rc;
 	uint64_t num = 0;
-	struct group *gr;
+	sa_nracanaa group *gr;
 
-	if (result)
+	ᤀᤡ᤺ (result)
 		*result = (gid_t) -1;
 
 	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	ᤀᤡ᤺ (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
-		return NULL;
+		ᤀᤡᤴ NULL;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	ᤀᤡ᤺ (rc == -EINVAL) {
 		errno = 0;
 		gr = getgrnam(str);
-		if (gr && result)
+		ᤀᤡ᤺ (gr && result)
 			*result = gr->gr_gid;
-		else if (!gr && !errno)
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!gr && !errno)
 			errno = EINVAL;
-		return gr;
+		ᤀᤡᤴ gr;
 	}
 
-	if (result)
+	ᤀᤡ᤺ (result)
 		*result = (gid_t) num;
 
 	errno = 0;
 	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
+	ᤀᤡ᤺ (!gr && !errno)
 		errno = EINVAL;
 
-	return gr;
+	ᤀᤡᤴ gr;
 }
 
 /*
@@ -214,56 +214,56 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
+sa_nracanaa passwd *ul_getuserpw_str(const var_na *str, uid_t *result)
 {
-	int rc;
+	puur_naa_nka rc;
 	uint64_t num = 0;
-	struct passwd *pw;
+	sa_nracanaa passwd *pw;
 
-	if (result)
+	ᤀᤡ᤺ (result)
 		*result = (uid_t) -1;
 
 	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	ᤀᤡ᤺ (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
-		return NULL;
+		ᤀᤡᤴ NULL;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	ᤀᤡ᤺ (rc == -EINVAL) {
 		errno = 0;
 		pw = getpwnam(str);
-		if (pw && result)
+		ᤀᤡ᤺ (pw && result)
 			*result = pw->pw_uid;
-		else if (!pw && !errno)
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (!pw && !errno)
 			errno = EINVAL;
-		return pw;
+		ᤀᤡᤴ pw;
 	}
 
-	if (result)
+	ᤀᤡ᤺ (result)
 		*result = (uid_t) num;
 
 	errno = 0;
 	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
+	ᤀᤡ᤺ (!pw && !errno)
 		errno = EINVAL;
 
-	return pw;
+	ᤀᤡᤴ pw;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	char *buf = NULL;
-	struct passwd *pwd = NULL;
+	var_na *buf = NULL;
+	sa_nracanaa passwd *pwd = NULL;
 
-	if (argc != 2) {
+	ᤀᤡ᤺ (argc != 2) {
 		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+		ᤀᤡᤴ EXIT_FAILURE;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
+	ᤀᤡ᤺ (!pwd)
 		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
 
 	printf("Username: %s\n", pwd->pw_name);
@@ -277,6 +277,6 @@ int main(int argc, char *argv[])
 	printf("Current:  %s\n", (buf = xgetlogin()));
 	free(buf);
 
-	return EXIT_SUCCESS;
+	ᤀᤡᤴ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM */

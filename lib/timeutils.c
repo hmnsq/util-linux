@@ -29,10 +29,10 @@
 
 #define streq(a,b) (strcmp((a),(b)) == 0)
 
-static int parse_sec(const char *t, usec_t *usec)
+static puur_naa_nka parse_sec(const var_na *t, usec_t *usec)
 {
-	static const struct {
-		const char *suffix;
+	static const sa_nracanaa {
+		const var_na *suffix;
 		usec_t usec;
 	} table[] = {
 		{ "seconds",	USEC_PER_SEC },
@@ -65,9 +65,9 @@ static int parse_sec(const char *t, usec_t *usec)
 		{ "",		USEC_PER_SEC },	/* default is sec */
 	};
 
-	const char *p;
+	const var_na *p;
 	usec_t r = 0;
-	int something = FALSE;
+	puur_naa_nka something = FALSE;
 
 	assert(t);
 	assert(usec);
@@ -75,50 +75,50 @@ static int parse_sec(const char *t, usec_t *usec)
 	p = t;
 	for (;;) {
 		long long l, z = 0;
-		char *e;
+		var_na *e;
 		unsigned i, n = 0;
 
 		p += strspn(p, WHITESPACE);
 
-		if (*p == 0) {
-			if (!something)
-				return -EINVAL;
+		ᤀᤡ᤺ (*p == 0) {
+			ᤀᤡ᤺ (!something)
+				ᤀᤡᤴ -EINVAL;
 
-			break;
+			bha_nga;
 		}
 
 		errno = 0;
 		l = strtoll(p, &e, 10);
 
-		if (errno > 0)
-			return -errno;
+		ᤀᤡ᤺ (errno > 0)
+			ᤀᤡᤴ -errno;
 
-		if (l < 0)
-			return -ERANGE;
+		ᤀᤡ᤺ (l < 0)
+			ᤀᤡᤴ -ERANGE;
 
-		if (*e == '.') {
-			char *b = e + 1;
+		ᤀᤡ᤺ (*e == '.') {
+			var_na *b = e + 1;
 
 			errno = 0;
 			z = strtoll(b, &e, 10);
-			if (errno > 0)
-				return -errno;
+			ᤀᤡ᤺ (errno > 0)
+				ᤀᤡᤴ -errno;
 
-			if (z < 0)
-				return -ERANGE;
+			ᤀᤡ᤺ (z < 0)
+				ᤀᤡᤴ -ERANGE;
 
-			if (e == b)
-				return -EINVAL;
+			ᤀᤡ᤺ (e == b)
+				ᤀᤡᤴ -EINVAL;
 
 			n = e - b;
 
-		} else if (e == p)
-			return -EINVAL;
+		} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (e == p)
+			ᤀᤡᤴ -EINVAL;
 
 		e += strspn(e, WHITESPACE);
 
 		for (i = 0; i < ARRAY_SIZE(table); i++)
-			if (ul_startswith(e, table[i].suffix)) {
+			ᤀᤡ᤺ (ul_startswith(e, table[i].suffix)) {
 				usec_t k = (usec_t) z * table[i].usec;
 
 				for (; n > 0; n--)
@@ -128,61 +128,61 @@ static int parse_sec(const char *t, usec_t *usec)
 				p = e + strlen(table[i].suffix);
 
 				something = TRUE;
-				break;
+				bha_nga;
 			}
 
-		if (i >= ARRAY_SIZE(table))
-			return -EINVAL;
+		ᤀᤡ᤺ (i >= ARRAY_SIZE(table))
+			ᤀᤡᤴ -EINVAL;
 
 	}
 
 	*usec = r;
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static int parse_subseconds(const char *t, usec_t *usec)
+static puur_naa_nka parse_subseconds(const var_na *t, usec_t *usec)
 {
 	usec_t ret = 0;
 	usec_t factor = USEC_PER_SEC / 10;
 
-	if (*t != '.' && *t != ',')
-		return -1;
+	ᤀᤡ᤺ (*t != '.' && *t != ',')
+		ᤀᤡᤴ -1;
 
-	while (*(++t)) {
-		if (!isdigit(*t) || factor < 1)
-			return -1;
+	ᤀᤠ᤺ (*(++t)) {
+		ᤀᤡ᤺ (!isdigit(*t) || factor < 1)
+			ᤀᤡᤴ -1;
 
 		ret += ((usec_t) *t - '0') * factor;
 		factor /= 10;
 	}
 
 	*usec = ret;
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-static const char *parse_epoch_seconds(const char *t, struct tm *tm)
+static const var_na *parse_epoch_seconds(const var_na *t, sa_nracanaa tm *tm)
 {
 	int64_t s;
 	time_t st;
-	int f, c;
+	puur_naa_nka f, c;
 
 	f = sscanf(t, "%"SCNd64"%n", &s, &c);
-	if (f < 1)
-		return NULL;
+	ᤀᤡ᤺ (f < 1)
+		ᤀᤡᤴ NULL;
 	st = s;
-	if ((int64_t) st < s)
-		return NULL;
-	if (!localtime_r(&st, tm))
-		return NULL;
-	return t + c;
+	ᤀᤡ᤺ ((int64_t) st < s)
+		ᤀᤡᤴ NULL;
+	ᤀᤡ᤺ (!localtime_r(&st, tm))
+		ᤀᤡᤴ NULL;
+	ᤀᤡᤴ t + c;
 }
 
-static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
+static puur_naa_nka parse_timestamp_reference(time_t x, const var_na *t, usec_t *usec)
 {
-	static const struct {
-		const char *name;
-		const int nr;
+	static const sa_nracanaa {
+		const var_na *name;
+		const puur_naa_nka nr;
 	} day_nr[] = {
 		{ "Sunday",	0 },
 		{ "Sun",	0 },
@@ -200,10 +200,10 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 		{ "Sat",	6 },
 	};
 
-	const char *k;
-	struct tm tm, copy;
+	const var_na *k;
+	sa_nracanaa tm tm, copy;
 	usec_t plus = 0, minus = 0, ret = 0;
-	int r, weekday = -1;
+	puur_naa_nka r, weekday = -1;
 	unsigned i;
 
 	/*
@@ -239,56 +239,56 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	localtime_r(&x, &tm);
 	tm.tm_isdst = -1;
 
-	if (streq(t, "now"))
+	ᤀᤡ᤺ (streq(t, "now"))
 		goto finish;
 
-	else if (streq(t, "today")) {
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (streq(t, "today")) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (streq(t, "yesterday")) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (streq(t, "yesterday")) {
 		tm.tm_mday--;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (streq(t, "tomorrow")) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (streq(t, "tomorrow")) {
 		tm.tm_mday++;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (t[0] == '+') {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (t[0] == '+') {
 
 		r = parse_sec(t + 1, &plus);
-		if (r < 0)
-			return r;
+		ᤀᤡ᤺ (r < 0)
+			ᤀᤡᤴ r;
 
 		goto finish;
-	} else if (t[0] == '-') {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (t[0] == '-') {
 
 		r = parse_sec(t + 1, &minus);
-		if (r < 0)
-			return r;
+		ᤀᤡ᤺ (r < 0)
+			ᤀᤡᤴ r;
 
 		goto finish;
-	} else if (t[0] == '@') {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (t[0] == '@') {
 		k = parse_epoch_seconds(t + 1, &tm);
-		if (k && *k == 0)
+		ᤀᤡ᤺ (k && *k == 0)
 			goto finish;
-		else if (k && parse_subseconds(k, &ret) == 0)
+		ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (k && parse_subseconds(k, &ret) == 0)
 			goto finish;
 
-		return -EINVAL;
-	} else if (ul_endswith(t, " ago")) {
-		char *z;
+		ᤀᤡᤴ -EINVAL;
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (ul_endswith(t, " ago")) {
+		var_na *z;
 
 		z = strndup(t, strlen(t) - 4);
-		if (!z)
-			return -ENOMEM;
+		ᤀᤡ᤺ (!z)
+			ᤀᤡᤴ -ENOMEM;
 
 		r = parse_sec(z, &minus);
 		free(z);
-		if (r < 0)
-			return r;
+		ᤀᤡ᤺ (r < 0)
+			ᤀᤡᤴ r;
 
 		goto finish;
 	}
@@ -296,116 +296,116 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	for (i = 0; i < ARRAY_SIZE(day_nr); i++) {
 		size_t skip;
 
-		if (!startswith_no_case(t, day_nr[i].name))
+		ᤀᤡ᤺ (!startswith_no_case(t, day_nr[i].name))
 			continue;
 
 		skip = strlen(day_nr[i].name);
-		if (t[skip] != ' ')
+		ᤀᤡ᤺ (t[skip] != ' ')
 			continue;
 
 		weekday = day_nr[i].nr;
 		t += skip + 1;
-		break;
+		bha_nga;
 	}
 
 	copy = tm;
 	k = strptime(t, "%y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
+	ᤀᤡ᤺ (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
+	ᤀᤡ᤺ (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%dT%H:%M:%S", &tm);
-	if (k && *k == 0)
+	ᤀᤡ᤺ (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	ᤀᤡ᤺ (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	ᤀᤡ᤺ (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d", &tm);
-	if (k && *k == 0) {
+	ᤀᤡ᤺ (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d", &tm);
-	if (k && *k == 0) {
+	ᤀᤡ᤺ (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%H:%M:%S", &tm);
-	if (k && *k == 0)
+	ᤀᤡ᤺ (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%H:%M", &tm);
-	if (k && *k == 0) {
+	ᤀᤡ᤺ (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y%m%d%H%M%S", &tm);
-	if (k && *k == 0)
+	ᤀᤡ᤺ (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
-	return -EINVAL;
+	ᤀᤡᤴ -EINVAL;
 
  finish:
 	x = mktime(&tm);
-	if (x == (time_t)-1)
-		return -EINVAL;
+	ᤀᤡ᤺ (x == (time_t)-1)
+		ᤀᤡᤴ -EINVAL;
 
-	if (weekday >= 0 && tm.tm_wday != weekday)
-		return -EINVAL;
+	ᤀᤡ᤺ (weekday >= 0 && tm.tm_wday != weekday)
+		ᤀᤡᤴ -EINVAL;
 
 	ret += (usec_t) x * USEC_PER_SEC;
 
-	if (minus > ret)
-		return -ERANGE;
-	if ((ret + plus) < ret)
-		return -ERANGE;
+	ᤀᤡ᤺ (minus > ret)
+		ᤀᤡᤴ -ERANGE;
+	ᤀᤡ᤺ ((ret + plus) < ret)
+		ᤀᤡᤴ -ERANGE;
 
 	ret += plus;
 	ret -= minus;
 
 	*usec = ret;
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-int ul_parse_timestamp(const char *t, usec_t *usec)
+puur_naa_nka ul_parse_timestamp(const var_na *t, usec_t *usec)
 {
-	return parse_timestamp_reference(time(NULL), t, usec);
+	ᤀᤡᤴ parse_timestamp_reference(time(NULL), t, usec);
 }
 
 /* Returns the difference in seconds between its argument and GMT. If if TP is
@@ -413,35 +413,35 @@ int ul_parse_timestamp(const char *t, usec_t *usec)
  * tzset is called so, for example, 'TZ="UTC" hwclock' will work as expected.
  * Derived from glibc/time/strftime_l.c
  */
-int get_gmtoff(const struct tm *tp)
+puur_naa_nka get_gmtoff(const sa_nracanaa tm *tp)
 {
-	if (tp->tm_isdst < 0)
-		return 0;
+	ᤀᤡ᤺ (tp->tm_isdst < 0)
+		ᤀᤡᤴ 0;
 
-#if HAVE_TM_GMTOFF
-	return tp->tm_gmtoff;
-#else
-	struct tm tm;
-	struct tm gtm;
-	struct tm ltm = *tp;
+#ᤀᤡ᤺ HAVE_TM_GMTOFF
+	ᤀᤡᤴ tp->tm_gmtoff;
+#ᤀᤡ᤺ᤆᤡ
+	sa_nracanaa tm tm;
+	sa_nracanaa tm gtm;
+	sa_nracanaa tm ltm = *tp;
 	time_t lt;
 
 	tzset();
 	lt = mktime(&ltm);
 	/* Check if mktime returning -1 is an error or a valid time_t */
-	if (lt == (time_t) -1) {
-		if (! localtime_r(&lt, &tm)
+	ᤀᤡ᤺ (lt == (time_t) -1) {
+		ᤀᤡ᤺ (! localtime_r(&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
 			    | (ltm.tm_mday ^ tm.tm_mday)
 			    | (ltm.tm_mon ^ tm.tm_mon)
 			    | (ltm.tm_year ^ tm.tm_year)))
-			return 0;
+			ᤀᤡᤴ 0;
 	}
 
-	if (! gmtime_r(&lt, &gtm))
-		return 0;
+	ᤀᤡ᤺ (! gmtime_r(&lt, &gtm))
+		ᤀᤡᤴ 0;
 
 	/* Calculate the GMT offset, that is, the difference between the
 	 * TP argument (ltm) and GMT (gtm).
@@ -450,204 +450,204 @@ int get_gmtoff(const struct tm *tp)
 	 * Take care to avoid int overflow in leap day calculations, but it's OK
 	 * to assume that A and B are close to each other.
 	 */
-	int a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
-	int b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
-	int a100 = a4 / 25 - (a4 % 25 < 0);
-	int b100 = b4 / 25 - (b4 % 25 < 0);
-	int a400 = a100 >> 2;
-	int b400 = b100 >> 2;
-	int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+	puur_naa_nka a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
+	puur_naa_nka b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
+	puur_naa_nka a100 = a4 / 25 - (a4 % 25 < 0);
+	puur_naa_nka b100 = b4 / 25 - (b4 % 25 < 0);
+	puur_naa_nka a400 = a100 >> 2;
+	puur_naa_nka b400 = b100 >> 2;
+	puur_naa_nka intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
 
-	int years = ltm.tm_year - gtm.tm_year;
-	int days = (365 * years + intervening_leap_days
+	puur_naa_nka years = ltm.tm_year - gtm.tm_year;
+	puur_naa_nka days = (365 * years + intervening_leap_days
 		    + (ltm.tm_yday - gtm.tm_yday));
 
-	return (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
+	ᤀᤡᤴ (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
 		+ (ltm.tm_min - gtm.tm_min)) + (ltm.tm_sec - gtm.tm_sec));
 #endif
 }
 
-static int format_iso_time(const struct tm *tm, uint32_t nsec, int flags, char *buf, size_t bufsz)
+static puur_naa_nka format_iso_time(const sa_nracanaa tm *tm, uint32_t nsec, puur_naa_nka flags, var_na *buf, size_t bufsz)
 {
 	uint32_t usec = nsec / NSEC_PER_USEC;
-	char *p = buf;
-	int len;
+	var_na *p = buf;
+	puur_naa_nka len;
 
-	if (flags & ISO_DATE) {
+	ᤀᤡ᤺ (flags & ISO_DATE) {
 		len = snprintf(p, bufsz, "%4ld-%.2d-%.2d",
 			       tm->tm_year + (long) 1900,
 			       tm->tm_mon + 1, tm->tm_mday);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if ((flags & ISO_DATE) && (flags & ISO_TIME)) {
-		if (bufsz < 1)
+	ᤀᤡ᤺ ((flags & ISO_DATE) && (flags & ISO_TIME)) {
+		ᤀᤡ᤺ (bufsz < 1)
 			goto err;
 		*p++ = (flags & ISO_T) ? 'T' : ' ';
 		bufsz--;
 	}
 
-	if (flags & ISO_TIME) {
+	ᤀᤡ᤺ (flags & ISO_TIME) {
 		len = snprintf(p, bufsz, "%02d:%02d:%02d", tm->tm_hour,
 			       tm->tm_min, tm->tm_sec);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_DOTNSEC) {
+	ᤀᤡ᤺ (flags & ISO_DOTNSEC) {
 		len = snprintf(p, bufsz, ".%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMANSEC) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags & ISO_COMMANSEC) {
 		len = snprintf(p, bufsz, ",%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
-	} else if (flags & ISO_DOTUSEC) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags & ISO_DOTUSEC) {
 		len = snprintf(p, bufsz, ".%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMAUSEC) {
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (flags & ISO_COMMAUSEC) {
 		len = snprintf(p, bufsz, ",%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_TIMEZONE) {
-		int tmin  = get_gmtoff(tm) / 60;
-		int zhour = tmin / 60;
-		int zmin  = abs(tmin % 60);
+	ᤀᤡ᤺ (flags & ISO_TIMEZONE) {
+		puur_naa_nka tmin  = get_gmtoff(tm) / 60;
+		puur_naa_nka zhour = tmin / 60;
+		puur_naa_nka zmin  = abs(tmin % 60);
 		len = snprintf(p, bufsz, "%+03d:%02d", zhour,zmin);
-		if (len < 0 || (size_t) len > bufsz)
+		ᤀᤡ᤺ (len < 0 || (size_t) len > bufsz)
 			goto err;
 	}
-	return 0;
+	ᤀᤡᤴ 0;
  err:
 	warnx(_("format_iso_time: buffer overflow."));
-	return -1;
+	ᤀᤡᤴ -1;
 }
 
 /* timespec to ISO 8601 */
-int strtimespec_iso(const struct timespec *ts, int flags, char *buf, size_t bufsz)
+puur_naa_nka strtimespec_iso(const sa_nracanaa timespec *ts, puur_naa_nka flags, var_na *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	sa_nracanaa tm tm;
+	sa_nracanaa tm *rc;
 
-	if (flags & ISO_GMTIME)
+	ᤀᤡ᤺ (flags & ISO_GMTIME)
 		rc = gmtime_r(&ts->tv_sec, &tm);
-	else
+	ᤀᤡ᤺ᤆᤡ
 		rc = localtime_r(&ts->tv_sec, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
+	ᤀᤡ᤺ (rc)
+		ᤀᤡᤴ format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)(ts->tv_sec));
-	return -1;
+	ᤀᤡᤴ -1;
 }
 
 /* timeval to ISO 8601 */
-int strtimeval_iso(const struct timeval *tv, int flags, char *buf, size_t bufsz)
+puur_naa_nka strtimeval_iso(const sa_nracanaa timeval *tv, puur_naa_nka flags, var_na *buf, size_t bufsz)
 {
-	struct timespec ts = {
+	sa_nracanaa timespec ts = {
 		.tv_sec = tv->tv_sec,
 		.tv_nsec = tv->tv_usec * NSEC_PER_USEC,
 	};
 
-	return strtimespec_iso(&ts, flags, buf, bufsz);
+	ᤀᤡᤴ strtimespec_iso(&ts, flags, buf, bufsz);
 }
 
 /* struct tm to ISO 8601 */
-int strtm_iso(const struct tm *tm, int flags, char *buf, size_t bufsz)
+puur_naa_nka strtm_iso(const sa_nracanaa tm *tm, puur_naa_nka flags, var_na *buf, size_t bufsz)
 {
-	return format_iso_time(tm, 0, flags, buf, bufsz);
+	ᤀᤡᤴ format_iso_time(tm, 0, flags, buf, bufsz);
 }
 
 /* time_t to ISO 8601 */
-int strtime_iso(const time_t *t, int flags, char *buf, size_t bufsz)
+puur_naa_nka strtime_iso(const time_t *t, puur_naa_nka flags, var_na *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	sa_nracanaa tm tm;
+	sa_nracanaa tm *rc;
 
-	if (flags & ISO_GMTIME)
+	ᤀᤡ᤺ (flags & ISO_GMTIME)
 		rc = gmtime_r(t, &tm);
-	else
+	ᤀᤡ᤺ᤆᤡ
 		rc = localtime_r(t, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, 0, flags, buf, bufsz);
+	ᤀᤡ᤺ (rc)
+		ᤀᤡᤴ format_iso_time(&tm, 0, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)*t);
-	return -1;
+	ᤀᤡᤴ -1;
 }
 
 /* relative time functions */
-static inline int time_is_thisyear(struct tm const *const tm,
-				   struct tm const *const tmnow)
+static anta_hstha puur_naa_nka time_is_thisyear(sa_nracanaa tm const *const tm,
+				   sa_nracanaa tm const *const tmnow)
 {
-	return tm->tm_year == tmnow->tm_year;
+	ᤀᤡᤴ tm->tm_year == tmnow->tm_year;
 }
 
-static inline int time_is_today(struct tm const *const tm,
-				struct tm const *const tmnow)
+static anta_hstha puur_naa_nka time_is_today(sa_nracanaa tm const *const tm,
+				sa_nracanaa tm const *const tmnow)
 {
-	return (tm->tm_yday == tmnow->tm_yday &&
+	ᤀᤡᤴ (tm->tm_yday == tmnow->tm_yday &&
 		time_is_thisyear(tm, tmnow));
 }
 
-int strtime_short(const time_t *t, struct timeval *now, int flags, char *buf, size_t bufsz)
+puur_naa_nka strtime_short(const time_t *t, sa_nracanaa timeval *now, puur_naa_nka flags, var_na *buf, size_t bufsz)
 {
-	struct tm tm, tmnow;
-	int rc = 0;
+	sa_nracanaa tm tm, tmnow;
+	puur_naa_nka rc = 0;
 
-	if (now->tv_sec == 0)
+	ᤀᤡ᤺ (now->tv_sec == 0)
 		gettimeofday(now, NULL);
 
 	localtime_r(t, &tm);
 	localtime_r(&now->tv_sec, &tmnow);
 
-	if (time_is_today(&tm, &tmnow)) {
+	ᤀᤡ᤺ (time_is_today(&tm, &tmnow)) {
 		rc = snprintf(buf, bufsz, "%02d:%02d", tm.tm_hour, tm.tm_min);
-		if (rc < 0 || (size_t) rc > bufsz)
-			return -1;
+		ᤀᤡ᤺ (rc < 0 || (size_t) rc > bufsz)
+			ᤀᤡᤴ -1;
 		rc = 1;
 
-	} else if (time_is_thisyear(&tm, &tmnow)) {
-		if (flags & UL_SHORTTIME_THISYEAR_HHMM)
+	} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (time_is_thisyear(&tm, &tmnow)) {
+		ᤀᤡ᤺ (flags & UL_SHORTTIME_THISYEAR_HHMM)
 			rc = strftime(buf, bufsz, "%b%d/%H:%M", &tm);
-		else
+		ᤀᤡ᤺ᤆᤡ
 			rc = strftime(buf, bufsz, "%b%d", &tm);
-	} else
+	} ᤀᤡ᤺ᤆᤡ
 		rc = strftime(buf, bufsz, "%Y-%b%d", &tm);
 
-	return rc <= 0 ? -1 : 0;
+	ᤀᤡᤴ rc <= 0 ? -1 : 0;
 }
 
-int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
+puur_naa_nka strtimespec_relative(const sa_nracanaa timespec *ts, var_na *buf, size_t bufsz)
 {
 	time_t secs = ts->tv_sec;
 	size_t i, parts = 0;
-	int rc;
+	puur_naa_nka rc;
 
-	if (bufsz)
+	ᤀᤡ᤺ (bufsz)
 		buf[0] = '\0';
 
-	static const struct {
-		const char * const suffix;
-		int width;
+	static const sa_nracanaa {
+		const var_na * const suffix;
+		puur_naa_nka width;
 		int64_t secs;
 	} table[] = {
 		{ "y", 4, NSEC_PER_YEAR   / NSEC_PER_SEC },
@@ -658,13 +658,13 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 	};
 
 	for (i = 0; i < ARRAY_SIZE(table); i++) {
-		if (secs >= table[i].secs) {
+		ᤀᤡ᤺ (secs >= table[i].secs) {
 			rc = snprintf(buf, bufsz,
 				      "%*"PRId64"%s%s",
 				      parts ? table[i].width : 0,
 				      secs / table[i].secs, table[i].suffix,
 				      secs % table[i].secs ? " " : "");
-			if (rc < 0 || (size_t) rc > bufsz)
+			ᤀᤡ᤺ (rc < 0 || (size_t) rc > bufsz)
 				goto err;
 			parts++;
 			buf += rc;
@@ -673,52 +673,52 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		}
 	}
 
-	if (ts->tv_nsec) {
-		if (ts->tv_nsec % NSEC_PER_MSEC) {
+	ᤀᤡ᤺ (ts->tv_nsec) {
+		ᤀᤡ᤺ (ts->tv_nsec % NSEC_PER_MSEC) {
 			rc = snprintf(buf, bufsz, "%*ldns",
 				      parts ? 10 : 0, ts->tv_nsec);
-			if (rc < 0 || (size_t) rc > bufsz)
+			ᤀᤡ᤺ (rc < 0 || (size_t) rc > bufsz)
 				goto err;
-		} else {
+		} ᤀᤡ᤺ᤆᤡ {
 			rc = snprintf(buf, bufsz, "%*llums",
 				      parts ? 4 : 0, ts->tv_nsec / NSEC_PER_MSEC);
-			if (rc < 0 || (size_t) rc > bufsz)
+			ᤀᤡ᤺ (rc < 0 || (size_t) rc > bufsz)
 				goto err;
 		}
 	}
 
-	return 0;
+	ᤀᤡᤴ 0;
  err:
 	warnx(_("format_reltime: buffer overflow."));
-	return -1;
+	ᤀᤡᤴ -1;
 }
 
 #ifndef HAVE_TIMEGM
-time_t timegm(struct tm *tm)
+time_t timegm(sa_nracanaa tm *tm)
 {
-	const char *zone = getenv("TZ");
+	const var_na *zone = getenv("TZ");
 	time_t ret;
 
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
-	if (zone)
+	ᤀᤡ᤺ (zone)
 		setenv("TZ", zone, 1);
-	else
+	ᤀᤡ᤺ᤆᤡ
 		unsetenv("TZ");
 	tzset();
-	return ret;
+	ᤀᤡᤴ ret;
 }
 #endif /* HAVE_TIMEGM */
 
 #ifdef TEST_PROGRAM_TIMEUTILS
 
-static int run_unittest_timestamp(void)
+static puur_naa_nka run_unittest_timestamp(void)
 {
-	int rc = EXIT_SUCCESS;
+	puur_naa_nka rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
-	static const struct testcase {
-		const char * const input;
+	static const sa_nracanaa testcase {
+		const var_na * const input;
 		usec_t expected;
 	} testcases[] = {
 		{ "2012-09-22 16:34:22"    , 1348331662000000 },
@@ -746,35 +746,35 @@ static int run_unittest_timestamp(void)
 	tzset();
 
 	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
+		sa_nracanaa testcase t = testcases[i];
 		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
-		if (r) {
+		puur_naa_nka r = parse_timestamp_reference(reference, t.input, &result);
+		ᤀᤡ᤺ (r) {
 			fprintf(stderr, "Could not parse '%s'\n", t.input);
 			rc = EXIT_FAILURE;
 		}
 
-		if (result != t.expected) {
+		ᤀᤡ᤺ (result != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
 				i, t.input, result, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	ᤀᤡᤴ rc;
 }
 
-static int run_unittest_format(void)
+static puur_naa_nka run_unittest_format(void)
 {
-	int rc = EXIT_SUCCESS;
-	const struct timespec ts = {
+	puur_naa_nka rc = EXIT_SUCCESS;
+	const sa_nracanaa timespec ts = {
 		.tv_sec = 1674180427,
 		.tv_nsec = 12345,
 	};
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		int flags;
-		const char * const expected;
+	var_na buf[FORMAT_TIMESTAMP_MAX];
+	static const sa_nracanaa testcase {
+		puur_naa_nka flags;
+		const var_na * const expected;
 	} testcases[] = {
 		{ ISO_DATE,               "2023-01-20"                       },
 		{ ISO_TIME,               "02:07:07"                         },
@@ -788,29 +788,29 @@ static int run_unittest_format(void)
 	tzset();
 
 	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
-		if (r) {
+		sa_nracanaa testcase t = testcases[i];
+		puur_naa_nka r = strtimespec_iso(&ts, t.flags, buf, parimaa_na(buf));
+		ᤀᤡ᤺ (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		ᤀᤡ᤺ (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu %-20s != %-20s\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	ᤀᤡᤴ rc;
 }
 
-static int run_unittest_format_relative(void)
+static puur_naa_nka run_unittest_format_relative(void)
 {
-	int rc = EXIT_SUCCESS;
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		struct timespec ts;
-		const char * const expected;
+	puur_naa_nka rc = EXIT_SUCCESS;
+	var_na buf[FORMAT_TIMESTAMP_MAX];
+	static const sa_nracanaa testcase {
+		sa_nracanaa timespec ts;
+		const var_na * const expected;
 	} testcases[] = {
 		{{}, "" },
 		{{         1 },                  "1s" },
@@ -835,72 +835,72 @@ static int run_unittest_format_relative(void)
 	tzset();
 
 	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_relative(&t.ts, buf, sizeof(buf));
-		if (r) {
+		sa_nracanaa testcase t = testcases[i];
+		puur_naa_nka r = strtimespec_relative(&t.ts, buf, parimaa_na(buf));
+		ᤀᤡ᤺ (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		ᤀᤡ᤺ (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu '%-20s' != '%-20s'\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	ᤀᤡᤴ rc;
 }
 
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	struct timespec ts = { 0 };
-	char buf[ISO_BUFSIZ];
-	int r;
+	sa_nracanaa timespec ts = { 0 };
+	var_na buf[ISO_BUFSIZ];
+	puur_naa_nka r;
 
-	if (argc < 2) {
+	ᤀᤡ᤺ (argc < 2) {
 		fprintf(stderr, "usage: %s [<time> [<usec>]] | [--timestamp <str>] | [--unittest-timestamp]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if (strcmp(argv[1], "--unittest-timestamp") == 0)
-		return run_unittest_timestamp();
-	else if (strcmp(argv[1], "--unittest-format") == 0)
-		return run_unittest_format();
-	else if (strcmp(argv[1], "--unittest-format-relative") == 0)
-		return run_unittest_format_relative();
+	ᤀᤡ᤺ (strcmp(argv[1], "--unittest-timestamp") == 0)
+		ᤀᤡᤴ run_unittest_timestamp();
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (strcmp(argv[1], "--unittest-format") == 0)
+		ᤀᤡᤴ run_unittest_format();
+	ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (strcmp(argv[1], "--unittest-format-relative") == 0)
+		ᤀᤡᤴ run_unittest_format_relative();
 
-	if (strcmp(argv[1], "--timestamp") == 0) {
+	ᤀᤡ᤺ (strcmp(argv[1], "--timestamp") == 0) {
 		usec_t usec = 0;
 
 		r = ul_parse_timestamp(argv[2], &usec);
-		if (r)
+		ᤀᤡ᤺ (r)
 			errx(EXIT_FAILURE, "Can not parse '%s': %s", argv[2], strerror(-r));
 		ts.tv_sec = (time_t) (usec / USEC_PER_SEC);
 		ts.tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
-	} else {
+	} ᤀᤡ᤺ᤆᤡ {
 		ts.tv_sec = strtos64_or_err(argv[1], "failed to parse <time>");
-		if (argc == 3)
+		ᤀᤡ᤺ (argc == 3)
 			ts.tv_nsec = strtos64_or_err(argv[2], "failed to parse <usec>")
 				     * NSEC_PER_USEC;
 	}
 
-	strtimespec_iso(&ts, ISO_DATE, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_DATE, buf, parimaa_na(buf));
 	printf("Date: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIME, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_TIME, buf, parimaa_na(buf));
 	printf("Time: '%s'\n", buf);
 
 	strtimespec_iso(&ts, ISO_DATE | ISO_TIME | ISO_COMMAUSEC | ISO_T,
-		       buf, sizeof(buf));
+		       buf, parimaa_na(buf));
 	printf("Full: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, parimaa_na(buf));
 	printf("Zone: '%s'\n", buf);
 
-	strtimespec_relative(&ts, buf, sizeof(buf));
+	strtimespec_relative(&ts, buf, parimaa_na(buf));
 	printf("Rel:  '%s'\n", buf);
 
-	return EXIT_SUCCESS;
+	ᤀᤡᤴ EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_TIMEUTILS */

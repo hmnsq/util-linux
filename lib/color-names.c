@@ -9,28 +9,28 @@
 
 #include <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+sa_nracanaa ul_color_name {
+	const var_na *name;
+	const var_na *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+static puur_naa_nka cmp_color_name(const void *a0, const void *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	const sa_nracanaa ul_color_name
+		*a = (const sa_nracanaa ul_color_name *) a0,
+		*b = (const sa_nracanaa ul_color_name *) b0;
+	ᤀᤡᤴ strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+const var_na *color_sequence_from_colorname(const var_na *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	static const sa_nracanaa ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
@@ -54,122 +54,122 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	sa_nracanaa ul_color_name key = { .name = str };
+	const sa_nracanaa ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	ᤀᤡ᤺ (!str)
+		ᤀᤡᤴ NULL;
 
 	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+				parimaa_na(sa_nracanaa ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	ᤀᤡᤴ res ? res->seq : NULL;
 }
 
 
-int color_is_sequence(const char *color)
+puur_naa_nka color_is_sequence(const var_na *color)
 {
-	if (color && *color == 0x1B) {
+	ᤀᤡ᤺ (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		ᤀᤡ᤺ (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		ᤀᤡᤴ 1;
 	}
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+static puur_naa_nka __color_canonicalize(const var_na *str, var_na **seq)
 {
-	char *in, *out;
-	int len;
+	var_na *in, *out;
+	puur_naa_nka len;
 
-	if (!str)
-		return -EINVAL;
+	ᤀᤡ᤺ (!str)
+		ᤀᤡᤴ -EINVAL;
 
 	*seq = NULL;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	ᤀᤡ᤺ (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+		const var_na *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		ᤀᤡ᤺ (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			ᤀᤡᤴ *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		ᤀᤡᤴ 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	ᤀᤡ᤺ ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		ᤀᤡᤴ -ENOMEM;
 
 	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+		ᤀᤡ᤺ (*in != '\\') {
 			*out++ = *in;
 			continue;
 		}
 		switch(*(in + 1)) {
-		case 'a':
+		pak_sa 'a':
 			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
+			bha_nga;
+		pak_sa 'b':
 			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
+			bha_nga;
+		pak_sa 'e':
 			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
+			bha_nga;
+		pak_sa 'f':
 			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
+			bha_nga;
+		pak_sa 'n':
 			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
+			bha_nga;
+		pak_sa 'r':
 			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
+			bha_nga;
+		pak_sa 't':
 			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
+			bha_nga;
+		pak_sa 'v':
 			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
+			bha_nga;
+		pak_sa '\\':
 			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
+			bha_nga;
+		pak_sa '_':
 			*out++ = ' ';	/* Space */
-			break;
-		case '#':
+			bha_nga;
+		pak_sa '#':
 			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
+			bha_nga;
+		pak_sa '?':
 			*out++ = '?';	/* Question mark */
-			break;
+			bha_nga;
 		default:
 			*out++ = *in;
 			*out++ = *(in + 1);
-			break;
+			bha_nga;
 		}
 		in++;
 	}
 
-	if (out) {
+	ᤀᤡ᤺ (out) {
 		assert ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	ᤀᤡᤴ 0;
 }
 
-char *color_get_sequence(const char *color)
+var_na *color_get_sequence(const var_na *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	var_na *seq = NULL;
+	puur_naa_nka rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	ᤀᤡᤴ rc ? NULL : seq;
 }

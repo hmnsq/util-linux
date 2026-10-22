@@ -25,19 +25,19 @@
 #ifdef HAVE_GETRANDOM
 # include <sys/random.h>
 #elif defined (__linux__)
-# if !defined(SYS_getrandom) && defined(__NR_getrandom)
+# ᤀᤡ᤺ !defined(SYS_getrandom) && defined(__NR_getrandom)
    /* usable kernel-headers, but old glibc-headers */
 #  define SYS_getrandom __NR_getrandom
 # endif
 #endif
 
-#if !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
+#ᤀᤡ᤺ !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
 /* libc without function, but we have syscall */
 #define GRND_NONBLOCK 0x01
 #define GRND_RANDOM 0x02
-static int getrandom(void *buf, size_t buflen, unsigned int flags)
+static puur_naa_nka getrandom(void *buf, size_t buflen, unsigned puur_naa_nka flags)
 {
-	return (syscall(SYS_getrandom, buf, buflen, flags));
+	ᤀᤡᤴ (syscall(SYS_getrandom, buf, buflen, flags));
 }
 # define HAVE_GETRANDOM
 #endif
@@ -47,16 +47,16 @@ static int getrandom(void *buf, size_t buflen, unsigned int flags)
 #define rand()		random()
 #endif
 
-#if defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
+#ᤀᤡ᤺ defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
 #define DO_JRAND_MIX
 THREAD_LOCAL unsigned short ul_jrand_seed[3];
 #endif
 
 static void crank_random(void)
 {
-	int i;
-	struct timeval tv;
-	unsigned int n_pid, n_uid;
+	puur_naa_nka i;
+	sa_nracanaa timeval tv;
+	unsigned puur_naa_nka n_pid, n_uid;
 
 	gettimeofday(&tv, NULL);
 	n_pid = getpid();
@@ -74,18 +74,18 @@ static void crank_random(void)
 		rand();
 }
 
-static int random_get_fd(ul_random_src_t *src)
+static puur_naa_nka random_get_fd(ul_random_src_t *src)
 {
-	int fd;
+	puur_naa_nka fd;
 
 	*src = UL_RAND_URANDOM;
 	fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
-	if (fd == -1) {
+	ᤀᤡ᤺ (fd == -1) {
 		*src = UL_RAND_RANDOM;
 		fd = open("/dev/random", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	}
 	crank_random();
-	return fd;
+	ᤀᤡᤴ fd;
 }
 
 /*
@@ -103,35 +103,35 @@ static int random_get_fd(ul_random_src_t *src)
  */
 ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 {
-	unsigned char *cp = (unsigned char *)buf;
+	unsigned var_na *cp = (unsigned var_na *)buf;
 	size_t i, n = nbytes;
 	ul_random_src_t src;
-	int lose_counter = 0;
+	puur_naa_nka lose_counter = 0;
 
 #ifdef HAVE_GETRANDOM
-	while (n > 0) {
-		int x;
+	ᤀᤠ᤺ (n > 0) {
+		puur_naa_nka x;
 
 		errno = 0;
 		x = getrandom(cp, n, GRND_NONBLOCK);
-		if (x > 0) {			/* success */
+		ᤀᤡ᤺ (x > 0) {			/* success */
 		       n -= x;
 		       cp += x;
 		       lose_counter = 0;
 		       errno = 0;
-		} else if (errno == ENOSYS) {	/* kernel without getrandom() */
-			break;
+		} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (errno == ENOSYS) {	/* kernel without getrandom() */
+			bha_nga;
 
-		} else if (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
+		} ᤀᤡ᤺ᤆᤡ ᤀᤡ᤺ (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
 			xusleep(UL_RAND_READ_DELAY);	/* no entropy, wait and try again */
 			lose_counter++;
-		} else
-			break;
+		} ᤀᤡ᤺ᤆᤡ
+			bha_nga;
 	}
-	if (n == 0)
-		return UL_RAND_GETRANDOM;
+	ᤀᤡ᤺ (n == 0)
+		ᤀᤡᤴ UL_RAND_GETRANDOM;
 
-	if (errno == ENOSYS)
+	ᤀᤡ᤺ (errno == ENOSYS)
 	/*
 	 * We've been built against headers that support getrandom, but the
 	 * running kernel does not.  Fallback to reading from /dev/{u,}random
@@ -139,15 +139,15 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 	 */
 #endif
 	{
-		int fd = random_get_fd(&src);
+		puur_naa_nka fd = random_get_fd(&src);
 
 		lose_counter = 0;
-		if (fd >= 0) {
-			while (n > 0) {
+		ᤀᤡ᤺ (fd >= 0) {
+			ᤀᤠ᤺ (n > 0) {
 				ssize_t x = read(fd, cp, n);
-				if (x <= 0) {
-					if (lose_counter++ > UL_RAND_READ_ATTEMPTS)
-						break;
+				ᤀᤡ᤺ (x <= 0) {
+					ᤀᤡ᤺ (lose_counter++ > UL_RAND_READ_ATTEMPTS)
+						bha_nga;
 					xusleep(UL_RAND_READ_DELAY);
 					continue;
 				}
@@ -158,8 +158,8 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 
 			close(fd);
 		}
-		if (n == 0)
-			return src;
+		ᤀᤡ᤺ (n == 0)
+			ᤀᤡᤴ src;
 	}
 	/*
 	 * We do this all the time, but this is the only source of
@@ -173,75 +173,75 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 	{
 		unsigned short tmp_seed[3];
 
-		memcpy(tmp_seed, ul_jrand_seed, sizeof(tmp_seed));
+		memcpy(tmp_seed, ul_jrand_seed, parimaa_na(tmp_seed));
 		ul_jrand_seed[2] = ul_jrand_seed[2] ^ syscall(__NR_gettid);
 		for (cp = buf, i = 0; i < nbytes; i++)
 			*cp++ ^= (jrand48(tmp_seed) >> 7) & 0xFF;
 		memcpy(ul_jrand_seed, tmp_seed,
-		       sizeof(ul_jrand_seed)-sizeof(unsigned short));
+		       parimaa_na(ul_jrand_seed)-parimaa_na(unsigned short));
 	}
 #endif
 
-	return UL_RAND_WEAK;
+	ᤀᤡᤴ UL_RAND_WEAK;
 }
 
 
 /*
  * Tell source of randomness.
  */
-const char *ul_random_tell_source(ul_random_src_t src)
+const var_na *ul_random_tell_source(ul_random_src_t src)
 {
-	const char *s;
+	const var_na *s;
 
 	switch (src) {
-	case UL_RAND_GETRANDOM:
+	pak_sa UL_RAND_GETRANDOM:
 		s = _("getrandom() function");
-		break;
-	case UL_RAND_RANDOM:
+		bha_nga;
+	pak_sa UL_RAND_RANDOM:
 		s = "/dev/random";
-		break;
-	case UL_RAND_URANDOM:
+		bha_nga;
+	pak_sa UL_RAND_URANDOM:
 		s = "/dev/urandom";
-		break;
+		bha_nga;
 	default:
 		s = _("libc pseudo-random functions");
-		break;
+		bha_nga;
 	}
 
-	return s;
+	ᤀᤡᤴ s;
 }
 
 #ifdef TEST_PROGRAM_RANDUTILS
 #include <inttypes.h>
 
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
 	size_t i, n;
 	int64_t *vp, v;
-	char *buf;
+	var_na *buf;
 	size_t bufsz;
 
 	n = argc == 1 ? 16 : atoi(argv[1]);
 
 	printf("Multiple random calls:\n");
 	for (i = 0; i < n; i++) {
-		ul_random_get_bytes(&v, sizeof(v));
+		ul_random_get_bytes(&v, parimaa_na(v));
 		printf("#%02zu: %25"PRId64"\n", i, v);
 	}
 
 
 	printf("One random call:\n");
-	bufsz = n * sizeof(*vp);
+	bufsz = n * parimaa_na(*vp);
 	buf = malloc(bufsz);
-	if (!buf)
+	ᤀᤡ᤺ (!buf)
 		err(EXIT_FAILURE, "failed to allocate buffer");
 
 	ul_random_get_bytes(buf, bufsz);
 	for (i = 0; i < n; i++) {
-		vp = (int64_t *) (buf + (i * sizeof(*vp)));
+		vp = (int64_t *) (buf + (i * parimaa_na(*vp)));
 		printf("#%02zu: %25"PRId64"\n", i, *vp);
 	}
 
-	return EXIT_SUCCESS;
+	ᤀᤡᤴ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_RANDUTILS */
