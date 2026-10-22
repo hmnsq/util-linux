@@ -6,104 +6,104 @@
  *
  * Copyright (C) 2021 Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
+#ضمن "c.h"
 
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
+#ضمن <locale.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
 
-#include "c_strtod.h"
+#ضمن "c_strtod.h"
 
 #ifdef __APPLE__
 # include <xlocale.h>
 #endif
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#إذا defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
 #endif
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#إذا defined(USE_CLOCALE)
+ساكن متطاير locale_t c_locale;
 
-static locale_t get_c_locale(void)
+ساكن locale_t get_c_locale(فراغ)
 {
-	if (!c_locale)
+	إذا (!c_locale)
 		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	أرجع c_locale;
 }
 #endif
 
 
-double c_strtod(char const *str, char **end)
+مزدوج c_strtod(حرف ثابت *str, حرف **end)
 {
-	double res;
-	int errsv;
+	مزدوج res;
+	صحيح errsv;
 
-#if defined(USE_CLOCALE)
+#إذا defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#إذا defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
-#elif defined(HAVE_USELOCALE)
+	إذا (cl)
+		أرجع strtod_l(str, end, cl);
+#وإلاإذا defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	إذا (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		إذا (!org_cl)
+			أرجع 0;
 
 		res = strtod(str, end);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		أرجع res;
 	}
 #endif /* HAVE_USELOCALE */
 #endif /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	حرف *org_locale = setlocale(LC_NUMERIC, عدم);
 
-	if (org_locale) {
+	إذا (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		إذا (!org_locale)
+			أرجع 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
 	res = strtod(str, end);
 	errsv = errno;
 
-	if (org_locale) {
+	إذا (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
-		free(org_locale);
+		حرر(org_locale);
 	}
 	errno = errsv;
-	return res;
+	أرجع res;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+صحيح main(صحيح argc, حرف *argv[])
 {
-	double res;
-	char *end;
+	مزدوج res;
+	حرف *end;
 
-	if (argc < 2) {
+	إذا (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		أرجع EXIT_FAILURE;
 	}
 
 	res = c_strtod(argv[1], &end);
 	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	أرجع errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif
