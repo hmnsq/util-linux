@@ -4,23 +4,23 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
-#include "nls.h"
+#ضمن "c.h"
+#ضمن "nls.h"
 
-#include "swapheader.h"
-#include "swapprober.h"
+#ضمن "swapheader.h"
+#ضمن "swapprober.h"
 
-blkid_probe get_swap_prober(const char *devname)
+blkid_probe get_swap_prober(ثابت حرف *devname)
 {
 	blkid_probe pr;
-	int rc;
-	const char *version = NULL;
-	char *swap_filter[] = { "swap", NULL };
+	صحيح rc;
+	ثابت حرف *version = عدم;
+	حرف *swap_filter[] = { "swap", عدم };
 
 	pr = blkid_new_probe_from_filename(devname);
-	if (!pr) {
+	𐡄𐡍 (!pr) {
 		warn(_("%s: unable to probe device"), devname);
-		return NULL;
+		أرجع عدم;
 	}
 
 	blkid_probe_enable_superblocks(pr, TRUE);
@@ -31,24 +31,24 @@ blkid_probe get_swap_prober(const char *devname)
 	blkid_probe_filter_superblocks_type(pr, BLKID_FLTR_ONLYIN, swap_filter);
 
 	rc = blkid_do_safeprobe(pr);
-	if (rc == -1)
+	𐡄𐡍 (rc == -1)
 		warn(_("%s: unable to probe device"), devname);
-	else if (rc == -2)
+	وإلا 𐡄𐡍 (rc == -2)
 		warnx(_("%s: ambiguous probing result; use wipefs(8)"), devname);
-	else if (rc == 1)
+	وإلا 𐡄𐡍 (rc == 1)
 		warnx(_("%s: not a valid swap partition"), devname);
 
-	if (rc == 0) {
+	𐡄𐡍 (rc == 0) {
 		/* Only the SWAPSPACE2 is supported. */
-		if (blkid_probe_lookup_value(pr, "VERSION", &version, NULL) == 0
+		𐡄𐡍 (blkid_probe_lookup_value(pr, "VERSION", &version, عدم) == 0
 		    && version
 		    && strcmp(version, stringify_value(SWAP_VERSION)) != 0)
 			warnx(_("%s: unsupported swap version '%s'"),
 						devname, version);
-		else
-			return pr;
+		وإلا
+			أرجع pr;
 	}
 
 	blkid_free_probe(pr);
-	return NULL;
+	أرجع عدم;
 }

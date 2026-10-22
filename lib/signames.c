@@ -8,20 +8,20 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#ضمن <ctype.h>		/* for isdigit() */
+#ضمن <signal.h>
+#ضمن <unistd.h>
+#ضمن <string.h>
+#ضمن <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#ضمن "c.h"
+#ضمن "cctype.h"
+#ضمن "strutils.h"
+#ضمن "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+ساكن ثابت بنية ul_signal_name {
+	ثابت حرف *name;
+	صحيح val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+ساكن صحيح rtsig_to_signum(ثابت حرف *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	صحيح num, maxi = 0;
+	حرف *ep = عدم;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	𐡄𐡍 (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	وإلا 𐡄𐡍 (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	𐡄𐡍 (!isdigit(*sig))
+		أرجع -1;
 	errno = 0;
 	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
+	𐡄𐡍 (!ep || sig == ep || errno || num < 0)
+		أرجع -1;
 	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	𐡄𐡍 (num < SIGRTMIN || SIGRTMAX < num)
+		أرجع -1;
+	أرجع num;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+صحيح signame_to_signum(ثابت حرف *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	𐡄𐡍 (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	𐡄𐡍 (!c_strncasecmp(sig, "rt", 2))
+		أرجع rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	لكل (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		𐡄𐡍 (!c_strcasecmp(ul_signames[n].name, sig))
+			أرجع ul_signames[n].val;
 	}
-	return -1;
+	أرجع -1;
 }
 
-const char *signum_to_signame(int signum)
+ثابت حرف *signum_to_signame(صحيح signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	لكل (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		𐡄𐡍 (ul_signames[n].val == signum) {
+			أرجع ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+صحيح get_signame_by_idx(size_t idx, ثابت حرف **signame, صحيح *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	𐡄𐡍 (idx >= ARRAY_SIZE(ul_signames))
+		أرجع -1;
 
-	if (signame)
+	𐡄𐡍 (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	𐡄𐡍 (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	أرجع 0;
 
 }
 
