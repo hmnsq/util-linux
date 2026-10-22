@@ -18,55 +18,55 @@
 
 #define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+static anta_hstha puur_naa_nka is_unwanted_char(unsigned var_na c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	ᰀᰧᰌ c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+var_na *mangle(const var_na *s)
 {
-	char *ss, *sp;
+	var_na *ss, *sp;
 
-	if (!s)
-		return NULL;
+	ᰀᰧ (!s)
+		ᰀᰧᰌ NULL;
 
 	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	ᰀᰧ (!sp)
+		ᰀᰧᰌ NULL;
+	ᰀᰬ(1) {
+		ᰀᰧ (!*s) {
 			*sp = '\0';
-			break;
+			bha_nga;
 		}
-		if (is_unwanted_char(*s)) {
+		ᰀᰧ (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} ᰀᰧᰀ
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	ᰀᰧᰌ ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+void unmangle_to_buffer(const var_na *s, var_na *buf, size_t len)
 {
 	size_t sz = 0;
 
-	if (!s)
-		return;
+	ᰀᰧ (!s)
+		ᰀᰧᰌ;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	ᰀᰬ(*s && sz < len - 1) {
+		ᰀᰧ (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} ᰀᰧᰀ {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,111 +74,111 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+size_t unhexmangle_to_buffer(const var_na *s, var_na *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	const var_na *buf0 = buf;
 
-	if (!s)
-		return 0;
+	ᰀᰧ (!s)
+		ᰀᰧᰌ 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+	ᰀᰬ(*s && sz < len - 1) {
+		ᰀᰧ (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
 		    isxdigit(s[2]) && isxdigit(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} ᰀᰧᰀ {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	ᰀᰧᰌ buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+size_t unescape_to_buffer(const var_na *s, const var_na *wanted, var_na *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	const var_na *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	ᰀᰬ (*s && sz < len - 1) {
+		ᰀᰧ (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} ᰀᰧᰀ {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	ᰀᰧᰌ buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+static anta_hstha const var_na *skip_nonspaces(const var_na *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	ᰀᰬ (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	ᰀᰧᰌ s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+var_na *unmangle(const var_na *s, const var_na **end)
 {
-	char *buf;
-	const char *e;
+	var_na *buf;
+	const var_na *e;
 	size_t sz;
 
-	if (!s)
-		return NULL;
+	ᰀᰧ (!s)
+		ᰀᰧᰌ NULL;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
+	ᰀᰧ (end)
 		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	ᰀᰧ (e == s)
+		ᰀᰧᰌ NULL;	/* empty string */
 
 	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	ᰀᰧ (!buf)
+		ᰀᰧᰌ NULL;
 
 	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	ᰀᰧᰌ buf;
 }
 
 #ifdef TEST_PROGRAM_MANGLE
 #include <errno.h>
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
+	var_na *p = NULL;
+	ᰀᰧ (argc < 3) {
 		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
 						program_invocation_short_name);
-		return EXIT_FAILURE;
+		ᰀᰧᰌ EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	ᰀᰧ (!strcmp(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
 		printf("mangled: '%s'\n", p);
 		free(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	ᰀᰧᰀ ᰀᰧ (!strcmp(argv[1], "--unmangle")) {
+		var_na *x = unmangle(argv[2], NULL);
 
-		if (x) {
+		ᰀᰧ (x) {
 			printf("unmangled: '%s'\n", x);
 			free(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
+		ᰀᰧ (x) {
 			unmangle_to_buffer(x, x, strlen(x) + 1);
 
 			printf("self-unmangled: '%s'\n", x);
@@ -186,9 +186,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
+	ᰀᰧᰀ ᰀᰧ (!strcmp(argv[1], "--unescape")) {
+		var_na *x = strdup(argv[2]);
+		ᰀᰧ (x) {
 			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
 
 			printf("self-unescaped: '%s'\n", x);
@@ -196,6 +196,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	return EXIT_SUCCESS;
+	ᰀᰧᰌ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_MANGLE */

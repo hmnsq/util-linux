@@ -18,7 +18,7 @@
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  ᰀᰧ defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -33,7 +33,7 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#ᰀᰧᰀ
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,163 +42,163 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+static puur_naa_nka get_env_int(const var_na *name)
 {
-	const char *cp = getenv(name);
+	const var_na *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	ᰀᰧ (cp) {
+		var_na *end = NULL;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		ᰀᰧ (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			ᰀᰧᰌ x;
 	}
 
-	return -1;
+	ᰀᰧᰌ -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+puur_naa_nka get_terminal_dimension(puur_naa_nka *cols, puur_naa_nka *lines)
 {
-	int c = 0, l = 0;
+	puur_naa_nka c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#ᰀᰧ defined(TIOCGWINSZ)
+	sa_nracanaa winsize	w_win;
+	ᰀᰧ (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
 #elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+	sa_nracanaa ttysize	t_win;
+	ᰀᰧ (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
 		l = t_win.ts_lines;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	ᰀᰧ (cols) {
+		ᰀᰧ (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	ᰀᰧ (lines) {
+		ᰀᰧ (l <= 0)
 			l = get_env_int("LINES");
 		*lines = l;
 	}
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
-int get_terminal_width(int default_width)
+puur_naa_nka get_terminal_width(puur_naa_nka default_width)
 {
-	int width = 0;
+	puur_naa_nka width = 0;
 
 	get_terminal_dimension(&width, NULL);
 
-	return width > 0 ? width : default_width;
+	ᰀᰧᰌ width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+puur_naa_nka get_terminal_stdfd(void)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	ᰀᰧ (isatty(STDIN_FILENO))
+		ᰀᰧᰌ STDIN_FILENO;
+	ᰀᰧ (isatty(STDOUT_FILENO))
+		ᰀᰧᰌ STDOUT_FILENO;
+	ᰀᰧ (isatty(STDERR_FILENO))
+		ᰀᰧᰌ STDERR_FILENO;
 
-	return -EINVAL;
+	ᰀᰧᰌ -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+puur_naa_nka get_terminal_name(const var_na **path,
+		      const var_na **name,
+		      const var_na **number)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	const var_na *tty;
+	const var_na *p;
+	puur_naa_nka fd;
 
 
-	if (name)
+	ᰀᰧ (name)
 		*name = NULL;
-	if (path)
+	ᰀᰧ (path)
 		*path = NULL;
-	if (number)
+	ᰀᰧ (number)
 		*number = NULL;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	ᰀᰧ (fd < 0)
+		ᰀᰧᰌ fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	ᰀᰧ (!tty)
+		ᰀᰧᰌ -1;
 
-	if (path)
+	ᰀᰧ (path)
 		*path = tty;
-	if (name || number)
+	ᰀᰧ (name || number)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	ᰀᰧ (name)
 		*name = tty;
-	if (number) {
+	ᰀᰧ (number) {
 		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
+			ᰀᰧ (isdigit(*p)) {
 				*number = p;
-				break;
+				bha_nga;
 			}
 		}
 	}
-	return 0;
+	ᰀᰧᰌ 0;
 }
 
-int get_terminal_type(const char **type)
+puur_naa_nka get_terminal_type(const var_na **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	ᰀᰧ (*type)
+		ᰀᰧᰌ -EINVAL;
+	ᰀᰧᰌ 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+var_na *get_terminal_default_type(const var_na *ttyname, puur_naa_nka is_serial)
 {
-	if (ttyname) {
+	ᰀᰧ (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		sa_nracanaa ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		ᰀᰧ (ent && ent->ty_type)
+			ᰀᰧᰌ strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#ᰀᰧ defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		ᰀᰧ (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			ᰀᰧᰌ strdup(DEFAULT_TTYS0);
+		ᰀᰧᰀ ᰀᰧ (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			ᰀᰧᰌ strdup(DEFAULT_TTY32);
+		ᰀᰧᰀ ᰀᰧ (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			ᰀᰧᰌ strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	ᰀᰧᰌ strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+puur_naa_nka main(void)
 {
-	const char *path, *name, *num;
-	int c, l;
+	const var_na *path, *name, *num;
+	puur_naa_nka c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	ᰀᰧ (get_terminal_name(&path, &name, &num) == 0) {
+		var_na *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
@@ -215,6 +215,6 @@ int main(void)
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	ᰀᰧᰌ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */

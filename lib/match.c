@@ -20,18 +20,18 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+puur_naa_nka match_fstype(const var_na *type, const var_na *pattern)
 {
-	int no = 0;		/* negated types list */
-	int len;
-	const char *p;
+	puur_naa_nka no = 0;		/* negated types list */
+	puur_naa_nka len;
+	const var_na *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	ᰀᰧ (!pattern && !type)
+		ᰀᰧᰌ 1;
+	ᰀᰧ (!pattern)
+		ᰀᰧᰌ 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	ᰀᰧ (!strncmp(pattern, "no", 2)) {
 		no = 1;
 		pattern += 2;
 	}
@@ -39,16 +39,16 @@ int match_fstype(const char *type, const char *pattern)
 	/* Does type occur in types, separated by commas? */
 	len = strlen(type);
 	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	ᰀᰬ(1) {
+		ᰀᰧ (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			ᰀᰧᰌ 0;
+		ᰀᰧ (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			ᰀᰧᰌ !no;
 		p = strchr(p,',');
-		if (!p)
-			break;
+		ᰀᰧ (!p)
+			bha_nga;
 		p++;
 	}
-	return no;
+	ᰀᰧᰌ no;
 }
