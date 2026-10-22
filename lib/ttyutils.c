@@ -61,7 +61,7 @@ static int get_env_int(const char *name)
 	return -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+int get_terminal_dimension(int *cols, int *मगा_लिन्या)
 {
 	int c = 0, l = 0;
 
@@ -75,7 +75,7 @@ int get_terminal_dimension(int *cols, int *lines)
 	struct ttysize	t_win;
 	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
-		l = t_win.ts_lines;
+		l = t_win.ts_मगा_लिन्या;
 	}
 #endif
 	if (cols) {
@@ -83,10 +83,10 @@ int get_terminal_dimension(int *cols, int *lines)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
+	if (मगा_लिन्या) {
 		if (l <= 0)
 			l = get_env_int("LINES");
-		*lines = l;
+		*मगा_लिन्या = l;
 	}
 	return 0;
 }
@@ -114,7 +114,7 @@ int get_terminal_stdfd(void)
 
 int get_terminal_name(const char **path,
 		      const char **name,
-		      const char **number)
+		      const char **नुमेरो_2)
 {
 	const char *tty;
 	const char *p;
@@ -125,8 +125,8 @@ int get_terminal_name(const char **path,
 		*name = NULL;
 	if (path)
 		*path = NULL;
-	if (number)
-		*number = NULL;
+	if (नुमेरो_2)
+		*नुमेरो_2 = NULL;
 
 	fd = get_terminal_stdfd();
 	if (fd < 0)
@@ -138,14 +138,14 @@ int get_terminal_name(const char **path,
 
 	if (path)
 		*path = tty;
-	if (name || number)
+	if (name || नुमेरो_2)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
 	if (name)
 		*name = tty;
-	if (number) {
+	if (नुमेरो_2) {
 		for (p = tty; p && *p; p++) {
 			if (isdigit(*p)) {
-				*number = p;
+				*नुमेरो_2 = p;
 				break;
 			}
 		}
@@ -194,15 +194,15 @@ char *get_terminal_default_type(const char *ttyname, int is_serial)
 # include <stdlib.h>
 int main(void)
 {
-	const char *path, *name, *num;
+	const char *path, *name, *नुमेरो;
 	int c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
+	if (get_terminal_name(&path, &name, &नुमेरो) == 0) {
 		char *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
-		fprintf(stderr, "tty number:    %s\n", num);
+		fprintf(stderr, "tty number:    %s\n", नुमेरो);
 
 		fprintf(stderr, "tty term:      %s\n", getenv("TERM"));
 

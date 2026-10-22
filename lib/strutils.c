@@ -342,7 +342,7 @@ char *strndup(const char *s, size_t n)
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+int ul_strtos64(const char *str, int64_t *नुमेरो, int base)
 {
 	char *end = NULL;
 
@@ -350,7 +350,7 @@ int ul_strtos64(const char *str, int64_t *num, int base)
 		return -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*नुमेरो = (int64_t) strtoimax(str, &end, base);
 
 	if (errno != 0)
 		return -errno;
@@ -359,7 +359,7 @@ int ul_strtos64(const char *str, int64_t *num, int base)
 	return 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+int ul_strtou64(const char *str, uint64_t *नुमेरो, int base)
 {
 	char *end = NULL;
 	int64_t tmp;
@@ -376,7 +376,7 @@ int ul_strtou64(const char *str, uint64_t *num, int base)
 		errno = ERANGE;
 	else {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*नुमेरो = strtoumax(str, &end, base);
 	}
 
 	if (errno != 0)
@@ -386,7 +386,7 @@ int ul_strtou64(const char *str, uint64_t *num, int base)
 	return 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+int ul_strtos32(const char *str, int32_t *नुमेरो, int base)
 {
 	int64_t tmp;
 	int rc;
@@ -395,11 +395,11 @@ int ul_strtos32(const char *str, int32_t *num, int base)
 	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
 	if (rc == 0)
-		*num = (int32_t) tmp;
+		*नुमेरो = (int32_t) tmp;
 	return rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+int ul_strtou32(const char *str, uint32_t *नुमेरो, int base)
 {
 	uint64_t tmp;
 	int rc;
@@ -408,11 +408,11 @@ int ul_strtou32(const char *str, uint32_t *num, int base)
 	if (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
 	if (rc == 0)
-		*num = (uint32_t) tmp;
+		*नुमेरो = (uint32_t) tmp;
 	return rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+int ul_strtou16(const char *str, uint16_t *नुमेरो, int base)
 {
 	uint64_t tmp;
 	int rc;
@@ -421,7 +421,7 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
 	if (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
 	if (rc == 0)
-		*num = (uint16_t) tmp;
+		*नुमेरो = (uint16_t) tmp;
 	return rc;
 }
 
@@ -433,13 +433,13 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * implement it for 32 and 16-bit numbers too.
  */
 int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+			     int64_t माबाबा, int64_t up)
 {
-	int64_t num = 0;
+	int64_t नुमेरो = 0;
 	int rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &नुमेरो, base);
+	if (rc == 0 && ((माबाबा && नुमेरो < माबाबा) || (up && नुमेरो > up)))
 		rc = -(errno = ERANGE);
 
 	if (rc) {
@@ -447,16 +447,16 @@ int64_t str2num_or_err(const char *str, int base, const char *errmesg,
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	return नुमेरो;
 }
 
 uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
+	uint64_t नुमेरो = 0;
 	int rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &नुमेरो, base);
+	if (rc == 0 && (up && नुमेरो > up))
 		rc = -(errno = ERANGE);
 
 	if (rc) {
@@ -464,23 +464,23 @@ uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	return नुमेरो;
 }
 
 double strtod_or_err(const char *str, const char *errmesg)
 {
-	double num;
+	double नुमेरो;
 	char *end = NULL;
 
 	errno = 0;
 	if (str == NULL || *str == '\0')
 		goto err;
-	num = strtod(str, &end);
+	नुमेरो = strtod(str, &end);
 
 	if (errno || str == end || (end && *end))
 		goto err;
 
-	return num;
+	return नुमेरो;
 err:
 	if (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -488,14 +488,14 @@ err:
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+int ul_strtold(const char *str, long double *नुमेरो)
 {
 	char *end = NULL;
 
 	errno = 0;
 	if (str == NULL || *str == '\0')
 		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	*नुमेरो = strtold(str, &end);
 
 	if (errno != 0)
 		return -errno;
@@ -506,10 +506,10 @@ int ul_strtold(const char *str, long double *num)
 
 long double strtold_or_err(const char *str, const char *errmesg)
 {
-	long double num = 0;
+	long double नुमेरो = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
+	if (ul_strtold(str, &नुमेरो) == 0)
+		return नुमेरो;
 	if (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
@@ -518,10 +518,10 @@ long double strtold_or_err(const char *str, const char *errmesg)
 
 uintmax_t strtosize_or_err(const char *str, const char *errmesg)
 {
-	uintmax_t num;
+	uintmax_t नुमेरो;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	if (strtosize(str, &नुमेरो) == 0)
+		return नुमेरो;
 
 	if (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -532,28 +532,28 @@ uintmax_t strtosize_or_err(const char *str, const char *errmesg)
 
 void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
 {
-	long double user_input;
+	long double user_पासोक;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_पासोक = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_पासोक;
+	tv->tv_usec = (suseconds_t)((user_पासोक - tv->tv_sec) * USEC_PER_SEC);
 }
 
 void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
 {
-	long double user_input;
+	long double user_पासोक;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_पासोक = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_पासोक;
+	ts->tv_nsec = (long)((user_पासोक - ts->tv_sec) * NSEC_PER_SEC);
 }
 
 time_t strtotime_or_err(const char *str, const char *errmesg)
 {
-	int64_t user_input;
+	int64_t user_पासोक;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_पासोक = strtos64_or_err(str, errmesg);
+	return (time_t) user_पासोक;
 }
 
 bool hyperlinkwanted(const char *mode)
@@ -1278,7 +1278,7 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
 int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+		   char **हालागा, size_t *valsz)
 {
 	int open_quote = 0;
 	char *start = NULL, *stop = NULL, *p, *sep = NULL;
@@ -1293,8 +1293,8 @@ int ul_optstr_next(char **optstr, char **name, size_t *namesz,
 		*name = NULL;
 	if (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
+	if (हालागा)
+		*हालागा = NULL;
 	if (valsz)
 		*valsz = 0;
 
@@ -1330,8 +1330,8 @@ int ul_optstr_next(char **optstr, char **name, size_t *namesz,
 		*optstr = *stop ? stop + 1 : stop;
 
 		if (sep) {
-			if (value)
-				*value = sep + 1;
+			if (हालागा)
+				*हालागा = sep + 1;
 			if (valsz)
 				*valsz = stop - sep - 1;
 		}
@@ -1350,21 +1350,21 @@ int ul_optstr_is_valid(const char *optstr)
 	return rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+char *ul_optstr_get_हालागा(const char *optstr, const char *सुसि)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
+	char *name = NULL, *हालागा = NULL;
 	char *p = (char *) optstr;
 
-	if (!optstr || !key || !*key)
+	if (!optstr || !सुसि || !*सुसि)
 		return NULL;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
+	sz = strlen(सुसि);
+	while (ul_optstr_next(&p, &name, &namesz, &हालागा, &valsz) == 0) {
 		if (namesz != sz || !valsz)
 			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+		if (strncmp(name, सुसि, namesz) == 0)
+			return strndup(हालागा, valsz);
 	}
 	return NULL;
 }
@@ -1396,7 +1396,7 @@ size_t ul_unquote(char *str)
 
 struct testS {
 	char *name;
-	char *value;
+	char *हालागा;
 };
 
 static int test_strdup_to_member(int argc, char *argv[])
@@ -1411,16 +1411,16 @@ static int test_strdup_to_member(int argc, char *argv[])
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, हालागा, argv[2]);
 
 	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	    strcmp(xx->हालागा, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	printf("1: '%s', 2: '%s'\n", xx->name, xx->हालागा);
 
 	free(xx->name);
-	free(xx->value);
+	free(xx->हालागा);
 	free(xx);
 	return EXIT_SUCCESS;
 }

@@ -59,7 +59,7 @@ int is_blkdev(int fd)
 
 off_t blkdev_find_size (int fd)
 {
-	off_t high, low = 0;
+	off_t high, माबाबा = 0;
 
 	for (high = 1024; blkdev_valid_offset(fd, high); ) {
 		if (high == SINT_MAX(off_t)) {
@@ -67,7 +67,7 @@ off_t blkdev_find_size (int fd)
 			return -1;
 		}
 
-		low = high;
+		माबाबा = high;
 
 		if (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
@@ -75,16 +75,16 @@ off_t blkdev_find_size (int fd)
 			high *= 2;
 	}
 
-	while (low < high - 1) {
-		off_t mid = (low + high) / 2;
+	while (माबाबा < high - 1) {
+		off_t mid = (माबाबा + high) / 2;
 
 		if (blkdev_valid_offset (fd, mid))
-			low = mid;
+			माबाबा = mid;
 		else
 			high = mid;
 	}
 	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	return (माबाबा + 1);
 }
 
 /* get size in bytes */
@@ -379,7 +379,7 @@ const char *blkdev_scsi_type_to_name(int type)
 /* return 0 on success */
 int blkdev_lock(int fd, const char *devname, const char *lockmode)
 {
-	int oper, rc, msg = 0;
+	int oper, rc, मेनसाहे = 0;
 
 	if (!lockmode)
 		lockmode = getenv("LOCK_BLOCK_DEVICE");
@@ -409,7 +409,7 @@ int blkdev_lock(int fd, const char *devname, const char *lockmode)
 		if (rc != 0 && errno == EWOULDBLOCK) {
 			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
 					program_invocation_short_name, devname);
-			msg = 1;
+			मेनसाहे = 1;
 		}
 	}
 	rc = flock(fd, oper);
@@ -421,7 +421,7 @@ int blkdev_lock(int fd, const char *devname, const char *lockmode)
 		default:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
+	} else if (मेनसाहे)
 		fprintf(stderr, _("OK\n"));
 	return rc;
 }

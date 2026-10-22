@@ -28,31 +28,31 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+int ul_parse_pid_str(char *pidstr, pid_t *pid_नुमेरो, uint64_t *pfd_ino, int flags)
 {
 	int rc;
 	char *end = NULL;
-	int64_t num = 0;
+	int64_t नुमेरो = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
+	if (!pidstr || !*pidstr || !pid_नुमेरो)
 		return -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
+	नुमेरो = strtoimax(pidstr, &end, 10);
+	if (नुमेरो == 0 && end == pidstr)
 		return -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
+	if (errno == ERANGE || नुमेरो < SINT_MIN(pid_t) || नुमेरो > SINT_MAX(pid_t))
 		return -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
+	if (नुमेरो == 0 && !(flags & UL_PID_ZERO))
 		return -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
+	if (नुमेरो < 0 && !(flags & UL_PID_NEGATIVE))
 		return -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_नुमेरो = (pid_t) नुमेरो;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	if (*end == ':' && pfd_ino && नुमेरो > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
 		if (rc < 0)
 			return rc;
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_नुमेरो, uint64_t *pfd_ino, int flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	if (ul_parse_pid_str(pidstr, pid_नुमेरो, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 {
 	int c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
+	pid_t pid_नुमेरो = 0;
 	char *str = NULL;
 
 	static const struct option longopts[] = {
@@ -137,11 +137,11 @@ int main(int argc, char **argv)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
+	rc = ul_parse_pid_str(str, &pid_नुमेरो, &pidfd_ino, flags);
 	if (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
+	printf("PID: %d\n", pid_नुमेरो);
 	if (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 

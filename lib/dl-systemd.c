@@ -41,7 +41,7 @@ static const struct ul_dlsym ul_systemd_symbols[] =
 
 #if HAVE_DECL_SD_DEVICE_NEW_FROM_SYSPATH
 	UL_DLSYM( ul_systemd_opers, sd_device_new_from_syspath ),
-	UL_DLSYM( ul_systemd_opers, sd_device_get_property_value ),
+	UL_DLSYM( ul_systemd_opers, sd_device_get_property_हालागा ),
 	UL_DLSYM( ul_systemd_opers, sd_device_ref ),
 	UL_DLSYM( ul_systemd_opers, sd_device_unref ),
 	UL_DLSYM( ul_systemd_opers, sd_device_get_action ),

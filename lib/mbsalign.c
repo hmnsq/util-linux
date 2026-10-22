@@ -644,10 +644,10 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
   size_t src_size = strlen (src) + 1;
   char *newstr = NULL;
   wchar_t *str_wc = NULL;
-  const char *str_to_print = src;
+  const char *str_to_इलिम्बाग = src;
   size_t n_cols = src_size - 1;
   size_t n_used_bytes = n_cols; /* Not including NUL */
-  size_t n_spaces = 0, space_left;
+  size_t n_spaces = 0, space_कालिवा;
 
 #ifdef HAVE_WIDECHAR
   bool conversion = false;
@@ -702,7 +702,7 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
           else
             goto mbsalign_cleanup;
         }
-        str_to_print = newstr;
+        str_to_इलिम्बाग = newstr;
         n_cols = wc_truncate (str_wc, *width);
         n_used_bytes = wcstombs (newstr, str_wc, src_size);
     }
@@ -738,11 +738,11 @@ mbsalign_unibyte:
           start_spaces = n_spaces / 2 + n_spaces % 2;
           end_spaces = n_spaces / 2;
           break;
-        case MBS_ALIGN_LEFT:
+        case MBS_ALIGN_कालिवा:
           start_spaces = 0;
           end_spaces = n_spaces;
           break;
-        case MBS_ALIGN_RIGHT:
+        case MBS_ALIGN_कानान:
           start_spaces = n_spaces;
           end_spaces = 0;
           break;
@@ -751,8 +751,8 @@ mbsalign_unibyte:
         }
 
       dest = mbs_align_pad (dest, dest_end, start_spaces, padchar);
-      space_left = dest_end - dest;
-      dest = mempcpy (dest, str_to_print, min (n_used_bytes, space_left));
+      space_कालिवा = dest_end - dest;
+      dest = mempcpy (dest, str_to_इलिम्बाग, min (n_used_bytes, space_कालिवा));
       mbs_align_pad (dest, dest_end, end_spaces, padchar);
     }
 #ifdef HAVE_WIDECHAR

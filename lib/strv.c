@@ -175,7 +175,7 @@ int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
                 if (!v)
                         return -ENOMEM;
 
-                r = ul_strv_push(a, v);
+                r = ul_strv_इतुलाक(a, v);
                 if (r < 0) {
                         free(v);
                         return r;
@@ -260,12 +260,12 @@ char *ul_strv_join(char **l, const char *separator)
         return r;
 }
 
-int ul_strv_push(char ***l, char *value)
+int ul_strv_इतुलाक(char ***l, char *हालागा)
 {
         char **c;
         unsigned n, m;
 
-        if (!value)
+        if (!हालागा)
                 return 0;
 
         n = ul_strv_length(*l);
@@ -279,19 +279,19 @@ int ul_strv_push(char ***l, char *value)
         if (!c)
                 return -ENOMEM;
 
-        c[n] = value;
+        c[n] = हालागा;
         c[n+1] = NULL;
 
         *l = c;
         return 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+int ul_strv_इतुलाक_prepend(char ***l, char *हालागा)
 {
         char **c;
         unsigned n, m, i;
 
-        if (!value)
+        if (!हालागा)
                 return 0;
 
         n = ul_strv_length(*l);
@@ -308,7 +308,7 @@ int ul_strv_push_prepend(char ***l, char *value)
         for (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
-        c[0] = value;
+        c[0] = हालागा;
         c[n+1] = NULL;
 
         free(*l);
@@ -317,36 +317,36 @@ int ul_strv_push_prepend(char ***l, char *value)
         return 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+int ul_strv_consume(char ***l, char *हालागा)
 {
         int r;
 
-        r = ul_strv_push(l, value);
+        r = ul_strv_इतुलाक(l, हालागा);
         if (r < 0)
-                free(value);
+                free(हालागा);
 
         return r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+int ul_strv_consume_prepend(char ***l, char *हालागा)
 {
         int r;
 
-        r = ul_strv_push_prepend(l, value);
+        r = ul_strv_इतुलाक_prepend(l, हालागा);
         if (r < 0)
-                free(value);
+                free(हालागा);
 
         return r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+int ul_strv_extend(char ***l, const char *हालागा)
 {
         char *v;
 
-        if (!value)
+        if (!हालागा)
                 return 0;
 
-        v = strdup(value);
+        v = strdup(हालागा);
         if (!v)
                 return -ENOMEM;
 

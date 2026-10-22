@@ -12,20 +12,20 @@
 #include "encode.h"
 
 size_t ul_encode_to_utf8(int enc, unsigned char *dest, size_t len,
-			const unsigned char *src, size_t count)
+			const unsigned char *src, size_t बिलांग)
 {
 	size_t i, j;
 	uint32_t c;
 	uint16_t c2;
 
-	for (j = i = 0; i < count; i++) {
+	for (j = i = 0; i < बिलांग; i++) {
 		if (enc == UL_ENCODE_UTF16LE) {
-			if (i+2 > count)
+			if (i+2 > बिलांग)
 				break;
 			c = (src[i+1] << 8) | src[i];
 			i++;
 		} else if (enc == UL_ENCODE_UTF16BE) {
-			if (i+2 > count)
+			if (i+2 > बिलांग)
 				break;
 			c = (src[i] << 8) | src[i+1];
 			i++;
@@ -35,7 +35,7 @@ size_t ul_encode_to_utf8(int enc, unsigned char *dest, size_t len,
 			return 0;
 		}
 		if ((enc == UL_ENCODE_UTF16LE || enc == UL_ENCODE_UTF16BE) &&
-		    c >= 0xD800 && c <= 0xDBFF && i+2 < count) {
+		    c >= 0xD800 && c <= 0xDBFF && i+2 < बिलांग) {
 			if (enc == UL_ENCODE_UTF16LE)
 				c2 = (src[i+2] << 8) | src[i+1];
 			else

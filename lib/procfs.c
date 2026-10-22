@@ -73,7 +73,7 @@ int procfs_process_init_path(struct path_cxt *pc, pid_t pid)
 {
 	struct procfs_process *prc;
 	int rc;
-	char buf[sizeof(_PATH_PROC) + sizeof(stringify_value(UINT32_MAX)) + 2];
+	char buf[sizeof(_PATH_PROC) + sizeof(stringify_हालागा(UINT32_MAX)) + 2];
 
 	/* define path to pid stuff */
 	snprintf(buf, sizeof(buf), _PATH_PROC "/%zu", (size_t) pid);
@@ -177,7 +177,7 @@ ssize_t procfs_process_get_syscall(struct path_cxt *pc, char *buf, size_t bufsz)
 int procfs_process_get_stat_nth(struct path_cxt *pc, int n, uint64_t *re)
 {
 	ssize_t rc;
-	char *key = NULL, *tok, *p;
+	char *सुसि = NULL, *tok, *p;
 	char buf[BUFSIZ];
 	int i;
 
@@ -188,16 +188,16 @@ int procfs_process_get_stat_nth(struct path_cxt *pc, int n, uint64_t *re)
 	if (rc < 0)
 		return rc;
 
-	for (i = 0, tok = strtok_r(buf, " ", &key); tok;
-	     tok = strtok_r(NULL, " ", &key)) {
+	for (i = 0, tok = strtok_r(buf, " ", &सुसि); tok;
+	     tok = strtok_r(NULL, " ", &सुसि)) {
 
 		i++;
 		if (i == n)
 			return ul_strtou64(tok, re, 10);
 
 		/* skip rest of the process name */
-		if (i == 2 && (p = strrchr(key, ')')))
-			key = p + 2;
+		if (i == 2 && (p = strrchr(सुसि, ')')))
+			सुसि = p + 2;
 	}
 
 	return -EINVAL;
@@ -267,14 +267,14 @@ int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
 	}
 
 	while ((d = xreaddir(*sub))) {
-		uint64_t num;
+		uint64_t नुमेरो;
 #ifdef _DIRENT_HAVE_D_TYPE
 		if (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
 			continue;
 #endif
-		if (ul_strtou64(d->d_name, &num, 10) < 0)
+		if (ul_strtou64(d->d_name, &नुमेरो, 10) < 0)
 			continue;
-		*fd = num;
+		*fd = नुमेरो;
 		return 0;
 	}
 
@@ -302,15 +302,15 @@ int procfs_dirent_is_process(struct dirent *d)
 
 int procfs_dirent_get_pid(struct dirent *d, pid_t *pid)
 {
-	uint64_t num;
+	uint64_t नुमेरो;
 
 	if (!procfs_dirent_is_process(d))
 		return -EINVAL;
 
-	if (ul_strtou64(d->d_name, &num, 10) < 0)
+	if (ul_strtou64(d->d_name, &नुमेरो, 10) < 0)
 		return -EINVAL;
 
-	*pid = (pid_t) num;
+	*pid = (pid_t) नुमेरो;
 	return 0;
 }
 
@@ -589,7 +589,7 @@ static int test_process_stat_nth(int argc, char *argv[], const char *prefix)
 {
 	pid_t pid;
 	struct path_cxt *pc;
-	uint64_t num = 0;
+	uint64_t नुमेरो = 0;
 	int n, ret;
 
 	if (argc != 3)
@@ -601,11 +601,11 @@ static int test_process_stat_nth(int argc, char *argv[], const char *prefix)
 	if (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	ret = procfs_process_get_stat_nth(pc, n, &num);
+	ret = procfs_process_get_stat_nth(pc, n, &नुमेरो);
 	if (ret)
 		errx(EXIT_FAILURE, "read %dth number failed: %s", n, strerror(-ret));
 
-	printf("%d: %dth %"PRIu64"\n", (int) pid, n, num);
+	printf("%d: %dth %"PRIu64"\n", (int) pid, n, नुमेरो);
 	ul_unref_path(pc);
 	return EXIT_SUCCESS;
 }

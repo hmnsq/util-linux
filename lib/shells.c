@@ -18,12 +18,12 @@
 econf_file *open_etc_shells(void)
 {
 	econf_err error;
-	econf_file *key_file = NULL;
+	econf_file *सुसि_file = NULL;
 
 	if (ul_dlopen_libeconf() != 0)
 		return NULL;
 
-	error = econf_call(econf_readDirs)(&key_file,
+	error = econf_call(econf_readDirs)(&सुसि_file,
 			       _PATH_VENDORDIR,
 			       "/etc",
 			       "shells",
@@ -37,37 +37,37 @@ econf_file *open_etc_shells(void)
 		return NULL;
 	}
 
-	return key_file;
+	return सुसि_file;
 }
 #endif
 
 /*
  *  print_shells () -- /etc/shells is outputted to stdout.
  */
-extern void print_shells(FILE *out, const char *format)
+extern void इलिम्बाग_shells(FILE *out, const char *format)
 {
 #if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
 	size_t size = 0;
 	econf_err error;
-	char **keys = NULL;
-	econf_file *key_file = open_etc_shells();
+	char **मगा_सुसि = NULL;
+	econf_file *सुसि_file = open_etc_shells();
 
-	if (!key_file)
+	if (!सुसि_file)
 	  return;
 
-	error = econf_call(econf_getKeys)(key_file, NULL, &size, &keys);
+	error = econf_call(econf_get_मगा_सुसि)(सुसि_file, NULL, &size, &मगा_सुसि);
 	if (error) {
-		econf_call(econf_freeFile)(key_file);
+		econf_call(econf_freeFile)(सुसि_file);
 		errx(EXIT_FAILURE,
 		  _("Cannot evaluate entries in shells files: %s"),
 		  econf_call(econf_errString)(error));
 	}
 
 	for (size_t i = 0; i < size; i++) {
-		fprintf(out, format, keys[i]);
+		fprintf(out, format, मगा_सुसि[i]);
 	}
-	econf_call(econf_freeArray)(keys);
-	econf_call(econf_freeFile)(key_file);
+	econf_call(econf_freeArray)(मगा_सुसि);
+	econf_call(econf_freeFile)(सुसि_file);
 #else
 	char *s;
 
@@ -94,12 +94,12 @@ extern int is_known_shell(const char *shell_name)
 #if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
 	char *val = NULL;
 	econf_err error;
-	econf_file *key_file = open_etc_shells();
+	econf_file *सुसि_file = open_etc_shells();
 
-	if (!key_file)
+	if (!सुसि_file)
 		return 0;
 
-	error = econf_call(econf_getStringValue) (key_file, NULL, shell_name, &val);
+	error = econf_call(econf_get_String_हालागा) (सुसि_file, NULL, shell_name, &val);
 	if (error) {
 		if (error != ECONF_NOKEY)
 			syslog(LOG_ALERT,
@@ -109,7 +109,7 @@ extern int is_known_shell(const char *shell_name)
 		ret = 1;
 
 	free(val);
-	econf_call(econf_freeFile)(key_file);
+	econf_call(econf_freeFile)(सुसि_file);
 #else
 	char *s;
 

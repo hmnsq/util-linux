@@ -105,7 +105,7 @@ static const struct ul_signal_name {
 #ifdef SIGRTMIN
 static int rtsig_to_signum(const char *sig)
 {
-	int num, maxi = 0;
+	int नुमेरो, maxi = 0;
 	char *ep = NULL;
 
 	if (c_strncasecmp(sig, "min+", 4) == 0)
@@ -117,13 +117,13 @@ static int rtsig_to_signum(const char *sig)
 	if (!isdigit(*sig))
 		return -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
+	नुमेरो = strtol(sig, &ep, 10);
+	if (!ep || sig == ep || errno || नुमेरो < 0)
 		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
+	नुमेरो = maxi ? SIGRTMAX - नुमेरो : SIGRTMIN + नुमेरो;
+	if (नुमेरो < SIGRTMIN || SIGRTMAX < नुमेरो)
 		return -1;
-	return num;
+	return नुमेरो;
 }
 #endif
 

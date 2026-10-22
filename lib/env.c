@@ -54,7 +54,7 @@ static char * const noslash[] = {
 
 struct ul_env_list {
 	char	*name;
-	char	*value;
+	char	*हालागा;
 
 	struct ul_env_list *next;
 };
@@ -64,7 +64,7 @@ struct ul_env_list {
  */
 static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
 					 const char *name, size_t namesz,
-					 const char *value, size_t valsz)
+					 const char *हालागा, size_t valsz)
 {
 	struct ul_env_list *ls;
 
@@ -73,10 +73,10 @@ static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
 		return ls0;
 
 	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
-	ls->value = ls->name + namesz + 1;
+	ls->हालागा = ls->name + namesz + 1;
 
 	memcpy(ls->name, name, namesz);
-	memcpy(ls->value, value, valsz);
+	memcpy(ls->हालागा, हालागा, valsz);
 
 	ls->next = ls0;
 	return ls;
@@ -112,12 +112,12 @@ static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
  */
 struct ul_env_list *env_list_add_variable(
 				struct ul_env_list *ls,
-				const char *name, const char *value)
+				const char *name, const char *हालागा)
 {
 	if (!name || !*name)
 		return ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	return env_list_add(ls, name, strlen(name), हालागा, हालागा ? strlen(हालागा) : 0);
 }
 
 /*
@@ -196,8 +196,8 @@ int env_list_setenv(struct ul_env_list *ls, int overwrite)
 	int rc = 0;
 
 	while (ls && rc == 0) {
-		if (ls->name && ls->value)
-			rc = setenv(ls->name, ls->value, overwrite);
+		if (ls->name && ls->हालागा)
+			rc = setenv(ls->name, ls->हालागा, overwrite);
 		ls = ls->next;
 	}
 	return rc;

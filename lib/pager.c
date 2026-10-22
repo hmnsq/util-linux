@@ -34,7 +34,7 @@ struct child_process {
 	pid_t pid;
 	int in;
 
-	int header_lines;
+	int header_मगा_लिन्या;
 	int header_width;
 
 	int org_err;
@@ -61,19 +61,19 @@ static void pager_preexec(void)
 {
 	const char *less_env = getenv("LESS");
 	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
+	int header_मगा_लिन्या = pager_process.header_मगा_लिन्या;
 	int header_width = pager_process.header_width;
 	char *less_val = NULL;
 
-	if (header_lines > 0 && header_width > 0)
+	if (header_मगा_लिन्या > 0 && header_width > 0)
 		less_val = ul_strfconcat(base, " --header %d,%d",
-					 header_lines, header_width);
+					 header_मगा_लिन्या, header_width);
 	else if (header_width > 0)
 		less_val = ul_strfconcat(base, " --header 0,%d",
 					 header_width);
-	else if (header_lines > 0)
+	else if (header_मगा_लिन्या > 0)
 		less_val = ul_strfconcat(base, " --header %d",
-					 header_lines);
+					 header_मगा_लिन्या);
 
 	if (less_val) {
 		if (setenv("LESS", less_val, 1) != 0)
@@ -276,12 +276,12 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+void pager_open_header(int header_मगा_लिन्या, int first_col_width)
 {
 	if (pager_process.pid)
 		return;		/* already running */
 
-	pager_process.header_lines = header_lines;
+	pager_process.header_मगा_लिन्या = header_मगा_लिन्या;
 	pager_process.header_width = first_col_width;
 
 	pager_process.org_out = dup(STDOUT_FILENO);

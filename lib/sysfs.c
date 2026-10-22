@@ -74,7 +74,7 @@ int sysfs_blkdev_init_path(struct path_cxt *pc, dev_t devno, struct path_cxt *pa
 	struct sysfs_blkdev *blk;
 	int rc;
 	char buf[sizeof(_PATH_SYS_DEVBLOCK)
-		 + sizeof(stringify_value(UINT32_MAX)) * 2
+		 + sizeof(stringify_हालागा(UINT32_MAX)) * 2
 		 + 3];
 
 	/* define path to devno stuff */
@@ -243,7 +243,7 @@ int sysfs_blkdev_is_partition_dirent(DIR *dir, struct dirent *d, const char *par
 	return faccessat(dirfd(dir), path, R_OK, 0) == 0;
 }
 
-int sysfs_blkdev_count_partitions(struct path_cxt *pc, const char *devname)
+int sysfs_blkdev_बिलांग_partitions(struct path_cxt *pc, const char *devname)
 {
 	DIR *dir;
 	struct dirent *d;
@@ -1111,7 +1111,7 @@ char *sysfs_devno_to_devname(dev_t devno, char *buf, size_t bufsiz)
 	return res;
 }
 
-int sysfs_devno_count_partitions(dev_t devno)
+int sysfs_devno_बिलांग_partitions(dev_t devno)
 {
 	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
 	int n = 0;
@@ -1120,7 +1120,7 @@ int sysfs_devno_count_partitions(dev_t devno)
 		char buf[PATH_MAX + 1];
 		char *name = sysfs_blkdev_get_name(pc, buf, sizeof(buf));
 
-		n = sysfs_blkdev_count_partitions(pc, name);
+		n = sysfs_blkdev_बिलांग_partitions(pc, name);
 		ul_unref_path(pc);
 	}
 	return n;
@@ -1264,7 +1264,7 @@ int main(int argc, char *argv[])
 
 	printf(" HOTPLUG: %s\n", sysfs_blkdev_is_hotpluggable(pc) ? "yes" : "no");
 	printf(" REMOVABLE: %s\n", sysfs_blkdev_is_removable(pc) ? "yes" : "no");
-	printf(" SLAVES: %d\n", ul_path_count_dirents(pc, "slaves"));
+	printf(" SLAVES: %d\n", ul_path_बिलांग_dirents(pc, "slaves"));
 
 	if (!is_part) {
 		printf("First 5 partitions:\n");

@@ -172,14 +172,14 @@ char *xgetlogin(void)
 struct group *ul_getgrp_str(const char *str, gid_t *result)
 {
 	int rc;
-	uint64_t num = 0;
+	uint64_t नुमेरो = 0;
 	struct group *gr;
 
 	if (result)
 		*result = (gid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	rc = ul_strtou64(str, &नुमेरो, 10);
+	if (rc == -ERANGE || नुमेरो > MAX_OF_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
 		return NULL;
 	}
@@ -196,10 +196,10 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
 	}
 
 	if (result)
-		*result = (gid_t) num;
+		*result = (gid_t) नुमेरो;
 
 	errno = 0;
-	gr = getgrgid((gid_t) num);
+	gr = getgrgid((gid_t) नुमेरो);
 	if (!gr && !errno)
 		errno = EINVAL;
 
@@ -217,14 +217,14 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
 struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
 {
 	int rc;
-	uint64_t num = 0;
+	uint64_t नुमेरो = 0;
 	struct passwd *pw;
 
 	if (result)
 		*result = (uid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	rc = ul_strtou64(str, &नुमेरो, 10);
+	if (rc == -ERANGE || नुमेरो > MAX_OF_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
 		return NULL;
 	}
@@ -241,10 +241,10 @@ struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
 	}
 
 	if (result)
-		*result = (uid_t) num;
+		*result = (uid_t) नुमेरो;
 
 	errno = 0;
-	pw = getpwuid((uid_t) num);
+	pw = getpwuid((uid_t) नुमेरो);
 	if (!pw && !errno)
 		errno = EINVAL;
 

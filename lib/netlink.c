@@ -51,7 +51,7 @@ static void netlink_init_debug(void)
 
 	__UL_INIT_DEBUG_FROM_ENV(netlink, ULNETLINK_DEBUG_, 0, ULNETLINK_DEBUG);
 
-	ON_DBG(HELP, ul_debug_print_masks("ULNETLINK_DEBUG",
+	ON_DBG(HELP, ul_debug_इलिम्बाग_masks("ULNETLINK_DEBUG",
 				UL_DEBUG_MASKNAMES(netlink)));
 }
 
@@ -199,7 +199,7 @@ static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
 	return (*(nl->callback_addr))(nl);
 }
 
-static int process_msg(struct ul_nl_data *nl, struct nlmsghdr *nh)
+static int process_मेनसाहे(struct ul_nl_data *nl, struct nlmsghdr *nh)
 {
 	int rc = 0;
 
@@ -237,7 +237,7 @@ int ul_nl_process(struct ul_nl_data *nl, bool async, bool loop)
 		.iov_base = buf,
 		.iov_len = sizeof(buf)
 	};
-	struct msghdr msg = {
+	struct msghdr मेनसाहे = {
 		.msg_name = &snl,
 		.msg_namelen = sizeof(snl),
 		.msg_iov = &iov,
@@ -249,7 +249,7 @@ int ul_nl_process(struct ul_nl_data *nl, bool async, bool loop)
 
 	while (1) {
 		DBG_OBJ(NLMSG, nl, ul_debug("waiting for message"));
-		rc = recvmsg(nl->fd, &msg, (loop ? 0 :
+		rc = recvmsg(nl->fd, &मेनसाहे, (loop ? 0 :
 					    (async ? MSG_DONTWAIT : 0)));
 		DBG_OBJ(NLMSG, nl, ul_debug("got message"));
 		if (rc < 0) {
@@ -280,7 +280,7 @@ int ul_nl_process(struct ul_nl_data *nl, bool async, bool loop)
 				return UL_NL_DONE;
 			}
 
-			rc = process_msg(nl, nh);
+			rc = process_मेनसाहे(nl, nh);
 			if (rc)
 			{
 				DBG_OBJ(NLMSG, nl,

@@ -308,7 +308,7 @@ const uint64_t crc_tab64[256] = {
  * indicating the length.
  */
 
-uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_ecma( const unsigned char *पासोक_str, size_t नुमेरो_bytes )
 {
 
 	uint64_t crc;
@@ -316,9 +316,9 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
 	size_t a;
 
 	crc = CRC_START_64_ECMA;
-	ptr = input_str;
+	ptr = पासोक_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	if ( ptr != NULL ) for (a=0; a<नुमेरो_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
@@ -335,7 +335,7 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
  * parameter indicating the length.
  */
 
-uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_we( const unsigned char *पासोक_str, size_t नुमेरो_bytes )
 {
 
 	uint64_t crc;
@@ -343,9 +343,9 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
 	size_t a;
 
 	crc = CRC_START_64_WE;
-	ptr = input_str;
+	ptr = पासोक_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	if ( ptr != NULL ) for (a=0; a<नुमेरो_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}

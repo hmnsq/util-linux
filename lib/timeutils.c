@@ -718,7 +718,7 @@ static int run_unittest_timestamp(void)
 	int rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
 	static const struct testcase {
-		const char * const input;
+		const char * const पासोक;
 		usec_t expected;
 	} testcases[] = {
 		{ "2012-09-22 16:34:22"    , 1348331662000000 },
@@ -748,15 +748,15 @@ static int run_unittest_timestamp(void)
 	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
 		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
+		int r = parse_timestamp_reference(reference, t.पासोक, &result);
 		if (r) {
-			fprintf(stderr, "Could not parse '%s'\n", t.input);
+			fprintf(stderr, "Could not parse '%s'\n", t.पासोक);
 			rc = EXIT_FAILURE;
 		}
 
 		if (result != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
-				i, t.input, result, t.expected);
+				i, t.पासोक, result, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}

@@ -67,7 +67,7 @@ unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
 	return res;
 }
 
-void ul_debug_print_masks(const char *env,
+void ul_debug_इलिम्बाग_masks(const char *env,
 			  const struct ul_debug_maskname flagnames[])
 {
 	const struct ul_debug_maskname *d;

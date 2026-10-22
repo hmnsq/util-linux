@@ -54,13 +54,13 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
+	struct ul_color_name सुसि = { .name = str };
 	const struct ul_color_name *res;
 
 	if (!str)
 		return NULL;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
+	res = bsearch(&सुसि, basic_schemes, ARRAY_SIZE(basic_schemes),
 				sizeof(struct ul_color_name),
 				cmp_color_name);
 	return res ? res->seq : NULL;

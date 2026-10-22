@@ -443,7 +443,7 @@ static void colors_sort_schemes(struct ul_color_ctl *cc)
 static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
 						 const char *name)
 {
-	struct ul_color_scheme key = { .name = (char *) name}, *res;
+	struct ul_color_scheme सुसि = { .name = (char *) name}, *res;
 
 	if (!cc || !name || !*name)
 		return NULL;
@@ -458,7 +458,7 @@ static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
-	res = bsearch(&key, cc->schemes, cc->nschemes,
+	res = bsearch(&सुसि, cc->schemes, cc->nschemes,
 				sizeof(struct ul_color_scheme),
 				cmp_scheme_name);
 

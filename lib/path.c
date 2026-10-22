@@ -952,9 +952,9 @@ int ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path
 	return !p ? -errno : ul_path_write_string(pc, str, p);
 }
 
-int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
+int ul_path_write_s64(struct path_cxt *pc, int64_t नुमेरो, const char *path)
 {
-	char buf[sizeof(stringify_value(LLONG_MAX))];
+	char buf[sizeof(stringify_हालागा(LLONG_MAX))];
 	int rc, errsv;
 	int fd, len;
 
@@ -962,7 +962,7 @@ int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
 	if (fd < 0)
 		return -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRId64, num);
+	len = snprintf(buf, sizeof(buf), "%" PRId64, नुमेरो);
 	if (len < 0 || (size_t) len >= sizeof(buf))
 		rc = len < 0 ? -errno : -E2BIG;
 	else
@@ -974,9 +974,9 @@ int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
 	return rc;
 }
 
-int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
+int ul_path_write_u64(struct path_cxt *pc, uint64_t नुमेरो, const char *path)
 {
-	char buf[sizeof(stringify_value(ULLONG_MAX))];
+	char buf[sizeof(stringify_हालागा(ULLONG_MAX))];
 	int rc, errsv;
 	int fd, len;
 
@@ -984,7 +984,7 @@ int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
 	if (fd < 0)
 		return -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRIu64, num);
+	len = snprintf(buf, sizeof(buf), "%" PRIu64, नुमेरो);
 	if (len < 0 || (size_t) len >= sizeof(buf))
 		rc = len < 0 ? -errno : -E2BIG;
 	else
@@ -996,7 +996,7 @@ int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
 	return rc;
 }
 
-int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
+int ul_path_writef_u64(struct path_cxt *pc, uint64_t नुमेरो, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -1005,11 +1005,11 @@ int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_u64(pc, num, p);
+	return !p ? -errno : ul_path_write_u64(pc, नुमेरो, p);
 
 }
 
-int ul_path_count_dirents(struct path_cxt *pc, const char *path)
+int ul_path_बिलांग_dirents(struct path_cxt *pc, const char *path)
 {
 	DIR *dir;
 	int r = 0;
@@ -1033,7 +1033,7 @@ int ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_count_dirents(pc, p);
+	return !p ? -errno : ul_path_बिलांग_dirents(pc, p);
 }
 
 /* first call (when @sub is NULL) opens the directory, last call closes the directory */
@@ -1313,16 +1313,16 @@ int main(int argc, char *argv[])
 			err(EXIT_FAILURE, "writef string failed");
 
 	} else if (strcmp(command, "write-u64") == 0) {
-		uint64_t num;
+		uint64_t नुमेरो;
 
 		if (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <num> not defined");
 		file = argv[optind++];
-		num = strtoumax(argv[optind++], NULL, 0);
+		नुमेरो = strtoumax(argv[optind++], NULL, 0);
 
-		if (ul_path_write_u64(pc, num, file) != 0)
+		if (ul_path_write_u64(pc, नुमेरो, file) != 0)
 			err(EXIT_FAILURE, "write u64 failed");
-		if (ul_path_writef_u64(pc, num, "%s", file) != 0)
+		if (ul_path_writef_u64(pc, नुमेरो, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef u64 failed");
 	}
 

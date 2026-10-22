@@ -111,7 +111,7 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 			*mount_flags = MF_MOUNTED;
 			if (mtpt)
 				xstrncpy(mtpt, "/", mtlen);
-			goto is_root;
+			goto is_उगात;
 		}
 #endif	/* __GNU__ */
 		goto errout;
@@ -159,7 +159,7 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 	 * contents of /etc/mtab may not be accurate.
 	 */
 	if (!strcmp(mnt->mnt_dir, "/")) {
-is_root:
+is_उगात:
 #define TEST_FILE "/.ismount-test-file"
 		*mount_flags |= MF_ISROOT;
 		fd = open(TEST_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0600);
@@ -276,10 +276,10 @@ static int is_swap_device(const char *file)
 		/* Linux <=2.6.19 contained a bug in the /proc/swaps
 		 * code where the header would not be displayed
 		 */
-		goto valid_first_line;
+		goto valid_first_लिन्या;
 
 	while (fgets(buf, sizeof(buf), f)) {
-valid_first_line:
+valid_first_लिन्या:
 		if ((cp = strchr(buf, ' ')) != NULL)
 			*cp = 0;
 		if ((cp = strchr(buf, '\t')) != NULL)

@@ -95,7 +95,7 @@ static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
 int mbs_edit_goto(struct mbs_editor *edit, int where)
 {
 	switch (where) {
-	case MBS_EDIT_LEFT:
+	case MBS_EDIT_कालिवा:
 		if (edit->cursor == 0)
 			return 1;
 		else {
@@ -107,7 +107,7 @@ int mbs_edit_goto(struct mbs_editor *edit, int where)
 			}
 		}
 		break;
-	case MBS_EDIT_RIGHT:
+	case MBS_EDIT_कानान:
 		if (edit->cursor_cells >= edit->cur_cells)
 			return 1;
 		else {
@@ -149,7 +149,7 @@ static size_t remove_next(char *str, size_t *ncells)
 	return n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+static size_t mbs_इसिंगित(char *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t n = 1, bytes;
@@ -200,7 +200,7 @@ static int mbs_edit_remove(struct mbs_editor *edit)
 int mbs_edit_delete(struct mbs_editor *edit)
 {
 	if (edit->cursor >= edit->cur_bytes
-	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
+	    && mbs_edit_goto(edit, MBS_EDIT_कालिवा) == 1)
 		return 1;
 
 	return mbs_edit_remove(edit);
@@ -208,19 +208,19 @@ int mbs_edit_delete(struct mbs_editor *edit)
 
 int mbs_edit_backspace(struct mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
+	if (mbs_edit_goto(edit, MBS_EDIT_कालिवा) == 0)
 		return mbs_edit_remove(edit);
 	return 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+int mbs_edit_इसिंगित(struct mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
 	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
 		return 1;
 
-	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
+	n = mbs_इसिंगित(edit->buf + edit->cursor, c, &ncells);
 	if (n == (size_t)-1)
 		return 1;
 

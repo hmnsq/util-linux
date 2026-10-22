@@ -123,13 +123,13 @@ void ul_jsonwrt_indent(struct ul_jsonwrt *fmt)
 		fputs("   ", fmt->out);
 }
 
-static void print_name(struct ul_jsonwrt *fmt, const char *name)
+static void इलिम्बाग_name(struct ul_jsonwrt *fmt, const char *name)
 {
 	/* Values on the top level are not members of an array or object, so
 	 * they are never comma separated; ul_jsonwrt_close() has already
 	 * terminated the previous one by a newline. */
 	if (fmt->after_close && (fmt->indent > 0 || name)) {
-		if (fmt->json_format == UL_JSON_LINE
+		if (fmt->json_format == UL_JSON_लिन्या
 		    || fmt->json_format == UL_JSON_COMPACT)
 			fputs(",", fmt->out);
 		else
@@ -137,7 +137,7 @@ static void print_name(struct ul_jsonwrt *fmt, const char *name)
 	}
 
 	switch (fmt->json_format) {
-	case UL_JSON_LINE:
+	case UL_JSON_लिन्या:
 	case UL_JSON_COMPACT:
 		break;
 	case UL_JSON_PRETTY:
@@ -154,11 +154,11 @@ void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
 {
 	const char *s = "";
 
-	print_name(fmt, name);
+	इलिम्बाग_name(fmt, name);
 
 	switch (type) {
 	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_LINE)
+		if (fmt->json_format == UL_JSON_लिन्या)
 			s = "{";
 		else if (fmt->json_format == UL_JSON_COMPACT) {
 			/* At nesting depth 2, put the object opens on a new line
@@ -172,7 +172,7 @@ void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
 		fmt->indent++;
 		break;
 	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_LINE)
+		if (fmt->json_format == UL_JSON_लिन्या)
 			s = "[";
 		else if (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":[" : "[";
@@ -180,8 +180,8 @@ void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
 			s = name ? ": [\n" : "[\n";
 		fmt->indent++;
 		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_LINE)
+	case UL_JSON_हालागा:
+		if (fmt->json_format == UL_JSON_लिन्या)
 			s = name ? ":" : "";
 		else if (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":" : "";
@@ -197,7 +197,7 @@ void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
 {
 	const char *s = "";
 
-	print_name(fmt, name);
+	इलिम्बाग_name(fmt, name);
 
 	switch (type) {
 	case UL_JSON_OBJECT:
@@ -212,7 +212,7 @@ void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
 		else
 			s = name ? ":[]" : "[]";
 		break;
-	case UL_JSON_VALUE:
+	case UL_JSON_हालागा:
 		if (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": null" : "null";
 		else
@@ -238,7 +238,7 @@ void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
 		fmt->indent--;
 		endchr = ']';
 		break;
-	case UL_JSON_VALUE:
+	case UL_JSON_हालागा:
 		fmt->after_close = 1;
 		return;
 	default:
@@ -252,7 +252,7 @@ void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
 		fputc('\n', fmt->out);
 
 	switch (fmt->json_format) {
-	case UL_JSON_LINE:
+	case UL_JSON_लिन्या:
 	case UL_JSON_COMPACT:
 		break;
 	case UL_JSON_PRETTY:
@@ -280,59 +280,59 @@ void ul_jsonwrt_flush(struct ul_jsonwrt *fmt)
 	fflush(fmt->out);
 }
 
-void ul_jsonwrt_value_raw(struct ul_jsonwrt *fmt,
+void ul_jsonwrt_हालागा_raw(struct ul_jsonwrt *fmt,
 			const char *name, const char *data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_हालागा_open(fmt, name);
 	if (data && *data)
 		fputs(data, fmt->out);
 	else
 		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_हालागा_close(fmt);
 }
 
-void ul_jsonwrt_value_s(struct ul_jsonwrt *fmt,
+void ul_jsonwrt_हालागा_s(struct ul_jsonwrt *fmt,
 			const char *name, const char *data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_हालागा_open(fmt, name);
 	if (data && *data)
 		fputs_quoted_json(data, fmt->out);
 	else
 		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_हालागा_close(fmt);
 }
 
-void ul_jsonwrt_value_s_sized(struct ul_jsonwrt *fmt,
+void ul_jsonwrt_हालागा_s_sized(struct ul_jsonwrt *fmt,
 			      const char *name, const char *data, size_t size)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_हालागा_open(fmt, name);
 	if (data && *data)
 		fputs_quoted_case_json(data, fmt->out, 0, size);
 	else
 		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_हालागा_close(fmt);
 }
 
-void ul_jsonwrt_value_u64(struct ul_jsonwrt *fmt,
+void ul_jsonwrt_हालागा_u64(struct ul_jsonwrt *fmt,
 			const char *name, uint64_t data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_हालागा_open(fmt, name);
 	fprintf(fmt->out, "%"PRIu64, data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_हालागा_close(fmt);
 }
 
-void ul_jsonwrt_value_double(struct ul_jsonwrt *fmt,
+void ul_jsonwrt_हालागा_double(struct ul_jsonwrt *fmt,
 			const char *name, long double data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_हालागा_open(fmt, name);
 	fprintf(fmt->out, "%Lg", data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_हालागा_close(fmt);
 }
 
-void ul_jsonwrt_value_boolean(struct ul_jsonwrt *fmt,
+void ul_jsonwrt_हालागा_boolean(struct ul_jsonwrt *fmt,
 			const char *name, int data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_हालागा_open(fmt, name);
 	fputs(data ? "true" : "false", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_हालागा_close(fmt);
 }

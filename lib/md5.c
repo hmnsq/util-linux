@@ -109,24 +109,24 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
  */
 void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
 {
-    unsigned count;
+    unsigned बिलांग;
     unsigned char *p;
 
     /* Compute number of bytes mod 64 */
-    count = (ctx->bits[0] >> 3) & 0x3F;
+    बिलांग = (ctx->bits[0] >> 3) & 0x3F;
 
     /* Set the first char of padding to 0x80.  This is safe since there is
        always at least one byte free */
-    p = ctx->in + count;
+    p = ctx->in + बिलांग;
     *p++ = 0x80;
 
     /* Bytes of padding needed to make 64 bytes */
-    count = 64 - 1 - count;
+    बिलांग = 64 - 1 - बिलांग;
 
     /* Pad out to 56 mod 64 */
-    if (count < 8) {
+    if (बिलांग < 8) {
 	/* Two lots of padding:  Pad the first block to 64 bytes */
-	memset(p, 0, count);
+	memset(p, 0, बिलांग);
 	byteReverse(ctx->in, 16);
 	ul_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
 
@@ -134,7 +134,7 @@ void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
 	memset(ctx->in, 0, 56);
     } else {
 	/* Pad block to 56 bytes */
-	memset(p, 0, count - 8);
+	memset(p, 0, बिलांग - 8);
     }
     byteReverse(ctx->in, 14);
 

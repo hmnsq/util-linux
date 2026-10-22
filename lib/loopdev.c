@@ -458,7 +458,7 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
 {
 	DIR *dir;
 	struct dirent *d;
-	unsigned int n, count = 0, arylen = 0;
+	unsigned int n, बिलांग = 0, arylen = 0;
 
 	if (!dirname || !ary)
 		return 0;
@@ -496,7 +496,7 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
 		if (n < LOOPDEV_DEFAULT_NNODES)
 			continue;			/* ignore loop<0..7> */
 
-		if (count + 1 > arylen) {
+		if (बिलांग + 1 > arylen) {
 			int *tmp;
 
 			arylen += 1;
@@ -511,13 +511,13 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
 			*ary = tmp;
 		}
 		if (*ary)
-			(*ary)[count++] = n;
+			(*ary)[बिलांग++] = n;
 	}
-	if (count && *ary)
-		qsort(*ary, count, sizeof(int), cmpnum);
+	if (बिलांग && *ary)
+		qsort(*ary, बिलांग, sizeof(int), cmpnum);
 
 	closedir(dir);
-	return count;
+	return बिलांग;
 }
 
 /*
@@ -2000,10 +2000,10 @@ char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64
  * device is associated with the given @filename and @loopdev is not NULL then
  * @loopdev returns name of the device.
  */
-int loopdev_count_by_backing_file(const char *filename, char **loopdev)
+int loopdev_बिलांग_by_backing_file(const char *filename, char **loopdev)
 {
 	struct loopdev_cxt lc;
-	int count = 0, rc;
+	int बिलांग = 0, rc;
 
 	if (!filename)
 		return -1;
@@ -2023,18 +2023,18 @@ int loopdev_count_by_backing_file(const char *filename, char **loopdev)
 		}
 
 		free(backing);
-		if (loopdev && count == 0)
+		if (loopdev && बिलांग == 0)
 			*loopdev = loopcxt_strdup_device(&lc);
-		count++;
+		बिलांग++;
 	}
 
 	loopcxt_deinit(&lc);
 
-	if (loopdev && count > 1) {
+	if (loopdev && बिलांग > 1) {
 		free(*loopdev);
 		*loopdev = NULL;
 	}
-	return count;
+	return बिलांग;
 }
 
 #ifdef TEST_PROGRAM_LOOPDEV

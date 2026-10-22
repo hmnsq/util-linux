@@ -22,15 +22,15 @@ static const struct ul_dlsym ul_cryptsetup_symbols[] =
 	UL_DLSYM( ul_cryptsetup_opers, crypt_set_log_callback ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_init_data_device ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_load ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_get_volume_key_size ),
-#ifdef HAVE_CRYPT_ACTIVATE_BY_SIGNED_KEY
-	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_signed_key ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_get_volume_सुसि_size ),
+#ifdef HAVE_CRYPT_ACTIVATE_BY_SIGNED_सुसि
+	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_signed_सुसि ),
 #endif
-	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_volume_key ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_volume_सुसि ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_free ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_init_by_name ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_get_verity_info ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_volume_key_get ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_volume_सुसि_get ),
 
 	UL_DLSYM( ul_cryptsetup_opers, crypt_deactivate_by_name ),
 };

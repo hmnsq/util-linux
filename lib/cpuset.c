@@ -62,7 +62,7 @@ static const char *nexttoken(const char *q,  int sep)
 /*
  * Number of bits in a CPU bitmask on current system
  */
-int get_max_number_of_cpus(void)
+int get_max_नुमेरो_of_cpus(void)
 {
 #ifdef SYS_sched_getaffinity
 	int n, cpus = 2048;

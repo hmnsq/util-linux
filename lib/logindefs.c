@@ -53,7 +53,7 @@ void logindefs_set_loader(void (*loader)(void *data), void *data)
 
 struct item {
 	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
+	char *हालागा;		/* value of the option.  */
 	char *path;		/* name of config file for this option.  */
 
 	struct item *next;	/* pointer to next option.  */
@@ -71,7 +71,7 @@ void free_getlogindefs_data(void)
 
 		free(ptr->path);
 		free(ptr->name);
-		free(ptr->value);
+		free(ptr->हालागा);
 		free(ptr);
 		ptr = tmp;
 	}
@@ -79,7 +79,7 @@ void free_getlogindefs_data(void)
 	list = NULL;
 }
 
-static void store(const char *name, const char *value, const char *path)
+static void store(const char *name, const char *हालागा, const char *path)
 {
 	struct item *new = xmalloc(sizeof(struct item));
 
@@ -87,7 +87,7 @@ static void store(const char *name, const char *value, const char *path)
 		abort();
 
 	new->name = xstrdup(name);
-	new->value = value && *value ? xstrdup(value) : NULL;
+	new->हालागा = हालागा && *हालागा ? xstrdup(हालागा) : NULL;
 	new->path = xstrdup(path);
 	new->next = list;
 	list = new;
@@ -163,7 +163,7 @@ static void load_defaults(void)
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+static struct item *हानाप(const char *name)
 {
 	struct item *ptr;
 
@@ -180,7 +180,7 @@ static struct item *search(const char *name)
 	return NULL;
 }
 
-static const char *search_config(const char *name)
+static const char *हानाप_config(const char *name)
 {
 	struct item *ptr;
 
@@ -196,26 +196,26 @@ static const char *search_config(const char *name)
 
 int getlogindefs_bool(const char *name, int dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	struct item *ptr = हानाप(name);
+	return ptr && ptr->हालागा ? (c_strcasecmp(ptr->हालागा, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_नुमेरो(const char *name, unsigned long dflt)
 {
-	struct item *ptr = search(name);
+	struct item *ptr = हानाप(name);
 	char *end = NULL;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
+	if (!ptr || !ptr->हालागा)
 		return dflt;
 
 	errno = 0;
-	retval = strtoul(ptr->value, &end, 0);
+	retval = strtoul(ptr->हालागा, &end, 0);
 	if (end && *end == '\0' && !errno)
 		return retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
-	       search_config(name), name, ptr->value);
+	       हानाप_config(name), name, ptr->हालागा);
 	return dflt;
 }
 
@@ -227,13 +227,13 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  */
 const char *getlogindefs_str(const char *name, const char *dflt)
 {
-	struct item *ptr = search(name);
+	struct item *ptr = हानाप(name);
 
 	if (!ptr)
 		return dflt;
-	if (!ptr->value)
+	if (!ptr->हालागा)
 		return "";
-	return ptr->value;
+	return ptr->हालागा;
 }
 
 #else /* !HAVE_LIBECONF */
@@ -325,7 +325,7 @@ void logindefs_load_file(const char *filename)
 
 int getlogindefs_bool(const char *name, int dflt)
 {
-	bool value;
+	bool हालागा;
 	econf_err error;
 
 	if (!file)
@@ -334,18 +334,18 @@ int getlogindefs_bool(const char *name, int dflt)
 	if (!file)
 		return dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
+	if ((error = econf_call(econf_get_Bool_हालागा)(file, NULL, name, &हालागा))) {
 		if (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
 		return dflt;
 	}
-	return value;
+	return हालागा;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_नुमेरो(const char *name, unsigned long dflt)
 {
-	uint64_t value;
+	uint64_t हालागा;
 	econf_err error;
 
 	if (!file)
@@ -354,13 +354,13 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
 	if (!file)
 		return dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
+	if ((error = econf_call(econf_get_UInt64_हालागा)(file, NULL, name, &हालागा))) {
 		if (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
 		return dflt;
 	}
-	return value;
+	return हालागा;
 }
 
 /*
@@ -371,7 +371,7 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  */
 const char *getlogindefs_str(const char *name, const char *dflt)
 {
-	char *value;
+	char *हालागा;
 	econf_err error;
 
 	if (!file)
@@ -380,14 +380,14 @@ const char *getlogindefs_str(const char *name, const char *dflt)
 	if (!file)
 		return dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
+	if ((error = econf_call(econf_get_String_हालागा)(file, NULL, name, &हालागा))) {
 		if (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
 		return dflt;
 	}
-	if (value)
-		return value;
+	if (हालागा)
+		return हालागा;
 
 	return xstrdup("");
 }
@@ -441,7 +441,7 @@ int logindefs_setenv_path(uid_t uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
 	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
-		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
+		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", PATH_DEFPATH_उगात);
 
 	return rc;
 }
@@ -592,15 +592,15 @@ int main(int argc, char *argv[])
 	if (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
 		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+		char *मगा_सुसि[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
 				NULL};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		for (i = 0; file && मगा_सुसि[i] != NULL; i++) {
+			char *हालागा = NULL;
 
-			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
-			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
+			econf_call(econf_get_String_हालागा)(file, NULL, मगा_सुसि[i], &हालागा);
+			printf ("%s: $%s: '%s'\n", argv[1], मगा_सुसि[i], हालागा);
 		}
 
 		if (file)
@@ -611,7 +611,7 @@ int main(int argc, char *argv[])
 
 		for (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
-			       ptr->value);
+			       ptr->हालागा);
 #endif
 		return EXIT_SUCCESS;
 	}
@@ -622,7 +622,7 @@ int main(int argc, char *argv[])
 	if (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
 	else if (strcmp(type, "num") == 0)
-		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
+		printf("$%s: '%lu'\n", name, getlogindefs_नुमेरो(name, 0));
 	else if (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");

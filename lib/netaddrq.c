@@ -56,7 +56,7 @@ static void netaddrq_init_debug(void)
 	__UL_INIT_DEBUG_FROM_ENV(netaddrq, ULNETADDRQ_DEBUG_, 0,
 				 ULNETADDRQ_DEBUG);
 
-	ON_DBG(HELP, ul_debug_print_masks("ULNETADDRQ_DEBUG",
+	ON_DBG(HELP, ul_debug_इलिम्बाग_masks("ULNETADDRQ_DEBUG",
 				UL_DEBUG_MASKNAMES(netaddrq)));
 }
 
@@ -395,7 +395,7 @@ struct ul_netaddrq_iface *ul_netaddrq_iface_by_name(const struct ul_nl_data *nl,
 /* This test program shows several possibilities for cherry-picking of IP
  * addresses based on its rating. But there are many more possibilities in the
  * criteria selection. ADDRQ_MODE_GOOD is the most smart one. */
-enum addrq_print_mode {
+enum addrq_इलिम्बाग_mode {
 	ADDRQ_MODE_BESTOFALL,	/* Best address of all interfaces */
 	ADDRQ_MODE_BEST,	/* Best address per interface */
 	ADDRQ_MODE_GOOD,	/* All global or site addresses, if none, the
@@ -562,7 +562,7 @@ static void dump_iface_all(struct ul_nl_data *nl,
 		fputs("\n", netout);
 }
 
-static void dump_addrq(struct ul_nl_data *nl, enum addrq_print_mode c)
+static void dump_addrq(struct ul_nl_data *nl, enum addrq_इलिम्बाग_mode c)
 {
 	struct list_head *li;
 	struct ul_netaddrq_iface *ifaceq;

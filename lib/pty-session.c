@@ -351,7 +351,7 @@ static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int
 
 	memcpy(stash->buf, buf, bufsz);
 	stash->size = bufsz;
-	stash->final_input = final ? 1 : 0;
+	stash->final_पासोक = final ? 1 : 0;
 
 	if (pty->child_buffer_head)
 		pty->child_buffer_tail = pty->child_buffer_tail->next = stash;
@@ -401,7 +401,7 @@ static int flush_child_buffers(struct ul_pty *pty, int *anything)
 		struct ul_pty_child_buffer *hd = pty->child_buffer_head;
 		ssize_t ret;
 
-		if (hd->final_input)
+		if (hd->final_पासोक)
 			drain_child_buffers(pty);
 
 		DBG_OBJ(IO, hd, ul_debug(" stdin --> master trying %zu bytes", hd->size - hd->cursor));

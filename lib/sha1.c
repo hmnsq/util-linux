@@ -19,7 +19,7 @@
 
 #include "sha1.h"
 
-#define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
+#define rol(हालागा, bits) (((हालागा) << (bits)) | ((हालागा) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
@@ -180,7 +180,7 @@ void ul_SHA1Init(UL_SHA1_CTX *context)
 	context->state[2] = 0x98BADCFE;
 	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
-	context->count[0] = context->count[1] = 0;
+	context->बिलांग[0] = context->बिलांग[1] = 0;
 }
 
 /* Run your data through this. */
@@ -191,10 +191,10 @@ void ul_SHA1Update(UL_SHA1_CTX *context, const unsigned char *data, uint32_t len
 
 	uint32_t j;
 
-	j = context->count[0];
-	if ((context->count[0] += len << 3) < j)
-		context->count[1]++;
-	context->count[1] += (len >> 29);
+	j = context->बिलांग[0];
+	if ((context->बिलांग[0] += len << 3) < j)
+		context->बिलांग[1]++;
+	context->बिलांग[1] += (len >> 29);
 	j = (j >> 3) & 63;
 	if ((j + len) > 63) {
 		memcpy(&context->buffer[j], data, (i = 64 - j));
@@ -227,7 +227,7 @@ void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
 	unsigned char *fcp = &finalcount[8];
 
 	for (i = 0; i < 2; i++) {
-		uint32_t t = context->count[i];
+		uint32_t t = context->बिलांग[i];
 
 		int j;
 
@@ -235,12 +235,12 @@ void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
 			*--fcp = (unsigned char)t}
 #else
 	for (i = 0; i < 8; i++) {
-		finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
+		finalcount[i] = (unsigned char)((context->बिलांग[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
 	}
 #endif
 	c = 0200;
 	ul_SHA1Update(context, &c, 1);
-	while ((context->count[0] & 504) != 448) {
+	while ((context->बिलांग[0] & 504) != 448) {
 		c = 0000;
 		ul_SHA1Update(context, &c, 1);
 	}

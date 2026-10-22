@@ -57,7 +57,7 @@ fail:
  * Returning absolute path or NULL if not found The return value has to be
  * freed by the caller.
  */
-static char *main_configs(const char *root,
+static char *main_configs(const char *उगात,
 			  const char *project,
 			  const char *confname,
 			  const char *suffix)
@@ -66,10 +66,10 @@ static char *main_configs(const char *root,
 
 	if (suffix)
 		path = config_mk_path(S_IFREG, "%s/%s/%s.%s",
-				root, project, confname, suffix);
+				उगात, project, confname, suffix);
 	if (!path)
 		path = config_mk_path(S_IFREG, "%s/%s/%s",
-				root, project, confname);
+				उगात, project, confname);
 	return path;
 }
 
@@ -107,7 +107,7 @@ static int filter(const struct dirent *d)
 
 static int read_dir(struct list_head *file_list,
 		    const char *project,
-		    const char *root,
+		    const char *उगात,
 		    const char *confname,
 		    const char *suffix)
 {
@@ -119,10 +119,10 @@ static int read_dir(struct list_head *file_list,
 
 	if (suffix)
 		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.%s.d",
-				root, project, confname, suffix);
+				उगात, project, confname, suffix);
 	if (!dirname)
 		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.d",
-				root, project, confname);
+				उगात, project, confname);
 	if (!dirname)
 		return errno == ENOMEM ? -ENOMEM : 0;
 
@@ -293,7 +293,7 @@ finish:
 	ul_configs_free_list(&run_list);
 	ul_configs_free_list(&usr_list);
 
-	return ret < 0 ? ret : (int) list_count_entries(file_list);
+	return ret < 0 ? ret : (int) list_बिलांग_entries(file_list);
 }
 
 void ul_configs_free_list(struct list_head *file_list)
@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, 0, NULL, 0 }
 	};
-	int ch, count;
+	int ch, बिलांग;
 
 	while ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, NULL)) != -1) {
 		switch (ch) {
@@ -387,14 +387,14 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	count = ul_configs_file_list(&file_list, project, etc_path, run_path, usr_path,
+	बिलांग = ul_configs_file_list(&file_list, project, etc_path, run_path, usr_path,
 				     config_name, config_suffix);
-	if (count < 0) {
-		fprintf(stderr, "failed to get config file list: %d\n", count);
+	if (बिलांग < 0) {
+		fprintf(stderr, "failed to get config file list: %d\n", बिलांग);
 		return EXIT_FAILURE;
 	}
 
-	printf("Found %d configuration file(s):\n", count);
+	printf("Found %d configuration file(s):\n", बिलांग);
 	while (ul_configs_next_filename(&file_list, &current, &name) == 0)
 		printf("  %s\n", name);
 

@@ -24,10 +24,10 @@ static const struct ul_dlsym ul_econf_symbols[] =
 	UL_DLSYM( ul_econf_opers, econf_readConfig ),
 #endif
 	UL_DLSYM( ul_econf_opers, econf_readDirs ),
-	UL_DLSYM( ul_econf_opers, econf_getKeys ),
-	UL_DLSYM( ul_econf_opers, econf_getStringValue ),
-	UL_DLSYM( ul_econf_opers, econf_getBoolValue ),
-	UL_DLSYM( ul_econf_opers, econf_getUInt64Value ),
+	UL_DLSYM( ul_econf_opers, econf_get_मगा_सुसि ),
+	UL_DLSYM( ul_econf_opers, econf_get_String_हालागा ),
+	UL_DLSYM( ul_econf_opers, econf_get_Bool_हालागा ),
+	UL_DLSYM( ul_econf_opers, econf_get_UInt64_हालागा ),
 	UL_DLSYM( ul_econf_opers, econf_errString ),
 
 	UL_DLSYM( ul_econf_opers, econf_freeFile ),
