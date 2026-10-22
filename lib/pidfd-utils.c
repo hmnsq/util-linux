@@ -4,45 +4,45 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
-#include <errno.h>
+#ضمن <stdlib.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/vfs.h>
+#ضمن <sys/types.h>
+#ضمن <errno.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "pidfd-utils.h"
-#include "statfs_magic.h"
+#ضمن "c.h"
+#ضمن "nls.h"
+#ضمن "strutils.h"
+#ضمن "pidfd-utils.h"
+#ضمن "statfs_magic.h"
 
 /*
  * Returns 1, if the pidfd has the pidfs file system type, otherwise 0.
  */
-int pfd_is_pidfs(int pidfd)
+صحيح pfd_is_pidfs(صحيح pidfd)
 {
-	struct statfs stfs;
-	int rc;
+	بنية statfs stfs;
+	صحيح rc;
 
 	rc = fstatfs(pidfd, &stfs);
-	if (rc < 0)
-		return 0;
+	אם (rc < 0)
+		החזר 0;
 
-	return F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
+	החזר F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
 }
 
 #ifdef USE_PIDFD_INO_SUPPORT
-uint64_t pidfd_get_inode(int pidfd)
+uint64_t pidfd_get_inode(صحيح pidfd)
 {
-	struct statx stx;
-	int rc;
+	بنية statx stx;
+	صحيح rc;
 
 	rc = statx(pidfd, "", AT_EMPTY_PATH, STATX_INO, &stx);
-	if (rc < 0) {
+	אם (rc < 0) {
 		close(pidfd);
 		err(EXIT_FAILURE, _("failed to statx() pidfd"));
 	}
-	return stx.stx_ino;
+	החזר stx.stx_ino;
 }
 #endif
 
@@ -62,18 +62,18 @@ uint64_t pidfd_get_inode(int pidfd)
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+صحيح ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
+#אחרת
+صحيح ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	صحيح pfd;
 
 	pfd = ul_get_valid_pidfd(pid, pidfd_ino);
-	if (pfd < 0)
+	אם (pfd < 0)
 		err(EXIT_FAILURE, _("failed to obtain a valid file descriptor for PID %d"), pid);
 
-	return pfd;
+	החזר pfd;
 }
 
 /*
@@ -91,34 +91,34 @@ int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unu
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+صحيح ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
+#אחרת
+صحيح ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	صحيح pfd;
 
 	pfd = pidfd_open(pid, 0);
-	if (pfd < 0)
-		return -errno;
+	אם (pfd < 0)
+		החזר -errno;
 
 	/* the file descriptor has to have the pidfs file system type
 	 * otherwise the inode assigned to it will not be useful.
 	 */
-	if (!pfd_is_pidfs(pfd)) {
+	אם (!pfd_is_pidfs(pfd)) {
 		close(pfd);
-		return -(errno = ENOTSUP);
+		החזר -(errno = ENOTSUP);
 	}
 
 #ifdef USE_PIDFD_INO_SUPPORT
 	uint64_t real_pidfd_ino;
-	if (pidfd_ino) {
+	אם (pidfd_ino) {
 		real_pidfd_ino = pidfd_get_inode(pfd);
-		if (real_pidfd_ino != pidfd_ino) {
+		אם (real_pidfd_ino != pidfd_ino) {
 			close(pfd);
-			return -(errno = ESRCH);
+			החזר -(errno = ESRCH);
 		}
 	}
 #endif
-	return pfd;
+	החזר pfd;
 }

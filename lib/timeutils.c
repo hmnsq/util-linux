@@ -12,27 +12,27 @@
  * Software Foundation; either version 2.1 of the License, or (at your option)
  * any later version.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <inttypes.h>
+#ضمن <assert.h>
+#ضمن <ctype.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <time.h>
+#ضمن <sys/time.h>
+#ضمن <inttypes.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
+#ضمن "c.h"
+#ضمن "nls.h"
+#ضمن "strutils.h"
+#ضمن "timeutils.h"
 
 #define WHITESPACE " \t\n\r"
 
 #define streq(a,b) (strcmp((a),(b)) == 0)
 
-static int parse_sec(const char *t, usec_t *usec)
+ساكن صحيح parse_sec(ثابت حرف *t, usec_t *usec)
 {
-	static const struct {
-		const char *suffix;
+	ساكن ثابت بنية {
+		ثابت حرف *suffix;
 		usec_t usec;
 	} table[] = {
 		{ "seconds",	USEC_PER_SEC },
@@ -65,124 +65,124 @@ static int parse_sec(const char *t, usec_t *usec)
 		{ "",		USEC_PER_SEC },	/* default is sec */
 	};
 
-	const char *p;
+	ثابت حرف *p;
 	usec_t r = 0;
-	int something = FALSE;
+	صحيح something = FALSE;
 
-	assert(t);
-	assert(usec);
+	أكد(t);
+	أكد(usec);
 
 	p = t;
-	for (;;) {
+	עבור (;;) {
 		long long l, z = 0;
-		char *e;
+		حرف *e;
 		unsigned i, n = 0;
 
 		p += strspn(p, WHITESPACE);
 
-		if (*p == 0) {
-			if (!something)
-				return -EINVAL;
+		אם (*p == 0) {
+			אם (!something)
+				החזר -EINVAL;
 
-			break;
+			اكسر;
 		}
 
 		errno = 0;
 		l = strtoll(p, &e, 10);
 
-		if (errno > 0)
-			return -errno;
+		אם (errno > 0)
+			החזר -errno;
 
-		if (l < 0)
-			return -ERANGE;
+		אם (l < 0)
+			החזר -ERANGE;
 
-		if (*e == '.') {
-			char *b = e + 1;
+		אם (*e == '.') {
+			حرف *b = e + 1;
 
 			errno = 0;
 			z = strtoll(b, &e, 10);
-			if (errno > 0)
-				return -errno;
+			אם (errno > 0)
+				החזר -errno;
 
-			if (z < 0)
-				return -ERANGE;
+			אם (z < 0)
+				החזר -ERANGE;
 
-			if (e == b)
-				return -EINVAL;
+			אם (e == b)
+				החזר -EINVAL;
 
 			n = e - b;
 
-		} else if (e == p)
-			return -EINVAL;
+		} אחרת אם (e == p)
+			החזר -EINVAL;
 
 		e += strspn(e, WHITESPACE);
 
-		for (i = 0; i < ARRAY_SIZE(table); i++)
-			if (ul_startswith(e, table[i].suffix)) {
+		עבור (i = 0; i < ARRAY_SIZE(table); i++)
+			אם (ul_startswith(e, table[i].suffix)) {
 				usec_t k = (usec_t) z * table[i].usec;
 
-				for (; n > 0; n--)
+				עבור (; n > 0; n--)
 					k /= 10;
 
 				r += (usec_t) l *table[i].usec + k;
 				p = e + strlen(table[i].suffix);
 
 				something = TRUE;
-				break;
+				اكسر;
 			}
 
-		if (i >= ARRAY_SIZE(table))
-			return -EINVAL;
+		אם (i >= ARRAY_SIZE(table))
+			החזר -EINVAL;
 
 	}
 
 	*usec = r;
 
-	return 0;
+	החזר 0;
 }
 
-static int parse_subseconds(const char *t, usec_t *usec)
+ساكن صحيح parse_subseconds(ثابت حرف *t, usec_t *usec)
 {
 	usec_t ret = 0;
 	usec_t factor = USEC_PER_SEC / 10;
 
-	if (*t != '.' && *t != ',')
-		return -1;
+	אם (*t != '.' && *t != ',')
+		החזר -1;
 
-	while (*(++t)) {
-		if (!isdigit(*t) || factor < 1)
-			return -1;
+	כלעוד (*(++t)) {
+		אם (!isdigit(*t) || factor < 1)
+			החזר -1;
 
 		ret += ((usec_t) *t - '0') * factor;
 		factor /= 10;
 	}
 
 	*usec = ret;
-	return 0;
+	החזר 0;
 }
 
-static const char *parse_epoch_seconds(const char *t, struct tm *tm)
+ساكن ثابت حرف *parse_epoch_seconds(ثابت حرف *t, بنية tm *tm)
 {
 	int64_t s;
 	time_t st;
-	int f, c;
+	صحيح f, c;
 
 	f = sscanf(t, "%"SCNd64"%n", &s, &c);
-	if (f < 1)
-		return NULL;
+	אם (f < 1)
+		החזר عدم;
 	st = s;
-	if ((int64_t) st < s)
-		return NULL;
-	if (!localtime_r(&st, tm))
-		return NULL;
-	return t + c;
+	אם ((int64_t) st < s)
+		החזר عدم;
+	אם (!localtime_r(&st, tm))
+		החזר عدم;
+	החזר t + c;
 }
 
-static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
+ساكن صحيح parse_timestamp_reference(time_t x, ثابت حرف *t, usec_t *usec)
 {
-	static const struct {
-		const char *name;
-		const int nr;
+	ساكن ثابت بنية {
+		ثابت حرف *name;
+		ثابت صحيح nr;
 	} day_nr[] = {
 		{ "Sunday",	0 },
 		{ "Sun",	0 },
@@ -200,10 +200,10 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 		{ "Sat",	6 },
 	};
 
-	const char *k;
-	struct tm tm, copy;
+	ثابت حرف *k;
+	بنية tm tm, copy;
 	usec_t plus = 0, minus = 0, ret = 0;
-	int r, weekday = -1;
+	صحيح r, weekday = -1;
 	unsigned i;
 
 	/*
@@ -233,179 +233,179 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	 *
 	 */
 
-	assert(t);
-	assert(usec);
+	أكد(t);
+	أكد(usec);
 
 	localtime_r(&x, &tm);
 	tm.tm_isdst = -1;
 
-	if (streq(t, "now"))
-		goto finish;
+	אם (streq(t, "now"))
+		اذهب finish;
 
-	else if (streq(t, "today")) {
+	אחרת אם (streq(t, "today")) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		اذهب finish;
 
-	} else if (streq(t, "yesterday")) {
+	} אחרת אם (streq(t, "yesterday")) {
 		tm.tm_mday--;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		اذهب finish;
 
-	} else if (streq(t, "tomorrow")) {
+	} אחרת אם (streq(t, "tomorrow")) {
 		tm.tm_mday++;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		اذهب finish;
 
-	} else if (t[0] == '+') {
+	} אחרת אם (t[0] == '+') {
 
 		r = parse_sec(t + 1, &plus);
-		if (r < 0)
-			return r;
+		אם (r < 0)
+			החזר r;
 
-		goto finish;
-	} else if (t[0] == '-') {
+		اذهب finish;
+	} אחרת אם (t[0] == '-') {
 
 		r = parse_sec(t + 1, &minus);
-		if (r < 0)
-			return r;
+		אם (r < 0)
+			החזר r;
 
-		goto finish;
-	} else if (t[0] == '@') {
+		اذهب finish;
+	} אחרת אם (t[0] == '@') {
 		k = parse_epoch_seconds(t + 1, &tm);
-		if (k && *k == 0)
-			goto finish;
-		else if (k && parse_subseconds(k, &ret) == 0)
-			goto finish;
+		אם (k && *k == 0)
+			اذهب finish;
+		אחרת אם (k && parse_subseconds(k, &ret) == 0)
+			اذهب finish;
 
-		return -EINVAL;
-	} else if (ul_endswith(t, " ago")) {
-		char *z;
+		החזר -EINVAL;
+	} אחרת אם (ul_endswith(t, " ago")) {
+		حرف *z;
 
 		z = strndup(t, strlen(t) - 4);
-		if (!z)
-			return -ENOMEM;
+		אם (!z)
+			החזר -ENOMEM;
 
 		r = parse_sec(z, &minus);
-		free(z);
-		if (r < 0)
-			return r;
+		حرر(z);
+		אם (r < 0)
+			החזר r;
 
-		goto finish;
+		اذهب finish;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(day_nr); i++) {
+	עבור (i = 0; i < ARRAY_SIZE(day_nr); i++) {
 		size_t skip;
 
-		if (!startswith_no_case(t, day_nr[i].name))
-			continue;
+		אם (!startswith_no_case(t, day_nr[i].name))
+			استمر;
 
 		skip = strlen(day_nr[i].name);
-		if (t[skip] != ' ')
-			continue;
+		אם (t[skip] != ' ')
+			استمر;
 
 		weekday = day_nr[i].nr;
 		t += skip + 1;
-		break;
+		اكسر;
 	}
 
 	copy = tm;
 	k = strptime(t, "%y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	אם (k && *k == 0)
+		اذهب finish;
+	אחרת אם (k && parse_subseconds(k, &ret) == 0)
+		اذهب finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	אם (k && *k == 0)
+		اذهب finish;
+	אחרת אם (k && parse_subseconds(k, &ret) == 0)
+		اذهب finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%dT%H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	אם (k && *k == 0)
+		اذهب finish;
+	אחרת אם (k && parse_subseconds(k, &ret) == 0)
+		اذهب finish;
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	אם (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		اذهب finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	אם (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		اذهب finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d", &tm);
-	if (k && *k == 0) {
+	אם (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		اذهب finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d", &tm);
-	if (k && *k == 0) {
+	אם (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		اذهب finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	אם (k && *k == 0)
+		اذهب finish;
+	אחרת אם (k && parse_subseconds(k, &ret) == 0)
+		اذهب finish;
 
 	tm = copy;
 	k = strptime(t, "%H:%M", &tm);
-	if (k && *k == 0) {
+	אם (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		اذهب finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y%m%d%H%M%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	אם (k && *k == 0)
+		اذهب finish;
+	אחרת אם (k && parse_subseconds(k, &ret) == 0)
+		اذهب finish;
 
-	return -EINVAL;
+	החזר -EINVAL;
 
  finish:
 	x = mktime(&tm);
-	if (x == (time_t)-1)
-		return -EINVAL;
+	אם (x == (time_t)-1)
+		החזר -EINVAL;
 
-	if (weekday >= 0 && tm.tm_wday != weekday)
-		return -EINVAL;
+	אם (weekday >= 0 && tm.tm_wday != weekday)
+		החזר -EINVAL;
 
 	ret += (usec_t) x * USEC_PER_SEC;
 
-	if (minus > ret)
-		return -ERANGE;
-	if ((ret + plus) < ret)
-		return -ERANGE;
+	אם (minus > ret)
+		החזר -ERANGE;
+	אם ((ret + plus) < ret)
+		החזר -ERANGE;
 
 	ret += plus;
 	ret -= minus;
 
 	*usec = ret;
 
-	return 0;
+	החזר 0;
 }
 
-int ul_parse_timestamp(const char *t, usec_t *usec)
+صحيح ul_parse_timestamp(ثابت حرف *t, usec_t *usec)
 {
-	return parse_timestamp_reference(time(NULL), t, usec);
+	החזר parse_timestamp_reference(time(عدم), t, usec);
 }
 
 /* Returns the difference in seconds between its argument and GMT. If if TP is
@@ -413,35 +413,35 @@ int ul_parse_timestamp(const char *t, usec_t *usec)
  * tzset is called so, for example, 'TZ="UTC" hwclock' will work as expected.
  * Derived from glibc/time/strftime_l.c
  */
-int get_gmtoff(const struct tm *tp)
+صحيح get_gmtoff(ثابت بنية tm *tp)
 {
-	if (tp->tm_isdst < 0)
-		return 0;
+	אם (tp->tm_isdst < 0)
+		החזר 0;
 
-#if HAVE_TM_GMTOFF
-	return tp->tm_gmtoff;
-#else
-	struct tm tm;
-	struct tm gtm;
-	struct tm ltm = *tp;
+#אם HAVE_TM_GMTOFF
+	החזר tp->tm_gmtoff;
+#אחרת
+	بنية tm tm;
+	بنية tm gtm;
+	بنية tm ltm = *tp;
 	time_t lt;
 
 	tzset();
 	lt = mktime(&ltm);
 	/* Check if mktime returning -1 is an error or a valid time_t */
-	if (lt == (time_t) -1) {
-		if (! localtime_r(&lt, &tm)
+	אם (lt == (time_t) -1) {
+		אם (! localtime_r(&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
 			    | (ltm.tm_mday ^ tm.tm_mday)
 			    | (ltm.tm_mon ^ tm.tm_mon)
 			    | (ltm.tm_year ^ tm.tm_year)))
-			return 0;
+			החזר 0;
 	}
 
-	if (! gmtime_r(&lt, &gtm))
-		return 0;
+	אם (! gmtime_r(&lt, &gtm))
+		החזר 0;
 
 	/* Calculate the GMT offset, that is, the difference between the
 	 * TP argument (ltm) and GMT (gtm).
@@ -450,204 +450,204 @@ int get_gmtoff(const struct tm *tp)
 	 * Take care to avoid int overflow in leap day calculations, but it's OK
 	 * to assume that A and B are close to each other.
 	 */
-	int a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
-	int b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
-	int a100 = a4 / 25 - (a4 % 25 < 0);
-	int b100 = b4 / 25 - (b4 % 25 < 0);
-	int a400 = a100 >> 2;
-	int b400 = b100 >> 2;
-	int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+	صحيح a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
+	صحيح b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
+	صحيح a100 = a4 / 25 - (a4 % 25 < 0);
+	صحيح b100 = b4 / 25 - (b4 % 25 < 0);
+	صحيح a400 = a100 >> 2;
+	صحيح b400 = b100 >> 2;
+	صحيح intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
 
-	int years = ltm.tm_year - gtm.tm_year;
-	int days = (365 * years + intervening_leap_days
+	صحيح years = ltm.tm_year - gtm.tm_year;
+	صحيح days = (365 * years + intervening_leap_days
 		    + (ltm.tm_yday - gtm.tm_yday));
 
-	return (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
+	החזר (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
 		+ (ltm.tm_min - gtm.tm_min)) + (ltm.tm_sec - gtm.tm_sec));
 #endif
 }
 
-static int format_iso_time(const struct tm *tm, uint32_t nsec, int flags, char *buf, size_t bufsz)
+ساكن صحيح format_iso_time(ثابت بنية tm *tm, uint32_t nsec, صحيح flags, حرف *buf, size_t bufsz)
 {
 	uint32_t usec = nsec / NSEC_PER_USEC;
-	char *p = buf;
-	int len;
+	حرف *p = buf;
+	صحيح len;
 
-	if (flags & ISO_DATE) {
+	אם (flags & ISO_DATE) {
 		len = snprintf(p, bufsz, "%4ld-%.2d-%.2d",
 			       tm->tm_year + (long) 1900,
 			       tm->tm_mon + 1, tm->tm_mday);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if ((flags & ISO_DATE) && (flags & ISO_TIME)) {
-		if (bufsz < 1)
-			goto err;
+	אם ((flags & ISO_DATE) && (flags & ISO_TIME)) {
+		אם (bufsz < 1)
+			اذهب err;
 		*p++ = (flags & ISO_T) ? 'T' : ' ';
 		bufsz--;
 	}
 
-	if (flags & ISO_TIME) {
+	אם (flags & ISO_TIME) {
 		len = snprintf(p, bufsz, "%02d:%02d:%02d", tm->tm_hour,
 			       tm->tm_min, tm->tm_sec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_DOTNSEC) {
+	אם (flags & ISO_DOTNSEC) {
 		len = snprintf(p, bufsz, ".%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMANSEC) {
+	} אחרת אם (flags & ISO_COMMANSEC) {
 		len = snprintf(p, bufsz, ",%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 		bufsz -= len;
 		p += len;
-	} else if (flags & ISO_DOTUSEC) {
+	} אחרת אם (flags & ISO_DOTUSEC) {
 		len = snprintf(p, bufsz, ".%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMAUSEC) {
+	} אחרת אם (flags & ISO_COMMAUSEC) {
 		len = snprintf(p, bufsz, ",%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_TIMEZONE) {
-		int tmin  = get_gmtoff(tm) / 60;
-		int zhour = tmin / 60;
-		int zmin  = abs(tmin % 60);
+	אם (flags & ISO_TIMEZONE) {
+		صحيح tmin  = get_gmtoff(tm) / 60;
+		صحيح zhour = tmin / 60;
+		صحيح zmin  = abs(tmin % 60);
 		len = snprintf(p, bufsz, "%+03d:%02d", zhour,zmin);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		אם (len < 0 || (size_t) len > bufsz)
+			اذهب err;
 	}
-	return 0;
+	החזר 0;
  err:
 	warnx(_("format_iso_time: buffer overflow."));
-	return -1;
+	החזר -1;
 }
 
 /* timespec to ISO 8601 */
-int strtimespec_iso(const struct timespec *ts, int flags, char *buf, size_t bufsz)
+صحيح strtimespec_iso(ثابت بنية timespec *ts, صحيح flags, حرف *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	بنية tm tm;
+	بنية tm *rc;
 
-	if (flags & ISO_GMTIME)
+	אם (flags & ISO_GMTIME)
 		rc = gmtime_r(&ts->tv_sec, &tm);
-	else
+	אחרת
 		rc = localtime_r(&ts->tv_sec, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
+	אם (rc)
+		החזר format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)(ts->tv_sec));
-	return -1;
+	החזר -1;
 }
 
 /* timeval to ISO 8601 */
-int strtimeval_iso(const struct timeval *tv, int flags, char *buf, size_t bufsz)
+صحيح strtimeval_iso(ثابت بنية timeval *tv, صحيح flags, حرف *buf, size_t bufsz)
 {
-	struct timespec ts = {
+	بنية timespec ts = {
 		.tv_sec = tv->tv_sec,
 		.tv_nsec = tv->tv_usec * NSEC_PER_USEC,
 	};
 
-	return strtimespec_iso(&ts, flags, buf, bufsz);
+	החזר strtimespec_iso(&ts, flags, buf, bufsz);
 }
 
 /* struct tm to ISO 8601 */
-int strtm_iso(const struct tm *tm, int flags, char *buf, size_t bufsz)
+صحيح strtm_iso(ثابت بنية tm *tm, صحيح flags, حرف *buf, size_t bufsz)
 {
-	return format_iso_time(tm, 0, flags, buf, bufsz);
+	החזר format_iso_time(tm, 0, flags, buf, bufsz);
 }
 
 /* time_t to ISO 8601 */
-int strtime_iso(const time_t *t, int flags, char *buf, size_t bufsz)
+صحيح strtime_iso(ثابت time_t *t, صحيح flags, حرف *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	بنية tm tm;
+	بنية tm *rc;
 
-	if (flags & ISO_GMTIME)
+	אם (flags & ISO_GMTIME)
 		rc = gmtime_r(t, &tm);
-	else
+	אחרת
 		rc = localtime_r(t, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, 0, flags, buf, bufsz);
+	אם (rc)
+		החזר format_iso_time(&tm, 0, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)*t);
-	return -1;
+	החזר -1;
 }
 
 /* relative time functions */
-static inline int time_is_thisyear(struct tm const *const tm,
-				   struct tm const *const tmnow)
+ساكن مضمن صحيح time_is_thisyear(بنية tm ثابت *ثابت tm,
+				   بنية tm ثابت *ثابت tmnow)
 {
-	return tm->tm_year == tmnow->tm_year;
+	החזר tm->tm_year == tmnow->tm_year;
 }
 
-static inline int time_is_today(struct tm const *const tm,
-				struct tm const *const tmnow)
+ساكن مضمن صحيح time_is_today(بنية tm ثابت *ثابت tm,
+				بنية tm ثابت *ثابت tmnow)
 {
-	return (tm->tm_yday == tmnow->tm_yday &&
+	החזר (tm->tm_yday == tmnow->tm_yday &&
 		time_is_thisyear(tm, tmnow));
 }
 
-int strtime_short(const time_t *t, struct timeval *now, int flags, char *buf, size_t bufsz)
+صحيح strtime_short(ثابت time_t *t, بنية timeval *now, صحيح flags, حرف *buf, size_t bufsz)
 {
-	struct tm tm, tmnow;
-	int rc = 0;
+	بنية tm tm, tmnow;
+	صحيح rc = 0;
 
-	if (now->tv_sec == 0)
-		gettimeofday(now, NULL);
+	אם (now->tv_sec == 0)
+		gettimeofday(now, عدم);
 
 	localtime_r(t, &tm);
 	localtime_r(&now->tv_sec, &tmnow);
 
-	if (time_is_today(&tm, &tmnow)) {
+	אם (time_is_today(&tm, &tmnow)) {
 		rc = snprintf(buf, bufsz, "%02d:%02d", tm.tm_hour, tm.tm_min);
-		if (rc < 0 || (size_t) rc > bufsz)
-			return -1;
+		אם (rc < 0 || (size_t) rc > bufsz)
+			החזר -1;
 		rc = 1;
 
-	} else if (time_is_thisyear(&tm, &tmnow)) {
-		if (flags & UL_SHORTTIME_THISYEAR_HHMM)
+	} אחרת אם (time_is_thisyear(&tm, &tmnow)) {
+		אם (flags & UL_SHORTTIME_THISYEAR_HHMM)
 			rc = strftime(buf, bufsz, "%b%d/%H:%M", &tm);
-		else
+		אחרת
 			rc = strftime(buf, bufsz, "%b%d", &tm);
-	} else
+	} אחרת
 		rc = strftime(buf, bufsz, "%Y-%b%d", &tm);
 
-	return rc <= 0 ? -1 : 0;
+	החזר rc <= 0 ? -1 : 0;
 }
 
-int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
+صحيح strtimespec_relative(ثابت بنية timespec *ts, حرف *buf, size_t bufsz)
 {
 	time_t secs = ts->tv_sec;
 	size_t i, parts = 0;
-	int rc;
+	صحيح rc;
 
-	if (bufsz)
+	אם (bufsz)
 		buf[0] = '\0';
 
-	static const struct {
-		const char * const suffix;
-		int width;
+	ساكن ثابت بنية {
+		ثابت حرف * ثابت suffix;
+		صحيح width;
 		int64_t secs;
 	} table[] = {
 		{ "y", 4, NSEC_PER_YEAR   / NSEC_PER_SEC },
@@ -657,15 +657,15 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		{ "s", 2, NSEC_PER_SEC    / NSEC_PER_SEC },
 	};
 
-	for (i = 0; i < ARRAY_SIZE(table); i++) {
-		if (secs >= table[i].secs) {
+	עבור (i = 0; i < ARRAY_SIZE(table); i++) {
+		אם (secs >= table[i].secs) {
 			rc = snprintf(buf, bufsz,
 				      "%*"PRId64"%s%s",
 				      parts ? table[i].width : 0,
 				      secs / table[i].secs, table[i].suffix,
 				      secs % table[i].secs ? " " : "");
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
+			אם (rc < 0 || (size_t) rc > bufsz)
+				اذهب err;
 			parts++;
 			buf += rc;
 			bufsz -= rc;
@@ -673,52 +673,52 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		}
 	}
 
-	if (ts->tv_nsec) {
-		if (ts->tv_nsec % NSEC_PER_MSEC) {
+	אם (ts->tv_nsec) {
+		אם (ts->tv_nsec % NSEC_PER_MSEC) {
 			rc = snprintf(buf, bufsz, "%*ldns",
 				      parts ? 10 : 0, ts->tv_nsec);
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
-		} else {
+			אם (rc < 0 || (size_t) rc > bufsz)
+				اذهب err;
+		} אחרת {
 			rc = snprintf(buf, bufsz, "%*llums",
 				      parts ? 4 : 0, ts->tv_nsec / NSEC_PER_MSEC);
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
+			אם (rc < 0 || (size_t) rc > bufsz)
+				اذهب err;
 		}
 	}
 
-	return 0;
+	החזר 0;
  err:
 	warnx(_("format_reltime: buffer overflow."));
-	return -1;
+	החזר -1;
 }
 
 #ifndef HAVE_TIMEGM
-time_t timegm(struct tm *tm)
+time_t timegm(بنية tm *tm)
 {
-	const char *zone = getenv("TZ");
+	ثابت حرف *zone = getenv("TZ");
 	time_t ret;
 
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
-	if (zone)
+	אם (zone)
 		setenv("TZ", zone, 1);
-	else
+	אחרת
 		unsetenv("TZ");
 	tzset();
-	return ret;
+	החזר ret;
 }
 #endif /* HAVE_TIMEGM */
 
 #ifdef TEST_PROGRAM_TIMEUTILS
 
-static int run_unittest_timestamp(void)
+ساكن صحيح run_unittest_timestamp(فراغ)
 {
-	int rc = EXIT_SUCCESS;
+	صحيح rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
-	static const struct testcase {
-		const char * const input;
+	ساكن ثابت بنية testcase {
+		ثابت حرف * ثابت input;
 		usec_t expected;
 	} testcases[] = {
 		{ "2012-09-22 16:34:22"    , 1348331662000000 },
@@ -745,36 +745,36 @@ static int run_unittest_timestamp(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
+	עבור (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+		بنية testcase t = testcases[i];
 		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
-		if (r) {
+		صحيح r = parse_timestamp_reference(reference, t.input, &result);
+		אם (r) {
 			fprintf(stderr, "Could not parse '%s'\n", t.input);
 			rc = EXIT_FAILURE;
 		}
 
-		if (result != t.expected) {
+		אם (result != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
 				i, t.input, result, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	החזר rc;
 }
 
-static int run_unittest_format(void)
+ساكن صحيح run_unittest_format(فراغ)
 {
-	int rc = EXIT_SUCCESS;
-	const struct timespec ts = {
+	صحيح rc = EXIT_SUCCESS;
+	ثابت بنية timespec ts = {
 		.tv_sec = 1674180427,
 		.tv_nsec = 12345,
 	};
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		int flags;
-		const char * const expected;
+	حرف buf[FORMAT_TIMESTAMP_MAX];
+	ساكن ثابت بنية testcase {
+		صحيح flags;
+		ثابت حرف * ثابت expected;
 	} testcases[] = {
 		{ ISO_DATE,               "2023-01-20"                       },
 		{ ISO_TIME,               "02:07:07"                         },
@@ -787,30 +787,30 @@ static int run_unittest_format(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
-		if (r) {
+	עבור (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+		بنية testcase t = testcases[i];
+		صحيح r = strtimespec_iso(&ts, t.flags, buf, حجم(buf));
+		אם (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		אם (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu %-20s != %-20s\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	החזר rc;
 }
 
-static int run_unittest_format_relative(void)
+ساكن صحيح run_unittest_format_relative(فراغ)
 {
-	int rc = EXIT_SUCCESS;
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		struct timespec ts;
-		const char * const expected;
+	صحيح rc = EXIT_SUCCESS;
+	حرف buf[FORMAT_TIMESTAMP_MAX];
+	ساكن ثابت بنية testcase {
+		بنية timespec ts;
+		ثابت حرف * ثابت expected;
 	} testcases[] = {
 		{{}, "" },
 		{{         1 },                  "1s" },
@@ -834,73 +834,73 @@ static int run_unittest_format_relative(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_relative(&t.ts, buf, sizeof(buf));
-		if (r) {
+	עבור (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+		بنية testcase t = testcases[i];
+		صحيح r = strtimespec_relative(&t.ts, buf, حجم(buf));
+		אם (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		אם (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu '%-20s' != '%-20s'\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	החזר rc;
 }
 
-int main(int argc, char *argv[])
+صحيح main(صحيح argc, حرف *argv[])
 {
-	struct timespec ts = { 0 };
-	char buf[ISO_BUFSIZ];
-	int r;
+	بنية timespec ts = { 0 };
+	حرف buf[ISO_BUFSIZ];
+	صحيح r;
 
-	if (argc < 2) {
+	אם (argc < 2) {
 		fprintf(stderr, "usage: %s [<time> [<usec>]] | [--timestamp <str>] | [--unittest-timestamp]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if (strcmp(argv[1], "--unittest-timestamp") == 0)
-		return run_unittest_timestamp();
-	else if (strcmp(argv[1], "--unittest-format") == 0)
-		return run_unittest_format();
-	else if (strcmp(argv[1], "--unittest-format-relative") == 0)
-		return run_unittest_format_relative();
+	אם (strcmp(argv[1], "--unittest-timestamp") == 0)
+		החזר run_unittest_timestamp();
+	אחרת אם (strcmp(argv[1], "--unittest-format") == 0)
+		החזר run_unittest_format();
+	אחרת אם (strcmp(argv[1], "--unittest-format-relative") == 0)
+		החזר run_unittest_format_relative();
 
-	if (strcmp(argv[1], "--timestamp") == 0) {
+	אם (strcmp(argv[1], "--timestamp") == 0) {
 		usec_t usec = 0;
 
 		r = ul_parse_timestamp(argv[2], &usec);
-		if (r)
+		אם (r)
 			errx(EXIT_FAILURE, "Can not parse '%s': %s", argv[2], strerror(-r));
 		ts.tv_sec = (time_t) (usec / USEC_PER_SEC);
 		ts.tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
-	} else {
+	} אחרת {
 		ts.tv_sec = strtos64_or_err(argv[1], "failed to parse <time>");
-		if (argc == 3)
+		אם (argc == 3)
 			ts.tv_nsec = strtos64_or_err(argv[2], "failed to parse <usec>")
 				     * NSEC_PER_USEC;
 	}
 
-	strtimespec_iso(&ts, ISO_DATE, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_DATE, buf, حجم(buf));
 	printf("Date: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIME, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_TIME, buf, حجم(buf));
 	printf("Time: '%s'\n", buf);
 
 	strtimespec_iso(&ts, ISO_DATE | ISO_TIME | ISO_COMMAUSEC | ISO_T,
-		       buf, sizeof(buf));
+		       buf, حجم(buf));
 	printf("Full: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, حجم(buf));
 	printf("Zone: '%s'\n", buf);
 
-	strtimespec_relative(&ts, buf, sizeof(buf));
+	strtimespec_relative(&ts, buf, حجم(buf));
 	printf("Rel:  '%s'\n", buf);
 
-	return EXIT_SUCCESS;
+	החזר EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_TIMEUTILS */
