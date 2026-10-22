@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+整数 ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, 整数 flags)
 {
-	int rc;
+	整数 rc;
 	char *end = NULL;
 	int64_t num = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	もし (!pidstr || !*pidstr || !pid_num)
+		戻る -(errno = EINVAL);
 
 	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	もし (num == 0 && end == pidstr)
+		戻る -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	もし (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
+		戻る -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	もし (num == 0 && !(flags & UL_PID_ZERO))
+		戻る -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	もし (num < 0 && !(flags & UL_PID_NEGATIVE))
+		戻る -(errno = ERANGE);
 
 	*pid_num = (pid_t) num;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	もし (*end == ':' && pfd_ino && num > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		もし (rc < 0)
+			戻る rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		もし (*pfd_ino == 0)
+			戻る -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	もし (end && *end != '\0')
+		戻る -(errno = EINVAL);
+	戻る 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, 整数 flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	もし (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -103,9 +103,9 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+整数 メインページ(整数 argc, char **argv)
 {
-	int c, flags = 0, rc = 0;
+	整数 c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
 	pid_t pid_num = 0;
 	char *str = NULL;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 		{ NULL, 0, NULL, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
+	ながら((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
 		switch(c) {
 		case 'n':
 			flags |= UL_PID_NEGATIVE;
@@ -133,19 +133,19 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind == argc)
+	もし (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
 	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	もし (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
 	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	もし (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */

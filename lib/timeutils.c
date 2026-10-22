@@ -29,7 +29,7 @@
 
 #define streq(a,b) (strcmp((a),(b)) == 0)
 
-static int parse_sec(const char *t, usec_t *usec)
+static 整数 parse_sec(const char *t, usec_t *usec)
 {
 	static const struct {
 		const char *suffix;
@@ -67,22 +67,22 @@ static int parse_sec(const char *t, usec_t *usec)
 
 	const char *p;
 	usec_t r = 0;
-	int something = FALSE;
+	整数 something = FALSE;
 
 	assert(t);
 	assert(usec);
 
 	p = t;
-	for (;;) {
+	ために (;;) {
 		long long l, z = 0;
 		char *e;
 		unsigned i, n = 0;
 
 		p += strspn(p, WHITESPACE);
 
-		if (*p == 0) {
-			if (!something)
-				return -EINVAL;
+		もし (*p == 0) {
+			もし (!something)
+				戻る -EINVAL;
 
 			break;
 		}
@@ -90,38 +90,38 @@ static int parse_sec(const char *t, usec_t *usec)
 		errno = 0;
 		l = strtoll(p, &e, 10);
 
-		if (errno > 0)
-			return -errno;
+		もし (errno > 0)
+			戻る -errno;
 
-		if (l < 0)
-			return -ERANGE;
+		もし (l < 0)
+			戻る -ERANGE;
 
-		if (*e == '.') {
+		もし (*e == '.') {
 			char *b = e + 1;
 
 			errno = 0;
 			z = strtoll(b, &e, 10);
-			if (errno > 0)
-				return -errno;
+			もし (errno > 0)
+				戻る -errno;
 
-			if (z < 0)
-				return -ERANGE;
+			もし (z < 0)
+				戻る -ERANGE;
 
-			if (e == b)
-				return -EINVAL;
+			もし (e == b)
+				戻る -EINVAL;
 
 			n = e - b;
 
-		} else if (e == p)
-			return -EINVAL;
+		} 否则 もし (e == p)
+			戻る -EINVAL;
 
 		e += strspn(e, WHITESPACE);
 
-		for (i = 0; i < ARRAY_SIZE(table); i++)
-			if (ul_startswith(e, table[i].suffix)) {
+		ために (i = 0; i < ARRAY_SIZE(table); i++)
+			もし (ul_startswith(e, table[i].suffix)) {
 				usec_t k = (usec_t) z * table[i].usec;
 
-				for (; n > 0; n--)
+				ために (; n > 0; n--)
 					k /= 10;
 
 				r += (usec_t) l *table[i].usec + k;
@@ -131,58 +131,58 @@ static int parse_sec(const char *t, usec_t *usec)
 				break;
 			}
 
-		if (i >= ARRAY_SIZE(table))
-			return -EINVAL;
+		もし (i >= ARRAY_SIZE(table))
+			戻る -EINVAL;
 
 	}
 
 	*usec = r;
 
-	return 0;
+	戻る 0;
 }
 
-static int parse_subseconds(const char *t, usec_t *usec)
+static 整数 parse_subseconds(const char *t, usec_t *usec)
 {
 	usec_t ret = 0;
 	usec_t factor = USEC_PER_SEC / 10;
 
-	if (*t != '.' && *t != ',')
-		return -1;
+	もし (*t != '.' && *t != ',')
+		戻る -1;
 
-	while (*(++t)) {
-		if (!isdigit(*t) || factor < 1)
-			return -1;
+	ながら (*(++t)) {
+		もし (!isdigit(*t) || factor < 1)
+			戻る -1;
 
 		ret += ((usec_t) *t - '0') * factor;
 		factor /= 10;
 	}
 
 	*usec = ret;
-	return 0;
+	戻る 0;
 }
 
 static const char *parse_epoch_seconds(const char *t, struct tm *tm)
 {
 	int64_t s;
 	time_t st;
-	int f, c;
+	整数 f, c;
 
 	f = sscanf(t, "%"SCNd64"%n", &s, &c);
-	if (f < 1)
-		return NULL;
+	もし (f < 1)
+		戻る NULL;
 	st = s;
-	if ((int64_t) st < s)
-		return NULL;
-	if (!localtime_r(&st, tm))
-		return NULL;
-	return t + c;
+	もし ((int64_t) st < s)
+		戻る NULL;
+	もし (!localtime_r(&st, tm))
+		戻る NULL;
+	戻る t + c;
 }
 
-static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
+static 整数 parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 {
 	static const struct {
 		const char *name;
-		const int nr;
+		const 整数 nr;
 	} day_nr[] = {
 		{ "Sunday",	0 },
 		{ "Sun",	0 },
@@ -203,7 +203,7 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	const char *k;
 	struct tm tm, copy;
 	usec_t plus = 0, minus = 0, ret = 0;
-	int r, weekday = -1;
+	整数 r, weekday = -1;
 	unsigned i;
 
 	/*
@@ -239,68 +239,68 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	localtime_r(&x, &tm);
 	tm.tm_isdst = -1;
 
-	if (streq(t, "now"))
+	もし (streq(t, "now"))
 		goto finish;
 
-	else if (streq(t, "today")) {
+	否则 もし (streq(t, "today")) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (streq(t, "yesterday")) {
+	} 否则 もし (streq(t, "yesterday")) {
 		tm.tm_mday--;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (streq(t, "tomorrow")) {
+	} 否则 もし (streq(t, "tomorrow")) {
 		tm.tm_mday++;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (t[0] == '+') {
+	} 否则 もし (t[0] == '+') {
 
 		r = parse_sec(t + 1, &plus);
-		if (r < 0)
-			return r;
+		もし (r < 0)
+			戻る r;
 
 		goto finish;
-	} else if (t[0] == '-') {
+	} 否则 もし (t[0] == '-') {
 
 		r = parse_sec(t + 1, &minus);
-		if (r < 0)
-			return r;
+		もし (r < 0)
+			戻る r;
 
 		goto finish;
-	} else if (t[0] == '@') {
+	} 否则 もし (t[0] == '@') {
 		k = parse_epoch_seconds(t + 1, &tm);
-		if (k && *k == 0)
+		もし (k && *k == 0)
 			goto finish;
-		else if (k && parse_subseconds(k, &ret) == 0)
+		否则 もし (k && parse_subseconds(k, &ret) == 0)
 			goto finish;
 
-		return -EINVAL;
-	} else if (ul_endswith(t, " ago")) {
+		戻る -EINVAL;
+	} 否则 もし (ul_endswith(t, " ago")) {
 		char *z;
 
 		z = strndup(t, strlen(t) - 4);
-		if (!z)
-			return -ENOMEM;
+		もし (!z)
+			戻る -ENOMEM;
 
 		r = parse_sec(z, &minus);
 		free(z);
-		if (r < 0)
-			return r;
+		もし (r < 0)
+			戻る r;
 
 		goto finish;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(day_nr); i++) {
+	ために (i = 0; i < ARRAY_SIZE(day_nr); i++) {
 		size_t skip;
 
-		if (!startswith_no_case(t, day_nr[i].name))
+		もし (!startswith_no_case(t, day_nr[i].name))
 			continue;
 
 		skip = strlen(day_nr[i].name);
-		if (t[skip] != ' ')
+		もし (t[skip] != ' ')
 			continue;
 
 		weekday = day_nr[i].nr;
@@ -310,102 +310,102 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 
 	copy = tm;
 	k = strptime(t, "%y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
+	もし (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	否则 もし (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
+	もし (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	否则 もし (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%dT%H:%M:%S", &tm);
-	if (k && *k == 0)
+	もし (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	否则 もし (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	もし (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	もし (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d", &tm);
-	if (k && *k == 0) {
+	もし (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d", &tm);
-	if (k && *k == 0) {
+	もし (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%H:%M:%S", &tm);
-	if (k && *k == 0)
+	もし (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	否则 もし (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%H:%M", &tm);
-	if (k && *k == 0) {
+	もし (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y%m%d%H%M%S", &tm);
-	if (k && *k == 0)
+	もし (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	否则 もし (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
-	return -EINVAL;
+	戻る -EINVAL;
 
  finish:
 	x = mktime(&tm);
-	if (x == (time_t)-1)
-		return -EINVAL;
+	もし (x == (time_t)-1)
+		戻る -EINVAL;
 
-	if (weekday >= 0 && tm.tm_wday != weekday)
-		return -EINVAL;
+	もし (weekday >= 0 && tm.tm_wday != weekday)
+		戻る -EINVAL;
 
 	ret += (usec_t) x * USEC_PER_SEC;
 
-	if (minus > ret)
-		return -ERANGE;
-	if ((ret + plus) < ret)
-		return -ERANGE;
+	もし (minus > ret)
+		戻る -ERANGE;
+	もし ((ret + plus) < ret)
+		戻る -ERANGE;
 
 	ret += plus;
 	ret -= minus;
 
 	*usec = ret;
 
-	return 0;
+	戻る 0;
 }
 
-int ul_parse_timestamp(const char *t, usec_t *usec)
+整数 ul_parse_timestamp(const char *t, usec_t *usec)
 {
-	return parse_timestamp_reference(time(NULL), t, usec);
+	戻る parse_timestamp_reference(time(NULL), t, usec);
 }
 
 /* Returns the difference in seconds between its argument and GMT. If if TP is
@@ -413,14 +413,14 @@ int ul_parse_timestamp(const char *t, usec_t *usec)
  * tzset is called so, for example, 'TZ="UTC" hwclock' will work as expected.
  * Derived from glibc/time/strftime_l.c
  */
-int get_gmtoff(const struct tm *tp)
+整数 get_gmtoff(const struct tm *tp)
 {
-	if (tp->tm_isdst < 0)
-		return 0;
+	もし (tp->tm_isdst < 0)
+		戻る 0;
 
-#if HAVE_TM_GMTOFF
-	return tp->tm_gmtoff;
-#else
+#もし HAVE_TM_GMTOFF
+	戻る tp->tm_gmtoff;
+#否则
 	struct tm tm;
 	struct tm gtm;
 	struct tm ltm = *tp;
@@ -429,19 +429,19 @@ int get_gmtoff(const struct tm *tp)
 	tzset();
 	lt = mktime(&ltm);
 	/* Check if mktime returning -1 is an error or a valid time_t */
-	if (lt == (time_t) -1) {
-		if (! localtime_r(&lt, &tm)
+	もし (lt == (time_t) -1) {
+		もし (! localtime_r(&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
 			    | (ltm.tm_mday ^ tm.tm_mday)
 			    | (ltm.tm_mon ^ tm.tm_mon)
 			    | (ltm.tm_year ^ tm.tm_year)))
-			return 0;
+			戻る 0;
 	}
 
-	if (! gmtime_r(&lt, &gtm))
-		return 0;
+	もし (! gmtime_r(&lt, &gtm))
+		戻る 0;
 
 	/* Calculate the GMT offset, that is, the difference between the
 	 * TP argument (ltm) and GMT (gtm).
@@ -450,204 +450,204 @@ int get_gmtoff(const struct tm *tp)
 	 * Take care to avoid int overflow in leap day calculations, but it's OK
 	 * to assume that A and B are close to each other.
 	 */
-	int a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
-	int b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
-	int a100 = a4 / 25 - (a4 % 25 < 0);
-	int b100 = b4 / 25 - (b4 % 25 < 0);
-	int a400 = a100 >> 2;
-	int b400 = b100 >> 2;
-	int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+	整数 a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
+	整数 b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
+	整数 a100 = a4 / 25 - (a4 % 25 < 0);
+	整数 b100 = b4 / 25 - (b4 % 25 < 0);
+	整数 a400 = a100 >> 2;
+	整数 b400 = b100 >> 2;
+	整数 intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
 
-	int years = ltm.tm_year - gtm.tm_year;
-	int days = (365 * years + intervening_leap_days
+	整数 years = ltm.tm_year - gtm.tm_year;
+	整数 days = (365 * years + intervening_leap_days
 		    + (ltm.tm_yday - gtm.tm_yday));
 
-	return (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
+	戻る (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
 		+ (ltm.tm_min - gtm.tm_min)) + (ltm.tm_sec - gtm.tm_sec));
 #endif
 }
 
-static int format_iso_time(const struct tm *tm, uint32_t nsec, int flags, char *buf, size_t bufsz)
+static 整数 format_iso_time(const struct tm *tm, uint32_t nsec, 整数 flags, char *buf, size_t bufsz)
 {
 	uint32_t usec = nsec / NSEC_PER_USEC;
 	char *p = buf;
-	int len;
+	整数 len;
 
-	if (flags & ISO_DATE) {
+	もし (flags & ISO_DATE) {
 		len = snprintf(p, bufsz, "%4ld-%.2d-%.2d",
 			       tm->tm_year + (long) 1900,
 			       tm->tm_mon + 1, tm->tm_mday);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if ((flags & ISO_DATE) && (flags & ISO_TIME)) {
-		if (bufsz < 1)
+	もし ((flags & ISO_DATE) && (flags & ISO_TIME)) {
+		もし (bufsz < 1)
 			goto err;
 		*p++ = (flags & ISO_T) ? 'T' : ' ';
 		bufsz--;
 	}
 
-	if (flags & ISO_TIME) {
+	もし (flags & ISO_TIME) {
 		len = snprintf(p, bufsz, "%02d:%02d:%02d", tm->tm_hour,
 			       tm->tm_min, tm->tm_sec);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_DOTNSEC) {
+	もし (flags & ISO_DOTNSEC) {
 		len = snprintf(p, bufsz, ".%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMANSEC) {
+	} 否则 もし (flags & ISO_COMMANSEC) {
 		len = snprintf(p, bufsz, ",%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
-	} else if (flags & ISO_DOTUSEC) {
+	} 否则 もし (flags & ISO_DOTUSEC) {
 		len = snprintf(p, bufsz, ".%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMAUSEC) {
+	} 否则 もし (flags & ISO_COMMAUSEC) {
 		len = snprintf(p, bufsz, ",%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_TIMEZONE) {
-		int tmin  = get_gmtoff(tm) / 60;
-		int zhour = tmin / 60;
-		int zmin  = abs(tmin % 60);
+	もし (flags & ISO_TIMEZONE) {
+		整数 tmin  = get_gmtoff(tm) / 60;
+		整数 zhour = tmin / 60;
+		整数 zmin  = abs(tmin % 60);
 		len = snprintf(p, bufsz, "%+03d:%02d", zhour,zmin);
-		if (len < 0 || (size_t) len > bufsz)
+		もし (len < 0 || (size_t) len > bufsz)
 			goto err;
 	}
-	return 0;
+	戻る 0;
  err:
 	warnx(_("format_iso_time: buffer overflow."));
-	return -1;
+	戻る -1;
 }
 
 /* timespec to ISO 8601 */
-int strtimespec_iso(const struct timespec *ts, int flags, char *buf, size_t bufsz)
+整数 strtimespec_iso(const struct timespec *ts, 整数 flags, char *buf, size_t bufsz)
 {
 	struct tm tm;
 	struct tm *rc;
 
-	if (flags & ISO_GMTIME)
+	もし (flags & ISO_GMTIME)
 		rc = gmtime_r(&ts->tv_sec, &tm);
-	else
+	否则
 		rc = localtime_r(&ts->tv_sec, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
+	もし (rc)
+		戻る format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)(ts->tv_sec));
-	return -1;
+	戻る -1;
 }
 
 /* timeval to ISO 8601 */
-int strtimeval_iso(const struct timeval *tv, int flags, char *buf, size_t bufsz)
+整数 strtimeval_iso(const struct timeval *tv, 整数 flags, char *buf, size_t bufsz)
 {
 	struct timespec ts = {
 		.tv_sec = tv->tv_sec,
 		.tv_nsec = tv->tv_usec * NSEC_PER_USEC,
 	};
 
-	return strtimespec_iso(&ts, flags, buf, bufsz);
+	戻る strtimespec_iso(&ts, flags, buf, bufsz);
 }
 
 /* struct tm to ISO 8601 */
-int strtm_iso(const struct tm *tm, int flags, char *buf, size_t bufsz)
+整数 strtm_iso(const struct tm *tm, 整数 flags, char *buf, size_t bufsz)
 {
-	return format_iso_time(tm, 0, flags, buf, bufsz);
+	戻る format_iso_time(tm, 0, flags, buf, bufsz);
 }
 
 /* time_t to ISO 8601 */
-int strtime_iso(const time_t *t, int flags, char *buf, size_t bufsz)
+整数 strtime_iso(const time_t *t, 整数 flags, char *buf, size_t bufsz)
 {
 	struct tm tm;
 	struct tm *rc;
 
-	if (flags & ISO_GMTIME)
+	もし (flags & ISO_GMTIME)
 		rc = gmtime_r(t, &tm);
-	else
+	否则
 		rc = localtime_r(t, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, 0, flags, buf, bufsz);
+	もし (rc)
+		戻る format_iso_time(&tm, 0, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)*t);
-	return -1;
+	戻る -1;
 }
 
 /* relative time functions */
-static inline int time_is_thisyear(struct tm const *const tm,
+static inline 整数 time_is_thisyear(struct tm const *const tm,
 				   struct tm const *const tmnow)
 {
-	return tm->tm_year == tmnow->tm_year;
+	戻る tm->tm_year == tmnow->tm_year;
 }
 
-static inline int time_is_today(struct tm const *const tm,
+static inline 整数 time_is_today(struct tm const *const tm,
 				struct tm const *const tmnow)
 {
-	return (tm->tm_yday == tmnow->tm_yday &&
+	戻る (tm->tm_yday == tmnow->tm_yday &&
 		time_is_thisyear(tm, tmnow));
 }
 
-int strtime_short(const time_t *t, struct timeval *now, int flags, char *buf, size_t bufsz)
+整数 strtime_short(const time_t *t, struct timeval *now, 整数 flags, char *buf, size_t bufsz)
 {
 	struct tm tm, tmnow;
-	int rc = 0;
+	整数 rc = 0;
 
-	if (now->tv_sec == 0)
+	もし (now->tv_sec == 0)
 		gettimeofday(now, NULL);
 
 	localtime_r(t, &tm);
 	localtime_r(&now->tv_sec, &tmnow);
 
-	if (time_is_today(&tm, &tmnow)) {
+	もし (time_is_today(&tm, &tmnow)) {
 		rc = snprintf(buf, bufsz, "%02d:%02d", tm.tm_hour, tm.tm_min);
-		if (rc < 0 || (size_t) rc > bufsz)
-			return -1;
+		もし (rc < 0 || (size_t) rc > bufsz)
+			戻る -1;
 		rc = 1;
 
-	} else if (time_is_thisyear(&tm, &tmnow)) {
-		if (flags & UL_SHORTTIME_THISYEAR_HHMM)
+	} 否则 もし (time_is_thisyear(&tm, &tmnow)) {
+		もし (flags & UL_SHORTTIME_THISYEAR_HHMM)
 			rc = strftime(buf, bufsz, "%b%d/%H:%M", &tm);
-		else
+		否则
 			rc = strftime(buf, bufsz, "%b%d", &tm);
-	} else
+	} 否则
 		rc = strftime(buf, bufsz, "%Y-%b%d", &tm);
 
-	return rc <= 0 ? -1 : 0;
+	戻る rc <= 0 ? -1 : 0;
 }
 
-int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
+整数 strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 {
 	time_t secs = ts->tv_sec;
 	size_t i, parts = 0;
-	int rc;
+	整数 rc;
 
-	if (bufsz)
+	もし (bufsz)
 		buf[0] = '\0';
 
 	static const struct {
 		const char * const suffix;
-		int width;
+		整数 width;
 		int64_t secs;
 	} table[] = {
 		{ "y", 4, NSEC_PER_YEAR   / NSEC_PER_SEC },
@@ -657,14 +657,14 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		{ "s", 2, NSEC_PER_SEC    / NSEC_PER_SEC },
 	};
 
-	for (i = 0; i < ARRAY_SIZE(table); i++) {
-		if (secs >= table[i].secs) {
+	ために (i = 0; i < ARRAY_SIZE(table); i++) {
+		もし (secs >= table[i].secs) {
 			rc = snprintf(buf, bufsz,
 				      "%*"PRId64"%s%s",
 				      parts ? table[i].width : 0,
 				      secs / table[i].secs, table[i].suffix,
 				      secs % table[i].secs ? " " : "");
-			if (rc < 0 || (size_t) rc > bufsz)
+			もし (rc < 0 || (size_t) rc > bufsz)
 				goto err;
 			parts++;
 			buf += rc;
@@ -673,24 +673,24 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		}
 	}
 
-	if (ts->tv_nsec) {
-		if (ts->tv_nsec % NSEC_PER_MSEC) {
+	もし (ts->tv_nsec) {
+		もし (ts->tv_nsec % NSEC_PER_MSEC) {
 			rc = snprintf(buf, bufsz, "%*ldns",
 				      parts ? 10 : 0, ts->tv_nsec);
-			if (rc < 0 || (size_t) rc > bufsz)
+			もし (rc < 0 || (size_t) rc > bufsz)
 				goto err;
-		} else {
+		} 否则 {
 			rc = snprintf(buf, bufsz, "%*llums",
 				      parts ? 4 : 0, ts->tv_nsec / NSEC_PER_MSEC);
-			if (rc < 0 || (size_t) rc > bufsz)
+			もし (rc < 0 || (size_t) rc > bufsz)
 				goto err;
 		}
 	}
 
-	return 0;
+	戻る 0;
  err:
 	warnx(_("format_reltime: buffer overflow."));
-	return -1;
+	戻る -1;
 }
 
 #ifndef HAVE_TIMEGM
@@ -702,20 +702,20 @@ time_t timegm(struct tm *tm)
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
-	if (zone)
+	もし (zone)
 		setenv("TZ", zone, 1);
-	else
+	否则
 		unsetenv("TZ");
 	tzset();
-	return ret;
+	戻る ret;
 }
 #endif /* HAVE_TIMEGM */
 
 #ifdef TEST_PROGRAM_TIMEUTILS
 
-static int run_unittest_timestamp(void)
+static 整数 run_unittest_timestamp(void)
 {
-	int rc = EXIT_SUCCESS;
+	整数 rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
 	static const struct testcase {
 		const char * const input;
@@ -745,35 +745,35 @@ static int run_unittest_timestamp(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+	ために (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
 		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
-		if (r) {
+		整数 r = parse_timestamp_reference(reference, t.input, &result);
+		もし (r) {
 			fprintf(stderr, "Could not parse '%s'\n", t.input);
 			rc = EXIT_FAILURE;
 		}
 
-		if (result != t.expected) {
+		もし (result != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
 				i, t.input, result, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	戻る rc;
 }
 
-static int run_unittest_format(void)
+static 整数 run_unittest_format(void)
 {
-	int rc = EXIT_SUCCESS;
+	整数 rc = EXIT_SUCCESS;
 	const struct timespec ts = {
 		.tv_sec = 1674180427,
 		.tv_nsec = 12345,
 	};
 	char buf[FORMAT_TIMESTAMP_MAX];
 	static const struct testcase {
-		int flags;
+		整数 flags;
 		const char * const expected;
 	} testcases[] = {
 		{ ISO_DATE,               "2023-01-20"                       },
@@ -787,26 +787,26 @@ static int run_unittest_format(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+	ために (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
-		int r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
-		if (r) {
+		整数 r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
+		もし (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		もし (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu %-20s != %-20s\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	戻る rc;
 }
 
-static int run_unittest_format_relative(void)
+static 整数 run_unittest_format_relative(void)
 {
-	int rc = EXIT_SUCCESS;
+	整数 rc = EXIT_SUCCESS;
 	char buf[FORMAT_TIMESTAMP_MAX];
 	static const struct testcase {
 		struct timespec ts;
@@ -834,52 +834,52 @@ static int run_unittest_format_relative(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+	ために (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
-		int r = strtimespec_relative(&t.ts, buf, sizeof(buf));
-		if (r) {
+		整数 r = strtimespec_relative(&t.ts, buf, sizeof(buf));
+		もし (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		もし (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu '%-20s' != '%-20s'\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	戻る rc;
 }
 
-int main(int argc, char *argv[])
+整数 メインページ(整数 argc, char *argv[])
 {
 	struct timespec ts = { 0 };
 	char buf[ISO_BUFSIZ];
-	int r;
+	整数 r;
 
-	if (argc < 2) {
+	もし (argc < 2) {
 		fprintf(stderr, "usage: %s [<time> [<usec>]] | [--timestamp <str>] | [--unittest-timestamp]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if (strcmp(argv[1], "--unittest-timestamp") == 0)
-		return run_unittest_timestamp();
-	else if (strcmp(argv[1], "--unittest-format") == 0)
-		return run_unittest_format();
-	else if (strcmp(argv[1], "--unittest-format-relative") == 0)
-		return run_unittest_format_relative();
+	もし (strcmp(argv[1], "--unittest-timestamp") == 0)
+		戻る run_unittest_timestamp();
+	否则 もし (strcmp(argv[1], "--unittest-format") == 0)
+		戻る run_unittest_format();
+	否则 もし (strcmp(argv[1], "--unittest-format-relative") == 0)
+		戻る run_unittest_format_relative();
 
-	if (strcmp(argv[1], "--timestamp") == 0) {
+	もし (strcmp(argv[1], "--timestamp") == 0) {
 		usec_t usec = 0;
 
 		r = ul_parse_timestamp(argv[2], &usec);
-		if (r)
+		もし (r)
 			errx(EXIT_FAILURE, "Can not parse '%s': %s", argv[2], strerror(-r));
 		ts.tv_sec = (time_t) (usec / USEC_PER_SEC);
 		ts.tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
-	} else {
+	} 否则 {
 		ts.tv_sec = strtos64_or_err(argv[1], "failed to parse <time>");
-		if (argc == 3)
+		もし (argc == 3)
 			ts.tv_nsec = strtos64_or_err(argv[2], "failed to parse <usec>")
 				     * NSEC_PER_USEC;
 	}
@@ -900,7 +900,7 @@ int main(int argc, char *argv[])
 	strtimespec_relative(&ts, buf, sizeof(buf));
 	printf("Rel:  '%s'\n", buf);
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_TIMEUTILS */

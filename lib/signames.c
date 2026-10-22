@@ -21,7 +21,7 @@
 
 static const struct ul_signal_name {
 	const char *name;
-	int val;
+	整数 val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+static 整数 rtsig_to_signum(const char *sig)
 {
-	int num, maxi = 0;
+	整数 num, maxi = 0;
 	char *ep = NULL;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	もし (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	否则 もし (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	もし (!isdigit(*sig))
+		戻る -1;
 	errno = 0;
 	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
+	もし (!ep || sig == ep || errno || num < 0)
+		戻る -1;
 	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	もし (num < SIGRTMIN || SIGRTMAX < num)
+		戻る -1;
+	戻る num;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+整数 signame_to_signum(const char *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	もし (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	もし (!c_strncasecmp(sig, "rt", 2))
+		戻る rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	ために (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		もし (!c_strcasecmp(ul_signames[n].name, sig))
+			戻る ul_signames[n].val;
 	}
-	return -1;
+	戻る -1;
 }
 
-const char *signum_to_signame(int signum)
+const char *signum_to_signame(整数 signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	ために (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		もし (ul_signames[n].val == signum) {
+			戻る ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	戻る NULL;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+整数 get_signame_by_idx(size_t idx, const char **signame, 整数 *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	もし (idx >= ARRAY_SIZE(ul_signames))
+		戻る -1;
 
-	if (signame)
+	もし (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	もし (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	戻る 0;
 
 }
 

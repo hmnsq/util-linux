@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		戻る "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		戻る ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		戻る "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		戻る "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		戻る "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		戻る "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		戻る "AM";
 	case PM_STR:
-		return "PM";
+		戻る "PM";
 	case DAY_1:
-		return "Sunday";
+		戻る "Sunday";
 	case DAY_2:
-		return "Monday";
+		戻る "Monday";
 	case DAY_3:
-		return "Tuesday";
+		戻る "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		戻る "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		戻る "Thursday";
 	case DAY_6:
-		return "Friday";
+		戻る "Friday";
 	case DAY_7:
-		return "Saturday";
+		戻る "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		戻る "Sun";
 	case ABDAY_2:
-		return "Mon";
+		戻る "Mon";
 	case ABDAY_3:
-		return "Tue";
+		戻る "Tue";
 	case ABDAY_4:
-		return "Wed";
+		戻る "Wed";
 	case ABDAY_5:
-		return "Thu";
+		戻る "Thu";
 	case ABDAY_6:
-		return "Fri";
+		戻る "Fri";
 	case ABDAY_7:
-		return "Sat";
+		戻る "Sat";
 	case MON_1:
-		return "January";
+		戻る "January";
 	case MON_2:
-		return "February";
+		戻る "February";
 	case MON_3:
-		return "March";
+		戻る "March";
 	case MON_4:
-		return "April";
+		戻る "April";
 	case MON_5:
-		return "May";
+		戻る "May";
 	case MON_6:
-		return "June";
+		戻る "June";
 	case MON_7:
-		return "July";
+		戻る "July";
 	case MON_8:
-		return "August";
+		戻る "August";
 	case MON_9:
-		return "September";
+		戻る "September";
 	case MON_10:
-		return "October";
+		戻る "October";
 	case MON_11:
-		return "November";
+		戻る "November";
 	case MON_12:
-		return "December";
+		戻る "December";
 	case ABMON_1:
-		return "Jan";
+		戻る "Jan";
 	case ABMON_2:
-		return "Feb";
+		戻る "Feb";
 	case ABMON_3:
-		return "Mar";
+		戻る "Mar";
 	case ABMON_4:
-		return "Apr";
+		戻る "Apr";
 	case ABMON_5:
-		return "May";
+		戻る "May";
 	case ABMON_6:
-		return "Jun";
+		戻る "Jun";
 	case ABMON_7:
-		return "Jul";
+		戻る "Jul";
 	case ABMON_8:
-		return "Aug";
+		戻る "Aug";
 	case ABMON_9:
-		return "Sep";
+		戻る "Sep";
 	case ABMON_10:
-		return "Oct";
+		戻る "Oct";
 	case ABMON_11:
-		return "Nov";
+		戻る "Nov";
 	case ABMON_12:
-		return "Dec";
+		戻る "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		戻る "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		戻る "-";
 	case YESEXPR:
-		return "^[yY]";
+		戻る "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		戻る "^[nN]";
 	default:
-		return "";
+		戻る "";
 	}
 }
 

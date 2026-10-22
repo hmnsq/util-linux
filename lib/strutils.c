@@ -23,21 +23,21 @@
 #include "bitops.h"
 #include "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+static 整数 STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+void strutils_set_exitcode(整数 ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+static 整数 do_scale_by_power (uintmax_t *x, 整数 base, 整数 power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	ながら (power--) {
+		もし (UINTMAX_MAX / base < *x)
+			戻る -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	戻る 0;
 }
 
 /*
@@ -67,12 +67,12 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+整数 ul_parse_size(const char *str, uintmax_t *res, 整数 *power)
 {
 	const char *p;
 	char *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	整数 base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
 	static const char *suf  = "KMGTPEZY";
 	static const char *suf2 = "kmgtpezy";
@@ -80,7 +80,7 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 
 	*res = 0;
 
-	if (!str || !*str) {
+	もし (!str || !*str) {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -92,9 +92,9 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	ながら (isspace((unsigned char) *p))
 		p++;
-	if (*p == '-') {
+	もし (*p == '-') {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -102,12 +102,12 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	errno = 0, end = NULL;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	もし (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
 		goto err;
 	}
-	if (!end || !*end)
+	もし (!end || !*end)
 		goto done;			/* without suffix */
 	p = end;
 
@@ -115,33 +115,33 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	もし (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	否则 もし ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
+	否则 もし (*(p + 1)) {
 		struct lconv const *l = localeconv();
 		const char *dp = l ? l->decimal_point : NULL;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+		もし (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
 			const char *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			ために (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
+			もし (isdigit(*fstr)) {
 				errno = 0, end = NULL;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				もし (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
 					goto err;
 				}
-			} else
+			} 否则
 				end = (char *) p;
 
-			if (!end || !*end) {
+			もし (!end || !*end) {
 				rc = -EINVAL;
 				goto err;	/* without suffix, but with fractions */
 			}
@@ -153,32 +153,32 @@ check_suffix:
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	もし (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	否则 {
 		sp = strchr(suf2, *p);
-		if (sp)
+		もし (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		否则 {
 			rc = -EINVAL;
 			goto err;
 		}
 	}
 
-	if (power)
+	もし (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
+	もし (rc)
 		goto err;
 
-	if (frac && pwr) {
-		int i;
+	もし (frac && pwr) {
+		整数 i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
+		もし (rc)
 			goto err;
 
 		/*
@@ -189,13 +189,13 @@ check_suffix:
 		do {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} ながら (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		ために (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		もし (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
 			goto err;
 		}
@@ -204,71 +204,71 @@ check_suffix:
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	もし (rc < 0)
 		errno = -rc;
-	return rc;
+	戻る rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+整数 strtosize(const char *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	戻る ul_parse_size(str, res, NULL);
 }
 
-int isdigit_strend(const char *str, const char **end)
-{
-	const char *p;
-
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
-
-	if (end)
-		*end = p;
-	return p && p > str && !*p;
-}
-
-int isxdigit_strend(const char *str, const char **end)
+整数 isdigit_strend(const char *str, const char **end)
 {
 	const char *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	ために (p = str; p && *p && isdigit((unsigned char) *p); p++);
 
-	if (end)
+	もし (end)
+		*end = p;
+	戻る p && p > str && !*p;
+}
+
+整数 isxdigit_strend(const char *str, const char **end)
+{
+	const char *p;
+
+	ために (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+
+	もし (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	戻る p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+整数 ul_strtobool(const char *str, bool *result)
 {
 	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
 	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	もし (!str || !result)
+		戻る -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	ために (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		もし (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			戻る 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	ために (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		もし (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			戻る 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	戻る -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+整数 ul_parse_switch(const char *arg, ...)
 {
 	const char *a, *b;
 	va_list ap;
@@ -276,22 +276,22 @@ int ul_parse_switch(const char *arg, ...)
 	va_start(ap, arg);
 	do {
 		a = va_arg(ap, char *);
-		if (!a)
+		もし (!a)
 			break;
 		b = va_arg(ap, char *);
-		if (!b)
+		もし (!b)
 			break;
 
-		if (strcmp(arg, a) == 0) {
+		もし (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			戻る 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		もし (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			戻る 0;
 		}
-	} while (1);
+	} ながら (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
@@ -300,7 +300,7 @@ int ul_parse_switch(const char *arg, ...)
 #ifndef HAVE_MEMPCPY
 void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	戻る ((char *)memcpy(dest, src, n)) + n;
 }
 #endif
 
@@ -309,21 +309,21 @@ size_t strnlen(const char *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	ために (i = 0; i < maxlen; i++) {
+		もし (s[i] == '\0')
+			戻る i;
 	}
-	return maxlen;
+	戻る maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+char *strnchr(const char *s, size_t maxlen, 整数 c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	ために (; maxlen-- && *s != '\0'; ++s)
+		もし (*s == (char)c)
+			戻る (char *)s;
+	戻る NULL;
 }
 #endif
 
@@ -332,97 +332,97 @@ char *strndup(const char *s, size_t n)
 {
 	size_t len = strnlen(s, n);
 	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	もし (!new)
+		戻る NULL;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	戻る (char *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+整数 ul_strtos64(const char *str, int64_t *num, 整数 base)
 {
 	char *end = NULL;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	もし (str == NULL || *str == '\0')
+		戻る -(errno = EINVAL);
 
 	errno = 0;
 	*num = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	もし (errno != 0)
+		戻る -errno;
+	もし (str == end || (end && *end))
+		戻る -(errno = EINVAL);
+	戻る 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+整数 ul_strtou64(const char *str, uint64_t *num, 整数 base)
 {
 	char *end = NULL;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	もし (str == NULL || *str == '\0')
+		戻る -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	もし (tmp < 0)
 		errno = ERANGE;
-	else {
+	否则 {
 		errno = 0;
 		*num = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	もし (errno != 0)
+		戻る -errno;
+	もし (str == end || (end && *end))
+		戻る -(errno = EINVAL);
+	戻る 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+整数 ul_strtos32(const char *str, int32_t *num, 整数 base)
 {
 	int64_t tmp;
-	int rc;
+	整数 rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	もし (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	もし (rc == 0)
 		*num = (int32_t) tmp;
-	return rc;
+	戻る rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+整数 ul_strtou32(const char *str, uint32_t *num, 整数 base)
 {
 	uint64_t tmp;
-	int rc;
+	整数 rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	もし (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	もし (rc == 0)
 		*num = (uint32_t) tmp;
-	return rc;
+	戻る rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+整数 ul_strtou16(const char *str, uint16_t *num, 整数 base)
 {
 	uint64_t tmp;
-	int rc;
+	整数 rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	もし (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	もし (rc == 0)
 		*num = (uint16_t) tmp;
-	return rc;
+	戻る rc;
 }
 
 /*
@@ -432,39 +432,39 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
+int64_t str2num_or_err(const char *str, 整数 base, const char *errmesg,
 			     int64_t low, int64_t up)
 {
 	int64_t num = 0;
-	int rc;
+	整数 rc;
 
 	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	もし (rc == 0 && ((low && num < low) || (up && num > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	もし (rc) {
+		もし (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	戻る num;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(const char *str, 整数 base, const char *errmesg, uint64_t up)
 {
 	uint64_t num = 0;
-	int rc;
+	整数 rc;
 
 	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	もし (rc == 0 && (up && num > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	もし (rc) {
+		もし (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	戻る num;
 }
 
 double strtod_or_err(const char *str, const char *errmesg)
@@ -473,44 +473,44 @@ double strtod_or_err(const char *str, const char *errmesg)
 	char *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
+	もし (str == NULL || *str == '\0')
 		goto err;
 	num = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
+	もし (errno || str == end || (end && *end))
 		goto err;
 
-	return num;
+	戻る num;
 err:
-	if (errno == ERANGE)
+	もし (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+整数 ul_strtold(const char *str, long double *num)
 {
 	char *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	もし (str == NULL || *str == '\0')
+		戻る -(errno = EINVAL);
 	*num = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	もし (errno != 0)
+		戻る -errno;
+	もし (str == end || (end && *end))
+		戻る -(errno = EINVAL);
+	戻る 0;
 }
 
 long double strtold_or_err(const char *str, const char *errmesg)
 {
 	long double num = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	もし (ul_strtold(str, &num) == 0)
+		戻る num;
+	もし (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -520,10 +520,10 @@ uintmax_t strtosize_or_err(const char *str, const char *errmesg)
 {
 	uintmax_t num;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	もし (strtosize(str, &num) == 0)
+		戻る num;
 
-	if (errno)
+	もし (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -553,33 +553,33 @@ time_t strtotime_or_err(const char *str, const char *errmesg)
 	int64_t user_input;
 
 	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	戻る (time_t) user_input;
 }
 
 bool hyperlinkwanted(const char *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	もし (mode && strcmp(mode, "never") == 0)
+		戻る false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	もし (mode && strcmp(mode, "always") == 0)
+		戻る true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	もし (!mode || strcmp(mode, "auto") == 0)
+		戻る isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
 bool annotationwanted(const char *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	もし (mode && strcmp(mode, "never") == 0)
+		戻る false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	もし (mode && strcmp(mode, "always") == 0)
+		戻る true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	もし (!mode || strcmp(mode, "auto") == 0)
+		戻る isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -592,19 +592,19 @@ char *xstrmode(mode_t mode, char *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	もし (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	否则 もし (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	否则 もし (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	否则 もし (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	否则 もし (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	否则 もし (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	否则 もし (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	戻る str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+static 整数 get_exp(uint64_t n)
 {
-	int shft;
+	整数 shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
+	ために (shft = 10; shft <= 60; shft += 10) {
+		もし (n < (1ULL << shft))
 			break;
 	}
-	return shft - 10;
+	戻る shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+char *size_to_human_string(整数 options, uint64_t bytes)
 {
 	char buf[32];
-	int dec, exp;
+	整数 dec, exp;
 	uint64_t frac;
 	const char *letters = "BKMGTPE";
 	char suffix[sizeof(" KiB")], *psuf = suffix;
 	char c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	もし (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	もし ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	もし (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		もし (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		否则
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		もし (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} 否则 {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		もし (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
+	もし (frac) {
 		struct lconv const *l = localeconv();
 		char *dp = l ? l->decimal_point : NULL;
-		int len;
+		整数 len;
 
-		if (!dp || !*dp)
+		もし (!dp || !*dp)
 			dp = ".";
 
 		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		もし (len > 0 && (size_t) len < sizeof(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			もし (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
 			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+		} 否则
 			*buf = '\0';	/* snprintf error */
-	} else
+	} 否则
 		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	戻る strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+整数 string_to_idarray(const char *list, 整数 ary[], size_t arysz,
+			整数 (name2id)(const char *, size_t))
 {
 	const char *begin = NULL, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	もし (!list || !*list || !ary || !arysz || !name2id)
+		戻る -1;
 
-	for (p = list; p && *p; p++) {
+	ために (p = list; p && *p; p++) {
 		const char *end = NULL;
-		int id;
+		整数 id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		もし (n >= arysz)
+			戻る -2;
+		もし (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		もし (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		もし (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		もし (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		もし (end <= begin)
+			戻る -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		もし (id == -1)
+			戻る -1;
 		ary[ n++ ] = id;
 		begin = NULL;
-		if (end && !*end)
+		もし (end && !*end)
 			break;
 	}
-	return n;
+	戻る n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+整数 string_add_to_idarray(const char *list, 整数 ary[], size_t arysz,
+			size_t *ary_pos, 整数 (name2id)(const char *, size_t))
 {
 	const char *list_add;
-	int r;
+	整数 r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	もし (!list || !*list || !ary_pos || *ary_pos > arysz)
+		戻る -1;
 
-	if (list[0] == '+')
+	もし (list[0] == '+')
 		list_add = &list[1];
-	else {
+	否则 {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	もし (r > 0)
 		*ary_pos += r;
-	return r;
+	戻る r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
+整数 string_to_bitarray(const char *list,
 		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+		     整数 (*name2bit)(const char *, size_t),
 		     size_t allow_range)
 {
 	const char *begin = NULL, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	もし (!list || !name2bit || !ary)
+		戻る -EINVAL;
 
-	for (p = list; p && *p; p++) {
+	ために (p = list; p && *p; p++) {
 		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+		整数 bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		もし (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		もし (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		もし (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		もし (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		もし (end <= begin)
+			戻る -1;
+		もし (allow_range) {
+			もし (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} 否则 もし (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		もし (bit < 0)
+			戻る bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		もし (set_lower)
+			ながら (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		否则 もし (set_higher)
+			ながら (++bit < (整数) allow_range)
 				setbit(ary, bit);
 		begin = NULL;
-		if (end && !*end)
+		もし (end && !*end)
 			break;
 	}
-	return 0;
+	戻る 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+整数 string_to_bitmask(const char *list,
 		     unsigned long *mask,
 		     long (*name2flag)(const char *, size_t))
 {
 	const char *begin = NULL, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	もし (!list || !name2flag || !mask)
+		戻る -EINVAL;
 
-	for (p = list; p && *p; p++) {
+	ために (p = list; p && *p; p++) {
 		const char *end = NULL;
 		long flag;
 
-		if (!begin)
+		もし (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		もし (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		もし (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		もし (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		もし (end <= begin)
+			戻る -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		もし (flag < 0)
+			戻る flag;	/* error */
 		*mask |= flag;
 		begin = NULL;
-		if (end && !*end)
+		もし (end && !*end)
 			break;
 	}
-	return 0;
+	戻る 0;
 }
 
 /*
@@ -909,39 +909,39 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+整数 ul_parse_range(const char *str, 整数 *lower, 整数 *upper, 整数 def)
 {
 	char *end = NULL;
 
-	if (!str)
-		return 0;
+	もし (!str)
+		戻る 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	もし (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		もし (errno || !end || *end || end == str)
+			戻る -1;
+	} 否则 {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		もし (errno || !end || end == str)
+			戻る -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		もし (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		否则 もし (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
 			end = NULL;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			もし (errno || !end || *end || end == str)
+				戻る -1;
 		}
 	}
-	return 0;
+	戻る 0;
 }
 
 const char *ul_path_next_segment(const char *str, size_t *sz)
@@ -950,22 +950,22 @@ const char *ul_path_next_segment(const char *str, size_t *sz)
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	ながら (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	もし (!start || !*start)
+		戻る NULL;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	ために (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	戻る start;
 }
 
-int streq_paths(const char *a, const char *b)
+整数 streq_paths(const char *a, const char *b)
 {
-	while (a && b) {
+	ながら (a && b) {
 		size_t a_sz, b_sz;
 		const char *a_seg = ul_path_next_segment(a, &a_sz);
 		const char *b_seg = ul_path_next_segment(b, &b_sz);
@@ -976,51 +976,51 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		もし (a_sz + b_sz == 0)
+			戻る 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		もし (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			戻る 1;
 
-		if (!a_seg || !b_seg)
+		もし (!a_seg || !b_seg)
 			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+		もし (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
 			break;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	戻る 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+整数 ul_path_is_within(const char *path, const char *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	もし (!path || !dir || !*path || !*dir)
+		戻る 0;
 
-	while (path && dir) {
+	ながら (path && dir) {
 		size_t p_sz, d_sz;
 		const char *p_seg = ul_path_next_segment(path, &p_sz);
 		const char *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		もし (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			戻る 1;
 
-		if (!p_seg || !d_seg)
+		もし (!p_seg || !d_seg)
 			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+		もし (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
 			break;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	戻る 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
@@ -1029,35 +1029,35 @@ char *ul_strnconcat(const char *s, const char *suffix, size_t b)
 	size_t a;
 	char *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	もし (!s && !suffix)
+		戻る strdup("");
+	もし (!s)
+		戻る strndup(suffix, b);
+	もし (!suffix)
+		戻る strdup(s);
 
 	assert(s);
 	assert(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	もし (b > ((size_t) -1) - a)
+		戻る NULL;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	もし (!r)
+		戻る NULL;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	戻る r;
 }
 
 /* concatenate two strings to a new string */
 char *ul_strconcat(const char *s, const char *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	戻る ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
@@ -1065,89 +1065,89 @@ char *ul_strfconcat(const char *s, const char *format, ...)
 {
 	va_list ap;
 	char *val, *res;
-	int sz;
+	整数 sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	もし (sz < 0)
+		戻る NULL;
 
 	res = ul_strnconcat(s, val, sz);
 	free(val);
-	return res;
+	戻る res;
 }
 
-int ul_strappend(char **a, const char *b)
+整数 ul_strappend(char **a, const char *b)
 {
 	size_t al, bl;
 	char *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	もし (!a)
+		戻る -EINVAL;
+	もし (!b || !*b)
+		戻る 0;
+	もし (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		戻る !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	もし (!tmp)
+		戻る -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	戻る 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+整数 strfappend(char **a, const char *format, ...)
 {
 	va_list ap;
-	int res;
+	整数 res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	戻る res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+extern 整数 ul_strvfappend(char **a, const char *format, va_list ap)
 {
 	char *val;
-	int sz;
-	int res;
+	整数 sz;
+	整数 res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	もし (sz < 0)
+		戻る -errno;
 
 	res = ul_strappend(a, val);
 	free(val);
-	return res;
+	戻る res;
 }
 
 static size_t strcspn_escaped(const char *s, const char *reject)
 {
-	int escaped = 0;
-	int n;
+	整数 escaped = 0;
+	整数 n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	ために (n=0; s[n]; n++) {
+		もし (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		否则 もし (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
+		否则 もし (strchr(reject, s[n]))
 			break;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	戻る n - escaped;
 }
 
 /*
@@ -1163,87 +1163,87 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+char *ul_strchr_escaped(const char *s, 整数 c)
 {
 	char *p;
-	int esc = 0;
+	整数 esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	ために (p = (char *) s; p && *p; p++) {
+		もし (!esc && *p == '\\') {
 			esc = 1;
 			continue;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		もし (*p == c && (!esc || c == '\\'))
+			戻る p;
 		esc = 0;
 	}
 
-	return NULL;
+	戻る NULL;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+const char *ul_split(const char **state, size_t *l, const char *separator, 整数 quoted)
 {
 	const char *current;
 
 	current = *state;
 
-	if (!*current) {
+	もし (!*current) {
 		assert(**state == '\0');
-		return NULL;
+		戻る NULL;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	もし (!*current) {
 		*state = current;
-		return NULL;
+		戻る NULL;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
+	もし (quoted && strchr("\'\"", *current)) {
 		char quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		もし (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			戻る NULL;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} 否则 もし (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		もし (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			戻る NULL;
 		}
 		*state = current + *l;
-	} else {
+	} 否则 {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	戻る current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+整数 skip_fline(FILE *fp)
 {
-	int ch;
+	整数 ch;
 
 	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+		もし ((ch = fgetc(fp)) == EOF)
+			戻る 1;
+		もし (ch == '\n')
+			戻る 0;
+	} ながら (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+整数 ul_stralnumcmp(const char *p1, const char *p2)
 {
 	const unsigned char *s1 = (const unsigned char *) p1;
 	const unsigned char *s2 = (const unsigned char *) p2;
@@ -1252,21 +1252,21 @@ int ul_stralnumcmp(const char *p1, const char *p2)
 	do {
 		do {
 			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+		} ながら (c1 != '\0' && !isalnum((unsigned 整数) c1));
 
 		do {
 			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		} ながら (c2 != '\0' && !isalnum((unsigned 整数) c2));
 
-		if (c1 != '\0')
+		もし (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		もし (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		もし (c1 == '\0')
+			戻る c1 - c2;
+	} ながら (c1 == c2);
 
-	return c1 - c2;
+	戻る c1 - c2;
 }
 
 /*
@@ -1277,10 +1277,10 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
+整数 ul_optstr_next(char **optstr, char **name, size_t *namesz,
 		   char **value, size_t *valsz)
 {
-	int open_quote = 0;
+	整数 open_quote = 0;
 	char *start = NULL, *stop = NULL, *p, *sep = NULL;
 	char *optstr0;
 
@@ -1289,65 +1289,65 @@ int ul_optstr_next(char **optstr, char **name, size_t *namesz,
 
 	optstr0 = *optstr;
 
-	if (name)
+	もし (name)
 		*name = NULL;
-	if (namesz)
+	もし (namesz)
 		*namesz = 0;
-	if (value)
+	もし (value)
 		*value = NULL;
-	if (valsz)
+	もし (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	ながら (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	ために (p = optstr0; p && *p; p++) {
+		もし (!start && *p == '=')
+			戻る -EINVAL;
+		もし (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		もし (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
+		もし (open_quote)
 			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		もし (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		もし (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		否则 もし (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
+		もし (!start || !stop)
 			continue;
-		if (stop <= start)
-			return -EINVAL;
+		もし (stop <= start)
+			戻る -EINVAL;
 
-		if (name)
+		もし (name)
 			*name = start;
-		if (namesz)
+		もし (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
+		もし (sep) {
+			もし (value)
 				*value = sep + 1;
-			if (valsz)
+			もし (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		戻る 0;
 	}
 
-	return 1;				/* end of optstr */
+	戻る 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+整数 ul_optstr_is_valid(const char *optstr)
 {
-	int rc;
+	整数 rc;
 	char *p = (char *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	ながら ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
+	戻る rc < 0 ? 0 : 1;
 }
 
 char *ul_optstr_get_value(const char *optstr, const char *key)
@@ -1356,17 +1356,17 @@ char *ul_optstr_get_value(const char *optstr, const char *key)
 	char *name = NULL, *value = NULL;
 	char *p = (char *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	もし (!optstr || !key || !*key)
+		戻る NULL;
 
 	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
+	ながら (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
+		もし (namesz != sz || !valsz)
 			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+		もし (strncmp(name, key, namesz) == 0)
+			戻る strndup(value, valsz);
 	}
-	return NULL;
+	戻る NULL;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
@@ -1378,18 +1378,18 @@ size_t ul_unquote(char *str)
 	size_t len;
 	char q;
 
-	if (!str || !*str)
-		return 0;
+	もし (!str || !*str)
+		戻る 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	もし ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		戻る len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	戻る len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
@@ -1399,21 +1399,21 @@ struct testS {
 	char *value;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+static 整数 test_strdup_to_member(整数 argc, char *argv[])
 {
 	struct testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	もし (argc < 3)
+		戻る EXIT_FAILURE;
 
 	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	もし (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
 	strdup_to_struct_member(xx, value, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
+	もし (strcmp(xx->name, argv[1]) != 0 &&
 	    strcmp(xx->value, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
@@ -1422,18 +1422,18 @@ static int test_strdup_to_member(int argc, char *argv[])
 	free(xx->name);
 	free(xx->value);
 	free(xx);
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+static 整数 test_strutils_sizes(整数 argc, char *argv[])
 {
 	uintmax_t size = 0;
 	char *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	もし (argc < 2)
+		戻る EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	もし (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1448,47 +1448,47 @@ static int test_strutils_sizes(int argc, char *argv[])
 	free(hum2);
 	free(hum3);
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+static 整数 test_strutils_cmp_paths(整数 argc, char *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	整数 rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	もし (argc < 3)
+		戻る EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+static 整数 test_strutils_path_is_within(整数 argc, char *argv[])
 {
-	int rc;
+	整数 rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	もし (argc < 3)
+		戻る EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+static 整数 test_strutils_normalize(整数 argc, char *argv[])
 {
 	unsigned char *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	もし (argc < 2)
+		戻る EXIT_FAILURE;
 
 	org = (unsigned char *) strdup(argv[1]);
 	src = (unsigned char *) strdup((char *) org);
 	len = strlen((char *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
+	もし (!org || !src || !dst)
 		goto done;
 
 	/* two buffers */
@@ -1504,132 +1504,132 @@ done:
 	free(dst);
 	free(org);
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+static 整数 test_strutils_cstrcasecmp(整数 argc, char *argv[])
 {
 	char *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	もし (argc < 3)
+		戻る EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	もし (!a || !b)
+		戻る EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+整数 メインページ(整数 argc, char *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	もし (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		戻る test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
 						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+		戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		もし (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} 否则 もし (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		戻る test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} 否则 もし (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		戻る test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} 否则 もし (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		戻る test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} 否则 もし  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} 否则 もし (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		戻る test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		戻る test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} 否则 もし (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+	} 否则 もし (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
 		char *buf = "abc\0Y\0\0xyz\0X";
 		char *end = buf + 12;
 		char *p = buf;
 
 		do {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} ながら ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
 		char *name = NULL, *val = NULL;
 		char *p = argv[2];
-		int rc;
+		整数 rc;
 
-		if (!ul_optstr_is_valid(p))
+		もし (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		ながら ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (整数) namesz, name,
+						   (整数) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		もし (rc == 1)
+			戻る EXIT_SUCCESS;
+	} 否则 もし (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
 		char *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		もし (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
 		free(unquoted);
-		return EXIT_SUCCESS;
+		戻る EXIT_SUCCESS;
 
-	} else {
+	} 否则 {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	戻る EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

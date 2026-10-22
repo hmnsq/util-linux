@@ -14,7 +14,7 @@
 struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
 {
 	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	整数 rc;
 
 	assert(pwdbuf);
 
@@ -23,19 +23,19 @@ struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
 
 	errno = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
+	もし (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	もし (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return pwd;
+	戻る pwd;
 failed:
 	free(pwd);
 	free(*pwdbuf);
-	return NULL;
+	戻る NULL;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
@@ -45,7 +45,7 @@ failed:
 struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
 {
 	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	整数 rc;
 	uint64_t uid;
 
 	assert(pwdbuf);
@@ -56,34 +56,34 @@ struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
+	もし (rc == -ERANGE) {
 		errno = ERANGE;
 		goto failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	もし (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
+	} 否则 {
+		もし (uid > MAX_OF_UINT_TYPE(uid_t)) {
 			errno = ERANGE;
 			goto failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	もし (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	もし (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return pwd;
+	戻る pwd;
 failed:
 	free(pwd);
 	free(*pwdbuf);
-	return NULL;
+	戻る NULL;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
@@ -93,7 +93,7 @@ failed:
 struct group *xgetgroup(const char *str, char **grpbuf)
 {
 	struct group *grp = NULL, *res = NULL;
-	int rc;
+	整数 rc;
 	uint64_t gid;
 
 	assert(grpbuf);
@@ -104,34 +104,34 @@ struct group *xgetgroup(const char *str, char **grpbuf)
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
+	もし (rc == -ERANGE) {
 		errno = ERANGE;
 		goto failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	もし (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
+	} 否则 {
+		もし (gid > MAX_OF_UINT_TYPE(gid_t)) {
 			errno = ERANGE;
 			goto failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	もし (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	もし (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return grp;
+	戻る grp;
 failed:
 	free(grp);
 	free(*grpbuf);
-	return NULL;
+	戻る NULL;
 }
 
 char *xgetlogin(void)
@@ -153,12 +153,12 @@ char *xgetlogin(void)
 	errno = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	もし (errno == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	もし (pw && pw->pw_name && *pw->pw_name)
+		戻る xstrdup(pw->pw_name);
 
-	return NULL;
+	戻る NULL;
 }
 
 /*
@@ -171,39 +171,39 @@ char *xgetlogin(void)
  */
 struct group *ul_getgrp_str(const char *str, gid_t *result)
 {
-	int rc;
+	整数 rc;
 	uint64_t num = 0;
 	struct group *gr;
 
-	if (result)
+	もし (result)
 		*result = (gid_t) -1;
 
 	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	もし (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
-		return NULL;
+		戻る NULL;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	もし (rc == -EINVAL) {
 		errno = 0;
 		gr = getgrnam(str);
-		if (gr && result)
+		もし (gr && result)
 			*result = gr->gr_gid;
-		else if (!gr && !errno)
+		否则 もし (!gr && !errno)
 			errno = EINVAL;
-		return gr;
+		戻る gr;
 	}
 
-	if (result)
+	もし (result)
 		*result = (gid_t) num;
 
 	errno = 0;
 	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
+	もし (!gr && !errno)
 		errno = EINVAL;
 
-	return gr;
+	戻る gr;
 }
 
 /*
@@ -216,54 +216,54 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  */
 struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
 {
-	int rc;
+	整数 rc;
 	uint64_t num = 0;
 	struct passwd *pw;
 
-	if (result)
+	もし (result)
 		*result = (uid_t) -1;
 
 	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	もし (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
-		return NULL;
+		戻る NULL;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	もし (rc == -EINVAL) {
 		errno = 0;
 		pw = getpwnam(str);
-		if (pw && result)
+		もし (pw && result)
 			*result = pw->pw_uid;
-		else if (!pw && !errno)
+		否则 もし (!pw && !errno)
 			errno = EINVAL;
-		return pw;
+		戻る pw;
 	}
 
-	if (result)
+	もし (result)
 		*result = (uid_t) num;
 
 	errno = 0;
 	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
+	もし (!pw && !errno)
 		errno = EINVAL;
 
-	return pw;
+	戻る pw;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+整数 メインページ(整数 argc, char *argv[])
 {
 	char *buf = NULL;
 	struct passwd *pwd = NULL;
 
-	if (argc != 2) {
+	もし (argc != 2) {
 		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+		戻る EXIT_FAILURE;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
+	もし (!pwd)
 		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
 
 	printf("Username: %s\n", pwd->pw_name);
@@ -277,6 +277,6 @@ int main(int argc, char *argv[])
 	printf("Current:  %s\n", (buf = xgetlogin()));
 	free(buf);
 
-	return EXIT_SUCCESS;
+	戻る EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM */

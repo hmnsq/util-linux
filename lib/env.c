@@ -9,10 +9,10 @@
 #include <string.h>
 #ifdef HAVE_SYS_PRCTL_H
 #include <sys/prctl.h>
-#else
+#否则
 #define PR_GET_DUMPABLE 3
 #endif
-#if (!defined(HAVE_PRCTL) && defined(linux))
+#もし (!defined(HAVE_PRCTL) && defined(linux))
 #include <sys/syscall.h>
 #endif
 #include <unistd.h>
@@ -69,8 +69,8 @@ static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
 	struct ul_env_list *ls;
 
 	ls = calloc(1, sizeof(struct ul_env_list) + namesz + valsz + 2);
-	if (!ls)
-		return ls0;
+	もし (!ls)
+		戻る ls0;
 
 	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
 	ls->value = ls->name + namesz + 1;
@@ -79,7 +79,7 @@ static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
 	memcpy(ls->value, value, valsz);
 
 	ls->next = ls0;
-	return ls;
+	戻る ls;
 }
 
 /*
@@ -92,18 +92,18 @@ static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
 	size_t namesz = 0, valsz = 0;
 	const char *val;
 
-	if (!str || !*str)
-		return ls;
+	もし (!str || !*str)
+		戻る ls;
 
 	val = strchr(str, '=');
-	if (!val)
-		return ls;
+	もし (!val)
+		戻る ls;
 	namesz = val - str;
 
 	val++;
 	valsz = strlen(val);
 
-	return env_list_add(ls, str, namesz, val, valsz);
+	戻る env_list_add(ls, str, namesz, val, valsz);
 }
 
 /*
@@ -114,10 +114,10 @@ struct ul_env_list *env_list_add_variable(
 				struct ul_env_list *ls,
 				const char *name, const char *value)
 {
-	if (!name || !*name)
-		return ls;
+	もし (!name || !*name)
+		戻る ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	戻る env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
 }
 
 /*
@@ -128,15 +128,15 @@ struct ul_env_list *env_list_add_getenv(struct ul_env_list *ls,
 {
 	const char *val;
 
-	if (!name)
-		return ls;
+	もし (!name)
+		戻る ls;
 
 	val = getenv(name);
-	if (!val)
+	もし (!val)
 		val= dflt;
-	if (val)
+	もし (val)
 		ls = env_list_add_variable(ls, name, val);
-	return ls;
+	戻る ls;
 }
 
 /*
@@ -147,18 +147,18 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
 {
 	char **all, **name;
 
-	if (!str)
-		return ls;
+	もし (!str)
+		戻る ls;
 
 	all = ul_strv_split(str, ",");
-	if (!all)
-		return ls;
+	もし (!all)
+		戻る ls;
 
 	UL_STRV_FOREACH(name, all)
 		ls = env_list_add_getenv(ls, *name, NULL);
 
 	ul_strv_free(all);
-	return ls;
+	戻る ls;
 }
 
 /*
@@ -166,46 +166,46 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
  *
  * @fd must be /proc/<pid>/environ file.
 */
-struct ul_env_list *env_list_from_fd(int fd)
+struct ul_env_list *env_list_from_fd(整数 fd)
 {
 	char *buf = NULL, *p;
 	ssize_t rc = 0;
 	struct ul_env_list *ls = NULL;
 
 	errno = 0;
-	if ((rc = ul_read_all_alloc(fd, &buf)) < 1)
-		return NULL;
+	もし ((rc = ul_read_all_alloc(fd, &buf)) < 1)
+		戻る NULL;
 	buf[rc] = '\0';
 	p = buf;
 
-	while (rc > 0) {
+	ながら (rc > 0) {
 		ls = env_list_add_from_string(ls, p);
 		p += strlen(p) + 1;
 		rc -= strlen(p) + 1;
 	}
 
 	free(buf);
-	return ls;
+	戻る ls;
 }
 
 /*
  * Use setenv() for all stuff in @ls.
  */
-int env_list_setenv(struct ul_env_list *ls, int overwrite)
+整数 env_list_setenv(struct ul_env_list *ls, 整数 overwrite)
 {
-	int rc = 0;
+	整数 rc = 0;
 
-	while (ls && rc == 0) {
-		if (ls->name && ls->value)
+	ながら (ls && rc == 0) {
+		もし (ls->name && ls->value)
 			rc = setenv(ls->name, ls->value, overwrite);
 		ls = ls->next;
 	}
-	return rc;
+	戻る rc;
 }
 
 void env_list_free(struct ul_env_list *ls)
 {
-	while (ls) {
+	ながら (ls) {
 		struct ul_env_list *x = ls;
 		ls = ls->next;
 		free(x);
@@ -221,15 +221,15 @@ void __sanitize_env(struct ul_env_list **org)
 	char **envp = environ;
 	char * const *bad;
 	char **cur;
-	int last = 0;
+	整数 last = 0;
 
-	for (cur = envp; *cur; cur++)
+	ために (cur = envp; *cur; cur++)
 		last++;
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = forbid; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) == 0) {
-				if (org)
+	ために (cur = envp; *cur; cur++) {
+		ために (bad = forbid; *bad; bad++) {
+			もし (strncmp(*cur, *bad, strlen(*bad)) == 0) {
+				もし (org)
 					*org = env_list_add_from_string(*org, *cur);
 				last = ul_remove_entry(envp, cur - envp, last);
 				cur--;
@@ -238,13 +238,13 @@ void __sanitize_env(struct ul_env_list **org)
 		}
 	}
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = noslash; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) != 0)
+	ために (cur = envp; *cur; cur++) {
+		ために (bad = noslash; *bad; bad++) {
+			もし (strncmp(*cur, *bad, strlen(*bad)) != 0)
 				continue;
-			if (!strchr(*cur, '/'))
+			もし (!strchr(*cur, '/'))
 				continue;  /* OK */
-			if (org)
+			もし (org)
 				*org = env_list_add_from_string(*org, *cur);
 			last = ul_remove_entry(envp, cur - envp, last);
 			cur--;
@@ -260,40 +260,40 @@ void sanitize_env(void)
 
 char *safe_getenv(const char *arg)
 {
-	if (is_privileged_execution())
-		return NULL;
+	もし (is_privileged_execution())
+		戻る NULL;
 #ifdef HAVE_PRCTL
-	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#else
-#if (defined(linux) && defined(SYS_prctl))
-	if (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
+	もし (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		戻る NULL;
+#否则
+#もし (defined(linux) && defined(SYS_prctl))
+	もし (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		戻る NULL;
 #endif
 #endif
 #ifdef HAVE_SECURE_GETENV
-return secure_getenv(arg);
+戻る secure_getenv(arg);
 #elif HAVE___SECURE_GETENV
-	return __secure_getenv(arg);
-#else
-	return getenv(arg);
+	戻る __secure_getenv(arg);
+#否则
+	戻る getenv(arg);
 #endif
 }
 
 #ifdef TEST_PROGRAM_ENV
-int main(void)
+整数 メインページ(void)
 {
 	char *const *bad;
 	char copy[32];
 	char *p;
-	int retval = EXIT_SUCCESS;
+	整数 retval = EXIT_SUCCESS;
 	struct ul_env_list *removed = NULL;
 
 	/* define env. */
-	for (bad = forbid; *bad; bad++) {
+	ために (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		もし (p)
 			*p = '\0';
 		setenv(copy, "abc", 1);
 	}
@@ -302,13 +302,13 @@ int main(void)
 	__sanitize_env(&removed);
 
 	/* check removal */
-	for (bad = forbid; *bad; bad++) {
+	ために (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		もし (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (p) {
+		もし (p) {
 			warnx("%s was not removed", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -318,13 +318,13 @@ int main(void)
 	env_list_setenv(removed, 0);
 
 	/* check restore */
-	for (bad = forbid; *bad; bad++) {
+	ために (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		もし (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (!p) {
+		もし (!p) {
 			warnx("%s was not restored", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -332,6 +332,6 @@ int main(void)
 
 	env_list_free(removed);
 
-	return retval;
+	戻る retval;
 }
 #endif
