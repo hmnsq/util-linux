@@ -2,74 +2,74 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <sys/utsname.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <sys/utsname.h>
 
-#include "c.h"
-#include "linux_version.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "linux_version.h"
 
-int get_linux_version (void)
+पूर्णाङ्क get_linux_version (शून्य)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	स्थिर पूर्णाङ्क kver = -1;
+	संरचना utsname uts;
+	पूर्णाङ्क x = 0, y = 0, z = 0;
+	पूर्णाङ्क n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	यदि (kver != -1)
+		प्रत्यागम kver;
+	यदि (uname(&uts))
+		प्रत्यागम kver = 0;
 
 	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	यदि (n < 1 || n > 3)
+		प्रत्यागम kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	प्रत्यागम kver = KERNEL_VERSION(x, y, z);
 }
 
 #ifdef TEST_PROGRAM_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण *argv[])
 {
-	int rc = EXIT_FAILURE;
+	पूर्णाङ्क rc = EXIT_FAILURE;
 
-	if (argc == 1) {
+	यदि (argc == 1) {
 		printf("Linux version: %d\n", get_linux_version());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} अन्यथा यदि (argc == 5) {
+		ध्रुव वर्ण *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		पूर्णाङ्क x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		पूर्णाङ्क kver = get_linux_version();
+		पूर्णाङ्क uver = KERNEL_VERSION(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		यदि (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		अन्यथा यदि (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		अन्यथा यदि (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		अन्यथा
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
+		यदि (rc)
 			printf("match\n");
-		else
+		अन्यथा
 			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} अन्यथा
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
 				 program_invocation_short_name);
 
-	return rc;
+	प्रत्यागम rc;
 }
 #endif
