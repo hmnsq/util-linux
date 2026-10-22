@@ -6,23 +6,23 @@
 #include "c.h"
 #include "default_shell.h"
 
-const char *ul_default_shell(int flags, const struct passwd *pw)
+const char *ul_default_shell(整数 flags, const struct passwd *pw)
 {
 	const char *shell = NULL;
 
-	if (!(flags & UL_SHELL_NOENV)) {
+	如果 (!(flags & UL_SHELL_NOENV)) {
 		shell = getenv("SHELL");
-		if (shell && *shell)
-			return shell;
+		如果 (shell && *shell)
+			返回 shell;
 	}
-	if (!(flags & UL_SHELL_NOPWD)) {
-		if (!pw)
+	如果 (!(flags & UL_SHELL_NOPWD)) {
+		如果 (!pw)
 			pw = getpwuid(getuid());
-		if (pw)
+		如果 (pw)
 			shell = pw->pw_shell;
-		if (shell && *shell)
-			return shell;
+		如果 (shell && *shell)
+			返回 shell;
 	}
 
-	return _PATH_BSHELL;
+	返回 _PATH_BSHELL;
 }

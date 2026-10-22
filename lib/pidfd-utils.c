@@ -19,30 +19,30 @@
 /*
  * Returns 1, if the pidfd has the pidfs file system type, otherwise 0.
  */
-int pfd_is_pidfs(int pidfd)
+整数 pfd_is_pidfs(整数 pidfd)
 {
 	struct statfs stfs;
-	int rc;
+	整数 rc;
 
 	rc = fstatfs(pidfd, &stfs);
-	if (rc < 0)
-		return 0;
+	如果 (rc < 0)
+		返回 0;
 
-	return F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
+	返回 F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
 }
 
 #ifdef USE_PIDFD_INO_SUPPORT
-uint64_t pidfd_get_inode(int pidfd)
+uint64_t pidfd_get_inode(整数 pidfd)
 {
 	struct statx stx;
-	int rc;
+	整数 rc;
 
 	rc = statx(pidfd, "", AT_EMPTY_PATH, STATX_INO, &stx);
-	if (rc < 0) {
+	如果 (rc < 0) {
 		close(pidfd);
 		err(EXIT_FAILURE, _("failed to statx() pidfd"));
 	}
-	return stx.stx_ino;
+	返回 stx.stx_ino;
 }
 #endif
 
@@ -62,18 +62,18 @@ uint64_t pidfd_get_inode(int pidfd)
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+整数 ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
+#否则
+整数 ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	整数 pfd;
 
 	pfd = ul_get_valid_pidfd(pid, pidfd_ino);
-	if (pfd < 0)
+	如果 (pfd < 0)
 		err(EXIT_FAILURE, _("failed to obtain a valid file descriptor for PID %d"), pid);
 
-	return pfd;
+	返回 pfd;
 }
 
 /*
@@ -91,34 +91,34 @@ int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unu
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+整数 ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
+#否则
+整数 ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	整数 pfd;
 
 	pfd = pidfd_open(pid, 0);
-	if (pfd < 0)
-		return -errno;
+	如果 (pfd < 0)
+		返回 -errno;
 
 	/* the file descriptor has to have the pidfs file system type
 	 * otherwise the inode assigned to it will not be useful.
 	 */
-	if (!pfd_is_pidfs(pfd)) {
+	如果 (!pfd_is_pidfs(pfd)) {
 		close(pfd);
-		return -(errno = ENOTSUP);
+		返回 -(errno = ENOTSUP);
 	}
 
 #ifdef USE_PIDFD_INO_SUPPORT
 	uint64_t real_pidfd_ino;
-	if (pidfd_ino) {
+	如果 (pidfd_ino) {
 		real_pidfd_ino = pidfd_get_inode(pfd);
-		if (real_pidfd_ino != pidfd_ino) {
+		如果 (real_pidfd_ino != pidfd_ino) {
 			close(pfd);
-			return -(errno = ESRCH);
+			返回 -(errno = ESRCH);
 		}
 	}
 #endif
-	return pfd;
+	返回 pfd;
 }

@@ -11,15 +11,15 @@
 #include <dirent.h>
 #include <ctype.h>
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
-# if defined(HAVE_NCURSESW_NCURSES_H)
+#如果 defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+# 如果 defined(HAVE_NCURSESW_NCURSES_H)
 #  include <ncursesw/ncurses.h>
 # elif defined(HAVE_NCURSES_NCURSES_H)
 #  include <ncurses/ncurses.h>
 # elif defined(HAVE_NCURSES_H)
 #  include <ncurses.h>
 # endif
-# if defined(HAVE_NCURSESW_TERM_H)
+# 如果 defined(HAVE_NCURSESW_TERM_H)
 #  include <ncursesw/term.h>
 # elif defined(HAVE_NCURSES_TERM_H)
 #  include <ncurses/term.h>
@@ -42,7 +42,7 @@
  */
 #ifdef USE_COLORS_BY_DEFAULT
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_AUTO	/* check isatty() */
-#else
+#否则
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_NEVER	/* no colors by default */
 #endif
 
@@ -99,13 +99,13 @@ struct ul_color_ctl {
 	size_t			nschemes;	/* number of the items */
 	size_t			schemes_sz;	/* number of the allocated items */
 
-	int		mode;		/* UL_COLORMODE_* */
-	unsigned int	has_colors : 1,	/* based on mode and scores[] */
+	整数		mode;		/* UL_COLORMODE_* */
+	unsigned 整数	has_colors : 1,	/* based on mode and scores[] */
 			disabled   : 1, /* disable colors */
 			cs_configured : 1, /* color schemes read */
 			configured : 1; /* terminal-colors.d parsed */
 
-	int		scores[__UL_COLORFILE_COUNT];	/* the best match */
+	整数		scores[__UL_COLORFILE_COUNT];	/* the best match */
 };
 
 /*
@@ -114,16 +114,16 @@ struct ul_color_ctl {
 static struct ul_color_ctl ul_colors;
 
 static void colors_free_schemes(struct ul_color_ctl *cc);
-static int colors_read_schemes(struct ul_color_ctl *cc);
+static 整数 colors_read_schemes(struct ul_color_ctl *cc);
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_scheme_name(const void *a0, const void *b0)
+static 整数 cmp_scheme_name(const void *a0, const void *b0)
 {
 	const struct ul_color_scheme *a = (const struct ul_color_scheme *) a0,
 				     *b = (const struct ul_color_scheme *) b0;
-	return strcmp(a->name, b->name);
+	返回 strcmp(a->name, b->name);
 }
 
 /*
@@ -131,8 +131,8 @@ static int cmp_scheme_name(const void *a0, const void *b0)
  */
 static void colors_reset(struct ul_color_ctl *cc)
 {
-	if (!cc)
-		return;
+	如果 (!cc)
+		返回;
 
 	colors_free_schemes(cc);
 
@@ -150,8 +150,8 @@ static void colors_debug(struct ul_color_ctl *cc)
 {
 	size_t i;
 
-	if (!cc)
-		return;
+	如果 (!cc)
+		返回;
 
 	printf("Colors:\n");
 	printf("\tutilname = '%s'\n", cc->utilname);
@@ -169,7 +169,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < ARRAY_SIZE(cc->scores); i++)
+	为 (i = 0; i < ARRAY_SIZE(cc->scores); i++)
 		printf("\tscore %s = %d\n",
 				i == UL_COLORFILE_DISABLE ? "disable" :
 				i == UL_COLORFILE_ENABLE ? "enable" :
@@ -178,7 +178,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < cc->nschemes; i++) {
+	为 (i = 0; i < cc->nschemes; i++) {
 		printf("\tscheme #%02zu ", i);
 		color_scheme_enable(cc->schemes[i].name, NULL);
 		fputs(cc->schemes[i].name, stdout);
@@ -191,42 +191,42 @@ static void colors_debug(struct ul_color_ctl *cc)
 /*
  * Parses [[<utilname>][@<termname>].]<type>
  */
-static int filename_to_tokens(const char *str,
+static 整数 filename_to_tokens(const char *str,
 			      const char **name, size_t *namesz,
 			      const char **term, size_t *termsz,
-			      int  *filetype)
+			      整数  *filetype)
 {
 	const char *type_start, *term_start, *p;
 
-	if (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
-		return -EINVAL;
+	如果 (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
+		返回 -EINVAL;
 
 	/* parse .type */
 	p = strrchr(str, '.');
 	type_start = p ? p + 1 : str;
 
-	if (strcmp(type_start, "disable") == 0)
+	如果 (strcmp(type_start, "disable") == 0)
 		*filetype = UL_COLORFILE_DISABLE;
-	else if (strcmp(type_start, "enable") == 0)
+	否则 如果 (strcmp(type_start, "enable") == 0)
 		*filetype = UL_COLORFILE_ENABLE;
-	else if (strcmp(type_start, "scheme") == 0)
+	否则 如果 (strcmp(type_start, "scheme") == 0)
 		*filetype = UL_COLORFILE_SCHEME;
-	else {
+	否则 {
 		DBG(CONF, ul_debug("unknown type '%s'", type_start));
-		return 1;				/* unknown type */
+		返回 1;				/* unknown type */
 	}
 
-	if (type_start == str)
-		return 0;				/* "type" only */
+	如果 (type_start == str)
+		返回 0;				/* "type" only */
 
 	/* parse @termname */
 	p = strchr(str, '@');
 	term_start = p ? p + 1 : NULL;
-	if (term_start) {
+	如果 (term_start) {
 		*term = term_start;
 		*termsz = type_start - term_start - 1;
-		if (term_start - 1 == str)
-			return 0;			/* "@termname.type" */
+		如果 (term_start - 1 == str)
+			返回 0;			/* "@termname.type" */
 	}
 
 	/* parse utilname */
@@ -234,7 +234,7 @@ static int filename_to_tokens(const char *str,
 	*name = str;
 	*namesz = p - str - 1;
 
-	return 0;
+	返回 0;
 }
 
 /*
@@ -242,48 +242,48 @@ static int filename_to_tokens(const char *str,
  * The result is stored to cc->scores. The path to the best "scheme"
  * file is stored to cc->scheme.
  */
-static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
+static 整数 colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 {
 	DIR *dir;
-	int rc = -ENOENT;
+	整数 rc = -ENOENT;
 	struct dirent *d;
 	char sfile[PATH_MAX] = { '\0' };
 	size_t namesz, termsz;
 
-	if (!dirname || !cc || !cc->utilname || !*cc->utilname)
-		return -EINVAL;
+	如果 (!dirname || !cc || !cc->utilname || !*cc->utilname)
+		返回 -EINVAL;
 
 	DBG(CONF, ul_debug("reading dir: '%s'", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return -errno;
+	如果 (!dir)
+		返回 -errno;
 
 	namesz = strlen(cc->utilname);
 	termsz = cc->termname ? strlen(cc->termname) : 0;
 
-	while ((d = readdir(dir))) {
-		int type, score = 1;
+	当 ((d = readdir(dir))) {
+		整数 type, score = 1;
 		const char *tk_name = NULL, *tk_term = NULL;
 		size_t tk_namesz = 0, tk_termsz = 0;
 
-		if (*d->d_name == '.')
+		如果 (*d->d_name == '.')
 			continue;
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
+		如果 (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
 		    d->d_type != DT_REG)
 			continue;
 #endif
-		if (filename_to_tokens(d->d_name,
+		如果 (filename_to_tokens(d->d_name,
 				       &tk_name, &tk_namesz,
 				       &tk_term, &tk_termsz, &type) != 0)
 			continue;
 
 		/* count theoretical score before we check names to avoid
 		 * unnecessary strcmp() */
-		if (tk_name)
+		如果 (tk_name)
 			score += 20;
-		if (tk_term)
+		如果 (tk_term)
 			score += 10;
 
 		DBG(CONF, ul_debug("item '%s': score=%d "
@@ -293,15 +293,15 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 			tk_termsz, tk_term));
 
 
-		if (score < cc->scores[type])
+		如果 (score < cc->scores[type])
 			continue;
 
 		/* filter out by names */
-		if (tk_namesz && (tk_namesz != namesz ||
+		如果 (tk_namesz && (tk_namesz != namesz ||
 				 strncmp(tk_name, cc->utilname, namesz) != 0))
 			continue;
 
-		if (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
+		如果 (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
 				  strncmp(tk_term, cc->termname, termsz) != 0))
 			continue;
 
@@ -312,18 +312,18 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 					cc->scores[type], score));
 		cc->scores[type] = score;
 		rc = 0;
-		if (type == UL_COLORFILE_SCHEME)
+		如果 (type == UL_COLORFILE_SCHEME)
 			strncpy(sfile, d->d_name, sizeof(sfile));
 	}
 
-	if (*sfile) {
+	如果 (*sfile) {
 		sfile[sizeof(sfile) - 1] = '\0';
-		if (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
+		如果 (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
 			rc = -ENOMEM;
 	}
 
 	closedir(dir);
-	return rc;
+	返回 rc;
 }
 
 /* atexit() wrapper */
@@ -339,46 +339,46 @@ static char *colors_get_homedir(char *buf, size_t bufsz)
 {
 	char *p = getenv("XDG_CONFIG_HOME");
 
-	if (p) {
+	如果 (p) {
 		snprintf(buf, bufsz, "%s/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		返回 buf;
 	}
 
 	p = getenv("HOME");
-	if (p) {
+	如果 (p) {
 		snprintf(buf, bufsz, "%s/.config/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		返回 buf;
 	}
 
-	return NULL;
+	返回 NULL;
 }
 
 /*
  * Adds one color sequence to array with color scheme.
  */
-static int colors_add_scheme(struct ul_color_ctl *cc,
+static 整数 colors_add_scheme(struct ul_color_ctl *cc,
 			     const char *name,
 			     const char *seq0)
 {
 	struct ul_color_scheme *cs = NULL;
 	char *seq = NULL;
-	int rc;
+	整数 rc;
 
-	if (!cc || !name || !*name || !seq0 || !*seq0)
-		return -EINVAL;
+	如果 (!cc || !name || !*name || !seq0 || !*seq0)
+		返回 -EINVAL;
 
 	DBG(SCHEME, ul_debug("add '%s'", name));
 
 	seq = color_get_sequence(seq0);
-	if (!seq)
-		return -EINVAL;
+	如果 (!seq)
+		返回 -EINVAL;
 	rc = -ENOMEM;
 
 	/* enlarge the array */
-	if (cc->nschemes == cc->schemes_sz) {
+	如果 (cc->nschemes == cc->schemes_sz) {
 		void *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
 					 sizeof(struct ul_color_scheme));
-		if (!tmp)
+		如果 (!tmp)
 			goto err;
 		cc->schemes = tmp;
 		cc->schemes_sz = cc->nschemes + 10;
@@ -388,19 +388,19 @@ static int colors_add_scheme(struct ul_color_ctl *cc,
 	cs = &cc->schemes[cc->nschemes];
 	cs->seq = seq;
 	cs->name = strdup(name);
-	if (!cs->name)
+	如果 (!cs->name)
 		goto err;
 
 	cc->nschemes++;
-	return 0;
+	返回 0;
 err:
-	if (cs) {
+	如果 (cs) {
 		free(cs->seq);
 		free(cs->name);
 		cs->seq = cs->name = NULL;
-	} else
+	} 否则
 		free(seq);
-	return rc;
+	返回 rc;
 }
 
 /*
@@ -412,7 +412,7 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
 
 	DBG(SCHEME, ul_debug("free scheme"));
 
-	for (i = 0; i < cc->nschemes; i++) {
+	为 (i = 0; i < cc->nschemes; i++) {
 		free(cc->schemes[i].name);
 		free(cc->schemes[i].seq);
 	}
@@ -428,8 +428,8 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
  */
 static void colors_sort_schemes(struct ul_color_ctl *cc)
 {
-	if (!cc->nschemes)
-		return;
+	如果 (!cc->nschemes)
+		返回;
 
 	DBG(SCHEME, ul_debug("sort scheme"));
 
@@ -445,16 +445,16 @@ static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
 {
 	struct ul_color_scheme key = { .name = (char *) name}, *res;
 
-	if (!cc || !name || !*name)
-		return NULL;
+	如果 (!cc || !name || !*name)
+		返回 NULL;
 
-	if (!cc->cs_configured) {
-		int rc = colors_read_schemes(cc);
-		if (rc)
-			return NULL;
+	如果 (!cc->cs_configured) {
+		整数 rc = colors_read_schemes(cc);
+		如果 (rc)
+			返回 NULL;
 	}
-	if (!cc->nschemes)
-		return NULL;
+	如果 (!cc->nschemes)
+		返回 NULL;
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
@@ -462,86 +462,86 @@ static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
 				sizeof(struct ul_color_scheme),
 				cmp_scheme_name);
 
-	return res && res->seq ? res  : NULL;
+	返回 res && res->seq ? res  : NULL;
 }
 
 /*
  * Parses filenames in terminal-colors.d
  */
-static int colors_read_configuration(struct ul_color_ctl *cc)
+static 整数 colors_read_configuration(struct ul_color_ctl *cc)
 {
-	int rc = -ENOENT;
+	整数 rc = -ENOENT;
 	char *dirname, buf[PATH_MAX];
 
 	cc->termname = getenv("TERM");
 
 	dirname = colors_get_homedir(buf, sizeof(buf));
-	if (dirname)
+	如果 (dirname)
 		rc = colors_readdir(cc, dirname);		/* ~/.config */
-	if (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
+	如果 (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
 		rc = colors_readdir(cc, _PATH_TERMCOLORS_DIR);	/* /etc */
 
 	cc->configured = 1;
-	return rc;
+	返回 rc;
 }
 
 /*
  * Reads terminal-colors.d/ scheme file into array schemes
  */
-static int colors_read_schemes(struct ul_color_ctl *cc)
+static 整数 colors_read_schemes(struct ul_color_ctl *cc)
 {
-	int rc = 0;
+	整数 rc = 0;
 	FILE *f = NULL;
 	char buf[BUFSIZ],
 	     cn[129], seq[129];
 
-	if (!cc->configured)
+	如果 (!cc->configured)
 		rc = colors_read_configuration(cc);
 
 	cc->cs_configured = 1;
 
-	if (rc || !cc->sfile)
+	如果 (rc || !cc->sfile)
 		goto done;
 
 	DBG(SCHEME, ul_debug("reading file '%s'", cc->sfile));
 
 	f = fopen(cc->sfile, "r" UL_CLOEXECSTR);
-	if (!f) {
+	如果 (!f) {
 		rc = -errno;
 		goto done;
 	}
 
-	while (fgets(buf, sizeof(buf), f)) {
+	当 (fgets(buf, sizeof(buf), f)) {
 		char *p = strchr(buf, '\n');
 
-		if (!p) {
-			if (feof(f))
+		如果 (!p) {
+			如果 (feof(f))
 				p = strchr(buf, '\0');
-			else {
+			否则 {
 				rc = -errno;
 				goto done;
 			}
 		}
 		*p = '\0';
 		p = (char *) skip_blank(buf);
-		if (*p == '\0' || *p == '#')
+		如果 (*p == '\0' || *p == '#')
 			continue;
 
 		rc = sscanf(p, "%128[^ ] %128[^\n ]", cn, seq);
-		if (rc == 2 && *cn && *seq) {
+		如果 (rc == 2 && *cn && *seq) {
 			rc = colors_add_scheme(cc, cn, seq);	/* set rc=0 on success */
-			if (rc)
+			如果 (rc)
 				goto done;
 		}
 	}
 	rc = 0;
 
 done:
-	if (f)
+	如果 (f)
 		fclose(f);
 	colors_sort_schemes(cc);
 
-	return rc;
+	返回 rc;
 }
 
 
@@ -550,28 +550,28 @@ static void termcolors_init_debug(void)
 	__UL_INIT_DEBUG_FROM_ENV(termcolors, TERMCOLORS_DEBUG_, 0, TERMINAL_COLORS_DEBUG);
 }
 
-static int colors_terminal_is_ready(void)
+static 整数 colors_terminal_is_ready(void)
 {
-	int ncolors = -1;
+	整数 ncolors = -1;
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+#如果 defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 	{
-		int ret;
+		整数 ret;
 
 		/* setupterm() allocates memory, del_curterm() deallocates it */
-		if (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
+		如果 (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
 			ncolors = tigetnum("colors");
 			del_curterm(cur_term);
 		}
 	}
 #endif
-	if (1 < ncolors) {
+	如果 (1 < ncolors) {
 		DBG(CONF, ul_debug("terminal is ready (supports %d colors)", ncolors));
-		return 1;
+		返回 1;
 	}
 
 	DBG(CONF, ul_debug("terminal is NOT ready (no colors)"));
-	return 0;
+	返回 0;
 }
 
 /**
@@ -584,34 +584,34 @@ static int colors_terminal_is_ready(void)
  *
  * Returns: >0 on success.
  */
-int colors_init(int mode, const char *name)
+整数 colors_init(整数 mode, const char *name)
 {
-	int ready = -1;
+	整数 ready = -1;
 	struct ul_color_ctl *cc = &ul_colors;
 
 	cc->utilname = name;
 
 	termcolors_init_debug();
 
-	if (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
+	如果 (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
 		cc->mode = UL_COLORMODE_NEVER;
-	else
+	否则
 		cc->mode = mode;
 
-	if (cc->mode == UL_COLORMODE_UNDEF
+	如果 (cc->mode == UL_COLORMODE_UNDEF
 	    && getenv("NO_COLOR") == NULL
 	    && (ready = colors_terminal_is_ready())) {
 
-		int rc = colors_read_configuration(cc);
-		if (rc)
+		整数 rc = colors_read_configuration(cc);
+		如果 (rc)
 			cc->mode = UL_COLORMODE_DEFAULT;
-		else {
+		否则 {
 
 			/* evaluate scores */
-			if (cc->scores[UL_COLORFILE_DISABLE] >
+			如果 (cc->scores[UL_COLORFILE_DISABLE] >
 			    cc->scores[UL_COLORFILE_ENABLE])
 				cc->mode = UL_COLORMODE_NEVER;
-			else
+			否则
 				cc->mode = UL_COLORMODE_DEFAULT;
 
 			atexit(colors_deinit);
@@ -632,7 +632,7 @@ int colors_init(int mode, const char *name)
 
 	ON_DBG(CONF, colors_debug(cc));
 
-	return cc->has_colors;
+	返回 cc->has_colors;
 }
 
 /*
@@ -654,17 +654,17 @@ void colors_on(void)
 /*
  * Is terminal-colors.d/ configured to use colors?
  */
-int colors_wanted(void)
+整数 colors_wanted(void)
 {
-	return ul_colors.has_colors;
+	返回 ul_colors.has_colors;
 }
 
 /*
  * Returns mode
  */
-int colors_mode(void)
+整数 colors_mode(void)
 {
-	return ul_colors.mode;
+	返回 ul_colors.mode;
 }
 
 /*
@@ -672,7 +672,7 @@ int colors_mode(void)
  */
 void color_fenable(const char *seq, FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors && seq)
+	如果 (!ul_colors.disabled && ul_colors.has_colors && seq)
 		fputs(seq, f);
 }
 
@@ -683,11 +683,11 @@ const char *color_scheme_get_sequence(const char *name, const char *dflt)
 {
 	struct ul_color_scheme *cs;
 
-	if (ul_colors.disabled || !ul_colors.has_colors)
-		return NULL;
+	如果 (ul_colors.disabled || !ul_colors.has_colors)
+		返回 NULL;
 
 	cs = colors_get_scheme(&ul_colors, name);
-	return cs && cs->seq ? cs->seq : dflt;
+	返回 cs && cs->seq ? cs->seq : dflt;
 }
 
 /*
@@ -697,8 +697,8 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
 {
 	const char *seq = color_scheme_get_sequence(name, dflt);
 
-	if (!seq)
-		return;
+	如果 (!seq)
+		返回;
 	color_fenable(seq, f);
 }
 
@@ -708,7 +708,7 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
  */
 void color_fdisable(FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
+	如果 (!ul_colors.disabled && ul_colors.has_colors)
 		fputs(UL_COLOR_RESET, f);
 }
 
@@ -717,16 +717,16 @@ void color_fdisable(FILE *f)
  */
 const char *color_get_disable_sequence(void)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
-		return UL_COLOR_RESET;
-	else
-		return "";
+	如果 (!ul_colors.disabled && ul_colors.has_colors)
+		返回 UL_COLOR_RESET;
+	否则
+		返回 "";
 }
 
 /*
  * Parses @str to return UL_COLORMODE_*
  */
-int colormode_from_string(const char *str)
+整数 colormode_from_string(const char *str)
 {
 	size_t i;
 	static const char *const modes[] = {
@@ -736,37 +736,37 @@ int colormode_from_string(const char *str)
 		[UL_COLORMODE_UNDEF] = ""
 	};
 
-	if (!str || !*str)
-		return -EINVAL;
+	如果 (!str || !*str)
+		返回 -EINVAL;
 
 	assert(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
 
-	for (i = 0; i < ARRAY_SIZE(modes); i++) {
-		if (c_strcasecmp(str, modes[i]) == 0)
-			return i;
+	为 (i = 0; i < ARRAY_SIZE(modes); i++) {
+		如果 (c_strcasecmp(str, modes[i]) == 0)
+			返回 i;
 	}
 
-	return -EINVAL;
+	返回 -EINVAL;
 }
 
 /*
  * Parses @str and exit(EXIT_FAILURE) on error
  */
-int colormode_or_err(const char *str)
+整数 colormode_or_err(const char *str)
 {
 	const char *p = str && *str == '=' ? str + 1 : str;
-	int colormode;
+	整数 colormode;
 
 	colormode = colormode_from_string(p);
-	if (colormode < 0)
+	如果 (colormode < 0)
 		errx(EXIT_FAILURE, _("unsupported color mode: %s"), p);
 
-	return colormode;
+	返回 colormode;
 }
 
 #ifdef TEST_PROGRAM_COLORS
 # include <getopt.h>
-int main(int argc, char *argv[])
+整数 主要(整数 argc, char *argv[])
 {
 	static const struct option longopts[] = {
 		{ "mode",	required_argument, NULL, 'm' },
@@ -775,11 +775,11 @@ int main(int argc, char *argv[])
 		{ "name",	required_argument, NULL, 'n' },
 		{ NULL, 0, NULL, 0 }
 	};
-	int c, mode = UL_COLORMODE_UNDEF;	/* default */
+	整数 c, mode = UL_COLORMODE_UNDEF;	/* default */
 	const char *color = "red", *name = NULL, *color_scheme = NULL;
 	char *seq = NULL;
 
-	while ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
+	当 ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
 		switch (c) {
 		case 'c':
 			color = optarg;
@@ -800,20 +800,20 @@ int main(int argc, char *argv[])
 			" -C, --color-scheme <name>       color for the test message\n"
 			" -n, --name <utilname>           util name\n",
 			program_invocation_short_name);
-			return EXIT_FAILURE;
+			返回 EXIT_FAILURE;
 		}
 	}
 
 	colors_init(mode, name ? name : program_invocation_short_name);
 
-	if (color_is_sequence(color))
+	如果 (color_is_sequence(color))
 		seq = strdup(color);
-	else
+	否则
 		seq = color_get_sequence(color);
 
-	if (color_scheme)
+	如果 (color_scheme)
 		color_scheme_enable(color_scheme, seq);
-	else
+	否则
 		color_enable(seq);
 	printf("Hello World!");
 	color_disable();
@@ -821,7 +821,7 @@ int main(int argc, char *argv[])
 
 	free(seq);
 
-	return EXIT_SUCCESS;
+	返回 EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_COLORS */
 

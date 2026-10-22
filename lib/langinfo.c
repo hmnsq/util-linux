@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		返回 "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		返回 ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		返回 "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		返回 "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		返回 "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		返回 "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		返回 "AM";
 	case PM_STR:
-		return "PM";
+		返回 "PM";
 	case DAY_1:
-		return "Sunday";
+		返回 "Sunday";
 	case DAY_2:
-		return "Monday";
+		返回 "Monday";
 	case DAY_3:
-		return "Tuesday";
+		返回 "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		返回 "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		返回 "Thursday";
 	case DAY_6:
-		return "Friday";
+		返回 "Friday";
 	case DAY_7:
-		return "Saturday";
+		返回 "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		返回 "Sun";
 	case ABDAY_2:
-		return "Mon";
+		返回 "Mon";
 	case ABDAY_3:
-		return "Tue";
+		返回 "Tue";
 	case ABDAY_4:
-		return "Wed";
+		返回 "Wed";
 	case ABDAY_5:
-		return "Thu";
+		返回 "Thu";
 	case ABDAY_6:
-		return "Fri";
+		返回 "Fri";
 	case ABDAY_7:
-		return "Sat";
+		返回 "Sat";
 	case MON_1:
-		return "January";
+		返回 "January";
 	case MON_2:
-		return "February";
+		返回 "February";
 	case MON_3:
-		return "March";
+		返回 "March";
 	case MON_4:
-		return "April";
+		返回 "April";
 	case MON_5:
-		return "May";
+		返回 "May";
 	case MON_6:
-		return "June";
+		返回 "June";
 	case MON_7:
-		return "July";
+		返回 "July";
 	case MON_8:
-		return "August";
+		返回 "August";
 	case MON_9:
-		return "September";
+		返回 "September";
 	case MON_10:
-		return "October";
+		返回 "October";
 	case MON_11:
-		return "November";
+		返回 "November";
 	case MON_12:
-		return "December";
+		返回 "December";
 	case ABMON_1:
-		return "Jan";
+		返回 "Jan";
 	case ABMON_2:
-		return "Feb";
+		返回 "Feb";
 	case ABMON_3:
-		return "Mar";
+		返回 "Mar";
 	case ABMON_4:
-		return "Apr";
+		返回 "Apr";
 	case ABMON_5:
-		return "May";
+		返回 "May";
 	case ABMON_6:
-		return "Jun";
+		返回 "Jun";
 	case ABMON_7:
-		return "Jul";
+		返回 "Jul";
 	case ABMON_8:
-		return "Aug";
+		返回 "Aug";
 	case ABMON_9:
-		return "Sep";
+		返回 "Sep";
 	case ABMON_10:
-		return "Oct";
+		返回 "Oct";
 	case ABMON_11:
-		return "Nov";
+		返回 "Nov";
 	case ABMON_12:
-		return "Dec";
+		返回 "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		返回 "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		返回 "-";
 	case YESEXPR:
-		return "^[yY]";
+		返回 "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		返回 "^[nN]";
 	default:
-		return "";
+		返回 "";
 	}
 }
 

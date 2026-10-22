@@ -17,12 +17,12 @@ struct ul_color_name {
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+static 整数 cmp_color_name(const void *a0, const void *b0)
 {
 	const struct ul_color_name
 		*a = (const struct ul_color_name *) a0,
 		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	返回 strcmp(a->name, b->name);
 }
 
 /*
@@ -57,59 +57,59 @@ const char *color_sequence_from_colorname(const char *str)
 	struct ul_color_name key = { .name = str };
 	const struct ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	如果 (!str)
+		返回 NULL;
 
 	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
 				sizeof(struct ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	返回 res ? res->seq : NULL;
 }
 
 
-int color_is_sequence(const char *color)
+整数 color_is_sequence(const char *color)
 {
-	if (color && *color == 0x1B) {
+	如果 (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		如果 (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		返回 1;
 	}
 
-	return 0;
+	返回 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+static 整数 __color_canonicalize(const char *str, char **seq)
 {
 	char *in, *out;
-	int len;
+	整数 len;
 
-	if (!str)
-		return -EINVAL;
+	如果 (!str)
+		返回 -EINVAL;
 
 	*seq = NULL;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+	如果 (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
 		const char *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		如果 (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			返回 *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		返回 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	如果 ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		返回 -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	为 (in = *seq, out = *seq; in && *in; in++) {
+		如果 (*in != '\\') {
 			*out++ = *in;
 			continue;
 		}
@@ -158,18 +158,18 @@ static int __color_canonicalize(const char *str, char **seq)
 		in++;
 	}
 
-	if (out) {
+	如果 (out) {
 		assert ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	返回 0;
 }
 
 char *color_get_sequence(const char *color)
 {
 	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	整数 rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	返回 rc ? NULL : seq;
 }

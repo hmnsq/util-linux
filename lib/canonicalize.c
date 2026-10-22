@@ -36,51 +36,51 @@ char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
 	size_t	sz;
 	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	如果 (!ptname || !*ptname)
+		返回 NULL;
 
-	if (!prefix)
+	如果 (!prefix)
 		prefix = "";
 
 	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	如果 (!(f = fopen(path, "r" UL_CLOEXECSTR)))
+		返回 NULL;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	如果 (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
+		如果 (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
 		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
+		如果 ((prefix && *prefix) || access(path, F_OK) == 0)
 			res = strdup(path);
 	}
 	fclose(f);
-	return res;
+	返回 res;
 }
 
 char *ul_canonicalize_dm_name(const char *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	返回 ul_canonicalize_dm_name_prefixed(NULL, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+static 整数 is_dm_devname(char *canonical, char **name)
 {
 	struct stat sb;
 	char *p = strrchr(canonical, '/');
 
 	*name = NULL;
 
-	if (!p
+	如果 (!p
 	    || strncmp(p, "/dm-", 4) != 0
 	    || !isdigit(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		返回 0;
 
 	*name = p + 1;
-	return 1;
+	返回 1;
 }
 
 /*
@@ -93,40 +93,40 @@ char *ul_absolute_path(const char *path)
 	char cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	如果 (!ul_is_relative_path(path)) {
 		errno = EINVAL;
-		return NULL;
+		返回 NULL;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	如果 (!getcwd(cwd, sizeof(cwd)))
+		返回 NULL;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
+	如果 (ul_startswith(path, "./"))
 		path += 2;
-	else if (strcmp(path, ".") == 0)
+	否则 如果 (strcmp(path, ".") == 0)
 		path = NULL;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	如果 (!path || !*path)
+		返回 strdup(cwd);
 
 	csz = strlen(cwd);
 	psz = strlen(path);
 
 	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	如果 (!res)
+		返回 NULL;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
 	memcpy(p, path, psz + 1);
 
-	return res;
+	返回 res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
+static 整数 __attribute__((nonnull(2)))
 do_canonicalize(const char *path, char **result,
 		void *data __attribute__((__unused__)))
 {
@@ -134,27 +134,27 @@ do_canonicalize(const char *path, char **result,
 
 	*result = NULL;
 
-	if (!path || !*path) {
+	如果 (!path || !*path) {
 		errno = EINVAL;
-		return -errno;
+		返回 -errno;
 	}
 
 	errno = 0;
 	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	如果 (!canonical)
+		返回 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
+	如果 (is_dm_devname(canonical, &dmname)) {
 		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
+		如果 (dm) {
 			free(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
+	如果 (canonical)
 		*result = canonical;
-	return 0;
+	返回 0;
 }
 
 /*
@@ -166,10 +166,10 @@ char *ul_canonicalize_path(const char *path)
 {
 	char *canonical = NULL;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	如果 (do_canonicalize(path, &canonical, NULL) == 1)
+		返回 strdup(path);
 
-	return canonical;
+	返回 canonical;
 }
 
 /*
@@ -178,15 +178,15 @@ char *ul_canonicalize_path(const char *path)
  */
 char *ul_canonicalize_path_restricted(const char *path)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	返回 ul_restricted_path_oper(path, do_canonicalize, NULL);
 }
 
 #ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+整数 主要(整数 argc, char **argv)
 {
 	char *p;
 
-	if (argc < 2) {
+	如果 (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}

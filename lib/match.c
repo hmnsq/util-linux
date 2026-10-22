@@ -20,18 +20,18 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+整数 match_fstype(const char *type, const char *pattern)
 {
-	int no = 0;		/* negated types list */
-	int len;
+	整数 no = 0;		/* negated types list */
+	整数 len;
 	const char *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	如果 (!pattern && !type)
+		返回 1;
+	如果 (!pattern)
+		返回 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	如果 (!strncmp(pattern, "no", 2)) {
 		no = 1;
 		pattern += 2;
 	}
@@ -39,16 +39,16 @@ int match_fstype(const char *type, const char *pattern)
 	/* Does type occur in types, separated by commas? */
 	len = strlen(type);
 	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	当(1) {
+		如果 (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			返回 0;
+		如果 (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			返回 !no;
 		p = strchr(p,',');
-		if (!p)
+		如果 (!p)
 			break;
 		p++;
 	}
-	return no;
+	返回 no;
 }

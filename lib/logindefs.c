@@ -66,7 +66,7 @@ void free_getlogindefs_data(void)
 	struct item *ptr;
 
 	ptr = list;
-	while (ptr) {
+	当 (ptr) {
 		struct item *tmp = ptr->next;
 
 		free(ptr->path);
@@ -83,7 +83,7 @@ static void store(const char *name, const char *value, const char *path)
 {
 	struct item *new = xmalloc(sizeof(struct item));
 
-	if (!name)
+	如果 (!name)
 		abort();
 
 	new->name = xstrdup(name);
@@ -99,54 +99,54 @@ void logindefs_load_file(const char *filename)
 	char buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	如果 (!f)
+		返回;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	当 (fgets(buf, sizeof(buf), f)) {
 
 		char *p, *name, *data = NULL;
 
-		if (*buf == '#' || *buf == '\n')
+		如果 (*buf == '#' || *buf == '\n')
 			continue;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		如果 (p)
 			*p = '\0';
-		else {
+		否则 {
 			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+			如果 (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
+		如果 (!*buf)
 			continue;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		当 (*name && isspace((unsigned)*name))
 			name++;
 
 		/* go to the end of the name */
 		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
+		当 (*data && !(isspace((unsigned)*data) || *data == '='))
 			data++;
-		if (data > name && *data)
+		如果 (data > name && *data)
 			*data++ = '\0';
 
-		if (!*name || data == name)
+		如果 (!*name || data == name)
 			continue;
 
 		/* go to the begin of the value */
-		while (*data
+		当 (*data
 		       && (isspace((unsigned)*data) || *data == '='
 			   || *data == '"'))
 			data++;
 
 		/* remove space at the end of the value */
 		p = data + strlen(data);
-		if (p > data)
+		如果 (p > data)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		当 (p > data && (isspace((unsigned)*p) || *p == '"'))
 			*p-- = '\0';
 
 		store(name, data, filename);
@@ -157,9 +157,9 @@ void logindefs_load_file(const char *filename)
 
 static void load_defaults(void)
 {
-	if (logindefs_loader)
+	如果 (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
-	else
+	否则
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
@@ -167,17 +167,17 @@ static struct item *search(const char *name)
 {
 	struct item *ptr;
 
-	if (!list)
+	如果 (!list)
 		load_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
+	当 (ptr != NULL) {
+		如果 (c_strcasecmp(name, ptr->name) == 0)
+			返回 ptr;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	返回 NULL;
 }
 
 static const char *search_config(const char *name)
@@ -185,19 +185,19 @@ static const char *search_config(const char *name)
 	struct item *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
+	当 (ptr != NULL) {
+		如果 (c_strcasecmp(name, ptr->name) == 0)
+			返回 ptr->path;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	返回 NULL;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+整数 getlogindefs_bool(const char *name, 整数 dflt)
 {
 	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	返回 ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
 }
 
 unsigned long getlogindefs_num(const char *name, unsigned long dflt)
@@ -206,17 +206,17 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
 	char *end = NULL;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	如果 (!ptr || !ptr->value)
+		返回 dflt;
 
 	errno = 0;
 	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	如果 (end && *end == '\0' && !errno)
+		返回 retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
 	       search_config(name), name, ptr->value);
-	return dflt;
+	返回 dflt;
 }
 
 /*
@@ -229,14 +229,14 @@ const char *getlogindefs_str(const char *name, const char *dflt)
 {
 	struct item *ptr = search(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	如果 (!ptr)
+		返回 dflt;
+	如果 (!ptr->value)
+		返回 "";
+	返回 ptr->value;
 }
 
-#else /* !HAVE_LIBECONF */
+#否则 /* !HAVE_LIBECONF */
 
 #include "dl-econf.h"
 
@@ -244,7 +244,7 @@ static econf_file *file = NULL;
 
 void free_getlogindefs_data(void)
 {
-	if (file)
+	如果 (file)
 		econf_call(econf_freeFile)(file);
 	file = NULL;
 }
@@ -253,23 +253,23 @@ static void load_defaults(void)
 {
 	econf_err error;
 
-	if (file != NULL)
+	如果 (file != NULL)
 		free_getlogindefs_data();
 
-	if (ul_dlopen_libeconf() == 0) {
+	如果 (ul_dlopen_libeconf() == 0) {
 #ifdef HAVE_ECONF_READCONFIG
 		error = econf_call(econf_readConfig)(&file, NULL,
 				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+#否则
 		error = econf_call(econf_readDirs)(&file,
 				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
 #endif
-		if (error)
+		如果 (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
+	如果 (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
 
 }
@@ -281,16 +281,16 @@ void logindefs_load_file(const char *filename)
 
 	logindefs_loader = NULL; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	如果 (ul_dlopen_libeconf() != 0)
+		返回;
 
-#if USE_VENDORDIR
+#如果 USE_VENDORDIR
 	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	如果 (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		如果 (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		否则 如果 (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
@@ -301,20 +301,20 @@ void logindefs_load_file(const char *filename)
 
 	xasprintf(&path, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	如果 (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		如果 (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		否则 如果 (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} 否则 如果 (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		如果 (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		否则 如果 (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
@@ -323,24 +323,24 @@ void logindefs_load_file(const char *filename)
 	free (path);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+整数 getlogindefs_bool(const char *name, 整数 dflt)
 {
 	bool value;
 	econf_err error;
 
-	if (!file)
+	如果 (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	如果 (!file)
+		返回 dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	如果 ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
+		如果 (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		返回 dflt;
 	}
-	return value;
+	返回 value;
 }
 
 unsigned long getlogindefs_num(const char *name, unsigned long dflt)
@@ -348,19 +348,19 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
 	uint64_t value;
 	econf_err error;
 
-	if (!file)
+	如果 (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	如果 (!file)
+		返回 dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	如果 ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
+		如果 (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		返回 dflt;
 	}
-	return value;
+	返回 value;
 }
 
 /*
@@ -374,22 +374,22 @@ const char *getlogindefs_str(const char *name, const char *dflt)
 	char *value;
 	econf_err error;
 
-	if (!file)
+	如果 (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	如果 (!file)
+		返回 dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	如果 ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
+		如果 (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		返回 dflt;
 	}
-	if (value)
-		return value;
+	如果 (value)
+		返回 value;
 
-	return xstrdup("");
+	返回 xstrdup("");
 }
 #endif /* !HAVE_LIBECONF */
 
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+整数 logindefs_setenv(const char *name, const char *conf, const char *dflt)
 {
 	const char *val = getlogindefs_str(conf, dflt);
 	const char *p;
 
-	if (!val)
-		return -1;
+	如果 (!val)
+		返回 -1;
 
 	p = strchr(val, '=');
-	if (p) {
+	如果 (p) {
 		size_t sz = strlen(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		如果 (strncmp(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			如果 (*val == '"')
 				val++;
-			if (!*val)
+			如果 (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	返回 val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+整数 logindefs_setenv_path(uid_t uid)
 {
-	int rc = 0;
+	整数 rc = 0;
 
-	if (uid)
+	如果 (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
+	否则 如果 ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
 		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
 
-	return rc;
+	返回 rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+整数 effective_access(const char *path, 整数 mode)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	整数 fd = open(path, mode);
+	如果 (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	返回 fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+整数 get_hushlogin_status(struct passwd *pwd, const char *override_home, 整数 force_check)
 {
 	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
 	const char *file;
 	char buf[BUFSIZ];
-	int i;
+	整数 i;
 
 	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	如果 (file) {
+		如果 (!*file)
+			返回 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
 		files[1] = NULL;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	为 (i = 0; files[i]; i++) {
+		整数 ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
+		如果 (*file == '/') {
 			struct stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
+			如果 (stat(file, &st) != 0)
 				continue;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			如果 (st.st_size == 0)
+				返回 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
+			如果 (!f)
 				continue;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
+			当 (ok == 0 && fgets(buf, sizeof(buf), f)) {
+				如果 (buf[0] != '\0')
 					buf[strlen(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			如果 (ok)
+				返回 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			返回 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
+		如果 (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
 			continue;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+		如果 (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
 			continue;
 
-		if (force_check) {
+		如果 (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			如果 (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			如果 (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
 				exit(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			如果 (ok)
+				返回 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		否则 {
+			整数 rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			如果 (rc == 0)
+				返回 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			如果 (rc == -1 && errno == EACCES)
+				返回 -1;
 		}
 
 	}
 
-	return 0;
+	返回 0;
 }
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+整数 主要(整数 argc, char *argv[])
 {
 	char *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	如果 (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
 	logindefs_load_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
+	如果 (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
-		int i;
+		整数 i;
 		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
 				NULL};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
+		为 (i = 0; file && keys[i] != NULL; i++) {
 			char *value = NULL;
 
 			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
 			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
 		}
 
-		if (file)
+		如果 (file)
 			econf_call(econf_freeFile)(file);
 
-#else
+#否则
 		struct item *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
+		为 (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
 			       ptr->value);
 #endif
-		return EXIT_SUCCESS;
+		返回 EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
+	如果 (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
+	否则 如果 (strcmp(type, "num") == 0)
 		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
+	否则 如果 (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	返回 EXIT_SUCCESS;
 }
 #endif

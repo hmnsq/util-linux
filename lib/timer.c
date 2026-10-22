@@ -32,9 +32,9 @@
  * deliveries.
  */
 #ifdef HAVE_TIMER_CREATE
-int setup_timer(struct ul_timer *timer,
+整数 setup_timer(struct ul_timer *timer,
 		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+		void (*timeout_handler)(整数, siginfo_t *, void *))
 {
 	time_t sec = timeout->it_value.tv_sec;
 	long usec = timeout->it_value.tv_usec;
@@ -50,30 +50,30 @@ int setup_timer(struct ul_timer *timer,
 		.it_interval.tv_nsec = (sec ? sec % 100 : 1) * 10 * NSEC_PER_MSEC
 	};
 
-	if (sigemptyset(&sig_a.sa_mask))
-		return 1;
+	如果 (sigemptyset(&sig_a.sa_mask))
+		返回 1;
 
 	sig_a.sa_flags = SA_SIGINFO;
 	sig_a.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sig_a, NULL))
-		return 1;
-	if (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
-		return 1;
-	if (timer_settime(timer->t_id, 0, &val, NULL))
-		return 1;
-	return 0;
+	如果 (sigaction(SIGALRM, &sig_a, NULL))
+		返回 1;
+	如果 (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
+		返回 1;
+	如果 (timer_settime(timer->t_id, 0, &val, NULL))
+		返回 1;
+	返回 0;
 }
 void cancel_timer(struct ul_timer *timer)
 {
 	timer_delete(timer->t_id);
 }
 
-#else /* !HAVE_TIMER_CREATE */
+#否则 /* !HAVE_TIMER_CREATE */
 
-int setup_timer(struct ul_timer *timer,
+整数 setup_timer(struct ul_timer *timer,
 		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+		void (*timeout_handler)(整数, siginfo_t *, void *))
 {
 	struct sigaction sa;
 
@@ -83,11 +83,11 @@ int setup_timer(struct ul_timer *timer,
 	sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
 	sa.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sa, &timer->old_sa))
-		return 1;
-	if (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
-		return 1;
-	return 0;
+	如果 (sigaction(SIGALRM, &sa, &timer->old_sa))
+		返回 1;
+	如果 (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
+		返回 1;
+	返回 0;
 }
 
 void cancel_timer(struct ul_timer *timer)

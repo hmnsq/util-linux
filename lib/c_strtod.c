@@ -18,18 +18,18 @@
 # include <xlocale.h>
 #endif
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#如果 defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
 #endif
 
-#if defined(USE_CLOCALE)
+#如果 defined(USE_CLOCALE)
 static volatile locale_t c_locale;
 
 static locale_t get_c_locale(void)
 {
-	if (!c_locale)
+	如果 (!c_locale)
 		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	返回 c_locale;
 }
 #endif
 
@@ -37,32 +37,32 @@ static locale_t get_c_locale(void)
 double c_strtod(char const *str, char **end)
 {
 	double res;
-	int errsv;
+	整数 errsv;
 
-#if defined(USE_CLOCALE)
+#如果 defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#如果 defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
+	如果 (cl)
+		返回 strtod_l(str, end, cl);
 #elif defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	如果 (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		如果 (!org_cl)
+			返回 0;
 
 		res = strtod(str, end);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		返回 res;
 	}
 #endif /* HAVE_USELOCALE */
 #endif /* USE_CLOCALE */
@@ -71,39 +71,39 @@ double c_strtod(char const *str, char **end)
 	 */
 	char *org_locale = setlocale(LC_NUMERIC, NULL);
 
-	if (org_locale) {
+	如果 (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		如果 (!org_locale)
+			返回 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
 	res = strtod(str, end);
 	errsv = errno;
 
-	if (org_locale) {
+	如果 (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
 		free(org_locale);
 	}
 	errno = errsv;
-	return res;
+	返回 res;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+整数 主要(整数 argc, char *argv[])
 {
 	double res;
 	char *end;
 
-	if (argc < 2) {
+	如果 (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		返回 EXIT_FAILURE;
 	}
 
 	res = c_strtod(argv[1], &end);
 	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	返回 errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif

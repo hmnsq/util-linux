@@ -12,36 +12,36 @@
 #include "widechar.h"
 #include "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+struct identry *get_id(struct idcache *ic, unsigned long 整数 id)
 {
 	struct identry *ent;
 
-	if (!ic)
-		return NULL;
+	如果 (!ic)
+		返回 NULL;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	为 (ent = ic->ent; ent; ent = ent->next) {
+		如果 (ent->id == id)
+			返回 ent;
 	}
 
-	return NULL;
+	返回 NULL;
 }
 
 struct idcache *new_idcache(void)
 {
-	return calloc(1, sizeof(struct idcache));
+	返回 calloc(1, sizeof(struct idcache));
 }
 
 void free_idcache(struct idcache *ic)
 {
 	struct identry *ent;
 
-	if (!ic)
-		return;
+	如果 (!ic)
+		返回;
 
 	ent = ic->ent;
 
-	while (ent) {
+	当 (ent) {
 		struct identry *next = ent->next;
 		free(ent->name);
 		free(ent);
@@ -51,73 +51,73 @@ void free_idcache(struct idcache *ic)
 	free(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+static void add_id(struct idcache *ic, char *name, unsigned long 整数 id)
 {
 	struct identry *ent, *x;
-	int w = 0;
+	整数 w = 0;
 
-	if (!ic)
-		return;
+	如果 (!ic)
+		返回;
 
 	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	如果 (!ent)
+		返回;
 	ent->id = id;
 
-	if (name) {
+	如果 (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		如果 (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		否则
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	如果 (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
+		如果 (!ent->name) {
 			free(ent);
-			return;
+			返回;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
+	} 否则 {
+		如果 (asprintf(&ent->name, "%lu", id) < 0) {
 			free(ent);
-			return;
+			返回;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	为 (x = ic->ent; x && x->next; x = x->next);
 
-	if (x)
+	如果 (x)
 		x->next = ent;
-	else
+	否则
 		ic->ent = ent;
 
-	if (w <= 0)
+	如果 (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+void add_uid(struct idcache *cache, unsigned long 整数 id)
 {
 	struct identry *ent = get_id(cache, id);
 
-	if (!ent) {
+	如果 (!ent) {
 		struct passwd *pw = getpwuid((uid_t) id);
 		add_id(cache, pw ? pw->pw_name : NULL, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+void add_gid(struct idcache *cache, unsigned long 整数 id)
 {
 	struct identry *ent = get_id(cache, id);
 
-	if (!ent) {
+	如果 (!ent) {
 		struct group *gr = getgrgid((gid_t) id);
 		add_id(cache, gr ? gr->gr_name : NULL, id);
 	}

@@ -18,7 +18,7 @@
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  如果 defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -33,7 +33,7 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#否则
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,162 +42,162 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+static 整数 get_env_int(const char *name)
 {
 	const char *cp = getenv(name);
 
-	if (cp) {
+	如果 (cp) {
 		char *end = NULL;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		如果 (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			返回 x;
 	}
 
-	return -1;
+	返回 -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+整数 get_terminal_dimension(整数 *cols, 整数 *lines)
 {
-	int c = 0, l = 0;
+	整数 c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
+#如果 defined(TIOCGWINSZ)
 	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+	如果 (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
 #elif defined(TIOCGSIZE)
 	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+	如果 (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
 		l = t_win.ts_lines;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	如果 (cols) {
+		如果 (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	如果 (lines) {
+		如果 (l <= 0)
 			l = get_env_int("LINES");
 		*lines = l;
 	}
-	return 0;
+	返回 0;
 }
 
-int get_terminal_width(int default_width)
+整数 get_terminal_width(整数 default_width)
 {
-	int width = 0;
+	整数 width = 0;
 
 	get_terminal_dimension(&width, NULL);
 
-	return width > 0 ? width : default_width;
+	返回 width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+整数 get_terminal_stdfd(void)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	如果 (isatty(STDIN_FILENO))
+		返回 STDIN_FILENO;
+	如果 (isatty(STDOUT_FILENO))
+		返回 STDOUT_FILENO;
+	如果 (isatty(STDERR_FILENO))
+		返回 STDERR_FILENO;
 
-	return -EINVAL;
+	返回 -EINVAL;
 }
 
-int get_terminal_name(const char **path,
+整数 get_terminal_name(const char **path,
 		      const char **name,
 		      const char **number)
 {
 	const char *tty;
 	const char *p;
-	int fd;
+	整数 fd;
 
 
-	if (name)
+	如果 (name)
 		*name = NULL;
-	if (path)
+	如果 (path)
 		*path = NULL;
-	if (number)
+	如果 (number)
 		*number = NULL;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	如果 (fd < 0)
+		返回 fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	如果 (!tty)
+		返回 -1;
 
-	if (path)
+	如果 (path)
 		*path = tty;
-	if (name || number)
+	如果 (name || number)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	如果 (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
+	如果 (number) {
+		为 (p = tty; p && *p; p++) {
+			如果 (isdigit(*p)) {
 				*number = p;
 				break;
 			}
 		}
 	}
-	return 0;
+	返回 0;
 }
 
-int get_terminal_type(const char **type)
+整数 get_terminal_type(const char **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	如果 (*type)
+		返回 -EINVAL;
+	返回 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+char *get_terminal_default_type(const char *ttyname, 整数 is_serial)
 {
-	if (ttyname) {
+	如果 (ttyname) {
 #ifdef HAVE_GETTTYNAM
 		struct ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		如果 (ent && ent->ty_type)
+			返回 strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#如果 defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		如果 (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			返回 strdup(DEFAULT_TTYS0);
+		否则 如果 (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			返回 strdup(DEFAULT_TTY32);
+		否则 如果 (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			返回 strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	返回 strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+整数 主要(void)
 {
 	const char *path, *name, *num;
-	int c, l;
+	整数 c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
+	如果 (get_terminal_name(&path, &name, &num) == 0) {
 		char *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
@@ -215,6 +215,6 @@ int main(void)
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	返回 EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */
