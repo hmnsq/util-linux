@@ -7,7 +7,7 @@
 #include "c.h"
 #include "dl-econf.h"
 
-#if defined(HAVE_LIBECONF) && defined(USE_DLOPEN_ECONF)
+#ако defined(HAVE_LIBECONF) && defined(USE_DLOPEN_ECONF)
 
 UL_ELF_NOTE_DLOPEN("econf",
 		    "Support for libeconf",
@@ -34,15 +34,15 @@ static const struct ul_dlsym ul_econf_symbols[] =
 	UL_DLSYM( ul_econf_opers, econf_freeArray ),
 };
 
-int ul_dlopen_libeconf(void)
+цео ul_dlopen_libeconf(void)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
+	static цео status = 0;
 	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	цео flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ако (status)
+		врати status > 0 ? 0 : -ENOSYS;
 
 #ifdef RTLD_NODELETE
 	flags |= RTLD_NODELETE;
@@ -52,7 +52,7 @@ int ul_dlopen_libeconf(void)
 				   ARRAY_SIZE(ul_econf_symbols),
 				   &ul_econf, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	врати status > 0 ? 0 : -ENOSYS;
 }
 
 #endif /* HAVE_LIBECONF && USE_DLOPEN_ECONF */

@@ -11,62 +11,62 @@
 #include "c.h"
 #include "encode.h"
 
-size_t ul_encode_to_utf8(int enc, unsigned char *dest, size_t len,
+size_t ul_encode_to_utf8(цео enc, unsigned char *dest, size_t len,
 			const unsigned char *src, size_t count)
 {
 	size_t i, j;
 	uint32_t c;
 	uint16_t c2;
 
-	for (j = i = 0; i < count; i++) {
-		if (enc == UL_ENCODE_UTF16LE) {
-			if (i+2 > count)
+	за (j = i = 0; i < count; i++) {
+		ако (enc == UL_ENCODE_UTF16LE) {
+			ако (i+2 > count)
 				break;
 			c = (src[i+1] << 8) | src[i];
 			i++;
-		} else if (enc == UL_ENCODE_UTF16BE) {
-			if (i+2 > count)
+		} инако ако (enc == UL_ENCODE_UTF16BE) {
+			ако (i+2 > count)
 				break;
 			c = (src[i] << 8) | src[i+1];
 			i++;
-		} else if (enc == UL_ENCODE_LATIN1) {
+		} инако ако (enc == UL_ENCODE_LATIN1) {
 			c = src[i];
-		} else {
-			return 0;
+		} инако {
+			врати 0;
 		}
-		if ((enc == UL_ENCODE_UTF16LE || enc == UL_ENCODE_UTF16BE) &&
+		ако ((enc == UL_ENCODE_UTF16LE || enc == UL_ENCODE_UTF16BE) &&
 		    c >= 0xD800 && c <= 0xDBFF && i+2 < count) {
-			if (enc == UL_ENCODE_UTF16LE)
+			ако (enc == UL_ENCODE_UTF16LE)
 				c2 = (src[i+2] << 8) | src[i+1];
-			else
+			инако
 				c2 = (src[i+1] << 8) | src[i+2];
-			if (c2 >= 0xDC00 && c2 <= 0xDFFF) {
+			ако (c2 >= 0xDC00 && c2 <= 0xDFFF) {
 				c = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
 				i += 2;
 			}
 		}
-		if (c == 0) {
+		ако (c == 0) {
 			dest[j] = '\0';
 			break;
 		}
 
-		if (c < 0x80) {
-			if (j+1 >= len)
+		ако (c < 0x80) {
+			ако (j+1 >= len)
 				break;
 			dest[j++] = (uint8_t) c;
-		} else if (c < 0x800) {
-			if (j+2 >= len)
+		} инако ако (c < 0x800) {
+			ако (j+2 >= len)
 				break;
 			dest[j++] = (uint8_t) (0xc0 | (c >> 6));
 			dest[j++] = (uint8_t) (0x80 | (c & 0x3f));
-		} else if (c < 0x10000) {
-			if (j+3 >= len)
+		} инако ако (c < 0x10000) {
+			ако (j+3 >= len)
 				break;
 			dest[j++] = (uint8_t) (0xe0 | (c >> 12));
 			dest[j++] = (uint8_t) (0x80 | ((c >> 6) & 0x3f));
 			dest[j++] = (uint8_t) (0x80 | (c & 0x3f));
-		} else {
-			if (j+4 >= len)
+		} инако {
+			ако (j+4 >= len)
 				break;
 			dest[j++] = (uint8_t) (0xf0 | (c >> 18));
 			dest[j++] = (uint8_t) (0x80 | ((c >> 12) & 0x3f));
@@ -75,5 +75,5 @@ size_t ul_encode_to_utf8(int enc, unsigned char *dest, size_t len,
 		}
 	}
 	dest[j] = '\0';
-	return j;
+	врати j;
 }

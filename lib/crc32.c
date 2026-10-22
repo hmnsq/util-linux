@@ -100,7 +100,7 @@ static const uint32_t crc32_tab[] = {
 
 static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
 {
-	return crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
+	врати crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
 }
 
 /*
@@ -113,12 +113,12 @@ uint32_t ul_crc32(uint32_t seed, const unsigned char *buf, size_t len)
 	uint32_t crc = seed;
 	const unsigned char *p = buf;
 
-	while (len) {
+	док (len) {
 		crc = crc32_add_char(crc, *p++);
 		len--;
 	}
 
-	return crc;
+	врати crc;
 }
 
 uint32_t ul_crc32_exclude_offset(uint32_t seed, const unsigned char *buf, size_t len,
@@ -128,15 +128,15 @@ uint32_t ul_crc32_exclude_offset(uint32_t seed, const unsigned char *buf, size_t
 	const unsigned char *p = buf;
 	size_t i;
 
-	for (i = 0; i < len; i++) {
+	за (i = 0; i < len; i++) {
 		unsigned char x = *p++;
 
-		if (i >= exclude_off && i < exclude_off + exclude_len)
+		ако (i >= exclude_off && i < exclude_off + exclude_len)
 			x = exclude_fill;
 
 		crc = crc32_add_char(crc, x);
 	}
 
-	return crc;
+	врати crc;
 }
 

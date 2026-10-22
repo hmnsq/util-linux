@@ -19,48 +19,48 @@
  * returns 0 on success,
  *     or <0 on error
  */
-int ul_setfscreatecon_from_file(char *orig_file)
+цео ul_setfscreatecon_from_file(char *orig_file)
 {
-	if (ul_dlopen_libselinux() == 0
+	ако (ul_dlopen_libselinux() == 0
 	    && selinux_call(is_selinux_enabled)() > 0) {
 		char *scontext = NULL;
 
-		if (selinux_call(getfilecon)(orig_file, &scontext) < 0)
-			return -1;
-		if (selinux_call(setfscreatecon)(scontext) < 0) {
+		ако (selinux_call(getfilecon)(orig_file, &scontext) < 0)
+			врати -1;
+		ако (selinux_call(setfscreatecon)(scontext) < 0) {
 			selinux_call(freecon)(scontext);
-			return -1;
+			врати -1;
 		}
 		selinux_call(freecon)(scontext);
 	}
-	return 0;
+	врати 0;
 }
 
 /* returns 1 if user has access to @class and @perm ("passwd", "chfn")
  *	or 0 on error,
  *	or 0 if has no access -- in this case sets @user_cxt to user-context
  */
-int ul_selinux_has_access(const char *classstr, const char *perm, char **user_cxt)
+цео ul_selinux_has_access(const char *classstr, const char *perm, char **user_cxt)
 {
 	char *user;
-	int rc;
+	цео rc;
 
-	if (user_cxt)
+	ако (user_cxt)
 		*user_cxt = NULL;
 
-	if (ul_dlopen_libselinux() != 0)
-		return 0;
+	ако (ul_dlopen_libselinux() != 0)
+		врати 0;
 
-	if (selinux_call(getprevcon)(&user) != 0)
-		return 0;
+	ако (selinux_call(getprevcon)(&user) != 0)
+		врати 0;
 
 	rc = selinux_call(selinux_check_access)(user, user, classstr, perm, NULL);
-	if (rc != 0 && user_cxt)
+	ако (rc != 0 && user_cxt)
 		*user_cxt = user;
-	else
+	инако
 		selinux_call(freecon)(user);
 
-	return rc == 0 ? 1 : 0;
+	врати rc == 0 ? 1 : 0;
 }
 
 /* Gets the default context for @path and @st_mode.
@@ -68,26 +68,26 @@ int ul_selinux_has_access(const char *classstr, const char *perm, char **user_cx
  * returns 0 on success,
  *     or <0 on error
  */
-int ul_selinux_get_default_context(const char *path, int st_mode, char **cxt)
+цео ul_selinux_get_default_context(const char *path, цео st_mode, char **cxt)
 {
 	struct selabel_handle *hnd;
 	struct selinux_opt options[SELABEL_NOPT] = {};
-	int rc = 0;
+	цео rc = 0;
 
 	*cxt = NULL;
 
-	if (ul_dlopen_libselinux() != 0)
-		return -ENOSYS;
+	ако (ul_dlopen_libselinux() != 0)
+		врати -ENOSYS;
 
 	hnd = selinux_call(selabel_open)(SELABEL_CTX_FILE, options, SELABEL_NOPT);
-	if (!hnd)
-		return -errno;
+	ако (!hnd)
+		врати -errno;
 
-	if (selinux_call(selabel_lookup)(hnd, cxt, path, st_mode) != 0)
+	ако (selinux_call(selabel_lookup)(hnd, cxt, path, st_mode) != 0)
 		rc = -errno;
 	selinux_call(selabel_close)(hnd);
 
-	return rc;
+	врати rc;
 }
 
 #endif /* HAVE_LIBSELINUX */

@@ -18,9 +18,9 @@
 
 #include "md5.h"
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#ако __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 # define byteReverse(buf, len)	/* Nothing */
-#else
+#инако
 static void byteReverse(unsigned char *buf, unsigned longs);
 
 #ifndef ASM_MD5
@@ -35,7 +35,7 @@ static void byteReverse(unsigned char *buf, unsigned longs)
 	    ((unsigned) buf[1] << 8 | buf[0]);
 	*(uint32_t *) buf = t;
 	buf += 4;
-    } while (--longs);
+    } док (--longs);
 }
 #endif /* !ASM_MD5 */
 #endif /* __ORDER_LITTLE_ENDIAN__ */
@@ -66,7 +66,7 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
     /* Update bitcount */
 
     t = ctx->bits[0];
-    if ((ctx->bits[0] = t + ((uint32_t) len << 3)) < t)
+    ако ((ctx->bits[0] = t + ((uint32_t) len << 3)) < t)
 	ctx->bits[1]++;		/* Carry from low to high */
     ctx->bits[1] += len >> 29;
 
@@ -74,13 +74,13 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
 
     /* Handle any leading odd-sized chunks */
 
-    if (t) {
+    ако (t) {
 	unsigned char *p = (unsigned char *) ctx->in + t;
 
 	t = 64 - t;
-	if (len < t) {
+	ако (len < t) {
 	    memcpy(p, buf, len);
-	    return;
+	    врати;
 	}
 	memcpy(p, buf, t);
 	byteReverse(ctx->in, 16);
@@ -90,7 +90,7 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
     }
     /* Process data in 64-byte chunks */
 
-    while (len >= 64) {
+    док (len >= 64) {
 	memcpy(ctx->in, buf, 64);
 	byteReverse(ctx->in, 16);
 	ul_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
@@ -124,7 +124,7 @@ void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
     count = 64 - 1 - count;
 
     /* Pad out to 56 mod 64 */
-    if (count < 8) {
+    ако (count < 8) {
 	/* Two lots of padding:  Pad the first block to 64 bytes */
 	memset(p, 0, count);
 	byteReverse(ctx->in, 16);
@@ -132,7 +132,7 @@ void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
 
 	/* Now fill the next block with 56 bytes */
 	memset(ctx->in, 0, 56);
-    } else {
+    } инако {
 	/* Pad block to 56 bytes */
 	memset(p, 0, count - 8);
     }

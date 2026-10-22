@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		врати "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		врати ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		врати "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		врати "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		врати "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		врати "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		врати "AM";
 	case PM_STR:
-		return "PM";
+		врати "PM";
 	case DAY_1:
-		return "Sunday";
+		врати "Sunday";
 	case DAY_2:
-		return "Monday";
+		врати "Monday";
 	case DAY_3:
-		return "Tuesday";
+		врати "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		врати "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		врати "Thursday";
 	case DAY_6:
-		return "Friday";
+		врати "Friday";
 	case DAY_7:
-		return "Saturday";
+		врати "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		врати "Sun";
 	case ABDAY_2:
-		return "Mon";
+		врати "Mon";
 	case ABDAY_3:
-		return "Tue";
+		врати "Tue";
 	case ABDAY_4:
-		return "Wed";
+		врати "Wed";
 	case ABDAY_5:
-		return "Thu";
+		врати "Thu";
 	case ABDAY_6:
-		return "Fri";
+		врати "Fri";
 	case ABDAY_7:
-		return "Sat";
+		врати "Sat";
 	case MON_1:
-		return "January";
+		врати "January";
 	case MON_2:
-		return "February";
+		врати "February";
 	case MON_3:
-		return "March";
+		врати "March";
 	case MON_4:
-		return "April";
+		врати "April";
 	case MON_5:
-		return "May";
+		врати "May";
 	case MON_6:
-		return "June";
+		врати "June";
 	case MON_7:
-		return "July";
+		врати "July";
 	case MON_8:
-		return "August";
+		врати "August";
 	case MON_9:
-		return "September";
+		врати "September";
 	case MON_10:
-		return "October";
+		врати "October";
 	case MON_11:
-		return "November";
+		врати "November";
 	case MON_12:
-		return "December";
+		врати "December";
 	case ABMON_1:
-		return "Jan";
+		врати "Jan";
 	case ABMON_2:
-		return "Feb";
+		врати "Feb";
 	case ABMON_3:
-		return "Mar";
+		врати "Mar";
 	case ABMON_4:
-		return "Apr";
+		врати "Apr";
 	case ABMON_5:
-		return "May";
+		врати "May";
 	case ABMON_6:
-		return "Jun";
+		врати "Jun";
 	case ABMON_7:
-		return "Jul";
+		врати "Jul";
 	case ABMON_8:
-		return "Aug";
+		врати "Aug";
 	case ABMON_9:
-		return "Sep";
+		врати "Sep";
 	case ABMON_10:
-		return "Oct";
+		врати "Oct";
 	case ABMON_11:
-		return "Nov";
+		врати "Nov";
 	case ABMON_12:
-		return "Dec";
+		врати "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		врати "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		врати "-";
 	case YESEXPR:
-		return "^[yY]";
+		врати "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		врати "^[nN]";
 	default:
-		return "";
+		врати "";
 	}
 }
 

@@ -63,8 +63,8 @@ UL_DEBUG_DEFINE_MASKNAMES(loopdev) = UL_DEBUG_EMPTY_MASKNAMES;
 
 static void loopdev_init_debug(void)
 {
-	if (loopdev_debug_mask)
-		return;
+	ако (loopdev_debug_mask)
+		врати;
 	__UL_INIT_DEBUG_FROM_ENV(loopdev, LOOPDEV_DEBUG_, 0, LOOPDEV_DEBUG);
 }
 
@@ -79,17 +79,17 @@ static void loopdev_init_debug(void)
  * Calls @x and repeat on EAGAIN
  */
 #define repeat_on_eagain(x) __extension__ ({			\
-		int _c = 0, _e;					\
+		цео _c = 0, _e;					\
 		do {						\
 			errno = 0;				\
 			_e = x;					\
-			if (_e == 0 || errno != EAGAIN)		\
+			ако (_e == 0 || errno != EAGAIN)		\
 				break;				\
-			if (_c >= LOOPDEV_MAX_TRIES)		\
+			ако (_c >= LOOPDEV_MAX_TRIES)		\
 				break;				\
 			xusleep(250000);			\
 			_c++;					\
-		} while (1);					\
+		} док (1);					\
 		_e == 0 ? 0 : errno ? -errno : -1;		\
 	})
 
@@ -105,12 +105,12 @@ static void loopdev_init_debug(void)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
+цео loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
-	if (lc->fd >= 0) {
+	ако (lc->fd >= 0) {
 		close(lc->fd);
 		DBG_OBJ(CXT, lc, ul_debug("closing old open fd"));
 	}
@@ -125,20 +125,20 @@ int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
 	memset(&lc->config, 0, sizeof(lc->config));
 
 	/* set new */
-	if (device) {
-		if (*device != '/') {
+	ако (device) {
+		ако (*device != '/') {
 			const char *dir = _PATH_DEV;
 
 			/* compose device name for /dev/loop<n> or /dev/loop/<n> */
-			if (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
-				if (strlen(device) < 5)
-					return -1;
+			ако (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
+				ако (strlen(device) < 5)
+					врати -1;
 				device += 4;
 				dir = _PATH_DEV_LOOP "/";	/* _PATH_DEV uses trailing slash */
 			}
 			snprintf(lc->device, sizeof(lc->device), "%s%s",
 				dir, device);
-		} else
+		} инако
 			xstrncpy(lc->device, device, sizeof(lc->device));
 
 		DBG_OBJ(CXT, lc, ul_debug("%s name assigned", device));
@@ -146,34 +146,34 @@ int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
 
 	ul_unref_path(lc->sysfs);
 	lc->sysfs = NULL;
-	return 0;
+	врати 0;
 }
 
-int loopcxt_has_device(struct loopdev_cxt *lc)
+цео loopcxt_has_device(struct loopdev_cxt *lc)
 {
-	return lc && *lc->device;
+	врати lc && *lc->device;
 }
 
 dev_t loopcxt_get_devno(struct loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (!lc->devno)
+	ако (!lc || !loopcxt_has_device(lc))
+		врати 0;
+	ако (!lc->devno)
 		lc->devno = sysfs_devname_to_devno(lc->device);
-	return lc->devno;
+	врати lc->devno;
 }
 
-int loopcxt_is_lost(struct loopdev_cxt *lc)
+цео loopcxt_is_lost(struct loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (lc->is_lost)
-		return 1;
+	ако (!lc || !loopcxt_has_device(lc))
+		врати 0;
+	ако (lc->is_lost)
+		врати 1;
 
 	lc->is_lost = access(lc->device, F_OK) != 0
 			&& loopcxt_get_devno(lc) != 0;
 
-	return lc->is_lost;
+	врати lc->is_lost;
 }
 
 /*
@@ -190,14 +190,14 @@ int loopcxt_is_lost(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_init(struct loopdev_cxt *lc, int flags)
+цео loopcxt_init(struct loopdev_cxt *lc, цео flags)
 {
-	int rc;
+	цео rc;
 	struct stat st;
 	struct loopdev_cxt dummy = UL_LOOPDEVCXT_EMPTY;
 
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
 	loopdev_init_debug();
 	DBG_OBJ(CXT, lc, ul_debug("initialize context"));
@@ -206,16 +206,16 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
 	lc->flags = flags;
 
 	rc = loopcxt_set_device(lc, NULL);
-	if (rc)
-		return rc;
+	ако (rc)
+		врати rc;
 
-	if (stat(_PATH_SYS_BLOCK, &st) || !S_ISDIR(st.st_mode)) {
+	ако (stat(_PATH_SYS_BLOCK, &st) || !S_ISDIR(st.st_mode)) {
 		lc->flags |= LOOPDEV_FL_NOSYSFS;
 		lc->flags &= ~LOOPDEV_FL_NOIOCTL;
 		DBG_OBJ(CXT, lc, ul_debug("init: disable /sys usage"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
+	ако (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
 	    get_linux_version() >= KERNEL_VERSION(2,6,37)) {
 		/*
 		 * Use only sysfs for basic information about loop devices
@@ -224,12 +224,12 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
 		DBG_OBJ(CXT, lc, ul_debug("init: ignore ioctls"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(_PATH_DEV_LOOPCTL, &st)) {
+	ако (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(_PATH_DEV_LOOPCTL, &st)) {
 		lc->flags |= LOOPDEV_FL_CONTROL;
 		DBG_OBJ(CXT, lc, ul_debug("init: loop-control detected "));
 	}
 
-	return 0;
+	врати 0;
 }
 
 /*
@@ -239,10 +239,10 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
  */
 void loopcxt_deinit(struct loopdev_cxt *lc)
 {
-	int errsv = errno;
+	цео errsv = errno;
 
-	if (!lc)
-		return;
+	ако (!lc)
+		врати;
 
 	DBG_OBJ(CXT, lc, ul_debug("de-initialize"));
 
@@ -262,9 +262,9 @@ void loopcxt_deinit(struct loopdev_cxt *lc)
  */
 char *loopcxt_strdup_device(struct loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device)
-		return NULL;
-	return strdup(lc->device);
+	ако (!lc || !*lc->device)
+		врати NULL;
+	врати strdup(lc->device);
 }
 
 /*
@@ -274,7 +274,7 @@ char *loopcxt_strdup_device(struct loopdev_cxt *lc)
  */
 const char *loopcxt_get_device(struct loopdev_cxt *lc)
 {
-	return lc && *lc->device ? lc->device : NULL;
+	врати lc && *lc->device ? lc->device : NULL;
 }
 
 /*
@@ -284,65 +284,65 @@ const char *loopcxt_get_device(struct loopdev_cxt *lc)
  */
 static struct path_cxt *loopcxt_get_sysfs(struct loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
-		return NULL;
+	ако (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
+		врати NULL;
 
-	if (!lc->sysfs) {
+	ако (!lc->sysfs) {
 		dev_t devno = loopcxt_get_devno(lc);
-		if (!devno) {
+		ако (!devno) {
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: failed devname to devno"));
-			return NULL;
+			врати NULL;
 		}
 
 		lc->sysfs = ul_new_sysfs_path(devno, NULL, NULL);
-		if (!lc->sysfs)
+		ако (!lc->sysfs)
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: init failed"));
 	}
 
-	return lc->sysfs;
+	врати lc->sysfs;
 }
 
-static int __loopcxt_get_fd(struct loopdev_cxt *lc, mode_t mode)
+static цео __loopcxt_get_fd(struct loopdev_cxt *lc, mode_t mode)
 {
-	int old = -1;
+	цео old = -1;
 
-	if (!lc || !*lc->device)
-		return -EINVAL;
+	ако (!lc || !*lc->device)
+		врати -EINVAL;
 
 	/* It's okay to return a FD with read-write permissions if someone
 	 * asked for read-only, but you shouldn't do the opposite.
 	 *
 	 * (O_RDONLY is a widely usable default.)
 	 */
-	if (lc->fd >= 0 && mode == O_RDWR && lc->mode == O_RDONLY) {
+	ако (lc->fd >= 0 && mode == O_RDWR && lc->mode == O_RDONLY) {
 		DBG_OBJ(CXT, lc, ul_debug("closing already open device (mode mismatch)"));
 		old = lc->fd;
 		lc->fd = -1;
 	}
 
-	if (lc->fd < 0) {
+	ако (lc->fd < 0) {
 		lc->mode = mode;
 		lc->fd = open(lc->device, lc->mode | O_CLOEXEC);
 		DBG_OBJ(CXT, lc, ul_debug("open %s [%s]: %m", lc->device,
 				mode == O_RDONLY ? "ro" :
 				mode == O_RDWR ? "rw" : "??"));
 
-		if (lc->fd < 0 && old >= 0) {
+		ако (lc->fd < 0 && old >= 0) {
 			/* restore original on error */
 			lc->fd = old;
 			old = -1;
 		}
 	}
 
-	if (old >= 0)
+	ако (old >= 0)
 		close(old);
-	return lc->fd;
+	врати lc->fd;
 }
 
 /* default is read-only file descriptor, it's enough for all ioctls */
-int loopcxt_get_fd(struct loopdev_cxt *lc)
+цео loopcxt_get_fd(struct loopdev_cxt *lc)
 {
-	return __loopcxt_get_fd(lc, O_RDONLY);
+	врати __loopcxt_get_fd(lc, O_RDONLY);
 }
 
 /*
@@ -353,13 +353,13 @@ int loopcxt_get_fd(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
+цео loopcxt_init_iterator(struct loopdev_cxt *lc, цео flags)
 {
 	struct loopdev_iter *iter;
 	struct stat st;
 
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
 
 	iter = &lc->iter;
@@ -372,17 +372,17 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
 	iter->flags = flags;
 	iter->default_check = 1;
 
-	if (!lc->extra_check) {
+	ако (!lc->extra_check) {
 		/*
 		 * Check for /dev/loop/<N> subdirectory
 		 */
-		if (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
+		ако (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
 		    stat(_PATH_DEV_LOOP, &st) == 0 && S_ISDIR(st.st_mode))
 			lc->flags |= LOOPDEV_FL_DEVSUBDIR;
 
 		lc->extra_check = 1;
 	}
-	return 0;
+	врати 0;
 }
 
 /*
@@ -390,24 +390,24 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
+цео loopcxt_deinit_iterator(struct loopdev_cxt *lc)
 {
 	struct loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
 	iter = &lc->iter;
 	DBG_OBJ(ITER, iter, ul_debug("de-initialize"));
 
 	free(iter->minors);
-	if (iter->proc)
+	ако (iter->proc)
 		fclose(iter->proc);
-	if (iter->sysblock)
+	ако (iter->sysblock)
 		closedir(iter->sysblock);
 
 	memset(iter, 0, sizeof(*iter));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -417,36 +417,36 @@ int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
  * Returns: <0 on error, 0 on success, 1 device does not match with
  *         LOOPITER_FL_{USED,FREE} flags.
  */
-static int loopiter_set_device(struct loopdev_cxt *lc, const char *device)
+static цео loopiter_set_device(struct loopdev_cxt *lc, const char *device)
 {
-	int rc = loopcxt_set_device(lc, device);
-	int used;
+	цео rc = loopcxt_set_device(lc, device);
+	цео used;
 
-	if (rc)
-		return rc;
+	ако (rc)
+		врати rc;
 
-	if (!(lc->iter.flags & LOOPITER_FL_USED) &&
+	ако (!(lc->iter.flags & LOOPITER_FL_USED) &&
 	    !(lc->iter.flags & LOOPITER_FL_FREE))
-		return 0;	/* caller does not care about device status */
+		врати 0;	/* caller does not care about device status */
 
 	used = loopcxt_get_offset(lc, NULL) == 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_USED) && used)
-		return 0;
+	ако ((lc->iter.flags & LOOPITER_FL_USED) && used)
+		врати 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_FREE) && !used)
-		return 0;
+	ако ((lc->iter.flags & LOOPITER_FL_FREE) && !used)
+		врати 0;
 
 	DBG_OBJ(ITER, &lc->iter, ul_debug("failed to use %s device", lc->device));
 
 	ignore_result( loopcxt_set_device(lc, NULL) );
-	return 1;
+	врати 1;
 }
 
-static int cmpnum(const void *p1, const void *p2)
+static цео cmpnum(const void *p1, const void *p2)
 {
-	return (((* (const int *) p1) > (* (const int *) p2)) -
-			((* (const int *) p1) < (* (const int *) p2)));
+	врати (((* (const цео *) p1) > (* (const цео *) p2)) -
+			((* (const цео *) p1) < (* (const цео *) p2)));
 }
 
 /*
@@ -454,70 +454,70 @@ static int cmpnum(const void *p1, const void *p2)
  * We needn't full loop device names -- loop numbers (loop<N>)
  * are enough.
  */
-static int loop_scandir(const char *dirname, int **ary, int hasprefix)
+static цео loop_scandir(const char *dirname, цео **ary, цео hasprefix)
 {
 	DIR *dir;
 	struct dirent *d;
-	unsigned int n, count = 0, arylen = 0;
+	unsigned цео n, count = 0, arylen = 0;
 
-	if (!dirname || !ary)
-		return 0;
+	ако (!dirname || !ary)
+		врати 0;
 
 	DBG(ITER, ul_debug("scan dir: %s", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return 0;
+	ако (!dir)
+		врати 0;
 	free(*ary);
 	*ary = NULL;
 
-	while((d = readdir(dir))) {
+	док((d = readdir(dir))) {
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
+		ако (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
 		    d->d_type != DT_LNK)
 			continue;
 #endif
-		if (is_dotdir_dirent(d))
+		ако (is_dotdir_dirent(d))
 			continue;
 
-		if (hasprefix) {
+		ако (hasprefix) {
 			/* /dev/loop<N> */
-			if (sscanf(d->d_name, "loop%u", &n) != 1)
+			ако (sscanf(d->d_name, "loop%u", &n) != 1)
 				continue;
-		} else {
+		} инако {
 			/* /dev/loop/<N> */
 			char *end = NULL;
 
 			errno = 0;
 			n = strtol(d->d_name, &end, 10);
-			if (d->d_name == end || (end && *end) || errno)
+			ако (d->d_name == end || (end && *end) || errno)
 				continue;
 		}
-		if (n < LOOPDEV_DEFAULT_NNODES)
+		ако (n < LOOPDEV_DEFAULT_NNODES)
 			continue;			/* ignore loop<0..7> */
 
-		if (count + 1 > arylen) {
-			int *tmp;
+		ако (count + 1 > arylen) {
+			цео *tmp;
 
 			arylen += 1;
 
-			tmp = reallocarray(*ary, arylen, sizeof(int));
-			if (!tmp) {
+			tmp = reallocarray(*ary, arylen, sizeof(цео));
+			ако (!tmp) {
 				free(*ary);
 				*ary = NULL;
 				closedir(dir);
-				return -1;
+				врати -1;
 			}
 			*ary = tmp;
 		}
-		if (*ary)
+		ако (*ary)
 			(*ary)[count++] = n;
 	}
-	if (count && *ary)
-		qsort(*ary, count, sizeof(int), cmpnum);
+	ако (count && *ary)
+		qsort(*ary, count, sizeof(цео), cmpnum);
 
 	closedir(dir);
-	return count;
+	врати count;
 }
 
 /*
@@ -525,34 +525,34 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
  *
  * Loop devices smaller than 512 bytes are invisible for this function.
  */
-static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
+static цео loopcxt_next_from_proc(struct loopdev_cxt *lc)
 {
 	struct loopdev_iter *iter = &lc->iter;
 	char buf[BUFSIZ];
 
 	DBG_OBJ(ITER, iter, ul_debug("scan /proc/partitions"));
 
-	if (!iter->proc)
+	ако (!iter->proc)
 		iter->proc = fopen(_PATH_PROC_PARTITIONS, "r" UL_CLOEXECSTR);
-	if (!iter->proc)
-		return 1;
+	ако (!iter->proc)
+		врати 1;
 
-	while (fgets(buf, sizeof(buf), iter->proc)) {
-		unsigned int m;
+	док (fgets(buf, sizeof(buf), iter->proc)) {
+		unsigned цео m;
 		char name[128 + 1];
 
 
-		if (sscanf(buf, " %u %*s %*s %128[^\n ]",
+		ако (sscanf(buf, " %u %*s %*s %128[^\n ]",
 			   &m, name) != 2 || m != LOOPDEV_MAJOR)
 			continue;
 
 		DBG_OBJ(ITER, iter, ul_debug("checking %s", name));
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		ако (loopiter_set_device(lc, name) == 0)
+			врати 0;
 	}
 
-	return 1;
+	врати 1;
 }
 
 /*
@@ -561,40 +561,40 @@ static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
  *
  * This is preferred method.
  */
-static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
+static цео loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
 {
 	struct loopdev_iter *iter = &lc->iter;
 	struct dirent *d;
-	int fd;
+	цео fd;
 
 	DBG_OBJ(ITER, iter, ul_debug("scanning /sys/block"));
 
-	if (!iter->sysblock)
+	ако (!iter->sysblock)
 		iter->sysblock = opendir(_PATH_SYS_BLOCK);
 
-	if (!iter->sysblock)
-		return 1;
+	ако (!iter->sysblock)
+		врати 1;
 
 	fd = dirfd(iter->sysblock);
 
-	while ((d = readdir(iter->sysblock))) {
+	док ((d = readdir(iter->sysblock))) {
 		char name[NAME_MAX + 18 + 1];
 		struct stat st;
 
 		DBG_OBJ(ITER, iter, ul_debug("check %s", d->d_name));
 
-		if (is_dotdir_dirent(d) || strncmp(d->d_name, "loop", 4) != 0)
+		ако (is_dotdir_dirent(d) || strncmp(d->d_name, "loop", 4) != 0)
 			continue;
 
 		snprintf(name, sizeof(name), "%s/loop/backing_file", d->d_name);
-		if (fstatat(fd, name, &st, 0) != 0)
+		ако (fstatat(fd, name, &st, 0) != 0)
 			continue;
 
-		if (loopiter_set_device(lc, d->d_name) == 0)
-			return 0;
+		ако (loopiter_set_device(lc, d->d_name) == 0)
+			врати 0;
 	}
 
-	return 1;
+	врати 1;
 }
 
 /*
@@ -604,84 +604,84 @@ static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
  *          about the current loop device are available by
  *          loopcxt_get_{fd,backing_file,device,offset, ...} functions.
  */
-int loopcxt_next(struct loopdev_cxt *lc)
+цео loopcxt_next(struct loopdev_cxt *lc)
 {
 	struct loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
 
 	iter = &lc->iter;
-	if (iter->done)
-		return 1;
+	ако (iter->done)
+		врати 1;
 
 	DBG_OBJ(ITER, iter, ul_debug("next"));
 
 	/* A) Look for used loop devices in /proc/partitions ("losetup -a" only)
 	 */
-	if (iter->flags & LOOPITER_FL_USED) {
-		int rc;
+	ако (iter->flags & LOOPITER_FL_USED) {
+		цео rc;
 
-		if (loopcxt_sysfs_available(lc))
+		ако (loopcxt_sysfs_available(lc))
 			rc = loopcxt_next_from_sysfs(lc);
-		else
+		инако
 			rc = loopcxt_next_from_proc(lc);
-		if (rc == 0)
-			return 0;
+		ако (rc == 0)
+			врати 0;
 		goto done;
 	}
 
 	/* B) Classic way, try first eight loop devices (default number
 	 *    of loop devices). This is enough for 99% of all cases.
 	 */
-	if (iter->default_check) {
+	ако (iter->default_check) {
 		DBG_OBJ(ITER, iter, ul_debug("next: default check"));
-		for (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
+		за (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
 							iter->ncur++) {
 			char name[16];
 			snprintf(name, sizeof(name), "loop%d", iter->ncur);
 
-			if (loopiter_set_device(lc, name) == 0)
-				return 0;
+			ако (loopiter_set_device(lc, name) == 0)
+				врати 0;
 		}
 		iter->default_check = 0;
 	}
 
 	/* C) the worst possibility, scan whole /dev or /dev/loop/<N>
 	 */
-	if (!iter->minors) {
+	ако (!iter->minors) {
 		DBG_OBJ(ITER, iter, ul_debug("next: scanning /dev"));
 		iter->nminors = (lc->flags & LOOPDEV_FL_DEVSUBDIR) ?
 			loop_scandir(_PATH_DEV_LOOP, &iter->minors, 0) :
 			loop_scandir(_PATH_DEV, &iter->minors, 1);
 		iter->ncur = -1;
 	}
-	for (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
+	за (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
 		char name[16];
 		snprintf(name, sizeof(name), "loop%d", iter->minors[iter->ncur]);
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		ако (loopiter_set_device(lc, name) == 0)
+			врати 0;
 	}
 done:
 	loopcxt_deinit_iterator(lc);
-	return 1;
+	врати 1;
 }
 
 /*
  * @device: path to device
  */
-int is_loopdev(const char *device)
+цео is_loopdev(const char *device)
 {
 	struct stat st;
-	int rc = 0;
+	цео rc = 0;
 
-	if (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
+	ако (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
 		rc = 0;
-	else if (major(st.st_rdev) == LOOPDEV_MAJOR)
+	инако ако (major(st.st_rdev) == LOOPDEV_MAJOR)
 		rc = 1;
-	else if (sysfs_devno_is_wholedisk(st.st_rdev)) {
+	инако ако (sysfs_devno_is_wholedisk(st.st_rdev)) {
 		/* It's possible that kernel creates a device with a different
 		 * major number ... check by /sys it's really loop device.
 		 */
@@ -690,15 +690,15 @@ int is_loopdev(const char *device)
 		snprintf(name, sizeof(name), _PATH_SYS_DEVBLOCK "/%u:%u",
 				major(st.st_rdev), minor(st.st_rdev));
 		cn = ul_canonicalize_path(name);
-		if (cn)
+		ако (cn)
 			p = stripoff_last_component(cn);
 		rc = p && ul_startswith(p, "loop");
 		free(cn);
 	}
 
-	if (rc == 0)
+	ако (rc == 0)
 		errno = ENODEV;
-	return rc;
+	врати rc;
 }
 
 /*
@@ -708,31 +708,31 @@ int is_loopdev(const char *device)
  */
 struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
 {
-	int fd;
+	цео fd;
 
-	if (!lc || lc->info_failed) {
+	ако (!lc || lc->info_failed) {
 		errno = EINVAL;
-		return NULL;
+		врати NULL;
 	}
 	errno = 0;
-	if (lc->has_info)
-		return &lc->config.info;
+	ако (lc->has_info)
+		врати &lc->config.info;
 
 	fd = loopcxt_get_fd(lc);
-	if (fd < 0)
-		return NULL;
+	ако (fd < 0)
+		врати NULL;
 
-	if (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
+	ако (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
 		lc->has_info = 1;
 		lc->info_failed = 0;
 		DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 OK"));
-		return &lc->config.info;
+		врати &lc->config.info;
 	}
 
 	lc->info_failed = 1;
 	DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 FAILED"));
 
-	return NULL;
+	врати NULL;
 }
 
 /*
@@ -746,17 +746,17 @@ char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
 	char *res = NULL;
 
-	if (sysfs)
+	ако (sysfs)
 		/*
 		 * This is always preferred, the loop_info64
 		 * has too small buffer for the filename.
 		 */
 		ul_path_read_string(sysfs, &res, "loop/backing_file");
 
-	if (!res && loopcxt_ioctl_enabled(lc)) {
+	ако (!res && loopcxt_ioctl_enabled(lc)) {
 		struct loop_info64 *lo = loopcxt_get_info(lc);
 
-		if (lo) {
+		ако (lo) {
 			lo->lo_file_name[LO_NAME_SIZE - 2] = '*';
 			lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
 			res = strdup((char *) lo->lo_file_name);
@@ -764,7 +764,7 @@ char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_file [%s]", res));
-	return res;
+	врати res;
 }
 
 /*
@@ -778,13 +778,13 @@ char *loopcxt_get_refname(struct loopdev_cxt *lc)
 	char *res = NULL;
 	struct loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo) {
+	ако (lo) {
 		lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
 		res = strdup((char *) lo->lo_file_name);
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_refname [%s]", res));
-	return res;
+	врати res;
 }
 
 /*
@@ -793,27 +793,27 @@ char *loopcxt_get_refname(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
+цео loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	цео rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, offset, "loop/offset") == 0)
+	ако (sysfs)
+		ако (ul_path_read_u64(sysfs, offset, "loop/offset") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
+	ако (rc && loopcxt_ioctl_enabled(lc)) {
 		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (offset)
+		ако (lo) {
+			ако (offset)
 				*offset = lo->lo_offset;
 			rc = 0;
-		} else
+		} инако
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_offset [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -822,31 +822,31 @@ int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
+цео loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	цео rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
+	ако (sysfs)
+		ако (ul_path_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
 			rc = 0;
 
 	/* Fallback based on BLKSSZGET ioctl */
-	if (rc) {
-		int fd = loopcxt_get_fd(lc);
-		int sz = 0;
+	ако (rc) {
+		цео fd = loopcxt_get_fd(lc);
+		цео sz = 0;
 
-		if (fd < 0)
-			return -EINVAL;
+		ако (fd < 0)
+			врати -EINVAL;
 		rc = blkdev_get_sector_size(fd, &sz);
-		if (rc)
-			return rc;
+		ако (rc)
+			врати rc;
 
 		*blocksize = sz;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_blocksize [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -855,27 +855,27 @@ int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
+цео loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	цео rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, size, "loop/sizelimit") == 0)
+	ако (sysfs)
+		ако (ul_path_read_u64(sysfs, size, "loop/sizelimit") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
+	ако (rc && loopcxt_ioctl_enabled(lc)) {
 		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (size)
+		ако (lo) {
+			ако (size)
 				*size = lo->lo_sizelimit;
 			rc = 0;
-		} else
+		} инако
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_sizelimit [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -886,21 +886,21 @@ int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
+цео loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
 {
 	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	цео rc;
 
 	/* not provided by sysfs */
-	if (lo) {
-		if (type)
+	ако (lo) {
+		ако (type)
 			*type = lo->lo_encrypt_type;
 		rc = 0;
-	} else
+	} инако
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_encrypt_type [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -914,11 +914,11 @@ const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
 {
 	struct loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo)
-		return (char *) lo->lo_crypt_name;
+	ако (lo)
+		врати (char *) lo->lo_crypt_name;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_crypt_name failed"));
-	return NULL;
+	врати NULL;
 }
 
 /*
@@ -927,20 +927,20 @@ const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
+цео loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
 {
 	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	цео rc;
 
-	if (lo) {
-		if (devno)
+	ако (lo) {
+		ако (devno)
 			*devno = lo->lo_device;
 		rc = 0;
-	} else
+	} инако
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_devno [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -949,20 +949,20 @@ int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
+цео loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
 {
 	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	цео rc;
 
-	if (lo) {
-		if (ino)
+	ако (lo) {
+		ако (ino)
 			*ino = lo->lo_inode;
 		rc = 0;
-	} else
+	} инако
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_inode [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -982,20 +982,20 @@ int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
  *
  *  See kernel commit e03c8dd14915fabc101aa495828d58598dc5af98.
  */
-int loopmod_supports_partscan(void)
+цео loopmod_supports_partscan(void)
 {
-	int rc, ret = 0;
+	цео rc, ret = 0;
 	FILE *f;
 
-	if (get_linux_version() >= KERNEL_VERSION(3,2,0))
-		return 1;
+	ако (get_linux_version() >= KERNEL_VERSION(3,2,0))
+		врати 1;
 
 	f = fopen("/sys/module/loop/parameters/max_part", "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	ако (!f)
+		врати 0;
 	rc = fscanf(f, "%d", &ret);
 	fclose(f);
-	return rc == 1 ? ret : 0;
+	врати rc == 1 ? ret : 0;
 }
 
 /*
@@ -1004,19 +1004,19 @@ int loopmod_supports_partscan(void)
  * Returns: 1 if the partscan flags is set *or* (for old kernels) partitions
  * scanning is enabled for all loop devices.
  */
-int loopcxt_is_partscan(struct loopdev_cxt *lc)
+цео loopcxt_is_partscan(struct loopdev_cxt *lc)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
+	ако (sysfs) {
 		/* kernel >= 3.2 */
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/partscan") == 0)
-			return fl;
+		цео fl;
+		ако (ul_path_read_s32(sysfs, &fl, "loop/partscan") == 0)
+			врати fl;
 	}
 
 	/* old kernels (including kernels without loopN/loop/<flags> directory */
-	return loopmod_supports_partscan();
+	врати loopmod_supports_partscan();
 }
 
 /*
@@ -1024,22 +1024,22 @@ int loopcxt_is_partscan(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the autoclear flags is set.
  */
-int loopcxt_is_autoclear(struct loopdev_cxt *lc)
+цео loopcxt_is_autoclear(struct loopdev_cxt *lc)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/autoclear") == 0)
-			return fl;
+	ако (sysfs) {
+		цео fl;
+		ако (ul_path_read_s32(sysfs, &fl, "loop/autoclear") == 0)
+			врати fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
+	ако (loopcxt_ioctl_enabled(lc)) {
 		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_AUTOCLEAR;
+		ако (lo)
+			врати lo->lo_flags & LO_FLAGS_AUTOCLEAR;
 	}
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1047,22 +1047,22 @@ int loopcxt_is_autoclear(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the readonly flags is set.
  */
-int loopcxt_is_readonly(struct loopdev_cxt *lc)
+цео loopcxt_is_readonly(struct loopdev_cxt *lc)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "ro") == 0)
-			return fl;
+	ако (sysfs) {
+		цео fl;
+		ако (ul_path_read_s32(sysfs, &fl, "ro") == 0)
+			врати fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
+	ако (loopcxt_ioctl_enabled(lc)) {
 		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_READ_ONLY;
+		ако (lo)
+			врати lo->lo_flags & LO_FLAGS_READ_ONLY;
 	}
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1070,21 +1070,21 @@ int loopcxt_is_readonly(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the dio flags is set.
  */
-int loopcxt_is_dio(struct loopdev_cxt *lc)
+цео loopcxt_is_dio(struct loopdev_cxt *lc)
 {
 	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/dio") == 0)
-			return fl;
+	ако (sysfs) {
+		цео fl;
+		ако (ul_path_read_s32(sysfs, &fl, "loop/dio") == 0)
+			врати fl;
 	}
-	if (loopcxt_ioctl_enabled(lc)) {
+	ако (loopcxt_ioctl_enabled(lc)) {
 		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_DIRECT_IO;
+		ако (lo)
+			врати lo->lo_flags & LO_FLAGS_DIRECT_IO;
 	}
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1105,84 +1105,84 @@ int loopcxt_is_dio(struct loopdev_cxt *lc)
  * Don't forget that old kernels provide very restricted (in size) backing
  * filename by LOOP_GET_STAT64 ioctl only.
  */
-int loopcxt_is_used(struct loopdev_cxt *lc,
+цео loopcxt_is_used(struct loopdev_cxt *lc,
 		    struct stat *st,
 		    const char *backing_file,
 		    uint64_t offset,
 		    uint64_t sizelimit,
-		    int flags)
+		    цео flags)
 {
 	ino_t ino = 0;
 	dev_t dev = 0;
 
-	if (!lc)
-		return 0;
+	ако (!lc)
+		врати 0;
 
 	DBG_OBJ(CXT, lc, ul_debug("checking %s vs. %s",
 				loopcxt_get_device(lc),
 				backing_file));
 
-	if (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
+	ако (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
 		  loopcxt_get_backing_devno(lc, &dev) == 0) {
 
-		if (ino == st->st_ino && dev == st->st_dev)
+		ако (ino == st->st_ino && dev == st->st_dev)
 			goto found;
 
 		/* don't use filename if we have devno and inode */
-		return 0;
+		врати 0;
 	}
 
 	/* poor man's solution */
-	if (backing_file) {
+	ако (backing_file) {
 		char *name = loopcxt_get_backing_file(lc);
-		int rc = name && strcmp(name, backing_file) == 0;
+		цео rc = name && strcmp(name, backing_file) == 0;
 
 		free(name);
-		if (rc)
+		ако (rc)
 			goto found;
 	}
 
-	return 0;
+	врати 0;
 found:
-	if (flags & LOOPDEV_FL_OFFSET) {
+	ако (flags & LOOPDEV_FL_OFFSET) {
 		uint64_t off = 0;
 
-		int rc = loopcxt_get_offset(lc, &off) == 0 && off == offset;
+		цео rc = loopcxt_get_offset(lc, &off) == 0 && off == offset;
 
-		if (rc && flags & LOOPDEV_FL_SIZELIMIT) {
+		ако (rc && flags & LOOPDEV_FL_SIZELIMIT) {
 			uint64_t sz = 0;
 
-			return loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
+			врати loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
 		}
-		return rc;
+		врати rc;
 	}
-	return 1;
+	врати 1;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_offset(struct loopdev_cxt *lc, uint64_t offset)
+цео loopcxt_set_offset(struct loopdev_cxt *lc, uint64_t offset)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 	lc->config.info.lo_offset = offset;
 
 	DBG_OBJ(CXT, lc, ul_debug("set offset=%"PRIu64, offset));
-	return 0;
+	врати 0;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
+цео loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 	lc->config.info.lo_sizelimit = sizelimit;
 
 	DBG_OBJ(CXT, lc, ul_debug("set sizelimit=%"PRIu64, sizelimit));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1191,14 +1191,14 @@ int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
  *
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+цео loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 	lc->blocksize = blocksize;
 
 	DBG_OBJ(CXT, lc, ul_debug("set blocksize=%"PRIu64, blocksize));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1209,14 +1209,14 @@ int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
+цео loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 	lc->config.info.lo_flags = flags;
 
 	DBG_OBJ(CXT, lc, ul_debug("set flags=%u", (unsigned) flags));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1228,17 +1228,17 @@ int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
+цео loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
 	memset(lc->config.info.lo_file_name, 0, sizeof(lc->config.info.lo_file_name));
-	if (refname)
+	ако (refname)
 		xstrncpy((char *)lc->config.info.lo_file_name, refname, LO_NAME_SIZE);
 
 	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (char *)lc->config.info.lo_file_name));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1249,23 +1249,23 @@ int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
+цео loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
 {
-	if (!lc)
-		return -EINVAL;
+	ако (!lc)
+		врати -EINVAL;
 
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+	ако (lc->flags & LOOPDEV_FL_NOFOLLOW)
 		lc->filename = strdup(filename);
-	else
+	инако
 		lc->filename = ul_canonicalize_path(filename);
-	if (!lc->filename)
-		return -errno;
+	ако (!lc->filename)
+		врати -errno;
 
-	if (!lc->config.info.lo_file_name[0])
+	ако (!lc->config.info.lo_file_name[0])
 		loopcxt_set_refname(lc, lc->filename);
 
 	DBG_OBJ(CXT, lc, ul_debug("set backing file=%s", lc->filename));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1281,80 +1281,80 @@ int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
  * it closes the device when it exits and whatever consumes the device
  * next will re-open it, causing the resync.
  */
-static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
+static цео loopcxt_check_size(struct loopdev_cxt *lc, цео file_fd)
 {
 	uint64_t size, expected_size;
-	int dev_fd;
+	цео dev_fd;
 	struct stat st;
 
-	if (!lc->config.info.lo_offset && !lc->config.info.lo_sizelimit)
-		return 0;
+	ако (!lc->config.info.lo_offset && !lc->config.info.lo_sizelimit)
+		врати 0;
 
-	if (fstat(file_fd, &st)) {
+	ако (fstat(file_fd, &st)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to fstat backing file"));
-		return -errno;
+		врати -errno;
 	}
-	if (S_ISBLK(st.st_mode)) {
-		if (blkdev_get_size(file_fd, &expected_size)) {
+	ако (S_ISBLK(st.st_mode)) {
+		ако (blkdev_get_size(file_fd, &expected_size)) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to determine device size"));
-			return -errno;
+			врати -errno;
 		}
-	} else
+	} инако
 		expected_size = st.st_size;
 
-	if (expected_size == 0 || expected_size <= lc->config.info.lo_offset) {
+	ако (expected_size == 0 || expected_size <= lc->config.info.lo_offset) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine expected size"));
-		return 0;	/* ignore this error */
+		врати 0;	/* ignore this error */
 	}
 
-	if (lc->config.info.lo_offset > 0)
+	ако (lc->config.info.lo_offset > 0)
 		expected_size -= lc->config.info.lo_offset;
 
-	if (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_size)
+	ако (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_size)
 		expected_size = lc->config.info.lo_sizelimit;
 
 	dev_fd = loopcxt_get_fd(lc);
-	if (dev_fd < 0) {
+	ако (dev_fd < 0) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to get loop FD"));
-		return -errno;
+		врати -errno;
 	}
 
-	if (blkdev_get_size(dev_fd, &size)) {
+	ако (blkdev_get_size(dev_fd, &size)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine loopdev size"));
-		return -errno;
+		врати -errno;
 	}
 
 	/* It's block device, so, align to 512-byte sectors */
-	if (expected_size % 512) {
+	ако (expected_size % 512) {
 		DBG_OBJ(CXT, lc, ul_debug("expected size misaligned to 512-byte sectors"));
 		expected_size = (expected_size >> 9) << 9;
 	}
 
-	if (expected_size != size) {
+	ако (expected_size != size) {
 		DBG_OBJ(CXT, lc, ul_debug("warning: loopdev and expected "
 				      "size mismatch (%ju/%ju)",
 				      size, expected_size));
 
-		if (loopcxt_ioctl_capacity(lc)) {
+		ако (loopcxt_ioctl_capacity(lc)) {
 			/* ioctl not available */
-			if (errno == ENOTTY || errno == EINVAL)
+			ако (errno == ENOTTY || errno == EINVAL)
 				errno = ERANGE;
-			return -errno;
+			врати -errno;
 		}
 
-		if (blkdev_get_size(dev_fd, &size))
-			return -errno;
+		ако (blkdev_get_size(dev_fd, &size))
+			врати -errno;
 
-		if (expected_size != size) {
+		ако (expected_size != size) {
 			errno = ERANGE;
 			DBG_OBJ(CXT, lc, ul_debug("failed to set loopdev size, "
 					"size: %ju, expected: %ju",
 					size, expected_size));
-			return -errno;
+			врати -errno;
 		}
 	}
 
-	return 0;
+	врати 0;
 }
 
 
@@ -1376,66 +1376,66 @@ static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_setup_device(struct loopdev_cxt *lc)
+цео loopcxt_setup_device(struct loopdev_cxt *lc)
 {
-	int file_fd, dev_fd;
+	цео file_fd, dev_fd;
 	mode_t flags = O_CLOEXEC, mode = O_RDWR;
-	int rc = -1, cnt = 0;
-	int errsv = 0;
-	int fallback = 0;
+	цео rc = -1, cnt = 0;
+	цео errsv = 0;
+	цео fallback = 0;
 
-	if (!lc || !*lc->device || !lc->filename)
-		return -EINVAL;
+	ако (!lc || !*lc->device || !lc->filename)
+		врати -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("device setup requested"));
 
 	/*
 	 * Open backing file and device
 	 */
-	if (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
+	ако (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
 		mode = O_RDONLY;
 
-	if (lc->config.info.lo_flags & LO_FLAGS_DIRECT_IO)
+	ако (lc->config.info.lo_flags & LO_FLAGS_DIRECT_IO)
 		flags |= O_DIRECT;
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+	ако (lc->flags & LOOPDEV_FL_NOFOLLOW)
 		file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-	else
+	инако
 		file_fd = open(lc->filename, mode | flags);
 
-	if (file_fd < 0 && mode != O_RDONLY
+	ако (file_fd < 0 && mode != O_RDONLY
 	    && (errno == EROFS || errno == EACCES)) {
 		mode = O_RDONLY;
-		if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+		ако (lc->flags & LOOPDEV_FL_NOFOLLOW)
 			file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-		else
+		инако
 			file_fd = open(lc->filename, mode | flags);
 	}
-	if (file_fd < 0) {
+	ако (file_fd < 0) {
 		DBG_OBJ(SETUP, lc, ul_debug("open backing file failed: %m"));
-		return -errno;
+		врати -errno;
 	}
 	DBG_OBJ(SETUP, lc, ul_debug("backing file open: OK"));
 
-	if (mode == O_RDONLY)
+	ако (mode == O_RDONLY)
 		lc->config.info.lo_flags |= LO_FLAGS_READ_ONLY;	/* kernel loopdev mode */
-	else
+	инако
 		lc->config.info.lo_flags &= ~LO_FLAGS_READ_ONLY;
 
 	do {
 		errno = 0;
 
 		dev_fd = __loopcxt_get_fd(lc, mode);
-		if (dev_fd >= 0 || lc->control_ok == 0)
+		ако (dev_fd >= 0 || lc->control_ok == 0)
 			break;
-		if (errno != EACCES && errno != ENOENT)
+		ако (errno != EACCES && errno != ENOENT)
 			break;
 		/* We have permissions to open /dev/loop-control, but open
 		 * /dev/loopN failed with EACCES, it's probably because udevd
 		 * does not applied chown yet. Let's wait a moment. */
 		xusleep(25000);
-	} while (cnt++ < 16);
+	} док (cnt++ < 16);
 
-	if (dev_fd < 0) {
+	ако (dev_fd < 0) {
 		rc = -errno;
 		goto err;
 	}
@@ -1447,18 +1447,18 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 	 * -- since Linux v5.8-rc1, commit 3448914e8cc550ba792d4ccc74471d1ca4293aae
 	 */
 	lc->config.fd = file_fd;
-	if (lc->blocksize > 0)
+	ако (lc->blocksize > 0)
 		lc->config.block_size = lc->blocksize;
 
 	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_CONFIGURE, &lc->config) );
-	if (rc != 0) {
+	ако (rc != 0) {
 		errsv = errno;
-		if (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
+		ако (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
 			DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE failed: %m"));
 			goto err;
 		}
 		fallback = 1;
-	} else {
+	} инако {
 		DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE: OK"));
 	}
 
@@ -1466,8 +1466,8 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 	 * Old deprecated way; first assign backing file FD and then in the
 	 * second step set loop device properties.
 	 */
-	if (fallback) {
-		if (ioctl(dev_fd, LOOP_SET_FD, file_fd) < 0) {
+	ако (fallback) {
+		ако (ioctl(dev_fd, LOOP_SET_FD, file_fd) < 0) {
 			rc = -errno;
 			errsv = errno;
 			DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD failed: %m"));
@@ -1476,19 +1476,19 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 
 		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD: OK"));
 
-		if (lc->blocksize > 0
+		ако (lc->blocksize > 0
 			&& (rc = loopcxt_ioctl_blocksize(lc, lc->blocksize)) < 0) {
 			errsv = -rc;
 			goto err;
 		}
 
-		if ((rc = loopcxt_ioctl_status(lc)) < 0) {
+		ако ((rc = loopcxt_ioctl_status(lc)) < 0) {
 			errsv = -rc;
 			goto err;
 		}
 	}
 
-	if ((rc = loopcxt_check_size(lc, file_fd)))
+	ако ((rc = loopcxt_check_size(lc, file_fd)))
 		goto err;
 
 	close(file_fd);
@@ -1498,17 +1498,17 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 	lc->info_failed = 0;
 
 	DBG_OBJ(SETUP, lc, ul_debug("success [rc=0]"));
-	return 0;
+	врати 0;
 err:
-	if (file_fd >= 0)
+	ако (file_fd >= 0)
 		close(file_fd);
-	if (dev_fd >= 0 && rc != -EBUSY)
+	ако (dev_fd >= 0 && rc != -EBUSY)
 		ioctl(dev_fd, LOOP_CLR_FD, 0);
-	if (errsv)
+	ако (errsv)
 		errno = errsv;
 
 	DBG_OBJ(SETUP, lc, ul_debug("failed [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 
@@ -1523,90 +1523,90 @@ err:
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_ioctl_status(struct loopdev_cxt *lc)
+цео loopcxt_ioctl_status(struct loopdev_cxt *lc)
 {
-	int dev_fd, rc;
+	цео dev_fd, rc;
 
 	errno = 0;
 	dev_fd = loopcxt_get_fd(lc);
 
-	if (dev_fd < 0)
-		return -errno;
+	ако (dev_fd < 0)
+		врати -errno;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_STATUS64"));
 
 	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_SET_STATUS64, &lc->config.info) );
-	if (rc != 0) {
+	ако (rc != 0) {
 		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64 failed: %m"));
-		return rc;
+		врати rc;
 	}
 
 	DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64: OK"));
-	return 0;
+	врати 0;
 }
 
-int loopcxt_ioctl_capacity(struct loopdev_cxt *lc)
+цео loopcxt_ioctl_capacity(struct loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	цео rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ако (fd < 0)
+		врати -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_CAPACITY"));
 
 	/* Kernels prior to v2.6.30 don't support this ioctl */
 	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_CAPACITY, 0) );
-	if (rc != 0) {
+	ако (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_CAPACITY failed: %m"));
-		return rc;
+		врати rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("capacity set"));
-	return 0;
+	врати 0;
 }
 
-int loopcxt_ioctl_dio(struct loopdev_cxt *lc, unsigned long use_dio)
+цео loopcxt_ioctl_dio(struct loopdev_cxt *lc, unsigned long use_dio)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	цео rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ако (fd < 0)
+		врати -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_DIRECT_IO"));
 
 	/* Kernels prior to v4.4 don't support this ioctl */
 	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_DIRECT_IO, use_dio) );
-	if (rc != 0) {
+	ако (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_DIRECT_IO failed: %m"));
-		return rc;
+		врати rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("direct io set"));
-	return 0;
+	врати 0;
 }
 
 /*
  * Kernel uses "unsigned long" as ioctl arg, but we use u64 for all sizes to
  * keep loopdev internal API simple.
  */
-int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+цео loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	цео rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ако (fd < 0)
+		врати -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_BLOCK_SIZE"));
 
 	rc = repeat_on_eagain(
 		ioctl(fd, LOOP_SET_BLOCK_SIZE, (unsigned long) blocksize) );
-	if (rc != 0) {
+	ако (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_BLOCK_SIZE failed: %m"));
-		return rc;
+		врати rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("logical block size set"));
-	return 0;
+	врати 0;
 }
 
 /*
@@ -1618,72 +1618,72 @@ int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error
  */
-static int loopcxt_get_device_nr(struct loopdev_cxt *lc, int *nr)
+static цео loopcxt_get_device_nr(struct loopdev_cxt *lc, цео *nr)
 {
 	const char *p, *dev;
-	int rc = -EINVAL;
+	цео rc = -EINVAL;
 
 	errno = 0;
-	if (!lc || !nr)
-		return rc;
+	ако (!lc || !nr)
+		врати rc;
 	*nr = -1;
 
 	dev = loopcxt_get_device(lc);
-	if (!dev)
+	ако (!dev)
 		goto done;
 
 	p = strrchr(dev, '/');
-	if (!p)
+	ако (!p)
 		goto done;
 
-	if (sscanf(p, "/loop%d", nr) != 1 && sscanf(p, "/%d", nr) != 1)
+	ако (sscanf(p, "/loop%d", nr) != 1 && sscanf(p, "/%d", nr) != 1)
 		goto done;
 
-	if (*nr < 0)
+	ако (*nr < 0)
 		goto done;
 	rc = 0;
 done:
-	if (rc && !errno)
+	ако (rc && !errno)
 		errno = -rc;
 	DBG_OBJ(CXT, lc, ul_debug("get_device_nr [nr=%d]", *nr));
-	return rc;
+	врати rc;
 }
 
-int loopcxt_detach_device(struct loopdev_cxt *lc)
+цео loopcxt_detach_device(struct loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	цео rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ако (fd < 0)
+		врати -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_CLR_FD"));
 
 	rc = repeat_on_eagain( ioctl(fd, LOOP_CLR_FD, 0) );
-	if (rc != 0) {
+	ако (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_CLR_FD failed: %m"));
-		return rc;
+		врати rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("device removed"));
-	return 0;
+	врати 0;
 }
 
-int loopcxt_remove_device(struct loopdev_cxt *lc)
+цео loopcxt_remove_device(struct loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	цео rc = -EINVAL;
+	цео ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	ако (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
 		goto done;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
+	ако (rc)
 		goto done;
 
 	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	ако (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("remove_device %d", nr));
 		rc = ioctl(ctl, LOOP_CTL_REMOVE, nr);
 		close(ctl);
@@ -1691,25 +1691,25 @@ int loopcxt_remove_device(struct loopdev_cxt *lc)
 	lc->control_ok = rc >= 0 ? 1 : 0;
 done:
 	DBG_OBJ(CXT, lc, ul_debug("remove_device done [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
-int loopcxt_add_device(struct loopdev_cxt *lc)
+цео loopcxt_add_device(struct loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	цео rc = -EINVAL;
+	цео ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	ако (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
 		goto done;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
+	ако (rc)
 		goto done;
 
 	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	ако (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("add_device %d", nr));
 		rc = ioctl(ctl, LOOP_CTL_ADD, nr);
 		close(ctl);
@@ -1717,7 +1717,7 @@ int loopcxt_add_device(struct loopdev_cxt *lc)
 	lc->control_ok = rc >= 0 ? 1 : 0;
 done:
 	DBG_OBJ(CXT, lc, ul_debug("add_device done [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
@@ -1728,47 +1728,47 @@ done:
  *
  * Returns: 0 = success, < 0 error
  */
-int loopcxt_find_unused(struct loopdev_cxt *lc)
+цео loopcxt_find_unused(struct loopdev_cxt *lc)
 {
-	int rc = -1;
+	цео rc = -1;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_unused requested"));
 
-	if (lc->flags & LOOPDEV_FL_CONTROL) {
-		int ctl;
+	ако (lc->flags & LOOPDEV_FL_CONTROL) {
+		цео ctl;
 
 		DBG_OBJ(CXT, lc, ul_debug("using loop-control"));
 
 		ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-		if (ctl >= 0)
+		ако (ctl >= 0)
 			rc = ioctl(ctl, LOOP_CTL_GET_FREE);
-		else
+		инако
 			rc = -errno;
-		if (rc >= 0) {
+		ако (rc >= 0) {
 			char name[16];
 			snprintf(name, sizeof(name), "loop%d", rc);
 
 			rc = loopiter_set_device(lc, name);
 		}
 		lc->control_ok = ctl >= 0 && rc == 0 ? 1 : 0;
-		if (ctl >= 0)
+		ако (ctl >= 0)
 			close(ctl);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by loop-control [rc=%d]", rc));
 	}
 
-	if (rc < 0 && rc != -EACCES) {
+	ако (rc < 0 && rc != -EACCES) {
 		DBG_OBJ(CXT, lc, ul_debug("using loop scan"));
 		rc = loopcxt_init_iterator(lc, LOOPITER_FL_FREE);
-		if (rc)
-			return rc;
+		ако (rc)
+			врати rc;
 
 		rc = loopcxt_next(lc);
 		loopcxt_deinit_iterator(lc);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by scan [rc=%d]", rc));
-		if (rc)
-			return -ENOENT;
+		ако (rc)
+			врати -ENOENT;
 	}
-	return rc;
+	врати rc;
 }
 
 
@@ -1776,22 +1776,22 @@ int loopcxt_find_unused(struct loopdev_cxt *lc)
 /*
  * Return: TRUE/FALSE
  */
-int loopdev_is_autoclear(const char *device)
+цео loopdev_is_autoclear(const char *device)
 {
 	struct loopdev_cxt lc;
-	int rc;
+	цео rc;
 
-	if (!device)
-		return 0;
+	ако (!device)
+		врати 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
+	ако (!rc)
 		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	ако (!rc)
 		rc = loopcxt_is_autoclear(&lc);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	врати rc;
 }
 
 char *loopdev_get_backing_file(const char *device)
@@ -1799,126 +1799,126 @@ char *loopdev_get_backing_file(const char *device)
 	struct loopdev_cxt lc;
 	char *res = NULL;
 
-	if (!device)
-		return NULL;
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_set_device(&lc, device) == 0)
+	ако (!device)
+		врати NULL;
+	ако (loopcxt_init(&lc, 0))
+		врати NULL;
+	ако (loopcxt_set_device(&lc, device) == 0)
 		res = loopcxt_get_backing_file(&lc);
 
 	loopcxt_deinit(&lc);
-	return res;
+	врати res;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_has_backing_file(const char *device)
+цео loopdev_has_backing_file(const char *device)
 {
 	char *tmp = loopdev_get_backing_file(device);
 
-	if (tmp) {
+	ако (tmp) {
 		free(tmp);
-		return 1;
+		врати 1;
 	}
-	return 0;
+	врати 0;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_is_used(const char *device, const char *filename,
-		    uint64_t offset, uint64_t sizelimit, int flags)
+цео loopdev_is_used(const char *device, const char *filename,
+		    uint64_t offset, uint64_t sizelimit, цео flags)
 {
 	struct loopdev_cxt lc;
 	struct stat st;
-	int rc = 0;
+	цео rc = 0;
 
-	if (!device || !filename)
-		return 0;
+	ако (!device || !filename)
+		врати 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
+	ако (!rc)
 		rc = loopcxt_set_device(&lc, device);
-	if (rc)
-		return rc;
+	ако (rc)
+		врати rc;
 
 	rc = !stat(filename, &st);
 	rc = loopcxt_is_used(&lc, rc ? &st : NULL, filename, offset, sizelimit, flags);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	врати rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error
  */
-int loopdev_detach(const char *device)
+цео loopdev_detach(const char *device)
 {
 	struct loopdev_cxt lc;
-	int rc;
+	цео rc;
 
-	if (!device)
-		return -EINVAL;
+	ако (!device)
+		врати -EINVAL;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
+	ако (!rc)
 		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	ако (!rc)
 		rc = loopcxt_detach_device(&lc);
 	loopcxt_deinit(&lc);
-	return rc;
+	врати rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error, 1 not found
  */
-int loopcxt_find_by_backing_file(struct loopdev_cxt *lc, const char *filename,
-				 uint64_t offset, uint64_t sizelimit, int flags)
+цео loopcxt_find_by_backing_file(struct loopdev_cxt *lc, const char *filename,
+				 uint64_t offset, uint64_t sizelimit, цео flags)
 {
-	int rc, hasst;
+	цео rc, hasst;
 	struct stat st;
 
-	if (!filename)
-		return -EINVAL;
+	ако (!filename)
+		врати -EINVAL;
 
 	hasst = !stat(filename, &st);
 
 	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	ако (rc)
+		врати rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
+	док ((rc = loopcxt_next(lc)) == 0) {
 
-		if (loopcxt_is_used(lc, hasst ? &st : NULL,
+		ако (loopcxt_is_used(lc, hasst ? &st : NULL,
 				    filename, offset, sizelimit, flags))
 			break;
 	}
 
 	loopcxt_deinit_iterator(lc);
-	return rc;
+	врати rc;
 }
 
 /*
  * Returns: 0 = not found, < 0 error, 1 found, 2 found full size and offset match
  */
-int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
+цео loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 			   uint64_t offset, uint64_t sizelimit)
 {
-	int rc, hasst;
+	цео rc, hasst;
 	struct stat st;
 
-	if (!filename)
-		return -EINVAL;
+	ако (!filename)
+		врати -EINVAL;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap requested"));
 	hasst = !stat(filename, &st);
 
 	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	ако (rc)
+		врати rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
+	док ((rc = loopcxt_next(lc)) == 0) {
 		uint64_t lc_sizelimit, lc_offset;
 
 		rc = loopcxt_is_used(lc, hasst ? &st : NULL,
@@ -1928,27 +1928,27 @@ int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 		 * happen when we are racing with device autoclear. Just ignore
 		 * this loopdev...
 		 */
-		if (rc <= 0)
+		ако (rc <= 0)
 			continue;
 
 		DBG_OBJ(CXT, lc, ul_debug("found %s backed by %s",
 			loopcxt_get_device(lc), filename));
 
 		rc = loopcxt_get_offset(lc, &lc_offset);
-		if (rc) {
+		ако (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get offset for device %s",
 				loopcxt_get_device(lc)));
 			continue;
 		}
 		rc = loopcxt_get_sizelimit(lc, &lc_sizelimit);
-		if (rc) {
+		ако (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get sizelimit for device %s",
 				loopcxt_get_device(lc)));
 			continue;
 		}
 
 		/* full match */
-		if (lc_sizelimit == sizelimit && lc_offset == offset) {
+		ако (lc_sizelimit == sizelimit && lc_offset == offset) {
 			DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s (full match)",
 						loopcxt_get_device(lc)));
 			rc = 2;
@@ -1956,9 +1956,9 @@ int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 		}
 
 		/* overlap */
-		if (lc_sizelimit != 0 && offset >= lc_offset + lc_sizelimit)
+		ако (lc_sizelimit != 0 && offset >= lc_offset + lc_sizelimit)
 			continue;
-		if (sizelimit != 0 && offset + sizelimit <= lc_offset)
+		ако (sizelimit != 0 && offset + sizelimit <= lc_offset)
 			continue;
 
 		DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s",
@@ -1967,32 +1967,32 @@ int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 			goto found;
 	}
 
-	if (rc == 1)
+	ако (rc == 1)
 		rc = 0;	/* not found */
 found:
 	loopcxt_deinit_iterator(lc);
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap done [rc=%d]", rc));
-	return rc;
+	врати rc;
 }
 
 /*
  * Returns allocated string with device name
  */
-char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64_t sizelimit, int flags)
+char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64_t sizelimit, цео flags)
 {
 	struct loopdev_cxt lc;
 	char *res = NULL;
 
-	if (!filename)
-		return NULL;
+	ако (!filename)
+		врати NULL;
 
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_find_by_backing_file(&lc, filename, offset, sizelimit, flags) == 0)
+	ако (loopcxt_init(&lc, 0))
+		врати NULL;
+	ако (loopcxt_find_by_backing_file(&lc, filename, offset, sizelimit, flags) == 0)
 		res = loopcxt_strdup_device(&lc);
 	loopcxt_deinit(&lc);
 
-	return res;
+	врати res;
 }
 
 /*
@@ -2000,59 +2000,59 @@ char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64
  * device is associated with the given @filename and @loopdev is not NULL then
  * @loopdev returns name of the device.
  */
-int loopdev_count_by_backing_file(const char *filename, char **loopdev)
+цео loopdev_count_by_backing_file(const char *filename, char **loopdev)
 {
 	struct loopdev_cxt lc;
-	int count = 0, rc;
+	цео count = 0, rc;
 
-	if (!filename)
-		return -1;
+	ако (!filename)
+		врати -1;
 
 	rc = loopcxt_init(&lc, 0);
-	if (rc)
-		return rc;
-	if (loopcxt_init_iterator(&lc, LOOPITER_FL_USED))
-		return -1;
+	ако (rc)
+		врати rc;
+	ако (loopcxt_init_iterator(&lc, LOOPITER_FL_USED))
+		врати -1;
 
-	while(loopcxt_next(&lc) == 0) {
+	док(loopcxt_next(&lc) == 0) {
 		char *backing = loopcxt_get_backing_file(&lc);
 
-		if (!backing || strcmp(backing, filename) != 0) {
+		ако (!backing || strcmp(backing, filename) != 0) {
 			free(backing);
 			continue;
 		}
 
 		free(backing);
-		if (loopdev && count == 0)
+		ако (loopdev && count == 0)
 			*loopdev = loopcxt_strdup_device(&lc);
 		count++;
 	}
 
 	loopcxt_deinit(&lc);
 
-	if (loopdev && count > 1) {
+	ако (loopdev && count > 1) {
 		free(*loopdev);
 		*loopdev = NULL;
 	}
-	return count;
+	врати count;
 }
 
 #ifdef TEST_PROGRAM_LOOPDEV
-int main(int argc, char *argv[])
+цео main(цео argc, char *argv[])
 {
-	if (argc < 2)
+	ако (argc < 2)
 		goto usage;
 
-	if (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
+	ако (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
 		printf("%s: %s\n", argv[2], is_loopdev(argv[2]) ? "OK" : "FAIL");
-	else
+	инако
 		goto usage;
 
-	return EXIT_SUCCESS;
+	врати EXIT_SUCCESS;
 usage:
 	fprintf(stderr, "usage: %1$s --is-loopdev <dev>\n",
 			program_invocation_short_name);
-	return EXIT_FAILURE;
+	врати EXIT_FAILURE;
 }
 #endif
 

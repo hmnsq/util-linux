@@ -7,7 +7,7 @@
 #include "c.h"
 #include "dl-systemd.h"
 
-#if defined(HAVE_LIBSYSTEMD) && defined(USE_DLOPEN_SYSTEMD)
+#ако defined(HAVE_LIBSYSTEMD) && defined(USE_DLOPEN_SYSTEMD)
 
 UL_ELF_NOTE_DLOPEN("systemd",
 		    "Support for systemd",
@@ -22,7 +22,7 @@ static const struct ul_dlsym ul_systemd_symbols[] =
 	UL_DLSYM( ul_systemd_opers, sd_listen_fds ),
 
 	UL_DLSYM( ul_systemd_opers, sd_get_sessions ),
-#if HAVE_DECL_SD_SESSION_GET_USERNAME
+#ако HAVE_DECL_SD_SESSION_GET_USERNAME
 	UL_DLSYM( ul_systemd_opers, sd_session_get_username ),
 	UL_DLSYM( ul_systemd_opers, sd_session_get_tty ),
 #endif
@@ -39,7 +39,7 @@ static const struct ul_dlsym ul_systemd_symbols[] =
 	UL_DLSYM( ul_systemd_opers, sd_journal_seek_tail ),
 	UL_DLSYM( ul_systemd_opers, sd_journal_sendv ),
 
-#if HAVE_DECL_SD_DEVICE_NEW_FROM_SYSPATH
+#ако HAVE_DECL_SD_DEVICE_NEW_FROM_SYSPATH
 	UL_DLSYM( ul_systemd_opers, sd_device_new_from_syspath ),
 	UL_DLSYM( ul_systemd_opers, sd_device_get_property_value ),
 	UL_DLSYM( ul_systemd_opers, sd_device_ref ),
@@ -58,21 +58,21 @@ static const struct ul_dlsym ul_systemd_symbols[] =
 	UL_DLSYM( ul_systemd_opers, sd_event_loop ),
 	UL_DLSYM( ul_systemd_opers, sd_event_exit ),
 #endif
-#if HAVE_DECL_SD_DEVICE_OPEN
+#ако HAVE_DECL_SD_DEVICE_OPEN
 	UL_DLSYM( ul_systemd_opers, sd_device_open ),
 	UL_DLSYM( ul_systemd_opers, sd_device_new_from_devname ),
 #endif
 };
 
-int ul_dlopen_libsystemd(void)
+цео ul_dlopen_libsystemd(void)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
+	static цео status = 0;
 	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	цео flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ако (status)
+		врати status > 0 ? 0 : -ENOSYS;
 
 #ifdef RTLD_NODELETE
 	flags |= RTLD_NODELETE;
@@ -82,7 +82,7 @@ int ul_dlopen_libsystemd(void)
 				   ARRAY_SIZE(ul_systemd_symbols),
 				   &ul_systemd, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	врати status > 0 ? 0 : -ENOSYS;
 }
 
 #endif /* HAVE_LIBSYSTEMD && USE_DLOPEN_SYSTEMD */

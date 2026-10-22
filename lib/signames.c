@@ -21,7 +21,7 @@
 
 static const struct ul_signal_name {
 	const char *name;
-	int val;
+	цео val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+static цео rtsig_to_signum(const char *sig)
 {
-	int num, maxi = 0;
+	цео num, maxi = 0;
 	char *ep = NULL;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	ако (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	инако ако (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	ако (!isdigit(*sig))
+		врати -1;
 	errno = 0;
 	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
+	ако (!ep || sig == ep || errno || num < 0)
+		врати -1;
 	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	ако (num < SIGRTMIN || SIGRTMAX < num)
+		врати -1;
+	врати num;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+цео signame_to_signum(const char *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	ако (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	ако (!c_strncasecmp(sig, "rt", 2))
+		врати rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	за (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ако (!c_strcasecmp(ul_signames[n].name, sig))
+			врати ul_signames[n].val;
 	}
-	return -1;
+	врати -1;
 }
 
-const char *signum_to_signame(int signum)
+const char *signum_to_signame(цео signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	за (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ако (ul_signames[n].val == signum) {
+			врати ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	врати NULL;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+цео get_signame_by_idx(size_t idx, const char **signame, цео *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	ако (idx >= ARRAY_SIZE(ul_signames))
+		врати -1;
 
-	if (signame)
+	ако (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	ако (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	врати 0;
 
 }
 

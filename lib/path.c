@@ -44,8 +44,8 @@ UL_DEBUG_DEFINE_MASKNAMES(ulpath) = UL_DEBUG_EMPTY_MASKNAMES;
 
 void ul_path_init_debug(void)
 {
-	if (ulpath_debug_mask)
-		return;
+	ако (ulpath_debug_mask)
+		врати;
 	__UL_INIT_DEBUG_FROM_ENV(ulpath, ULPATH_DEBUG_, 0, ULPATH_DEBUG);
 }
 
@@ -53,47 +53,47 @@ struct path_cxt *ul_new_path(const char *dir, ...)
 {
 	struct path_cxt *pc = calloc(1, sizeof(*pc));
 
-	if (!pc)
-		return NULL;
+	ако (!pc)
+		врати NULL;
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
 
 	pc->refcount = 1;
 	pc->dir_fd = -1;
 
-	if (dir) {
-		int rc;
+	ако (dir) {
+		цео rc;
 		va_list ap;
 
 		va_start(ap, dir);
 		rc = vasprintf(&pc->dir_path, dir, ap);
 		va_end(ap);
 
-		if (rc < 0 || !pc->dir_path)
+		ако (rc < 0 || !pc->dir_path)
 			goto fail;
 	}
-	return pc;
+	врати pc;
 fail:
 	ul_unref_path(pc);
-	return NULL;
+	врати NULL;
 }
 
 void ul_ref_path(struct path_cxt *pc)
 {
-	if (pc)
+	ако (pc)
 		pc->refcount++;
 }
 
 void ul_unref_path(struct path_cxt *pc)
 {
-	if (!pc)
-		return;
+	ако (!pc)
+		врати;
 
 	pc->refcount--;
 
-	if (pc->refcount <= 0) {
+	ако (pc->refcount <= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("dealloc"));
-		if (pc->dialect)
+		ако (pc->dialect)
 			pc->free_dialect(pc);
 		ul_path_close_dirfd(pc);
 		free(pc->dir_path);
@@ -104,44 +104,44 @@ void ul_unref_path(struct path_cxt *pc)
 
 void ul_path_refer_vfs(struct path_cxt *pc, const struct ul_vfs_ops *vfs)
 {
-	if (pc)
+	ако (pc)
 		pc->vfs = vfs;
 }
 
-int ul_path_set_prefix(struct path_cxt *pc, const char *prefix)
+цео ul_path_set_prefix(struct path_cxt *pc, const char *prefix)
 {
 	char *p = NULL;
 
 	assert(pc->dir_fd < 0);
 
-	if (prefix) {
+	ако (prefix) {
 		p = strdup(prefix);
-		if (!p)
-			return -ENOMEM;
+		ако (!p)
+			врати -ENOMEM;
 	}
 
 	free(pc->prefix);
 	pc->prefix = p;
 	DBG_OBJ(CXT, pc, ul_debug("new prefix: '%s'", p));
-	return 0;
+	врати 0;
 }
 
 const char *ul_path_get_prefix(struct path_cxt *pc)
 {
-	return pc ? pc->prefix : NULL;
+	врати pc ? pc->prefix : NULL;
 }
 
-int ul_path_set_dir(struct path_cxt *pc, const char *dir)
+цео ul_path_set_dir(struct path_cxt *pc, const char *dir)
 {
 	char *p = NULL;
 
-	if (dir) {
+	ако (dir) {
 		p = strdup(dir);
-		if (!p)
-			return -ENOMEM;
+		ако (!p)
+			врати -ENOMEM;
 	}
 
-	if (pc->dir_fd >= 0) {
+	ако (pc->dir_fd >= 0) {
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
@@ -149,87 +149,87 @@ int ul_path_set_dir(struct path_cxt *pc, const char *dir)
 	free(pc->dir_path);
 	pc->dir_path = p;
 	DBG_OBJ(CXT, pc, ul_debug("new dir: '%s'", p));
-	return 0;
+	врати 0;
 }
 
 const char *ul_path_get_dir(struct path_cxt *pc)
 {
-	return pc ? pc->dir_path : NULL;
+	врати pc ? pc->dir_path : NULL;
 }
 
-int ul_path_set_dialect(struct path_cxt *pc, void *data, void free_data(struct path_cxt *))
+цео ul_path_set_dialect(struct path_cxt *pc, void *data, void free_data(struct path_cxt *))
 {
 	pc->dialect = data;
 	pc->free_dialect = free_data;
 	DBG_OBJ(CXT, pc, ul_debug("(re)set dialect"));
-	return 0;
+	врати 0;
 }
 
 void *ul_path_get_dialect(struct path_cxt *pc)
 {
-	return pc ? pc->dialect : NULL;
+	врати pc ? pc->dialect : NULL;
 }
 
-int ul_path_set_enoent_redirect(struct path_cxt *pc, int (*func)(struct path_cxt *, const char *, int *))
+цео ul_path_set_enoent_redirect(struct path_cxt *pc, цео (*func)(struct path_cxt *, const char *, цео *))
 {
 	pc->redirect_on_enoent = func;
-	return 0;
+	врати 0;
 }
 
 static const char *get_absdir(struct path_cxt *pc)
 {
-	int rc;
+	цео rc;
 	const char *dirpath;
 
-	if (!pc->prefix)
-		return pc->dir_path;
+	ако (!pc->prefix)
+		врати pc->dir_path;
 
 	dirpath = pc->dir_path;
-	if (!dirpath)
-		return pc->prefix;
-	if (*dirpath == '/')
+	ако (!dirpath)
+		врати pc->prefix;
+	ако (*dirpath == '/')
 		dirpath++;
 
 	rc = snprintf(pc->path_buffer, sizeof(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
-	if (rc < 0)
-		return NULL;
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	ако (rc < 0)
+		врати NULL;
+	ако ((size_t)rc >= sizeof(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		врати NULL;
 	}
 
-	return pc->path_buffer;
+	врати pc->path_buffer;
 }
 
-int ul_path_is_accessible(struct path_cxt *pc)
+цео ul_path_is_accessible(struct path_cxt *pc)
 {
 	const char *path;
 	assert(pc);
 
-	if (pc->dir_fd >= 0)
-		return 1;
+	ако (pc->dir_fd >= 0)
+		врати 1;
 
 	path = get_absdir(pc);
-	if (!path)
-		return 0;
-	return access(path, F_OK) == 0;
+	ако (!path)
+		врати 0;
+	врати access(path, F_OK) == 0;
 }
 
-int ul_path_get_dirfd(struct path_cxt *pc)
+цео ul_path_get_dirfd(struct path_cxt *pc)
 {
 	assert(pc);
 	assert(pc->dir_path);
 
-	if (pc->dir_fd < 0) {
+	ако (pc->dir_fd < 0) {
 		const char *path = get_absdir(pc);
-		if (!path)
-			return -errno;
+		ако (!path)
+			врати -errno;
 
 		DBG_OBJ(CXT, pc, ul_debug("opening dir: '%s'", path));
 		pc->dir_fd = open(path, O_RDONLY|O_CLOEXEC);
 	}
 
-	return pc->dir_fd;
+	врати pc->dir_fd;
 }
 
 /* Note that next ul_path_get_dirfd() will reopen the directory */
@@ -237,43 +237,43 @@ void ul_path_close_dirfd(struct path_cxt *pc)
 {
 	assert(pc);
 
-	if (pc->dir_fd >= 0) {
+	ако (pc->dir_fd >= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("closing dir"));
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
 }
 
-int ul_path_isopen_dirfd(struct path_cxt *pc)
+цео ul_path_isopen_dirfd(struct path_cxt *pc)
 {
-	return pc && pc->dir_fd >= 0;
+	врати pc && pc->dir_fd >= 0;
 }
 
 static const char *ul_path_mkpath(struct path_cxt *pc, const char *path, va_list ap)
 {
-	int rc;
+	цео rc;
 
 	errno = 0;
 
 	rc = vsnprintf(pc->path_buffer, sizeof(pc->path_buffer), path, ap);
-	if (rc < 0) {
-		if (!errno)
+	ако (rc < 0) {
+		ако (!errno)
 			errno = EINVAL;
-		return NULL;
+		врати NULL;
 	}
 
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	ако ((size_t)rc >= sizeof(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		врати NULL;
 	}
 
-	return pc->path_buffer;
+	врати pc->path_buffer;
 }
 
 char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
 {
-	if (path) {
-		int rc;
+	ако (path) {
+		цео rc;
 		va_list ap;
 		const char *tail = NULL, *dirpath = pc->dir_path;
 
@@ -281,9 +281,9 @@ char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const ch
 		tail = ul_path_mkpath(pc, path, ap);
 		va_end(ap);
 
-		if (dirpath && *dirpath == '/')
+		ако (dirpath && *dirpath == '/')
 			dirpath++;
-		if (tail && *tail == '/')
+		ако (tail && *tail == '/')
 			tail++;
 
 		rc = snprintf(buf, bufsz, "%s/%s/%s",
@@ -291,51 +291,51 @@ char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const ch
 				dirpath ? dirpath : "",
 				tail ? tail : "");
 
-		if ((size_t)rc >= bufsz) {
+		ако ((size_t)rc >= bufsz) {
 			errno = ENAMETOOLONG;
-			return NULL;
+			врати NULL;
 		}
-	} else {
+	} инако {
 		const char *tmp = get_absdir(pc);
 
-		if (!tmp)
-			return NULL;
+		ако (!tmp)
+			врати NULL;
 		xstrncpy(buf, tmp, bufsz);
 	}
 
-	return buf;
+	врати buf;
 }
 
 
-int ul_path_access(struct path_cxt *pc, int mode, const char *path)
+цео ul_path_access(struct path_cxt *pc, цео mode, const char *path)
 {
-	int rc;
+	цео rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	ако (!path)
+		врати -EINVAL;
+	ако (!pc) {
 		rc = access(path, mode);
 		DBG(CXT, ul_debug("access '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	} инако {
+		цео dir = ul_path_get_dirfd(pc);
+		ако (dir < 0)
+			врати dir;
+		ако (*path == '/')
 			path++;
 
 		rc = faccessat(dir, path, mode, 0);
 
-		if (rc && errno == ENOENT
+		ако (rc && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			rc = faccessat(dir, path, mode, 0);
 
 		DBG_OBJ(CXT, pc, ul_debug("access: '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	врати rc;
 }
 
-int ul_path_accessf(struct path_cxt *pc, int mode, const char *path, ...)
+цео ul_path_accessf(struct path_cxt *pc, цео mode, const char *path, ...)
 {
 	va_list ap;
 	const char *p;
@@ -344,32 +344,32 @@ int ul_path_accessf(struct path_cxt *pc, int mode, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_access(pc, mode, p);
+	врати !p ? -errno : ul_path_access(pc, mode, p);
 }
 
 /*
  * If @path is NULL, then stat() is called for the directory itself addressed by @pc.
  */
-int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *path)
+цео ul_path_stat(struct path_cxt *pc, struct stat *sb, цео flags, const char *path)
 {
-	int rc;
+	цео rc;
 
-	if (!pc) {
+	ако (!pc) {
 		rc = path ? stat(path, sb) : -EINVAL;
 		DBG(CXT, ul_debug("stat '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (path) {
-			if  (*path == '/')
+	} инако {
+		цео dir = ul_path_get_dirfd(pc);
+		ако (dir < 0)
+			врати dir;
+		ако (path) {
+			ако  (*path == '/')
 				path++;
 			rc = fstatat(dir, path, sb, flags);
 
-		} else
+		} инако
 			rc = fstat(dir, sb);	/* dir itself */
 
-		if (rc && errno == ENOENT
+		ако (rc && errno == ENOENT
 		    && path
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
@@ -377,133 +377,133 @@ int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *pa
 
 		DBG_OBJ(CXT, pc, ul_debug("stat '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	врати rc;
 }
 
-int ul_path_vstatf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, va_list ap)
+цео ul_path_vstatf(struct path_cxt *pc, struct stat *sb, цео flags, const char *path, va_list ap)
 {
 	const char *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_stat(pc, sb, flags, p);
+	врати !p ? -errno : ul_path_stat(pc, sb, flags, p);
 }
 
-int ul_path_statf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, ...)
+цео ul_path_statf(struct path_cxt *pc, struct stat *sb, цео flags, const char *path, ...)
 {
 	va_list ap;
-	int rc;
+	цео rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatf(pc, sb, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 #ifdef HAVE_STATX
 /*
 * This function follows the semantics of statx(). To call statx() for the directory
 * itself addressed by @pc, use an empty string and the AT_EMPTY_PATH @flag.
 */
-int ul_path_statx(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
+цео ul_path_statx(struct path_cxt *pc, struct statx *stx, цео flags, unsigned цео mask,
 		  const char *path)
 {
-	int rc;
+	цео rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc)
+	ако (!path)
+		врати -EINVAL;
+	ако (!pc)
 		rc = path ? statx(AT_FDCWD, path, flags, mask, stx) : - EINVAL;
-	else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	инако {
+		цео dir = ul_path_get_dirfd(pc);
+		ако (dir < 0)
+			врати dir;
+		ако (*path == '/')
 			path++;
 
 		rc = statx(dir, path, flags, mask, stx);
 	}
 
-	return rc;
+	врати rc;
 }
-#else
-int ul_path_statx(struct path_cxt *pc __attribute__((__unused__)),
+#инако
+цео ul_path_statx(struct path_cxt *pc __attribute__((__unused__)),
 		  struct statx *stx __attribute__((__unused__)),
-		  int flags __attribute__((__unused__)),
-		  unsigned int mask __attribute__((__unused__)),
+		  цео flags __attribute__((__unused__)),
+		  unsigned цео mask __attribute__((__unused__)),
 		  const char *path __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	врати -1;
 }
 #endif /* HAVE_STATX */
 
-int ul_path_vstatxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
+цео ul_path_vstatxf(struct path_cxt *pc, struct statx *stx, цео flags, unsigned цео mask,
 		    const char *path, va_list ap)
 {
 	const char *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
+	врати !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
 }
 
-int ul_path_statxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
+цео ul_path_statxf(struct path_cxt *pc, struct statx *stx, цео flags, unsigned цео mask,
 		   const char *path, ...)
 {
 	va_list ap;
-	int rc;
+	цео rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatxf(pc, stx, flags, mask, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 
-int ul_path_open(struct path_cxt *pc, int flags, const char *path)
+цео ul_path_open(struct path_cxt *pc, цео flags, const char *path)
 {
-	int fd;
+	цео fd;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	ако (!path)
+		врати -EINVAL;
+	ако (!pc) {
 		fd = open(path, flags);
 		DBG(CXT, ul_debug("opening '%s' [no context]", path));
-	} else {
-		int fdx;
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
+	} инако {
+		цео fdx;
+		цео dir = ul_path_get_dirfd(pc);
+		ако (dir < 0)
+			врати dir;
 
-		if (*path == '/')
+		ако (*path == '/')
 			path++;
 
 		fdx = fd = openat(dir, path, flags);
 
-		if (fd < 0 && errno == ENOENT
+		ако (fd < 0 && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			fd = openat(dir, path, flags);
 
 		DBG_OBJ(CXT, pc, ul_debug("opening '%s'%s", path, fdx != fd ? " [redirected]" : ""));
 	}
-	return fd;
+	врати fd;
 }
 
-int ul_path_vopenf(struct path_cxt *pc, int flags, const char *path, va_list ap)
+цео ul_path_vopenf(struct path_cxt *pc, цео flags, const char *path, va_list ap)
 {
 	const char *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_open(pc, flags, p);
+	врати !p ? -errno : ul_path_open(pc, flags, p);
 }
 
-int ul_path_openf(struct path_cxt *pc, int flags, const char *path, ...)
+цео ul_path_openf(struct path_cxt *pc, цео flags, const char *path, ...)
 {
 	va_list ap;
-	int rc;
+	цео rc;
 
 	va_start(ap, path);
 	rc = ul_path_vopenf(pc, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 
 /*
@@ -511,13 +511,13 @@ int ul_path_openf(struct path_cxt *pc, int flags, const char *path, ...)
  */
 FILE *ul_path_fopen(struct path_cxt *pc, const char *mode, const char *path)
 {
-	int flags = ul_mode_to_flags(mode);
-	int fd = ul_path_open(pc, flags, path);
+	цео flags = ul_mode_to_flags(mode);
+	цео fd = ul_path_open(pc, flags, path);
 
-	if (fd < 0)
-		return NULL;
+	ако (fd < 0)
+		врати NULL;
 
-	return ul_vfs_fdopen(pc ? pc->vfs : NULL, fd, mode);
+	врати ul_vfs_fdopen(pc ? pc->vfs : NULL, fd, mode);
 }
 
 
@@ -525,7 +525,7 @@ FILE *ul_path_vfopenf(struct path_cxt *pc, const char *mode, const char *path, v
 {
 	const char *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_fopen(pc, mode, p);
+	врати !p ? NULL : ul_path_fopen(pc, mode, p);
 }
 
 FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ...)
@@ -537,7 +537,7 @@ FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ..
 	f = ul_path_vfopenf(pc, mode, path, ap);
 	va_end(ap);
 
-	return f;
+	врати f;
 }
 
 /*
@@ -547,30 +547,30 @@ FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ..
 DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
 {
 	DIR *dir;
-	int fd = -1;
+	цео fd = -1;
 
-	if (path)
+	ако (path)
 		fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	else if (pc->dir_path) {
-		int dirfd;
+	инако ако (pc->dir_path) {
+		цео dirfd;
 
 		DBG_OBJ(CXT, pc, ul_debug("duplicate dir path"));
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd >= 0)
+		ако (dirfd >= 0)
 			fd = dup_fd_cloexec(dirfd, STDERR_FILENO + 1);
 	}
 
-	if (fd < 0)
-		return NULL;
+	ако (fd < 0)
+		врати NULL;
 
 	dir = fdopendir(fd);
-	if (!dir) {
+	ако (!dir) {
 		close(fd);
-		return NULL;
+		врати NULL;
 	}
-	if (!path)
+	ако (!path)
 		 rewinddir(dir);
-	return dir;
+	врати dir;
 }
 
 
@@ -582,7 +582,7 @@ DIR *ul_path_vopendirf(struct path_cxt *pc, const char *path, va_list ap)
 {
 	const char *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_opendir(pc, p);
+	врати !p ? NULL : ul_path_opendir(pc, p);
 }
 
 /*
@@ -598,7 +598,7 @@ DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
 	dir = ul_path_vopendirf(pc, path, ap);
 	va_end(ap);
 
-	return dir;
+	врати dir;
 }
 
 /*
@@ -606,28 +606,28 @@ DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
  */
 ssize_t ul_path_readlink(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path)
 {
-	int dirfd;
+	цео dirfd;
 	ssize_t ssz;
 
-	if (!path) {
+	ако (!path) {
 		const char *p = get_absdir(pc);
-		if (!p)
-			return -errno;
+		ако (!p)
+			врати -errno;
 		ssz = readlink(p, buf, bufsiz - 1);
-	} else {
+	} инако {
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd < 0)
-			return dirfd;
+		ако (dirfd < 0)
+			врати dirfd;
 
-		if (*path == '/')
+		ако (*path == '/')
 			path++;
 
 		ssz = readlinkat(dirfd, path, buf, bufsiz - 1);
 	}
 
-	if (ssz >= 0)
+	ако (ssz >= 0)
 		buf[ssz] = '\0';
-	return ssz;
+	врати ssz;
 }
 
 /*
@@ -642,17 +642,17 @@ ssize_t ul_path_readlinkf(struct path_cxt *pc, char *buf, size_t bufsiz, const c
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
+	врати !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
 }
 
-int ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
+цео ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
 {
-	int rc, errsv;
-	int fd;
+	цео rc, errsv;
+	цео fd;
 
 	fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ако (fd < 0)
+		врати -errno;
 
 	DBG(CXT, ul_debug(" reading '%s'", path));
 	rc = ul_vfs_read_all(pc ? pc->vfs : NULL, fd, buf, len);
@@ -660,26 +660,26 @@ int ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	врати rc;
 }
 
-int ul_path_vreadf(struct path_cxt *pc, char *buf, size_t len, const char *path, va_list ap)
+цео ul_path_vreadf(struct path_cxt *pc, char *buf, size_t len, const char *path, va_list ap)
 {
 	const char *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read(pc, buf, len, p);
+	врати !p ? -errno : ul_path_read(pc, buf, len, p);
 }
 
-int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, ...)
+цео ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, ...)
 {
 	va_list ap;
-	int rc;
+	цео rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf(pc, buf, len, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 
 
@@ -689,28 +689,28 @@ int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, 
  *
  * Returns size of the string without \0, nothing is allocated if returns <= 0.
  */
-int ul_path_read_string(struct path_cxt *pc, char **str, const char *path)
+цео ul_path_read_string(struct path_cxt *pc, char **str, const char *path)
 {
 	char buf[BUFSIZ];
-	int rc;
+	цео rc;
 
-	if (!str)
-		return -EINVAL;
+	ако (!str)
+		врати -EINVAL;
 
 	*str = NULL;
 
 	rc = ul_path_read_buffer(pc, buf, sizeof(buf), path);
-	if (rc < 0)
-		return rc;
+	ако (rc < 0)
+		врати rc;
 
 	*str = strdup(buf);
-	if (!*str)
+	ако (!*str)
 		rc = -ENOMEM;
 
-	return rc;
+	врати rc;
 }
 
-int ul_path_readf_string(struct path_cxt *pc, char **str, const char *path, ...)
+цео ul_path_readf_string(struct path_cxt *pc, char **str, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -719,57 +719,57 @@ int ul_path_readf_string(struct path_cxt *pc, char **str, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_string(pc, str, p);
+	врати !p ? -errno : ul_path_read_string(pc, str, p);
 }
 
-int ul_path_read_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path)
+цео ul_path_read_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path)
 {
-	int rc = ul_path_read(pc, buf, bufsz - 1, path);
+	цео rc = ul_path_read(pc, buf, bufsz - 1, path);
 
-	if (rc == 0)
+	ако (rc == 0)
 		buf[0] = '\0';
 
-	else if (rc > 0) {
+	инако ако (rc > 0) {
 		/* Remove trailing newline (usual in sysfs) */
-		if (*(buf + rc - 1) == '\n')
+		ако (*(buf + rc - 1) == '\n')
 			buf[--rc] = '\0';
-		else
+		инако
 			buf[rc] = '\0';
 	}
 
-	return rc;
+	врати rc;
 }
 
-int ul_path_vreadf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, va_list ap)
+цео ul_path_vreadf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, va_list ap)
 {
 	const char *p;
 
 	p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
+	врати !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
 }
 
-int ul_path_readf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+цео ul_path_readf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
 {
 	va_list ap;
-	int rc;
+	цео rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf_buffer(pc, buf, bufsz, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 
-int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
+цео ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	цео rc;
 
 	f = ul_path_fopen(pc, "r" UL_CLOEXECSTR, path);
-	if (!f)
-		return -EINVAL;
+	ако (!f)
+		врати -EINVAL;
 
 	DBG(CXT, ul_debug(" fscanf [%s] '%s'", fmt, path));
 
@@ -778,42 +778,42 @@ int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	врати rc;
 }
 
-int ul_path_scanff(struct path_cxt *pc, const char *path, va_list ap, const char *fmt, ...)
+цео ul_path_scanff(struct path_cxt *pc, const char *path, va_list ap, const char *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	цео rc;
 
 	f = ul_path_vfopenf(pc, "r" UL_CLOEXECSTR, path, ap);
-	if (!f)
-		return -EINVAL;
+	ако (!f)
+		врати -EINVAL;
 
 	va_start(fmt_ap, fmt);
 	rc = vfscanf(f, fmt, fmt_ap);
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	врати rc;
 }
 
 
-int ul_path_read_s64(struct path_cxt *pc, int64_t *res, const char *path)
+цео ul_path_read_s64(struct path_cxt *pc, int64_t *res, const char *path)
 {
 	int64_t x = 0;
-	int rc;
+	цео rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNd64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ако (rc != 1)
+		врати -1;
+	ако (res)
 		*res = x;
-	return 0;
+	врати 0;
 }
 
-int ul_path_readf_s64(struct path_cxt *pc, int64_t *res, const char *path, ...)
+цео ul_path_readf_s64(struct path_cxt *pc, int64_t *res, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -822,23 +822,23 @@ int ul_path_readf_s64(struct path_cxt *pc, int64_t *res, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s64(pc, res, p);
+	врати !p ? -errno : ul_path_read_s64(pc, res, p);
 }
 
-int ul_path_read_u64(struct path_cxt *pc, uint64_t *res, const char *path)
+цео ul_path_read_u64(struct path_cxt *pc, uint64_t *res, const char *path)
 {
 	uint64_t x = 0;
-	int rc;
+	цео rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNu64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ако (rc != 1)
+		врати -1;
+	ако (res)
 		*res = x;
-	return 0;
+	врати 0;
 }
 
-int ul_path_readf_u64(struct path_cxt *pc, uint64_t *res, const char *path, ...)
+цео ul_path_readf_u64(struct path_cxt *pc, uint64_t *res, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -847,22 +847,22 @@ int ul_path_readf_u64(struct path_cxt *pc, uint64_t *res, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u64(pc, res, p);
+	врати !p ? -errno : ul_path_read_u64(pc, res, p);
 }
 
-int ul_path_read_s32(struct path_cxt *pc, int *res, const char *path)
+цео ul_path_read_s32(struct path_cxt *pc, цео *res, const char *path)
 {
-	int rc, x = 0;
+	цео rc, x = 0;
 
 	rc = ul_path_scanf(pc, path, "%d", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ако (rc != 1)
+		врати -1;
+	ако (res)
 		*res = x;
-	return 0;
+	врати 0;
 }
 
-int ul_path_readf_s32(struct path_cxt *pc, int *res, const char *path, ...)
+цео ul_path_readf_s32(struct path_cxt *pc, цео *res, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -871,23 +871,23 @@ int ul_path_readf_s32(struct path_cxt *pc, int *res, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s32(pc, res, p);
+	врати !p ? -errno : ul_path_read_s32(pc, res, p);
 }
 
-int ul_path_read_u32(struct path_cxt *pc, unsigned int *res, const char *path)
+цео ul_path_read_u32(struct path_cxt *pc, unsigned цео *res, const char *path)
 {
-	int rc;
-	unsigned int x = 0;
+	цео rc;
+	unsigned цео x = 0;
 
 	rc = ul_path_scanf(pc, path, "%u", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ако (rc != 1)
+		врати -1;
+	ако (res)
 		*res = x;
-	return 0;
+	врати 0;
 }
 
-int ul_path_readf_u32(struct path_cxt *pc, unsigned int *res, const char *path, ...)
+цео ul_path_readf_u32(struct path_cxt *pc, unsigned цео *res, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -896,22 +896,22 @@ int ul_path_readf_u32(struct path_cxt *pc, unsigned int *res, const char *path, 
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u32(pc, res, p);
+	врати !p ? -errno : ul_path_read_u32(pc, res, p);
 }
 
-int ul_path_read_majmin(struct path_cxt *pc, dev_t *res, const char *path)
+цео ul_path_read_majmin(struct path_cxt *pc, dev_t *res, const char *path)
 {
-	int rc, maj = 0, min = 0;
+	цео rc, maj = 0, min = 0;
 
 	rc = ul_path_scanf(pc, path, "%d:%d", &maj, &min);
-	if (rc != 2)
-		return -1;
-	if (res)
+	ако (rc != 2)
+		врати -1;
+	ако (res)
 		*res = makedev(maj, min);
-	return 0;
+	врати 0;
 }
 
-int ul_path_readf_majmin(struct path_cxt *pc, dev_t *res, const char *path, ...)
+цео ul_path_readf_majmin(struct path_cxt *pc, dev_t *res, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -920,27 +920,27 @@ int ul_path_readf_majmin(struct path_cxt *pc, dev_t *res, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_majmin(pc, res, p);
+	врати !p ? -errno : ul_path_read_majmin(pc, res, p);
 }
 
-int ul_path_write_string(struct path_cxt *pc, const char *str, const char *path)
+цео ul_path_write_string(struct path_cxt *pc, const char *str, const char *path)
 {
-	int rc, errsv;
-	int fd;
+	цео rc, errsv;
+	цео fd;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ако (fd < 0)
+		врати -errno;
 
 	rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, str, strlen(str));
 
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	врати rc;
 }
 
-int ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path, ...)
+цео ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -949,54 +949,54 @@ int ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_string(pc, str, p);
+	врати !p ? -errno : ul_path_write_string(pc, str, p);
 }
 
-int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
+цео ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
 {
 	char buf[sizeof(stringify_value(LLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	цео rc, errsv;
+	цео fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ако (fd < 0)
+		врати -errno;
 
 	len = snprintf(buf, sizeof(buf), "%" PRId64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	ако (len < 0 || (size_t) len >= sizeof(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
+	инако
 		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
 
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	врати rc;
 }
 
-int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
+цео ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
 {
 	char buf[sizeof(stringify_value(ULLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	цео rc, errsv;
+	цео fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ако (fd < 0)
+		врати -errno;
 
 	len = snprintf(buf, sizeof(buf), "%" PRIu64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	ако (len < 0 || (size_t) len >= sizeof(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
+	инако
 		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
 
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	врати rc;
 }
 
-int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
+цео ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -1005,26 +1005,26 @@ int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_u64(pc, num, p);
+	врати !p ? -errno : ul_path_write_u64(pc, num, p);
 
 }
 
-int ul_path_count_dirents(struct path_cxt *pc, const char *path)
+цео ul_path_count_dirents(struct path_cxt *pc, const char *path)
 {
 	DIR *dir;
-	int r = 0;
+	цео r = 0;
 
 	dir = ul_path_opendir(pc, path);
-	if (!dir)
-		return 0;
+	ако (!dir)
+		врати 0;
 
-	while (xreaddir(dir)) r++;
+	док (xreaddir(dir)) r++;
 
 	closedir(dir);
-	return r;
+	врати r;
 }
 
-int ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
+цео ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
 {
 	const char *p;
 	va_list ap;
@@ -1033,61 +1033,61 @@ int ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_count_dirents(pc, p);
+	врати !p ? -errno : ul_path_count_dirents(pc, p);
 }
 
 /* first call (when @sub is NULL) opens the directory, last call closes the directory */
-int ul_path_next_dirent(struct path_cxt *pc, DIR **sub, const char *dirname, struct dirent **d)
+цео ul_path_next_dirent(struct path_cxt *pc, DIR **sub, const char *dirname, struct dirent **d)
 {
-	if (!pc || !sub || !d)
-		return -EINVAL;
+	ако (!pc || !sub || !d)
+		врати -EINVAL;
 
-	if (!*sub) {
+	ако (!*sub) {
 		*sub = ul_path_opendir(pc, dirname);
-		if (!*sub)
-			return -errno;
+		ако (!*sub)
+			врати -errno;
 	}
 
 	*d = xreaddir(*sub);
-	if (*d)
-		return 0;
+	ако (*d)
+		врати 0;
 
 	closedir(*sub);
 	*sub = NULL;
-	return 1;
+	врати 1;
 }
 
 #ifdef HAVE_CPU_SET_T
-static int ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, int maxcpus, int islist, const char *path, va_list ap)
+static цео ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, цео maxcpus, цео islist, const char *path, va_list ap)
 {
 	size_t setsize, len = maxcpus * 7;
 	char *buf;
-	int rc;
+	цео rc;
 
 	*set = NULL;
 
 	buf = malloc(len);
-	if (!buf)
-		return -ENOMEM;
+	ако (!buf)
+		врати -ENOMEM;
 
 	rc = ul_path_vreadf_buffer(pc, buf, len, path, ap);
-	if (rc < 0)
+	ако (rc < 0)
 		goto out;
 
 	*set = cpuset_alloc(maxcpus, &setsize, NULL);
-	if (!*set) {
+	ако (!*set) {
 		rc = -EINVAL;
 		goto out;
 	}
 
-	if (islist) {
-		if (cpulist_parse(buf, *set, setsize, 0)) {
+	ако (islist) {
+		ако (cpulist_parse(buf, *set, setsize, 0)) {
 			errno = EINVAL;
 			rc = -errno;
 			goto out;
 		}
-	} else {
-		if (cpumask_parse(buf, *set, setsize)) {
+	} инако {
+		ако (cpumask_parse(buf, *set, setsize)) {
 			errno = EINVAL;
 			rc = -errno;
 			goto out;
@@ -1096,36 +1096,36 @@ static int ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, int maxcpus, i
 	rc = 0;
 
 out:
-	if (rc) {
+	ако (rc) {
 		cpuset_free(*set);
 		*set = NULL;
 	}
 	free(buf);
-	return rc;
+	врати rc;
 }
 
-int ul_path_readf_cpuset(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+цео ul_path_readf_cpuset(struct path_cxt *pc, cpu_set_t **set, цео maxcpus, const char *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	цео rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 0, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 
-int ul_path_readf_cpulist(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+цео ul_path_readf_cpulist(struct path_cxt *pc, cpu_set_t **set, цео maxcpus, const char *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	цео rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 1, path, ap);
 	va_end(ap);
 
-	return rc;
+	врати rc;
 }
 
 #endif /* HAVE_CPU_SET_T */
@@ -1153,9 +1153,9 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char *argv[])
+цео main(цео argc, char *argv[])
 {
-	int c;
+	цео c;
 	const char *prefix = NULL, *dir, *file, *command;
 	struct path_cxt *pc = NULL;
 
@@ -1165,7 +1165,7 @@ int main(int argc, char *argv[])
 		{ NULL, 0, NULL, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "p:h", longopts, NULL)) != -1) {
+	док((c = getopt_long(argc, argv, "p:h", longopts, NULL)) != -1) {
 		switch(c) {
 		case 'p':
 			prefix = optarg;
@@ -1178,155 +1178,155 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (optind == argc)
+	ако (optind == argc)
 		errx(EXIT_FAILURE, "<dir> not defined");
 	dir = argv[optind++];
 
 	ul_path_init_debug();
 
 	pc = ul_new_path("%s", dir);
-	if (!pc)
+	ако (!pc)
 		err(EXIT_FAILURE, "failed to initialize path context");
-	if (prefix)
+	ако (prefix)
 		ul_path_set_prefix(pc, prefix);
 
-	if (optind == argc)
+	ако (optind == argc)
 		errx(EXIT_FAILURE, "<command> not defined");
 	command = argv[optind++];
 
-	if (strcmp(command, "read-u32") == 0) {
+	ако (strcmp(command, "read-u32") == 0) {
 		uint32_t res;
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u32(pc, &res, file) != 0)
+		ако (ul_path_read_u32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %u\n", file, res);
 
-		if (ul_path_readf_u32(pc, &res, "%s", file) != 0)
+		ако (ul_path_readf_u32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %u\n", file, res);
 
-	} else if (strcmp(command, "read-s32") == 0) {
+	} инако ако (strcmp(command, "read-s32") == 0) {
 		int32_t res;
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s32(pc, &res, file) != 0)
+		ако (ul_path_read_s32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %d\n", file, res);
 
-		if (ul_path_readf_s32(pc, &res, "%s", file) != 0)
+		ако (ul_path_readf_s32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %d\n", file, res);
 
-	} else if (strcmp(command, "read-u64") == 0) {
+	} инако ако (strcmp(command, "read-u64") == 0) {
 		uint64_t res;
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u64(pc, &res, file) != 0)
+		ако (ul_path_read_u64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRIu64 "\n", file, res);
 
-		if (ul_path_readf_u64(pc, &res, "%s", file) != 0)
+		ако (ul_path_readf_u64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRIu64 "\n", file, res);
 
-	} else if (strcmp(command, "read-s64") == 0) {
+	} инако ако (strcmp(command, "read-s64") == 0) {
 		int64_t res;
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s64(pc, &res, file) != 0)
+		ако (ul_path_read_s64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRId64 "\n", file, res);
 
-		if (ul_path_readf_s64(pc, &res, "%s", file) != 0)
+		ако (ul_path_readf_s64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRId64 "\n", file, res);
 
-	} else if (strcmp(command, "read-majmin") == 0) {
+	} инако ако (strcmp(command, "read-majmin") == 0) {
 		dev_t res;
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_majmin(pc, &res, file) != 0)
+		ако (ul_path_read_majmin(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read maj:min failed");
-		printf("read:  %s: %d\n", file, (int) res);
+		printf("read:  %s: %d\n", file, (цео) res);
 
-		if (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
+		ако (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf maj:min failed");
-		printf("readf: %s: %d\n", file, (int) res);
+		printf("readf: %s: %d\n", file, (цео) res);
 
-	} else if (strcmp(command, "read-string") == 0) {
+	} инако ако (strcmp(command, "read-string") == 0) {
 		char *res;
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_string(pc, &res, file) <= 0)
+		ако (ul_path_read_string(pc, &res, file) <= 0)
 			err(EXIT_FAILURE, "read string failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readf_string(pc, &res, "%s", file) <= 0)
+		ако (ul_path_readf_string(pc, &res, "%s", file) <= 0)
 			err(EXIT_FAILURE, "readf string failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "read-link") == 0) {
+	} инако ако (strcmp(command, "read-link") == 0) {
 		char res[PATH_MAX];
 
-		if (optind == argc)
+		ако (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_readlink(pc, res, sizeof(res), file) < 0)
+		ако (ul_path_readlink(pc, res, sizeof(res), file) < 0)
 			err(EXIT_FAILURE, "read symlink failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readlinkf(pc, res, sizeof(res), "%s", file) < 0)
+		ако (ul_path_readlinkf(pc, res, sizeof(res), "%s", file) < 0)
 			err(EXIT_FAILURE, "readf symlink failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "write-string") == 0) {
+	} инако ако (strcmp(command, "write-string") == 0) {
 		char *str;
 
-		if (optind + 1 == argc)
+		ако (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <string> not defined");
 		file = argv[optind++];
 		str = argv[optind++];
 
-		if (ul_path_write_string(pc, str, file) != 0)
+		ако (ul_path_write_string(pc, str, file) != 0)
 			err(EXIT_FAILURE, "write string failed");
-		if (ul_path_writef_string(pc, str, "%s", file) != 0)
+		ако (ul_path_writef_string(pc, str, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef string failed");
 
-	} else if (strcmp(command, "write-u64") == 0) {
+	} инако ако (strcmp(command, "write-u64") == 0) {
 		uint64_t num;
 
-		if (optind + 1 == argc)
+		ако (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <num> not defined");
 		file = argv[optind++];
 		num = strtoumax(argv[optind++], NULL, 0);
 
-		if (ul_path_write_u64(pc, num, file) != 0)
+		ако (ul_path_write_u64(pc, num, file) != 0)
 			err(EXIT_FAILURE, "write u64 failed");
-		if (ul_path_writef_u64(pc, num, "%s", file) != 0)
+		ако (ul_path_writef_u64(pc, num, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef u64 failed");
 	}
 
 	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	врати EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PATH */
