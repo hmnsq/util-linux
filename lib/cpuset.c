@@ -15,128 +15,128 @@
  * Copyright (C) 2010 Karel Zak <kzak@redhat.com>
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sched.h>
-#include <errno.h>
-#include <string.h>
-#include <ctype.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <stdlib.h>
+#অন্তর্ভাৱ <unistd.h>
+#অন্তর্ভাৱ <sched.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <string.h>
+#অন্তর্ভাৱ <ctype.h>
 #ifdef HAVE_SYS_SYSCALL_H
-#include <sys/syscall.h>
+#অন্তর্ভাৱ <sys/syscall.h>
 #endif
 
-#include "cpuset.h"
-#include "c.h"
+#অন্তর্ভাৱ "cpuset.h"
+#অন্তর্ভাৱ "c.h"
 
-static inline int val_to_char(int v)
+স্থির অন্তঃস্থ পূর্ণাঙ্ক val_to_char(পূর্ণাঙ্ক v)
 {
-	if (v >= 0 && v < 10)
-		return '0' + v;
-	if (v >= 10 && v < 16)
-		return ('a' - 10) + v;
-	return -1;
+	যদি (v >= 0 && v < 10)
+		ঘূৰাই '0' + v;
+	যদি (v >= 10 && v < 16)
+		ঘূৰাই ('a' - 10) + v;
+	ঘূৰাই -1;
 }
 
-static inline int char_to_val(int c)
+স্থির অন্তঃস্থ পূর্ণাঙ্ক char_to_val(পূর্ণাঙ্ক c)
 {
-	int cl;
+	পূর্ণাঙ্ক cl;
 
-	if (c >= '0' && c <= '9')
-		return c - '0';
+	যদি (c >= '0' && c <= '9')
+		ঘূৰাই c - '0';
 	cl = tolower(c);
-	if (cl >= 'a' && cl <= 'f')
-		return cl + (10 - 'a');
-	return -1;
+	যদি (cl >= 'a' && cl <= 'f')
+		ঘূৰাই cl + (10 - 'a');
+	ঘূৰাই -1;
 }
 
-static const char *nexttoken(const char *q,  int sep)
+স্থির ধ্রুৱ ৱর্ণ *nexttoken(ধ্রুৱ ৱর্ণ *q,  পূর্ণাঙ্ক sep)
 {
-	if (q)
+	যদি (q)
 		q = strchr(q, sep);
-	if (q)
+	যদি (q)
 		q++;
-	return q;
+	ঘূৰাই q;
 }
 
 /*
  * Number of bits in a CPU bitmask on current system
  */
-int get_max_number_of_cpus(void)
+পূর্ণাঙ্ক get_max_সংখ্যা_of_cpus(শূন্য)
 {
 #ifdef SYS_sched_getaffinity
-	int n, cpus = 2048;
+	পূর্ণাঙ্ক n, cpus = 2048;
 	size_t setsize;
-	cpu_set_t *set = cpuset_alloc(cpus, &setsize, NULL);
+	cpu_set_t *set = cpuset_alloc(cpus, &setsize, রিক্ত);
 
-	if (!set)
-		return -1;	/* error */
+	যদি (!set)
+		ঘূৰাই -1;	/* error */
 
-	for (;;) {
+	বাবে (;;) {
 		CPU_ZERO_S(setsize, set);
 
 		/* the library version does not return size of cpumask_t */
 		n = syscall(SYS_sched_getaffinity, 0, setsize, set);
 
-		if (n < 0 && errno == EINVAL && cpus < 1024 * 1024) {
+		যদি (n < 0 && errno == EINVAL && cpus < 1024 * 1024) {
 			cpuset_free(set);
 			cpus *= 2;
-			set = cpuset_alloc(cpus, &setsize, NULL);
-			if (!set)
-				return -1;	/* error */
-			continue;
+			set = cpuset_alloc(cpus, &setsize, রিক্ত);
+			যদি (!set)
+				ঘূৰাই -1;	/* error */
+			অনুৱর্ত;
 		}
 		cpuset_free(set);
-		return n * 8;
+		ঘূৰাই n * 8;
 	}
 #endif
-	return -1;
+	ঘূৰাই -1;
 }
 
 /*
  * Allocates a new set for ncpus and returns size in bytes and size in bits
  */
-cpu_set_t *cpuset_alloc(int ncpus, size_t *setsize, size_t *nbits)
+cpu_set_t *cpuset_alloc(পূর্ণাঙ্ক ncpus, size_t *setsize, size_t *nbits)
 {
-	cpu_set_t *set = NULL;
+	cpu_set_t *set = রিক্ত;
 
-	if (ncpus)
+	যদি (ncpus)
 		set = CPU_ALLOC(ncpus);
-	if (!set)
-		return NULL;
-	if (setsize)
+	যদি (!set)
+		ঘূৰাই রিক্ত;
+	যদি (setsize)
 		*setsize = CPU_ALLOC_SIZE(ncpus);
-	if (nbits)
+	যদি (nbits)
 		*nbits = cpuset_nbits(CPU_ALLOC_SIZE(ncpus));
-	return set;
+	ঘূৰাই set;
 }
 
-void cpuset_free(cpu_set_t *set)
+শূন্য cpuset_free(cpu_set_t *set)
 {
 	CPU_FREE(set);
 }
 
-#if !HAVE_DECL_CPU_ALLOC
+#যদি !HAVE_DECL_CPU_ALLOC
 /* Please, use CPU_COUNT_S() macro. This is fallback */
-int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
+পূর্ণাঙ্ক __cpuset_count_s(size_t setsize, ধ্রুৱ cpu_set_t *set)
 {
-	int s = 0;
-	const __cpu_mask *p = set->__bits;
-	const __cpu_mask *end = &set->__bits[setsize / sizeof (__cpu_mask)];
+	পূর্ণাঙ্ক s = 0;
+	ধ্রুৱ __cpu_mask *p = set->__bits;
+	ধ্রুৱ __cpu_mask *end = &set->__bits[setsize / পরিমাণ (__cpu_mask)];
 
-	while (p < end) {
+	যেতিয়ালৈ (p < end) {
 		__cpu_mask l = *p++;
 
-		if (l == 0)
-			continue;
-# if LONG_BIT > 32
+		যদি (l == 0)
+			অনুৱর্ত;
+# যদি LONG_BIT > 32
 		l = (l & 0x5555555555555555ul) + ((l >> 1) & 0x5555555555555555ul);
 		l = (l & 0x3333333333333333ul) + ((l >> 2) & 0x3333333333333333ul);
 		l = (l & 0x0f0f0f0f0f0f0f0ful) + ((l >> 4) & 0x0f0f0f0f0f0f0f0ful);
 		l = (l & 0x00ff00ff00ff00fful) + ((l >> 8) & 0x00ff00ff00ff00fful);
 		l = (l & 0x0000ffff0000fffful) + ((l >> 16) & 0x0000ffff0000fffful);
 		l = (l & 0x00000000fffffffful) + ((l >> 32) & 0x00000000fffffffful);
-# else
+# অন্যথা
 		l = (l & 0x55555555ul) + ((l >> 1) & 0x55555555ul);
 		l = (l & 0x33333333ul) + ((l >> 2) & 0x33333333ul);
 		l = (l & 0x0f0f0f0ful) + ((l >> 4) & 0x0f0f0f0ful);
@@ -145,7 +145,7 @@ int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
 # endif
 		s += l;
 	}
-	return s;
+	ঘূৰাই s;
 }
 #endif
 
@@ -159,57 +159,57 @@ int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
  * Return: the index of the first CPU present in `set`, starting at `start`.
  * If no such CPU exists, returns the size of the set in *bits*.
  */
-static size_t find_next_cpu(size_t start, size_t setsize, cpu_set_t *set)
+স্থির size_t find_next_cpu(size_t start, size_t setsize, cpu_set_t *set)
 {
 	size_t nbits = cpuset_nbits(setsize);
-	for (; start < nbits; start++)
-		if (CPU_ISSET_S(start, setsize, set))
-			return start;
-	return start;
+	বাবে (; start < nbits; start++)
+		যদি (CPU_ISSET_S(start, setsize, set))
+			ঘূৰাই start;
+	ঘূৰাই start;
 }
 
 /*
  * Returns human readable representation of the cpuset. The output format is
  * a list of CPUs with ranges (for example, "0,1,3-9:3").
  */
-char *cpulist_create(char *str, size_t len,
+ৱর্ণ *cpulist_create(ৱর্ণ *str, size_t len,
 			cpu_set_t *set, size_t setsize)
 {
-	char *ptr = str;
-	int entry_made = 0;
+	ৱর্ণ *ptr = str;
+	পূর্ণাঙ্ক entry_made = 0;
 	size_t max = cpuset_nbits(setsize);
 	size_t a = 0;  /* min for cpu range */
 	size_t next = 0;  /* where to start looking for next cpu */
 
-	while ((a = find_next_cpu(next, setsize, set)) < max) {
-		int rlen;
+	যেতিয়ালৈ ((a = find_next_cpu(next, setsize, set)) < max) {
+		পূর্ণাঙ্ক rlen;
 		next = find_next_cpu(a + 1, setsize, set);
-		if (next == max) {
+		যদি (next == max) {
 			rlen = snprintf(ptr, len, "%zu,", a);
-		} else {
+		} অন্যথা {
 			/* Extend range as long as we have the same stride. */
 			size_t b = next;
 			size_t s = b - a;
-			while (((next = find_next_cpu(b + 1, setsize, set)) <
+			যেতিয়ালৈ (((next = find_next_cpu(b + 1, setsize, set)) <
 				max) && next - b == s) {
 				b = next;
 			}
-			if (b - a == s) {
+			যদি (b - a == s) {
 				/*
 				 * Only print one CPU.  Hope the next one can
 				 * be put in the next range.
 				 */
 				rlen = snprintf(ptr, len, "%zu,", a);
 				next = b;
-			} else if (s == 1) {
+			} অন্যথা যদি (s == 1) {
 				rlen = snprintf(ptr, len, "%zu-%zu,", a, b);
-			} else {
+			} অন্যথা {
 				rlen = snprintf(ptr, len, "%zu-%zu:%zu,",
 						a, b, s);
 			}
 		}
-		if (rlen < 0 || (size_t) rlen >= len)
-			return NULL;
+		যদি (rlen < 0 || (size_t) rlen >= len)
+			ঘূৰাই রিক্ত;
 		ptr += rlen;
 		len -= rlen;
 		entry_made = 1;
@@ -217,29 +217,29 @@ char *cpulist_create(char *str, size_t len,
 	ptr -= entry_made;
 	*ptr = '\0';
 
-	return str;
+	ঘূৰাই str;
 }
 
 /*
  * cpulist_flat_create - Convert cpumask to flat comma-separated list
  * Output: ONLY single CPUs, NO ranges (e.g. "0,1,2,3,4")
  */
-char *cpulist_flat_create(char *str, size_t len,
+ৱর্ণ *cpulist_flat_create(ৱর্ণ *str, size_t len,
 			    cpu_set_t *set, size_t setsize)
 {
-	char *ptr = str;
-	int entry_made = 0;
+	ৱর্ণ *ptr = str;
+	পূর্ণাঙ্ক entry_made = 0;
 	size_t max = cpuset_nbits(setsize);
 	size_t cpu;
-	int rlen;
+	পূর্ণাঙ্ক rlen;
 
-	for (cpu = 0; cpu < max; cpu++) {
-		if (!CPU_ISSET_S(cpu, setsize, set))
-			continue;
+	বাবে (cpu = 0; cpu < max; cpu++) {
+		যদি (!CPU_ISSET_S(cpu, setsize, set))
+			অনুৱর্ত;
 
 		rlen = snprintf(ptr, len, "%zu,", cpu);
-		if (rlen < 0 || (size_t)rlen >= len)
-			return NULL;
+		যদি (rlen < 0 || (size_t)rlen >= len)
+			ঘূৰাই রিক্ত;
 
 		ptr += rlen;
 		len -= rlen;
@@ -248,94 +248,94 @@ char *cpulist_flat_create(char *str, size_t len,
 	ptr -= entry_made;
 	*ptr = '\0';
 
-	return str;
+	ঘূৰাই str;
 }
 
 
 /*
  * Returns string with CPU mask.
  */
-char *cpumask_create(char *str, size_t len,
+ৱর্ণ *cpumask_create(ৱর্ণ *str, size_t len,
 			cpu_set_t *set, size_t setsize)
 {
-	char *ptr = str;
-	char *ret = NULL;
-	int cpu;
+	ৱর্ণ *ptr = str;
+	ৱর্ণ *ret = রিক্ত;
+	পূর্ণাঙ্ক cpu;
 
-	for (cpu = cpuset_nbits(setsize) - 4; cpu >= 0; cpu -= 4) {
-		char val = 0;
+	বাবে (cpu = cpuset_nbits(setsize) - 4; cpu >= 0; cpu -= 4) {
+		ৱর্ণ val = 0;
 
-		if (len == (size_t) (ptr - str))
-			break;
+		যদি (len == (size_t) (ptr - str))
+			ভঙ্গ;
 
-		if (CPU_ISSET_S(cpu, setsize, set))
+		যদি (CPU_ISSET_S(cpu, setsize, set))
 			val |= 1;
-		if (CPU_ISSET_S(cpu + 1, setsize, set))
+		যদি (CPU_ISSET_S(cpu + 1, setsize, set))
 			val |= 2;
-		if (CPU_ISSET_S(cpu + 2, setsize, set))
+		যদি (CPU_ISSET_S(cpu + 2, setsize, set))
 			val |= 4;
-		if (CPU_ISSET_S(cpu + 3, setsize, set))
+		যদি (CPU_ISSET_S(cpu + 3, setsize, set))
 			val |= 8;
 
-		if (!ret && val)
+		যদি (!ret && val)
 			ret = ptr;
 		*ptr++ = val_to_char(val);
 	}
 	*ptr = '\0';
-	return ret ? ret : ptr - 1;
+	ঘূৰাই ret ? ret : ptr - 1;
 }
 
 /*
  * Parses string with CPUs mask.
  */
-int cpumask_parse(const char *str, cpu_set_t *set, size_t setsize)
+পূর্ণাঙ্ক cpumask_parse(ধ্রুৱ ৱর্ণ *str, cpu_set_t *set, size_t setsize)
 {
-	int len = strlen(str);
-	const char *ptr = str + len - 1;
-	int cpu = 0;
+	পূর্ণাঙ্ক len = strlen(str);
+	ধ্রুৱ ৱর্ণ *ptr = str + len - 1;
+	পূর্ণাঙ্ক cpu = 0;
 
 	/* skip 0x, it's all hex anyway */
-	if (len > 1 && !memcmp(str, "0x", 2L))
+	যদি (len > 1 && !memcmp(str, "0x", 2L))
 		str += 2;
 
 	CPU_ZERO_S(setsize, set);
 
-	while (ptr >= str) {
-		char val;
+	যেতিয়ালৈ (ptr >= str) {
+		ৱর্ণ val;
 
 		/* cpu masks in /sys uses comma as a separator */
-		if (*ptr == ',')
+		যদি (*ptr == ',')
 			ptr--;
 
 		val = char_to_val(*ptr);
-		if (val == (char) -1)
-			return -1;
-		if (val & 1)
+		যদি (val == (ৱর্ণ) -1)
+			ঘূৰাই -1;
+		যদি (val & 1)
 			CPU_SET_S(cpu, setsize, set);
-		if (val & 2)
+		যদি (val & 2)
 			CPU_SET_S(cpu + 1, setsize, set);
-		if (val & 4)
+		যদি (val & 4)
 			CPU_SET_S(cpu + 2, setsize, set);
-		if (val & 8)
+		যদি (val & 8)
 			CPU_SET_S(cpu + 3, setsize, set);
 		ptr--;
 		cpu += 4;
 	}
 
-	return 0;
+	ঘূৰাই 0;
 }
 
-static int nextnumber(const char *str, char **end, unsigned int *result)
+স্থির পূর্ণাঙ্ক nextnumber(ধ্রুৱ ৱর্ণ *str, ৱর্ণ **end, unsigned পূর্ণাঙ্ক *result)
 {
 	errno = 0;
-	if (str == NULL || *str == '\0' || !isdigit(*str))
-		return -EINVAL;
-	*result = (unsigned int) strtoul(str, end, 10);
-	if (errno)
-		return -errno;
-	if (str == *end)
-		return -EINVAL;
-	return 0;
+	যদি (str == রিক্ত || *str == '\0' || !isdigit(*str))
+		ঘূৰাই -EINVAL;
+	*result = (unsigned পূর্ণাঙ্ক) strtoul(str, end, 10);
+	যদি (errno)
+		ঘূৰাই -errno;
+	যদি (str == *end)
+		ঘূৰাই -EINVAL;
+	ঘূৰাই 0;
 }
 
 /*
@@ -346,24 +346,24 @@ static int nextnumber(const char *str, char **end, unsigned int *result)
  * into the cpu_set. If fail is not set cpu numbers that do not fit are
  * ignored and 0 is returned instead.
  */
-int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
+পূর্ণাঙ্ক cpulist_parse(ধ্রুৱ ৱর্ণ *str, cpu_set_t *set, size_t setsize, পূর্ণাঙ্ক fail)
 {
-	const size_t max = cpuset_nbits(setsize);
-	const char *p, *q;
-	char *end = NULL;
+	ধ্রুৱ size_t max = cpuset_nbits(setsize);
+	ধ্রুৱ ৱর্ণ *p, *q;
+	ৱর্ণ *end = রিক্ত;
 
 	q = str;
 	CPU_ZERO_S(setsize, set);
 
-	while (p = q, q = nexttoken(q, ','), p) {
-		unsigned int a;	/* beginning of range */
-		unsigned int b;	/* end of range */
-		unsigned int s;	/* stride */
-		const char *c1, *c2;
+	যেতিয়ালৈ (p = q, q = nexttoken(q, ','), p) {
+		unsigned পূর্ণাঙ্ক a;	/* beginning of range */
+		unsigned পূর্ণাঙ্ক b;	/* end of range */
+		unsigned পূর্ণাঙ্ক s;	/* stride */
+		ধ্রুৱ ৱর্ণ *c1, *c2;
 
-		if (nextnumber(p, &end, &a) != 0 ||
+		যদি (nextnumber(p, &end, &a) != 0 ||
 			(*end && *end != ',' && *end != '-'))
-			return 1;
+			ঘূৰাই 1;
 		b = a;
 		s = 1;
 		p = end;
@@ -371,80 +371,80 @@ int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
 		c1 = nexttoken(p, '-');
 		c2 = nexttoken(p, ',');
 
-		if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-			if (nextnumber(c1, &end, &b) != 0 ||
+		যদি (c1 != রিক্ত && (c2 == রিক্ত || c1 < c2)) {
+			যদি (nextnumber(c1, &end, &b) != 0 ||
 				(*end && *end != ',' && *end != ':'))
-				return 1;
+				ঘূৰাই 1;
 
 			c1 = nexttoken(end, ':');
 
-			if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-				if (nextnumber(c1, &end, &s) != 0 ||
+			যদি (c1 != রিক্ত && (c2 == রিক্ত || c1 < c2)) {
+				যদি (nextnumber(c1, &end, &s) != 0 ||
 					(*end && *end != ','))
-					return 1;
-				if (s == 0)
-					return 1;
+					ঘূৰাই 1;
+				যদি (s == 0)
+					ঘূৰাই 1;
 			}
 		}
 
-		if (!(a <= b))
-			return 1;
-		while (a <= b) {
-			if (a >= max) {
-				if (fail)
-					return 2;
-				else
-					break;
+		যদি (!(a <= b))
+			ঘূৰাই 1;
+		যেতিয়ালৈ (a <= b) {
+			যদি (a >= max) {
+				যদি (fail)
+					ঘূৰাই 2;
+				অন্যথা
+					ভঙ্গ;
 			}
 			CPU_SET_S(a, setsize, set);
 			a += s;
 		}
 	}
 
-	if (end && *end)
-		return 1;
-	return 0;
+	যদি (end && *end)
+		ঘূৰাই 1;
+	ঘূৰাই 0;
 }
 
 #ifdef TEST_PROGRAM_CPUSET
 
-#include <getopt.h>
+#অন্তর্ভাৱ <getopt.h>
 
-int main(int argc, char *argv[])
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, ৱর্ণ *argv[])
 {
 	cpu_set_t *set;
 	size_t setsize, buflen, nbits;
-	char *buf, *mask = NULL, *range = NULL;
-	int ncpus = 2048, rc, c;
+	ৱর্ণ *buf, *mask = রিক্ত, *range = রিক্ত;
+	পূর্ণাঙ্ক ncpus = 2048, rc, c;
 
-	static const struct option longopts[] = {
-	    { "ncpus", 1, NULL, 'n' },
-	    { "mask",  1, NULL, 'm' },
-	    { "range", 1, NULL, 'r' },
-	    { NULL,    0, NULL, 0 }
+	স্থির ধ্রুৱ সংরচনা option longopts[] = {
+	    { "ncpus", 1, রিক্ত, 'n' },
+	    { "mask",  1, রিক্ত, 'm' },
+	    { "range", 1, রিক্ত, 'r' },
+	    { রিক্ত,    0, রিক্ত, 0 }
 	};
 
-	while ((c = getopt_long(argc, argv, "n:m:r:", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	যেতিয়ালৈ ((c = getopt_long(argc, argv, "n:m:r:", longopts, রিক্ত)) != -1) {
+		ৱিকল্প(c) {
+		পক্ষ 'n':
 			ncpus = atoi(optarg);
-			break;
-		case 'm':
+			ভঙ্গ;
+		পক্ষ 'm':
 			mask = optarg;
-			break;
-		case 'r':
+			ভঙ্গ;
+		পক্ষ 'r':
 			range = optarg;
-			break;
-		default:
-			goto usage_err;
+			ভঙ্গ;
+		স্ৱভাৱ:
+			গচ্ছ usage_err;
 		}
 	}
 
-	if (!mask && !range)
-		goto usage_err;
+	যদি (!mask && !range)
+		গচ্ছ usage_err;
 
 	set = cpuset_alloc(ncpus, &setsize, &nbits);
-	if (!set)
+	যদি (!set)
 		err(EXIT_FAILURE, "failed to allocate cpu set");
 
 	/*
@@ -454,25 +454,25 @@ int main(int argc, char *argv[])
 
 	buflen = 7 * nbits;
 	buf = malloc(buflen);
-	if (!buf)
+	যদি (!buf)
 		err(EXIT_FAILURE, "failed to allocate cpu set buffer");
 
-	if (mask)
+	যদি (mask)
 		rc = cpumask_parse(mask, set, setsize);
-	else
+	অন্যথা
 		rc = cpulist_parse(range, set, setsize, 0);
 
-	if (rc)
+	যদি (rc)
 		errx(EXIT_FAILURE, "failed to parse string: %s", mask ? : range);
 
 	printf("%-15s = %15s ", mask ? : range,
 				cpumask_create(buf, buflen, set, setsize));
 	printf("[%s]\n", cpulist_create(buf, buflen, set, setsize));
 
-	free(buf);
+	মুক্ত(buf);
 	cpuset_free(set);
 
-	return EXIT_SUCCESS;
+	ঘূৰাই EXIT_SUCCESS;
 
 usage_err:
 	fprintf(stderr,

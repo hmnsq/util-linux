@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#অন্তর্ভাৱ <errno.h>
+#অন্তর্ভাৱ <limits.h>
+#অন্তর্ভাৱ <poll.h>
+#অন্তর্ভাৱ <signal.h>
+#অন্তর্ভাৱ <stdarg.h>
+#অন্তর্ভাৱ <stdlib.h>
+#অন্তর্ভাৱ <sys/mman.h>
+#অন্তর্ভাৱ <sys/socket.h>
+#অন্তর্ভাৱ <sys/types.h>
+#অন্তর্ভাৱ <sys/un.h>
+#অন্তর্ভাৱ <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#অন্তর্ভাৱ "all-io.h"
+#অন্তর্ভাৱ "c.h"
+#অন্তর্ভাৱ "nls.h"
+#অন্তর্ভাৱ "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+স্থির পূর্ণাঙ্ক can_read(পূর্ণাঙ্ক fd, ধ্রুৱ long timeout)
 {
-	struct pollfd fds = {
+	সংরচনা pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	পূর্ণাঙ্ক ret;
 
-	do {
+	কৰা {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} যেতিয়ালৈ ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	ঘূৰাই (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+স্থির পূর্ণাঙ্ক open_un_socket_and_connect(শূন্য)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	সংরচনা sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	ধ্রুৱ পূর্ণাঙ্ক one = 1;
+	পূর্ণাঙ্ক fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	যদি (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		গচ্ছ err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, পরিমাণ(one));
+	যদি (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		গচ্ছ err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (সংরচনা sockaddr *) &su,
+		offsetof(সংরচনা sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
+	যদি (ret < 0) {
+		যদি (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		গচ্ছ err;
 	}
 err:
-	return fd;
+	ঘূৰাই fd;
 }
 
-int plymouth_command(int cmd, ...)
+পূর্ণাঙ্ক plymouth_command(পূর্ণাঙ্ক cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	সংরচনা sigaction sp, op;
+	পূর্ণাঙ্ক fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	ৱিকল্প (cmd) {
+	পক্ষ MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		যদি (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, পরিমাণ(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		ভঙ্গ;
+	পক্ষ MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		যদি (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, পরিমাণ(command));
 		}
-		break;
-	default:
+		ভঙ্গ;
+	স্ৱভাৱ:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	পক্ষ '?':
+		গচ্ছ err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	যদি (fdsock >= 0) {
+		যদি (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (ৱর্ণ *) &answer[0], পরিমাণ(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, রিক্ত);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	ঘূৰাই ret;
 }
 

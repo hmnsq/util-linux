@@ -32,15 +32,15 @@
  * calculate a 64 bit CRC value of a sequence of bytes.
  */
 
-#include <stdbool.h>
-#include <stdlib.h>
+#অন্তর্ভাৱ <stdbool.h>
+#অন্তর্ভাৱ <stdlib.h>
 
-#include "crc64.h"
+#অন্তর্ভাৱ "crc64.h"
 
 #define		CRC_START_64_ECMA	0x0000000000000000ull
 #define		CRC_START_64_WE		0xFFFFFFFFFFFFFFFFull
 
-const uint64_t crc_tab64[256] = {
+ধ্রুৱ uint64_t crc_tab64[256] = {
 	0x0000000000000000ull,
 	0x42F0E1EBA9EA3693ull,
 	0x85E1C3D753D46D26ull,
@@ -308,22 +308,22 @@ const uint64_t crc_tab64[256] = {
  * indicating the length.
  */
 
-uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_ecma( ধ্রুৱ unsigned ৱর্ণ *প্ৰবেশ_str, size_t অঙ্ক_bytes )
 {
 
 	uint64_t crc;
-	const unsigned char *ptr;
+	ধ্রুৱ unsigned ৱর্ণ *ptr;
 	size_t a;
 
 	crc = CRC_START_64_ECMA;
-	ptr = input_str;
+	ptr = প্ৰবেশ_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	যদি ( ptr != রিক্ত ) বাবে (a=0; a<অঙ্ক_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc;
+	ঘূৰাই crc;
 
 }  /* crc_64_ecma */
 
@@ -335,22 +335,22 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
  * parameter indicating the length.
  */
 
-uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_we( ধ্রুৱ unsigned ৱর্ণ *প্ৰবেশ_str, size_t অঙ্ক_bytes )
 {
 
 	uint64_t crc;
-	const unsigned char *ptr;
+	ধ্রুৱ unsigned ৱর্ণ *ptr;
 	size_t a;
 
 	crc = CRC_START_64_WE;
-	ptr = input_str;
+	ptr = প্ৰবেশ_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	যদি ( ptr != রিক্ত ) বাবে (a=0; a<অঙ্ক_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc ^ 0xFFFFFFFFFFFFFFFFull;
+	ঘূৰাই crc ^ 0xFFFFFFFFFFFFFFFFull;
 
 }  /* crc_64_we */
 
@@ -361,9 +361,9 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
  * previous value of the CRC and the next byte of the data to be checked.
  */
 
-uint64_t ul_update_crc64( uint64_t crc, unsigned char c )
+uint64_t ul_update_crc64( uint64_t crc, unsigned ৱর্ণ c )
 {
 
-	return (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
+	ঘূৰাই (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
 
 }  /* update_crc_64 */

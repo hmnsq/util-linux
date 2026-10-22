@@ -6,13 +6,13 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <cctype.h>
+#অন্তর্ভাৱ <stdio.h>
+#অন্তর্ভাৱ <inttypes.h>
+#অন্তর্ভাৱ <ctype.h>
+#অন্তর্ভাৱ <cctype.h>
 
-#include "c.h"
-#include "jsonwrt.h"
+#অন্তর্ভাৱ "c.h"
+#অন্তর্ভাৱ "jsonwrt.h"
 
 /*
  * Requirements enumerated via testing (V8, Firefox, IE11):
@@ -26,14 +26,14 @@
  *	}
  * }
  */
-static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t size)
+স্থির শূন্য fputs_quoted_case_json(ধ্রুৱ ৱর্ণ *data, FILE *out, পূর্ণাঙ্ক dir, size_t size)
 {
-	const char *p;
+	ধ্রুৱ ৱর্ণ *p;
 
 	fputc('"', out);
-	for (p = data; p && *p && (!size || p < data + size); p++) {
+	বাবে (p = data; p && *p && (!size || p < data + size); p++) {
 
-		const unsigned int c = (unsigned int) *p;
+		ধ্রুৱ unsigned পূর্ণাঙ্ক c = (unsigned পূর্ণাঙ্ক) *p;
 
 		/* From http://www.json.org
 		 *
@@ -43,56 +43,56 @@ static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t 
 		 * Note that single-quotes and forward slashes, while they're
 		 * in the JSON spec, don't break double-quoted strings.
 		 */
-		if (c == '"' || c == '\\') {
+		যদি (c == '"' || c == '\\') {
 			fputc('\\', out);
 			fputc(c, out);
-			continue;
+			অনুৱর্ত;
 		}
 
 		/* All non-control characters OK; do the case swap as required. */
-		if (c >= 0x20) {
+		যদি (c >= 0x20) {
 			/*
 			 * Don't use locale sensitive ctype.h functions for regular
 			 * ASCII chars, because for example with Turkish locale
 			 * (aka LANG=tr_TR.UTF-8) toupper('I') returns 'I'.
 			 */
-			if (c <= 127)
+			যদি (c <= 127)
 				fputc(dir ==  1 ? c_toupper(c) :
 				      dir == -1 ? c_tolower(c) : *p, out);
-			else
+			অন্যথা
 				fputc(dir ==  1 ? toupper(c) :
 				      dir == -1 ? tolower(c) : *p, out);
-			continue;
+			অনুৱর্ত;
 		}
 
 		/* In addition, all chars under ' ' break Node's/V8/Chrome's, and
 		 * Firefox's JSON.parse function
 		 */
-		switch (c) {
+		ৱিকল্প (c) {
 			/* Handle short-hand cases to reduce output size.  C
 			 * has most of the same stuff here, so if there's an
 			 * "Escape for C" function somewhere in the STL, we
 			 * should probably be using it.
 			 */
-			case '\b':
+			পক্ষ '\b':
 				fputs("\\b", out);
-				break;
-			case '\t':
+				ভঙ্গ;
+			পক্ষ '\t':
 				fputs("\\t", out);
-				break;
-			case '\n':
+				ভঙ্গ;
+			পক্ষ '\n':
 				fputs("\\n", out);
-				break;
-			case '\f':
+				ভঙ্গ;
+			পক্ষ '\f':
 				fputs("\\f", out);
-				break;
-			case '\r':
+				ভঙ্গ;
+			পক্ষ '\r':
 				fputs("\\r", out);
-				break;
-			default:
+				ভঙ্গ;
+			স্ৱভাৱ:
 				/* Other assorted control characters */
 				fprintf(out, "\\u00%02x", c);
-				break;
+				ভঙ্গ;
 		}
 	}
 	fputc('"', out);
@@ -102,7 +102,7 @@ static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t 
 #define fputs_quoted_json_upper(_d, _o) fputs_quoted_case_json(_d, _o, 1, 0)
 #define fputs_quoted_json_lower(_d, _o) fputs_quoted_case_json(_d, _o, -1, 0)
 
-void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json_format json_format)
+শূন্য ul_jsonwrt_init(সংরচনা ul_jsonwrt *fmt, FILE *out, পূর্ণাঙ্ক indent, গণনা ul_json_format json_format)
 {
 	fmt->out = out;
 	fmt->indent = indent;
@@ -110,156 +110,156 @@ void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json
 	fmt->after_close = 0;
 }
 
-int ul_jsonwrt_is_ready(struct ul_jsonwrt *fmt)
+পূর্ণাঙ্ক ul_jsonwrt_is_ready(সংরচনা ul_jsonwrt *fmt)
 {
-	return fmt->out == NULL ? 0 : 1;
+	ঘূৰাই fmt->out == রিক্ত ? 0 : 1;
 }
 
-void ul_jsonwrt_indent(struct ul_jsonwrt *fmt)
+শূন্য ul_jsonwrt_indent(সংরচনা ul_jsonwrt *fmt)
 {
-	int i;
+	পূর্ণাঙ্ক i;
 
-	for (i = 0; i < fmt->indent; i++)
+	বাবে (i = 0; i < fmt->indent; i++)
 		fputs("   ", fmt->out);
 }
 
-static void print_name(struct ul_jsonwrt *fmt, const char *name)
+স্থির শূন্য print_name(সংরচনা ul_jsonwrt *fmt, ধ্রুৱ ৱর্ণ *name)
 {
 	/* Values on the top level are not members of an array or object, so
 	 * they are never comma separated; ul_jsonwrt_close() has already
 	 * terminated the previous one by a newline. */
-	if (fmt->after_close && (fmt->indent > 0 || name)) {
-		if (fmt->json_format == UL_JSON_LINE
+	যদি (fmt->after_close && (fmt->indent > 0 || name)) {
+		যদি (fmt->json_format == UL_JSON_সাৰি
 		    || fmt->json_format == UL_JSON_COMPACT)
 			fputs(",", fmt->out);
-		else
+		অন্যথা
 			fputs(name ? ",\n" : ",", fmt->out);
 	}
 
-	switch (fmt->json_format) {
-	case UL_JSON_LINE:
-	case UL_JSON_COMPACT:
-		break;
-	case UL_JSON_PRETTY:
-	default:
-		if (name || !fmt->after_close)
+	ৱিকল্প (fmt->json_format) {
+	পক্ষ UL_JSON_সাৰি:
+	পক্ষ UL_JSON_COMPACT:
+		ভঙ্গ;
+	পক্ষ UL_JSON_PRETTY:
+	স্ৱভাৱ:
+		যদি (name || !fmt->after_close)
 			ul_jsonwrt_indent(fmt);
-		break;
+		ভঙ্গ;
 	}
-	if (name)
+	যদি (name)
 		fputs_quoted_json_lower(name, fmt->out);
 }
 
-void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
+শূন্য ul_jsonwrt_open(সংরচনা ul_jsonwrt *fmt, ধ্রুৱ ৱর্ণ *name, পূর্ণাঙ্ক type)
 {
-	const char *s = "";
+	ধ্রুৱ ৱর্ণ *s = "";
 
 	print_name(fmt, name);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_LINE)
+	ৱিকল্প (type) {
+	পক্ষ UL_JSON_OBJECT:
+		যদি (fmt->json_format == UL_JSON_সাৰি)
 			s = "{";
-		else if (fmt->json_format == UL_JSON_COMPACT) {
+		অন্যথা যদি (fmt->json_format == UL_JSON_COMPACT) {
 			/* At nesting depth 2, put the object opens on a new line
 			 * for readability; otherwise keep fully compact (no newline). */
-			if (fmt->indent == 2)
+			যদি (fmt->indent == 2)
 				s = name ? ":{" : "\n{";
-			else
+			অন্যথা
 				s = "{";
-		} else
+		} অন্যথা
 			s = name ? ": {\n" : "{\n";
 		fmt->indent++;
-		break;
-	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_LINE)
+		ভঙ্গ;
+	পক্ষ UL_JSON_ARRAY:
+		যদি (fmt->json_format == UL_JSON_সাৰি)
 			s = "[";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		অন্যথা যদি (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":[" : "[";
-		else
+		অন্যথা
 			s = name ? ": [\n" : "[\n";
 		fmt->indent++;
-		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_LINE)
+		ভঙ্গ;
+	পক্ষ UL_JSON_মান:
+		যদি (fmt->json_format == UL_JSON_সাৰি)
 			s = name ? ":" : "";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		অন্যথা যদি (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":" : "";
-		else
+		অন্যথা
 			s = name ? ": " : " ";
-		break;
+		ভঙ্গ;
 	}
 	fputs(s, fmt->out);
 	fmt->after_close = 0;
 }
 
-void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
+শূন্য ul_jsonwrt_empty(সংরচনা ul_jsonwrt *fmt, ধ্রুৱ ৱর্ণ *name, পূর্ণাঙ্ক type)
 {
-	const char *s = "";
+	ধ্রুৱ ৱর্ণ *s = "";
 
 	print_name(fmt, name);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_PRETTY)
+	ৱিকল্প (type) {
+	পক্ষ UL_JSON_OBJECT:
+		যদি (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": {}" : "{}";
-		else
+		অন্যথা
 			s = name ? ":{}" : "{}";
-		break;
-	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		ভঙ্গ;
+	পক্ষ UL_JSON_ARRAY:
+		যদি (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": []" : "[]";
-		else
+		অন্যথা
 			s = name ? ":[]" : "[]";
-		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		ভঙ্গ;
+	পক্ষ UL_JSON_মান:
+		যদি (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": null" : "null";
-		else
+		অন্যথা
 			s = name ? ":null" : "null";
-		break;
+		ভঙ্গ;
 	}
 	fputs(s, fmt->out);
 	fmt->after_close = 1;
 }
 
-void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
+শূন্য ul_jsonwrt_close(সংরচনা ul_jsonwrt *fmt, পূর্ণাঙ্ক type)
 {
-	char endchr;
+	ৱর্ণ endchr;
 
-	assert(fmt->indent > 0);
+	প্রতিজ্ঞা(fmt->indent > 0);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
+	ৱিকল্প (type) {
+	পক্ষ UL_JSON_OBJECT:
 		fmt->indent--;
 		endchr = '}';
-		break;
-	case UL_JSON_ARRAY:
+		ভঙ্গ;
+	পক্ষ UL_JSON_ARRAY:
 		fmt->indent--;
 		endchr = ']';
-		break;
-	case UL_JSON_VALUE:
+		ভঙ্গ;
+	পক্ষ UL_JSON_মান:
 		fmt->after_close = 1;
-		return;
-	default:
+		ঘূৰাই;
+	স্ৱভাৱ:
 		fmt->after_close = 1;
-		return;
+		ঘূৰাই;
 	}
 
 	/* In COMPACT, when closing a direct child of root (indent==1),
 	 * insert a newline so the closing bracket starts on its own line. */
-	if (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
+	যদি (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
 		fputc('\n', fmt->out);
 
-	switch (fmt->json_format) {
-	case UL_JSON_LINE:
-	case UL_JSON_COMPACT:
-		break;
-	case UL_JSON_PRETTY:
-	default:
+	ৱিকল্প (fmt->json_format) {
+	পক্ষ UL_JSON_সাৰি:
+	পক্ষ UL_JSON_COMPACT:
+		ভঙ্গ;
+	পক্ষ UL_JSON_PRETTY:
+	স্ৱভাৱ:
 		fputs("\n", fmt->out);
 		ul_jsonwrt_indent(fmt);
-		break;
+		ভঙ্গ;
 	}
 
 	fputc(endchr, fmt->out);
@@ -268,71 +268,71 @@ void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
 	 * between the values (for example libsmartcols does it for every
 	 * scols_table_print_range() call), so the terminator has to be printed
 	 * by the value itself rather than by the next one (see print_name()). */
-	if (fmt->indent == 0)
+	যদি (fmt->indent == 0)
 		fputc('\n', fmt->out);
 
 	fmt->after_close = 1;
 }
 
 
-void ul_jsonwrt_flush(struct ul_jsonwrt *fmt)
+শূন্য ul_jsonwrt_flush(সংরচনা ul_jsonwrt *fmt)
 {
 	fflush(fmt->out);
 }
 
-void ul_jsonwrt_value_raw(struct ul_jsonwrt *fmt,
-			const char *name, const char *data)
+শূন্য ul_jsonwrt_মান_raw(সংরচনা ul_jsonwrt *fmt,
+			ধ্রুৱ ৱর্ণ *name, ধ্রুৱ ৱর্ণ *data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ul_jsonwrt_মান_open(fmt, name);
+	যদি (data && *data)
 		fputs(data, fmt->out);
-	else
+	অন্যথা
 		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_মান_close(fmt);
 }
 
-void ul_jsonwrt_value_s(struct ul_jsonwrt *fmt,
-			const char *name, const char *data)
+শূন্য ul_jsonwrt_মান_s(সংরচনা ul_jsonwrt *fmt,
+			ধ্রুৱ ৱর্ণ *name, ধ্রুৱ ৱর্ণ *data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ul_jsonwrt_মান_open(fmt, name);
+	যদি (data && *data)
 		fputs_quoted_json(data, fmt->out);
-	else
+	অন্যথা
 		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_মান_close(fmt);
 }
 
-void ul_jsonwrt_value_s_sized(struct ul_jsonwrt *fmt,
-			      const char *name, const char *data, size_t size)
+শূন্য ul_jsonwrt_মান_s_sized(সংরচনা ul_jsonwrt *fmt,
+			      ধ্রুৱ ৱর্ণ *name, ধ্রুৱ ৱর্ণ *data, size_t size)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ul_jsonwrt_মান_open(fmt, name);
+	যদি (data && *data)
 		fputs_quoted_case_json(data, fmt->out, 0, size);
-	else
+	অন্যথা
 		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_মান_close(fmt);
 }
 
-void ul_jsonwrt_value_u64(struct ul_jsonwrt *fmt,
-			const char *name, uint64_t data)
+শূন্য ul_jsonwrt_মান_u64(সংরচনা ul_jsonwrt *fmt,
+			ধ্রুৱ ৱর্ণ *name, uint64_t data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_মান_open(fmt, name);
 	fprintf(fmt->out, "%"PRIu64, data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_মান_close(fmt);
 }
 
-void ul_jsonwrt_value_double(struct ul_jsonwrt *fmt,
-			const char *name, long double data)
+শূন্য ul_jsonwrt_মান_double(সংরচনা ul_jsonwrt *fmt,
+			ধ্রুৱ ৱর্ণ *name, long দ্ৱিগুণ data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_মান_open(fmt, name);
 	fprintf(fmt->out, "%Lg", data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_মান_close(fmt);
 }
 
-void ul_jsonwrt_value_boolean(struct ul_jsonwrt *fmt,
-			const char *name, int data)
+শূন্য ul_jsonwrt_মান_boolean(সংরচনা ul_jsonwrt *fmt,
+			ধ্রুৱ ৱর্ণ *name, পূর্ণাঙ্ক data)
 {
-	ul_jsonwrt_value_open(fmt, name);
+	ul_jsonwrt_মান_open(fmt, name);
 	fputs(data ? "true" : "false", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_মান_close(fmt);
 }
