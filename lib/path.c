@@ -14,25 +14,25 @@
  * The ul_path_read_* API is possible to use without path_cxt handler. In this
  * case is not possible to use global prefix and printf-like formatting.
  */
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <inttypes.h>
-#include <errno.h>
+#અન્તર્ભાવ <stdarg.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <unistd.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <inttypes.h>
+#અન્તર્ભાવ <errno.h>
 
-#include "c.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "vfs.h"
-#include "path.h"
-#include "debug.h"
-#include "strutils.h"
+#અન્તર્ભાવ "c.h"
+#અન્તર્ભાવ "fileutils.h"
+#અન્તર્ભાવ "all-io.h"
+#અન્તર્ભાવ "vfs.h"
+#અન્તર્ભાવ "path.h"
+#અન્તર્ભાવ "debug.h"
+#અન્તર્ભાવ "strutils.h"
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulpath);
+સ્થિર UL_DEBUG_DEFINE_MASK(ulpath);
 UL_DEBUG_DEFINE_MASKNAMES(ulpath) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULPATH_DEBUG_INIT	(1 << 1)
@@ -42,248 +42,248 @@ UL_DEBUG_DEFINE_MASKNAMES(ulpath) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulpath, ULPATH_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulpath, ULPATH_DEBUG_, m, x)
 
-void ul_path_init_debug(void)
+શૂન્ય ul_path_init_debug(શૂન્ય)
 {
-	if (ulpath_debug_mask)
-		return;
+	જો (ulpath_debug_mask)
+		પાછા;
 	__UL_INIT_DEBUG_FROM_ENV(ulpath, ULPATH_DEBUG_, 0, ULPATH_DEBUG);
 }
 
-struct path_cxt *ul_new_path(const char *dir, ...)
+સંરચના path_cxt *ul_new_path(અચલ અક્ષર *dir, ...)
 {
-	struct path_cxt *pc = calloc(1, sizeof(*pc));
+	સંરચના path_cxt *pc = calloc(1, કદ(*pc));
 
-	if (!pc)
-		return NULL;
+	જો (!pc)
+		પાછા ખાલી;
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
 
 	pc->refcount = 1;
 	pc->dir_fd = -1;
 
-	if (dir) {
-		int rc;
+	જો (dir) {
+		પૂર્ણાંક rc;
 		va_list ap;
 
 		va_start(ap, dir);
 		rc = vasprintf(&pc->dir_path, dir, ap);
 		va_end(ap);
 
-		if (rc < 0 || !pc->dir_path)
-			goto fail;
+		જો (rc < 0 || !pc->dir_path)
+			જાઓ fail;
 	}
-	return pc;
+	પાછા pc;
 fail:
 	ul_unref_path(pc);
-	return NULL;
+	પાછા ખાલી;
 }
 
-void ul_ref_path(struct path_cxt *pc)
+શૂન્ય ul_ref_path(સંરચના path_cxt *pc)
 {
-	if (pc)
+	જો (pc)
 		pc->refcount++;
 }
 
-void ul_unref_path(struct path_cxt *pc)
+શૂન્ય ul_unref_path(સંરચના path_cxt *pc)
 {
-	if (!pc)
-		return;
+	જો (!pc)
+		પાછા;
 
 	pc->refcount--;
 
-	if (pc->refcount <= 0) {
+	જો (pc->refcount <= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("dealloc"));
-		if (pc->dialect)
+		જો (pc->dialect)
 			pc->free_dialect(pc);
 		ul_path_close_dirfd(pc);
-		free(pc->dir_path);
-		free(pc->prefix);
-		free(pc);
+		મુક્ત(pc->dir_path);
+		મુક્ત(pc->prefix);
+		મુક્ત(pc);
 	}
 }
 
-void ul_path_refer_vfs(struct path_cxt *pc, const struct ul_vfs_ops *vfs)
+શૂન્ય ul_path_refer_vfs(સંરચના path_cxt *pc, અચલ સંરચના ul_vfs_ops *vfs)
 {
-	if (pc)
+	જો (pc)
 		pc->vfs = vfs;
 }
 
-int ul_path_set_prefix(struct path_cxt *pc, const char *prefix)
+પૂર્ણાંક ul_path_set_prefix(સંરચના path_cxt *pc, અચલ અક્ષર *prefix)
 {
-	char *p = NULL;
+	અક્ષર *p = ખાલી;
 
-	assert(pc->dir_fd < 0);
+	પ્રતિજ્ઞા(pc->dir_fd < 0);
 
-	if (prefix) {
+	જો (prefix) {
 		p = strdup(prefix);
-		if (!p)
-			return -ENOMEM;
+		જો (!p)
+			પાછા -ENOMEM;
 	}
 
-	free(pc->prefix);
+	મુક્ત(pc->prefix);
 	pc->prefix = p;
 	DBG_OBJ(CXT, pc, ul_debug("new prefix: '%s'", p));
-	return 0;
+	પાછા 0;
 }
 
-const char *ul_path_get_prefix(struct path_cxt *pc)
+અચલ અક્ષર *ul_path_get_prefix(સંરચના path_cxt *pc)
 {
-	return pc ? pc->prefix : NULL;
+	પાછા pc ? pc->prefix : ખાલી;
 }
 
-int ul_path_set_dir(struct path_cxt *pc, const char *dir)
+પૂર્ણાંક ul_path_set_dir(સંરચના path_cxt *pc, અચલ અક્ષર *dir)
 {
-	char *p = NULL;
+	અક્ષર *p = ખાલી;
 
-	if (dir) {
+	જો (dir) {
 		p = strdup(dir);
-		if (!p)
-			return -ENOMEM;
+		જો (!p)
+			પાછા -ENOMEM;
 	}
 
-	if (pc->dir_fd >= 0) {
+	જો (pc->dir_fd >= 0) {
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
 
-	free(pc->dir_path);
+	મુક્ત(pc->dir_path);
 	pc->dir_path = p;
 	DBG_OBJ(CXT, pc, ul_debug("new dir: '%s'", p));
-	return 0;
+	પાછા 0;
 }
 
-const char *ul_path_get_dir(struct path_cxt *pc)
+અચલ અક્ષર *ul_path_get_dir(સંરચના path_cxt *pc)
 {
-	return pc ? pc->dir_path : NULL;
+	પાછા pc ? pc->dir_path : ખાલી;
 }
 
-int ul_path_set_dialect(struct path_cxt *pc, void *data, void free_data(struct path_cxt *))
+પૂર્ણાંક ul_path_set_dialect(સંરચના path_cxt *pc, શૂન્ય *data, શૂન્ય free_data(સંરચના path_cxt *))
 {
 	pc->dialect = data;
 	pc->free_dialect = free_data;
 	DBG_OBJ(CXT, pc, ul_debug("(re)set dialect"));
-	return 0;
+	પાછા 0;
 }
 
-void *ul_path_get_dialect(struct path_cxt *pc)
+શૂન્ય *ul_path_get_dialect(સંરચના path_cxt *pc)
 {
-	return pc ? pc->dialect : NULL;
+	પાછા pc ? pc->dialect : ખાલી;
 }
 
-int ul_path_set_enoent_redirect(struct path_cxt *pc, int (*func)(struct path_cxt *, const char *, int *))
+પૂર્ણાંક ul_path_set_enoent_redirect(સંરચના path_cxt *pc, પૂર્ણાંક (*func)(સંરચના path_cxt *, અચલ અક્ષર *, પૂર્ણાંક *))
 {
 	pc->redirect_on_enoent = func;
-	return 0;
+	પાછા 0;
 }
 
-static const char *get_absdir(struct path_cxt *pc)
+સ્થિર અચલ અક્ષર *get_absdir(સંરચના path_cxt *pc)
 {
-	int rc;
-	const char *dirpath;
+	પૂર્ણાંક rc;
+	અચલ અક્ષર *dirpath;
 
-	if (!pc->prefix)
-		return pc->dir_path;
+	જો (!pc->prefix)
+		પાછા pc->dir_path;
 
 	dirpath = pc->dir_path;
-	if (!dirpath)
-		return pc->prefix;
-	if (*dirpath == '/')
+	જો (!dirpath)
+		પાછા pc->prefix;
+	જો (*dirpath == '/')
 		dirpath++;
 
-	rc = snprintf(pc->path_buffer, sizeof(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
-	if (rc < 0)
-		return NULL;
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	rc = snprintf(pc->path_buffer, કદ(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
+	જો (rc < 0)
+		પાછા ખાલી;
+	જો ((size_t)rc >= કદ(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		પાછા ખાલી;
 	}
 
-	return pc->path_buffer;
+	પાછા pc->path_buffer;
 }
 
-int ul_path_is_accessible(struct path_cxt *pc)
+પૂર્ણાંક ul_path_is_accessible(સંરચના path_cxt *pc)
 {
-	const char *path;
-	assert(pc);
+	અચલ અક્ષર *path;
+	પ્રતિજ્ઞા(pc);
 
-	if (pc->dir_fd >= 0)
-		return 1;
+	જો (pc->dir_fd >= 0)
+		પાછા 1;
 
 	path = get_absdir(pc);
-	if (!path)
-		return 0;
-	return access(path, F_OK) == 0;
+	જો (!path)
+		પાછા 0;
+	પાછા access(path, F_OK) == 0;
 }
 
-int ul_path_get_dirfd(struct path_cxt *pc)
+પૂર્ણાંક ul_path_get_dirfd(સંરચના path_cxt *pc)
 {
-	assert(pc);
-	assert(pc->dir_path);
+	પ્રતિજ્ઞા(pc);
+	પ્રતિજ્ઞા(pc->dir_path);
 
-	if (pc->dir_fd < 0) {
-		const char *path = get_absdir(pc);
-		if (!path)
-			return -errno;
+	જો (pc->dir_fd < 0) {
+		અચલ અક્ષર *path = get_absdir(pc);
+		જો (!path)
+			પાછા -errno;
 
 		DBG_OBJ(CXT, pc, ul_debug("opening dir: '%s'", path));
 		pc->dir_fd = open(path, O_RDONLY|O_CLOEXEC);
 	}
 
-	return pc->dir_fd;
+	પાછા pc->dir_fd;
 }
 
 /* Note that next ul_path_get_dirfd() will reopen the directory */
-void ul_path_close_dirfd(struct path_cxt *pc)
+શૂન્ય ul_path_close_dirfd(સંરચના path_cxt *pc)
 {
-	assert(pc);
+	પ્રતિજ્ઞા(pc);
 
-	if (pc->dir_fd >= 0) {
+	જો (pc->dir_fd >= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("closing dir"));
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
 }
 
-int ul_path_isopen_dirfd(struct path_cxt *pc)
+પૂર્ણાંક ul_path_isopen_dirfd(સંરચના path_cxt *pc)
 {
-	return pc && pc->dir_fd >= 0;
+	પાછા pc && pc->dir_fd >= 0;
 }
 
-static const char *ul_path_mkpath(struct path_cxt *pc, const char *path, va_list ap)
+સ્થિર અચલ અક્ષર *ul_path_mkpath(સંરચના path_cxt *pc, અચલ અક્ષર *path, va_list ap)
 {
-	int rc;
+	પૂર્ણાંક rc;
 
 	errno = 0;
 
-	rc = vsnprintf(pc->path_buffer, sizeof(pc->path_buffer), path, ap);
-	if (rc < 0) {
-		if (!errno)
+	rc = vsnprintf(pc->path_buffer, કદ(pc->path_buffer), path, ap);
+	જો (rc < 0) {
+		જો (!errno)
 			errno = EINVAL;
-		return NULL;
+		પાછા ખાલી;
 	}
 
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	જો ((size_t)rc >= કદ(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		પાછા ખાલી;
 	}
 
-	return pc->path_buffer;
+	પાછા pc->path_buffer;
 }
 
-char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+અક્ષર *ul_path_get_abspath(સંરચના path_cxt *pc, અક્ષર *buf, size_t bufsz, અચલ અક્ષર *path, ...)
 {
-	if (path) {
-		int rc;
+	જો (path) {
+		પૂર્ણાંક rc;
 		va_list ap;
-		const char *tail = NULL, *dirpath = pc->dir_path;
+		અચલ અક્ષર *tail = ખાલી, *dirpath = pc->dir_path;
 
 		va_start(ap, path);
 		tail = ul_path_mkpath(pc, path, ap);
 		va_end(ap);
 
-		if (dirpath && *dirpath == '/')
+		જો (dirpath && *dirpath == '/')
 			dirpath++;
-		if (tail && *tail == '/')
+		જો (tail && *tail == '/')
 			tail++;
 
 		rc = snprintf(buf, bufsz, "%s/%s/%s",
@@ -291,85 +291,85 @@ char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const ch
 				dirpath ? dirpath : "",
 				tail ? tail : "");
 
-		if ((size_t)rc >= bufsz) {
+		જો ((size_t)rc >= bufsz) {
 			errno = ENAMETOOLONG;
-			return NULL;
+			પાછા ખાલી;
 		}
-	} else {
-		const char *tmp = get_absdir(pc);
+	} નહીંતર {
+		અચલ અક્ષર *tmp = get_absdir(pc);
 
-		if (!tmp)
-			return NULL;
+		જો (!tmp)
+			પાછા ખાલી;
 		xstrncpy(buf, tmp, bufsz);
 	}
 
-	return buf;
+	પાછા buf;
 }
 
 
-int ul_path_access(struct path_cxt *pc, int mode, const char *path)
+પૂર્ણાંક ul_path_access(સંરચના path_cxt *pc, પૂર્ણાંક mode, અચલ અક્ષર *path)
 {
-	int rc;
+	પૂર્ણાંક rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	જો (!path)
+		પાછા -EINVAL;
+	જો (!pc) {
 		rc = access(path, mode);
 		DBG(CXT, ul_debug("access '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	} નહીંતર {
+		પૂર્ણાંક dir = ul_path_get_dirfd(pc);
+		જો (dir < 0)
+			પાછા dir;
+		જો (*path == '/')
 			path++;
 
 		rc = faccessat(dir, path, mode, 0);
 
-		if (rc && errno == ENOENT
+		જો (rc && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			rc = faccessat(dir, path, mode, 0);
 
 		DBG_OBJ(CXT, pc, ul_debug("access: '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_accessf(struct path_cxt *pc, int mode, const char *path, ...)
+પૂર્ણાંક ul_path_accessf(સંરચના path_cxt *pc, પૂર્ણાંક mode, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	const char *p;
+	અચલ અક્ષર *p;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_access(pc, mode, p);
+	પાછા !p ? -errno : ul_path_access(pc, mode, p);
 }
 
 /*
  * If @path is NULL, then stat() is called for the directory itself addressed by @pc.
  */
-int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *path)
+પૂર્ણાંક ul_path_stat(સંરચના path_cxt *pc, સંરચના stat *sb, પૂર્ણાંક flags, અચલ અક્ષર *path)
 {
-	int rc;
+	પૂર્ણાંક rc;
 
-	if (!pc) {
+	જો (!pc) {
 		rc = path ? stat(path, sb) : -EINVAL;
 		DBG(CXT, ul_debug("stat '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (path) {
-			if  (*path == '/')
+	} નહીંતર {
+		પૂર્ણાંક dir = ul_path_get_dirfd(pc);
+		જો (dir < 0)
+			પાછા dir;
+		જો (path) {
+			જો  (*path == '/')
 				path++;
 			rc = fstatat(dir, path, sb, flags);
 
-		} else
+		} નહીંતર
 			rc = fstat(dir, sb);	/* dir itself */
 
-		if (rc && errno == ENOENT
+		જો (rc && errno == ENOENT
 		    && path
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
@@ -377,158 +377,158 @@ int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *pa
 
 		DBG_OBJ(CXT, pc, ul_debug("stat '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_vstatf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, va_list ap)
+પૂર્ણાંક ul_path_vstatf(સંરચના path_cxt *pc, સંરચના stat *sb, પૂર્ણાંક flags, અચલ અક્ષર *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	અચલ અક્ષર *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_stat(pc, sb, flags, p);
+	પાછા !p ? -errno : ul_path_stat(pc, sb, flags, p);
 }
 
-int ul_path_statf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, ...)
+પૂર્ણાંક ul_path_statf(સંરચના path_cxt *pc, સંરચના stat *sb, પૂર્ણાંક flags, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatf(pc, sb, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 #ifdef HAVE_STATX
 /*
 * This function follows the semantics of statx(). To call statx() for the directory
 * itself addressed by @pc, use an empty string and the AT_EMPTY_PATH @flag.
 */
-int ul_path_statx(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		  const char *path)
+પૂર્ણાંક ul_path_statx(સંરચના path_cxt *pc, સંરચના statx *stx, પૂર્ણાંક flags, unsigned પૂર્ણાંક mask,
+		  અચલ અક્ષર *path)
 {
-	int rc;
+	પૂર્ણાંક rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc)
+	જો (!path)
+		પાછા -EINVAL;
+	જો (!pc)
 		rc = path ? statx(AT_FDCWD, path, flags, mask, stx) : - EINVAL;
-	else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	નહીંતર {
+		પૂર્ણાંક dir = ul_path_get_dirfd(pc);
+		જો (dir < 0)
+			પાછા dir;
+		જો (*path == '/')
 			path++;
 
 		rc = statx(dir, path, flags, mask, stx);
 	}
 
-	return rc;
+	પાછા rc;
 }
-#else
-int ul_path_statx(struct path_cxt *pc __attribute__((__unused__)),
-		  struct statx *stx __attribute__((__unused__)),
-		  int flags __attribute__((__unused__)),
-		  unsigned int mask __attribute__((__unused__)),
-		  const char *path __attribute__((__unused__)))
+#નહીંતર
+પૂર્ણાંક ul_path_statx(સંરચના path_cxt *pc __attribute__((__unused__)),
+		  સંરચના statx *stx __attribute__((__unused__)),
+		  પૂર્ણાંક flags __attribute__((__unused__)),
+		  unsigned પૂર્ણાંક mask __attribute__((__unused__)),
+		  અચલ અક્ષર *path __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	પાછા -1;
 }
 #endif /* HAVE_STATX */
 
-int ul_path_vstatxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		    const char *path, va_list ap)
+પૂર્ણાંક ul_path_vstatxf(સંરચના path_cxt *pc, સંરચના statx *stx, પૂર્ણાંક flags, unsigned પૂર્ણાંક mask,
+		    અચલ અક્ષર *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	અચલ અક્ષર *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
+	પાછા !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
 }
 
-int ul_path_statxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		   const char *path, ...)
+પૂર્ણાંક ul_path_statxf(સંરચના path_cxt *pc, સંરચના statx *stx, પૂર્ણાંક flags, unsigned પૂર્ણાંક mask,
+		   અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatxf(pc, stx, flags, mask, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_open(struct path_cxt *pc, int flags, const char *path)
+પૂર્ણાંક ul_path_open(સંરચના path_cxt *pc, પૂર્ણાંક flags, અચલ અક્ષર *path)
 {
-	int fd;
+	પૂર્ણાંક fd;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	જો (!path)
+		પાછા -EINVAL;
+	જો (!pc) {
 		fd = open(path, flags);
 		DBG(CXT, ul_debug("opening '%s' [no context]", path));
-	} else {
-		int fdx;
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
+	} નહીંતર {
+		પૂર્ણાંક fdx;
+		પૂર્ણાંક dir = ul_path_get_dirfd(pc);
+		જો (dir < 0)
+			પાછા dir;
 
-		if (*path == '/')
+		જો (*path == '/')
 			path++;
 
 		fdx = fd = openat(dir, path, flags);
 
-		if (fd < 0 && errno == ENOENT
+		જો (fd < 0 && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			fd = openat(dir, path, flags);
 
 		DBG_OBJ(CXT, pc, ul_debug("opening '%s'%s", path, fdx != fd ? " [redirected]" : ""));
 	}
-	return fd;
+	પાછા fd;
 }
 
-int ul_path_vopenf(struct path_cxt *pc, int flags, const char *path, va_list ap)
+પૂર્ણાંક ul_path_vopenf(સંરચના path_cxt *pc, પૂર્ણાંક flags, અચલ અક્ષર *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	અચલ અક્ષર *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_open(pc, flags, p);
+	પાછા !p ? -errno : ul_path_open(pc, flags, p);
 }
 
-int ul_path_openf(struct path_cxt *pc, int flags, const char *path, ...)
+પૂર્ણાંક ul_path_openf(સંરચના path_cxt *pc, પૂર્ણાંક flags, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	va_start(ap, path);
 	rc = ul_path_vopenf(pc, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 
 /*
  * Maybe stupid, but good enough ;-)
  */
-FILE *ul_path_fopen(struct path_cxt *pc, const char *mode, const char *path)
+FILE *ul_path_fopen(સંરચના path_cxt *pc, અચલ અક્ષર *mode, અચલ અક્ષર *path)
 {
-	int flags = ul_mode_to_flags(mode);
-	int fd = ul_path_open(pc, flags, path);
+	પૂર્ણાંક flags = ul_mode_to_flags(mode);
+	પૂર્ણાંક fd = ul_path_open(pc, flags, path);
 
-	if (fd < 0)
-		return NULL;
+	જો (fd < 0)
+		પાછા ખાલી;
 
-	return ul_vfs_fdopen(pc ? pc->vfs : NULL, fd, mode);
+	પાછા ul_vfs_fdopen(pc ? pc->vfs : ખાલી, fd, mode);
 }
 
 
-FILE *ul_path_vfopenf(struct path_cxt *pc, const char *mode, const char *path, va_list ap)
+FILE *ul_path_vfopenf(સંરચના path_cxt *pc, અચલ અક્ષર *mode, અચલ અક્ષર *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	અચલ અક્ષર *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_fopen(pc, mode, p);
+	પાછા !p ? ખાલી : ul_path_fopen(pc, mode, p);
 }
 
-FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ...)
+FILE *ul_path_fopenf(સંરચના path_cxt *pc, અચલ અક્ષર *mode, અચલ અક્ષર *path, ...)
 {
 	FILE *f;
 	va_list ap;
@@ -537,40 +537,40 @@ FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ..
 	f = ul_path_vfopenf(pc, mode, path, ap);
 	va_end(ap);
 
-	return f;
+	પાછા f;
 }
 
 /*
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
+DIR *ul_path_opendir(સંરચના path_cxt *pc, અચલ અક્ષર *path)
 {
 	DIR *dir;
-	int fd = -1;
+	પૂર્ણાંક fd = -1;
 
-	if (path)
+	જો (path)
 		fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	else if (pc->dir_path) {
-		int dirfd;
+	નહીંતર જો (pc->dir_path) {
+		પૂર્ણાંક dirfd;
 
 		DBG_OBJ(CXT, pc, ul_debug("duplicate dir path"));
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd >= 0)
+		જો (dirfd >= 0)
 			fd = dup_fd_cloexec(dirfd, STDERR_FILENO + 1);
 	}
 
-	if (fd < 0)
-		return NULL;
+	જો (fd < 0)
+		પાછા ખાલી;
 
 	dir = fdopendir(fd);
-	if (!dir) {
+	જો (!dir) {
 		close(fd);
-		return NULL;
+		પાછા ખાલી;
 	}
-	if (!path)
+	જો (!path)
 		 rewinddir(dir);
-	return dir;
+	પાછા dir;
 }
 
 
@@ -578,18 +578,18 @@ DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_vopendirf(struct path_cxt *pc, const char *path, va_list ap)
+DIR *ul_path_vopendirf(સંરચના path_cxt *pc, અચલ અક્ષર *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	અચલ અક્ષર *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_opendir(pc, p);
+	પાછા !p ? ખાલી : ul_path_opendir(pc, p);
 }
 
 /*
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
+DIR *ul_path_opendirf(સંરચના path_cxt *pc, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
 	DIR *dir;
@@ -598,88 +598,88 @@ DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
 	dir = ul_path_vopendirf(pc, path, ap);
 	va_end(ap);
 
-	return dir;
+	પાછા dir;
 }
 
 /*
  * If @path is NULL then readlink is called on @pc directory.
  */
-ssize_t ul_path_readlink(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path)
+ssize_t ul_path_readlink(સંરચના path_cxt *pc, અક્ષર *buf, size_t bufsiz, અચલ અક્ષર *path)
 {
-	int dirfd;
+	પૂર્ણાંક dirfd;
 	ssize_t ssz;
 
-	if (!path) {
-		const char *p = get_absdir(pc);
-		if (!p)
-			return -errno;
+	જો (!path) {
+		અચલ અક્ષર *p = get_absdir(pc);
+		જો (!p)
+			પાછા -errno;
 		ssz = readlink(p, buf, bufsiz - 1);
-	} else {
+	} નહીંતર {
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd < 0)
-			return dirfd;
+		જો (dirfd < 0)
+			પાછા dirfd;
 
-		if (*path == '/')
+		જો (*path == '/')
 			path++;
 
 		ssz = readlinkat(dirfd, path, buf, bufsiz - 1);
 	}
 
-	if (ssz >= 0)
+	જો (ssz >= 0)
 		buf[ssz] = '\0';
-	return ssz;
+	પાછા ssz;
 }
 
 /*
  * If @path is NULL then readlink is called on @pc directory.
  */
-ssize_t ul_path_readlinkf(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path, ...)
+ssize_t ul_path_readlinkf(સંરચના path_cxt *pc, અક્ષર *buf, size_t bufsiz, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
+	પાછા !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
 }
 
-int ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
+પૂર્ણાંક ul_path_read(સંરચના path_cxt *pc, અક્ષર *buf, size_t len, અચલ અક્ષર *path)
 {
-	int rc, errsv;
-	int fd;
+	પૂર્ણાંક rc, errsv;
+	પૂર્ણાંક fd;
 
 	fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	જો (fd < 0)
+		પાછા -errno;
 
 	DBG(CXT, ul_debug(" reading '%s'", path));
-	rc = ul_vfs_read_all(pc ? pc->vfs : NULL, fd, buf, len);
+	rc = ul_vfs_read_all(pc ? pc->vfs : ખાલી, fd, buf, len);
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ખાલી, fd);
 	errno = errsv;
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_vreadf(struct path_cxt *pc, char *buf, size_t len, const char *path, va_list ap)
+પૂર્ણાંક ul_path_vreadf(સંરચના path_cxt *pc, અક્ષર *buf, size_t len, અચલ અક્ષર *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	અચલ અક્ષર *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read(pc, buf, len, p);
+	પાછા !p ? -errno : ul_path_read(pc, buf, len, p);
 }
 
-int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, ...)
+પૂર્ણાંક ul_path_readf(સંરચના path_cxt *pc, અક્ષર *buf, size_t len, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf(pc, buf, len, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 
 
@@ -689,87 +689,87 @@ int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, 
  *
  * Returns size of the string without \0, nothing is allocated if returns <= 0.
  */
-int ul_path_read_string(struct path_cxt *pc, char **str, const char *path)
+પૂર્ણાંક ul_path_read_string(સંરચના path_cxt *pc, અક્ષર **str, અચલ અક્ષર *path)
 {
-	char buf[BUFSIZ];
-	int rc;
+	અક્ષર buf[BUFSIZ];
+	પૂર્ણાંક rc;
 
-	if (!str)
-		return -EINVAL;
+	જો (!str)
+		પાછા -EINVAL;
 
-	*str = NULL;
+	*str = ખાલી;
 
-	rc = ul_path_read_buffer(pc, buf, sizeof(buf), path);
-	if (rc < 0)
-		return rc;
+	rc = ul_path_read_buffer(pc, buf, કદ(buf), path);
+	જો (rc < 0)
+		પાછા rc;
 
 	*str = strdup(buf);
-	if (!*str)
+	જો (!*str)
 		rc = -ENOMEM;
 
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_readf_string(struct path_cxt *pc, char **str, const char *path, ...)
+પૂર્ણાંક ul_path_readf_string(સંરચના path_cxt *pc, અક્ષર **str, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_string(pc, str, p);
+	પાછા !p ? -errno : ul_path_read_string(pc, str, p);
 }
 
-int ul_path_read_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path)
+પૂર્ણાંક ul_path_read_buffer(સંરચના path_cxt *pc, અક્ષર *buf, size_t bufsz, અચલ અક્ષર *path)
 {
-	int rc = ul_path_read(pc, buf, bufsz - 1, path);
+	પૂર્ણાંક rc = ul_path_read(pc, buf, bufsz - 1, path);
 
-	if (rc == 0)
+	જો (rc == 0)
 		buf[0] = '\0';
 
-	else if (rc > 0) {
+	નહીંતર જો (rc > 0) {
 		/* Remove trailing newline (usual in sysfs) */
-		if (*(buf + rc - 1) == '\n')
+		જો (*(buf + rc - 1) == '\n')
 			buf[--rc] = '\0';
-		else
+		નહીંતર
 			buf[rc] = '\0';
 	}
 
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_vreadf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, va_list ap)
+પૂર્ણાંક ul_path_vreadf_buffer(સંરચના path_cxt *pc, અક્ષર *buf, size_t bufsz, અચલ અક્ષર *path, va_list ap)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 
 	p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
+	પાછા !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
 }
 
-int ul_path_readf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+પૂર્ણાંક ul_path_readf_buffer(સંરચના path_cxt *pc, અક્ષર *buf, size_t bufsz, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf_buffer(pc, buf, bufsz, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
+પૂર્ણાંક ul_path_scanf(સંરચના path_cxt *pc, અચલ અક્ષર *path, અચલ અક્ષર *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	f = ul_path_fopen(pc, "r" UL_CLOEXECSTR, path);
-	if (!f)
-		return -EINVAL;
+	જો (!f)
+		પાછા -EINVAL;
 
 	DBG(CXT, ul_debug(" fscanf [%s] '%s'", fmt, path));
 
@@ -778,363 +778,363 @@ int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_scanff(struct path_cxt *pc, const char *path, va_list ap, const char *fmt, ...)
+પૂર્ણાંક ul_path_scanff(સંરચના path_cxt *pc, અચલ અક્ષર *path, va_list ap, અચલ અક્ષર *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	પૂર્ણાંક rc;
 
 	f = ul_path_vfopenf(pc, "r" UL_CLOEXECSTR, path, ap);
-	if (!f)
-		return -EINVAL;
+	જો (!f)
+		પાછા -EINVAL;
 
 	va_start(fmt_ap, fmt);
 	rc = vfscanf(f, fmt, fmt_ap);
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	પાછા rc;
 }
 
 
-int ul_path_read_s64(struct path_cxt *pc, int64_t *res, const char *path)
+પૂર્ણાંક ul_path_read_s64(સંરચના path_cxt *pc, int64_t *res, અચલ અક્ષર *path)
 {
 	int64_t x = 0;
-	int rc;
+	પૂર્ણાંક rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNd64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	જો (rc != 1)
+		પાછા -1;
+	જો (res)
 		*res = x;
-	return 0;
+	પાછા 0;
 }
 
-int ul_path_readf_s64(struct path_cxt *pc, int64_t *res, const char *path, ...)
+પૂર્ણાંક ul_path_readf_s64(સંરચના path_cxt *pc, int64_t *res, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s64(pc, res, p);
+	પાછા !p ? -errno : ul_path_read_s64(pc, res, p);
 }
 
-int ul_path_read_u64(struct path_cxt *pc, uint64_t *res, const char *path)
+પૂર્ણાંક ul_path_read_u64(સંરચના path_cxt *pc, uint64_t *res, અચલ અક્ષર *path)
 {
 	uint64_t x = 0;
-	int rc;
+	પૂર્ણાંક rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNu64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	જો (rc != 1)
+		પાછા -1;
+	જો (res)
 		*res = x;
-	return 0;
+	પાછા 0;
 }
 
-int ul_path_readf_u64(struct path_cxt *pc, uint64_t *res, const char *path, ...)
+પૂર્ણાંક ul_path_readf_u64(સંરચના path_cxt *pc, uint64_t *res, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u64(pc, res, p);
+	પાછા !p ? -errno : ul_path_read_u64(pc, res, p);
 }
 
-int ul_path_read_s32(struct path_cxt *pc, int *res, const char *path)
+પૂર્ણાંક ul_path_read_s32(સંરચના path_cxt *pc, પૂર્ણાંક *res, અચલ અક્ષર *path)
 {
-	int rc, x = 0;
+	પૂર્ણાંક rc, x = 0;
 
 	rc = ul_path_scanf(pc, path, "%d", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	જો (rc != 1)
+		પાછા -1;
+	જો (res)
 		*res = x;
-	return 0;
+	પાછા 0;
 }
 
-int ul_path_readf_s32(struct path_cxt *pc, int *res, const char *path, ...)
+પૂર્ણાંક ul_path_readf_s32(સંરચના path_cxt *pc, પૂર્ણાંક *res, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s32(pc, res, p);
+	પાછા !p ? -errno : ul_path_read_s32(pc, res, p);
 }
 
-int ul_path_read_u32(struct path_cxt *pc, unsigned int *res, const char *path)
+પૂર્ણાંક ul_path_read_u32(સંરચના path_cxt *pc, unsigned પૂર્ણાંક *res, અચલ અક્ષર *path)
 {
-	int rc;
-	unsigned int x = 0;
+	પૂર્ણાંક rc;
+	unsigned પૂર્ણાંક x = 0;
 
 	rc = ul_path_scanf(pc, path, "%u", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	જો (rc != 1)
+		પાછા -1;
+	જો (res)
 		*res = x;
-	return 0;
+	પાછા 0;
 }
 
-int ul_path_readf_u32(struct path_cxt *pc, unsigned int *res, const char *path, ...)
+પૂર્ણાંક ul_path_readf_u32(સંરચના path_cxt *pc, unsigned પૂર્ણાંક *res, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u32(pc, res, p);
+	પાછા !p ? -errno : ul_path_read_u32(pc, res, p);
 }
 
-int ul_path_read_majmin(struct path_cxt *pc, dev_t *res, const char *path)
+પૂર્ણાંક ul_path_read_majmin(સંરચના path_cxt *pc, dev_t *res, અચલ અક્ષર *path)
 {
-	int rc, maj = 0, min = 0;
+	પૂર્ણાંક rc, maj = 0, min = 0;
 
 	rc = ul_path_scanf(pc, path, "%d:%d", &maj, &min);
-	if (rc != 2)
-		return -1;
-	if (res)
+	જો (rc != 2)
+		પાછા -1;
+	જો (res)
 		*res = makedev(maj, min);
-	return 0;
+	પાછા 0;
 }
 
-int ul_path_readf_majmin(struct path_cxt *pc, dev_t *res, const char *path, ...)
+પૂર્ણાંક ul_path_readf_majmin(સંરચના path_cxt *pc, dev_t *res, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_majmin(pc, res, p);
+	પાછા !p ? -errno : ul_path_read_majmin(pc, res, p);
 }
 
-int ul_path_write_string(struct path_cxt *pc, const char *str, const char *path)
+પૂર્ણાંક ul_path_write_string(સંરચના path_cxt *pc, અચલ અક્ષર *str, અચલ અક્ષર *path)
 {
-	int rc, errsv;
-	int fd;
+	પૂર્ણાંક rc, errsv;
+	પૂર્ણાંક fd;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	જો (fd < 0)
+		પાછા -errno;
 
-	rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, str, strlen(str));
+	rc = ul_vfs_write_all(pc ? pc->vfs : ખાલી, fd, str, strlen(str));
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ખાલી, fd);
 	errno = errsv;
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path, ...)
+પૂર્ણાંક ul_path_writef_string(સંરચના path_cxt *pc, અચલ અક્ષર *str, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_string(pc, str, p);
+	પાછા !p ? -errno : ul_path_write_string(pc, str, p);
 }
 
-int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
+પૂર્ણાંક ul_path_write_s64(સંરચના path_cxt *pc, int64_t અંક, અચલ અક્ષર *path)
 {
-	char buf[sizeof(stringify_value(LLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	અક્ષર buf[કદ(stringify_કિંમત(LLONG_MAX))];
+	પૂર્ણાંક rc, errsv;
+	પૂર્ણાંક fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	જો (fd < 0)
+		પાછા -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRId64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	len = snprintf(buf, કદ(buf), "%" PRId64, અંક);
+	જો (len < 0 || (size_t) len >= કદ(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
-		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
+	નહીંતર
+		rc = ul_vfs_write_all(pc ? pc->vfs : ખાલી, fd, buf, len);
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ખાલી, fd);
 	errno = errsv;
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
+પૂર્ણાંક ul_path_write_u64(સંરચના path_cxt *pc, uint64_t અંક, અચલ અક્ષર *path)
 {
-	char buf[sizeof(stringify_value(ULLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	અક્ષર buf[કદ(stringify_કિંમત(ULLONG_MAX))];
+	પૂર્ણાંક rc, errsv;
+	પૂર્ણાંક fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	જો (fd < 0)
+		પાછા -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRIu64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	len = snprintf(buf, કદ(buf), "%" PRIu64, અંક);
+	જો (len < 0 || (size_t) len >= કદ(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
-		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
+	નહીંતર
+		rc = ul_vfs_write_all(pc ? pc->vfs : ખાલી, fd, buf, len);
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ખાલી, fd);
 	errno = errsv;
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
+પૂર્ણાંક ul_path_writef_u64(સંરચના path_cxt *pc, uint64_t અંક, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_u64(pc, num, p);
+	પાછા !p ? -errno : ul_path_write_u64(pc, અંક, p);
 
 }
 
-int ul_path_count_dirents(struct path_cxt *pc, const char *path)
+પૂર્ણાંક ul_path_ગણતરી_dirents(સંરચના path_cxt *pc, અચલ અક્ષર *path)
 {
 	DIR *dir;
-	int r = 0;
+	પૂર્ણાંક r = 0;
 
 	dir = ul_path_opendir(pc, path);
-	if (!dir)
-		return 0;
+	જો (!dir)
+		પાછા 0;
 
-	while (xreaddir(dir)) r++;
+	જ્યારે (xreaddir(dir)) r++;
 
 	closedir(dir);
-	return r;
+	પાછા r;
 }
 
-int ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
+પૂર્ણાંક ul_path_countf_dirents(સંરચના path_cxt *pc, અચલ અક્ષર *path, ...)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_count_dirents(pc, p);
+	પાછા !p ? -errno : ul_path_ગણતરી_dirents(pc, p);
 }
 
 /* first call (when @sub is NULL) opens the directory, last call closes the directory */
-int ul_path_next_dirent(struct path_cxt *pc, DIR **sub, const char *dirname, struct dirent **d)
+પૂર્ણાંક ul_path_next_dirent(સંરચના path_cxt *pc, DIR **sub, અચલ અક્ષર *dirname, સંરચના dirent **d)
 {
-	if (!pc || !sub || !d)
-		return -EINVAL;
+	જો (!pc || !sub || !d)
+		પાછા -EINVAL;
 
-	if (!*sub) {
+	જો (!*sub) {
 		*sub = ul_path_opendir(pc, dirname);
-		if (!*sub)
-			return -errno;
+		જો (!*sub)
+			પાછા -errno;
 	}
 
 	*d = xreaddir(*sub);
-	if (*d)
-		return 0;
+	જો (*d)
+		પાછા 0;
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = ખાલી;
+	પાછા 1;
 }
 
 #ifdef HAVE_CPU_SET_T
-static int ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, int maxcpus, int islist, const char *path, va_list ap)
+સ્થિર પૂર્ણાંક ul_path_cpuparse(સંરચના path_cxt *pc, cpu_set_t **set, પૂર્ણાંક maxcpus, પૂર્ણાંક islist, અચલ અક્ષર *path, va_list ap)
 {
 	size_t setsize, len = maxcpus * 7;
-	char *buf;
-	int rc;
+	અક્ષર *buf;
+	પૂર્ણાંક rc;
 
-	*set = NULL;
+	*set = ખાલી;
 
 	buf = malloc(len);
-	if (!buf)
-		return -ENOMEM;
+	જો (!buf)
+		પાછા -ENOMEM;
 
 	rc = ul_path_vreadf_buffer(pc, buf, len, path, ap);
-	if (rc < 0)
-		goto out;
+	જો (rc < 0)
+		જાઓ out;
 
-	*set = cpuset_alloc(maxcpus, &setsize, NULL);
-	if (!*set) {
+	*set = cpuset_alloc(maxcpus, &setsize, ખાલી);
+	જો (!*set) {
 		rc = -EINVAL;
-		goto out;
+		જાઓ out;
 	}
 
-	if (islist) {
-		if (cpulist_parse(buf, *set, setsize, 0)) {
+	જો (islist) {
+		જો (cpulist_parse(buf, *set, setsize, 0)) {
 			errno = EINVAL;
 			rc = -errno;
-			goto out;
+			જાઓ out;
 		}
-	} else {
-		if (cpumask_parse(buf, *set, setsize)) {
+	} નહીંતર {
+		જો (cpumask_parse(buf, *set, setsize)) {
 			errno = EINVAL;
 			rc = -errno;
-			goto out;
+			જાઓ out;
 		}
 	}
 	rc = 0;
 
 out:
-	if (rc) {
+	જો (rc) {
 		cpuset_free(*set);
-		*set = NULL;
+		*set = ખાલી;
 	}
-	free(buf);
-	return rc;
+	મુક્ત(buf);
+	પાછા rc;
 }
 
-int ul_path_readf_cpuset(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+પૂર્ણાંક ul_path_readf_cpuset(સંરચના path_cxt *pc, cpu_set_t **set, પૂર્ણાંક maxcpus, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 0, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 
-int ul_path_readf_cpulist(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+પૂર્ણાંક ul_path_readf_cpulist(સંરચના path_cxt *pc, cpu_set_t **set, પૂર્ણાંક maxcpus, અચલ અક્ષર *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 1, path, ap);
 	va_end(ap);
 
-	return rc;
+	પાછા rc;
 }
 
 #endif /* HAVE_CPU_SET_T */
 
 
 #ifdef TEST_PROGRAM_PATH
-#include <getopt.h>
+#અન્તર્ભાવ <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+સ્થિર શૂન્ય __attribute__((__noreturn__)) usage(શૂન્ય)
 {
 	fprintf(stdout, " %s [options] <dir> <command>\n\n", program_invocation_short_name);
 	fputs(" -p, --prefix <dir>      redirect hardcoded paths to <dir>\n", stdout);
@@ -1153,180 +1153,180 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char *argv[])
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	int c;
-	const char *prefix = NULL, *dir, *file, *command;
-	struct path_cxt *pc = NULL;
+	પૂર્ણાંક c;
+	અચલ અક્ષર *prefix = ખાલી, *dir, *file, *command;
+	સંરચના path_cxt *pc = ખાલી;
 
-	static const struct option longopts[] = {
-		{ "prefix",	1, NULL, 'p' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	સ્થિર અચલ સંરચના option longopts[] = {
+		{ "prefix",	1, ખાલી, 'p' },
+		{ "help",       0, ખાલી, 'h' },
+		{ ખાલી, 0, ખાલી, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "p:h", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'p':
+	જ્યારે((c = getopt_long(argc, argv, "p:h", longopts, ખાલી)) != -1) {
+		પસંદગી(c) {
+		સ્થિતિ 'p':
 			prefix = optarg;
-			break;
-		case 'h':
+			તોડો;
+		સ્થિતિ 'h':
 			usage();
-			break;
-		default:
+			તોડો;
+		મૂળભૂત:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	જો (optind == argc)
 		errx(EXIT_FAILURE, "<dir> not defined");
 	dir = argv[optind++];
 
 	ul_path_init_debug();
 
 	pc = ul_new_path("%s", dir);
-	if (!pc)
+	જો (!pc)
 		err(EXIT_FAILURE, "failed to initialize path context");
-	if (prefix)
+	જો (prefix)
 		ul_path_set_prefix(pc, prefix);
 
-	if (optind == argc)
+	જો (optind == argc)
 		errx(EXIT_FAILURE, "<command> not defined");
 	command = argv[optind++];
 
-	if (strcmp(command, "read-u32") == 0) {
+	જો (strcmp(command, "read-u32") == 0) {
 		uint32_t res;
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u32(pc, &res, file) != 0)
+		જો (ul_path_read_u32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %u\n", file, res);
 
-		if (ul_path_readf_u32(pc, &res, "%s", file) != 0)
+		જો (ul_path_readf_u32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %u\n", file, res);
 
-	} else if (strcmp(command, "read-s32") == 0) {
+	} નહીંતર જો (strcmp(command, "read-s32") == 0) {
 		int32_t res;
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s32(pc, &res, file) != 0)
+		જો (ul_path_read_s32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %d\n", file, res);
 
-		if (ul_path_readf_s32(pc, &res, "%s", file) != 0)
+		જો (ul_path_readf_s32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %d\n", file, res);
 
-	} else if (strcmp(command, "read-u64") == 0) {
+	} નહીંતર જો (strcmp(command, "read-u64") == 0) {
 		uint64_t res;
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u64(pc, &res, file) != 0)
+		જો (ul_path_read_u64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRIu64 "\n", file, res);
 
-		if (ul_path_readf_u64(pc, &res, "%s", file) != 0)
+		જો (ul_path_readf_u64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRIu64 "\n", file, res);
 
-	} else if (strcmp(command, "read-s64") == 0) {
+	} નહીંતર જો (strcmp(command, "read-s64") == 0) {
 		int64_t res;
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s64(pc, &res, file) != 0)
+		જો (ul_path_read_s64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRId64 "\n", file, res);
 
-		if (ul_path_readf_s64(pc, &res, "%s", file) != 0)
+		જો (ul_path_readf_s64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRId64 "\n", file, res);
 
-	} else if (strcmp(command, "read-majmin") == 0) {
+	} નહીંતર જો (strcmp(command, "read-majmin") == 0) {
 		dev_t res;
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_majmin(pc, &res, file) != 0)
+		જો (ul_path_read_majmin(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read maj:min failed");
-		printf("read:  %s: %d\n", file, (int) res);
+		printf("read:  %s: %d\n", file, (પૂર્ણાંક) res);
 
-		if (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
+		જો (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf maj:min failed");
-		printf("readf: %s: %d\n", file, (int) res);
+		printf("readf: %s: %d\n", file, (પૂર્ણાંક) res);
 
-	} else if (strcmp(command, "read-string") == 0) {
-		char *res;
+	} નહીંતર જો (strcmp(command, "read-string") == 0) {
+		અક્ષર *res;
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_string(pc, &res, file) <= 0)
+		જો (ul_path_read_string(pc, &res, file) <= 0)
 			err(EXIT_FAILURE, "read string failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readf_string(pc, &res, "%s", file) <= 0)
+		જો (ul_path_readf_string(pc, &res, "%s", file) <= 0)
 			err(EXIT_FAILURE, "readf string failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "read-link") == 0) {
-		char res[PATH_MAX];
+	} નહીંતર જો (strcmp(command, "read-link") == 0) {
+		અક્ષર res[PATH_MAX];
 
-		if (optind == argc)
+		જો (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_readlink(pc, res, sizeof(res), file) < 0)
+		જો (ul_path_readlink(pc, res, કદ(res), file) < 0)
 			err(EXIT_FAILURE, "read symlink failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readlinkf(pc, res, sizeof(res), "%s", file) < 0)
+		જો (ul_path_readlinkf(pc, res, કદ(res), "%s", file) < 0)
 			err(EXIT_FAILURE, "readf symlink failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "write-string") == 0) {
-		char *str;
+	} નહીંતર જો (strcmp(command, "write-string") == 0) {
+		અક્ષર *str;
 
-		if (optind + 1 == argc)
+		જો (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <string> not defined");
 		file = argv[optind++];
 		str = argv[optind++];
 
-		if (ul_path_write_string(pc, str, file) != 0)
+		જો (ul_path_write_string(pc, str, file) != 0)
 			err(EXIT_FAILURE, "write string failed");
-		if (ul_path_writef_string(pc, str, "%s", file) != 0)
+		જો (ul_path_writef_string(pc, str, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef string failed");
 
-	} else if (strcmp(command, "write-u64") == 0) {
-		uint64_t num;
+	} નહીંતર જો (strcmp(command, "write-u64") == 0) {
+		uint64_t અંક;
 
-		if (optind + 1 == argc)
+		જો (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <num> not defined");
 		file = argv[optind++];
-		num = strtoumax(argv[optind++], NULL, 0);
+		અંક = strtoumax(argv[optind++], ખાલી, 0);
 
-		if (ul_path_write_u64(pc, num, file) != 0)
+		જો (ul_path_write_u64(pc, અંક, file) != 0)
 			err(EXIT_FAILURE, "write u64 failed");
-		if (ul_path_writef_u64(pc, num, "%s", file) != 0)
+		જો (ul_path_writef_u64(pc, અંક, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef u64 failed");
 	}
 
 	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PATH */

@@ -15,30 +15,30 @@
  * along with this program.  If not, see <https://gnu.org/licenses/>.
  */
 
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <libgen.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <unistd.h>
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <libgen.h>
 
-#include "nls.h"
-#include "c.h"
-#include "xalloc.h"
+#અન્તર્ભાવ "nls.h"
+#અન્તર્ભાવ "c.h"
+#અન્તર્ભાવ "xalloc.h"
 
-#include "exec_shell.h"
-#include "default_shell.h"
+#અન્તર્ભાવ "exec_shell.h"
+#અન્તર્ભાવ "default_shell.h"
 
-void __attribute__((__noreturn__)) exec_shell(void)
+શૂન્ય __attribute__((__noreturn__)) exec_shell(શૂન્ય)
 {
-	const char *shell = ul_default_shell(0, NULL);
-	char *shellc;
-	const char *shell_basename;
-	char *arg0;
+	અચલ અક્ષર *shell = ul_default_shell(0, ખાલી);
+	અક્ષર *shellc;
+	અચલ અક્ષર *shell_basename;
+	અક્ષર *arg0;
 
 	shellc = xstrdup(shell);
 	shell_basename = basename(shellc);
 	xasprintf(&arg0, "-%s", shell_basename);
 
-	execl(shell, arg0, (char *)NULL);
+	execl(shell, arg0, (અક્ષર *)ખાલી);
 	errexec(shell);
 }

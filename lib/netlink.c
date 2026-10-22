@@ -13,13 +13,13 @@
  * callback for a selected message type has to be defined.
  */
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include "strutils.h"
-#include "netlink.h"
-#include "debug.h"
-#include "nls.h"
+#અન્તર્ભાવ <sys/socket.h>
+#અન્તર્ભાવ <arpa/inet.h>
+#અન્તર્ભાવ <netinet/in.h>
+#અન્તર્ભાવ "strutils.h"
+#અન્તર્ભાવ "netlink.h"
+#અન્તર્ભાવ "debug.h"
+#અન્તર્ભાવ "nls.h"
 
 /*
  * Debug stuff (based on include/debug.h)
@@ -29,7 +29,7 @@
 #define ULNETLINK_DEBUG_NLMSG	(1 << 2)
 #define ULNETLINK_DEBUG_ADDR	(1 << 3)
 
-static UL_DEBUG_DEFINE_MASK(netlink);
+સ્થિર UL_DEBUG_DEFINE_MASK(netlink);
 UL_DEBUG_DEFINE_MASKNAMES(netlink) =
 {
 	{ "all",   UL_DEBUG_ALL,		"complete netlink debugging" },
@@ -37,17 +37,17 @@ UL_DEBUG_DEFINE_MASKNAMES(netlink) =
 	{ "nlmsg", ULNETLINK_DEBUG_NLMSG,	"netlink message debugging" },
 	{ "addr",  ULNETLINK_DEBUG_ADDR,	"netlink address processing" },
 
-	{ NULL, 0 }
+	{ ખાલી, 0 }
 };
 
 #define DBG(m, x)		__UL_DBG(netlink, ULNETLINK_DEBUG_, m, x)
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(netlink, ULNETLINK_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(netlink, ULNETLINK_DEBUG_, m, x)
 
-static void netlink_init_debug(void)
+સ્થિર શૂન્ય netlink_init_debug(શૂન્ય)
 {
-	if (netlink_debug_mask)
-		return;
+	જો (netlink_debug_mask)
+		પાછા;
 
 	__UL_INIT_DEBUG_FROM_ENV(netlink, ULNETLINK_DEBUG_, 0, ULNETLINK_DEBUG);
 
@@ -55,44 +55,44 @@ static void netlink_init_debug(void)
 				UL_DEBUG_MASKNAMES(netlink)));
 }
 
-void ul_nl_init(struct ul_nl_data *nl)
+શૂન્ય ul_nl_init(સંરચના ul_nl_data *nl)
 {
 	netlink_init_debug();
-	memset(nl, 0, sizeof(struct ul_nl_data));
+	memset(nl, 0, કદ(સંરચના ul_nl_data));
 }
 
-int ul_nl_request_dump(struct ul_nl_data *nl, uint16_t nlmsg_type)
+પૂર્ણાંક ul_nl_request_dump(સંરચના ul_nl_data *nl, uint16_t nlmsg_type)
 {
-	struct {
-		struct nlmsghdr nh;
-		struct rtgenmsg g;
+	સંરચના {
+		સંરચના nlmsghdr nh;
+		સંરચના rtgenmsg g;
 	} req;
 
-	memset(&req, 0, sizeof(req));
-	req.nh.nlmsg_len = NLMSG_LENGTH(sizeof(req.g));
+	memset(&req, 0, કદ(req));
+	req.nh.nlmsg_len = NLMSG_LENGTH(કદ(req.g));
 	req.nh.nlmsg_flags = NLM_F_REQUEST | NLM_F_DUMP;
 	req.nh.nlmsg_type = nlmsg_type;
 	req.g.rtgen_family = AF_NETLINK;
 	nl->dumping = true;
 	DBG_OBJ(NLMSG, nl, ul_debug("sending dump request"));
-	if (send(nl->fd, &req, req.nh.nlmsg_len, 0) < 0)
-		return -1;
-	return 0;
+	જો (send(nl->fd, &req, req.nh.nlmsg_len, 0) < 0)
+		પાછા -1;
+	પાછા 0;
 }
 
-#define DBG_CASE(x) case x: str = #x; break
-#define DBG_CASE_DEF8(x) default: snprintf(strx+2, 3, "%02hhx", x); str = strx; break
-static void dbg_addr(struct ul_nl_data *nl)
+#define DBG_CASE(x) સ્થિતિ x: str = #x; તોડો
+#define DBG_CASE_DEF8(x) મૂળભૂત: snprintf(strx+2, 3, "%02hhx", x); str = strx; તોડો
+સ્થિર શૂન્ય dbg_addr(સંરચના ul_nl_data *nl)
 {
-	char *str;
-	char strx[5] = "0x";
-	switch (nl->addr.ifa_family) {
+	અક્ષર *str;
+	અક્ષર strx[5] = "0x";
+	પસંદગી (nl->addr.ifa_family) {
 		DBG_CASE(AF_INET);
 		DBG_CASE(AF_INET6);
 		DBG_CASE_DEF8(nl->addr.ifa_family);
 	}
 	DBG(ADDR, ul_debug(" ifa_family: %s", str));
-	switch (nl->addr.ifa_scope) {
+	પસંદગી (nl->addr.ifa_scope) {
 		DBG_CASE(RT_SCOPE_UNIVERSE);
 		DBG_CASE(RT_SCOPE_SITE);
 		DBG_CASE(RT_SCOPE_LINK);
@@ -107,16 +107,16 @@ static void dbg_addr(struct ul_nl_data *nl)
 }
 
 /* Expecting non-zero nl->callback_addr! */
-static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
+સ્થિર પૂર્ણાંક process_addr(સંરચના ul_nl_data *nl, સંરચના nlmsghdr *nh)
 {
-	struct ifaddrmsg *ifaddr;
-	struct rtattr *attr;
-	int len;
-	static char ifname[IF_NAMESIZE];
+	સંરચના ifaddrmsg *ifaddr;
+	સંરચના rtattr *attr;
+	પૂર્ણાંક len;
+	સ્થિર અક્ષર ifname[IF_NAMESIZE];
 	bool has_local_address = false;
 
 	DBG_OBJ(ADDR, nh, ul_debug("processing nlmsghdr"));
-	memset(&(nl->addr), 0, sizeof(struct ul_nl_addr));
+	memset(&(nl->addr), 0, કદ(સંરચના ul_nl_addr));
 
 	/* Process ifaddrmsg. */
 	ifaddr = NLMSG_DATA(nh);
@@ -124,9 +124,9 @@ static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
 	nl->addr.ifa_family = ifaddr->ifa_family;
 	nl->addr.ifa_scope = ifaddr->ifa_scope;
 	nl->addr.ifa_index = ifaddr->ifa_index;
-	if ((if_indextoname(ifaddr->ifa_index, ifname)))
+	જો ((if_indextoname(ifaddr->ifa_index, ifname)))
 		nl->addr.ifname = ifname;
-	else
+	નહીંતર
 	{
 		/* There can be race, we do not return error here.
 		 * It also happens on RTM_DELADDR, as interface name could
@@ -142,16 +142,16 @@ static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
 	ON_DBG(ADDR, dbg_addr(nl));
 
 	/* Process rtattr. */
-	len = nh->nlmsg_len - NLMSG_LENGTH(sizeof(*ifaddr));
-	for (attr = IFA_RTA(ifaddr); RTA_OK(attr, len);
+	len = nh->nlmsg_len - NLMSG_LENGTH(કદ(*ifaddr));
+	માટે (attr = IFA_RTA(ifaddr); RTA_OK(attr, len);
 	     attr = RTA_NEXT(attr, len)) {
 		/* Process most common rta attributes */
 		DBG_OBJ(ADDR, attr, ul_debug("processing rtattr"));
-		switch (attr->rta_type) {
-		case IFA_ADDRESS:
+		પસંદગી (attr->rta_type) {
+		સ્થિતિ IFA_ADDRESS:
 			nl->addr.ifa_address = RTA_DATA(attr);
 			nl->addr.ifa_address_len = RTA_PAYLOAD(attr);
-			if (!has_local_address) {
+			જો (!has_local_address) {
 				nl->addr.address = RTA_DATA(attr);
 				nl->addr.address_len = RTA_PAYLOAD(attr);
 			}
@@ -160,8 +160,8 @@ static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
 				     (has_local_address ? "" :
 				      " (setting address)"),
 				     ul_nl_addr_ntop_ifa_address(&(nl->addr))));
-		break;
-		case IFA_LOCAL:
+		તોડો;
+		સ્થિતિ IFA_LOCAL:
 			/* Point to Point interface listens has local address
 			 * and listens there */
 			has_local_address = true;
@@ -171,11 +171,11 @@ static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
 			DBG(ADDR,
 			    ul_debug(" IFA_LOCAL (setting address): %s",
 				     ul_nl_addr_ntop_ifa_local(&(nl->addr))));
-		break;
-		case IFA_CACHEINFO:
+		તોડો;
+		સ્થિતિ IFA_CACHEINFO:
 		{
-			struct ifa_cacheinfo *ci =
-				(struct ifa_cacheinfo *)RTA_DATA(attr);
+			સંરચના ifa_cacheinfo *ci =
+				(સંરચના ifa_cacheinfo *)RTA_DATA(attr);
 			nl->addr.ifa_valid = ci->ifa_valid;
 			DBG(ADDR,
 			    ul_debug(" IFA_CACHEINFO: ifa_prefered = %u,"
@@ -183,285 +183,285 @@ static int process_addr(struct ul_nl_data *nl, struct nlmsghdr *nh)
 				     nl->addr.ifa_prefered,
 				     nl->addr.ifa_valid));
 		}
-		break;
-		case IFA_FLAGS:
+		તોડો;
+		સ્થિતિ IFA_FLAGS:
 			nl->addr.ifa_flags = *(uint32_t *)(RTA_DATA(attr));
 			DBG(ADDR, ul_debug(" IFA_FLAGS: 0x%08x",
 					  nl->addr.ifa_flags));
-		break;
-		default:
+		તોડો;
+		મૂળભૂત:
 			DBG(ADDR, ul_debug(" rta_type = 0x%04x",
 					  attr->rta_type));
-		break;
+		તોડો;
 		}
 	}
 	DBG_OBJ(NLMSG, nl, ul_debug("callback %p", nl->callback_addr));
-	return (*(nl->callback_addr))(nl);
+	પાછા (*(nl->callback_addr))(nl);
 }
 
-static int process_msg(struct ul_nl_data *nl, struct nlmsghdr *nh)
+સ્થિર પૂર્ણાંક process_સંદેશ(સંરચના ul_nl_data *nl, સંરચના nlmsghdr *nh)
 {
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 
 	nl->rtm_event = UL_NL_RTM_DEL;
-	switch (nh->nlmsg_type) {
-	case RTM_NEWADDR:
+	પસંદગી (nh->nlmsg_type) {
+	સ્થિતિ RTM_NEWADDR:
 		nl->rtm_event = UL_NL_RTM_NEW;
 		/* fallthrough */
-	case RTM_DELADDR:
+	સ્થિતિ RTM_DELADDR:
 	/* If callback_addr is not set, skip process_addr */
 		DBG_OBJ(NLMSG, nl, ul_debug("%s",
 				       (UL_NL_IS_RTM_DEL(nl) ?
 					"RTM_DELADDR" : "RTM_NEWADDR")));
-		if (nl->callback_addr)
+		જો (nl->callback_addr)
 			rc = process_addr(nl, nh);
-		break;
+		તોડો;
 	/* More can be implemented in future (RTM_NEWLINK, RTM_DELLINK etc.). */
-	default:
+	મૂળભૂત:
 		DBG_OBJ(NLMSG, nl, ul_debug("nlmsg_type = %hu", nh->nlmsg_type));
-		break;
+		તોડો;
 
 	}
-	return rc;
+	પાછા rc;
 }
 
-int ul_nl_process(struct ul_nl_data *nl, bool async, bool loop)
+પૂર્ણાંક ul_nl_process(સંરચના ul_nl_data *nl, bool async, bool loop)
 {
-	char buf[BUFSIZ];
-	struct sockaddr_nl snl;
-	struct nlmsghdr *nh;
-	int rc;
+	અક્ષર buf[BUFSIZ];
+	સંરચના sockaddr_nl snl;
+	સંરચના nlmsghdr *nh;
+	પૂર્ણાંક rc;
 	uint32_t len;
 
-	struct iovec iov = {
+	સંરચના iovec iov = {
 		.iov_base = buf,
-		.iov_len = sizeof(buf)
+		.iov_len = કદ(buf)
 	};
-	struct msghdr msg = {
+	સંરચના msghdr સંદેશ = {
 		.msg_name = &snl,
-		.msg_namelen = sizeof(snl),
+		.msg_namelen = કદ(snl),
 		.msg_iov = &iov,
 		.msg_iovlen = 1,
-		.msg_control = NULL,
+		.msg_control = ખાલી,
 		.msg_controllen = 0,
 		.msg_flags = 0
 	};
 
-	while (1) {
+	જ્યારે (1) {
 		DBG_OBJ(NLMSG, nl, ul_debug("waiting for message"));
-		rc = recvmsg(nl->fd, &msg, (loop ? 0 :
+		rc = recvmsg(nl->fd, &સંદેશ, (loop ? 0 :
 					    (async ? MSG_DONTWAIT : 0)));
 		DBG_OBJ(NLMSG, nl, ul_debug("got message"));
-		if (rc < 0) {
-			if (errno == EWOULDBLOCK || errno == EAGAIN) {
+		જો (rc < 0) {
+			જો (errno == EWOULDBLOCK || errno == EAGAIN) {
 				DBG_OBJ(NLMSG, nl, ul_debug("no data"));
-				return UL_NL_WOULDBLOCK;
+				પાછા UL_NL_WOULDBLOCK;
 			}
 			/* Failure, just stop listening for changes */
 			nl->dumping = false;
 			DBG_OBJ(NLMSG, nl, ul_debug("error"));
-			return rc;
+			પાછા rc;
 		}
-		else
+		નહીંતર
 			len = rc;
 
-		for (nh = (struct nlmsghdr *)buf;
+		માટે (nh = (સંરચના nlmsghdr *)buf;
 		     NLMSG_OK(nh, len);
 		     nh = NLMSG_NEXT(nh, len)) {
 
-			if (nh->nlmsg_type == NLMSG_ERROR) {
+			જો (nh->nlmsg_type == NLMSG_ERROR) {
 				DBG_OBJ(NLMSG, nl, ul_debug("NLMSG_ERROR"));
 				nl->dumping = false;
-				return -1;
+				પાછા -1;
 			}
-			if (nh->nlmsg_type == NLMSG_DONE) {
+			જો (nh->nlmsg_type == NLMSG_DONE) {
 				DBG_OBJ(NLMSG, nl, ul_debug("NLMSG_DONE"));
 				nl->dumping = false;
-				return UL_NL_DONE;
+				પાછા UL_NL_DONE;
 			}
 
-			rc = process_msg(nl, nh);
-			if (rc)
+			rc = process_સંદેશ(nl, nh);
+			જો (rc)
 			{
 				DBG_OBJ(NLMSG, nl,
 				    ul_debug("process_msg() returned %d", rc));
-				if (rc != UL_NL_SOFT_ERROR)
-					return rc;
+				જો (rc != UL_NL_SOFT_ERROR)
+					પાછા rc;
 			}
 		}
-		if (!loop)
-			return 0;
+		જો (!loop)
+			પાછા 0;
 		DBG_OBJ(NLMSG, nl, ul_debug("looping until NLMSG_DONE"));
 	}
 }
 
-int ul_nl_open(struct ul_nl_data *nl, uint32_t nl_groups)
+પૂર્ણાંક ul_nl_open(સંરચના ul_nl_data *nl, uint32_t nl_groups)
 {
-	struct sockaddr_nl addr = { 0, };
-	int sock;
-	int rc;
+	સંરચના sockaddr_nl addr = { 0, };
+	પૂર્ણાંક sock;
+	પૂર્ણાંક rc;
 
 	DBG_OBJ(NLMSG, nl, ul_debug("opening socket"));
 	sock = socket(AF_NETLINK, SOCK_RAW | SOCK_CLOEXEC, NETLINK_ROUTE);
-	if (sock < 0)
-		return sock;
+	જો (sock < 0)
+		પાછા sock;
 	addr.nl_family = AF_NETLINK;
 	addr.nl_pid = getpid();
 	addr.nl_groups = nl_groups;
-	if ((rc = bind(sock, (struct sockaddr *)&addr, sizeof(addr))) >= 0)
+	જો ((rc = bind(sock, (સંરચના sockaddr *)&addr, કદ(addr))) >= 0)
 	{
 		nl->fd = sock;
-		return 0;
+		પાછા 0;
 	}
-	else
+	નહીંતર
 	{
 		close(sock);
-		return rc;
+		પાછા rc;
 	}
 }
 
-int ul_nl_close(struct ul_nl_data *nl)
+પૂર્ણાંક ul_nl_close(સંરચના ul_nl_data *nl)
 {
 	DBG_OBJ(NLMSG, nl, ul_debug("closing socket"));
-	return close(nl->fd);
+	પાછા close(nl->fd);
 }
 
-struct ul_nl_addr *ul_nl_addr_dup(struct ul_nl_addr *addr)
+સંરચના ul_nl_addr *ul_nl_addr_dup(સંરચના ul_nl_addr *addr)
 {
-	struct ul_nl_addr *newaddr;
-	newaddr = calloc(1, sizeof(struct ul_nl_addr));
-	if (!newaddr)
-		goto error;
-	memcpy(newaddr, addr, sizeof(struct ul_nl_addr));
-	if (addr->ifa_address_len) {
+	સંરચના ul_nl_addr *newaddr;
+	newaddr = calloc(1, કદ(સંરચના ul_nl_addr));
+	જો (!newaddr)
+		જાઓ error;
+	memcpy(newaddr, addr, કદ(સંરચના ul_nl_addr));
+	જો (addr->ifa_address_len) {
 		newaddr->ifa_address = malloc(addr->ifa_address_len);
-		if (!newaddr->ifa_address)
-			goto error;
+		જો (!newaddr->ifa_address)
+			જાઓ error;
 		memcpy(newaddr->ifa_address, addr->ifa_address,
 		       addr->ifa_address_len);
 	}
-	if (addr->ifa_local_len) {
+	જો (addr->ifa_local_len) {
 		newaddr->ifa_local = malloc(addr->ifa_local_len);
-		if (!newaddr->ifa_local)
-			goto error;
+		જો (!newaddr->ifa_local)
+			જાઓ error;
 		memcpy(newaddr->ifa_local, addr->ifa_local,
 		       addr->ifa_local_len);
 	}
-	if (addr->address == addr->ifa_local)
+	જો (addr->address == addr->ifa_local)
 		newaddr->address = newaddr->ifa_local;
-	else
+	નહીંતર
 		newaddr->address = newaddr->ifa_address;
-	if (!(newaddr->ifname = strdup(addr->ifname)))
-		goto error;
-	return newaddr;
+	જો (!(newaddr->ifname = strdup(addr->ifname)))
+		જાઓ error;
+	પાછા newaddr;
 error:
 	ul_nl_addr_free(newaddr);
-	return NULL;
+	પાછા ખાલી;
 }
 
-void ul_nl_addr_free(struct ul_nl_addr *addr)
+શૂન્ય ul_nl_addr_free(સંરચના ul_nl_addr *addr)
 {
-	if (addr) {
-		free(addr->ifa_address);
-		free(addr->ifa_local);
-		free(addr->ifname);
-		free(addr);
+	જો (addr) {
+		મુક્ત(addr->ifa_address);
+		મુક્ત(addr->ifa_local);
+		મુક્ત(addr->ifname);
+		મુક્ત(addr);
 	}
 }
 
-const char *ul_nl_addr_ntop(const struct ul_nl_addr *addr, int addrid) {
-	const void **ifa_addr = (const void **)((const char *)addr + addrid);
+અચલ અક્ષર *ul_nl_addr_ntop(અચલ સંરચના ul_nl_addr *addr, પૂર્ણાંક addrid) {
+	અચલ શૂન્ય **ifa_addr = (અચલ શૂન્ય **)((અચલ અક્ષર *)addr + addrid);
 	/* (INET6_ADDRSTRLEN-1) + (IF_NAMESIZE-1) + strlen("%") + 1 */
-	static char addr_str[INET6_ADDRSTRLEN+IF_NAMESIZE];
+	સ્થિર અક્ષર addr_str[INET6_ADDRSTRLEN+IF_NAMESIZE];
 
-	if (addr->ifa_family == AF_INET)
-		return inet_ntop(AF_INET,
-				 *ifa_addr, addr_str, sizeof(addr_str));
-	else {
+	જો (addr->ifa_family == AF_INET)
+		પાછા inet_ntop(AF_INET,
+				 *ifa_addr, addr_str, કદ(addr_str));
+	નહીંતર {
 	/* if (addr->ifa_family == AF_INET6) */
-		if (addr->ifa_scope == RT_SCOPE_LINK) {
-			char *p;
+		જો (addr->ifa_scope == RT_SCOPE_LINK) {
+			અક્ષર *p;
 
 			inet_ntop(AF_INET6,
-				  *ifa_addr, addr_str, sizeof(addr_str));
+				  *ifa_addr, addr_str, કદ(addr_str));
 			p = addr_str;
-			while (*p) p++;
+			જ્યારે (*p) p++;
 			*p++ = '%';
 			xstrncpy(p, addr->ifname, IF_NAMESIZE);
-			return addr_str;
-		} else
-			return inet_ntop(AF_INET6,
-					 *ifa_addr, addr_str, sizeof(addr_str));
+			પાછા addr_str;
+		} નહીંતર
+			પાછા inet_ntop(AF_INET6,
+					 *ifa_addr, addr_str, કદ(addr_str));
 	}
 }
 
 #ifdef TEST_PROGRAM_NETLINK
-#include <stdio.h>
+#અન્તર્ભાવ <stdio.h>
 
-static int callback_addr(struct ul_nl_data *nl)
+સ્થિર પૂર્ણાંક callback_addr(સંરચના ul_nl_data *nl)
 {
-	char *str;
+	અક્ષર *str;
 
 	printf("%s address:\n", ((nl->rtm_event ? "Add" : "Delete")));
 	printf("  interface: %s\n", nl->addr.ifname);
-	if (nl->addr.ifa_family == AF_INET)
+	જો (nl->addr.ifa_family == AF_INET)
 		printf("  IPv4 %s\n",
 		       ul_nl_addr_ntop_address(&(nl->addr)));
-	else
+	નહીંતર
 	/* if (nl->addr.ifa_family == AF_INET) */
 		printf("  IPv6 %s\n",
 		       ul_nl_addr_ntop_address(&(nl->addr)));
-	switch (nl->addr.ifa_scope) {
-	case RT_SCOPE_UNIVERSE:	str = "global"; break;
-	case RT_SCOPE_SITE:	str = "site"; break;
-	case RT_SCOPE_LINK:	str = "link"; break;
-	case RT_SCOPE_NOWHERE:	str = "nowhere"; break;
-	default:		str = "other"; break;
+	પસંદગી (nl->addr.ifa_scope) {
+	સ્થિતિ RT_SCOPE_UNIVERSE:	str = "global"; તોડો;
+	સ્થિતિ RT_SCOPE_SITE:	str = "site"; તોડો;
+	સ્થિતિ RT_SCOPE_LINK:	str = "link"; તોડો;
+	સ્થિતિ RT_SCOPE_NOWHERE:	str = "nowhere"; તોડો;
+	મૂળભૂત:		str = "other"; તોડો;
 	}
 	printf("  scope: %s\n", str);
-	if (nl->addr.ifa_valid != UINT32_MAX)
+	જો (nl->addr.ifa_valid != UINT32_MAX)
 		printf("  valid: %u\n", nl->addr.ifa_valid);
-	else
+	નહીંતર
 		printf("  valid: forever\n");
-	return 0;
+	પાછા 0;
 }
 
-int main(int argc __attribute__((__unused__)),
-	 char *argv[] __attribute__((__unused__)))
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc __attribute__((__unused__)),
+	 અક્ષર *argv[] __attribute__((__unused__)))
 {
-	int rc;
-	struct ul_nl_data nl;
+	પૂર્ણાંક rc;
+	સંરચના ul_nl_data nl;
 
 	/* Prepare netlink. */
 	ul_nl_init(&nl);
 	nl.callback_addr = callback_addr;
 
 	/* Dump addresses */
-	if ((rc = ul_nl_open(&nl, 0)))
-		return 1;
-	if (ul_nl_request_dump(&nl, RTM_GETADDR))
-		goto error;
-	if (ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP) != UL_NL_DONE)
-		goto error;
+	જો ((rc = ul_nl_open(&nl, 0)))
+		પાછા 1;
+	જો (ul_nl_request_dump(&nl, RTM_GETADDR))
+		જાઓ error;
+	જો (ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP) != UL_NL_DONE)
+		જાઓ error;
 	puts("RTM_GETADDR dump finished.");
 
 	/* Close and later open. See note in the ul_nl_open() docs. */
-	if ((rc = ul_nl_close(&nl)) < 0)
-		goto error;
+	જો ((rc = ul_nl_close(&nl)) < 0)
+		જાઓ error;
 
 	/* Monitor further changes */
 	puts("Going to monitor mode.");
-	if ((rc = ul_nl_open(&nl, RTMGRP_LINK |
+	જો ((rc = ul_nl_open(&nl, RTMGRP_LINK |
 			     RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR)))
-		goto error;
+		જાઓ error;
 	/* In this example UL_NL_ABORT never appears, as callback does
 	 * not use it. */
 	rc = ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP);
-	if (rc == UL_NL_RETURN)
+	જો (rc == UL_NL_RETURN)
 		rc = 0;
 error:
-	if ((ul_nl_close(&nl)))
+	જો ((ul_nl_close(&nl)))
 		rc = 1;
-	return rc;
+	પાછા rc;
 }
 #endif /* TEST_PROGRAM_NETLINK */

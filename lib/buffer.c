@@ -4,142 +4,142 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#અન્તર્ભાવ "buffer.h"
+#અન્તર્ભાવ "mbsalign.h"
+#અન્તર્ભાવ "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+શૂન્ય ul_buffer_reset_data(સંરચના ul_buffer *buf)
 {
-	if (buf->begin)
+	જો (buf->begin)
 		memset(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	જો (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * કદ(અક્ષર *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+સ્થિર અંતઃરેખ અક્ષર *ul_buffer_free_data_common(સંરચના ul_buffer *buf, bool steal)
 {
-	char *t = NULL;
+	અક્ષર *t = ખાલી;
 
-	assert(buf);
+	પ્રતિજ્ઞા(buf);
 
-	if (steal)
+	જો (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	નહીંતર
+		મુક્ત(buf->begin);
+	buf->begin = ખાલી;
+	buf->end = ખાલી;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	મુક્ત(buf->ptrs);
+	buf->ptrs = ખાલી;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	મુક્ત(buf->encoded);
+	buf->encoded = ખાલી;
 	buf->encoded_sz = 0;
 
-	return t;
+	પાછા t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+શૂન્ય ul_buffer_free_data(સંરચના ul_buffer *buf)
 {
 	ul_buffer_free_data_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+અક્ષર *ul_buffer_steal_string(સંરચના ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	જો (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		પાછા ખાલી;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	પાછા ul_buffer_free_data_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+શૂન્ય ul_buffer_set_chunksize(સંરચના ul_buffer *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+પૂર્ણાંક ul_buffer_is_empty(સંરચના ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	પાછા buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+પૂર્ણાંક ul_buffer_save_pointer(સંરચના ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	જો (ptr_idx >= buf->nptrs) {
+		અક્ષર **tmp = reallocarray(buf->ptrs, ptr_idx + 1, કદ(અક્ષર *));
 
-		if (!tmp)
-			return -EINVAL;
+		જો (!tmp)
+			પાછા -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	પાછા 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+અક્ષર *ul_buffer_get_pointer(સંરચના ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	જો (ptr_idx < buf->nptrs)
+		પાછા buf->ptrs[ptr_idx];
+	પાછા ખાલી;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_pointer_length(સંરચના ul_buffer *buf, unsigned short ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	અક્ષર *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	જો (ptr && ptr > buf->begin)
+		પાછા ptr - buf->begin;
+	પાછા 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_safe_pointer_width(સંરચના ul_buffer *buf, unsigned short ptr_idx)
 {
 	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	જો (!len)
+		પાછા 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	પાછા mbs_safe_nwidth(buf->begin, len, ખાલી);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+શૂન્ય ul_buffer_refer_string(સંરચના ul_buffer *buf, અક્ષર *str)
 {
-	if (buf->sz)
+	જો (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
 	buf->sz = str ? strlen(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+પૂર્ણાંક ul_buffer_alloc_data(સંરચના ul_buffer *buf, size_t sz)
 {
-	char *tmp;
+	અક્ષર *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	પ્રતિજ્ઞા(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	જો (sz <= buf->sz)
+		પાછા 0;
 
-	if (buf->end && buf->begin)
+	જો (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	જો (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	જો (!tmp)
+		પાછા -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
@@ -147,175 +147,175 @@ int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 
 	memset(buf->end, '\0', sz - len);
 
-	return 0;
+	પાછા 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+પૂર્ણાંક ul_buffer_append_data(સંરચના ul_buffer *buf, અચલ અક્ષર *data, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	જો (!buf)
+		પાછા -EINVAL;
+	જો (!data)
+		પાછા 0;
 
-	if (buf->begin && buf->end)
+	જો (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	જો (maxsz <= sz + 1) {
+		પૂર્ણાંક rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		જો (rc)
+			પાછા rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	જો (!buf->end)
+		પાછા -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	પાછા 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+પૂર્ણાંક ul_buffer_append_char(સંરચના ul_buffer *buf, અચલ અક્ષર c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	પાછા ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+પૂર્ણાંક ul_buffer_append_string(સંરચના ul_buffer *buf, અચલ અક્ષર *str)
 {
-	if (!str)
-		return 0;
+	જો (!str)
+		પાછા 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	પાછા ul_buffer_append_data(buf, str, strlen(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+પૂર્ણાંક ul_buffer_append_ntimes(સંરચના ul_buffer *buf, size_t n, અચલ અક્ષર *str)
 {
 	size_t i;
 	size_t len = strlen(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	માટે (i = 0; len && i < n; i++) {
+		પૂર્ણાંક rc = ul_buffer_append_data(buf, str, len);
+		જો (rc)
+			પાછા rc;
 	}
-	return 0;
+	પાછા 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+પૂર્ણાંક ul_buffer_appendf(સંરચના ul_buffer *buf, અચલ અક્ષર *format, ...)
 {
 	va_list ap;
-	int res;
+	પૂર્ણાંક res;
 
 	va_start(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	પાછા res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+પૂર્ણાંક ul_buffer_appendvf(સંરચના ul_buffer *buf, અચલ અક્ષર *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	અક્ષર *val;
+	પૂર્ણાંક sz;
+	પૂર્ણાંક res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	જો (sz < 0)
+		પાછા -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	મુક્ત(val);
 
-	return res;
+	પાછા res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+પૂર્ણાંક ul_buffer_set_data(સંરચના ul_buffer *buf, અચલ અક્ષર *data, size_t sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	પાછા ul_buffer_append_data(buf, data, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+અક્ષર *ul_buffer_get_data(સંરચના ul_buffer *buf, size_t *sz, size_t *width)
 {
-	if (sz)
+	જો (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	જો (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	પાછા buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+અક્ષર *ul_buffer_get_string(સંરચના ul_buffer *buf, size_t *sz, size_t *width)
 {
-	char *ret;
+	અક્ષર *ret;
 
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	જો (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	પાછા ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_buffer_get_bufsiz(સંરચના ul_buffer *buf)
 {
-	return buf->sz;
+	પાછા buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_buffer_get_datasiz(સંરચના ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	પાછા buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+અક્ષર *ul_buffer_get_safe_data(સંરચના ul_buffer *buf, size_t *sz, size_t *width, અચલ અક્ષર *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	અક્ષર *data = ul_buffer_get_data(buf, ખાલી, ખાલી);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	અક્ષર *res = ખાલી;
 
-	if (!data)
-		goto nothing;
+	જો (!data)
+		જાઓ nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	જો (encsz > buf->encoded_sz) {
+		અક્ષર *tmp = realloc(buf->encoded, encsz);
+		જો (!tmp)
+			જાઓ nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	જો (!res || !wsz || wsz == (size_t) -1)
+		જાઓ nothing;
 
-	if (width)
+	જો (width)
 		*width = wsz;
-	if (sz)
+	જો (sz)
 		*sz = strlen(res);
-	return res;
+	પાછા res;
 nothing:
-	if (width)
+	જો (width)
 		*width = 0;
-	if (sz)
+	જો (sz)
 		*sz = 0;
-	return NULL;
+	પાછા ખાલી;
 }
 
 
 #ifdef TEST_PROGRAM_BUFFER
 
-enum {
+ગણના {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+પૂર્ણાંક મુખ્ય(શૂન્ય)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	સંરચના ul_buffer buf = UL_INIT_BUFFER;
+	અક્ષર *str;
 	size_t sz = 0;
 
 	ul_buffer_set_chunksize(&buf, 16);
@@ -331,7 +331,7 @@ int main(void)
 	ul_buffer_append_string(&buf, "bbb");
 	ul_buffer_save_pointer(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ખાલી);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
@@ -345,7 +345,7 @@ int main(void)
 	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
 	ul_buffer_save_pointer(&buf, PTR_AAA);
 	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ખાલી);
 	printf("data [%zu] '%s'\n", sz, str);
 	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
 
@@ -354,29 +354,29 @@ int main(void)
 	ul_buffer_refer_string(&buf, str);
 	ul_buffer_append_data(&buf, ",", 1);
 	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ખાલી);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ખાલી);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_append_char(&buf, 'x');
 	{
-		char c = 'y';
+		અક્ષર c = 'y';
 		ul_buffer_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
+		અચલ અક્ષર c = 'z';
 		ul_buffer_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ખાલી);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BUFFER */

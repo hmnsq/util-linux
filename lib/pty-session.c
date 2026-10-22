@@ -10,24 +10,24 @@
  *
  * Written by Karel Zak <kzak@redhat.com> in Jul 2019
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <pty.h>
-#include <poll.h>
-#include <sys/signalfd.h>
-#include <paths.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <inttypes.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <pty.h>
+#અન્તર્ભાવ <poll.h>
+#અન્તર્ભાવ <sys/signalfd.h>
+#અન્તર્ભાવ <paths.h>
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <sys/wait.h>
+#અન્તર્ભાવ <inttypes.h>
 
-#include "c.h"
-#include "all-io.h"
-#include "ttyutils.h"
-#include "pty-session.h"
-#include "monotonic.h"
-#include "debug.h"
+#અન્તર્ભાવ "c.h"
+#અન્તર્ભાવ "all-io.h"
+#અન્તર્ભાવ "ttyutils.h"
+#અન્તર્ભાવ "pty-session.h"
+#અન્તર્ભાવ "monotonic.h"
+#અન્તર્ભાવ "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulpty);
+સ્થિર UL_DEBUG_DEFINE_MASK(ulpty);
 UL_DEBUG_DEFINE_MASKNAMES(ulpty) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULPTY_DEBUG_INIT	(1 << 1)
@@ -40,19 +40,19 @@ UL_DEBUG_DEFINE_MASKNAMES(ulpty) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulpty, ULPTY_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulpty, ULPTY_DEBUG_, m, x)
 
-void ul_pty_init_debug(int mask)
+શૂન્ય ul_pty_init_debug(પૂર્ણાંક mask)
 {
-	if (ulpty_debug_mask)
-		return;
+	જો (ulpty_debug_mask)
+		પાછા;
 	__UL_INIT_DEBUG_FROM_ENV(ulpty, ULPTY_DEBUG_, mask, ULPTY_DEBUG);
 }
 
-struct ul_pty *ul_new_pty(int is_stdin_tty)
+સંરચના ul_pty *ul_new_pty(પૂર્ણાંક is_stdin_tty)
 {
-	struct ul_pty *pty = calloc(1, sizeof(*pty));
+	સંરચના ul_pty *pty = calloc(1, કદ(*pty));
 
-	if (!pty)
-		return NULL;
+	જો (!pty)
+		પાછા ખાલી;
 
 	DBG_OBJ(SETUP, pty, ul_debug("alloc handler"));
 	pty->isterm = is_stdin_tty;
@@ -61,81 +61,81 @@ struct ul_pty *ul_new_pty(int is_stdin_tty)
 	pty->sigfd = -1;
 	pty->child = (pid_t) -1;
 
-	return pty;
+	પાછા pty;
 }
 
-void ul_free_pty(struct ul_pty *pty)
+શૂન્ય ul_free_pty(સંરચના ul_pty *pty)
 {
-	struct ul_pty_child_buffer *hd;
+	સંરચના ul_pty_child_buffer *hd;
 
-	while ((hd = pty->child_buffer_head)) {
+	જ્યારે ((hd = pty->child_buffer_head)) {
 		pty->child_buffer_head = hd->next;
-		free(hd);
+		મુક્ત(hd);
 	}
 
-	while ((hd = pty->free_buffers)) {
+	જ્યારે ((hd = pty->free_buffers)) {
 		pty->free_buffers = hd->next;
-		free(hd);
+		મુક્ત(hd);
 	}
-	free(pty);
+	મુક્ત(pty);
 }
 
-void ul_pty_slave_echo(struct ul_pty *pty, int enable)
+શૂન્ય ul_pty_slave_echo(સંરચના ul_pty *pty, પૂર્ણાંક enable)
 {
-	assert(pty);
+	પ્રતિજ્ઞા(pty);
 	pty->slave_echo = enable ? 1 : 0;
 }
 
-int ul_pty_get_delivered_signal(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_get_delivered_signal(સંરચના ul_pty *pty)
 {
-	assert(pty);
-	return pty->delivered_signal;
+	પ્રતિજ્ઞા(pty);
+	પાછા pty->delivered_signal;
 }
 
-struct ul_pty_callbacks *ul_pty_get_callbacks(struct ul_pty *pty)
+સંરચના ul_pty_callbacks *ul_pty_get_callbacks(સંરચના ul_pty *pty)
 {
-	assert(pty);
-	return &pty->callbacks;
+	પ્રતિજ્ઞા(pty);
+	પાછા &pty->callbacks;
 }
 
-void ul_pty_set_callback_data(struct ul_pty *pty, void *data)
+શૂન્ય ul_pty_set_callback_data(સંરચના ul_pty *pty, શૂન્ય *data)
 {
-	assert(pty);
+	પ્રતિજ્ઞા(pty);
 	pty->callback_data = data;
 }
 
-void ul_pty_set_child(struct ul_pty *pty, pid_t child)
+શૂન્ય ul_pty_set_child(સંરચના ul_pty *pty, pid_t child)
 {
-	assert(pty);
+	પ્રતિજ્ઞા(pty);
 	pty->child = child;
 }
 
-int ul_pty_get_childfd(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_get_childfd(સંરચના ul_pty *pty)
 {
-	assert(pty);
-	return pty->master;
+	પ્રતિજ્ઞા(pty);
+	પાછા pty->master;
 }
 
-pid_t ul_pty_get_child(struct ul_pty *pty)
+pid_t ul_pty_get_child(સંરચના ul_pty *pty)
 {
-	assert(pty);
-	return pty->child;
+	પ્રતિજ્ઞા(pty);
+	પાછા pty->child;
 }
 
 /* it's active when signals are redirected to sigfd */
-int ul_pty_is_running(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_is_running(સંરચના ul_pty *pty)
 {
-	assert(pty);
-	return pty->sigfd >= 0;
+	પ્રતિજ્ઞા(pty);
+	પાછા pty->sigfd >= 0;
 }
 
-void ul_pty_set_mainloop_time(struct ul_pty *pty, struct timeval *tv)
+શૂન્ય ul_pty_set_mainloop_time(સંરચના ul_pty *pty, સંરચના timeval *tv)
 {
-	assert(pty);
-	if (!tv) {
+	પ્રતિજ્ઞા(pty);
+	જો (!tv) {
 		DBG_OBJ(IO, pty, ul_debug("mainloop time: clear"));
 		timerclear(&pty->next_callback_time);
-	} else {
+	} નહીંતર {
 		pty->next_callback_time.tv_sec = tv->tv_sec;
 		pty->next_callback_time.tv_usec = tv->tv_usec;
 		DBG_OBJ(IO, pty, ul_debug("mainloop time: %"PRId64".%06"PRId64,
@@ -143,61 +143,61 @@ void ul_pty_set_mainloop_time(struct ul_pty *pty, struct timeval *tv)
 	}
 }
 
-static void pty_signals_cleanup(struct ul_pty *pty)
+સ્થિર શૂન્ય pty_signals_cleanup(સંરચના ul_pty *pty)
 {
-	if (pty->sigfd != -1)
+	જો (pty->sigfd != -1)
 		close(pty->sigfd);
 	pty->sigfd = -1;
 
 	/* restore original setting */
-	sigprocmask(SIG_SETMASK, &pty->orgsig, NULL);
+	sigprocmask(SIG_SETMASK, &pty->orgsig, ખાલી);
 }
 
 /* call me before fork() */
-int ul_pty_setup(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_setup(સંરચના ul_pty *pty)
 {
-	struct termios attrs;
-	int rc = 0;
+	સંરચના termios attrs;
+	પૂર્ણાંક rc = 0;
 
-	assert(pty->sigfd == -1);
+	પ્રતિજ્ઞા(pty->sigfd == -1);
 
 	/* save the current signals setting (to make ul_pty_cleanup() usable,
 	 * otherwise see ul_pty_signals_setup() */
-	sigprocmask(0, NULL, &pty->orgsig);
+	sigprocmask(0, ખાલી, &pty->orgsig);
 
-	if (pty->isterm) {
+	જો (pty->isterm) {
 		DBG_OBJ(SETUP, pty, ul_debug("create for terminal"));
 
 		/* original setting of the current terminal */
-		if (tcgetattr(STDIN_FILENO, &pty->stdin_attrs) != 0) {
+		જો (tcgetattr(STDIN_FILENO, &pty->stdin_attrs) != 0) {
 			rc = -errno;
-			goto done;
+			જાઓ done;
 		}
 
 		attrs = pty->stdin_attrs;
-		if (pty->slave_echo)
+		જો (pty->slave_echo)
 			attrs.c_lflag |= ECHO;
-		else
+		નહીંતર
 			attrs.c_lflag &= ~ECHO;
 
-		ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&pty->win);
+		ioctl(STDIN_FILENO, TIOCGWINSZ, (અક્ષર *)&pty->win);
 		/* create master+slave */
-		rc = openpty(&pty->master, &pty->slave, NULL, &attrs, &pty->win);
-		if (rc)
-			goto done;
+		rc = openpty(&pty->master, &pty->slave, ખાલી, &attrs, &pty->win);
+		જો (rc)
+			જાઓ done;
 
-	} else {
+	} નહીંતર {
 		DBG_OBJ(SETUP, pty, ul_debug("create for non-terminal"));
 
-		rc = openpty(&pty->master, &pty->slave, NULL, NULL, NULL);
-		if (rc)
-			goto done;
+		rc = openpty(&pty->master, &pty->slave, ખાલી, ખાલી, ખાલી);
+		જો (rc)
+			જાઓ done;
 
 		tcgetattr(pty->slave, &attrs);
 
-		if (pty->slave_echo)
+		જો (pty->slave_echo)
 			attrs.c_lflag |= ECHO;
-		else
+		નહીંતર
 			attrs.c_lflag &= ~ECHO;
 
 		tcsetattr(pty->slave, TCSANOW, &attrs);
@@ -206,46 +206,46 @@ int ul_pty_setup(struct ul_pty *pty)
 	fcntl(pty->master, F_SETFL, O_NONBLOCK);
 
 done:
-	if (rc)
+	જો (rc)
 		ul_pty_cleanup(pty);
 
 	DBG_OBJ(SETUP, pty, ul_debug("pty setup done [master=%d, slave=%d, rc=%d]",
 				pty->master, pty->slave, rc));
-	return rc;
+	પાછા rc;
 }
 
 /* call me after ul_pty_signals_setup() and before fork() */
-int ul_pty_terminal_setup(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_terminal_setup(સંરચના ul_pty *pty)
 {
-	struct termios attrs;
+	સંરચના termios attrs;
 
-	if (!pty->isterm)
-		return 0;
+	જો (!pty->isterm)
+		પાછા 0;
 
 	attrs = pty->stdin_attrs;
 	cfmakeraw(&attrs);
-	if (tcsetattr(STDIN_FILENO, TCSANOW, &attrs))
-		return -errno;
+	જો (tcsetattr(STDIN_FILENO, TCSANOW, &attrs))
+		પાછા -errno;
 
 	DBG_OBJ(SETUP, pty, ul_debug("terminal raw mode setup done"));
-	return 0;
+	પાછા 0;
 }
 
 /* call me before fork() */
-int ul_pty_signals_setup(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_signals_setup(સંરચના ul_pty *pty)
 {
 	sigset_t ourset;
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 
-	assert(pty->sigfd == -1);
+	પ્રતિજ્ઞા(pty->sigfd == -1);
 
 	/* save the current signals setting */
-	sigprocmask(0, NULL, &pty->orgsig);
+	sigprocmask(0, ખાલી, &pty->orgsig);
 
 	sigfillset(&ourset);
-	if (sigprocmask(SIG_BLOCK, &ourset, NULL)) {
+	જો (sigprocmask(SIG_BLOCK, &ourset, ખાલી)) {
 		rc = -errno;
-		goto done;
+		જાઓ done;
 	}
 
 	sigemptyset(&ourset);
@@ -257,45 +257,45 @@ int ul_pty_signals_setup(struct ul_pty *pty)
 	sigaddset(&ourset, SIGINT);
 	sigaddset(&ourset, SIGQUIT);
 
-	if (pty->callbacks.flush_logs)
+	જો (pty->callbacks.flush_logs)
 		sigaddset(&ourset, SIGUSR1);
 
-	if ((pty->sigfd = signalfd(-1, &ourset, SFD_CLOEXEC)) < 0)
+	જો ((pty->sigfd = signalfd(-1, &ourset, SFD_CLOEXEC)) < 0)
 		rc = -errno;
 done:
-	if (rc)
+	જો (rc)
 		ul_pty_cleanup(pty);
 
 	DBG_OBJ(SETUP, pty, ul_debug("pty signals setup done [rc=%d]", rc));
-	return rc;
+	પાછા rc;
 }
 
 /* cleanup in parent process */
-void ul_pty_cleanup(struct ul_pty *pty)
+શૂન્ય ul_pty_cleanup(સંરચના ul_pty *pty)
 {
-	struct termios rtt;
+	સંરચના termios rtt;
 
 	pty_signals_cleanup(pty);
 
-	if (pty->master == -1 || !pty->isterm)
-		return;
+	જો (pty->master == -1 || !pty->isterm)
+		પાછા;
 
 	DBG_OBJ(DONE, pty, ul_debug("cleanup"));
 	rtt = pty->stdin_attrs;
 	tcsetattr(STDIN_FILENO, TCSADRAIN, &rtt);
 }
 
-int ul_pty_chownmod_slave(struct ul_pty *pty, uid_t uid, gid_t gid, mode_t mode)
+પૂર્ણાંક ul_pty_chownmod_slave(સંરચના ul_pty *pty, uid_t uid, gid_t gid, mode_t mode)
 {
-	if (fchown(pty->slave, uid, gid))
-		return -errno;
-	if (fchmod(pty->slave, mode))
-		return -errno;
-	return 0;
+	જો (fchown(pty->slave, uid, gid))
+		પાછા -errno;
+	જો (fchmod(pty->slave, mode))
+		પાછા -errno;
+	પાછા 0;
 }
 
 /* call me in child process */
-void ul_pty_init_slave(struct ul_pty *pty)
+શૂન્ય ul_pty_init_slave(સંરચના ul_pty *pty)
 {
 	DBG_OBJ(SETUP, pty, ul_debug("initialize slave"));
 
@@ -310,54 +310,54 @@ void ul_pty_init_slave(struct ul_pty *pty)
 
 	close(pty->slave);
 
-	if (pty->sigfd >= 0)
+	જો (pty->sigfd >= 0)
 		close(pty->sigfd);
 
 	pty->slave = -1;
 	pty->master = -1;
 	pty->sigfd = -1;
 
-	sigprocmask(SIG_SETMASK, &pty->orgsig, NULL);
+	sigprocmask(SIG_SETMASK, &pty->orgsig, ખાલી);
 
 	DBG_OBJ(SETUP, pty, ul_debug("... initialize slave done"));
 }
 
-static int write_output(char *obuf, ssize_t bytes)
+સ્થિર પૂર્ણાંક write_output(અક્ષર *obuf, ssize_t bytes)
 {
 	DBG(IO, ul_debug(" writing output"));
 
-	if (ul_write_all(STDOUT_FILENO, obuf, bytes)) {
+	જો (ul_write_all(STDOUT_FILENO, obuf, bytes)) {
 		DBG(IO, ul_debug("  writing output *failed*"));
-		return -errno;
+		પાછા -errno;
 	}
 
-	return 0;
+	પાછા 0;
 }
 
-static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int final)
+સ્થિર પૂર્ણાંક schedule_child_write(સંરચના ul_pty *pty, અક્ષર *buf, size_t bufsz, પૂર્ણાંક final)
 {
-	struct ul_pty_child_buffer *stash;
+	સંરચના ul_pty_child_buffer *stash;
 
-	if (pty->free_buffers) {
+	જો (pty->free_buffers) {
 		stash = pty->free_buffers;
 		pty->free_buffers = stash->next;
-		memset(stash, 0, sizeof(*stash));
-	} else
-		stash = calloc(1, sizeof(*stash));
-	if (!stash)
-		return -1;
+		memset(stash, 0, કદ(*stash));
+	} નહીંતર
+		stash = calloc(1, કદ(*stash));
+	જો (!stash)
+		પાછા -1;
 
-	assert(bufsz <= sizeof(stash->buf));
+	પ્રતિજ્ઞા(bufsz <= કદ(stash->buf));
 
 	memcpy(stash->buf, buf, bufsz);
 	stash->size = bufsz;
-	stash->final_input = final ? 1 : 0;
+	stash->final_આગત = final ? 1 : 0;
 
-	if (pty->child_buffer_head)
+	જો (pty->child_buffer_head)
 		pty->child_buffer_tail = pty->child_buffer_tail->next = stash;
-	else
+	નહીંતર
 		pty->child_buffer_head = pty->child_buffer_tail = stash;
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -376,51 +376,51 @@ static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int
  * maintains master+slave tty stuff within the session. Use pipe to write to
  * pty and assume non-interactive (tee-like) behavior is NOT well supported.
  */
-static void drain_child_buffers(struct ul_pty *pty)
+સ્થિર શૂન્ય drain_child_buffers(સંરચના ul_pty *pty)
 {
-	unsigned int tries = 0;
-	struct pollfd fd = { .fd = pty->slave, .events = POLLIN };
+	unsigned પૂર્ણાંક tries = 0;
+	સંરચના pollfd fd = { .fd = pty->slave, .events = POLLIN };
 
 	DBG_OBJ(IO, pty, ul_debug(" waiting for empty slave"));
-	while (poll(&fd, 1, 10) == 1 && tries < 8) {
+	જ્યારે (poll(&fd, 1, 10) == 1 && tries < 8) {
 		DBG_OBJ(IO, pty, ul_debug("   slave is not empty"));
 		xusleep(250000);
 		tries++;
 	}
-	if (tries < 8)
+	જો (tries < 8)
 		DBG_OBJ(IO, pty, ul_debug("   slave is empty now"));
 
 	DBG_OBJ(IO, pty, ul_debug(" sending EOF to master"));
 }
 
-static int flush_child_buffers(struct ul_pty *pty, int *anything)
+સ્થિર પૂર્ણાંક flush_child_buffers(સંરચના ul_pty *pty, પૂર્ણાંક *anything)
 {
-	int rc = 0, any = 0;
+	પૂર્ણાંક rc = 0, any = 0;
 
-	while (pty->child_buffer_head) {
-		struct ul_pty_child_buffer *hd = pty->child_buffer_head;
+	જ્યારે (pty->child_buffer_head) {
+		સંરચના ul_pty_child_buffer *hd = pty->child_buffer_head;
 		ssize_t ret;
 
-		if (hd->final_input)
+		જો (hd->final_આગત)
 			drain_child_buffers(pty);
 
 		DBG_OBJ(IO, hd, ul_debug(" stdin --> master trying %zu bytes", hd->size - hd->cursor));
 
-		ret = write(pty->master, hd->buf + hd->cursor, hd->size - hd->cursor);
-		if (ret == -1) {
+		ret = લિખ(pty->master, hd->buf + hd->cursor, hd->size - hd->cursor);
+		જો (ret == -1) {
 			DBG_OBJ(IO, hd, ul_debug("   EAGAIN"));
-			if (!(errno == EINTR || errno == EAGAIN))
+			જો (!(errno == EINTR || errno == EAGAIN))
 				rc = -errno;
-			goto out;
+			જાઓ out;
 		}
 		DBG_OBJ(IO, hd, ul_debug("   wrote %zd", ret));
 		any = 1;
 		hd->cursor += ret;
 
-		if (hd->cursor == hd->size) {
+		જો (hd->cursor == hd->size) {
 			pty->child_buffer_head = hd->next;
-			if (!hd->next)
-				pty->child_buffer_tail = NULL;
+			જો (!hd->next)
+				pty->child_buffer_tail = ખાલી;
 
 			hd->next = pty->free_buffers;
 			pty->free_buffers = hd;
@@ -429,39 +429,39 @@ static int flush_child_buffers(struct ul_pty *pty, int *anything)
 out:
 	/* without sync write_output() will write both input &
 	 * shell output that looks like double echoing */
-	if (any)
+	જો (any)
 		fdatasync(pty->master);
 
-	if (anything)
+	જો (anything)
 		*anything = any;
-	return rc;
+	પાછા rc;
 }
 
-void ul_pty_write_eof_to_child(struct ul_pty *pty)
+શૂન્ય ul_pty_write_eof_to_child(સંરચના ul_pty *pty)
 {
-	char c = DEF_EOF;
-	schedule_child_write(pty, &c, sizeof(char), 1);
+	અક્ષર c = DEF_EOF;
+	schedule_child_write(pty, &c, કદ(અક્ષર), 1);
 }
 
-static int mainloop_callback(struct ul_pty *pty)
+સ્થિર પૂર્ણાંક mainloop_callback(સંરચના ul_pty *pty)
 {
-	int rc;
+	પૂર્ણાંક rc;
 
-	if (!pty->callbacks.mainloop)
-		return 0;
+	જો (!pty->callbacks.mainloop)
+		પાછા 0;
 
 	DBG_OBJ(IO, pty, ul_debug("calling mainloop callback"));
 	rc = pty->callbacks.mainloop(pty->callback_data);
 
 	DBG_OBJ(IO, pty, ul_debug(" callback done [rc=%d]", rc));
-	return rc;
+	પાછા rc;
 }
 
-static int handle_io(struct ul_pty *pty, int fd, int *eof)
+સ્થિર પૂર્ણાંક handle_io(સંરચના ul_pty *pty, પૂર્ણાંક fd, પૂર્ણાંક *eof)
 {
-	char buf[BUFSIZ];
+	અક્ષર buf[BUFSIZ];
 	ssize_t bytes;
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 	sigset_t set;
 
 	DBG_OBJ(IO, pty, ul_debug(" handle I/O on fd=%d", fd));
@@ -469,73 +469,73 @@ static int handle_io(struct ul_pty *pty, int fd, int *eof)
 
 	sigemptyset(&set);
 	sigaddset(&set, SIGTTIN);
-	sigprocmask(SIG_UNBLOCK, &set, NULL);
+	sigprocmask(SIG_UNBLOCK, &set, ખાલી);
 	/* read from active FD */
-	bytes = read(fd, buf, sizeof(buf));
-	sigprocmask(SIG_BLOCK, &set, NULL);
-	if (bytes == -1) {
-		if (errno == EAGAIN || errno == EINTR)
-			return 0;
-		return -errno;
+	bytes = પઠ(fd, buf, કદ(buf));
+	sigprocmask(SIG_BLOCK, &set, ખાલી);
+	જો (bytes == -1) {
+		જો (errno == EAGAIN || errno == EINTR)
+			પાછા 0;
+		પાછા -errno;
 	}
 
-	if (bytes == 0) {
+	જો (bytes == 0) {
 		*eof = 1;
-		return 0;
+		પાછા 0;
 	}
 
 	/* from stdin (user) to command */
-	if (fd == STDIN_FILENO) {
+	જો (fd == STDIN_FILENO) {
 		DBG_OBJ(IO, pty, ul_debug(" stdin --> master %zd bytes queued", bytes));
 
-		if (schedule_child_write(pty, buf, bytes, 0))
-			return -errno;
+		જો (schedule_child_write(pty, buf, bytes, 0))
+			પાછા -errno;
 
 	/* from command (master) to stdout */
-	} else if (fd == pty->master) {
+	} નહીંતર જો (fd == pty->master) {
 		DBG_OBJ(IO, pty, ul_debug(" master --> stdout %zd bytes", bytes));
 		write_output(buf, bytes);
 	}
 
-	if (pty->callbacks.log_stream_activity)
+	જો (pty->callbacks.log_stream_activity)
 		rc = pty->callbacks.log_stream_activity(
 					pty->callback_data, fd, buf, bytes);
 
-	return rc;
+	પાછા rc;
 }
 
-void ul_pty_wait_for_child(struct ul_pty *pty)
+શૂન્ય ul_pty_wait_for_child(સંરચના ul_pty *pty)
 {
-	int status;
+	પૂર્ણાંક status;
 	pid_t pid;
-	int options = 0;
+	પૂર્ણાંક options = 0;
 
-	if (pty->child == (pid_t) -1)
-		return;
+	જો (pty->child == (pid_t) -1)
+		પાછા;
 
-	DBG(SIG, ul_debug("waiting for child [child=%d]", (int) pty->child));
+	DBG(SIG, ul_debug("waiting for child [child=%d]", (પૂર્ણાંક) pty->child));
 
-	if (ul_pty_is_running(pty)) {
+	જો (ul_pty_is_running(pty)) {
 		/* wait for specific child */
 		options = WNOHANG;
-		for (;;) {
+		માટે (;;) {
 			pid = waitpid(pty->child, &status, options);
-			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (int) pid));
-			if (pid != (pid_t) - 1) {
-				if (pty->callbacks.child_die)
+			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (પૂર્ણાંક) pid));
+			જો (pid != (pid_t) - 1) {
+				જો (pty->callbacks.child_die)
 					pty->callbacks.child_die(
 							pty->callback_data,
 							pty->child, status);
 				ul_pty_set_child(pty, (pid_t) -1);
-			} else
-				break;
+			} નહીંતર
+				તોડો;
 		}
-	} else {
+	} નહીંતર {
 		/* final wait */
-		while ((pid = waitpid(-1, &status, options)) > 0) {
-			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (int) pid));
-			if (pid == pty->child) {
-				if (pty->callbacks.child_die)
+		જ્યારે ((pid = waitpid(-1, &status, options)) > 0) {
+			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (પૂર્ણાંક) pid));
+			જો (pid == pty->child) {
+				જો (pty->callbacks.child_die)
 					pty->callbacks.child_die(
 							pty->callback_data,
 							pty->child, status);
@@ -545,143 +545,143 @@ void ul_pty_wait_for_child(struct ul_pty *pty)
 	}
 }
 
-static int handle_signal(struct ul_pty *pty, int fd)
+સ્થિર પૂર્ણાંક handle_signal(સંરચના ul_pty *pty, પૂર્ણાંક fd)
 {
-	struct signalfd_siginfo info;
+	સંરચના signalfd_siginfo info;
 	ssize_t bytes;
-	int rc = 0;
+	પૂર્ણાંક rc = 0;
 
 	DBG_OBJ(SIG, pty, ul_debug(" handle signal on fd=%d", fd));
 
-	bytes = read(fd, &info, sizeof(info));
-	if (bytes != sizeof(info)) {
-		if (bytes < 0 && (errno == EAGAIN || errno == EINTR))
-			return 0;
-		return -errno;
+	bytes = પઠ(fd, &info, કદ(info));
+	જો (bytes != કદ(info)) {
+		જો (bytes < 0 && (errno == EAGAIN || errno == EINTR))
+			પાછા 0;
+		પાછા -errno;
 	}
 
-	switch (info.ssi_signo) {
-	case SIGCHLD:
+	પસંદગી (info.ssi_signo) {
+	સ્થિતિ SIGCHLD:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGCHLD"));
 
-		if (info.ssi_code == CLD_EXITED
+		જો (info.ssi_code == CLD_EXITED
 		    || info.ssi_code == CLD_KILLED
 		    || info.ssi_code == CLD_DUMPED) {
 
-			if (pty->callbacks.child_wait)
+			જો (pty->callbacks.child_wait)
 				pty->callbacks.child_wait(pty->callback_data,
 							  pty->child);
-			else
+			નહીંતર
 				ul_pty_wait_for_child(pty);
 
-		} else if (info.ssi_status == SIGSTOP && pty->child > 0) {
+		} નહીંતર જો (info.ssi_status == SIGSTOP && pty->child > 0) {
 			pty->callbacks.child_sigstop(pty->callback_data,
 						     pty->child);
 		}
 
-		if (pty->child <= 0) {
+		જો (pty->child <= 0) {
 			DBG_OBJ(SIG, pty, ul_debug(" no child, setting leaving timeout"));
 			pty->poll_timeout = 10;
 			timerclear(&pty->next_callback_time);
 		}
-		return 0;
-	case SIGWINCH:
+		પાછા 0;
+	સ્થિતિ SIGWINCH:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGWINCH"));
-		if (pty->isterm) {
-			ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&pty->win);
-			ioctl(pty->slave, TIOCSWINSZ, (char *)&pty->win);
+		જો (pty->isterm) {
+			ioctl(STDIN_FILENO, TIOCGWINSZ, (અક્ષર *)&pty->win);
+			ioctl(pty->slave, TIOCSWINSZ, (અક્ષર *)&pty->win);
 
-			if (pty->callbacks.log_signal)
+			જો (pty->callbacks.log_signal)
 				rc = pty->callbacks.log_signal(pty->callback_data,
-							&info, (void *) &pty->win);
+							&info, (શૂન્ય *) &pty->win);
 		}
-		break;
-	case SIGALRM:
+		તોડો;
+	સ્થિતિ SIGALRM:
 		FALLTHROUGH;
-	case SIGHUP:
+	સ્થિતિ SIGHUP:
 		FALLTHROUGH;
-	case SIGTERM:
+	સ્થિતિ SIGTERM:
 		FALLTHROUGH;
-	case SIGINT:
+	સ્થિતિ SIGINT:
 		FALLTHROUGH;
-	case SIGQUIT:
+	સ્થિતિ SIGQUIT:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIG{ALRM,HUP,TERM,INT,QUIT}"));
 		pty->delivered_signal = info.ssi_signo;
 		/* Child termination is going to generate SIGCHLD (see above) */
-		if (pty->child > 0)
+		જો (pty->child > 0)
 			kill(pty->child, SIGTERM);
 
-		if (pty->callbacks.log_signal)
+		જો (pty->callbacks.log_signal)
 			rc = pty->callbacks.log_signal(pty->callback_data,
-					&info, (void *) &pty->win);
-		break;
-	case SIGUSR1:
+					&info, (શૂન્ય *) &pty->win);
+		તોડો;
+	સ્થિતિ SIGUSR1:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGUSR1"));
-		if (pty->callbacks.flush_logs)
+		જો (pty->callbacks.flush_logs)
 			rc = pty->callbacks.flush_logs(pty->callback_data);
-		break;
-	default:
+		તોડો;
+	મૂળભૂત:
 		abort();
 	}
 
-	return rc;
+	પાછા rc;
 }
 
 /* loop in parent */
-int ul_pty_proxy_master(struct ul_pty *pty)
+પૂર્ણાંક ul_pty_proxy_master(સંરચના ul_pty *pty)
 {
-	int rc = 0, ret, eof = 0;
-	enum {
+	પૂર્ણાંક rc = 0, ret, eof = 0;
+	ગણના {
 		POLLFD_SIGNAL = 0,
 		POLLFD_MASTER,
 		POLLFD_STDIN
 
 	};
-	struct pollfd pfd[] = {
+	સંરચના pollfd pfd[] = {
 		[POLLFD_SIGNAL] = { .fd = -1,		.events = POLLIN | POLLERR | POLLHUP },
 		[POLLFD_MASTER] = { .fd = pty->master,  .events = POLLIN | POLLERR | POLLHUP },
 		[POLLFD_STDIN]	= { .fd = STDIN_FILENO, .events = POLLIN | POLLERR | POLLHUP }
 	};
 
 	/* We use signalfd, and standard signals by handlers are completely blocked */
-	assert(pty->sigfd >= 0);
+	પ્રતિજ્ઞા(pty->sigfd >= 0);
 
 	pfd[POLLFD_SIGNAL].fd = pty->sigfd;
 	pty->poll_timeout = -1;
 
-	while (!pty->delivered_signal) {
+	જ્યારે (!pty->delivered_signal) {
 		size_t i;
-		int errsv, timeout;
+		પૂર્ણાંક errsv, timeout;
 
 		DBG_OBJ(IO, pty, ul_debug("--poll() loop--"));
 
 		/* note, callback usually updates @next_callback_time */
-		if (timerisset(&pty->next_callback_time)) {
-			struct timeval now = { 0 };
+		જો (timerisset(&pty->next_callback_time)) {
+			સંરચના timeval now = { 0 };
 
 			DBG_OBJ(IO, pty, ul_debug(" callback requested"));
 			gettime_monotonic(&now);
-			if (timercmp(&now, &pty->next_callback_time, >)) {
+			જો (timercmp(&now, &pty->next_callback_time, >)) {
 				rc = mainloop_callback(pty);
-				if (rc)
-					break;
+				જો (rc)
+					તોડો;
 			}
 		}
 
 		/* set timeout */
-		if (timerisset(&pty->next_callback_time)) {
-			struct timeval now = { 0 }, rest = { 0 };
+		જો (timerisset(&pty->next_callback_time)) {
+			સંરચના timeval now = { 0 }, rest = { 0 };
 
 			gettime_monotonic(&now);
 			timersub(&pty->next_callback_time, &now, &rest);
 			timeout = (rest.tv_sec * MSEC_PER_SEC) +  (rest.tv_usec / USEC_PER_MSEC);
-		} else
+		} નહીંતર
 			timeout = pty->poll_timeout;
 
 		/* use POLLOUT (aka "writing is now possible") if data queued */
-		if (pty->child_buffer_head)
+		જો (pty->child_buffer_head)
 			pfd[POLLFD_MASTER].events |= POLLOUT;
-		else
+		નહીંતર
 			pfd[POLLFD_MASTER].events &= ~POLLOUT;
 
 		/* wait for input, signal or timeout */
@@ -692,30 +692,30 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 		DBG_OBJ(IO, pty, ul_debug("poll() rc=%d", ret));
 
 		/* error */
-		if (ret < 0) {
-			if (errsv == EAGAIN)
-				continue;
+		જો (ret < 0) {
+			જો (errsv == EAGAIN)
+				ચાલુ;
 			rc = -errno;
-			break;
+			તોડો;
 		}
 
 		/* timeout */
-		if (ret == 0) {
-			if (timerisset(&pty->next_callback_time)) {
+		જો (ret == 0) {
+			જો (timerisset(&pty->next_callback_time)) {
 				rc = mainloop_callback(pty);
-				if (rc == 0)
-					continue;
-			} else {
+				જો (rc == 0)
+					ચાલુ;
+			} નહીંતર {
 				rc = 0;
 			}
 
 			DBG_OBJ(IO, pty, ul_debug("leaving poll() loop [timeout=%d, rc=%d]", timeout, rc));
-			break;
+			તોડો;
 		}
 		/* event */
-		for (i = 0; i < ARRAY_SIZE(pfd); i++) {
-			if (pfd[i].revents == 0)
-				continue;
+		માટે (i = 0; i < ARRAY_SIZE(pfd); i++) {
+			જો (pfd[i].revents == 0)
+				ચાલુ;
 
 			DBG_OBJ(IO, pty, ul_debug(" active pfd[%s].fd=%d %s %s %s %s %s",
 						i == POLLFD_STDIN  ? "stdin" :
@@ -728,26 +728,26 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 						pfd[i].revents & POLLERR ? "POLLERR" : "",
 						pfd[i].revents & POLLNVAL ? "POLLNVAL" : ""));
 
-			if (i == POLLFD_SIGNAL)
+			જો (i == POLLFD_SIGNAL)
 				rc = handle_signal(pty, pfd[i].fd);
-			else {
-				if (pfd[i].revents & POLLIN)
+			નહીંતર {
+				જો (pfd[i].revents & POLLIN)
 					rc = handle_io(pty, pfd[i].fd, &eof); /* data */
-				if (pfd[i].revents & POLLOUT) /* i == POLLFD_MASTER */
-					rc = flush_child_buffers(pty, NULL);
+				જો (pfd[i].revents & POLLOUT) /* i == POLLFD_MASTER */
+					rc = flush_child_buffers(pty, ખાલી);
 			}
 
-			if (rc) {
-				int anything = 1;
+			જો (rc) {
+				પૂર્ણાંક anything = 1;
 
 				ul_pty_write_eof_to_child(pty);
-				for (anything = 1; anything;)
+				માટે (anything = 1; anything;)
 					flush_child_buffers(pty, &anything);
-				break;
+				તોડો;
 			}
 
-			if (i == POLLFD_SIGNAL)
-				continue;
+			જો (i == POLLFD_SIGNAL)
+				ચાલુ;
 
 			/* EOF maybe detected in two ways; they are as follows:
 			 *	A) poll() return POLLHUP event after close()
@@ -755,20 +755,20 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 			 *
 			 * POLLNVAL means that fd is closed.
 			 */
-			if ((pfd[i].revents & POLLHUP) || (pfd[i].revents & POLLNVAL) || eof) {
+			જો ((pfd[i].revents & POLLHUP) || (pfd[i].revents & POLLNVAL) || eof) {
 				DBG_OBJ(IO, pty, ul_debug(" ignore FD"));
-				if (i == POLLFD_STDIN) {
+				જો (i == POLLFD_STDIN) {
 					pfd[i].fd = -1;
 					ul_pty_write_eof_to_child(pty);
-				} else /* i == POLLFD_MASTER */
+				} નહીંતર /* i == POLLFD_MASTER */
 					pfd[i].revents &= ~POLLIN;
 			}
 		}
-		if (rc)
-			break;
+		જો (rc)
+			તોડો;
 	}
 
-	if (rc && pty->child && pty->child != (pid_t) -1 && !pty->delivered_signal) {
+	જો (rc && pty->child && pty->child != (pid_t) -1 && !pty->delivered_signal) {
 		kill(pty->child, SIGTERM);
 		sleep(2);
 		kill(pty->child, SIGKILL);
@@ -777,7 +777,7 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 	pty_signals_cleanup(pty);
 
 	DBG(IO, ul_debug("poll() done [signal=%d, rc=%d]", pty->delivered_signal, rc));
-	return rc;
+	પાછા rc;
 }
 
 #ifdef TEST_PROGRAM_PTY
@@ -787,67 +787,67 @@ int ul_pty_proxy_master(struct ul_pty *pty)
  *
  * ... and see for example tty(1) or "ps afu"
  */
-static void child_sigstop(void *data __attribute__((__unused__)), pid_t child)
+સ્થિર શૂન્ય child_sigstop(શૂન્ય *data __attribute__((__unused__)), pid_t child)
 {
 	kill(getpid(), SIGSTOP);
 	kill(child, SIGCONT);
 }
 
-int main(int argc, char *argv[])
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	struct ul_pty_callbacks *cb;
-	const char *shell, *command = NULL, *shname = NULL;
-	int caught_signal = 0;
+	સંરચના ul_pty_callbacks *cb;
+	અચલ અક્ષર *shell, *command = ખાલી, *shname = ખાલી;
+	પૂર્ણાંક caught_signal = 0;
 	pid_t child;
-	struct ul_pty *pty;
+	સંરચના ul_pty *pty;
 
 	shell = getenv("SHELL");
-	if (shell == NULL)
+	જો (shell == ખાલી)
 		shell = _PATH_BSHELL;
-	if (argc == 2)
+	જો (argc == 2)
 		command = argv[1];
 
 	ul_pty_init_debug(0);
 
 	pty = ul_new_pty(isatty(STDIN_FILENO));
-	if (!pty)
+	જો (!pty)
 		err(EXIT_FAILURE, "failed to allocate PTY handler");
 
 	cb = ul_pty_get_callbacks(pty);
 	cb->child_sigstop = child_sigstop;
 
-	if (ul_pty_setup(pty))
+	જો (ul_pty_setup(pty))
 		err(EXIT_FAILURE, "failed to create pseudo-terminal");
-	if (ul_pty_signals_setup(pty))
+	જો (ul_pty_signals_setup(pty))
 		err(EXIT_FAILURE, "failed to initialize signals handler");
-	if (ul_pty_terminal_setup(pty))
+	જો (ul_pty_terminal_setup(pty))
 		err(EXIT_FAILURE, "failed to setup terminal");
 
 	fflush(stdout);			/* ??? */
 
-	switch ((int) (child = fork())) {
-	case -1: /* error */
+	પસંદગી ((પૂર્ણાંક) (child = fork())) {
+	સ્થિતિ -1: /* error */
 		ul_pty_cleanup(pty);
 		err(EXIT_FAILURE, "cannot create child process");
-		break;
+		તોડો;
 
-	case 0: /* child */
+	સ્થિતિ 0: /* child */
 		ul_pty_init_slave(pty);
 
-		signal(SIGTERM, SIG_DFL); /* because /etc/csh.login */
+		સંકેત(SIGTERM, SIG_DFL); /* because /etc/csh.login */
 
 		shname = strrchr(shell, '/');
 		shname = shname ? shname + 1 : shell;
 
-		if (command)
-			execl(shell, shname, "-c", command, (char *)NULL);
-		else
-			execl(shell, shname, "-i", (char *)NULL);
+		જો (command)
+			execl(shell, shname, "-c", command, (અક્ષર *)ખાલી);
+		નહીંતર
+			execl(shell, shname, "-i", (અક્ષર *)ખાલી);
 		err(EXIT_FAILURE, "failed to execute %s", shell);
-		break;
+		તોડો;
 
-	default:
-		break;
+	મૂળભૂત:
+		તોડો;
 	}
 
 	/* parent */
@@ -859,10 +859,10 @@ int main(int argc, char *argv[])
 	/* all done; cleanup and kill */
 	caught_signal = ul_pty_get_delivered_signal(pty);
 
-	if (!caught_signal && ul_pty_get_child(pty) != (pid_t)-1)
+	જો (!caught_signal && ul_pty_get_child(pty) != (pid_t)-1)
 		ul_pty_wait_for_child(pty);	/* final wait */
 
-	if (caught_signal && ul_pty_get_child(pty) != (pid_t)-1) {
+	જો (caught_signal && ul_pty_get_child(pty) != (pid_t)-1) {
 		fprintf(stderr, "\nSession terminated, killing shell...");
 		kill(child, SIGTERM);
 		sleep(2);
@@ -872,7 +872,7 @@ int main(int argc, char *argv[])
 
 	ul_pty_cleanup(pty);
 	ul_free_pty(pty);
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM */

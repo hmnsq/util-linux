@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <inttypes.h>
+#અન્તર્ભાવ <ctype.h>
+#અન્તર્ભાવ <errno.h>
+#અન્તર્ભાવ <sys/stat.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <strings.h>
+#અન્તર્ભાવ <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#અન્તર્ભાવ "c.h"
+#અન્તર્ભાવ "cctype.h"
+#અન્તર્ભાવ "nls.h"
+#અન્તર્ભાવ "strutils.h"
+#અન્તર્ભાવ "timeutils.h"
+#અન્તર્ભાવ "bitops.h"
+#અન્તર્ભાવ "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+સ્થિર પૂર્ણાંક STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+શૂન્ય strutils_set_exitcode(પૂર્ણાંક ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+સ્થિર પૂર્ણાંક do_scale_by_power (uintmax_t *x, પૂર્ણાંક base, પૂર્ણાંક power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	જ્યારે (power--) {
+		જો (UINTMAX_MAX / base < *x)
+			પાછા -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+પૂર્ણાંક ul_parse_size(અચલ અક્ષર *str, uintmax_t *res, પૂર્ણાંક *power)
 {
-	const char *p;
-	char *end;
+	અચલ અક્ષર *p;
+	અક્ષર *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	પૂર્ણાંક base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	સ્થિર અચલ અક્ષર *suf  = "KMGTPEZY";
+	સ્થિર અચલ અક્ષર *suf2 = "kmgtpezy";
+	અચલ અક્ષર *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	જો (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		જાઓ err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	જ્યારે (isspace((unsigned અક્ષર) *p))
 		p++;
-	if (*p == '-') {
+	જો (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		જાઓ err;
 	}
 
-	errno = 0, end = NULL;
+	errno = 0, end = ખાલી;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	જો (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		જાઓ err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
+	જો (!end || !*end)
+		જાઓ done;			/* without suffix */
 	p = end;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	જો (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	નહીંતર જો ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
+	નહીંતર જો (*(p + 1)) {
+		સંરચના lconv અચલ *l = localeconv();
+		અચલ અક્ષર *dp = l ? l->decimal_point : ખાલી;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		જો (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+			અચલ અક્ષર *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			માટે (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
+			જો (isdigit(*fstr)) {
+				errno = 0, end = ખાલી;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				જો (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					જાઓ err;
 				}
-			} else
-				end = (char *) p;
+			} નહીંતર
+				end = (અક્ષર *) p;
 
-			if (!end || !*end) {
+			જો (!end || !*end) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				જાઓ err;	/* without suffix, but with fractions */
 			}
 			p = end;
-			goto check_suffix;
+			જાઓ check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		જાઓ err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	જો (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	નહીંતર {
 		sp = strchr(suf2, *p);
-		if (sp)
+		જો (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		નહીંતર {
 			rc = -EINVAL;
-			goto err;
+			જાઓ err;
 		}
 	}
 
-	if (power)
+	જો (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	જો (rc)
+		જાઓ err;
 
-	if (frac && pwr) {
-		int i;
+	જો (frac && pwr) {
+		પૂર્ણાંક i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		જો (rc)
+			જાઓ err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
+		કરો {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} જ્યારે (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		માટે (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		જો (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			જાઓ err;
 		}
 		x += frac_val;
 	}
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	જો (rc < 0)
 		errno = -rc;
-	return rc;
+	પાછા rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+પૂર્ણાંક strtosize(અચલ અક્ષર *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	પાછા ul_parse_size(str, res, ખાલી);
 }
 
-int isdigit_strend(const char *str, const char **end)
+પૂર્ણાંક isdigit_strend(અચલ અક્ષર *str, અચલ અક્ષર **end)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	માટે (p = str; p && *p && isdigit((unsigned અક્ષર) *p); p++);
 
-	if (end)
+	જો (end)
 		*end = p;
-	return p && p > str && !*p;
+	પાછા p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+પૂર્ણાંક isxdigit_strend(અચલ અક્ષર *str, અચલ અક્ષર **end)
 {
-	const char *p;
+	અચલ અક્ષર *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	માટે (p = str; p && *p && isxdigit((unsigned અક્ષર) *p); p++);
 
-	if (end)
+	જો (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	પાછા p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+પૂર્ણાંક ul_strtobool(અચલ અક્ષર *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	સ્થિર અચલ અક્ષર *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	સ્થિર અચલ અક્ષર *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	જો (!str || !result)
+		પાછા -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	માટે (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		જો (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			પાછા 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	માટે (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		જો (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			પાછા 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	પાછા -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+પૂર્ણાંક ul_parse_switch(અચલ અક્ષર *arg, ...)
 {
-	const char *a, *b;
+	અચલ અક્ષર *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	કરો {
+		a = va_arg(ap, અક્ષર *);
+		જો (!a)
+			તોડો;
+		b = va_arg(ap, અક્ષર *);
+		જો (!b)
+			તોડો;
 
-		if (strcmp(arg, a) == 0) {
+		જો (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			પાછા 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		જો (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			પાછા 0;
 		}
-	} while (1);
+	} જ્યારે (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
 }
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+શૂન્ય *mempcpy(શૂન્ય *restrict dest, અચલ શૂન્ય *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	પાછા ((અક્ષર *)memcpy(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+size_t strnlen(અચલ અક્ષર *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	માટે (i = 0; i < maxlen; i++) {
+		જો (s[i] == '\0')
+			પાછા i;
 	}
-	return maxlen;
+	પાછા maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+અક્ષર *strnchr(અચલ અક્ષર *s, size_t maxlen, પૂર્ણાંક c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	માટે (; maxlen-- && *s != '\0'; ++s)
+		જો (*s == (અક્ષર)c)
+			પાછા (અક્ષર *)s;
+	પાછા ખાલી;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+અક્ષર *strndup(અચલ અક્ષર *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	અક્ષર *new = malloc((len + 1) * કદ(અક્ષર));
+	જો (!new)
+		પાછા ખાલી;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	પાછા (અક્ષર *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+પૂર્ણાંક ul_strtos64(અચલ અક્ષર *str, int64_t *અંક, પૂર્ણાંક base)
 {
-	char *end = NULL;
+	અક્ષર *end = ખાલી;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	જો (str == ખાલી || *str == '\0')
+		પાછા -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*અંક = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	જો (errno != 0)
+		પાછા -errno;
+	જો (str == end || (end && *end))
+		પાછા -(errno = EINVAL);
+	પાછા 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+પૂર્ણાંક ul_strtou64(અચલ અક્ષર *str, uint64_t *અંક, પૂર્ણાંક base)
 {
-	char *end = NULL;
+	અક્ષર *end = ખાલી;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	જો (str == ખાલી || *str == '\0')
+		પાછા -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	જો (tmp < 0)
 		errno = ERANGE;
-	else {
+	નહીંતર {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*અંક = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	જો (errno != 0)
+		પાછા -errno;
+	જો (str == end || (end && *end))
+		પાછા -(errno = EINVAL);
+	પાછા 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+પૂર્ણાંક ul_strtos32(અચલ અક્ષર *str, int32_t *અંક, પૂર્ણાંક base)
 {
 	int64_t tmp;
-	int rc;
+	પૂર્ણાંક rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	જો (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	જો (rc == 0)
+		*અંક = (int32_t) tmp;
+	પાછા rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+પૂર્ણાંક ul_strtou32(અચલ અક્ષર *str, uint32_t *અંક, પૂર્ણાંક base)
 {
 	uint64_t tmp;
-	int rc;
+	પૂર્ણાંક rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	જો (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	જો (rc == 0)
+		*અંક = (uint32_t) tmp;
+	પાછા rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+પૂર્ણાંક ul_strtou16(અચલ અક્ષર *str, uint16_t *અંક, પૂર્ણાંક base)
 {
 	uint64_t tmp;
-	int rc;
+	પૂર્ણાંક rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	જો (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	જો (rc == 0)
+		*અંક = (uint16_t) tmp;
+	પાછા rc;
 }
 
 /*
@@ -432,154 +432,154 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(અચલ અક્ષર *str, પૂર્ણાંક base, અચલ અક્ષર *errmesg,
+			     int64_t નીચલું, int64_t up)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t અંક = 0;
+	પૂર્ણાંક rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &અંક, base);
+	જો (rc == 0 && ((નીચલું && અંક < નીચલું) || (up && અંક > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	જો (rc) {
+		જો (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	પાછા અંક;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(અચલ અક્ષર *str, પૂર્ણાંક base, અચલ અક્ષર *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t અંક = 0;
+	પૂર્ણાંક rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &અંક, base);
+	જો (rc == 0 && (up && અંક > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	જો (rc) {
+		જો (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	પાછા અંક;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+દ્વિગુણ strtod_or_err(અચલ અક્ષર *str, અચલ અક્ષર *errmesg)
 {
-	double num;
-	char *end = NULL;
+	દ્વિગુણ અંક;
+	અક્ષર *end = ખાલી;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	જો (str == ખાલી || *str == '\0')
+		જાઓ err;
+	અંક = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	જો (errno || str == end || (end && *end))
+		જાઓ err;
 
-	return num;
+	પાછા અંક;
 err:
-	if (errno == ERANGE)
+	જો (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+પૂર્ણાંક ul_strtold(અચલ અક્ષર *str, long દ્વિગુણ *અંક)
 {
-	char *end = NULL;
+	અક્ષર *end = ખાલી;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	જો (str == ખાલી || *str == '\0')
+		પાછા -(errno = EINVAL);
+	*અંક = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	જો (errno != 0)
+		પાછા -errno;
+	જો (str == end || (end && *end))
+		પાછા -(errno = EINVAL);
+	પાછા 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+long દ્વિગુણ strtold_or_err(અચલ અક્ષર *str, અચલ અક્ષર *errmesg)
 {
-	long double num = 0;
+	long દ્વિગુણ અંક = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	જો (ul_strtold(str, &અંક) == 0)
+		પાછા અંક;
+	જો (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(અચલ અક્ષર *str, અચલ અક્ષર *errmesg)
 {
-	uintmax_t num;
+	uintmax_t અંક;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	જો (strtosize(str, &અંક) == 0)
+		પાછા અંક;
 
-	if (errno)
+	જો (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+શૂન્ય strtotimeval_or_err(અચલ અક્ષર *str, સંરચના timeval *tv, અચલ અક્ષર *errmesg)
 {
-	long double user_input;
+	long દ્વિગુણ user_આગત;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_આગત = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_આગત;
+	tv->tv_usec = (suseconds_t)((user_આગત - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+શૂન્ય strtotimespec_or_err(અચલ અક્ષર *str, સંરચના timespec *ts, અચલ અક્ષર *errmesg)
 {
-	long double user_input;
+	long દ્વિગુણ user_આગત;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_આગત = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_આગત;
+	ts->tv_nsec = (long)((user_આગત - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(અચલ અક્ષર *str, અચલ અક્ષર *errmesg)
 {
-	int64_t user_input;
+	int64_t user_આગત;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_આગત = strtos64_or_err(str, errmesg);
+	પાછા (time_t) user_આગત;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(અચલ અક્ષર *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	જો (mode && strcmp(mode, "never") == 0)
+		પાછા false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	જો (mode && strcmp(mode, "always") == 0)
+		પાછા true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	જો (!mode || strcmp(mode, "auto") == 0)
+		પાછા isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(અચલ અક્ષર *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	જો (mode && strcmp(mode, "never") == 0)
+		પાછા false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	જો (mode && strcmp(mode, "always") == 0)
+		પાછા true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	જો (!mode || strcmp(mode, "auto") == 0)
+		પાછા isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -588,23 +588,23 @@ bool annotationwanted(const char *mode)
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+અક્ષર *xstrmode(mode_t mode, અક્ષર *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	જો (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	નહીંતર જો (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	નહીંતર જો (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	નહીંતર જો (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	નહીંતર જો (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	નહીંતર જો (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	નહીંતર જો (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	પાછા str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+સ્થિર પૂર્ણાંક get_exp(uint64_t n)
 {
-	int shft;
+	પૂર્ણાંક shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	માટે (shft = 10; shft <= 60; shft += 10) {
+		જો (n < (1ULL << shft))
+			તોડો;
 	}
-	return shft - 10;
+	પાછા shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+અક્ષર *size_to_human_string(પૂર્ણાંક options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	અક્ષર buf[32];
+	પૂર્ણાંક dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	અચલ અક્ષર *letters = "BKMGTPE";
+	અક્ષર suffix[કદ(" KiB")], *psuf = suffix;
+	અક્ષર c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	જો (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	જો ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	જો (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		જો (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		નહીંતર
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		જો (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} નહીંતર {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		જો (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	જો (frac) {
+		સંરચના lconv અચલ *l = localeconv();
+		અક્ષર *dp = l ? l->decimal_point : ખાલી;
+		પૂર્ણાંક len;
 
-		if (!dp || !*dp)
+		જો (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, કદ(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		જો (len > 0 && (size_t) len < કદ(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			જો (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, કદ(buf) - len);
+		} નહીંતર
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} નહીંતર
+		snprintf(buf, કદ(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	પાછા strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+પૂર્ણાંક string_to_idarray(અચલ અક્ષર *list, પૂર્ણાંક ary[], size_t arysz,
+			પૂર્ણાંક (name2id)(અચલ અક્ષર *, size_t))
 {
-	const char *begin = NULL, *p;
+	અચલ અક્ષર *begin = ખાલી, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	જો (!list || !*list || !ary || !arysz || !name2id)
+		પાછા -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	માટે (p = list; p && *p; p++) {
+		અચલ અક્ષર *end = ખાલી;
+		પૂર્ણાંક id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		જો (n >= arysz)
+			પાછા -2;
+		જો (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		જો (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		જો (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		જો (!begin || !end)
+			ચાલુ;
+		જો (end <= begin)
+			પાછા -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		જો (id == -1)
+			પાછા -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ખાલી;
+		જો (end && !*end)
+			તોડો;
 	}
-	return n;
+	પાછા n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+પૂર્ણાંક string_add_to_idarray(અચલ અક્ષર *list, પૂર્ણાંક ary[], size_t arysz,
+			size_t *ary_pos, પૂર્ણાંક (name2id)(અચલ અક્ષર *, size_t))
 {
-	const char *list_add;
-	int r;
+	અચલ અક્ષર *list_add;
+	પૂર્ણાંક r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	જો (!list || !*list || !ary_pos || *ary_pos > arysz)
+		પાછા -1;
 
-	if (list[0] == '+')
+	જો (list[0] == '+')
 		list_add = &list[1];
-	else {
+	નહીંતર {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	જો (r > 0)
 		*ary_pos += r;
-	return r;
+	પાછા r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+પૂર્ણાંક string_to_bitarray(અચલ અક્ષર *list,
+		     અક્ષર *ary,
+		     પૂર્ણાંક (*name2bit)(અચલ અક્ષર *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	અચલ અક્ષર *begin = ખાલી, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	જો (!list || !name2bit || !ary)
+		પાછા -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	માટે (p = list; p && *p; p++) {
+		અચલ અક્ષર *end = ખાલી;
+		પૂર્ણાંક bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		જો (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		જો (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		જો (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		જો (!begin || !end)
+			ચાલુ;
+		જો (end <= begin)
+			પાછા -1;
+		જો (allow_range) {
+			જો (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} નહીંતર જો (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		જો (bit < 0)
+			પાછા bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		જો (set_lower)
+			જ્યારે (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		નહીંતર જો (set_higher)
+			જ્યારે (++bit < (પૂર્ણાંક) allow_range)
 				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ખાલી;
+		જો (end && !*end)
+			તોડો;
 	}
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+પૂર્ણાંક string_to_bitmask(અચલ અક્ષર *list,
 		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+		     long (*name2flag)(અચલ અક્ષર *, size_t))
 {
-	const char *begin = NULL, *p;
+	અચલ અક્ષર *begin = ખાલી, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	જો (!list || !name2flag || !mask)
+		પાછા -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
+	માટે (p = list; p && *p; p++) {
+		અચલ અક્ષર *end = ખાલી;
 		long flag;
 
-		if (!begin)
+		જો (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		જો (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		જો (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		જો (!begin || !end)
+			ચાલુ;
+		જો (end <= begin)
+			પાછા -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		જો (flag < 0)
+			પાછા flag;	/* error */
 		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ખાલી;
+		જો (end && !*end)
+			તોડો;
 	}
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+પૂર્ણાંક ul_parse_range(અચલ અક્ષર *str, પૂર્ણાંક *lower, પૂર્ણાંક *upper, પૂર્ણાંક def)
 {
-	char *end = NULL;
+	અક્ષર *end = ખાલી;
 
-	if (!str)
-		return 0;
+	જો (!str)
+		પાછા 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	જો (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		જો (errno || !end || *end || end == str)
+			પાછા -1;
+	} નહીંતર {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		જો (errno || !end || end == str)
+			પાછા -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		જો (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		નહીંતર જો (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
-			end = NULL;
+			end = ખાલી;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			જો (errno || !end || *end || end == str)
+				પાછા -1;
 		}
 	}
-	return 0;
+	પાછા 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+અચલ અક્ષર *ul_path_next_segment(અચલ અક્ષર *str, size_t *sz)
 {
-	const char *start, *p;
+	અચલ અક્ષર *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	જ્યારે (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	જો (!start || !*start)
+		પાછા ખાલી;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	માટે (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	પાછા start;
 }
 
-int streq_paths(const char *a, const char *b)
+પૂર્ણાંક streq_paths(અચલ અક્ષર *a, અચલ અક્ષર *b)
 {
-	while (a && b) {
+	જ્યારે (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		અચલ અક્ષર *a_seg = ul_path_next_segment(a, &a_sz);
+		અચલ અક્ષર *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		જો (a_sz + b_sz == 0)
+			પાછા 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		જો (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			પાછા 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		જો (!a_seg || !b_seg)
+			તોડો;
+		જો (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+			તોડો;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	પાછા 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+પૂર્ણાંક ul_path_is_within(અચલ અક્ષર *path, અચલ અક્ષર *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	જો (!path || !dir || !*path || !*dir)
+		પાછા 0;
 
-	while (path && dir) {
+	જ્યારે (path && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		અચલ અક્ષર *p_seg = ul_path_next_segment(path, &p_sz);
+		અચલ અક્ષર *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		જો (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			પાછા 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		જો (!p_seg || !d_seg)
+			તોડો;
+		જો (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+			તોડો;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	પાછા 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+અક્ષર *ul_strnconcat(અચલ અક્ષર *s, અચલ અક્ષર *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	અક્ષર *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	જો (!s && !suffix)
+		પાછા strdup("");
+	જો (!s)
+		પાછા strndup(suffix, b);
+	જો (!suffix)
+		પાછા strdup(s);
 
-	assert(s);
-	assert(suffix);
+	પ્રતિજ્ઞા(s);
+	પ્રતિજ્ઞા(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	જો (b > ((size_t) -1) - a)
+		પાછા ખાલી;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	જો (!r)
+		પાછા ખાલી;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	પાછા r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+અક્ષર *ul_strconcat(અચલ અક્ષર *s, અચલ અક્ષર *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	પાછા ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+અક્ષર *ul_strfconcat(અચલ અક્ષર *s, અચલ અક્ષર *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	અક્ષર *val, *res;
+	પૂર્ણાંક sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	જો (sz < 0)
+		પાછા ખાલી;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	મુક્ત(val);
+	પાછા res;
 }
 
-int ul_strappend(char **a, const char *b)
+પૂર્ણાંક ul_strappend(અક્ષર **a, અચલ અક્ષર *b)
 {
 	size_t al, bl;
-	char *tmp;
+	અક્ષર *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	જો (!a)
+		પાછા -EINVAL;
+	જો (!b || !*b)
+		પાછા 0;
+	જો (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		પાછા !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	જો (!tmp)
+		પાછા -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	પાછા 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+પૂર્ણાંક strfappend(અક્ષર **a, અચલ અક્ષર *format, ...)
 {
 	va_list ap;
-	int res;
+	પૂર્ણાંક res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	પાછા res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+બાહ્ય પૂર્ણાંક ul_strvfappend(અક્ષર **a, અચલ અક્ષર *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	અક્ષર *val;
+	પૂર્ણાંક sz;
+	પૂર્ણાંક res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	જો (sz < 0)
+		પાછા -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	મુક્ત(val);
+	પાછા res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+સ્થિર size_t strcspn_escaped(અચલ અક્ષર *s, અચલ અક્ષર *reject)
 {
-	int escaped = 0;
-	int n;
+	પૂર્ણાંક escaped = 0;
+	પૂર્ણાંક n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	માટે (n=0; s[n]; n++) {
+		જો (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		નહીંતર જો (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		નહીંતર જો (strchr(reject, s[n]))
+			તોડો;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	પાછા n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+અક્ષર *ul_strchr_escaped(અચલ અક્ષર *s, પૂર્ણાંક c)
 {
-	char *p;
-	int esc = 0;
+	અક્ષર *p;
+	પૂર્ણાંક esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	માટે (p = (અક્ષર *) s; p && *p; p++) {
+		જો (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			ચાલુ;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		જો (*p == c && (!esc || c == '\\'))
+			પાછા p;
 		esc = 0;
 	}
 
-	return NULL;
+	પાછા ખાલી;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+અચલ અક્ષર *ul_split(અચલ અક્ષર **state, size_t *l, અચલ અક્ષર *separator, પૂર્ણાંક quoted)
 {
-	const char *current;
+	અચલ અક્ષર *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	જો (!*current) {
+		પ્રતિજ્ઞા(**state == '\0');
+		પાછા ખાલી;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	જો (!*current) {
 		*state = current;
-		return NULL;
+		પાછા ખાલી;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	જો (quoted && strchr("\'\"", *current)) {
+		અક્ષર quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		જો (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			પાછા ખાલી;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} નહીંતર જો (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		જો (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			પાછા ખાલી;
 		}
 		*state = current + *l;
-	} else {
+	} નહીંતર {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	પાછા current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+પૂર્ણાંક skip_fline(FILE *fp)
 {
-	int ch;
+	પૂર્ણાંક ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	કરો {
+		જો ((ch = fgetc(fp)) == EOF)
+			પાછા 1;
+		જો (ch == '\n')
+			પાછા 0;
+	} જ્યારે (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+પૂર્ણાંક ul_stralnumcmp(અચલ અક્ષર *p1, અચલ અક્ષર *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	અચલ unsigned અક્ષર *s1 = (અચલ unsigned અક્ષર *) p1;
+	અચલ unsigned અક્ષર *s2 = (અચલ unsigned અક્ષર *) p2;
+	unsigned અક્ષર c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	કરો {
+		કરો {
+			c1 = (unsigned અક્ષર) *s1++;
+		} જ્યારે (c1 != '\0' && !isalnum((unsigned પૂર્ણાંક) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		કરો {
+			c2 = (unsigned અક્ષર) *s2++;
+		} જ્યારે (c2 != '\0' && !isalnum((unsigned પૂર્ણાંક) c2));
 
-		if (c1 != '\0')
+		જો (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		જો (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		જો (c1 == '\0')
+			પાછા c1 - c2;
+	} જ્યારે (c1 == c2);
 
-	return c1 - c2;
+	પાછા c1 - c2;
 }
 
 /*
@@ -1277,163 +1277,163 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+પૂર્ણાંક ul_optstr_next(અક્ષર **optstr, અક્ષર **name, size_t *namesz,
+		   અક્ષર **કિંમત, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	પૂર્ણાંક open_quote = 0;
+	અક્ષર *start = ખાલી, *stop = ખાલી, *p, *sep = ખાલી;
+	અક્ષર *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	પ્રતિજ્ઞા(optstr);
+	પ્રતિજ્ઞા(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	જો (name)
+		*name = ખાલી;
+	જો (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	જો (કિંમત)
+		*કિંમત = ખાલી;
+	જો (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	જ્યારે (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	માટે (p = optstr0; p && *p; p++) {
+		જો (!start && *p == '=')
+			પાછા -EINVAL;
+		જો (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		જો (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		જો (open_quote)
+			ચાલુ;		/* still in quoted block */
+		જો (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		જો (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		નહીંતર જો (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		જો (!start || !stop)
+			ચાલુ;
+		જો (stop <= start)
+			પાછા -EINVAL;
 
-		if (name)
+		જો (name)
 			*name = start;
-		if (namesz)
+		જો (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		જો (sep) {
+			જો (કિંમત)
+				*કિંમત = sep + 1;
+			જો (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		પાછા 0;
 	}
 
-	return 1;				/* end of optstr */
+	પાછા 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+પૂર્ણાંક ul_optstr_is_valid(અચલ અક્ષર *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	પૂર્ણાંક rc;
+	અક્ષર *p = (અક્ષર *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	જ્યારે ((rc = ul_optstr_next(&p, ખાલી, ખાલી, ખાલી, ખાલી)) == 0);
+	પાછા rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+અક્ષર *ul_optstr_get_કિંમત(અચલ અક્ષર *optstr, અચલ અક્ષર *ચાવી)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	અક્ષર *name = ખાલી, *કિંમત = ખાલી;
+	અક્ષર *p = (અક્ષર *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	જો (!optstr || !ચાવી || !*ચાવી)
+		પાછા ખાલી;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = strlen(ચાવી);
+	જ્યારે (ul_optstr_next(&p, &name, &namesz, &કિંમત, &valsz) == 0) {
+		જો (namesz != sz || !valsz)
+			ચાલુ;
+		જો (strncmp(name, ચાવી, namesz) == 0)
+			પાછા strndup(કિંમત, valsz);
 	}
-	return NULL;
+	પાછા ખાલી;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(અક્ષર *str)
 {
 	size_t len;
-	char q;
+	અક્ષર q;
 
-	if (!str || !*str)
-		return 0;
+	જો (!str || !*str)
+		પાછા 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	જો ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		પાછા len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	પાછા len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+સંરચના testS {
+	અક્ષર *name;
+	અક્ષર *કિંમત;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+સ્થિર પૂર્ણાંક test_strdup_to_member(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	struct testS *xx;
+	સંરચના testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	જો (argc < 3)
+		પાછા EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = calloc(1, કદ(*xx));
+	જો (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, કિંમત, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	જો (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->કિંમત, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	printf("1: '%s', 2: '%s'\n", xx->name, xx->કિંમત);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	મુક્ત(xx->name);
+	મુક્ત(xx->કિંમત);
+	મુક્ત(xx);
+	પાછા EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+સ્થિર પૂર્ણાંક test_strutils_sizes(પૂર્ણાંક argc, અક્ષર *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	અક્ષર *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	જો (argc < 2)
+		પાછા EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	જો (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1444,52 +1444,52 @@ static int test_strutils_sizes(int argc, char *argv[])
 				    SIZE_DECIMAL_2DIGITS, size);
 
 	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	મુક્ત(hum1);
+	મુક્ત(hum2);
+	મુક્ત(hum3);
 
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+સ્થિર પૂર્ણાંક test_strutils_cmp_paths(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	પૂર્ણાંક rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	જો (argc < 3)
+		પાછા EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+સ્થિર પૂર્ણાંક test_strutils_path_is_within(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	int rc;
+	પૂર્ણાંક rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	જો (argc < 3)
+		પાછા EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+સ્થિર પૂર્ણાંક test_strutils_normalize(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	unsigned char *src, *dst, *org;
+	unsigned અક્ષર *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	જો (argc < 2)
+		પાછા EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
+	org = (unsigned અક્ષર *) strdup(argv[1]);
+	src = (unsigned અક્ષર *) strdup((અક્ષર *) org);
+	len = strlen((અક્ષર *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	જો (!org || !src || !dst)
+		જાઓ done;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
@@ -1500,136 +1500,136 @@ static int test_strutils_normalize(int argc, char *argv[])
 	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
 done:
-	free(src);
-	free(dst);
-	free(org);
+	મુક્ત(src);
+	મુક્ત(dst);
+	મુક્ત(org);
 
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+સ્થિર પૂર્ણાંક test_strutils_cstrcasecmp(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	char *a, *b;
+	અક્ષર *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	જો (argc < 3)
+		પાછા EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	જો (!a || !b)
+		પાછા EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	પાછા EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	જો (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		પાછા test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						ખાલી));
+		પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		જો (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		પાછા EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} નહીંતર જો (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		પાછા test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} નહીંતર જો (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		પાછા test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} નહીંતર જો (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		પાછા test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} નહીંતર જો  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		પાછા EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} નહીંતર જો (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		પાછા test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		પાછા test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		પાછા EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} નહીંતર જો (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		પાછા EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} નહીંતર જો (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		અક્ષર *buf = "abc\0Y\0\0xyz\0X";
+		અક્ષર *end = buf + 12;
+		અક્ષર *p = buf;
 
-		do {
+		કરો {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} જ્યારે ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		પાછા EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		અક્ષર *name = ખાલી, *val = ખાલી;
+		અક્ષર *p = argv[2];
+		પૂર્ણાંક rc;
 
-		if (!ul_optstr_is_valid(p))
+		જો (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		જ્યારે ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (પૂર્ણાંક) namesz, name,
+						   (પૂર્ણાંક) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		જો (rc == 1)
+			પાછા EXIT_SUCCESS;
+	} નહીંતર જો (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		અક્ષર *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		જો (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		મુક્ત(unquoted);
+		પાછા EXIT_SUCCESS;
 
-	} else {
+	} નહીંતર {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	પાછા EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

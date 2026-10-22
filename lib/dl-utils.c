@@ -2,10 +2,10 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
-#include <errno.h>
+#અન્તર્ભાવ <dlfcn.h>
+#અન્તર્ભાવ <errno.h>
 
-#include "dl-utils.h"
+#અન્તર્ભાવ "dl-utils.h"
 
 /*
  * Open @libname with dlopen() and resolve all symbols listed in @syms
@@ -13,38 +13,38 @@
  * stored in *@dl_handle and 0 is returned.  On failure *@dl_handle is
  * set to NULL and a negative errno value is returned (usually -ENOTSUP).
  */
-int ul_dlopen_symbols(const char *libname, int flags,
-		      const struct ul_dlsym *syms, size_t nsyms,
-		      void *opers, void **dl_handle)
+પૂર્ણાંક ul_dlopen_symbols(અચલ અક્ષર *libname, પૂર્ણાંક flags,
+		      અચલ સંરચના ul_dlsym *syms, size_t nsyms,
+		      શૂન્ય *opers, શૂન્ય **dl_handle)
 {
 	size_t i;
 
 	errno = 0;
 
 	*dl_handle = dlopen(libname, flags);
-	if (!*dl_handle)
-		goto failed;
+	જો (!*dl_handle)
+		જાઓ failed;
 
 	dlerror();
 
-	for (i = 0; i < nsyms; i++) {
-		const struct ul_dlsym *def = &syms[i];
-		void **sym;
+	માટે (i = 0; i < nsyms; i++) {
+		અચલ સંરચના ul_dlsym *def = &syms[i];
+		શૂન્ય **sym;
 
-		sym = (void **) ((char *) opers + def->offset);
+		sym = (શૂન્ય **) ((અક્ષર *) opers + def->offset);
 		*sym = dlsym(*dl_handle, def->name);
 
-		if (dlerror())
-			goto failed;
+		જો (dlerror())
+			જાઓ failed;
 	}
 
-	return 0;
+	પાછા 0;
 failed:
-	if (*dl_handle) {
+	જો (*dl_handle) {
 		dlclose(*dl_handle);
-		*dl_handle = NULL;
+		*dl_handle = ખાલી;
 	}
-	if (!errno)
+	જો (!errno)
 		errno = ENOTSUP;
-	return -errno;
+	પાછા -errno;
 }

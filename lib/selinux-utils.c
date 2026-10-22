@@ -4,13 +4,13 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [January 2021]
  */
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <errno.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <errno.h>
 
-#include "dl-selinux.h"
-#include "selinux-utils.h"
+#અન્તર્ભાવ "dl-selinux.h"
+#અન્તર્ભાવ "selinux-utils.h"
 
 #ifdef HAVE_LIBSELINUX
 
@@ -19,48 +19,48 @@
  * returns 0 on success,
  *     or <0 on error
  */
-int ul_setfscreatecon_from_file(char *orig_file)
+પૂર્ણાંક ul_setfscreatecon_from_file(અક્ષર *orig_file)
 {
-	if (ul_dlopen_libselinux() == 0
+	જો (ul_dlopen_libselinux() == 0
 	    && selinux_call(is_selinux_enabled)() > 0) {
-		char *scontext = NULL;
+		અક્ષર *scontext = ખાલી;
 
-		if (selinux_call(getfilecon)(orig_file, &scontext) < 0)
-			return -1;
-		if (selinux_call(setfscreatecon)(scontext) < 0) {
+		જો (selinux_call(getfilecon)(orig_file, &scontext) < 0)
+			પાછા -1;
+		જો (selinux_call(setfscreatecon)(scontext) < 0) {
 			selinux_call(freecon)(scontext);
-			return -1;
+			પાછા -1;
 		}
 		selinux_call(freecon)(scontext);
 	}
-	return 0;
+	પાછા 0;
 }
 
 /* returns 1 if user has access to @class and @perm ("passwd", "chfn")
  *	or 0 on error,
  *	or 0 if has no access -- in this case sets @user_cxt to user-context
  */
-int ul_selinux_has_access(const char *classstr, const char *perm, char **user_cxt)
+પૂર્ણાંક ul_selinux_has_access(અચલ અક્ષર *classstr, અચલ અક્ષર *perm, અક્ષર **user_cxt)
 {
-	char *user;
-	int rc;
+	અક્ષર *user;
+	પૂર્ણાંક rc;
 
-	if (user_cxt)
-		*user_cxt = NULL;
+	જો (user_cxt)
+		*user_cxt = ખાલી;
 
-	if (ul_dlopen_libselinux() != 0)
-		return 0;
+	જો (ul_dlopen_libselinux() != 0)
+		પાછા 0;
 
-	if (selinux_call(getprevcon)(&user) != 0)
-		return 0;
+	જો (selinux_call(getprevcon)(&user) != 0)
+		પાછા 0;
 
-	rc = selinux_call(selinux_check_access)(user, user, classstr, perm, NULL);
-	if (rc != 0 && user_cxt)
+	rc = selinux_call(selinux_check_access)(user, user, classstr, perm, ખાલી);
+	જો (rc != 0 && user_cxt)
 		*user_cxt = user;
-	else
+	નહીંતર
 		selinux_call(freecon)(user);
 
-	return rc == 0 ? 1 : 0;
+	પાછા rc == 0 ? 1 : 0;
 }
 
 /* Gets the default context for @path and @st_mode.
@@ -68,26 +68,26 @@ int ul_selinux_has_access(const char *classstr, const char *perm, char **user_cx
  * returns 0 on success,
  *     or <0 on error
  */
-int ul_selinux_get_default_context(const char *path, int st_mode, char **cxt)
+પૂર્ણાંક ul_selinux_get_default_context(અચલ અક્ષર *path, પૂર્ણાંક st_mode, અક્ષર **cxt)
 {
-	struct selabel_handle *hnd;
-	struct selinux_opt options[SELABEL_NOPT] = {};
-	int rc = 0;
+	સંરચના selabel_handle *hnd;
+	સંરચના selinux_opt options[SELABEL_NOPT] = {};
+	પૂર્ણાંક rc = 0;
 
-	*cxt = NULL;
+	*cxt = ખાલી;
 
-	if (ul_dlopen_libselinux() != 0)
-		return -ENOSYS;
+	જો (ul_dlopen_libselinux() != 0)
+		પાછા -ENOSYS;
 
 	hnd = selinux_call(selabel_open)(SELABEL_CTX_FILE, options, SELABEL_NOPT);
-	if (!hnd)
-		return -errno;
+	જો (!hnd)
+		પાછા -errno;
 
-	if (selinux_call(selabel_lookup)(hnd, cxt, path, st_mode) != 0)
+	જો (selinux_call(selabel_lookup)(hnd, cxt, path, st_mode) != 0)
 		rc = -errno;
 	selinux_call(selabel_close)(hnd);
 
-	return rc;
+	પાછા rc;
 }
 
 #endif /* HAVE_LIBSELINUX */

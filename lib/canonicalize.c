@@ -6,20 +6,20 @@
  *
  * Copyright (C) 2009-2013 Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#અન્તર્ભાવ <stdio.h>
+#અન્તર્ભાવ <string.h>
+#અન્તર્ભાવ <ctype.h>
+#અન્તર્ભાવ <unistd.h>
+#અન્તર્ભાવ <errno.h>
+#અન્તર્ભાવ <stdlib.h>
+#અન્તર્ભાવ <sys/types.h>
+#અન્તર્ભાવ <sys/stat.h>
 
-#include "canonicalize.h"
-#include "pathnames.h"
-#include "all-io.h"
-#include "strutils.h"
-#include "fileutils.h"
+#અન્તર્ભાવ "canonicalize.h"
+#અન્તર્ભાવ "pathnames.h"
+#અન્તર્ભાવ "all-io.h"
+#અન્તર્ભાવ "strutils.h"
+#અન્તર્ભાવ "fileutils.h"
 
 /*
  * Converts private "dm-N" names to "/dev/mapper/<name>"
@@ -30,57 +30,57 @@
  * The @prefix allows /sys to be mounted or stored outside the system root
  * (/prefix/sys/...).
  */
-char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
+અક્ષર *ul_canonicalize_dm_name_prefixed(અચલ અક્ષર *prefix, અચલ અક્ષર *ptname)
 {
 	FILE	*f;
 	size_t	sz;
-	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
+	અક્ષર	path[256], name[કદ(path) - કદ(_PATH_DEV_MAPPER)], *res = ખાલી;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	જો (!ptname || !*ptname)
+		પાછા ખાલી;
 
-	if (!prefix)
+	જો (!prefix)
 		prefix = "";
 
-	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	snprintf(path, કદ(path), "%s/sys/block/%s/dm/name", prefix, ptname);
+	જો (!(f = fopen(path, "r" UL_CLOEXECSTR)))
+		પાછા ખાલી;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	જો (fgets(name, કદ(name), f) && (sz = strlen(name)) > 1) {
+		જો (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
-		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
+		snprintf(path, કદ(path), _PATH_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
+		જો ((prefix && *prefix) || access(path, F_OK) == 0)
 			res = strdup(path);
 	}
 	fclose(f);
-	return res;
+	પાછા res;
 }
 
-char *ul_canonicalize_dm_name(const char *ptname)
+અક્ષર *ul_canonicalize_dm_name(અચલ અક્ષર *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	પાછા ul_canonicalize_dm_name_prefixed(ખાલી, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+સ્થિર પૂર્ણાંક is_dm_devname(અક્ષર *canonical, અક્ષર **name)
 {
-	struct stat sb;
-	char *p = strrchr(canonical, '/');
+	સંરચના stat sb;
+	અક્ષર *p = strrchr(canonical, '/');
 
-	*name = NULL;
+	*name = ખાલી;
 
-	if (!p
+	જો (!p
 	    || strncmp(p, "/dm-", 4) != 0
 	    || !isdigit(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		પાછા 0;
 
 	*name = p + 1;
-	return 1;
+	પાછા 1;
 }
 
 /*
@@ -88,73 +88,73 @@ static int is_dm_devname(char *canonical, char **name)
  * relative path. If the path is no relative than returns NULL. The path does
  * not have to exist.
  */
-char *ul_absolute_path(const char *path)
+અક્ષર *ul_absolute_path(અચલ અક્ષર *path)
 {
-	char cwd[PATH_MAX], *res, *p;
+	અક્ષર cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	જો (!ul_is_relative_path(path)) {
 		errno = EINVAL;
-		return NULL;
+		પાછા ખાલી;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	જો (!getcwd(cwd, કદ(cwd)))
+		પાછા ખાલી;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
+	જો (ul_startswith(path, "./"))
 		path += 2;
-	else if (strcmp(path, ".") == 0)
-		path = NULL;
+	નહીંતર જો (strcmp(path, ".") == 0)
+		path = ખાલી;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	જો (!path || !*path)
+		પાછા strdup(cwd);
 
 	csz = strlen(cwd);
 	psz = strlen(path);
 
 	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	જો (!res)
+		પાછા ખાલી;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
 	memcpy(p, path, psz + 1);
 
-	return res;
+	પાછા res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
-do_canonicalize(const char *path, char **result,
-		void *data __attribute__((__unused__)))
+સ્થિર પૂર્ણાંક __attribute__((nonnull(2)))
+do_canonicalize(અચલ અક્ષર *path, અક્ષર **result,
+		શૂન્ય *data __attribute__((__unused__)))
 {
-	char *canonical, *dmname;
+	અક્ષર *canonical, *dmname;
 
-	*result = NULL;
+	*result = ખાલી;
 
-	if (!path || !*path) {
+	જો (!path || !*path) {
 		errno = EINVAL;
-		return -errno;
+		પાછા -errno;
 	}
 
 	errno = 0;
-	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	canonical = realpath(path, ખાલી);
+	જો (!canonical)
+		પાછા 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
-		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
-			free(canonical);
+	જો (is_dm_devname(canonical, &dmname)) {
+		અક્ષર *dm = ul_canonicalize_dm_name(dmname);
+		જો (dm) {
+			મુક્ત(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
+	જો (canonical)
 		*result = canonical;
-	return 0;
+	પાછા 0;
 }
 
 /*
@@ -162,31 +162,31 @@ do_canonicalize(const char *path, char **result,
  * unreachable path is not an error (!), and in this case, it just duplicates
  * @path.
  */
-char *ul_canonicalize_path(const char *path)
+અક્ષર *ul_canonicalize_path(અચલ અક્ષર *path)
 {
-	char *canonical = NULL;
+	અક્ષર *canonical = ખાલી;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	જો (do_canonicalize(path, &canonical, ખાલી) == 1)
+		પાછા strdup(path);
 
-	return canonical;
+	પાછા canonical;
 }
 
 /*
  * Drop permissions (e.g., suid) and canonicalize the path. If the path is
  * unreadable (for example, due to missing permissions), it returns NULL.
  */
-char *ul_canonicalize_path_restricted(const char *path)
+અક્ષર *ul_canonicalize_path_restricted(અચલ અક્ષર *path)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	પાછા ul_restricted_path_oper(path, do_canonicalize, ખાલી);
 }
 
 #ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+પૂર્ણાંક મુખ્ય(પૂર્ણાંક argc, અક્ષર **argv)
 {
-	char *p;
+	અક્ષર *p;
 
-	if (argc < 2) {
+	જો (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
@@ -195,11 +195,11 @@ int main(int argc, char **argv)
 
 	p = ul_canonicalize_path(argv[1]);
 	fprintf(stdout, "real:            %s\n", p);
-	free(p);
+	મુક્ત(p);
 
 	p = ul_canonicalize_path_restricted(argv[1]);
 	fprintf(stdout, "real-restricted: %s\n", p);
-	free(p);
+	મુક્ત(p);
 
 	exit(EXIT_SUCCESS);
 }
