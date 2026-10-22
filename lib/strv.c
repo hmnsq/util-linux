@@ -14,74 +14,74 @@
  *    Modified the original version from systemd project for util-linux.
  */
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <assert.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdarg.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdbool.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <assert.h>
 
-#include "strutils.h"
-#include "strv.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strv.h"
 
-static void ul_strv_clear(char **l)
+ਸਥਿਰ ਖਾਲੀ ul_strv_clear(ਅੱਖਰ **l)
 {
-        char **k;
+        ਅੱਖਰ **k;
 
-        if (!l)
-                return;
+        ਜੇ (!l)
+                ਵਾਪਸ;
 
-        for (k = l; *k; k++)
-                free(*k);
+        ਲਈ (k = l; *k; k++)
+                ਮੁਕਤ(*k);
 
-        *l = NULL;
+        *l = ਨਿਰਾ;
 }
 
-char **ul_strv_free(char **l)
+ਅੱਖਰ **ul_strv_free(ਅੱਖਰ **l)
 {
         ul_strv_clear(l);
-        free(l);
-        return NULL;
+        ਮੁਕਤ(l);
+        ਵਾਪਸ ਨਿਰਾ;
 }
 
-char **ul_strv_copy(char * const *l)
+ਅੱਖਰ **ul_strv_copy(ਅੱਖਰ * ਅਚਲ *l)
 {
-        char **r, **k;
+        ਅੱਖਰ **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਆਕਾਰ(ਅੱਖਰ *) * (ul_strv_ਲੰਮਾਈ(l) + 1));
+        ਜੇ (!r)
+                ਵਾਪਸ ਨਿਰਾ;
 
-        if (l)
-                for (; *l; k++, l++) {
+        ਜੇ (l)
+                ਲਈ (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        ਜੇ (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                ਵਾਪਸ ਨਿਰਾ;
                         }
                 }
 
-        *k = NULL;
-        return r;
+        *k = ਨਿਰਾ;
+        ਵਾਪਸ r;
 }
 
-unsigned ul_strv_length(char * const *l) {
-        unsigned n = 0;
+ਬਿਨਾਨਿਸ਼ਾਨੀ ul_strv_ਲੰਮਾਈ(ਅੱਖਰ * ਅਚਲ *l) {
+        ਬਿਨਾਨਿਸ਼ਾਨੀ n = 0;
 
-        if (!l)
-                return 0;
+        ਜੇ (!l)
+                ਵਾਪਸ 0;
 
-        for (; *l; l++)
+        ਲਈ (; *l; l++)
                 n++;
 
-        return n;
+        ਵਾਪਸ n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+ਸਥਿਰ ਅੱਖਰ **ul_strv_new_ap(ਅਚਲ ਅੱਖਰ *x, va_list ap)
 {
-        const char *s;
-        char **a;
-        unsigned n = 0, i = 0;
+        ਅਚਲ ਅੱਖਰ *s;
+        ਅੱਖਰ **a;
+        ਬਿਨਾਨਿਸ਼ਾਨੀ n = 0, i = 0;
         va_list aq;
 
         /* As a special trick we ignore all listed strings that equal
@@ -89,13 +89,13 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        ਜੇ (x) {
+                n = x == (ਅਚਲ ਅੱਖਰ*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
-                                continue;
+                ਜਦੋਂ ((s = va_arg(aq, ਅਚਲ ਅੱਖਰ*))) {
+                        ਜੇ (s == (ਅਚਲ ਅੱਖਰ*) -1)
+                                ਜਾਰੀ;
 
                         n++;
                 }
@@ -103,153 +103,153 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਆਕਾਰ(ਅੱਖਰ *) * (n + 1));
+        ਜੇ (!a)
+                ਵਾਪਸ ਨਿਰਾ;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        ਜੇ (x) {
+                ਜੇ (x != (ਅਚਲ ਅੱਖਰ*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
-                                goto fail;
+                        ਜੇ (!a[i])
+                                ਜਾਓ fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                ਜਦੋਂ ((s = va_arg(ap, ਅਚਲ ਅੱਖਰ*))) {
 
-                        if (s == (const char*) -1)
-                                continue;
+                        ਜੇ (s == (ਅਚਲ ਅੱਖਰ*) -1)
+                                ਜਾਰੀ;
 
                         a[i] = strdup(s);
-                        if (!a[i])
-                                goto fail;
+                        ਜੇ (!a[i])
+                                ਜਾਓ fail;
 
                         i++;
                 }
         }
 
-        a[i] = NULL;
+        a[i] = ਨਿਰਾ;
 
-        return a;
+        ਵਾਪਸ a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        ਵਾਪਸ ਨਿਰਾ;
 }
 
-char **ul_strv_new(const char *x, ...)
+ਅੱਖਰ **ul_strv_new(ਅਚਲ ਅੱਖਰ *x, ...)
 {
-        char **r;
+        ਅੱਖਰ **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        ਵਾਪਸ r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+ਪੂਰਨ ul_strv_extend_strv(ਅੱਖਰ ***a, ਅੱਖਰ **b)
 {
-        int r;
-        char **s;
+        ਪੂਰਨ r;
+        ਅੱਖਰ **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                ਜੇ (r < 0)
+                        ਵਾਪਸ r;
         }
 
-        return 0;
+        ਵਾਪਸ 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+ਪੂਰਨ ul_strv_extend_strv_concat(ਅੱਖਰ ***a, ਅੱਖਰ **b, ਅਚਲ ਅੱਖਰ *suffix)
 {
-        int r;
-        char **s;
+        ਪੂਰਨ r;
+        ਅੱਖਰ **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                ਅੱਖਰ *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                ਜੇ (!v)
+                        ਵਾਪਸ -ENOMEM;
 
-                r = ul_strv_push(a, v);
-                if (r < 0) {
-                        free(v);
-                        return r;
+                r = ul_strv_ਧੱਕੋ(a, v);
+                ਜੇ (r < 0) {
+                        ਮੁਕਤ(v);
+                        ਵਾਪਸ r;
                 }
         }
 
-        return 0;
+        ਵਾਪਸ 0;
 }
 
 
-#define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ FOREACH_ਸ਼ਬਦ(ਸ਼ਬਦ, ਲੰਮਾਈ, s, separator, quoted, state)        \
+        ਲਈ ((state) = (s), (ਸ਼ਬਦ) = ul_ਵੰਡੋ(&(state), &(ਲੰਮਾਈ), (separator), (quoted)); (ਸ਼ਬਦ); (ਸ਼ਬਦ) = ul_ਵੰਡੋ(&(state), &(ਲੰਮਾਈ), (separator), (quoted)))
 
-#define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
-        _FOREACH_WORD(word, length, s, separator, false, state)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ FOREACH_ਸ਼ਬਦ_SEPARATOR(ਸ਼ਬਦ, ਲੰਮਾਈ, s, separator, state)       \
+        FOREACH_ਸ਼ਬਦ(ਸ਼ਬਦ, ਲੰਮਾਈ, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+ਅੱਖਰ **ul_strv_ਵੰਡੋ(ਅਚਲ ਅੱਖਰ *s, ਅਚਲ ਅੱਖਰ *separator)
 {
-        const char *word, *state;
+        ਅਚਲ ਅੱਖਰ *ਸ਼ਬਦ, *state;
         size_t l;
-        unsigned n, i;
-        char **r;
+        ਬਿਨਾਨਿਸ਼ਾਨੀ n, i;
+        ਅੱਖਰ **r;
 
-        assert(s);
+        ਪ੍ਰਤਿਜ੍ਞਾ(s);
 
         n = 0;
-        FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
+        FOREACH_ਸ਼ਬਦ_SEPARATOR(ਸ਼ਬਦ, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਆਕਾਰ(ਅੱਖਰ *) * (n + 1));
+        ਜੇ (!r)
+                ਵਾਪਸ ਨਿਰਾ;
 
         i = 0;
-        FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
-                r[i] = strndup(word, l);
-                if (!r[i]) {
+        FOREACH_ਸ਼ਬਦ_SEPARATOR(ਸ਼ਬਦ, l, s, separator, state) {
+                r[i] = strndup(ਸ਼ਬਦ, l);
+                ਜੇ (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        ਵਾਪਸ ਨਿਰਾ;
                 }
 
                 i++;
         }
 
-        r[i] = NULL;
-        return r;
+        r[i] = ਨਿਰਾ;
+        ਵਾਪਸ r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+ਅੱਖਰ *ul_strv_join(ਅੱਖਰ **l, ਅਚਲ ਅੱਖਰ *separator)
 {
-        char *r, *e;
-        char **s;
+        ਅੱਖਰ *r, *e;
+        ਅੱਖਰ **s;
         size_t n, k;
 
-        if (!separator)
+        ਜੇ (!separator)
                 separator = " ";
 
-        k = strlen(separator);
+        k = ਲੜੀ_ਲੰਬਾਈ(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                ਜੇ (n != 0)
                         n += k;
-                n += strlen(*s);
+                n += ਲੜੀ_ਲੰਬਾਈ(*s);
         }
 
-        r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        r = ਸਮ੍ਰਿਤੀ_ਦਿਓ(n + 1);
+        ਜੇ (!r)
+                ਵਾਪਸ ਨਿਰਾ;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                ਜੇ (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,167 +257,167 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        ਵਾਪਸ r;
 }
 
-int ul_strv_push(char ***l, char *value)
+ਪੂਰਨ ul_strv_ਧੱਕੋ(ਅੱਖਰ ***l, ਅੱਖਰ *ਮੁੱਲ)
 {
-        char **c;
-        unsigned n, m;
+        ਅੱਖਰ **c;
+        ਬਿਨਾਨਿਸ਼ਾਨੀ n, m;
 
-        if (!value)
-                return 0;
+        ਜੇ (!ਮੁੱਲ)
+                ਵਾਪਸ 0;
 
-        n = ul_strv_length(*l);
+        n = ul_strv_ਲੰਮਾਈ(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ਜੇ (m < n)
+                ਵਾਪਸ -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, ਆਕਾਰ(ਅੱਖਰ *));
+        ਜੇ (!c)
+                ਵਾਪਸ -ENOMEM;
 
-        c[n] = value;
-        c[n+1] = NULL;
+        c[n] = ਮੁੱਲ;
+        c[n+1] = ਨਿਰਾ;
 
         *l = c;
-        return 0;
+        ਵਾਪਸ 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+ਪੂਰਨ ul_strv_ਧੱਕੋ_prepend(ਅੱਖਰ ***l, ਅੱਖਰ *ਮੁੱਲ)
 {
-        char **c;
-        unsigned n, m, i;
+        ਅੱਖਰ **c;
+        ਬਿਨਾਨਿਸ਼ਾਨੀ n, m, i;
 
-        if (!value)
-                return 0;
+        ਜੇ (!ਮੁੱਲ)
+                ਵਾਪਸ 0;
 
-        n = ul_strv_length(*l);
+        n = ul_strv_ਲੰਮਾਈ(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ਜੇ (m < n)
+                ਵਾਪਸ -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਆਕਾਰ(ਅੱਖਰ *) * m);
+        ਜੇ (!c)
+                ਵਾਪਸ -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        ਲਈ (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
-        c[0] = value;
-        c[n+1] = NULL;
+        c[0] = ਮੁੱਲ;
+        c[n+1] = ਨਿਰਾ;
 
-        free(*l);
+        ਮੁਕਤ(*l);
         *l = c;
 
-        return 0;
+        ਵਾਪਸ 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+ਪੂਰਨ ul_strv_consume(ਅੱਖਰ ***l, ਅੱਖਰ *ਮੁੱਲ)
 {
-        int r;
+        ਪੂਰਨ r;
 
-        r = ul_strv_push(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_ਧੱਕੋ(l, ਮੁੱਲ);
+        ਜੇ (r < 0)
+                ਮੁਕਤ(ਮੁੱਲ);
 
-        return r;
+        ਵਾਪਸ r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+ਪੂਰਨ ul_strv_consume_prepend(ਅੱਖਰ ***l, ਅੱਖਰ *ਮੁੱਲ)
 {
-        int r;
+        ਪੂਰਨ r;
 
-        r = ul_strv_push_prepend(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_ਧੱਕੋ_prepend(l, ਮੁੱਲ);
+        ਜੇ (r < 0)
+                ਮੁਕਤ(ਮੁੱਲ);
 
-        return r;
+        ਵਾਪਸ r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+ਪੂਰਨ ul_strv_extend(ਅੱਖਰ ***l, ਅਚਲ ਅੱਖਰ *ਮੁੱਲ)
 {
-        char *v;
+        ਅੱਖਰ *v;
 
-        if (!value)
-                return 0;
+        ਜੇ (!ਮੁੱਲ)
+                ਵਾਪਸ 0;
 
-        v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        v = strdup(ਮੁੱਲ);
+        ਜੇ (!v)
+                ਵਾਪਸ -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        ਵਾਪਸ ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+ਅੱਖਰ **ul_strv_remove(ਅੱਖਰ **l, ਅਚਲ ਅੱਖਰ *s)
 {
-        char **f, **t;
+        ਅੱਖਰ **f, **t;
 
-        if (!l)
-                return NULL;
+        ਜੇ (!l)
+                ਵਾਪਸ ਨਿਰਾ;
 
-        assert(s);
+        ਪ੍ਰਤਿਜ੍ਞਾ(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
-                        free(*f);
-                else
+        ਲਈ (f = t = l; *f; f++)
+                ਜੇ (strcmp(*f, s) == 0)
+                        ਮੁਕਤ(*f);
+                ਨਹੀਂਤਾਂ
                         *(t++) = *f;
 
-        *t = NULL;
-        return l;
+        *t = ਨਿਰਾ;
+        ਵਾਪਸ l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+ਪੂਰਨ ul_strv_extendf(ਅੱਖਰ ***l, ਅਚਲ ਅੱਖਰ *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        ਅੱਖਰ *x;
+        ਪੂਰਨ r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        ਜੇ (r < 0)
+                ਵਾਪਸ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ਵਾਪਸ ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+ਪੂਰਨ ul_strv_extendv(ਅੱਖਰ ***l, ਅਚਲ ਅੱਖਰ *format, va_list ap)
 {
-        char *x;
-        int r;
+        ਅੱਖਰ *x;
+        ਪੂਰਨ r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        ਜੇ (r < 0)
+                ਵਾਪਸ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ਵਾਪਸ ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+ਅੱਖਰ **ul_strv_ਉਲਟ(ਅੱਖਰ **l)
 {
-        unsigned n, i;
+        ਬਿਨਾਨਿਸ਼ਾਨੀ n, i;
 
-        n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        n = ul_strv_ਲੰਮਾਈ(l);
+        ਜੇ (n <= 1)
+                ਵਾਪਸ l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        ਲਈ (i = 0; i < n / 2; i++) {
+                ਅੱਖਰ *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        ਵਾਪਸ l;
 }

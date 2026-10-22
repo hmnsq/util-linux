@@ -10,242 +10,242 @@
  * by Davidlohr Bueso <dave@xxxxxxx> - March 2012.
  */
 
-#include <unistd.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <signal.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdbool.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/stat.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/wait.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <signal.h>
 
-#include "c.h"
-#include "xalloc.h"
-#include "nls.h"
-#include "strutils.h"
-#include "ttyutils.h"
-#include "pager.h"
-#include "env.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "xalloc.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "nls.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "ttyutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "pager.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "env.h"
 
-static const char *pager_argv[] = { "sh", "-c", NULL, NULL };
+ਸਥਿਰ ਅਚਲ ਅੱਖਰ *pager_argv[] = { "sh", "-c", ਨਿਰਾ, ਨਿਰਾ };
 
-struct child_process {
-	const char **argv;
+ਬਣਤਰ ਬੱਚਾ_process {
+	ਅਚਲ ਅੱਖਰ **argv;
 	pid_t pid;
-	int in;
+	ਪੂਰਨ ਵਿੱਚ;
 
-	int header_lines;
-	int header_width;
+	ਪੂਰਨ ਸਿਰਲੇਖ_ਸਤਰਾਂ;
+	ਪੂਰਨ ਸਿਰਲੇਖ_ਚੌੜਾਈ;
 
-	int org_err;
-	int org_out;
-	struct sigaction orig_sigchld;
-	struct sigaction orig_sigint;
-	struct sigaction orig_sighup;
-	struct sigaction orig_sigterm;
-	struct sigaction orig_sigquit;
-	struct sigaction orig_sigpipe;
+	ਪੂਰਨ org_err;
+	ਪੂਰਨ org_ਬਾਹਰਲਾ;
+	ਬਣਤਰ sigaction orig_sigchld;
+	ਬਣਤਰ sigaction orig_sigint;
+	ਬਣਤਰ sigaction orig_sighup;
+	ਬਣਤਰ sigaction orig_sigterm;
+	ਬਣਤਰ sigaction orig_sigquit;
+	ਬਣਤਰ sigaction orig_sigpipe;
 };
-static struct child_process pager_process;
+ਸਥਿਰ ਬਣਤਰ ਬੱਚਾ_process pager_process;
 
-static volatile sig_atomic_t pager_caught_signal;
-static volatile sig_atomic_t pager_caught_sigpipe;
+ਸਥਿਰ ਅਸਥਿਰ sig_atomic_t pager_caught_signal;
+ਸਥਿਰ ਅਸਥਿਰ sig_atomic_t pager_caught_sigpipe;
 
-static inline void close_pair(int fd[2])
+ਸਥਿਰ ਸਤਰਅੰਦਰ ਖਾਲੀ close_pair(ਪੂਰਨ fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
 }
 
-static void pager_preexec(void)
+ਸਥਿਰ ਖਾਲੀ pager_preexec(ਖਾਲੀ)
 {
-	const char *less_env = getenv("LESS");
-	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
-	int header_width = pager_process.header_width;
-	char *less_val = NULL;
+	ਅਚਲ ਅੱਖਰ *less_env = getenv("LESS");
+	ਅਚਲ ਅੱਖਰ *ਅਧਾਰ = less_env ? less_env : "FRSX";
+	ਪੂਰਨ ਸਿਰਲੇਖ_ਸਤਰਾਂ = pager_process.ਸਿਰਲੇਖ_ਸਤਰਾਂ;
+	ਪੂਰਨ ਸਿਰਲੇਖ_ਚੌੜਾਈ = pager_process.ਸਿਰਲੇਖ_ਚੌੜਾਈ;
+	ਅੱਖਰ *less_val = ਨਿਰਾ;
 
-	if (header_lines > 0 && header_width > 0)
-		less_val = ul_strfconcat(base, " --header %d,%d",
-					 header_lines, header_width);
-	else if (header_width > 0)
-		less_val = ul_strfconcat(base, " --header 0,%d",
-					 header_width);
-	else if (header_lines > 0)
-		less_val = ul_strfconcat(base, " --header %d",
-					 header_lines);
+	ਜੇ (ਸਿਰਲੇਖ_ਸਤਰਾਂ > 0 && ਸਿਰਲੇਖ_ਚੌੜਾਈ > 0)
+		less_val = ul_strfconcat(ਅਧਾਰ, " --header %d,%d",
+					 ਸਿਰਲੇਖ_ਸਤਰਾਂ, ਸਿਰਲੇਖ_ਚੌੜਾਈ);
+	ਨਹੀਂਤਾਂ ਜੇ (ਸਿਰਲੇਖ_ਚੌੜਾਈ > 0)
+		less_val = ul_strfconcat(ਅਧਾਰ, " --header 0,%d",
+					 ਸਿਰਲੇਖ_ਚੌੜਾਈ);
+	ਨਹੀਂਤਾਂ ਜੇ (ਸਿਰਲੇਖ_ਸਤਰਾਂ > 0)
+		less_val = ul_strfconcat(ਅਧਾਰ, " --header %d",
+					 ਸਿਰਲੇਖ_ਸਤਰਾਂ);
 
-	if (less_val) {
-		if (setenv("LESS", less_val, 1) != 0)
+	ਜੇ (less_val) {
+		ਜੇ (setenv("LESS", less_val, 1) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
-		free(less_val);
-	} else if (less_env == NULL) {
-		if (setenv("LESS", "FRSX", 0) != 0)
+		ਮੁਕਤ(less_val);
+	} ਨਹੀਂਤਾਂ ਜੇ (less_env == ਨਿਰਾ) {
+		ਜੇ (setenv("LESS", "FRSX", 0) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 	}
 
-	if (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
+	ਜੇ (getenv("LV") == ਨਿਰਾ && setenv("LV", "-c", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LV");
 }
 
-static int start_command(struct child_process *cmd)
+ਸਥਿਰ ਪੂਰਨ ਸ਼ੁਰੂ_command(ਬਣਤਰ ਬੱਚਾ_process *cmd)
 {
-	int fdin[2];
+	ਪੂਰਨ fdin[2];
 
-	if (pipe(fdin) < 0)
-		return -1;
-	cmd->in = fdin[1];
+	ਜੇ (pipe(fdin) < 0)
+		ਵਾਪਸ -1;
+	cmd->ਵਿੱਚ = fdin[1];
 
-	fflush(NULL);
+	fflush(ਨਿਰਾ);
 	cmd->pid = fork();
-	if (!cmd->pid) {
+	ਜੇ (!cmd->pid) {
 		dup2(fdin[0], STDIN_FILENO);
 		close_pair(fdin);
 
 		pager_preexec();
-		execvp(cmd->argv[0], (char *const*) cmd->argv);
+		execvp(cmd->argv[0], (ਅੱਖਰ *ਅਚਲ*) cmd->argv);
 		errexec(cmd->argv[0]);
 	}
 
-	if (cmd->pid < 0) {
+	ਜੇ (cmd->pid < 0) {
 		cmd->pid = 0;
 		close_pair(fdin);
-		return -1;
+		ਵਾਪਸ -1;
 	}
 
 	close(fdin[0]);
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-static int wait_for_pager(void)
+ਸਥਿਰ ਪੂਰਨ wait_for_pager(ਖਾਲੀ)
 {
-	pid_t waiting;
-	int ret, status;
+	pid_t ਉਡੀਕ;
+	ਪੂਰਨ ret, ਸਥਿਤੀ;
 
-	do {
-		waiting = waitpid(pager_process.pid, &status, 0);
-	} while (waiting == -1 && errno == EINTR);
+	ਕਰੋ {
+		ਉਡੀਕ = waitpid(pager_process.pid, &ਸਥਿਤੀ, 0);
+	} ਜਦੋਂ (ਉਡੀਕ == -1 && errno == EINTR);
 
-	if (waiting == -1)
+	ਜੇ (ਉਡੀਕ == -1)
 		ret = -1;
-	else if (waiting == pager_process.pid && WIFEXITED(status))
-		ret = WEXITSTATUS(status);
-	else
+	ਨਹੀਂਤਾਂ ਜੇ (ਉਡੀਕ == pager_process.pid && WIFEXITED(ਸਥਿਤੀ))
+		ret = WEXITSTATUS(ਸਥਿਤੀ);
+	ਨਹੀਂਤਾਂ
 		ret = 1;
 
 	pager_process.pid = 0;
 
-	return ret;
+	ਵਾਪਸ ret;
 }
 
-static void catch_signal(int signo)
+ਸਥਿਰ ਖਾਲੀ catch_signal(ਪੂਰਨ signo)
 {
 	pager_caught_signal = signo;
 }
 
-static void catch_sigpipe(int signo)
+ਸਥਿਰ ਖਾਲੀ catch_sigpipe(ਪੂਰਨ signo)
 {
 	pager_caught_sigpipe = signo;
 }
 
-static void wait_for_pager_signal(int signo __attribute__ ((__unused__)))
+ਸਥਿਰ ਖਾਲੀ wait_for_pager_signal(ਪੂਰਨ signo __attribute__ ((__unused__)))
 {
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* async-signal safe: wait for all children, including pager */
-	while (wait(NULL) != -1 || errno == EINTR)
+	ਜਦੋਂ (wait(ਨਿਰਾ) != -1 || errno == EINTR)
 		;
 
 	_exit(EXIT_FAILURE);
 }
 
-static int has_command(const char *cmd)
+ਸਥਿਰ ਪੂਰਨ has_command(ਅਚਲ ਅੱਖਰ *cmd)
 {
-	const char *path;
-	char *b, *c, *p, *s;
-	int rc = 0;
+	ਅਚਲ ਅੱਖਰ *ਰਸਤਾ;
+	ਅੱਖਰ *b, *c, *p, *s;
+	ਪੂਰਨ rc = 0;
 
-	if (!cmd)
-		goto done;
+	ਜੇ (!cmd)
+		ਜਾਓ ਪੂਰਾ;
 
 	c = xstrdup(cmd);
-	if (!c)
-		goto done;
+	ਜੇ (!c)
+		ਜਾਓ ਪੂਰਾ;
 	b = strtok(c, " ");	/* cmd may contain options */
-	if (!b)
-		goto cleanup;
+	ਜੇ (!b)
+		ਜਾਓ cleanup;
 
-	if (strchr(b, '/')) {
+	ਜੇ (strchr(b, '/')) {
 		rc = access(b, X_OK) == 0;
-		goto cleanup;
+		ਜਾਓ cleanup;
 	}
 
-	path = getenv("PATH");
-	if (!path)
-		goto cleanup;
-	p = xstrdup(path);
-	if (!p)
-		goto cleanup;
+	ਰਸਤਾ = getenv("PATH");
+	ਜੇ (!ਰਸਤਾ)
+		ਜਾਓ cleanup;
+	p = xstrdup(ਰਸਤਾ);
+	ਜੇ (!p)
+		ਜਾਓ cleanup;
 
-	for (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
-		int fd = open(s, O_RDONLY|O_CLOEXEC);
-		if (fd < 0)
-			continue;
+	ਲਈ (s = strtok(p, ":"); s; s = strtok(ਨਿਰਾ, ":")) {
+		ਪੂਰਨ fd = open(s, O_RDONLY|O_CLOEXEC);
+		ਜੇ (fd < 0)
+			ਜਾਰੀ;
 		rc = faccessat(fd, b, X_OK, 0) == 0;
 		close(fd);
-		if (rc)
-			break;
+		ਜੇ (rc)
+			ਰੋਕੋ;
 	}
-	free(p);
+	ਮੁਕਤ(p);
 cleanup:
-	free(c);
-done:
+	ਮੁਕਤ(c);
+ਪੂਰਾ:
 	/*fprintf(stderr, "has PAGER '%s': rc=%d\n", cmd, rc);*/
-	return rc;
+	ਵਾਪਸ rc;
 }
 
-static void __setup_pager(void)
+ਸਥਿਰ ਖਾਲੀ __setup_pager(ਖਾਲੀ)
 {
-	const char *pager = getenv("PAGER");
-	struct sigaction sa;
+	ਅਚਲ ਅੱਖਰ *pager = getenv("PAGER");
+	ਬਣਤਰ sigaction sa;
 
-	if (!isatty(STDOUT_FILENO))
-		return;
+	ਜੇ (!isatty(STDOUT_FILENO))
+		ਵਾਪਸ;
 
-	if (!pager)
+	ਜੇ (!pager)
 		pager = "less";
-	else if (!*pager || !strcmp(pager, "cat"))
-		return;
+	ਨਹੀਂਤਾਂ ਜੇ (!*pager || !strcmp(pager, "cat"))
+		ਵਾਪਸ;
 
-	if (!has_command(pager))
-		return;
+	ਜੇ (!has_command(pager))
+		ਵਾਪਸ;
 
 	/* spawn the pager */
 	pager_argv[2] = pager;
 	pager_process.argv = pager_argv;
-	pager_process.in = -1;
+	pager_process.ਵਿੱਚ = -1;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, ਆਕਾਰ(sa));
 	sa.sa_handler = SIG_DFL;
 
 	/* this makes sure that waitpid works as expected */
 	sigaction(SIGCHLD, &sa, &pager_process.orig_sigchld);
 
-	if (start_command(&pager_process)) {
-		sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-		return;
+	ਜੇ (ਸ਼ੁਰੂ_command(&pager_process)) {
+		sigaction(SIGCHLD, &pager_process.orig_sigchld, ਨਿਰਾ);
+		ਵਾਪਸ;
 	}
 
 	/* original process continues, but writes to the pipe */
-	dup2(pager_process.in, STDOUT_FILENO);
-	setvbuf(stdout, NULL, _IOLBF, 0);
-	if (isatty(STDERR_FILENO)) {
-		dup2(pager_process.in, STDERR_FILENO);
-		setvbuf(stderr, NULL, _IOLBF, 0);
+	dup2(pager_process.ਵਿੱਚ, STDOUT_FILENO);
+	setvbuf(stdout, ਨਿਰਾ, _IOLBF, 0);
+	ਜੇ (isatty(STDERR_FILENO)) {
+		dup2(pager_process.ਵਿੱਚ, STDERR_FILENO);
+		setvbuf(stderr, ਨਿਰਾ, _IOLBF, 0);
 	}
-	close(pager_process.in);
+	close(pager_process.ਵਿੱਚ);
 
 	sa.sa_handler = wait_for_pager_signal;
 
@@ -263,9 +263,9 @@ static void __setup_pager(void)
 
 /* Setup pager and redirect output, the pager may be closed by pager_close().
  */
-void pager_open(void)
+ਖਾਲੀ pager_open(ਖਾਲੀ)
 {
-	pager_open_header(0, 0);
+	pager_open_ਸਿਰਲੇਖ(0, 0);
 }
 
 /* Setup pager with "less --header" support to freeze header lines and
@@ -276,49 +276,49 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+ਖਾਲੀ pager_open_ਸਿਰਲੇਖ(ਪੂਰਨ ਸਿਰਲੇਖ_ਸਤਰਾਂ, ਪੂਰਨ ਪਹਿਲਾ_ਖਾਨਾ_ਚੌੜਾਈ)
 {
-	if (pager_process.pid)
-		return;		/* already running */
+	ਜੇ (pager_process.pid)
+		ਵਾਪਸ;		/* already running */
 
-	pager_process.header_lines = header_lines;
-	pager_process.header_width = first_col_width;
+	pager_process.ਸਿਰਲੇਖ_ਸਤਰਾਂ = ਸਿਰਲੇਖ_ਸਤਰਾਂ;
+	pager_process.ਸਿਰਲੇਖ_ਚੌੜਾਈ = ਪਹਿਲਾ_ਖਾਨਾ_ਚੌੜਾਈ;
 
-	pager_process.org_out = dup(STDOUT_FILENO);
+	pager_process.org_ਬਾਹਰਲਾ = dup(STDOUT_FILENO);
 	pager_process.org_err = dup(STDERR_FILENO);
 
-	if (pager_process.org_out != -1 && pager_process.org_err != -1)
+	ਜੇ (pager_process.org_ਬਾਹਰਲਾ != -1 && pager_process.org_err != -1)
 		__setup_pager();
 
-	if (!pager_process.pid) {
-		if (pager_process.org_out != -1)
-			close(pager_process.org_out);
-		if (pager_process.org_err != -1)
+	ਜੇ (!pager_process.pid) {
+		ਜੇ (pager_process.org_ਬਾਹਰਲਾ != -1)
+			close(pager_process.org_ਬਾਹਰਲਾ);
+		ਜੇ (pager_process.org_err != -1)
 			close(pager_process.org_err);
-		memset(&pager_process, 0, sizeof(pager_process));
+		memset(&pager_process, 0, ਆਕਾਰ(pager_process));
 	}
 }
 
 /* Close pager and restore original std{out,err}.
  */
-void pager_close(void)
+ਖਾਲੀ pager_close(ਖਾਲੀ)
 {
-	struct sigaction sa;
-	int ret, safe_errno;
+	ਬਣਤਰ sigaction sa;
+	ਪੂਰਨ ret, ਸੁਰੱਖਿਅਤ_errno;
 
-	if (pager_process.pid == 0)
-		return;
+	ਜੇ (pager_process.pid == 0)
+		ਵਾਪਸ;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, ਆਕਾਰ(sa));
 	sa.sa_handler = catch_signal;
 
 	/* set flag instead of calling wait_for_pager again */
-	sigaction(SIGINT,  &sa, NULL);
-	sigaction(SIGHUP,  &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGINT,  &sa, ਨਿਰਾ);
+	sigaction(SIGHUP,  &sa, ਨਿਰਾ);
+	sigaction(SIGTERM, &sa, ਨਿਰਾ);
+	sigaction(SIGQUIT, &sa, ਨਿਰਾ);
 
-	fflush(NULL);
+	fflush(ਨਿਰਾ);
 
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
@@ -326,32 +326,32 @@ void pager_close(void)
 
 	/* restore original output */
 	clearerr(stdout);
-	dup2(pager_process.org_out, STDOUT_FILENO);
+	dup2(pager_process.org_ਬਾਹਰਲਾ, STDOUT_FILENO);
 	clearerr(stderr);
 	dup2(pager_process.org_err, STDERR_FILENO);
 
-	close(pager_process.org_out);
+	close(pager_process.org_ਬਾਹਰਲਾ);
 	close(pager_process.org_err);
 
 	ret = wait_for_pager();
 
 	/* restore original signal settings */
-	safe_errno = errno;
-	sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-	sigaction(SIGINT,  &pager_process.orig_sigint, NULL);
-	sigaction(SIGHUP,  &pager_process.orig_sighup, NULL);
-	sigaction(SIGTERM, &pager_process.orig_sigterm, NULL);
-	sigaction(SIGQUIT, &pager_process.orig_sigquit, NULL);
-	sigaction(SIGPIPE, &pager_process.orig_sigpipe, NULL);
-	errno = safe_errno;
+	ਸੁਰੱਖਿਅਤ_errno = errno;
+	sigaction(SIGCHLD, &pager_process.orig_sigchld, ਨਿਰਾ);
+	sigaction(SIGINT,  &pager_process.orig_sigint, ਨਿਰਾ);
+	sigaction(SIGHUP,  &pager_process.orig_sighup, ਨਿਰਾ);
+	sigaction(SIGTERM, &pager_process.orig_sigterm, ਨਿਰਾ);
+	sigaction(SIGQUIT, &pager_process.orig_sigquit, ਨਿਰਾ);
+	sigaction(SIGPIPE, &pager_process.orig_sigpipe, ਨਿਰਾ);
+	errno = ਸੁਰੱਖਿਅਤ_errno;
 
-	if (ret == -1)
+	ਜੇ (ret == -1)
 		err(EXIT_FAILURE, _("waitpid failed"));
 
-	if (pager_caught_signal || (pager_caught_sigpipe && ret))
-		exit(EXIT_FAILURE);
+	ਜੇ (pager_caught_signal || (pager_caught_sigpipe && ret))
+		ਬਾਹਰ_ਨਿਕਲੋ(EXIT_FAILURE);
 
-	memset(&pager_process, 0, sizeof(pager_process));
+	memset(&pager_process, 0, ਆਕਾਰ(pager_process));
 	pager_caught_signal = 0;
 	pager_caught_sigpipe = 0;
 }
@@ -367,42 +367,42 @@ void pager_close(void)
  * a pager. The variable is also suppressed in privileged (SUID/SGID)
  * contexts via safe_getenv().
  */
-bool pager_is_enabled(enum ul_pagermode mode)
+bool pager_is_enabled(ਗਿਣਤੀ ul_pagermode ਬਹੁਲਕ)
 {
-	switch (mode) {
-	case UL_PAGER_ALWAYS:
-		return true;
-	case UL_PAGER_NEVER:
-		return false;
-	case UL_PAGER_AUTO: {
-		const char *s;
+	ਚੋਣ (ਬਹੁਲਕ) {
+	ਹਾਲਤ UL_PAGER_ALWAYS:
+		ਵਾਪਸ true;
+	ਹਾਲਤ UL_PAGER_NEVER:
+		ਵਾਪਸ false;
+	ਹਾਲਤ UL_PAGER_AUTO: {
+		ਅਚਲ ਅੱਖਰ *s;
 		bool val;
 
-		if (!isatty(STDOUT_FILENO))
-			return false;
-		s = safe_getenv("PAGER_ENABLE");
-		if (!s || ul_strtobool(s, &val) != 0)
-			return false;
-		return val;
+		ਜੇ (!isatty(STDOUT_FILENO))
+			ਵਾਪਸ false;
+		s = ਸੁਰੱਖਿਅਤ_getenv("PAGER_ENABLE");
+		ਜੇ (!s || ul_strtobool(s, &val) != 0)
+			ਵਾਪਸ false;
+		ਵਾਪਸ val;
 	}
-	default:
-		return false;
+	ਮੂਲ:
+		ਵਾਪਸ false;
 	}
 }
 
-#ifdef TEST_PROGRAM_PAGER
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ_PAGER
 
-#define MAX 255
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ MAX 255
 
-int main(int argc __attribute__ ((__unused__)),
-	 char *argv[] __attribute__ ((__unused__)))
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc __attribute__ ((__unused__)),
+	 ਅੱਖਰ *argv[] __attribute__ ((__unused__)))
 {
-	int i;
+	ਪੂਰਨ i;
 
 	pager_open();
-	for (i = 0; i < MAX; i++)
-		printf("%d\n", i);
+	ਲਈ (i = 0; i < MAX; i++)
+		ਲਿਖੋ("%d\n", i);
 	pager_close();
-	return EXIT_SUCCESS;
+	ਵਾਪਸ EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_PAGER */
+#ਜੇ_ਅੰਤ /* TEST_PROGRAM_PAGER */

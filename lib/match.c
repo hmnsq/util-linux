@@ -5,10 +5,10 @@
  * GNU Lesser General Public License.
  */
 
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
-#include "match.h"
-#include "cctype.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "match.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "cctype.h"
 
 /*
  * match_fstype:
@@ -20,35 +20,35 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+ਪੂਰਨ ਮੇਲ_fstype(ਅਚਲ ਅੱਖਰ *type, ਅਚਲ ਅੱਖਰ *ਨਮੂਨਾ)
 {
-	int no = 0;		/* negated types list */
-	int len;
-	const char *p;
+	ਪੂਰਨ no = 0;		/* negated types list */
+	ਪੂਰਨ len;
+	ਅਚਲ ਅੱਖਰ *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	ਜੇ (!ਨਮੂਨਾ && !type)
+		ਵਾਪਸ 1;
+	ਜੇ (!ਨਮੂਨਾ)
+		ਵਾਪਸ 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	ਜੇ (!ਲੜੀ_ਤੁਲਨਾ(ਨਮੂਨਾ, "no", 2)) {
 		no = 1;
-		pattern += 2;
+		ਨਮੂਨਾ += 2;
 	}
 
 	/* Does type occur in types, separated by commas? */
-	len = strlen(type);
-	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	len = ਲੜੀ_ਲੰਬਾਈ(type);
+	p = ਨਮੂਨਾ;
+	ਜਦੋਂ(1) {
+		ਜੇ (!ਲੜੀ_ਤੁਲਨਾ(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			ਵਾਪਸ 0;
+		ਜੇ (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			ਵਾਪਸ !no;
 		p = strchr(p,',');
-		if (!p)
-			break;
+		ਜੇ (!p)
+			ਰੋਕੋ;
 		p++;
 	}
-	return no;
+	ਵਾਪਸ no;
 }

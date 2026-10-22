@@ -8,39 +8,39 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>		/* for isdigit() */
+#ਅਨ੍ਤਰ੍ਭਾਵ <signal.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "cctype.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+ਸਥਿਰ ਅਚਲ ਬਣਤਰ ul_signal_name {
+	ਅਚਲ ਅੱਖਰ *name;
+	ਪੂਰਨ val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
 	{ "INT",	SIGINT },	/* 2 */
 	{ "QUIT",	SIGQUIT },	/* 3 */
 	{ "ILL",	SIGILL },	/* 4 */
-#ifdef SIGTRAP
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGTRAP
 	{ "TRAP",	SIGTRAP },	/* 5 */
-#endif
+#ਜੇ_ਅੰਤ
 	{ "ABRT",	SIGABRT },	/* 6 */
-#ifdef SIGIOT
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGIOT
 	{ "IOT",	SIGIOT },	/* 6, same as SIGABRT */
-#endif
-#ifdef SIGEMT
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGEMT
 	{ "EMT",	SIGEMT },	/* 7 (mips,alpha,sparc*) */
-#endif
-#ifdef SIGBUS
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGBUS
 	{ "BUS",	SIGBUS },	/* 7 (arm,i386,m68k,ppc), 10 (mips,alpha,sparc*) */
-#endif
+#ਜੇ_ਅੰਤ
 	{ "FPE",	SIGFPE },	/* 8 */
 	{ "KILL",	SIGKILL },	/* 9 */
 	{ "USR1",	SIGUSR1 },	/* 10 (arm,i386,m68k,ppc), 30 (alpha,sparc*), 16 (mips) */
@@ -49,126 +49,126 @@ static const struct ul_signal_name {
 	{ "PIPE",	SIGPIPE },	/* 13 */
 	{ "ALRM",	SIGALRM },	/* 14 */
 	{ "TERM",	SIGTERM },	/* 15 */
-#ifdef SIGSTKFLT
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGSTKFLT
 	{ "STKFLT",	SIGSTKFLT },	/* 16 (arm,i386,m68k,ppc) */
-#endif
+#ਜੇ_ਅੰਤ
 	{ "CHLD",	SIGCHLD },	/* 17 (arm,i386,m68k,ppc), 20 (alpha,sparc*), 18 (mips) */
-#ifdef SIGCLD
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGCLD
 	{ "CLD",	SIGCLD },	/* same as SIGCHLD (mips) */
-#endif
+#ਜੇ_ਅੰਤ
 	{ "CONT",	SIGCONT },	/* 18 (arm,i386,m68k,ppc), 19 (alpha,sparc*), 25 (mips) */
 	{ "STOP",	SIGSTOP },	/* 19 (arm,i386,m68k,ppc), 17 (alpha,sparc*), 23 (mips) */
 	{ "TSTP",	SIGTSTP },	/* 20 (arm,i386,m68k,ppc), 18 (alpha,sparc*), 24 (mips) */
 	{ "TTIN",	SIGTTIN },	/* 21 (arm,i386,m68k,ppc,alpha,sparc*), 26 (mips) */
 	{ "TTOU",	SIGTTOU },	/* 22 (arm,i386,m68k,ppc,alpha,sparc*), 27 (mips) */
-#ifdef SIGURG
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGURG
 	{ "URG",	SIGURG },	/* 23 (arm,i386,m68k,ppc), 16 (alpha,sparc*), 21 (mips) */
-#endif
-#ifdef SIGXCPU
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGXCPU
 	{ "XCPU",	SIGXCPU },	/* 24 (arm,i386,m68k,ppc,alpha,sparc*), 30 (mips) */
-#endif
-#ifdef SIGXFSZ
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGXFSZ
 	{ "XFSZ",	SIGXFSZ },	/* 25 (arm,i386,m68k,ppc,alpha,sparc*), 31 (mips) */
-#endif
-#ifdef SIGVTALRM
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGVTALRM
 	{ "VTALRM",	SIGVTALRM },	/* 26 (arm,i386,m68k,ppc,alpha,sparc*), 28 (mips) */
-#endif
-#ifdef SIGPROF
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGPROF
 	{ "PROF",	SIGPROF },	/* 27 (arm,i386,m68k,ppc,alpha,sparc*), 29 (mips) */
-#endif
-#ifdef SIGWINCH
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGWINCH
 	{ "WINCH",	SIGWINCH },	/* 28 (arm,i386,m68k,ppc,alpha,sparc*), 20 (mips) */
-#endif
-#ifdef SIGIO
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGIO
 	{ "IO",		SIGIO },	/* 29 (arm,i386,m68k,ppc), 23 (alpha,sparc*), 22 (mips) */
-#endif
-#ifdef SIGPOLL
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGPOLL
 	{ "POLL",	SIGPOLL },	/* same as SIGIO */
-#endif
-#ifdef SIGINFO
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGINFO
 	{ "INFO",	SIGINFO },	/* 29 (alpha) */
-#endif
-#ifdef SIGLOST
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGLOST
 	{ "LOST",	SIGLOST },	/* 29 (arm,i386,m68k,ppc,sparc*) */
-#endif
-#ifdef SIGPWR
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGPWR
 	{ "PWR",	SIGPWR },	/* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
-#endif
-#ifdef SIGUNUSED
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGUNUSED
 	{ "UNUSED",	SIGUNUSED },	/* 31 (arm,i386,m68k,ppc) */
-#endif
-#ifdef SIGSYS
+#ਜੇ_ਅੰਤ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGSYS
 	{ "SYS",	SIGSYS },	/* 31 (mips,alpha,sparc*) */
-#endif
+#ਜੇ_ਅੰਤ
 };
 
-#ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGRTMIN
+ਸਥਿਰ ਪੂਰਨ rtsig_ਮੰਜ਼ਿਲ_signum(ਅਚਲ ਅੱਖਰ *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	ਪੂਰਨ ਅੰਕ, maxi = 0;
+	ਅੱਖਰ *ep = ਨਿਰਾ;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	ਜੇ (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	ਨਹੀਂਤਾਂ ਜੇ (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	ਜੇ (!ਅੰਕ_ਹੈ(*sig))
+		ਵਾਪਸ -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	ਅੰਕ = strtol(sig, &ep, 10);
+	ਜੇ (!ep || sig == ep || errno || ਅੰਕ < 0)
+		ਵਾਪਸ -1;
+	ਅੰਕ = maxi ? SIGRTMAX - ਅੰਕ : SIGRTMIN + ਅੰਕ;
+	ਜੇ (ਅੰਕ < SIGRTMIN || SIGRTMAX < ਅੰਕ)
+		ਵਾਪਸ -1;
+	ਵਾਪਸ ਅੰਕ;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-int signame_to_signum(const char *sig)
+ਪੂਰਨ signame_ਮੰਜ਼ਿਲ_signum(ਅਚਲ ਅੱਖਰ *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	ਜੇ (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
-#ifdef SIGRTMIN
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
-#endif
+	ਜੇ (!c_strncasecmp(sig, "rt", 2))
+		ਵਾਪਸ rtsig_ਮੰਜ਼ਿਲ_signum(sig + 2);
+#ਜੇ_ਅੰਤ
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	ਲਈ (n = 0; n < ARRAY_ਮਾਪ(ul_signames); n++) {
+		ਜੇ (!c_strcasecmp(ul_signames[n].name, sig))
+			ਵਾਪਸ ul_signames[n].val;
 	}
-	return -1;
+	ਵਾਪਸ -1;
 }
 
-const char *signum_to_signame(int signum)
+ਅਚਲ ਅੱਖਰ *signum_ਮੰਜ਼ਿਲ_signame(ਪੂਰਨ signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	ਲਈ (n = 0; n < ARRAY_ਮਾਪ(ul_signames); n++) {
+		ਜੇ (ul_signames[n].val == signum) {
+			ਵਾਪਸ ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+ਪੂਰਨ get_signame_by_idx(size_t idx, ਅਚਲ ਅੱਖਰ **signame, ਪੂਰਨ *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	ਜੇ (idx >= ARRAY_ਮਾਪ(ul_signames))
+		ਵਾਪਸ -1;
 
-	if (signame)
+	ਜੇ (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	ਜੇ (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	ਵਾਪਸ 0;
 
 }
 

@@ -11,47 +11,47 @@
  *
  */
 
-#include <net/if.h>
-#include <netinet/in.h>
-#include <linux/rtnetlink.h>
-#include <linux/if_addr.h>
-#include "netaddrq.h"
-#include "list.h"
-#include "debug.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ <net/if.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <netinet/in.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <linux/rtnetlink.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <linux/if_addr.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ "netaddrq.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "list.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "debug.h"
 
 /* Maximal number of interfaces. The algorithm has a quadratic complexity,
  * don't overflood it. */
-const int max_ifaces = 12;
+ਅਚਲ ਪੂਰਨ max_ifaces = 12;
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-#define ULNETADDRQ_DEBUG_HELP	(1 << 0)
-#define ULNETADDRQ_DEBUG_INIT	(1 << 1)
-#define ULNETADDRQ_DEBUG_ADDRQ	(1 << 2)
-#define ULNETADDRQ_DEBUG_LIST	(1 << 3)
-#define ULNETADDRQ_DEBUG_BEST	(1 << 4)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ULNETADDRQ_DEBUG_HELP	(1 << 0)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ULNETADDRQ_DEBUG_INIT	(1 << 1)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ULNETADDRQ_DEBUG_ADDRQ	(1 << 2)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ULNETADDRQ_DEBUG_LIST	(1 << 3)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ULNETADDRQ_DEBUG_ਉੱਤਮ	(1 << 4)
 
-static UL_DEBUG_DEFINE_MASK(netaddrq);
+ਸਥਿਰ UL_DEBUG_DEFINE_ਨਕਾਬ(netaddrq);
 UL_DEBUG_DEFINE_MASKNAMES(netaddrq) =
 {
 	{ "all",   UL_DEBUG_ALL,		"complete address processing" },
 	{ "help",  ULNETADDRQ_DEBUG_HELP,	"this help" },
 	{ "addrq", ULNETADDRQ_DEBUG_ADDRQ,	"address rating" },
 	{ "list",  ULNETADDRQ_DEBUG_LIST,	"list processing" },
-	{ "best",  ULNETADDRQ_DEBUG_BEST,	"searching best address" },
+	{ "best",  ULNETADDRQ_DEBUG_ਉੱਤਮ,	"searching best address" },
 
-	{ NULL, 0 }
+	{ ਨਿਰਾ, 0 }
 };
 
-#define DBG(m, x)		__UL_DBG(netaddrq, ULNETADDRQ_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(netaddrq, ULNETADDRQ_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(netaddrq, ULNETADDRQ_DEBUG_, m, x)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DBG(m, x)		__UL_DBG(netaddrq, ULNETADDRQ_DEBUG_, m, x)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DBG_OBJ(m, h, x)	__UL_DBG_OBJ(netaddrq, ULNETADDRQ_DEBUG_, m, h, x)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ON_DBG(m, x)		__UL_DBG_CALL(netaddrq, ULNETADDRQ_DEBUG_, m, x)
 
-static void netaddrq_init_debug(void)
+ਸਥਿਰ ਖਾਲੀ netaddrq_init_debug(ਖਾਲੀ)
 {
-	if (netaddrq_debug_mask)
-		return;
+	ਜੇ (netaddrq_debug_ਨਕਾਬ)
+		ਵਾਪਸ;
 
 	__UL_INIT_DEBUG_FROM_ENV(netaddrq, ULNETADDRQ_DEBUG_, 0,
 				 ULNETADDRQ_DEBUG);
@@ -60,38 +60,38 @@ static void netaddrq_init_debug(void)
 				UL_DEBUG_MASKNAMES(netaddrq)));
 }
 
-static inline enum ul_netaddrq_ip_rating
-evaluate_ip_quality(struct ul_nl_addr *addr) {
-	enum ul_netaddrq_ip_rating quality;
+ਸਥਿਰ ਸਤਰਅੰਦਰ ਗਿਣਤੀ ul_netaddrq_ip_rating
+evaluate_ip_quality(ਬਣਤਰ ul_nl_addr *addr) {
+	ਗਿਣਤੀ ul_netaddrq_ip_rating quality;
 
-	switch (addr->ifa_scope) {
-	case RT_SCOPE_UNIVERSE:
+	ਚੋਣ (addr->ifa_scope) {
+	ਹਾਲਤ RT_SCOPE_UNIVERSE:
 		quality = ULNETLINK_RATING_SCOPE_UNIVERSE;
-		break;
-	case RT_SCOPE_LINK:
+		ਰੋਕੋ;
+	ਹਾਲਤ RT_SCOPE_LINK:
 		quality = ULNETLINK_RATING_SCOPE_LINK;
-		break;
-	case RT_SCOPE_SITE:
+		ਰੋਕੋ;
+	ਹਾਲਤ RT_SCOPE_SITE:
 		quality = ULNETLINK_RATING_SCOPE_SITE;
-		break;
-	default:
+		ਰੋਕੋ;
+	ਮੂਲ:
 		quality = ULNETLINK_RATING_BAD;
-		break;
+		ਰੋਕੋ;
 	}
-	if (addr->ifa_flags & IFA_F_TEMPORARY) {
-		if (quality <= ULNETLINK_RATING_F_TEMPORARY)
+	ਜੇ (addr->ifa_flags & IFA_F_TEMPORARY) {
+		ਜੇ (quality <= ULNETLINK_RATING_F_TEMPORARY)
 			quality = ULNETLINK_RATING_F_TEMPORARY;
 	}
-	return quality;
+	ਵਾਪਸ quality;
 }
 
-#define DBG_CASE(x) case x: str = #x; break
-#define DBG_CASE_DEF8(x) default: snprintf(strx+2, 3, "%02hhx", x); str = strx; break
-static char *ip_rating_as_string(enum ul_netaddrq_ip_rating q)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DBG_CASE(x) ਹਾਲਤ x: str = #x; ਰੋਕੋ
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DBG_CASE_DEF8(x) ਮੂਲ: snprintf(strx+2, 3, "%02hhx", x); str = strx; ਰੋਕੋ
+ਸਥਿਰ ਅੱਖਰ *ip_rating_as_string(ਗਿਣਤੀ ul_netaddrq_ip_rating q)
 {
-	char *str;
-	static char strx[5] = "0x";
-	switch (q) {
+	ਅੱਖਰ *str;
+	ਸਥਿਰ ਅੱਖਰ strx[5] = "0x";
+	ਚੋਣ (q) {
 		DBG_CASE(ULNETLINK_RATING_SCOPE_UNIVERSE);
 		DBG_CASE(ULNETLINK_RATING_SCOPE_SITE);
 		DBG_CASE(ULNETLINK_RATING_F_TEMPORARY);
@@ -99,27 +99,27 @@ static char *ip_rating_as_string(enum ul_netaddrq_ip_rating q)
 		DBG_CASE(ULNETLINK_RATING_BAD);
 		DBG_CASE_DEF8(q);
 	}
-	return str;
+	ਵਾਪਸ str;
 }
 
 /* Netlink callback evaluating the address quality and building the list of
  * interface lists */
-static int callback_addrq(struct ul_nl_data *nl)
+ਸਥਿਰ ਪੂਰਨ callback_addrq(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl)
 {
-	struct ul_netaddrq_data *addrq = UL_NETADDRQ_DATA(nl);
-	struct list_head *li, *ipq_list;
-	struct ul_netaddrq_iface *ifaceq = NULL;
-	struct ul_netaddrq_ip *ipq = NULL;
-	int rc;
+	ਬਣਤਰ ul_netaddrq_ਅੰਕੜੇ *addrq = UL_NETADDRQ_ਅੰਕੜੇ(nl);
+	ਬਣਤਰ list_ਸਿਰ *li, *ipq_list;
+	ਬਣਤਰ ul_netaddrq_iface *ifaceq = ਨਿਰਾ;
+	ਬਣਤਰ ul_netaddrq_ip *ipq = ਨਿਰਾ;
+	ਪੂਰਨ rc;
 	bool *ifaces_change;
 
 	DBG_OBJ(LIST, addrq, ul_debug("callback_addrq() for %s on %s",
-			      ul_nl_addr_ntop_address(&(nl->addr)),
+			      ul_nl_addr_ntop_ਪਤਾ(&(nl->addr)),
 			      nl->addr.ifname));
-	if (addrq->callback_pre)
+	ਜੇ (addrq->callback_pre)
 	{
 		DBG_OBJ(LIST, addrq, ul_debug("callback_pre"));
-		if ((rc = (*(addrq->callback_pre))(nl)))
+		ਜੇ ((rc = (*(addrq->callback_pre))(nl)))
 			DBG_OBJ(LIST, nl, ul_debug("callback_pre rc != 0"));
 	}
 
@@ -127,100 +127,100 @@ static int callback_addrq(struct ul_nl_data *nl)
 	addrq->nifaces = 0;
 
 	list_for_each(li, &(addrq->ifaces)) {
-		struct ul_netaddrq_iface *ifaceqq;
+		ਬਣਤਰ ul_netaddrq_iface *ifaceqq;
 
-		ifaceqq = list_entry(li, struct ul_netaddrq_iface, entry);
-		if (ifaceqq->ifa_index == nl->addr.ifa_index) {
+		ifaceqq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_iface, ਇੰਦਰਾਜ);
+		ਜੇ (ifaceqq->ifa_index == nl->addr.ifa_index) {
 			ifaceq = ifaceqq;
 			DBG_OBJ(LIST, ifaceq, ul_debug(
 					      "%s found in addrq",
 					      nl->addr.ifname));
-			break;
+			ਰੋਕੋ;
 		}
 		addrq->nifaces++;
 	}
 
-	if (ifaceq == NULL) {
-		if (nl->rtm_event) {
-			if (addrq->nifaces >= max_ifaces) {
+	ਜੇ (ifaceq == ਨਿਰਾ) {
+		ਜੇ (nl->rtm_event) {
+			ਜੇ (addrq->nifaces >= max_ifaces) {
 				DBG_OBJ(LIST, addrq, ul_debug(
 						       "too many interfaces"));
-				addrq->overflow = true;
-				return UL_NL_IFACES_MAX;
+				addrq->ਉਛਾਲ = true;
+				ਵਾਪਸ UL_NL_IFACES_MAX;
 			}
 			DBG_OBJ(LIST, addrq, ul_debug(
 					       "new ifa_index in addrq"));
-			if (!(ifaceq = malloc(sizeof(struct ul_netaddrq_iface))))
-				return -ENOMEM;
-			INIT_LIST_HEAD(&(ifaceq->ip_quality_list_4));
-			INIT_LIST_HEAD(&(ifaceq->ip_quality_list_6));
+			ਜੇ (!(ifaceq = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਆਕਾਰ(ਬਣਤਰ ul_netaddrq_iface))))
+				ਵਾਪਸ -ENOMEM;
+			INIT_LIST_ਸਿਰ(&(ifaceq->ip_quality_list_4));
+			INIT_LIST_ਸਿਰ(&(ifaceq->ip_quality_list_6));
 			ifaceq->ifa_index = nl->addr.ifa_index;
-			if (!(ifaceq->ifname = strdup(nl->addr.ifname)))
+			ਜੇ (!(ifaceq->ifname = strdup(nl->addr.ifname)))
 			{
 				DBG_OBJ(LIST, addrq, ul_debug(
 						      "malloc() failed"));
-				free(ifaceq);
-				return -ENOMEM;
+				ਮੁਕਤ(ifaceq);
+				ਵਾਪਸ -ENOMEM;
 			}
-			list_add_tail(&(ifaceq->entry), &(addrq->ifaces));
+			list_ਜੋੜੋ_ਪੂਛ(&(ifaceq->ਇੰਦਰਾਜ), &(addrq->ifaces));
 			DBG_OBJ(LIST, ifaceq, ul_debug(
 					       "new interface"));
-		} else {
+		} ਨਹੀਂਤਾਂ {
 			/* Should never happen. */
 			DBG_OBJ(LIST, ifaceq, ul_debug(
 					       "interface not found"));
-			return UL_NL_SOFT_ERROR;
+			ਵਾਪਸ UL_NL_SOFT_ERROR;
 		}
 	}
-	if (nl->addr.ifa_family == AF_INET) {
+	ਜੇ (nl->addr.ifa_family == AF_INET) {
 		ipq_list = &(ifaceq->ip_quality_list_4);
 		ifaces_change = &(addrq->ifaces_change_4);
-	} else {
+	} ਨਹੀਂਤਾਂ {
 	/* if (nl->addr.ifa_family == AF_INET6) */
 		ipq_list = &(ifaceq->ip_quality_list_6);
 		ifaces_change = &(addrq->ifaces_change_6);
 	}
 
 	list_for_each(li, ipq_list) {
-		struct ul_netaddrq_ip *ipqq;
+		ਬਣਤਰ ul_netaddrq_ip *ipqq;
 
-		ipqq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (ipqq->addr->address_len == nl->addr.address_len)
-			if (!memcmp(ipqq->addr->address, nl->addr.address,
-				   nl->addr.address_len)) {
+		ipqq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_ip, ਇੰਦਰਾਜ);
+		ਜੇ (ipqq->addr->ਪਤਾ_len == nl->addr.ਪਤਾ_len)
+			ਜੇ (!memcmp(ipqq->addr->ਪਤਾ, nl->addr.ਪਤਾ,
+				   nl->addr.ਪਤਾ_len)) {
 				ipq = ipqq;
 				DBG_OBJ(LIST, ipq, ul_debug(
 						      "address found in ipq_list"));
-				break;
+				ਰੋਕੋ;
 			}
 	}
-	if (ipq == NULL) {
+	ਜੇ (ipq == ਨਿਰਾ) {
 			DBG_OBJ(LIST, ipq_list, ul_debug(
 					      "address not found in the list"));
 	}
 
 	/* From now on, rc is return code */
 	rc = 0;
-	if (UL_NL_IS_RTM_NEW(nl)) {
-		struct ul_nl_addr *addr;
+	ਜੇ (UL_NL_IS_RTM_NEW(nl)) {
+		ਬਣਤਰ ul_nl_addr *addr;
 
 		addr = ul_nl_addr_dup(&(nl->addr));
-		if (!addr) {
+		ਜੇ (!addr) {
 			rc = -ENOMEM;
-			goto error;
+			ਜਾਓ error;
 		}
-		if (ipq == NULL) {
-			if (!(ipq = malloc(sizeof(struct ul_netaddrq_ip))))
+		ਜੇ (ipq == ਨਿਰਾ) {
+			ਜੇ (!(ipq = ਸਮ੍ਰਿਤੀ_ਦਿਓ(ਆਕਾਰ(ਬਣਤਰ ul_netaddrq_ip))))
 			{
 				rc = -ENOMEM;
 				ul_nl_addr_free(addr);
-				goto error;
+				ਜਾਓ error;
 			}
 			ipq->addr = addr;
-			list_add_tail(&(ipq->entry), ipq_list);
+			list_ਜੋੜੋ_ਪੂਛ(&(ipq->ਇੰਦਰਾਜ), ipq_list);
 			DBG_OBJ(LIST, ipq, ul_debug("new address"));
 			*ifaces_change = true;
-		} else {
+		} ਨਹੀਂਤਾਂ {
 			DBG_OBJ(LIST, addrq, ul_debug("updating address data"));
 			ul_nl_addr_free(ipq->addr);
 			ipq->addr = addr;
@@ -228,472 +228,472 @@ static int callback_addrq(struct ul_nl_data *nl)
 		ipq->quality = evaluate_ip_quality(addr);
 		DBG_OBJ(ADDRQ, addrq,
 		    ul_debug("%s rating: %s",
-				ul_nl_addr_ntop_address(&(nl->addr)),
+				ul_nl_addr_ntop_ਪਤਾ(&(nl->addr)),
 				ip_rating_as_string(ipq->quality)));
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		/* UL_NL_RTM_DEL */
-		if (ipq == NULL)
+		ਜੇ (ipq == ਨਿਰਾ)
 		{
 			/* Should not happen. */
 			DBG_OBJ(LIST, nl, ul_debug(
 					      "UL_NL_RTM_DEL: unknown address"));
-			return UL_NL_SOFT_ERROR;
+			ਵਾਪਸ UL_NL_SOFT_ERROR;
 		}
 		/* Delist the address */
 		DBG_OBJ(LIST, ipq, ul_debug("removing address"));
 		*ifaces_change = true;
-		list_del(&(ipq->entry));
+		list_del(&(ipq->ਇੰਦਰਾਜ));
 		ul_nl_addr_free(ipq->addr);
-		free(ipq);
+		ਮੁਕਤ(ipq);
 	error:
-		if (list_empty(&(ifaceq->ip_quality_list_4)) &&
-		    list_empty(&(ifaceq->ip_quality_list_6))) {
+		ਜੇ (list_ਖਾਲੀ_ਥਾਵਾਂ(&(ifaceq->ip_quality_list_4)) &&
+		    list_ਖਾਲੀ_ਥਾਵਾਂ(&(ifaceq->ip_quality_list_6))) {
 		DBG_OBJ(LIST, ifaceq,
 		    ul_debug("deleted last address, removing interface"));
-			list_del(&(ifaceq->entry));
+			list_del(&(ifaceq->ਇੰਦਰਾਜ));
 			addrq->nifaces--;
-			free(ifaceq->ifname);
-			free(ifaceq);
+			ਮੁਕਤ(ifaceq->ifname);
+			ਮੁਕਤ(ifaceq);
 		}
 	}
-	if (!rc && addrq->callback_post)
+	ਜੇ (!rc && addrq->callback_post)
 	{
 		DBG_OBJ(LIST, addrq, ul_debug("callback_post"));
-		if ((rc = (*(addrq->callback_post))(nl)))
+		ਜੇ ((rc = (*(addrq->callback_post))(nl)))
 			DBG_OBJ(LIST, nl, ul_debug("callback_post rc != 0"));
 	}
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /* Initialize ul_nl_data for use with netlink-addr-quality */
-int ul_netaddrq_init(struct ul_nl_data *nl, ul_nl_callback callback_pre,
-		     ul_nl_callback callback_post, void *data)
+ਪੂਰਨ ul_netaddrq_init(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl, ul_nl_callback callback_pre,
+		     ul_nl_callback callback_post, ਖਾਲੀ *ਅੰਕੜੇ)
 {
-	struct ul_netaddrq_data *addrq;
+	ਬਣਤਰ ul_netaddrq_ਅੰਕੜੇ *addrq;
 
 	netaddrq_init_debug();
-	if (!(nl->data_addr = calloc(1, sizeof(struct ul_netaddrq_data))))
-		return -ENOMEM;
+	ਜੇ (!(nl->ਅੰਕੜੇ_addr = ਸਿਫਰ_ਸਮ੍ਰਿਤੀ_ਦਿਓ(1, ਆਕਾਰ(ਬਣਤਰ ul_netaddrq_ਅੰਕੜੇ))))
+		ਵਾਪਸ -ENOMEM;
 	nl->callback_addr = callback_addrq;
-	addrq = UL_NETADDRQ_DATA(nl);
+	addrq = UL_NETADDRQ_ਅੰਕੜੇ(nl);
 	addrq->callback_pre = callback_pre;
 	addrq->callback_post = callback_post;
-	addrq->callback_data = data;
-	INIT_LIST_HEAD(&(addrq->ifaces));
+	addrq->callback_ਅੰਕੜੇ = ਅੰਕੜੇ;
+	INIT_LIST_ਸਿਰ(&(addrq->ifaces));
 	DBG_OBJ(LIST, addrq, ul_debug("callback initialized"));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-enum ul_netaddrq_ip_rating
-ul_netaddrq_iface_bestaddr(struct list_head *ipq_list,
-			   struct ul_netaddrq_ip *(*best)[__ULNETLINK_RATING_MAX])
+ਗਿਣਤੀ ul_netaddrq_ip_rating
+ul_netaddrq_iface_bestaddr(ਬਣਤਰ list_ਸਿਰ *ipq_list,
+			   ਬਣਤਰ ul_netaddrq_ip *(*ਉੱਤਮ)[__ULNETLINK_RATING_MAX])
 {
-	struct list_head *li;
-	struct ul_netaddrq_ip *ipq;
-	enum ul_netaddrq_ip_rating threshold;
+	ਬਣਤਰ list_ਸਿਰ *li;
+	ਬਣਤਰ ul_netaddrq_ip *ipq;
+	ਗਿਣਤੀ ul_netaddrq_ip_rating ਹੱਦ;
 
-	threshold = __ULNETLINK_RATING_MAX;
+	ਹੱਦ = __ULNETLINK_RATING_MAX;
 	list_for_each(li, ipq_list)
 	{
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
+		ipq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_ip, ਇੰਦਰਾਜ);
 
-		if (!(*best)[ipq->quality] ||
+		ਜੇ (!(*ਉੱਤਮ)[ipq->quality] ||
 		    ipq->addr->ifa_valid >
-		    (*best)[ipq->quality]->addr->ifa_valid)
+		    (*ਉੱਤਮ)[ipq->quality]->addr->ifa_valid)
 		{
-			DBG_OBJ(BEST, (*best),
+			DBG_OBJ(ਉੱਤਮ_2, (*ਉੱਤਮ),
 			    ul_debug("%s -> best[%s]",
-					ul_nl_addr_ntop_address(ipq->addr),
+					ul_nl_addr_ntop_ਪਤਾ(ipq->addr),
 					ip_rating_as_string(ipq->quality)));
-			(*best)[ipq->quality] = ipq;
+			(*ਉੱਤਮ)[ipq->quality] = ipq;
 		}
 
-		if (ipq->quality < threshold)
+		ਜੇ (ipq->quality < ਹੱਦ)
 		{
-			threshold = ipq->quality;
-			DBG(BEST,
-			    ul_debug("threshold %s", ip_rating_as_string(threshold)));
+			ਹੱਦ = ipq->quality;
+			DBG(ਉੱਤਮ_2,
+			    ul_debug("threshold %s", ip_rating_as_string(ਹੱਦ)));
 
 		}
 	}
-	return threshold;
+	ਵਾਪਸ ਹੱਦ;
 }
 
-enum ul_netaddrq_ip_rating
-ul_netaddrq_bestaddr(struct ul_nl_data *nl,
-		     struct ul_netaddrq_iface **best_ifaceq,
-		     struct ul_netaddrq_ip *(*best)[__ULNETLINK_RATING_MAX],
+ਗਿਣਤੀ ul_netaddrq_ip_rating
+ul_netaddrq_bestaddr(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl,
+		     ਬਣਤਰ ul_netaddrq_iface **ਉੱਤਮ_ifaceq,
+		     ਬਣਤਰ ul_netaddrq_ip *(*ਉੱਤਮ)[__ULNETLINK_RATING_MAX],
 		     uint8_t ifa_family)
 {
-	struct ul_netaddrq_data *addrq = UL_NETADDRQ_DATA(nl);
-	struct list_head *li;
-	struct ul_netaddrq_iface *ifaceq;
+	ਬਣਤਰ ul_netaddrq_ਅੰਕੜੇ *addrq = UL_NETADDRQ_ਅੰਕੜੇ(nl);
+	ਬਣਤਰ list_ਸਿਰ *li;
+	ਬਣਤਰ ul_netaddrq_iface *ifaceq;
 	size_t ipqo;
-	enum ul_netaddrq_ip_rating threshold;
+	ਗਿਣਤੀ ul_netaddrq_ip_rating ਹੱਦ;
 
-	if (ifa_family == AF_INET) {
-		ipqo = offsetof(struct ul_netaddrq_iface, ip_quality_list_4);
-	} else {
+	ਜੇ (ifa_family == AF_INET) {
+		ipqo = offsetof(ਬਣਤਰ ul_netaddrq_iface, ip_quality_list_4);
+	} ਨਹੀਂਤਾਂ {
 	/* if (ifa_family == AF_INET6) */
-		ipqo = offsetof(struct ul_netaddrq_iface, ip_quality_list_6);
+		ipqo = offsetof(ਬਣਤਰ ul_netaddrq_iface, ip_quality_list_6);
 	}
 
-	threshold = __ULNETLINK_RATING_MAX;
+	ਹੱਦ = __ULNETLINK_RATING_MAX;
 	list_for_each(li, &(addrq->ifaces))
 	{
-		struct list_head *ipq_list;
-		enum ul_netaddrq_ip_rating t;
+		ਬਣਤਰ list_ਸਿਰ *ipq_list;
+		ਗਿਣਤੀ ul_netaddrq_ip_rating t;
 
-		ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+		ifaceq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_iface, ਇੰਦਰਾਜ);
 
-		ipq_list = (struct list_head*)((char*)ifaceq + ipqo);
+		ipq_list = (ਬਣਤਰ list_ਸਿਰ*)((ਅੱਖਰ*)ifaceq + ipqo);
 
-		t = ul_netaddrq_iface_bestaddr(ipq_list, best);
-		if (t < threshold)
+		t = ul_netaddrq_iface_bestaddr(ipq_list, ਉੱਤਮ);
+		ਜੇ (t < ਹੱਦ)
 		{
-			DBG_OBJ(BEST, *best,
+			DBG_OBJ(ਉੱਤਮ_2, *ਉੱਤਮ,
 			    ul_debug("best iface %s, threshold %u",
 					ifaceq->ifname, t));
-			*best_ifaceq = ifaceq;
-			threshold = t;
+			*ਉੱਤਮ_ifaceq = ifaceq;
+			ਹੱਦ = t;
 		}
 	}
-	return threshold;
+	ਵਾਪਸ ਹੱਦ;
 }
 
-const char *ul_netaddrq_get_best_ipp(struct ul_nl_data *nl,
+ਅਚਲ ਅੱਖਰ *ul_netaddrq_get_ਉੱਤਮ_ipp(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl,
 				     uint8_t ifa_family,
-				     enum ul_netaddrq_ip_rating *threshold,
-				     struct ul_netaddrq_iface **best_ifaceq)
+				     ਗਿਣਤੀ ul_netaddrq_ip_rating *ਹੱਦ,
+				     ਬਣਤਰ ul_netaddrq_iface **ਉੱਤਮ_ifaceq)
 {
-	struct ul_netaddrq_ip *best[__ULNETLINK_RATING_MAX];
+	ਬਣਤਰ ul_netaddrq_ip *ਉੱਤਮ[__ULNETLINK_RATING_MAX];
 
-	memset(best, 0, sizeof(best));
-	*threshold = ul_netaddrq_bestaddr(nl, best_ifaceq, &best, ifa_family);
-	if (*threshold != __ULNETLINK_RATING_MAX)
-		return ul_nl_addr_ntop_address(best[*threshold]->addr);
-	return NULL;
+	memset(ਉੱਤਮ, 0, ਆਕਾਰ(ਉੱਤਮ));
+	*ਹੱਦ = ul_netaddrq_bestaddr(nl, ਉੱਤਮ_ifaceq, &ਉੱਤਮ, ifa_family);
+	ਜੇ (*ਹੱਦ != __ULNETLINK_RATING_MAX)
+		ਵਾਪਸ ul_nl_addr_ntop_ਪਤਾ(ਉੱਤਮ[*ਹੱਦ]->addr);
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-struct ul_netaddrq_iface *ul_netaddrq_iface_by_name(const struct ul_nl_data *nl,
-						    const char *ifname)
+ਬਣਤਰ ul_netaddrq_iface *ul_netaddrq_iface_by_name(ਅਚਲ ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl,
+						    ਅਚਲ ਅੱਖਰ *ifname)
 {
-	struct list_head *li;
-	struct ul_netaddrq_iface *ifaceq;
+	ਬਣਤਰ list_ਸਿਰ *li;
+	ਬਣਤਰ ul_netaddrq_iface *ifaceq;
 
 	list_for_each_netaddrq_iface(li, nl)
 	{
-		ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+		ifaceq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_iface, ਇੰਦਰਾਜ);
 
-		if (!strcmp(ifaceq->ifname, ifname))
-			return ifaceq;
+		ਜੇ (!strcmp(ifaceq->ifname, ifname))
+			ਵਾਪਸ ifaceq;
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
-#ifdef TEST_PROGRAM_NETADDRQ
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ_NETADDRQ
 /* This test program shows several possibilities for cherry-picking of IP
  * addresses based on its rating. But there are many more possibilities in the
  * criteria selection. ADDRQ_MODE_GOOD is the most smart one. */
-enum addrq_print_mode {
-	ADDRQ_MODE_BESTOFALL,	/* Best address of all interfaces */
-	ADDRQ_MODE_BEST,	/* Best address per interface */
-	ADDRQ_MODE_GOOD,	/* All global or site addresses, if none, the
+ਗਿਣਤੀ addrq_print_ਬਹੁਲਕ {
+	ADDRQ_ਬਹੁਲਕ_BESTOFALL,	/* Best address of all interfaces */
+	ADDRQ_ਬਹੁਲਕ_ਉੱਤਮ,	/* Best address per interface */
+	ADDRQ_ਬਹੁਲਕ_GOOD,	/* All global or site addresses, if none, the
 				 * longest living temporary, if none, link */
-	ADDRQ_MODE_ALL		/* All available addresses */
+	ADDRQ_ਬਹੁਲਕ_ALL		/* All available addresses */
 };
 
 /* In our example addrq->callback_data is a simple FILE *. In more complex
  * programs it could be a pointer to an arbitrary struct */
-#define netout (FILE *)(UL_NETADDRQ_DATA(nl)->callback_data)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ netout (FILE *)(UL_NETADDRQ_ਅੰਕੜੇ(nl)->callback_ਅੰਕੜੇ)
 
 /* This example uses separate threshold for IPv4 and IPv6, so the best IPv4 and
  * best IPv6 addresses are printed. */
-static void dump_iface_best(struct ul_nl_data *nl,
-			    struct ul_netaddrq_iface *ifaceq)
+ਸਥਿਰ ਖਾਲੀ dump_iface_ਉੱਤਮ(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl,
+			    ਬਣਤਰ ul_netaddrq_iface *ifaceq)
 {
-	struct ul_netaddrq_ip *best[__ULNETLINK_RATING_MAX];
-	enum ul_netaddrq_ip_rating threshold;
-	bool first = true;
+	ਬਣਤਰ ul_netaddrq_ip *ਉੱਤਮ[__ULNETLINK_RATING_MAX];
+	ਗਿਣਤੀ ul_netaddrq_ip_rating ਹੱਦ;
+	bool ਪਹਿਲਾ = true;
 
-	memset(best, 0, sizeof(best));
-	threshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
-					       &best);
-	if (threshold != __ULNETLINK_RATING_MAX)
+	memset(ਉੱਤਮ, 0, ਆਕਾਰ(ਉੱਤਮ));
+	ਹੱਦ = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
+					       &ਉੱਤਮ);
+	ਜੇ (ਹੱਦ != __ULNETLINK_RATING_MAX)
 	{
-		fprintf(netout, "%s IPv4: %s", (first ? "best address" : " "),
-		       ul_nl_addr_ntop_address(best[threshold]->addr));
-		first = false;
+		fprintf(netout, "%s IPv4: %s", (ਪਹਿਲਾ ? "best address" : " "),
+		       ul_nl_addr_ntop_ਪਤਾ(ਉੱਤਮ[ਹੱਦ]->addr));
+		ਪਹਿਲਾ = false;
 	}
-	memset(best, 0, sizeof(best));
-	threshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_6),
-					       &best);
-	if (threshold != __ULNETLINK_RATING_MAX)
+	memset(ਉੱਤਮ, 0, ਆਕਾਰ(ਉੱਤਮ));
+	ਹੱਦ = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_6),
+					       &ਉੱਤਮ);
+	ਜੇ (ਹੱਦ != __ULNETLINK_RATING_MAX)
 	{
-		fprintf(netout, "%s IPv6: %s", (first ? "best address" : " "),
-		       ul_nl_addr_ntop_address(best[threshold]->addr));
-		first = false;
+		fprintf(netout, "%s IPv6: %s", (ਪਹਿਲਾ ? "best address" : " "),
+		       ul_nl_addr_ntop_ਪਤਾ(ਉੱਤਮ[ਹੱਦ]->addr));
+		ਪਹਿਲਾ = false;
 	}
-	if (!first)
+	ਜੇ (!ਪਹਿਲਾ)
 		fprintf(netout, " on interface %s\n",
 		       ifaceq->ifname);
 }
 
 /* This example uses common threshold for IPv4 and IPv6, so e. g. worse rated
  * IPv6 are completely ignored. */
-static void dump_iface_good(struct ul_nl_data *nl,
-			    struct ul_netaddrq_iface *ifaceq)
+ਸਥਿਰ ਖਾਲੀ dump_iface_good(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl,
+			    ਬਣਤਰ ul_netaddrq_iface *ifaceq)
 {
-	struct ul_netaddrq_ip *best4[__ULNETLINK_RATING_MAX];
-	struct ul_netaddrq_ip *best6[__ULNETLINK_RATING_MAX];
-	struct list_head *li;
-	enum ul_netaddrq_ip_rating threshold = __ULNETLINK_RATING_MAX - 1;
-	enum ul_netaddrq_ip_rating fthreshold; /* per family threshold */
-	bool first = true;
+	ਬਣਤਰ ul_netaddrq_ip *best4[__ULNETLINK_RATING_MAX];
+	ਬਣਤਰ ul_netaddrq_ip *best6[__ULNETLINK_RATING_MAX];
+	ਬਣਤਰ list_ਸਿਰ *li;
+	ਗਿਣਤੀ ul_netaddrq_ip_rating ਹੱਦ = __ULNETLINK_RATING_MAX - 1;
+	ਗਿਣਤੀ ul_netaddrq_ip_rating fthreshold; /* per family threshold */
+	bool ਪਹਿਲਾ = true;
 
-	memset(best4, 0, sizeof(best4));
-	threshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
+	memset(best4, 0, ਆਕਾਰ(best4));
+	ਹੱਦ = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
 					       &best4);
-	memset(best6, 0, sizeof(best6));
+	memset(best6, 0, ਆਕਾਰ(best6));
 	fthreshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_6),
 						&best6);
-	if (fthreshold < threshold)
-		threshold = fthreshold;
+	ਜੇ (fthreshold < ਹੱਦ)
+		ਹੱਦ = fthreshold;
 
 	list_for_each(li, &(ifaceq->ip_quality_list_4))
 	{
-		struct ul_netaddrq_ip *ipq;
+		ਬਣਤਰ ul_netaddrq_ip *ipq;
 
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (threshold <= ULNETLINK_RATING_SCOPE_LINK &&
-		    ( ipq->quality <= threshold ||
+		ipq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_ip, ਇੰਦਰਾਜ);
+		ਜੇ (ਹੱਦ <= ULNETLINK_RATING_SCOPE_LINK &&
+		    ( ipq->quality <= ਹੱਦ ||
 		      /* Consider site addresses equally good as global */
 		      ipq->quality == ULNETLINK_RATING_SCOPE_SITE) &&
-		    best4[threshold])
+		    best4[ਹੱਦ])
 		{
-			if (first)
+			ਜੇ (ਪਹਿਲਾ)
 			{
 				fprintf(netout, "%s: ", ifaceq->ifname);
-				first = false;
+				ਪਹਿਲਾ = false;
 			}
-			else
+			ਨਹੀਂਤਾਂ
 				fprintf(netout, " ");
 			/* Write only the longest living temporary address */
-			if (threshold == ULNETLINK_RATING_F_TEMPORARY)
+			ਜੇ (ਹੱਦ == ULNETLINK_RATING_F_TEMPORARY)
 			{
-				fputs(ul_nl_addr_ntop_address(best4[ULNETLINK_RATING_F_TEMPORARY]->addr),
+				fputs(ul_nl_addr_ntop_ਪਤਾ(best4[ULNETLINK_RATING_F_TEMPORARY]->addr),
 				      netout);
-				goto temp_cont4;
+				ਜਾਓ ਆਰਜ਼ੀ_cont4;
 			}
-			else
-				fputs(ul_nl_addr_ntop_address(ipq->addr),
+			ਨਹੀਂਤਾਂ
+				fputs(ul_nl_addr_ntop_ਪਤਾ(ipq->addr),
 				      netout);
 		}
-	temp_cont4:;
+	ਆਰਜ਼ੀ_cont4:;
 	}
 
 	list_for_each(li, &(ifaceq->ip_quality_list_6))
 	{
-		struct ul_netaddrq_ip *ipq;
+		ਬਣਤਰ ul_netaddrq_ip *ipq;
 
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (threshold <= ULNETLINK_RATING_SCOPE_LINK &&
-		    ( ipq->quality <= threshold ||
+		ipq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_ip, ਇੰਦਰਾਜ);
+		ਜੇ (ਹੱਦ <= ULNETLINK_RATING_SCOPE_LINK &&
+		    ( ipq->quality <= ਹੱਦ ||
 		      /* Consider site addresses equally good as global */
 		      ipq->quality == ULNETLINK_RATING_SCOPE_SITE) &&
-		    best6[threshold])
+		    best6[ਹੱਦ])
 		{
-			if (first)
+			ਜੇ (ਪਹਿਲਾ)
 			{
 				fprintf(netout, "%s: ", ifaceq->ifname);
-				first = false;
+				ਪਹਿਲਾ = false;
 			}
-			else
+			ਨਹੀਂਤਾਂ
 				fprintf(netout, " ");
 			/* Write only the longest living temporary address */
-			if (threshold == ULNETLINK_RATING_F_TEMPORARY)
+			ਜੇ (ਹੱਦ == ULNETLINK_RATING_F_TEMPORARY)
 			{
-				fputs(ul_nl_addr_ntop_address(best6[ULNETLINK_RATING_F_TEMPORARY]->addr),
+				fputs(ul_nl_addr_ntop_ਪਤਾ(best6[ULNETLINK_RATING_F_TEMPORARY]->addr),
 				      netout);
-				goto temp_cont6;
+				ਜਾਓ ਆਰਜ਼ੀ_cont6;
 			}
-			else
-				fputs(ul_nl_addr_ntop_address(ipq->addr),
+			ਨਹੀਂਤਾਂ
+				fputs(ul_nl_addr_ntop_ਪਤਾ(ipq->addr),
 				      netout);
 		}
-	temp_cont6:;
+	ਆਰਜ਼ੀ_cont6:;
 	}
-	if (!first)
+	ਜੇ (!ਪਹਿਲਾ)
 		fputs("\n", netout);
 }
 
-static void dump_iface_all(struct ul_nl_data *nl,
-			   struct ul_netaddrq_iface *ifaceq)
+ਸਥਿਰ ਖਾਲੀ dump_iface_all(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl,
+			   ਬਣਤਰ ul_netaddrq_iface *ifaceq)
 {
-	struct list_head *li;
-	struct ul_netaddrq_ip *ipq;
-	bool first = true;
+	ਬਣਤਰ list_ਸਿਰ *li;
+	ਬਣਤਰ ul_netaddrq_ip *ipq;
+	bool ਪਹਿਲਾ = true;
 
 	list_for_each(li, &(ifaceq->ip_quality_list_4))
 	{
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (first)
+		ipq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_ip, ਇੰਦਰਾਜ);
+		ਜੇ (ਪਹਿਲਾ)
 		{
 			fprintf(netout, "%s: ", ifaceq->ifname);
-			first = false;
+			ਪਹਿਲਾ = false;
 		}
-		else
+		ਨਹੀਂਤਾਂ
 			fprintf(netout, " ");
-		fputs(ul_nl_addr_ntop_address(ipq->addr), netout);
+		fputs(ul_nl_addr_ntop_ਪਤਾ(ipq->addr), netout);
 	}
 	list_for_each(li, &(ifaceq->ip_quality_list_6))
 	{
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (first)
+		ipq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_ip, ਇੰਦਰਾਜ);
+		ਜੇ (ਪਹਿਲਾ)
 		{
 			fprintf(netout, "%s: ", ifaceq->ifname);
-			first = false;
+			ਪਹਿਲਾ = false;
 		}
-		else
+		ਨਹੀਂਤਾਂ
 			fprintf(netout, " ");
-		fputs(ul_nl_addr_ntop_address(ipq->addr), netout);
+		fputs(ul_nl_addr_ntop_ਪਤਾ(ipq->addr), netout);
 	}
-	if (!first)
+	ਜੇ (!ਪਹਿਲਾ)
 		fputs("\n", netout);
 }
 
-static void dump_addrq(struct ul_nl_data *nl, enum addrq_print_mode c)
+ਸਥਿਰ ਖਾਲੀ dump_addrq(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl, ਗਿਣਤੀ addrq_print_ਬਹੁਲਕ c)
 {
-	struct list_head *li;
-	struct ul_netaddrq_iface *ifaceq;
-	enum ul_netaddrq_ip_rating threshold;
+	ਬਣਤਰ list_ਸਿਰ *li;
+	ਬਣਤਰ ul_netaddrq_iface *ifaceq;
+	ਗਿਣਤੀ ul_netaddrq_ip_rating ਹੱਦ;
 
-	switch(c)
+	ਚੋਣ(c)
 	{
-	case ADDRQ_MODE_BESTOFALL:
+	ਹਾਲਤ ADDRQ_ਬਹੁਲਕ_BESTOFALL:
 	{
-		struct ul_netaddrq_iface *best_ifaceq;
-		const char *best_ipp;
+		ਬਣਤਰ ul_netaddrq_iface *ਉੱਤਮ_ifaceq;
+		ਅਚਲ ਅੱਖਰ *ਉੱਤਮ_ipp;
 
-		best_ipp = ul_netaddrq_get_best_ipp(nl, AF_INET,
-						    &threshold, &best_ifaceq);
-		if (best_ipp)
+		ਉੱਤਮ_ipp = ul_netaddrq_get_ਉੱਤਮ_ipp(nl, AF_INET,
+						    &ਹੱਦ, &ਉੱਤਮ_ifaceq);
+		ਜੇ (ਉੱਤਮ_ipp)
 			fprintf(netout, "best IPv4 address: %s on %s\n",
-				best_ipp, best_ifaceq->ifname);
-		best_ipp = ul_netaddrq_get_best_ipp(nl, AF_INET6,
-						    &threshold, &best_ifaceq);
-		if (best_ipp)
+				ਉੱਤਮ_ipp, ਉੱਤਮ_ifaceq->ifname);
+		ਉੱਤਮ_ipp = ul_netaddrq_get_ਉੱਤਮ_ipp(nl, AF_INET6,
+						    &ਹੱਦ, &ਉੱਤਮ_ifaceq);
+		ਜੇ (ਉੱਤਮ_ipp)
 			fprintf(netout, "best IPv6 address: %s on %s\n",
-				best_ipp, best_ifaceq->ifname);
+				ਉੱਤਮ_ipp, ਉੱਤਮ_ifaceq->ifname);
 	}
-	break;
-	case ADDRQ_MODE_BEST:
+	ਰੋਕੋ;
+	ਹਾਲਤ ADDRQ_ਬਹੁਲਕ_ਉੱਤਮ:
 	{
 		list_for_each_netaddrq_iface(li, nl)
 		{
-			ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+			ifaceq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_iface, ਇੰਦਰਾਜ);
 
-			dump_iface_best(nl, ifaceq);
+			dump_iface_ਉੱਤਮ(nl, ifaceq);
 		}
 	}
-	break;
-	case ADDRQ_MODE_GOOD:
+	ਰੋਕੋ;
+	ਹਾਲਤ ADDRQ_ਬਹੁਲਕ_GOOD:
 	{
 		list_for_each_netaddrq_iface(li, nl)
 		{
-			ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+			ifaceq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_iface, ਇੰਦਰਾਜ);
 
 			dump_iface_good(nl, ifaceq);
 		}
 	}
-	break;
-	case ADDRQ_MODE_ALL:
+	ਰੋਕੋ;
+	ਹਾਲਤ ADDRQ_ਬਹੁਲਕ_ALL:
 		list_for_each_netaddrq_iface(li, nl)
 		{
-			ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+			ifaceq = list_ਇੰਦਰਾਜ(li, ਬਣਤਰ ul_netaddrq_iface, ਇੰਦਰਾਜ);
 
 			dump_iface_all(nl,ifaceq);
 		}
-	break;
+	ਰੋਕੋ;
 	}
 }
 
-static int callback_post(struct ul_nl_data *nl)
+ਸਥਿਰ ਪੂਰਨ callback_post(ਬਣਤਰ ul_nl_ਅੰਕੜੇ *nl)
 {
 	/* If not processing dump, process the change immediately by the
 	 * callback. */
-	if (!nl->dumping)
+	ਜੇ (!nl->dumping)
 	{
 		/* If there is no change in the list, do nothing */
-		if (!(UL_NETADDRQ_DATA(nl)->ifaces_change_4 ||
-		      UL_NETADDRQ_DATA(nl)->ifaces_change_6))
+		ਜੇ (!(UL_NETADDRQ_ਅੰਕੜੇ(nl)->ifaces_change_4 ||
+		      UL_NETADDRQ_ਅੰਕੜੇ(nl)->ifaces_change_6))
 		{
 			fputs("\n\nNo changes in the address list.\n", netout);
-			return 0;
+			ਵਾਪਸ 0;
 		}
-		UL_NETADDRQ_DATA(nl)->ifaces_change_4 = false;
-		UL_NETADDRQ_DATA(nl)->ifaces_change_6 = false;
+		UL_NETADDRQ_ਅੰਕੜੇ(nl)->ifaces_change_4 = false;
+		UL_NETADDRQ_ਅੰਕੜੇ(nl)->ifaces_change_6 = false;
 		fputs("\n\nNetwork change detected:\n", netout);
 		fputs("\nbest address:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_BESTOFALL);
+		dump_addrq(nl, ADDRQ_ਬਹੁਲਕ_BESTOFALL);
 
 		fputs("\nbest addresses dump:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_BEST);
+		dump_addrq(nl, ADDRQ_ਬਹੁਲਕ_ਉੱਤਮ);
 
 		fputs("\ngood addresses dump:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_GOOD);
+		dump_addrq(nl, ADDRQ_ਬਹੁਲਕ_GOOD);
 
 		fputs("\nall addresses dump:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_ALL);
+		dump_addrq(nl, ADDRQ_ਬਹੁਲਕ_ALL);
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-int main(int argc __attribute__((__unused__)), char *argv[] __attribute__((__unused__)))
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc __attribute__((__unused__)), ਅੱਖਰ *argv[] __attribute__((__unused__)))
 {
-	int rc = 1;
-	int ulrc;
-	struct ul_nl_data nl;
-	FILE *out = stdout;
-	struct ul_netaddrq_iface *ifaceq;
-	const char *ifname = "eth0";
+	ਪੂਰਨ rc = 1;
+	ਪੂਰਨ ulrc;
+	ਬਣਤਰ ul_nl_ਅੰਕੜੇ nl;
+	FILE *ਬਾਹਰਲਾ = stdout;
+	ਬਣਤਰ ul_netaddrq_iface *ifaceq;
+	ਅਚਲ ਅੱਖਰ *ifname = "eth0";
 
 	/* Prepare netlink. */
 	ul_nl_init(&nl);
-	if ((ul_netaddrq_init(&nl, NULL, callback_post, (void *)out)))
-		return -1;
+	ਜੇ ((ul_netaddrq_init(&nl, ਨਿਰਾ, callback_post, (ਖਾਲੀ *)ਬਾਹਰਲਾ)))
+		ਵਾਪਸ -1;
 
 	/* Dump addresses */
-	if (ul_nl_open(&nl,
+	ਜੇ (ul_nl_open(&nl,
 		       RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR))
-		return -1;
-	if (ul_nl_request_dump(&nl, RTM_GETADDR))
-		goto error;
-	if (ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP) != UL_NL_DONE)
-		goto error;
-	fputs("RTM_GETADDR dump finished.", out);
+		ਵਾਪਸ -1;
+	ਜੇ (ul_nl_request_dump(&nl, RTM_GETADDR))
+		ਜਾਓ error;
+	ਜੇ (ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP) != UL_NL_ਪੂਰਾ)
+		ਜਾਓ error;
+	fputs("RTM_GETADDR dump finished.", ਬਾਹਰਲਾ);
 
 	/* Example of several types of dump */
-	fputs("\nbest address:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_BESTOFALL);
+	fputs("\nbest address:\n", ਬਾਹਰਲਾ);
+	dump_addrq(&nl, ADDRQ_ਬਹੁਲਕ_BESTOFALL);
 
-	fputs("\nbest addresses dump:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_BEST);
+	fputs("\nbest addresses dump:\n", ਬਾਹਰਲਾ);
+	dump_addrq(&nl, ADDRQ_ਬਹੁਲਕ_ਉੱਤਮ);
 
-	fputs("\ngood addresses dump:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_GOOD);
+	fputs("\ngood addresses dump:\n", ਬਾਹਰਲਾ);
+	dump_addrq(&nl, ADDRQ_ਬਹੁਲਕ_GOOD);
 
-	fputs("\nall addresses dump:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_ALL);
+	fputs("\nall addresses dump:\n", ਬਾਹਰਲਾ);
+	dump_addrq(&nl, ADDRQ_ਬਹੁਲਕ_ALL);
 
-	fputs("\naddresses for interface ", out);
-	if ((ifaceq = ul_netaddrq_iface_by_name(&nl, ifname)))
+	fputs("\naddresses for interface ", ਬਾਹਰਲਾ);
+	ਜੇ ((ifaceq = ul_netaddrq_iface_by_name(&nl, ifname)))
 		dump_iface_all(&nl, ifaceq);
-	else
-		fprintf(out, "%s not found.", ifname);
+	ਨਹੀਂਤਾਂ
+		fprintf(ਬਾਹਰਲਾ, "%s not found.", ifname);
 
 	/* Monitor further changes */
-	fputs("\nGoing to monitor mode.\n", out);
+	fputs("\nGoing to monitor mode.\n", ਬਾਹਰਲਾ);
 
 	/* In this example UL_NL_RETURN never appears, as callback does
 	 * not use it. */
@@ -710,11 +710,11 @@ int main(int argc __attribute__((__unused__)), char *argv[] __attribute__((__unu
 	 *    and process the result in the loop.
 	 */
 	ulrc = ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP);
-	if (!ulrc || ulrc == UL_NL_RETURN)
+	ਜੇ (!ulrc || ulrc == UL_NL_RETURN)
 		rc = 0;
 error:
-	if ((ul_nl_close(&nl)))
+	ਜੇ ((ul_nl_close(&nl)))
 		rc = 1;
-	return rc;
+	ਵਾਪਸ rc;
 }
-#endif /* TEST_PROGRAM_NETADDRQ */
+#ਜੇ_ਅੰਤ /* TEST_PROGRAM_NETADDRQ */

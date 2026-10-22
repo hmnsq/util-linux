@@ -6,104 +6,104 @@
  *
  * Copyright (C) 2021 Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
 
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <locale.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
 
-#include "c_strtod.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c_strtod.h"
 
-#ifdef __APPLE__
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ __APPLE__
 # include <xlocale.h>
-#endif
+#ਜੇ_ਅੰਤ
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#ਜੇ defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
-#endif
+#ਜੇ_ਅੰਤ
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#ਜੇ defined(USE_CLOCALE)
+ਸਥਿਰ ਅਸਥਿਰ locale_t c_locale;
 
-static locale_t get_c_locale(void)
+ਸਥਿਰ locale_t get_c_locale(ਖਾਲੀ)
 {
-	if (!c_locale)
-		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	ਜੇ (!c_locale)
+		c_locale = newlocale(LC_ALL_ਨਕਾਬ, "C", (locale_t) 0);
+	ਵਾਪਸ c_locale;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 
-double c_strtod(char const *str, char **end)
+ਦੁੱਗਣਾ c_strtod(ਅੱਖਰ ਅਚਲ *str, ਅੱਖਰ **ਸਿਰਾ)
 {
-	double res;
-	int errsv;
+	ਦੁੱਗਣਾ res;
+	ਪੂਰਨ errsv;
 
-#if defined(USE_CLOCALE)
+#ਜੇ defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#ਜੇ defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
-#elif defined(HAVE_USELOCALE)
+	ਜੇ (cl)
+		ਵਾਪਸ strtod_l(str, ਸਿਰਾ, cl);
+#ਜਾਂਜੇ defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	ਜੇ (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		ਜੇ (!org_cl)
+			ਵਾਪਸ 0;
 
-		res = strtod(str, end);
+		res = strtod(str, ਸਿਰਾ);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		ਵਾਪਸ res;
 	}
-#endif /* HAVE_USELOCALE */
-#endif /* USE_CLOCALE */
+#ਜੇ_ਅੰਤ /* HAVE_USELOCALE */
+#ਜੇ_ਅੰਤ /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	ਅੱਖਰ *org_locale = setlocale(LC_NUMERIC, ਨਿਰਾ);
 
-	if (org_locale) {
+	ਜੇ (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		ਜੇ (!org_locale)
+			ਵਾਪਸ 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
-	res = strtod(str, end);
+	res = strtod(str, ਸਿਰਾ);
 	errsv = errno;
 
-	if (org_locale) {
+	ਜੇ (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
-		free(org_locale);
+		ਮੁਕਤ(org_locale);
 	}
 	errno = errsv;
-	return res;
+	ਵਾਪਸ res;
 }
 
-#ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	double res;
-	char *end;
+	ਦੁੱਗਣਾ res;
+	ਅੱਖਰ *ਸਿਰਾ;
 
-	if (argc < 2) {
+	ਜੇ (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				ਪ੍ਰੋਗਰਾਮ_invocation_short_name);
+		ਵਾਪਸ EXIT_FAILURE;
 	}
 
-	res = c_strtod(argv[1], &end);
-	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
+	res = c_strtod(argv[1], &ਸਿਰਾ);
+	ਲਿਖੋ("Result: %g, errno: %d, endptr: '%s'\n", res, errno, ਸਿਰਾ);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	ਵਾਪਸ errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-#endif
+#ਜੇ_ਅੰਤ

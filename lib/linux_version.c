@@ -2,74 +2,74 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <sys/utsname.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/utsname.h>
 
-#include "c.h"
-#include "linux_version.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "linux_version.h"
 
-int get_linux_version (void)
+ਪੂਰਨ get_linux_ਸੰਸਕਰਣ (ਖਾਲੀ)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	ਸਥਿਰ ਪੂਰਨ kver = -1;
+	ਬਣਤਰ utsname uts;
+	ਪੂਰਨ x = 0, y = 0, z = 0;
+	ਪੂਰਨ n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	ਜੇ (kver != -1)
+		ਵਾਪਸ kver;
+	ਜੇ (uname(&uts))
+		ਵਾਪਸ kver = 0;
 
-	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	n = ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(uts.release, "%d.%d.%d", &x, &y, &z);
+	ਜੇ (n < 1 || n > 3)
+		ਵਾਪਸ kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	ਵਾਪਸ kver = KERNEL_ਸੰਸਕਰਣ(x, y, z);
 }
 
-#ifdef TEST_PROGRAM_LINUXVERSION
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	int rc = EXIT_FAILURE;
+	ਪੂਰਨ rc = EXIT_FAILURE;
 
-	if (argc == 1) {
-		printf("Linux version: %d\n", get_linux_version());
+	ਜੇ (argc == 1) {
+		ਲਿਖੋ("Linux version: %d\n", get_linux_ਸੰਸਕਰਣ());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 5) {
+		ਅਚਲ ਅੱਖਰ *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		ਪੂਰਨ x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		ਪੂਰਨ kver = get_linux_ਸੰਸਕਰਣ();
+		ਪੂਰਨ uver = KERNEL_ਸੰਸਕਰਣ(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		ਜੇ (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		ਨਹੀਂਤਾਂ ਜੇ (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		ਨਹੀਂਤਾਂ ਜੇ (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		ਨਹੀਂਤਾਂ
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
-			printf("match\n");
-		else
-			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
+		ਜੇ (rc)
+			ਲਿਖੋ("match\n");
+		ਨਹੀਂਤਾਂ
+			ਲਿਖੋ("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} ਨਹੀਂਤਾਂ
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
-				 program_invocation_short_name);
+				 ਪ੍ਰੋਗਰਾਮ_invocation_short_name);
 
-	return rc;
+	ਵਾਪਸ rc;
 }
-#endif
+#ਜੇ_ਅੰਤ

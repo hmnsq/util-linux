@@ -2,57 +2,57 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <dlfcn.h>
 
-#include "c.h"
-#include "dl-econf.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dl-econf.h"
 
-#if defined(HAVE_LIBECONF) && defined(USE_DLOPEN_ECONF)
+#ਜੇ defined(HAVE_LIBECONF) && defined(USE_DLOPEN_ECONF)
 
 UL_ELF_NOTE_DLOPEN("econf",
 		    "Support for libeconf",
-		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
+		    UL_ELF_NOTE_DLOPEN_ਤਰਜੀਹ_RECOMMENDED,
 		    "libeconf.so.0");
 
-struct ul_econf_opers ul_econf;
+ਬਣਤਰ ul_econf_opers ul_econf;
 
-static const struct ul_dlsym ul_econf_symbols[] =
+ਸਥਿਰ ਅਚਲ ਬਣਤਰ ul_dlsym ul_econf_symbols[] =
 {
 	UL_DLSYM( ul_econf_opers, econf_readFile ),
-	UL_DLSYM( ul_econf_opers, econf_mergeFiles ),
-#ifdef HAVE_ECONF_READCONFIG
+	UL_DLSYM( ul_econf_opers, econf_ਮਿਲਾਓ_Files ),
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_ECONF_READCONFIG
 	UL_DLSYM( ul_econf_opers, econf_readConfig ),
-#endif
+#ਜੇ_ਅੰਤ
 	UL_DLSYM( ul_econf_opers, econf_readDirs ),
-	UL_DLSYM( ul_econf_opers, econf_getKeys ),
-	UL_DLSYM( ul_econf_opers, econf_getStringValue ),
-	UL_DLSYM( ul_econf_opers, econf_getBoolValue ),
-	UL_DLSYM( ul_econf_opers, econf_getUInt64Value ),
+	UL_DLSYM( ul_econf_opers, econf_get_ਕੁੰਜੀਆਂ ),
+	UL_DLSYM( ul_econf_opers, econf_get_String_ਮੁੱਲ ),
+	UL_DLSYM( ul_econf_opers, econf_get_Bool_ਮੁੱਲ ),
+	UL_DLSYM( ul_econf_opers, econf_get_UInt64_ਮੁੱਲ ),
 	UL_DLSYM( ul_econf_opers, econf_errString ),
 
 	UL_DLSYM( ul_econf_opers, econf_freeFile ),
 	UL_DLSYM( ul_econf_opers, econf_freeArray ),
 };
 
-int ul_dlopen_libeconf(void)
+ਪੂਰਨ ul_dlopen_libeconf(ਖਾਲੀ)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	ਸਥਿਰ ਪੂਰਨ ਸਥਿਤੀ = 0;
+	ਸਥਿਰ ਖਾਲੀ *dl = ਨਿਰਾ;
+	ਪੂਰਨ flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ਜੇ (ਸਥਿਤੀ)
+		ਵਾਪਸ ਸਥਿਤੀ > 0 ? 0 : -ENOSYS;
 
-#ifdef RTLD_NODELETE
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ RTLD_NODELETE
 	flags |= RTLD_NODELETE;
-#endif
-	status = ul_dlopen_symbols("libeconf.so.0", flags,
+#ਜੇ_ਅੰਤ
+	ਸਥਿਤੀ = ul_dlopen_symbols("libeconf.so.0", flags,
 				   ul_econf_symbols,
-				   ARRAY_SIZE(ul_econf_symbols),
+				   ARRAY_ਮਾਪ(ul_econf_symbols),
 				   &ul_econf, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	ਵਾਪਸ ਸਥਿਤੀ > 0 ? 0 : -ENOSYS;
 }
 
-#endif /* HAVE_LIBECONF && USE_DLOPEN_ECONF */
+#ਜੇ_ਅੰਤ /* HAVE_LIBECONF && USE_DLOPEN_ECONF */

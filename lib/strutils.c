@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <inttypes.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/stat.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <strings.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "cctype.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "nls.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "strutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "timeutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "bitops.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+ਸਥਿਰ ਪੂਰਨ STRTOXX_EXIT_ਕੋਡ = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+ਖਾਲੀ strutils_ਸੈੱਟ_exitcode(ਪੂਰਨ ex)
 {
-	STRTOXX_EXIT_CODE = ex;
+	STRTOXX_EXIT_ਕੋਡ = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+ਸਥਿਰ ਪੂਰਨ do_scale_by_power (uintmax_t *x, ਪੂਰਨ ਅਧਾਰ, ਪੂਰਨ power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
-		*x *= base;
+	ਜਦੋਂ (power--) {
+		ਜੇ (UINTMAX_MAX / ਅਧਾਰ < *x)
+			ਵਾਪਸ -ERANGE;
+		*x *= ਅਧਾਰ;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+ਪੂਰਨ ul_parse_ਮਾਪ(ਅਚਲ ਅੱਖਰ *str, uintmax_t *res, ਪੂਰਨ *power)
 {
-	const char *p;
-	char *end;
+	ਅਚਲ ਅੱਖਰ *p;
+	ਅੱਖਰ *ਸਿਰਾ;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	ਪੂਰਨ ਅਧਾਰ = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *suf  = "KMGTPEZY";
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *suf2 = "kmgtpezy";
+	ਅਚਲ ਅੱਖਰ *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	ਜੇ (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		ਜਾਓ err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	ਜਦੋਂ (ਖਾਲੀ_ਥਾਂ_ਹੈ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ) *p))
 		p++;
-	if (*p == '-') {
+	ਜੇ (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		ਜਾਓ err;
 	}
 
-	errno = 0, end = NULL;
-	x = strtoumax(str, &end, 0);
+	errno = 0, ਸਿਰਾ = ਨਿਰਾ;
+	x = strtoumax(str, &ਸਿਰਾ, 0);
 
-	if (end == str ||
+	ਜੇ (ਸਿਰਾ == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		ਜਾਓ err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
-	p = end;
+	ਜੇ (!ਸਿਰਾ || !*ਸਿਰਾ)
+		ਜਾਓ ਪੂਰਾ;			/* without suffix */
+	p = ਸਿਰਾ;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
-		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
-		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
-		size_t dpsz = dp ? strlen(dp) : 0;
+	ਜੇ (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+		ਅਧਾਰ = 1024;			/* XiB, 2^N */
+	ਨਹੀਂਤਾਂ ਜੇ ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+		ਅਧਾਰ = 1000;			/* XB, 10^N */
+	ਨਹੀਂਤਾਂ ਜੇ (*(p + 1)) {
+		ਬਣਤਰ lconv ਅਚਲ *l = localeconv();
+		ਅਚਲ ਅੱਖਰ *dp = l ? l->decimal_ਬਿੰਦੂ : ਨਿਰਾ;
+		size_t dpsz = dp ? ਲੜੀ_ਲੰਬਾਈ(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		ਜੇ (frac == 0 && *p && dp && ਲੜੀ_ਤੁਲਨਾ(dp, p, dpsz) == 0) {
+			ਅਚਲ ਅੱਖਰ *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			ਲਈ (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
-				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+			ਜੇ (ਅੰਕ_ਹੈ(*fstr)) {
+				errno = 0, ਸਿਰਾ = ਨਿਰਾ;
+				frac = strtoumax(fstr, &ਸਿਰਾ, 0);
+				ਜੇ (ਸਿਰਾ == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					ਜਾਓ err;
 				}
-			} else
-				end = (char *) p;
+			} ਨਹੀਂਤਾਂ
+				ਸਿਰਾ = (ਅੱਖਰ *) p;
 
-			if (!end || !*end) {
+			ਜੇ (!ਸਿਰਾ || !*ਸਿਰਾ) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				ਜਾਓ err;	/* without suffix, but with fractions */
 			}
-			p = end;
-			goto check_suffix;
+			p = ਸਿਰਾ;
+			ਜਾਓ check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		ਜਾਓ err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	ਜੇ (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	ਨਹੀਂਤਾਂ {
 		sp = strchr(suf2, *p);
-		if (sp)
+		ਜੇ (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		ਨਹੀਂਤਾਂ {
 			rc = -EINVAL;
-			goto err;
+			ਜਾਓ err;
 		}
 	}
 
-	if (power)
+	ਜੇ (power)
 		*power = pwr;
 
-	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	rc = do_scale_by_power(&x, ਅਧਾਰ, pwr);
+	ਜੇ (rc)
+		ਜਾਓ err;
 
-	if (frac && pwr) {
-		int i;
-		uintmax_t frac_base = 1, frac_val = 0;
+	ਜੇ (frac && pwr) {
+		ਪੂਰਨ i;
+		uintmax_t frac_ਅਧਾਰ = 1, frac_val = 0;
 
 		/* mega, giga, ... */
-		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		rc = do_scale_by_power(&frac_ਅਧਾਰ, ਅਧਾਰ, pwr);
+		ਜੇ (rc)
+			ਜਾਓ err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
-			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
+		ਕਰੋ {
+			frac_val = ((frac % 10) * frac_ਅਧਾਰ + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} ਜਦੋਂ (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		ਲਈ (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		ਜੇ (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			ਜਾਓ err;
 		}
 		x += frac_val;
 	}
-done:
+ਪੂਰਾ:
 	*res = x;
 err:
-	if (rc < 0)
+	ਜੇ (rc < 0)
 		errno = -rc;
-	return rc;
+	ਵਾਪਸ rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+ਪੂਰਨ strtosize(ਅਚਲ ਅੱਖਰ *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	ਵਾਪਸ ul_parse_ਮਾਪ(str, res, ਨਿਰਾ);
 }
 
-int isdigit_strend(const char *str, const char **end)
+ਪੂਰਨ isdigit_strend(ਅਚਲ ਅੱਖਰ *str, ਅਚਲ ਅੱਖਰ **ਸਿਰਾ)
 {
-	const char *p;
+	ਅਚਲ ਅੱਖਰ *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	ਲਈ (p = str; p && *p && ਅੰਕ_ਹੈ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ) *p); p++);
 
-	if (end)
-		*end = p;
-	return p && p > str && !*p;
+	ਜੇ (ਸਿਰਾ)
+		*ਸਿਰਾ = p;
+	ਵਾਪਸ p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+ਪੂਰਨ isxdigit_strend(ਅਚਲ ਅੱਖਰ *str, ਅਚਲ ਅੱਖਰ **ਸਿਰਾ)
 {
-	const char *p;
+	ਅਚਲ ਅੱਖਰ *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	ਲਈ (p = str; p && *p && isxdigit((ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ) *p); p++);
 
-	if (end)
-		*end = p;
+	ਜੇ (ਸਿਰਾ)
+		*ਸਿਰਾ = p;
 
-	return p && p > str && !*p;
+	ਵਾਪਸ p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+ਪੂਰਨ ul_strtobool(ਅਚਲ ਅੱਖਰ *str, bool *ਨਤੀਜਾ)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	ਸਥਿਰ ਅਚਲ ਅੱਖਰ *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	ਜੇ (!str || !ਨਤੀਜਾ)
+		ਵਾਪਸ -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
-			*result = true;
-			return 0;
+	ਲਈ (i = 0; i < ARRAY_ਮਾਪ(bool_true); i++) {
+		ਜੇ (c_strcasecmp(str, bool_true[i]) == 0) {
+			*ਨਤੀਜਾ = true;
+			ਵਾਪਸ 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
-			*result = false;
-			return 0;
+	ਲਈ (i = 0; i < ARRAY_ਮਾਪ(bool_false); i++) {
+		ਜੇ (c_strcasecmp(str, bool_false[i]) == 0) {
+			*ਨਤੀਜਾ = false;
+			ਵਾਪਸ 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	ਵਾਪਸ -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+ਪੂਰਨ ul_parse_switch(ਅਚਲ ਅੱਖਰ *arg, ...)
 {
-	const char *a, *b;
+	ਅਚਲ ਅੱਖਰ *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	ਕਰੋ {
+		a = va_arg(ap, ਅੱਖਰ *);
+		ਜੇ (!a)
+			ਰੋਕੋ;
+		b = va_arg(ap, ਅੱਖਰ *);
+		ਜੇ (!b)
+			ਰੋਕੋ;
 
-		if (strcmp(arg, a) == 0) {
+		ਜੇ (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			ਵਾਪਸ 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		ਜੇ (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			ਵਾਪਸ 0;
 		}
-	} while (1);
+	} ਜਦੋਂ (1);
 	va_end(ap);
 
-	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
+	errx(STRTOXX_EXIT_ਕੋਡ, _("unsupported argument: %s"), arg);
 }
 
-#ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ HAVE_MEMPCPY
+ਖਾਲੀ *mempcpy(ਖਾਲੀ *ਸੀਮਿਤ dest, ਅਚਲ ਖਾਲੀ *ਸੀਮਿਤ src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	ਵਾਪਸ ((ਅੱਖਰ *)ਸਮ੍ਰਿਤੀ_ਨਕਲ(dest, src, n)) + n;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-#ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ HAVE_STRNLEN
+size_t strnlen(ਅਚਲ ਅੱਖਰ *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	ਲਈ (i = 0; i < maxlen; i++) {
+		ਜੇ (s[i] == '\0')
+			ਵਾਪਸ i;
 	}
-	return maxlen;
+	ਵਾਪਸ maxlen;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-#ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ HAVE_STRNCHR
+ਅੱਖਰ *strnchr(ਅਚਲ ਅੱਖਰ *s, size_t maxlen, ਪੂਰਨ c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	ਲਈ (; maxlen-- && *s != '\0'; ++s)
+		ਜੇ (*s == (ਅੱਖਰ)c)
+			ਵਾਪਸ (ਅੱਖਰ *)s;
+	ਵਾਪਸ ਨਿਰਾ;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-#ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ HAVE_STRNDUP
+ਅੱਖਰ *strndup(ਅਚਲ ਅੱਖਰ *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	ਅੱਖਰ *new = ਸਮ੍ਰਿਤੀ_ਦਿਓ((len + 1) * ਆਕਾਰ(ਅੱਖਰ));
+	ਜੇ (!new)
+		ਵਾਪਸ ਨਿਰਾ;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	ਵਾਪਸ (ਅੱਖਰ *) ਸਮ੍ਰਿਤੀ_ਨਕਲ(new, s, len);
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+ਪੂਰਨ ul_strtos64(ਅਚਲ ਅੱਖਰ *str, int64_t *ਅੰਕ, ਪੂਰਨ ਅਧਾਰ)
 {
-	char *end = NULL;
+	ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ਜੇ (str == ਨਿਰਾ || *str == '\0')
+		ਵਾਪਸ -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*ਅੰਕ = (int64_t) strtoimax(str, &ਸਿਰਾ, ਅਧਾਰ);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ਜੇ (errno != 0)
+		ਵਾਪਸ -errno;
+	ਜੇ (str == ਸਿਰਾ || (ਸਿਰਾ && *ਸਿਰਾ))
+		ਵਾਪਸ -(errno = EINVAL);
+	ਵਾਪਸ 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+ਪੂਰਨ ul_strtou64(ਅਚਲ ਅੱਖਰ *str, uint64_t *ਅੰਕ, ਪੂਰਨ ਅਧਾਰ)
 {
-	char *end = NULL;
+	ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ਜੇ (str == ਨਿਰਾ || *str == '\0')
+		ਵਾਪਸ -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
-	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	tmp = (int64_t) strtoimax(str, &ਸਿਰਾ, ਅਧਾਰ);
+	ਜੇ (tmp < 0)
 		errno = ERANGE;
-	else {
+	ਨਹੀਂਤਾਂ {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*ਅੰਕ = strtoumax(str, &ਸਿਰਾ, ਅਧਾਰ);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ਜੇ (errno != 0)
+		ਵਾਪਸ -errno;
+	ਜੇ (str == ਸਿਰਾ || (ਸਿਰਾ && *ਸਿਰਾ))
+		ਵਾਪਸ -(errno = EINVAL);
+	ਵਾਪਸ 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+ਪੂਰਨ ul_strtos32(ਅਚਲ ਅੱਖਰ *str, int32_t *ਅੰਕ, ਪੂਰਨ ਅਧਾਰ)
 {
 	int64_t tmp;
-	int rc;
+	ਪੂਰਨ rc;
 
-	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	rc = ul_strtos64(str, &tmp, ਅਧਾਰ);
+	ਜੇ (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	ਜੇ (rc == 0)
+		*ਅੰਕ = (int32_t) tmp;
+	ਵਾਪਸ rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+ਪੂਰਨ ul_strtou32(ਅਚਲ ਅੱਖਰ *str, uint32_t *ਅੰਕ, ਪੂਰਨ ਅਧਾਰ)
 {
 	uint64_t tmp;
-	int rc;
+	ਪੂਰਨ rc;
 
-	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	rc = ul_strtou64(str, &tmp, ਅਧਾਰ);
+	ਜੇ (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	ਜੇ (rc == 0)
+		*ਅੰਕ = (uint32_t) tmp;
+	ਵਾਪਸ rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+ਪੂਰਨ ul_strtou16(ਅਚਲ ਅੱਖਰ *str, uint16_t *ਅੰਕ, ਪੂਰਨ ਅਧਾਰ)
 {
 	uint64_t tmp;
-	int rc;
+	ਪੂਰਨ rc;
 
-	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	rc = ul_strtou64(str, &tmp, ਅਧਾਰ);
+	ਜੇ (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	ਜੇ (rc == 0)
+		*ਅੰਕ = (uint16_t) tmp;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -432,236 +432,236 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(ਅਚਲ ਅੱਖਰ *str, ਪੂਰਨ ਅਧਾਰ, ਅਚਲ ਅੱਖਰ *errmesg,
+			     int64_t ਨੀਵਾਂ, int64_t ਉੱਪਰ)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t ਅੰਕ = 0;
+	ਪੂਰਨ rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &ਅੰਕ, ਅਧਾਰ);
+	ਜੇ (rc == 0 && ((ਨੀਵਾਂ && ਅੰਕ < ਨੀਵਾਂ) || (ਉੱਪਰ && ਅੰਕ > ਉੱਪਰ)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
-			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
-		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ਜੇ (rc) {
+		ਜੇ (errno == ERANGE)
+			err(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
+		errx(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	ਵਾਪਸ ਅੰਕ;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(ਅਚਲ ਅੱਖਰ *str, ਪੂਰਨ ਅਧਾਰ, ਅਚਲ ਅੱਖਰ *errmesg, uint64_t ਉੱਪਰ)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t ਅੰਕ = 0;
+	ਪੂਰਨ rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &ਅੰਕ, ਅਧਾਰ);
+	ਜੇ (rc == 0 && (ਉੱਪਰ && ਅੰਕ > ਉੱਪਰ))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
-			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
-		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ਜੇ (rc) {
+		ਜੇ (errno == ERANGE)
+			err(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
+		errx(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	ਵਾਪਸ ਅੰਕ;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+ਦੁੱਗਣਾ strtod_or_err(ਅਚਲ ਅੱਖਰ *str, ਅਚਲ ਅੱਖਰ *errmesg)
 {
-	double num;
-	char *end = NULL;
+	ਦੁੱਗਣਾ ਅੰਕ;
+	ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	ਜੇ (str == ਨਿਰਾ || *str == '\0')
+		ਜਾਓ err;
+	ਅੰਕ = strtod(str, &ਸਿਰਾ);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	ਜੇ (errno || str == ਸਿਰਾ || (ਸਿਰਾ && *ਸਿਰਾ))
+		ਜਾਓ err;
 
-	return num;
+	ਵਾਪਸ ਅੰਕ;
 err:
-	if (errno == ERANGE)
-		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ਜੇ (errno == ERANGE)
+		err(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 
-	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	errx(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+ਪੂਰਨ ul_strtold(ਅਚਲ ਅੱਖਰ *str, ਲੰਮਾ ਦੁੱਗਣਾ *ਅੰਕ)
 {
-	char *end = NULL;
+	ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	ਜੇ (str == ਨਿਰਾ || *str == '\0')
+		ਵਾਪਸ -(errno = EINVAL);
+	*ਅੰਕ = strtold(str, &ਸਿਰਾ);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ਜੇ (errno != 0)
+		ਵਾਪਸ -errno;
+	ਜੇ (str == ਸਿਰਾ || (ਸਿਰਾ && *ਸਿਰਾ))
+		ਵਾਪਸ -(errno = EINVAL);
+	ਵਾਪਸ 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+ਲੰਮਾ ਦੁੱਗਣਾ strtold_or_err(ਅਚਲ ਅੱਖਰ *str, ਅਚਲ ਅੱਖਰ *errmesg)
 {
-	long double num = 0;
+	ਲੰਮਾ ਦੁੱਗਣਾ ਅੰਕ = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
-		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ਜੇ (ul_strtold(str, &ਅੰਕ) == 0)
+		ਵਾਪਸ ਅੰਕ;
+	ਜੇ (errno == ERANGE)
+		err(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 
-	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	errx(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(ਅਚਲ ਅੱਖਰ *str, ਅਚਲ ਅੱਖਰ *errmesg)
 {
-	uintmax_t num;
+	uintmax_t ਅੰਕ;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	ਜੇ (strtosize(str, &ਅੰਕ) == 0)
+		ਵਾਪਸ ਅੰਕ;
 
-	if (errno)
-		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ਜੇ (errno)
+		err(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 
-	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	errx(STRTOXX_EXIT_ਕੋਡ, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+ਖਾਲੀ strtotimeval_or_err(ਅਚਲ ਅੱਖਰ *str, ਬਣਤਰ timeval *tv, ਅਚਲ ਅੱਖਰ *errmesg)
 {
-	long double user_input;
+	ਲੰਮਾ ਦੁੱਗਣਾ user_ਨਿਵੇਸ਼;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_ਨਿਵੇਸ਼ = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_ਨਿਵੇਸ਼;
+	tv->tv_usec = (suseconds_t)((user_ਨਿਵੇਸ਼ - tv->tv_sec) * USEC_ਪ੍ਰਤੀ_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+ਖਾਲੀ strtotimespec_or_err(ਅਚਲ ਅੱਖਰ *str, ਬਣਤਰ timespec *ts, ਅਚਲ ਅੱਖਰ *errmesg)
 {
-	long double user_input;
+	ਲੰਮਾ ਦੁੱਗਣਾ user_ਨਿਵੇਸ਼;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_ਨਿਵੇਸ਼ = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_ਨਿਵੇਸ਼;
+	ts->tv_nsec = (ਲੰਮਾ)((user_ਨਿਵੇਸ਼ - ts->tv_sec) * NSEC_ਪ੍ਰਤੀ_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(ਅਚਲ ਅੱਖਰ *str, ਅਚਲ ਅੱਖਰ *errmesg)
 {
-	int64_t user_input;
+	int64_t user_ਨਿਵੇਸ਼;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_ਨਿਵੇਸ਼ = strtos64_or_err(str, errmesg);
+	ਵਾਪਸ (time_t) user_ਨਿਵੇਸ਼;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(ਅਚਲ ਅੱਖਰ *ਬਹੁਲਕ)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	ਜੇ (ਬਹੁਲਕ && strcmp(ਬਹੁਲਕ, "never") == 0)
+		ਵਾਪਸ false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	ਜੇ (ਬਹੁਲਕ && strcmp(ਬਹੁਲਕ, "always") == 0)
+		ਵਾਪਸ true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	ਜੇ (!ਬਹੁਲਕ || strcmp(ਬਹੁਲਕ, "auto") == 0)
+		ਵਾਪਸ isatty(STDOUT_FILENO) ? true : false;
 
-	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
+	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), ਬਹੁਲਕ);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(ਅਚਲ ਅੱਖਰ *ਬਹੁਲਕ)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	ਜੇ (ਬਹੁਲਕ && strcmp(ਬਹੁਲਕ, "never") == 0)
+		ਵਾਪਸ false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	ਜੇ (ਬਹੁਲਕ && strcmp(ਬਹੁਲਕ, "always") == 0)
+		ਵਾਪਸ true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	ਜੇ (!ਬਹੁਲਕ || strcmp(ਬਹੁਲਕ, "auto") == 0)
+		ਵਾਪਸ isatty(STDOUT_FILENO) ? true : false;
 
-	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
+	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), ਬਹੁਲਕ);
 }
 
 /*
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+ਅੱਖਰ *xstrmode(mode_t ਬਹੁਲਕ, ਅੱਖਰ *str)
 {
-	unsigned short i = 0;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਛੋਟਾ i = 0;
 
-	if (S_ISDIR(mode))
+	ਜੇ (S_ISDIR(ਬਹੁਲਕ))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	ਨਹੀਂਤਾਂ ਜੇ (S_ISLNK(ਬਹੁਲਕ))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	ਨਹੀਂਤਾਂ ਜੇ (S_ISCHR(ਬਹੁਲਕ))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	ਨਹੀਂਤਾਂ ਜੇ (S_ISBLK(ਬਹੁਲਕ))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	ਨਹੀਂਤਾਂ ਜੇ (S_ISSOCK(ਬਹੁਲਕ))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	ਨਹੀਂਤਾਂ ਜੇ (S_ISFIFO(ਬਹੁਲਕ))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	ਨਹੀਂਤਾਂ ਜੇ (S_ISREG(ਬਹੁਲਕ))
 		str[i++] = '-';
 
-	str[i++] = mode & S_IRUSR ? 'r' : '-';
-	str[i++] = mode & S_IWUSR ? 'w' : '-';
-	str[i++] = (mode & S_ISUID
-		? (mode & S_IXUSR ? 's' : 'S')
-		: (mode & S_IXUSR ? 'x' : '-'));
-	str[i++] = mode & S_IRGRP ? 'r' : '-';
-	str[i++] = mode & S_IWGRP ? 'w' : '-';
-	str[i++] = (mode & S_ISGID
-		? (mode & S_IXGRP ? 's' : 'S')
-		: (mode & S_IXGRP ? 'x' : '-'));
-	str[i++] = mode & S_IROTH ? 'r' : '-';
-	str[i++] = mode & S_IWOTH ? 'w' : '-';
-	str[i++] = (mode & S_ISVTX
-		? (mode & S_IXOTH ? 't' : 'T')
-		: (mode & S_IXOTH ? 'x' : '-'));
+	str[i++] = ਬਹੁਲਕ & S_IRUSR ? 'r' : '-';
+	str[i++] = ਬਹੁਲਕ & S_IWUSR ? 'w' : '-';
+	str[i++] = (ਬਹੁਲਕ & S_ISUID
+		? (ਬਹੁਲਕ & S_IXUSR ? 's' : 'S')
+		: (ਬਹੁਲਕ & S_IXUSR ? 'x' : '-'));
+	str[i++] = ਬਹੁਲਕ & S_IRGRP ? 'r' : '-';
+	str[i++] = ਬਹੁਲਕ & S_IWGRP ? 'w' : '-';
+	str[i++] = (ਬਹੁਲਕ & S_ISGID
+		? (ਬਹੁਲਕ & S_IXGRP ? 's' : 'S')
+		: (ਬਹੁਲਕ & S_IXGRP ? 'x' : '-'));
+	str[i++] = ਬਹੁਲਕ & S_IROTH ? 'r' : '-';
+	str[i++] = ਬਹੁਲਕ & S_IWOTH ? 'w' : '-';
+	str[i++] = (ਬਹੁਲਕ & S_ISVTX
+		? (ਬਹੁਲਕ & S_IXOTH ? 't' : 'T')
+		: (ਬਹੁਲਕ & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	ਵਾਪਸ str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+ਸਥਿਰ ਪੂਰਨ get_exp(uint64_t n)
 {
-	int shft;
+	ਪੂਰਨ shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	ਲਈ (shft = 10; shft <= 60; shft += 10) {
+		ਜੇ (n < (1ULL << shft))
+			ਰੋਕੋ;
 	}
-	return shft - 10;
+	ਵਾਪਸ shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+ਅੱਖਰ *ਮਾਪ_ਮੰਜ਼ਿਲ_human_string(ਪੂਰਨ options, uint64_t ਬਾਈਟਾਂ)
 {
-	char buf[32];
-	int dec, exp;
+	ਅੱਖਰ buf[32];
+	ਪੂਰਨ dec, ਘਾਤਾਂਕ;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	ਅਚਲ ਅੱਖਰ *letters = "BKMGTPE";
+	ਅੱਖਰ suffix[ਆਕਾਰ(" KiB")], *psuf = suffix;
+	ਅੱਖਰ c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	ਜੇ (options & ਮਾਪ_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
-	exp  = get_exp(bytes);
-	c    = *(letters + (exp ? exp / 10 : 0));
-	dec  = exp ? bytes / (1ULL << exp) : bytes;
-	frac = exp ? bytes % (1ULL << exp) : 0;
+	ਘਾਤਾਂਕ  = get_exp(ਬਾਈਟਾਂ);
+	c    = *(letters + (ਘਾਤਾਂਕ ? ਘਾਤਾਂਕ / 10 : 0));
+	dec  = ਘਾਤਾਂਕ ? ਬਾਈਟਾਂ / (1ULL << ਘਾਤਾਂਕ) : ਬਾਈਟਾਂ;
+	frac = ਘਾਤਾਂਕ ? ਬਾਈਟਾਂ % (1ULL << ਘਾਤਾਂਕ) : 0;
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	ਜੇ ((options & ਮਾਪ_SUFFIX_3_LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -672,50 +672,50 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 *                 exp, suffix[0], dec, frac);
 	 */
 
-	/* round */
-	if (frac) {
+	/*ਗੇੜਾ*/
+	ਜੇ (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
-			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
-			frac = (frac * 1000) / (1ULL << (exp)) ;
+		ਜੇ (frac >= UINT64_MAX / 1000)
+			frac = ((frac / 1024) * 1000) / (1ULL << (ਘਾਤਾਂਕ - 10)) ;
+		ਨਹੀਂਤਾਂ
+			frac = (frac * 1000) / (1ULL << (ਘਾਤਾਂਕ)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		ਜੇ (options & ਮਾਪ_DECIMAL_2_DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} ਨਹੀਂਤਾਂ {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		ਜੇ (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	ਜੇ (frac) {
+		ਬਣਤਰ lconv ਅਚਲ *l = localeconv();
+		ਅੱਖਰ *dp = l ? l->decimal_ਬਿੰਦੂ : ਨਿਰਾ;
+		ਪੂਰਨ len;
 
-		if (!dp || !*dp)
+		ਜੇ (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, ਆਕਾਰ(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		ਜੇ (len > 0 && (size_t) len < ਆਕਾਰ(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			ਜੇ (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, ਆਕਾਰ(buf) - len);
+		} ਨਹੀਂਤਾਂ
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} ਨਹੀਂਤਾਂ
+		snprintf(buf, ਆਕਾਰ(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	ਵਾਪਸ strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+ਪੂਰਨ string_ਮੰਜ਼ਿਲ_idarray(ਅਚਲ ਅੱਖਰ *list, ਪੂਰਨ ary[], size_t arysz,
+			ਪੂਰਨ (name2id)(ਅਚਲ ਅੱਖਰ *, size_t))
 {
-	const char *begin = NULL, *p;
+	ਅਚਲ ਅੱਖਰ *begin = ਨਿਰਾ, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	ਜੇ (!list || !*list || !ary || !arysz || !name2id)
+		ਵਾਪਸ -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	ਲਈ (p = list; p && *p; p++) {
+		ਅਚਲ ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
+		ਪੂਰਨ id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		ਜੇ (n >= arysz)
+			ਵਾਪਸ -2;
+		ਜੇ (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
-			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
-			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		ਜੇ (*p == ',')
+			ਸਿਰਾ = p;		/* terminate the name */
+		ਜੇ (*(p + 1) == '\0')
+			ਸਿਰਾ = p + 1;		/* end of string */
+		ਜੇ (!begin || !ਸਿਰਾ)
+			ਜਾਰੀ;
+		ਜੇ (ਸਿਰਾ <= begin)
+			ਵਾਪਸ -1;
 
-		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		id = name2id(begin, ਸਿਰਾ - begin);
+		ਜੇ (id == -1)
+			ਵਾਪਸ -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ਨਿਰਾ;
+		ਜੇ (ਸਿਰਾ && !*ਸਿਰਾ)
+			ਰੋਕੋ;
 	}
-	return n;
+	ਵਾਪਸ n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+ਪੂਰਨ string_ਜੋੜੋ_ਮੰਜ਼ਿਲ_idarray(ਅਚਲ ਅੱਖਰ *list, ਪੂਰਨ ary[], size_t arysz,
+			size_t *ary_pos, ਪੂਰਨ (name2id)(ਅਚਲ ਅੱਖਰ *, size_t))
 {
-	const char *list_add;
-	int r;
+	ਅਚਲ ਅੱਖਰ *list_ਜੋੜੋ;
+	ਪੂਰਨ r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	ਜੇ (!list || !*list || !ary_pos || *ary_pos > arysz)
+		ਵਾਪਸ -1;
 
-	if (list[0] == '+')
-		list_add = &list[1];
-	else {
-		list_add = list;
+	ਜੇ (list[0] == '+')
+		list_ਜੋੜੋ = &list[1];
+	ਨਹੀਂਤਾਂ {
+		list_ਜੋੜੋ = list;
 		*ary_pos = 0;
 	}
 
-	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	r = string_ਮੰਜ਼ਿਲ_idarray(list_ਜੋੜੋ, &ary[*ary_pos], arysz - *ary_pos, name2id);
+	ਜੇ (r > 0)
 		*ary_pos += r;
-	return r;
+	ਵਾਪਸ r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+ਪੂਰਨ string_ਮੰਜ਼ਿਲ_bitarray(ਅਚਲ ਅੱਖਰ *list,
+		     ਅੱਖਰ *ary,
+		     ਪੂਰਨ (*name2bit)(ਅਚਲ ਅੱਖਰ *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	ਅਚਲ ਅੱਖਰ *begin = ਨਿਰਾ, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	ਜੇ (!list || !name2bit || !ary)
+		ਵਾਪਸ -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	ਲਈ (p = list; p && *p; p++) {
+		ਅਚਲ ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
+		ਪੂਰਨ ਦੋਆਧਾਰੀ_ਅੰਕ, ਸੈੱਟ_ਹੇਠਲਾ = 0, ਸੈੱਟ_higher = 0;
 
-		if (!begin)
+		ਜੇ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
-			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
-			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
-				end--;
-				set_lower = 1;
-			} else if (*begin == '+') {
+		ਜੇ (*p == ',')
+			ਸਿਰਾ = p;		/* terminate the name */
+		ਜੇ (*(p + 1) == '\0')
+			ਸਿਰਾ = p + 1;		/* end of string */
+		ਜੇ (!begin || !ਸਿਰਾ)
+			ਜਾਰੀ;
+		ਜੇ (ਸਿਰਾ <= begin)
+			ਵਾਪਸ -1;
+		ਜੇ (allow_range) {
+			ਜੇ (*(ਸਿਰਾ - 1) == '+') {
+				ਸਿਰਾ--;
+				ਸੈੱਟ_ਹੇਠਲਾ = 1;
+			} ਨਹੀਂਤਾਂ ਜੇ (*begin == '+') {
 				begin++;
-				set_higher = 1;
+				ਸੈੱਟ_higher = 1;
 			}
 		}
 
-		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
-		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
-				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
-				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		ਦੋਆਧਾਰੀ_ਅੰਕ = name2bit(begin, ਸਿਰਾ - begin);
+		ਜੇ (ਦੋਆਧਾਰੀ_ਅੰਕ < 0)
+			ਵਾਪਸ ਦੋਆਧਾਰੀ_ਅੰਕ;
+		setbit(ary, ਦੋਆਧਾਰੀ_ਅੰਕ);
+		ਜੇ (ਸੈੱਟ_ਹੇਠਲਾ)
+			ਜਦੋਂ (--ਦੋਆਧਾਰੀ_ਅੰਕ >= 0)
+				setbit(ary, ਦੋਆਧਾਰੀ_ਅੰਕ);
+		ਨਹੀਂਤਾਂ ਜੇ (ਸੈੱਟ_higher)
+			ਜਦੋਂ (++ਦੋਆਧਾਰੀ_ਅੰਕ < (ਪੂਰਨ) allow_range)
+				setbit(ary, ਦੋਆਧਾਰੀ_ਅੰਕ);
+		begin = ਨਿਰਾ;
+		ਜੇ (ਸਿਰਾ && !*ਸਿਰਾ)
+			ਰੋਕੋ;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
-		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+ਪੂਰਨ string_ਮੰਜ਼ਿਲ_bitmask(ਅਚਲ ਅੱਖਰ *list,
+		     ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ *ਨਕਾਬ,
+		     ਲੰਮਾ (*name2flag)(ਅਚਲ ਅੱਖਰ *, size_t))
 {
-	const char *begin = NULL, *p;
+	ਅਚਲ ਅੱਖਰ *begin = ਨਿਰਾ, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	ਜੇ (!list || !name2flag || !ਨਕਾਬ)
+		ਵਾਪਸ -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		long flag;
+	ਲਈ (p = list; p && *p; p++) {
+		ਅਚਲ ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
+		ਲੰਮਾ flag;
 
-		if (!begin)
+		ਜੇ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
-			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
-			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		ਜੇ (*p == ',')
+			ਸਿਰਾ = p;		/* terminate the name */
+		ਜੇ (*(p + 1) == '\0')
+			ਸਿਰਾ = p + 1;		/* end of string */
+		ਜੇ (!begin || !ਸਿਰਾ)
+			ਜਾਰੀ;
+		ਜੇ (ਸਿਰਾ <= begin)
+			ਵਾਪਸ -1;
 
-		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
-		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		flag = name2flag(begin, ਸਿਰਾ - begin);
+		ਜੇ (flag < 0)
+			ਵਾਪਸ flag;	/* error */
+		*ਨਕਾਬ |= flag;
+		begin = ਨਿਰਾ;
+		ਜੇ (ਸਿਰਾ && !*ਸਿਰਾ)
+			ਰੋਕੋ;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+ਪੂਰਨ ul_parse_range(ਅਚਲ ਅੱਖਰ *str, ਪੂਰਨ *ਹੇਠਲਾ, ਪੂਰਨ *ਉੱਤਲਾ, ਪੂਰਨ def)
 {
-	char *end = NULL;
+	ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
 
-	if (!str)
-		return 0;
+	ਜੇ (!str)
+		ਵਾਪਸ 0;
 
-	*upper = *lower = def;
+	*ਉੱਤਲਾ = *ਹੇਠਲਾ = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	ਜੇ (*str == ':') {				/* <:N> */
 		str++;
-		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
-		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		*ਉੱਤਲਾ = strtol(str, &ਸਿਰਾ, 10);
+		ਜੇ (errno || !ਸਿਰਾ || *ਸਿਰਾ || ਸਿਰਾ == str)
+			ਵਾਪਸ -1;
+	} ਨਹੀਂਤਾਂ {
+		*ਉੱਤਲਾ = *ਹੇਠਲਾ = strtol(str, &ਸਿਰਾ, 10);
+		ਜੇ (errno || !ਸਿਰਾ || ਸਿਰਾ == str)
+			ਵਾਪਸ -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
-			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
-			str = end + 1;
-			end = NULL;
+		ਜੇ (*ਸਿਰਾ == ':' && !*(ਸਿਰਾ + 1))		/* <M:> */
+			*ਉੱਤਲਾ = def;
+		ਨਹੀਂਤਾਂ ਜੇ (*ਸਿਰਾ == '-' || *ਸਿਰਾ == ':') {	/* <M:N> <M-N> */
+			str = ਸਿਰਾ + 1;
+			ਸਿਰਾ = ਨਿਰਾ;
 			errno = 0;
-			*upper = strtol(str, &end, 10);
+			*ਉੱਤਲਾ = strtol(str, &ਸਿਰਾ, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			ਜੇ (errno || !ਸਿਰਾ || *ਸਿਰਾ || ਸਿਰਾ == str)
+				ਵਾਪਸ -1;
 		}
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+ਅਚਲ ਅੱਖਰ *ul_ਰਸਤਾ_ਅਗਲਾ_segment(ਅਚਲ ਅੱਖਰ *str, size_t *sz)
 {
-	const char *start, *p;
+	ਅਚਲ ਅੱਖਰ *ਸ਼ੁਰੂ, *p;
 
-	start = str;
+	ਸ਼ੁਰੂ = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
-		start++;
+	ਜਦੋਂ (ਸ਼ੁਰੂ && *ਸ਼ੁਰੂ == '/' && *(ਸ਼ੁਰੂ + 1) == '/')
+		ਸ਼ੁਰੂ++;
 
-	if (!start || !*start)
-		return NULL;
+	ਜੇ (!ਸ਼ੁਰੂ || !*ਸ਼ੁਰੂ)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	ਲਈ (*sz = 1, p = ਸ਼ੁਰੂ + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	ਵਾਪਸ ਸ਼ੁਰੂ;
 }
 
-int streq_paths(const char *a, const char *b)
+ਪੂਰਨ streq_paths(ਅਚਲ ਅੱਖਰ *a, ਅਚਲ ਅੱਖਰ *b)
 {
-	while (a && b) {
+	ਜਦੋਂ (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		ਅਚਲ ਅੱਖਰ *a_seg = ul_ਰਸਤਾ_ਅਗਲਾ_segment(a, &a_sz);
+		ਅਚਲ ਅੱਖਰ *b_seg = ul_ਰਸਤਾ_ਅਗਲਾ_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		ਜੇ (a_sz + b_sz == 0)
+			ਵਾਪਸ 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		ਜੇ (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			ਵਾਪਸ 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		ਜੇ (!a_seg || !b_seg)
+			ਰੋਕੋ;
+		ਜੇ (a_sz != b_sz || ਲੜੀ_ਤੁਲਨਾ(a_seg, b_seg, a_sz) != 0)
+			ਰੋਕੋ;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+ਪੂਰਨ ul_ਰਸਤਾ_is_within(ਅਚਲ ਅੱਖਰ *ਰਸਤਾ, ਅਚਲ ਅੱਖਰ *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	ਜੇ (!ਰਸਤਾ || !dir || !*ਰਸਤਾ || !*dir)
+		ਵਾਪਸ 0;
 
-	while (path && dir) {
+	ਜਦੋਂ (ਰਸਤਾ && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		ਅਚਲ ਅੱਖਰ *p_seg = ul_ਰਸਤਾ_ਅਗਲਾ_segment(ਰਸਤਾ, &p_sz);
+		ਅਚਲ ਅੱਖਰ *d_seg = ul_ਰਸਤਾ_ਅਗਲਾ_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		ਜੇ (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			ਵਾਪਸ 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		ਜੇ (!p_seg || !d_seg)
+			ਰੋਕੋ;
+		ਜੇ (p_sz != d_sz || ਲੜੀ_ਤੁਲਨਾ(p_seg, d_seg, p_sz) != 0)
+			ਰੋਕੋ;
 
-		path = p_seg + p_sz;
+		ਰਸਤਾ = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+ਅੱਖਰ *ul_strnconcat(ਅਚਲ ਅੱਖਰ *s, ਅਚਲ ਅੱਖਰ *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	ਅੱਖਰ *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	ਜੇ (!s && !suffix)
+		ਵਾਪਸ strdup("");
+	ਜੇ (!s)
+		ਵਾਪਸ strndup(suffix, b);
+	ਜੇ (!suffix)
+		ਵਾਪਸ strdup(s);
 
-	assert(s);
-	assert(suffix);
+	ਪ੍ਰਤਿਜ੍ਞਾ(s);
+	ਪ੍ਰਤਿਜ੍ਞਾ(suffix);
 
-	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	a = ਲੜੀ_ਲੰਬਾਈ(s);
+	ਜੇ (b > ((size_t) -1) - a)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	r = ਸਮ੍ਰਿਤੀ_ਦਿਓ(a + b + 1);
+	ਜੇ (!r)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	memcpy(r, s, a);
-	memcpy(r + a, suffix, b);
+	ਸਮ੍ਰਿਤੀ_ਨਕਲ(r, s, a);
+	ਸਮ੍ਰਿਤੀ_ਨਕਲ(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	ਵਾਪਸ r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+ਅੱਖਰ *ul_strconcat(ਅਚਲ ਅੱਖਰ *s, ਅਚਲ ਅੱਖਰ *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	ਵਾਪਸ ul_strnconcat(s, suffix, suffix ? ਲੜੀ_ਲੰਬਾਈ(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+ਅੱਖਰ *ul_strfconcat(ਅਚਲ ਅੱਖਰ *s, ਅਚਲ ਅੱਖਰ *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	ਅੱਖਰ *val, *res;
+	ਪੂਰਨ sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	ਜੇ (sz < 0)
+		ਵਾਪਸ ਨਿਰਾ;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	ਮੁਕਤ(val);
+	ਵਾਪਸ res;
 }
 
-int ul_strappend(char **a, const char *b)
+ਪੂਰਨ ul_strappend(ਅੱਖਰ **a, ਅਚਲ ਅੱਖਰ *b)
 {
 	size_t al, bl;
-	char *tmp;
+	ਅੱਖਰ *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	ਜੇ (!a)
+		ਵਾਪਸ -EINVAL;
+	ਜੇ (!b || !*b)
+		ਵਾਪਸ 0;
+	ਜੇ (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		ਵਾਪਸ !*a ? -ENOMEM : 0;
 	}
 
-	al = strlen(*a);
-	bl = strlen(b);
+	al = ਲੜੀ_ਲੰਬਾਈ(*a);
+	bl = ਲੜੀ_ਲੰਬਾਈ(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	ਜੇ (!tmp)
+		ਵਾਪਸ -ENOMEM;
 	*a = tmp;
-	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	ਸਮ੍ਰਿਤੀ_ਨਕਲ((*a) + al, b, bl + 1);
+	ਵਾਪਸ 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+ਪੂਰਨ strfappend(ਅੱਖਰ **a, ਅਚਲ ਅੱਖਰ *format, ...)
 {
 	va_list ap;
-	int res;
+	ਪੂਰਨ res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	ਵਾਪਸ res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+ਬਾਹਰੀ ਪੂਰਨ ul_strvfappend(ਅੱਖਰ **a, ਅਚਲ ਅੱਖਰ *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	ਅੱਖਰ *val;
+	ਪੂਰਨ sz;
+	ਪੂਰਨ res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ਜੇ (sz < 0)
+		ਵਾਪਸ -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	ਮੁਕਤ(val);
+	ਵਾਪਸ res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+ਸਥਿਰ size_t strcspn_escaped(ਅਚਲ ਅੱਖਰ *s, ਅਚਲ ਅੱਖਰ *reject)
 {
-	int escaped = 0;
-	int n;
+	ਪੂਰਨ escaped = 0;
+	ਪੂਰਨ n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	ਲਈ (n=0; s[n]; n++) {
+		ਜੇ (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		ਨਹੀਂਤਾਂ ਜੇ (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		ਨਹੀਂਤਾਂ ਜੇ (strchr(reject, s[n]))
+			ਰੋਕੋ;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	ਵਾਪਸ n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+ਅੱਖਰ *ul_strchr_escaped(ਅਚਲ ਅੱਖਰ *s, ਪੂਰਨ c)
 {
-	char *p;
-	int esc = 0;
+	ਅੱਖਰ *p;
+	ਪੂਰਨ esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	ਲਈ (p = (ਅੱਖਰ *) s; p && *p; p++) {
+		ਜੇ (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			ਜਾਰੀ;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		ਜੇ (*p == c && (!esc || c == '\\'))
+			ਵਾਪਸ p;
 		esc = 0;
 	}
 
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+ਅਚਲ ਅੱਖਰ *ul_ਵੰਡੋ(ਅਚਲ ਅੱਖਰ **state, size_t *l, ਅਚਲ ਅੱਖਰ *separator, ਪੂਰਨ quoted)
 {
-	const char *current;
+	ਅਚਲ ਅੱਖਰ *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	ਜੇ (!*current) {
+		ਪ੍ਰਤਿਜ੍ਞਾ(**state == '\0');
+		ਵਾਪਸ ਨਿਰਾ;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	ਜੇ (!*current) {
 		*state = current;
-		return NULL;
+		ਵਾਪਸ ਨਿਰਾ;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	ਜੇ (quoted && strchr("\'\"", *current)) {
+		ਅੱਖਰ quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		ਜੇ (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			ਵਾਪਸ ਨਿਰਾ;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} ਨਹੀਂਤਾਂ ਜੇ (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		ਜੇ (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			ਵਾਪਸ ਨਿਰਾ;
 		}
 		*state = current + *l;
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	ਵਾਪਸ current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+ਪੂਰਨ skip_fline(FILE *fp)
 {
-	int ch;
+	ਪੂਰਨ ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	ਕਰੋ {
+		ਜੇ ((ch = fgetc(fp)) == EOF)
+			ਵਾਪਸ 1;
+		ਜੇ (ch == '\n')
+			ਵਾਪਸ 0;
+	} ਜਦੋਂ (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+ਪੂਰਨ ul_stralnumcmp(ਅਚਲ ਅੱਖਰ *p1, ਅਚਲ ਅੱਖਰ *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *s1 = (ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *) p1;
+	ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *s2 = (ਅਚਲ ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *) p2;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	ਕਰੋ {
+		ਕਰੋ {
+			c1 = (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ) *s1++;
+		} ਜਦੋਂ (c1 != '\0' && !ਅੱਖਰ_ਜਾਂ_ਅੰਕ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		ਕਰੋ {
+			c2 = (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ) *s2++;
+		} ਜਦੋਂ (c2 != '\0' && !ਅੱਖਰ_ਜਾਂ_ਅੰਕ((ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ) c2));
 
-		if (c1 != '\0')
+		ਜੇ (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		ਜੇ (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		ਜੇ (c1 == '\0')
+			ਵਾਪਸ c1 - c2;
+	} ਜਦੋਂ (c1 == c2);
 
-	return c1 - c2;
+	ਵਾਪਸ c1 - c2;
 }
 
 /*
@@ -1277,359 +1277,359 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+ਪੂਰਨ ul_optstr_ਅਗਲਾ(ਅੱਖਰ **optstr, ਅੱਖਰ **name, size_t *namesz,
+		   ਅੱਖਰ **ਮੁੱਲ, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	ਪੂਰਨ open_quote = 0;
+	ਅੱਖਰ *ਸ਼ੁਰੂ = ਨਿਰਾ, *stop = ਨਿਰਾ, *p, *sep = ਨਿਰਾ;
+	ਅੱਖਰ *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	ਪ੍ਰਤਿਜ੍ਞਾ(optstr);
+	ਪ੍ਰਤਿਜ੍ਞਾ(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	ਜੇ (name)
+		*name = ਨਿਰਾ;
+	ਜੇ (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	ਜੇ (ਮੁੱਲ)
+		*ਮੁੱਲ = ਨਿਰਾ;
+	ਜੇ (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	ਜਦੋਂ (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
-			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+	ਲਈ (p = optstr0; p && *p; p++) {
+		ਜੇ (!ਸ਼ੁਰੂ && *p == '=')
+			ਵਾਪਸ -EINVAL;
+		ਜੇ (!ਸ਼ੁਰੂ)
+			ਸ਼ੁਰੂ = p;		/* beginning of the option item */
+		ਜੇ (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		ਜੇ (open_quote)
+			ਜਾਰੀ;		/* still in quoted block */
+		ਜੇ (!sep && p > ਸ਼ੁਰੂ && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		ਜੇ (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		ਨਹੀਂਤਾਂ ਜੇ (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		ਜੇ (!ਸ਼ੁਰੂ || !stop)
+			ਜਾਰੀ;
+		ਜੇ (stop <= ਸ਼ੁਰੂ)
+			ਵਾਪਸ -EINVAL;
 
-		if (name)
-			*name = start;
-		if (namesz)
-			*namesz = sep ? sep - start : stop - start;
+		ਜੇ (name)
+			*name = ਸ਼ੁਰੂ;
+		ਜੇ (namesz)
+			*namesz = sep ? sep - ਸ਼ੁਰੂ : stop - ਸ਼ੁਰੂ;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		ਜੇ (sep) {
+			ਜੇ (ਮੁੱਲ)
+				*ਮੁੱਲ = sep + 1;
+			ਜੇ (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
-	return 1;				/* end of optstr */
+	ਵਾਪਸ 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+ਪੂਰਨ ul_optstr_is_valid(ਅਚਲ ਅੱਖਰ *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	ਪੂਰਨ rc;
+	ਅੱਖਰ *p = (ਅੱਖਰ *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	ਜਦੋਂ ((rc = ul_optstr_ਅਗਲਾ(&p, ਨਿਰਾ, ਨਿਰਾ, ਨਿਰਾ, ਨਿਰਾ)) == 0);
+	ਵਾਪਸ rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+ਅੱਖਰ *ul_optstr_get_ਮੁੱਲ(ਅਚਲ ਅੱਖਰ *optstr, ਅਚਲ ਅੱਖਰ *ਕੁੰਜੀ)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	ਅੱਖਰ *name = ਨਿਰਾ, *ਮੁੱਲ = ਨਿਰਾ;
+	ਅੱਖਰ *p = (ਅੱਖਰ *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	ਜੇ (!optstr || !ਕੁੰਜੀ || !*ਕੁੰਜੀ)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = ਲੜੀ_ਲੰਬਾਈ(ਕੁੰਜੀ);
+	ਜਦੋਂ (ul_optstr_ਅਗਲਾ(&p, &name, &namesz, &ਮੁੱਲ, &valsz) == 0) {
+		ਜੇ (namesz != sz || !valsz)
+			ਜਾਰੀ;
+		ਜੇ (ਲੜੀ_ਤੁਲਨਾ(name, ਕੁੰਜੀ, namesz) == 0)
+			ਵਾਪਸ strndup(ਮੁੱਲ, valsz);
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(ਅੱਖਰ *str)
 {
 	size_t len;
-	char q;
+	ਅੱਖਰ q;
 
-	if (!str || !*str)
-		return 0;
+	ਜੇ (!str || !*str)
+		ਵਾਪਸ 0;
 
-	len = strlen(str);
+	len = ਲੜੀ_ਲੰਬਾਈ(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	ਜੇ ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		ਵਾਪਸ len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	ਵਾਪਸ len - 2;
 }
 
-#ifdef TEST_PROGRAM_STRUTILS
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+ਬਣਤਰ testS {
+	ਅੱਖਰ *name;
+	ਅੱਖਰ *ਮੁੱਲ;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+ਸਥਿਰ ਪੂਰਨ test_strdup_ਮੰਜ਼ਿਲ_member(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	struct testS *xx;
+	ਬਣਤਰ testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ਜੇ (argc < 3)
+		ਵਾਪਸ EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = ਸਿਫਰ_ਸਮ੍ਰਿਤੀ_ਦਿਓ(1, ਆਕਾਰ(*xx));
+	ਜੇ (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
-	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_ਮੰਜ਼ਿਲ_struct_member(xx, name, argv[1]);
+	strdup_ਮੰਜ਼ਿਲ_struct_member(xx, ਮੁੱਲ, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	ਜੇ (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->ਮੁੱਲ, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	ਲਿਖੋ("1: '%s', 2: '%s'\n", xx->name, xx->ਮੁੱਲ);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	ਮੁਕਤ(xx->name);
+	ਮੁਕਤ(xx->ਮੁੱਲ);
+	ਮੁਕਤ(xx);
+	ਵਾਪਸ EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+ਸਥਿਰ ਪੂਰਨ test_strutils_sizes(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	uintmax_t ਮਾਪ = 0;
+	ਅੱਖਰ *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	ਜੇ (argc < 2)
+		ਵਾਪਸ EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	ਜੇ (strtosize(argv[1], &ਮਾਪ))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
-	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
-	hum2 = size_to_human_string(SIZE_SUFFIX_3LETTER |
-				    SIZE_SUFFIX_SPACE, size);
-	hum3 = size_to_human_string(SIZE_SUFFIX_3LETTER |
-				    SIZE_SUFFIX_SPACE |
-				    SIZE_DECIMAL_2DIGITS, size);
+	hum1 = ਮਾਪ_ਮੰਜ਼ਿਲ_human_string(ਮਾਪ_SUFFIX_1_LETTER, ਮਾਪ);
+	hum2 = ਮਾਪ_ਮੰਜ਼ਿਲ_human_string(ਮਾਪ_SUFFIX_3_LETTER |
+				    ਮਾਪ_SUFFIX_SPACE, ਮਾਪ);
+	hum3 = ਮਾਪ_ਮੰਜ਼ਿਲ_human_string(ਮਾਪ_SUFFIX_3_LETTER |
+				    ਮਾਪ_SUFFIX_SPACE |
+				    ਮਾਪ_DECIMAL_2_DIGITS, ਮਾਪ);
 
-	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	ਲਿਖੋ("%25s : %20ju : %8s : %12s : %13s\n", argv[1], ਮਾਪ, hum1, hum2, hum3);
+	ਮੁਕਤ(hum1);
+	ਮੁਕਤ(hum2);
+	ਮੁਕਤ(hum3);
 
-	return EXIT_SUCCESS;
+	ਵਾਪਸ EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+ਸਥਿਰ ਪੂਰਨ test_strutils_cmp_paths(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	ਪੂਰਨ rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ਜੇ (argc < 3)
+		ਵਾਪਸ EXIT_FAILURE;
 
-	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	ਲਿਖੋ("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
+	ਵਾਪਸ EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+ਸਥਿਰ ਪੂਰਨ test_strutils_ਰਸਤਾ_is_within(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	int rc;
+	ਪੂਰਨ rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ਜੇ (argc < 3)
+		ਵਾਪਸ EXIT_FAILURE;
 
-	rc = ul_path_is_within(argv[1], argv[2]);
+	rc = ul_ਰਸਤਾ_is_within(argv[1], argv[2]);
 
-	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	ਲਿਖੋ("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
+	ਵਾਪਸ EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+ਸਥਿਰ ਪੂਰਨ test_strutils_normalize(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	unsigned char *src, *dst, *org;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	ਜੇ (argc < 2)
+		ਵਾਪਸ EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
-	dst = malloc(len + 1);
+	org = (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *) strdup(argv[1]);
+	src = (ਬਿਨਾਨਿਸ਼ਾਨੀ ਅੱਖਰ *) strdup((ਅੱਖਰ *) org);
+	len = ਲੜੀ_ਲੰਬਾਈ((ਅੱਖਰ *) src);
+	dst = ਸਮ੍ਰਿਤੀ_ਦਿਓ(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	ਜੇ (!org || !src || !dst)
+		ਜਾਓ ਪੂਰਾ;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
-	printf("1: '%s' --> '%s' [sz=%zu]\n", src, dst, sz);
+	ਲਿਖੋ("1: '%s' --> '%s' [sz=%zu]\n", src, dst, sz);
 
 	/* one buffer */
 	sz = normalize_whitespace(src);
-	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
+	ਲਿਖੋ("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
-done:
-	free(src);
-	free(dst);
-	free(org);
+ਪੂਰਾ:
+	ਮੁਕਤ(src);
+	ਮੁਕਤ(dst);
+	ਮੁਕਤ(org);
 
-	return EXIT_SUCCESS;
+	ਵਾਪਸ EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+ਸਥਿਰ ਪੂਰਨ test_strutils_cstrcasecmp(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	char *a, *b;
+	ਅੱਖਰ *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ਜੇ (argc < 3)
+		ਵਾਪਸ EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	ਜੇ (!a || !b)
+		ਵਾਪਸ EXIT_FAILURE;
 
-	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
-	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
-	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
+	ਲਿਖੋ("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
+	ਲਿਖੋ("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
+	ਲਿਖੋ("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, ਲੜੀ_ਲੰਬਾਈ(a)));
 
-	return EXIT_SUCCESS;
+	ਵਾਪਸ EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	ਜੇ (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		ਵਾਪਸ test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
-		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+		ਲਿਖੋ("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						ਨਿਰਾ));
+		ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		ਜੇ (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
-		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		ਲਿਖੋ("'%s'-->%s\n", argv[2], val ? "true" : "false");
+		ਵਾਪਸ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		ਵਾਪਸ test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		ਵਾਪਸ test_strutils_ਰਸਤਾ_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		ਵਾਪਸ test_strdup_ਮੰਜ਼ਿਲ_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
-		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
+	} ਨਹੀਂਤਾਂ ਜੇ  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+		ਲਿਖੋ("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		ਵਾਪਸ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		ਵਾਪਸ test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		ਵਾਪਸ test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
-		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
-		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
-		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
-		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
-		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
-		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+		ਲਿਖੋ("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
+		ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		ਲਿਖੋ("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
+		ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		ਲਿਖੋ("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
+		ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		ਲਿਖੋ("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
+		ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		ਲਿਖੋ("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
+		ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		ਲਿਖੋ("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
+		ਵਾਪਸ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
-		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+		ਲਿਖੋ("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
+		ਵਾਪਸ EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		ਅੱਖਰ *buf = "abc\0Y\0\0xyz\0X";
+		ਅੱਖਰ *ਸਿਰਾ = buf + 12;
+		ਅੱਖਰ *p = buf;
 
-		do {
-			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		ਕਰੋ {
+			ਲਿਖੋ("str: '%s'\n", p);
+		} ਜਦੋਂ ((p = ul_ਅਗਲਾ_string(p, ਸਿਰਾ)));
 
-		return EXIT_SUCCESS;
+		ਵਾਪਸ EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		ਅੱਖਰ *name = ਨਿਰਾ, *val = ਨਿਰਾ;
+		ਅੱਖਰ *p = argv[2];
+		ਪੂਰਨ rc;
 
-		if (!ul_optstr_is_valid(p))
+		ਜੇ (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		ਜਦੋਂ ((rc = ul_optstr_ਅਗਲਾ(&p, &name, &namesz, &val, &valsz)) == 0) {
+			ਲਿਖੋ("'%.*s' : '%.*s'\n", (ਪੂਰਨ) namesz, name,
+						   (ਪੂਰਨ) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		ਜੇ (rc == 1)
+			ਵਾਪਸ EXIT_SUCCESS;
+	} ਨਹੀਂਤਾਂ ਜੇ (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		ਅੱਖਰ *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		ਜੇ (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
-		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		ਲਿਖੋ("%s-->%s\n", argv[2], unquoted);
+		ਮੁਕਤ(unquoted);
+		ਵਾਪਸ EXIT_SUCCESS;
 
-	} else {
+	} ਨਹੀਂਤਾਂ {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1643,9 +1643,9 @@ int main(int argc, char *argv[])
 				"       %1$s --optstr <str>\n"
 				"       %1$s --unquote <str>\n",
 				argv[0]);
-		exit(EXIT_FAILURE);
+		ਬਾਹਰ_ਨਿਕਲੋ(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	ਵਾਪਸ EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_STRUTILS */
+#ਜੇ_ਅੰਤ /* TEST_PROGRAM_STRUTILS */

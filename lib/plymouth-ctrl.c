@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <limits.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <poll.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <signal.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdarg.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/mman.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/socket.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/un.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "all-io.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "nls.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+ਸਥਿਰ ਪੂਰਨ can_read(ਪੂਰਨ fd, ਅਚਲ ਲੰਮਾ timeout)
 {
-	struct pollfd fds = {
+	ਬਣਤਰ pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	ਪੂਰਨ ret;
 
-	do {
+	ਕਰੋ {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} ਜਦੋਂ ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	ਵਾਪਸ (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+ਸਥਿਰ ਪੂਰਨ open_un_socket_and_connect(ਖਾਲੀ)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	ਬਣਤਰ sockaddr_un su = {
 		.sun_family = AF_UNIX,
-		.sun_path = PLYMOUTH_SOCKET_PATH,
+		.sun_path = PLYMOUTH_SOCKET_ਰਸਤਾ,
 	};
-	const int one = 1;
-	int fd, ret;
+	ਅਚਲ ਪੂਰਨ one = 1;
+	ਪੂਰਨ fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	ਜੇ (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		ਜਾਓ err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, ਆਕਾਰ(one));
+	ਜੇ (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		ਜਾਓ err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (ਬਣਤਰ sockaddr *) &su,
+		offsetof(ਬਣਤਰ sockaddr_un, sun_path) + 1 + ਲੜੀ_ਲੰਬਾਈ(su.sun_path+1));
+	ਜੇ (ret < 0) {
+		ਜੇ (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		ਜਾਓ err;
 	}
 err:
-	return fd;
+	ਵਾਪਸ fd;
 }
 
-int plymouth_command(int cmd, ...)
+ਪੂਰਨ plymouth_command(ਪੂਰਨ cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	ਬਣਤਰ sigaction sp, op;
+	ਪੂਰਨ fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	ਚੋਣ (cmd) {
+	ਹਾਲਤ MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ਜੇ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, ਆਕਾਰ(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		ਰੋਕੋ;
+	ਹਾਲਤ MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ਜੇ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, ਆਕਾਰ(command));
 		}
-		break;
-	default:
+		ਰੋਕੋ;
+	ਮੂਲ:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	ਹਾਲਤ '?':
+		ਜਾਓ err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	ਜੇ (fdsock >= 0) {
+		ਜੇ (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (ਅੱਖਰ *) &answer[0], ਆਕਾਰ(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, ਨਿਰਾ);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	ਵਾਪਸ ret;
 }
 

@@ -20,76 +20,76 @@
  *  - old LOOP_{SET,GET}_STATUS (32bit) ioctls are unsupported
  *  - extendible
  */
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <inttypes.h>
-#include <dirent.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdint.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <string.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <ctype.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <fcntl.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/ioctl.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/stat.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/mman.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <inttypes.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <dirent.h>
 
-#include "linux_version.h"
-#include "c.h"
-#include "timeutils.h"
-#include "sysfs.h"
-#include "pathnames.h"
-#include "loopdev.h"
-#include "canonicalize.h"
-#include "blkdev.h"
-#include "debug.h"
-#include "fileutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "linux_version.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "timeutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "sysfs.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "pathnames.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "loopdev.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "canonicalize.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "blkdev.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "debug.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "fileutils.h"
 
-#define LOOPDEV_MAX_TRIES	10
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LOOPDEV_MAX_TRIES	10
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(loopdev);
-UL_DEBUG_DEFINE_MASKNAMES(loopdev) = UL_DEBUG_EMPTY_MASKNAMES;
+ਸਥਿਰ UL_DEBUG_DEFINE_ਨਕਾਬ(loopdev);
+UL_DEBUG_DEFINE_MASKNAMES(loopdev) = UL_DEBUG_ਖਾਲੀ_ਥਾਵਾਂ_MASKNAMES;
 
-#define LOOPDEV_DEBUG_INIT	(1 << 1)
-#define LOOPDEV_DEBUG_CXT	(1 << 2)
-#define LOOPDEV_DEBUG_ITER	(1 << 3)
-#define LOOPDEV_DEBUG_SETUP	(1 << 4)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LOOPDEV_DEBUG_INIT	(1 << 1)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LOOPDEV_DEBUG_CXT	(1 << 2)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LOOPDEV_DEBUG_ITER	(1 << 3)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ LOOPDEV_DEBUG_ਤਿਆਰੀ	(1 << 4)
 
-#define DBG(m, x)		__UL_DBG(loopdev, LOOPDEV_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(loopdev, LOOPDEV_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(loopdev, LOOPDEV_DEBUG_, m, x)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DBG(m, x)		__UL_DBG(loopdev, LOOPDEV_DEBUG_, m, x)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ DBG_OBJ(m, h, x)	__UL_DBG_OBJ(loopdev, LOOPDEV_DEBUG_, m, h, x)
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ ON_DBG(m, x)		__UL_DBG_CALL(loopdev, LOOPDEV_DEBUG_, m, x)
 
-static void loopdev_init_debug(void)
+ਸਥਿਰ ਖਾਲੀ loopdev_init_debug(ਖਾਲੀ)
 {
-	if (loopdev_debug_mask)
-		return;
+	ਜੇ (loopdev_debug_ਨਕਾਬ)
+		ਵਾਪਸ;
 	__UL_INIT_DEBUG_FROM_ENV(loopdev, LOOPDEV_DEBUG_, 0, LOOPDEV_DEBUG);
 }
 
 /*
  * see loopcxt_init()
  */
-#define loopcxt_ioctl_enabled(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOIOCTL))
-#define loopcxt_sysfs_available(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOSYSFS)) \
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ loopcxt_ioctl_enabled(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOIOCTL))
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ loopcxt_sysfs_ਉਪਲਬਧ(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOSYSFS)) \
 					 && !loopcxt_ioctl_enabled(_lc)
 
 /*
  * Calls @x and repeat on EAGAIN
  */
-#define repeat_on_eagain(x) __extension__ ({			\
-		int _c = 0, _e;					\
-		do {						\
+#ਪਰਿਭਾਸ਼ਿਤ_ਕਰੋ repeat_on_eagain(x) __extension__ ({			\
+		ਪੂਰਨ _c = 0, _e;					\
+		ਕਰੋ {						\
 			errno = 0;				\
 			_e = x;					\
-			if (_e == 0 || errno != EAGAIN)		\
-				break;				\
-			if (_c >= LOOPDEV_MAX_TRIES)		\
-				break;				\
+			ਜੇ (_e == 0 || errno != EAGAIN)		\
+				ਰੋਕੋ;				\
+			ਜੇ (_c >= LOOPDEV_MAX_TRIES)		\
+				ਰੋਕੋ;				\
 			xusleep(250000);			\
 			_c++;					\
-		} while (1);					\
+		} ਜਦੋਂ (1);					\
 		_e == 0 ? 0 : errno ? -errno : -1;		\
 	})
 
@@ -105,75 +105,75 @@ static void loopdev_init_debug(void)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_device(ਬਣਤਰ loopdev_cxt *lc, ਅਚਲ ਅੱਖਰ *device)
 {
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
-	if (lc->fd >= 0) {
+	ਜੇ (lc->fd >= 0) {
 		close(lc->fd);
 		DBG_OBJ(CXT, lc, ul_debug("closing old open fd"));
 	}
 	lc->fd = -1;
-	lc->is_lost = 0;
+	lc->is_ਗੁਆਚਾ = 0;
 	lc->devno = 0;
-	lc->mode = O_RDONLY;
+	lc->ਬਹੁਲਕ = O_RDONLY;
 	lc->blocksize = 0;
 	lc->has_info = 0;
 	lc->info_failed = 0;
 	*lc->device = '\0';
-	memset(&lc->config, 0, sizeof(lc->config));
+	memset(&lc->config, 0, ਆਕਾਰ(lc->config));
 
 	/* set new */
-	if (device) {
-		if (*device != '/') {
-			const char *dir = _PATH_DEV;
+	ਜੇ (device) {
+		ਜੇ (*device != '/') {
+			ਅਚਲ ਅੱਖਰ *dir = _PATH_DEV;
 
 			/* compose device name for /dev/loop<n> or /dev/loop/<n> */
-			if (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
-				if (strlen(device) < 5)
-					return -1;
+			ਜੇ (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
+				ਜੇ (ਲੜੀ_ਲੰਬਾਈ(device) < 5)
+					ਵਾਪਸ -1;
 				device += 4;
-				dir = _PATH_DEV_LOOP "/";	/* _PATH_DEV uses trailing slash */
+				dir = ਰਸਤਾ_DEV_LOOP "/";	/* _PATH_DEV uses trailing slash */
 			}
-			snprintf(lc->device, sizeof(lc->device), "%s%s",
+			snprintf(lc->device, ਆਕਾਰ(lc->device), "%s%s",
 				dir, device);
-		} else
-			xstrncpy(lc->device, device, sizeof(lc->device));
+		} ਨਹੀਂਤਾਂ
+			xstrncpy(lc->device, device, ਆਕਾਰ(lc->device));
 
 		DBG_OBJ(CXT, lc, ul_debug("%s name assigned", device));
 	}
 
-	ul_unref_path(lc->sysfs);
-	lc->sysfs = NULL;
-	return 0;
+	ul_unref_ਰਸਤਾ(lc->sysfs);
+	lc->sysfs = ਨਿਰਾ;
+	ਵਾਪਸ 0;
 }
 
-int loopcxt_has_device(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_has_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	return lc && *lc->device;
+	ਵਾਪਸ lc && *lc->device;
 }
 
-dev_t loopcxt_get_devno(struct loopdev_cxt *lc)
+dev_t loopcxt_get_devno(ਬਣਤਰ loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (!lc->devno)
-		lc->devno = sysfs_devname_to_devno(lc->device);
-	return lc->devno;
+	ਜੇ (!lc || !loopcxt_has_device(lc))
+		ਵਾਪਸ 0;
+	ਜੇ (!lc->devno)
+		lc->devno = sysfs_devname_ਮੰਜ਼ਿਲ_devno(lc->device);
+	ਵਾਪਸ lc->devno;
 }
 
-int loopcxt_is_lost(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_is_ਗੁਆਚਾ(ਬਣਤਰ loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (lc->is_lost)
-		return 1;
+	ਜੇ (!lc || !loopcxt_has_device(lc))
+		ਵਾਪਸ 0;
+	ਜੇ (lc->is_ਗੁਆਚਾ)
+		ਵਾਪਸ 1;
 
-	lc->is_lost = access(lc->device, F_OK) != 0
+	lc->is_ਗੁਆਚਾ = access(lc->device, F_OK) != 0
 			&& loopcxt_get_devno(lc) != 0;
 
-	return lc->is_lost;
+	ਵਾਪਸ lc->is_ਗੁਆਚਾ;
 }
 
 /*
@@ -190,33 +190,33 @@ int loopcxt_is_lost(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_init(struct loopdev_cxt *lc, int flags)
+ਪੂਰਨ loopcxt_init(ਬਣਤਰ loopdev_cxt *lc, ਪੂਰਨ flags)
 {
-	int rc;
-	struct stat st;
-	struct loopdev_cxt dummy = UL_LOOPDEVCXT_EMPTY;
+	ਪੂਰਨ rc;
+	ਬਣਤਰ stat st;
+	ਬਣਤਰ loopdev_cxt dummy = UL_LOOPDEVCXT_ਖਾਲੀ_ਥਾਵਾਂ;
 
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
 	loopdev_init_debug();
 	DBG_OBJ(CXT, lc, ul_debug("initialize context"));
 
-	memcpy(lc, &dummy, sizeof(dummy));
+	ਸਮ੍ਰਿਤੀ_ਨਕਲ(lc, &dummy, ਆਕਾਰ(dummy));
 	lc->flags = flags;
 
-	rc = loopcxt_set_device(lc, NULL);
-	if (rc)
-		return rc;
+	rc = loopcxt_ਸੈੱਟ_device(lc, ਨਿਰਾ);
+	ਜੇ (rc)
+		ਵਾਪਸ rc;
 
-	if (stat(_PATH_SYS_BLOCK, &st) || !S_ISDIR(st.st_mode)) {
+	ਜੇ (stat(ਰਸਤਾ_SYS_ਖੰਡ, &st) || !S_ISDIR(st.st_mode)) {
 		lc->flags |= LOOPDEV_FL_NOSYSFS;
 		lc->flags &= ~LOOPDEV_FL_NOIOCTL;
 		DBG_OBJ(CXT, lc, ul_debug("init: disable /sys usage"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
-	    get_linux_version() >= KERNEL_VERSION(2,6,37)) {
+	ਜੇ (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
+	    get_linux_ਸੰਸਕਰਣ() >= KERNEL_ਸੰਸਕਰਣ(2,6,37)) {
 		/*
 		 * Use only sysfs for basic information about loop devices
 		 */
@@ -224,12 +224,12 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
 		DBG_OBJ(CXT, lc, ul_debug("init: ignore ioctls"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(_PATH_DEV_LOOPCTL, &st)) {
+	ਜੇ (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(ਰਸਤਾ_DEV_LOOPCTL, &st)) {
 		lc->flags |= LOOPDEV_FL_CONTROL;
 		DBG_OBJ(CXT, lc, ul_debug("init: loop-control detected "));
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -237,19 +237,19 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
  *
  * Deinitialize loop context
  */
-void loopcxt_deinit(struct loopdev_cxt *lc)
+ਖਾਲੀ loopcxt_deinit(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int errsv = errno;
+	ਪੂਰਨ errsv = errno;
 
-	if (!lc)
-		return;
+	ਜੇ (!lc)
+		ਵਾਪਸ;
 
 	DBG_OBJ(CXT, lc, ul_debug("de-initialize"));
 
-	free(lc->filename);
-	lc->filename = NULL;
+	ਮੁਕਤ(lc->filename);
+	lc->filename = ਨਿਰਾ;
 
-	ignore_result( loopcxt_set_device(lc, NULL) );
+	ignore_ਨਤੀਜਾ( loopcxt_ਸੈੱਟ_device(lc, ਨਿਰਾ) );
 	loopcxt_deinit_iterator(lc);
 
 	errno = errsv;
@@ -260,11 +260,11 @@ void loopcxt_deinit(struct loopdev_cxt *lc)
  *
  * Returns newly allocated device path.
  */
-char *loopcxt_strdup_device(struct loopdev_cxt *lc)
+ਅੱਖਰ *loopcxt_strdup_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device)
-		return NULL;
-	return strdup(lc->device);
+	ਜੇ (!lc || !*lc->device)
+		ਵਾਪਸ ਨਿਰਾ;
+	ਵਾਪਸ strdup(lc->device);
 }
 
 /*
@@ -272,9 +272,9 @@ char *loopcxt_strdup_device(struct loopdev_cxt *lc)
  *
  * Returns pointer device name in the @lc struct.
  */
-const char *loopcxt_get_device(struct loopdev_cxt *lc)
+ਅਚਲ ਅੱਖਰ *loopcxt_get_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	return lc && *lc->device ? lc->device : NULL;
+	ਵਾਪਸ lc && *lc->device ? lc->device : ਨਿਰਾ;
 }
 
 /*
@@ -282,67 +282,67 @@ const char *loopcxt_get_device(struct loopdev_cxt *lc)
  *
  * Returns pointer to the sysfs context (see lib/sysfs.c)
  */
-static struct path_cxt *loopcxt_get_sysfs(struct loopdev_cxt *lc)
+ਸਥਿਰ ਬਣਤਰ ਰਸਤਾ_cxt *loopcxt_get_sysfs(ਬਣਤਰ loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
-		return NULL;
+	ਜੇ (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
+		ਵਾਪਸ ਨਿਰਾ;
 
-	if (!lc->sysfs) {
+	ਜੇ (!lc->sysfs) {
 		dev_t devno = loopcxt_get_devno(lc);
-		if (!devno) {
+		ਜੇ (!devno) {
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: failed devname to devno"));
-			return NULL;
+			ਵਾਪਸ ਨਿਰਾ;
 		}
 
-		lc->sysfs = ul_new_sysfs_path(devno, NULL, NULL);
-		if (!lc->sysfs)
+		lc->sysfs = ul_new_sysfs_ਰਸਤਾ(devno, ਨਿਰਾ, ਨਿਰਾ);
+		ਜੇ (!lc->sysfs)
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: init failed"));
 	}
 
-	return lc->sysfs;
+	ਵਾਪਸ lc->sysfs;
 }
 
-static int __loopcxt_get_fd(struct loopdev_cxt *lc, mode_t mode)
+ਸਥਿਰ ਪੂਰਨ __loopcxt_get_fd(ਬਣਤਰ loopdev_cxt *lc, mode_t ਬਹੁਲਕ)
 {
-	int old = -1;
+	ਪੂਰਨ old = -1;
 
-	if (!lc || !*lc->device)
-		return -EINVAL;
+	ਜੇ (!lc || !*lc->device)
+		ਵਾਪਸ -EINVAL;
 
 	/* It's okay to return a FD with read-write permissions if someone
 	 * asked for read-only, but you shouldn't do the opposite.
 	 *
 	 * (O_RDONLY is a widely usable default.)
 	 */
-	if (lc->fd >= 0 && mode == O_RDWR && lc->mode == O_RDONLY) {
+	ਜੇ (lc->fd >= 0 && ਬਹੁਲਕ == O_RDWR && lc->ਬਹੁਲਕ == O_RDONLY) {
 		DBG_OBJ(CXT, lc, ul_debug("closing already open device (mode mismatch)"));
 		old = lc->fd;
 		lc->fd = -1;
 	}
 
-	if (lc->fd < 0) {
-		lc->mode = mode;
-		lc->fd = open(lc->device, lc->mode | O_CLOEXEC);
+	ਜੇ (lc->fd < 0) {
+		lc->ਬਹੁਲਕ = ਬਹੁਲਕ;
+		lc->fd = open(lc->device, lc->ਬਹੁਲਕ | O_CLOEXEC);
 		DBG_OBJ(CXT, lc, ul_debug("open %s [%s]: %m", lc->device,
-				mode == O_RDONLY ? "ro" :
-				mode == O_RDWR ? "rw" : "??"));
+				ਬਹੁਲਕ == O_RDONLY ? "ro" :
+				ਬਹੁਲਕ == O_RDWR ? "rw" : "??"));
 
-		if (lc->fd < 0 && old >= 0) {
+		ਜੇ (lc->fd < 0 && old >= 0) {
 			/* restore original on error */
 			lc->fd = old;
 			old = -1;
 		}
 	}
 
-	if (old >= 0)
+	ਜੇ (old >= 0)
 		close(old);
-	return lc->fd;
+	ਵਾਪਸ lc->fd;
 }
 
 /* default is read-only file descriptor, it's enough for all ioctls */
-int loopcxt_get_fd(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_get_fd(ਬਣਤਰ loopdev_cxt *lc)
 {
-	return __loopcxt_get_fd(lc, O_RDONLY);
+	ਵਾਪਸ __loopcxt_get_fd(lc, O_RDONLY);
 }
 
 /*
@@ -353,13 +353,13 @@ int loopcxt_get_fd(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
+ਪੂਰਨ loopcxt_init_iterator(ਬਣਤਰ loopdev_cxt *lc, ਪੂਰਨ flags)
 {
-	struct loopdev_iter *iter;
-	struct stat st;
+	ਬਣਤਰ loopdev_iter *iter;
+	ਬਣਤਰ stat st;
 
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
 
 	iter = &lc->iter;
@@ -367,22 +367,22 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
 
 	/* always zeroize
 	 */
-	memset(iter, 0, sizeof(*iter));
+	memset(iter, 0, ਆਕਾਰ(*iter));
 	iter->ncur = -1;
 	iter->flags = flags;
 	iter->default_check = 1;
 
-	if (!lc->extra_check) {
+	ਜੇ (!lc->extra_check) {
 		/*
 		 * Check for /dev/loop/<N> subdirectory
 		 */
-		if (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
-		    stat(_PATH_DEV_LOOP, &st) == 0 && S_ISDIR(st.st_mode))
+		ਜੇ (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
+		    stat(ਰਸਤਾ_DEV_LOOP, &st) == 0 && S_ISDIR(st.st_mode))
 			lc->flags |= LOOPDEV_FL_DEVSUBDIR;
 
 		lc->extra_check = 1;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -390,24 +390,24 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_deinit_iterator(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter;
+	ਬਣਤਰ loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
 	iter = &lc->iter;
 	DBG_OBJ(ITER, iter, ul_debug("de-initialize"));
 
-	free(iter->minors);
-	if (iter->proc)
+	ਮੁਕਤ(iter->minors);
+	ਜੇ (iter->proc)
 		fclose(iter->proc);
-	if (iter->sysblock)
+	ਜੇ (iter->sysblock)
 		closedir(iter->sysblock);
 
-	memset(iter, 0, sizeof(*iter));
-	return 0;
+	memset(iter, 0, ਆਕਾਰ(*iter));
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -417,36 +417,36 @@ int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
  * Returns: <0 on error, 0 on success, 1 device does not match with
  *         LOOPITER_FL_{USED,FREE} flags.
  */
-static int loopiter_set_device(struct loopdev_cxt *lc, const char *device)
+ਸਥਿਰ ਪੂਰਨ loopiter_ਸੈੱਟ_device(ਬਣਤਰ loopdev_cxt *lc, ਅਚਲ ਅੱਖਰ *device)
 {
-	int rc = loopcxt_set_device(lc, device);
-	int used;
+	ਪੂਰਨ rc = loopcxt_ਸੈੱਟ_device(lc, device);
+	ਪੂਰਨ ਵਰਤਿਆ;
 
-	if (rc)
-		return rc;
+	ਜੇ (rc)
+		ਵਾਪਸ rc;
 
-	if (!(lc->iter.flags & LOOPITER_FL_USED) &&
+	ਜੇ (!(lc->iter.flags & LOOPITER_FL_ਵਰਤਿਆ) &&
 	    !(lc->iter.flags & LOOPITER_FL_FREE))
-		return 0;	/* caller does not care about device status */
+		ਵਾਪਸ 0;	/* caller does not care about device status */
 
-	used = loopcxt_get_offset(lc, NULL) == 0;
+	ਵਰਤਿਆ = loopcxt_get_ਵਿੱਥ(lc, ਨਿਰਾ) == 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_USED) && used)
-		return 0;
+	ਜੇ ((lc->iter.flags & LOOPITER_FL_ਵਰਤਿਆ) && ਵਰਤਿਆ)
+		ਵਾਪਸ 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_FREE) && !used)
-		return 0;
+	ਜੇ ((lc->iter.flags & LOOPITER_FL_FREE) && !ਵਰਤਿਆ)
+		ਵਾਪਸ 0;
 
 	DBG_OBJ(ITER, &lc->iter, ul_debug("failed to use %s device", lc->device));
 
-	ignore_result( loopcxt_set_device(lc, NULL) );
-	return 1;
+	ignore_ਨਤੀਜਾ( loopcxt_ਸੈੱਟ_device(lc, ਨਿਰਾ) );
+	ਵਾਪਸ 1;
 }
 
-static int cmpnum(const void *p1, const void *p2)
+ਸਥਿਰ ਪੂਰਨ cmpnum(ਅਚਲ ਖਾਲੀ *p1, ਅਚਲ ਖਾਲੀ *p2)
 {
-	return (((* (const int *) p1) > (* (const int *) p2)) -
-			((* (const int *) p1) < (* (const int *) p2)));
+	ਵਾਪਸ (((* (ਅਚਲ ਪੂਰਨ *) p1) > (* (ਅਚਲ ਪੂਰਨ *) p2)) -
+			((* (ਅਚਲ ਪੂਰਨ *) p1) < (* (ਅਚਲ ਪੂਰਨ *) p2)));
 }
 
 /*
@@ -454,70 +454,70 @@ static int cmpnum(const void *p1, const void *p2)
  * We needn't full loop device names -- loop numbers (loop<N>)
  * are enough.
  */
-static int loop_scandir(const char *dirname, int **ary, int hasprefix)
+ਸਥਿਰ ਪੂਰਨ loop_scandir(ਅਚਲ ਅੱਖਰ *dirname, ਪੂਰਨ **ary, ਪੂਰਨ hasprefix)
 {
 	DIR *dir;
-	struct dirent *d;
-	unsigned int n, count = 0, arylen = 0;
+	ਬਣਤਰ dirent *d;
+	ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ n, ਗਿਣਤੀ_2 = 0, arylen = 0;
 
-	if (!dirname || !ary)
-		return 0;
+	ਜੇ (!dirname || !ary)
+		ਵਾਪਸ 0;
 
 	DBG(ITER, ul_debug("scan dir: %s", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return 0;
-	free(*ary);
-	*ary = NULL;
+	ਜੇ (!dir)
+		ਵਾਪਸ 0;
+	ਮੁਕਤ(*ary);
+	*ary = ਨਿਰਾ;
 
-	while((d = readdir(dir))) {
-#ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
+	ਜਦੋਂ((d = readdir(dir))) {
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ _DIRENT_HAVE_D_TYPE
+		ਜੇ (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
 		    d->d_type != DT_LNK)
-			continue;
-#endif
-		if (is_dotdir_dirent(d))
-			continue;
+			ਜਾਰੀ;
+#ਜੇ_ਅੰਤ
+		ਜੇ (is_dotdir_dirent(d))
+			ਜਾਰੀ;
 
-		if (hasprefix) {
+		ਜੇ (hasprefix) {
 			/* /dev/loop<N> */
-			if (sscanf(d->d_name, "loop%u", &n) != 1)
-				continue;
-		} else {
+			ਜੇ (ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(d->d_name, "loop%u", &n) != 1)
+				ਜਾਰੀ;
+		} ਨਹੀਂਤਾਂ {
 			/* /dev/loop/<N> */
-			char *end = NULL;
+			ਅੱਖਰ *ਸਿਰਾ = ਨਿਰਾ;
 
 			errno = 0;
-			n = strtol(d->d_name, &end, 10);
-			if (d->d_name == end || (end && *end) || errno)
-				continue;
+			n = strtol(d->d_name, &ਸਿਰਾ, 10);
+			ਜੇ (d->d_name == ਸਿਰਾ || (ਸਿਰਾ && *ਸਿਰਾ) || errno)
+				ਜਾਰੀ;
 		}
-		if (n < LOOPDEV_DEFAULT_NNODES)
-			continue;			/* ignore loop<0..7> */
+		ਜੇ (n < LOOPDEV_DEFAULT_NNODES)
+			ਜਾਰੀ;			/* ignore loop<0..7> */
 
-		if (count + 1 > arylen) {
-			int *tmp;
+		ਜੇ (ਗਿਣਤੀ_2 + 1 > arylen) {
+			ਪੂਰਨ *tmp;
 
 			arylen += 1;
 
-			tmp = reallocarray(*ary, arylen, sizeof(int));
-			if (!tmp) {
-				free(*ary);
-				*ary = NULL;
+			tmp = reallocarray(*ary, arylen, ਆਕਾਰ(ਪੂਰਨ));
+			ਜੇ (!tmp) {
+				ਮੁਕਤ(*ary);
+				*ary = ਨਿਰਾ;
 				closedir(dir);
-				return -1;
+				ਵਾਪਸ -1;
 			}
 			*ary = tmp;
 		}
-		if (*ary)
-			(*ary)[count++] = n;
+		ਜੇ (*ary)
+			(*ary)[ਗਿਣਤੀ_2++] = n;
 	}
-	if (count && *ary)
-		qsort(*ary, count, sizeof(int), cmpnum);
+	ਜੇ (ਗਿਣਤੀ_2 && *ary)
+		qsort(*ary, ਗਿਣਤੀ_2, ਆਕਾਰ(ਪੂਰਨ), cmpnum);
 
 	closedir(dir);
-	return count;
+	ਵਾਪਸ ਗਿਣਤੀ_2;
 }
 
 /*
@@ -525,34 +525,34 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
  *
  * Loop devices smaller than 512 bytes are invisible for this function.
  */
-static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
+ਸਥਿਰ ਪੂਰਨ loopcxt_ਅਗਲਾ_from_proc(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter = &lc->iter;
-	char buf[BUFSIZ];
+	ਬਣਤਰ loopdev_iter *iter = &lc->iter;
+	ਅੱਖਰ buf[BUFSIZ];
 
 	DBG_OBJ(ITER, iter, ul_debug("scan /proc/partitions"));
 
-	if (!iter->proc)
-		iter->proc = fopen(_PATH_PROC_PARTITIONS, "r" UL_CLOEXECSTR);
-	if (!iter->proc)
-		return 1;
+	ਜੇ (!iter->proc)
+		iter->proc = fopen(ਰਸਤਾ_PROC_PARTITIONS, "r" UL_CLOEXECSTR);
+	ਜੇ (!iter->proc)
+		ਵਾਪਸ 1;
 
-	while (fgets(buf, sizeof(buf), iter->proc)) {
-		unsigned int m;
-		char name[128 + 1];
+	ਜਦੋਂ (fgets(buf, ਆਕਾਰ(buf), iter->proc)) {
+		ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ m;
+		ਅੱਖਰ name[128 + 1];
 
 
-		if (sscanf(buf, " %u %*s %*s %128[^\n ]",
+		ਜੇ (ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(buf, " %u %*s %*s %128[^\n ]",
 			   &m, name) != 2 || m != LOOPDEV_MAJOR)
-			continue;
+			ਜਾਰੀ;
 
 		DBG_OBJ(ITER, iter, ul_debug("checking %s", name));
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		ਜੇ (loopiter_ਸੈੱਟ_device(lc, name) == 0)
+			ਵਾਪਸ 0;
 	}
 
-	return 1;
+	ਵਾਪਸ 1;
 }
 
 /*
@@ -561,40 +561,40 @@ static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
  *
  * This is preferred method.
  */
-static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
+ਸਥਿਰ ਪੂਰਨ loopcxt_ਅਗਲਾ_from_sysfs(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter = &lc->iter;
-	struct dirent *d;
-	int fd;
+	ਬਣਤਰ loopdev_iter *iter = &lc->iter;
+	ਬਣਤਰ dirent *d;
+	ਪੂਰਨ fd;
 
 	DBG_OBJ(ITER, iter, ul_debug("scanning /sys/block"));
 
-	if (!iter->sysblock)
-		iter->sysblock = opendir(_PATH_SYS_BLOCK);
+	ਜੇ (!iter->sysblock)
+		iter->sysblock = opendir(ਰਸਤਾ_SYS_ਖੰਡ);
 
-	if (!iter->sysblock)
-		return 1;
+	ਜੇ (!iter->sysblock)
+		ਵਾਪਸ 1;
 
 	fd = dirfd(iter->sysblock);
 
-	while ((d = readdir(iter->sysblock))) {
-		char name[NAME_MAX + 18 + 1];
-		struct stat st;
+	ਜਦੋਂ ((d = readdir(iter->sysblock))) {
+		ਅੱਖਰ name[NAME_MAX + 18 + 1];
+		ਬਣਤਰ stat st;
 
 		DBG_OBJ(ITER, iter, ul_debug("check %s", d->d_name));
 
-		if (is_dotdir_dirent(d) || strncmp(d->d_name, "loop", 4) != 0)
-			continue;
+		ਜੇ (is_dotdir_dirent(d) || ਲੜੀ_ਤੁਲਨਾ(d->d_name, "loop", 4) != 0)
+			ਜਾਰੀ;
 
-		snprintf(name, sizeof(name), "%s/loop/backing_file", d->d_name);
-		if (fstatat(fd, name, &st, 0) != 0)
-			continue;
+		snprintf(name, ਆਕਾਰ(name), "%s/loop/backing_file", d->d_name);
+		ਜੇ (fstatat(fd, name, &st, 0) != 0)
+			ਜਾਰੀ;
 
-		if (loopiter_set_device(lc, d->d_name) == 0)
-			return 0;
+		ਜੇ (loopiter_ਸੈੱਟ_device(lc, d->d_name) == 0)
+			ਵਾਪਸ 0;
 	}
 
-	return 1;
+	ਵਾਪਸ 1;
 }
 
 /*
@@ -604,101 +604,101 @@ static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
  *          about the current loop device are available by
  *          loopcxt_get_{fd,backing_file,device,offset, ...} functions.
  */
-int loopcxt_next(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_ਅਗਲਾ(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter;
+	ਬਣਤਰ loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
 
 	iter = &lc->iter;
-	if (iter->done)
-		return 1;
+	ਜੇ (iter->ਪੂਰਾ)
+		ਵਾਪਸ 1;
 
 	DBG_OBJ(ITER, iter, ul_debug("next"));
 
 	/* A) Look for used loop devices in /proc/partitions ("losetup -a" only)
 	 */
-	if (iter->flags & LOOPITER_FL_USED) {
-		int rc;
+	ਜੇ (iter->flags & LOOPITER_FL_ਵਰਤਿਆ) {
+		ਪੂਰਨ rc;
 
-		if (loopcxt_sysfs_available(lc))
-			rc = loopcxt_next_from_sysfs(lc);
-		else
-			rc = loopcxt_next_from_proc(lc);
-		if (rc == 0)
-			return 0;
-		goto done;
+		ਜੇ (loopcxt_sysfs_ਉਪਲਬਧ(lc))
+			rc = loopcxt_ਅਗਲਾ_from_sysfs(lc);
+		ਨਹੀਂਤਾਂ
+			rc = loopcxt_ਅਗਲਾ_from_proc(lc);
+		ਜੇ (rc == 0)
+			ਵਾਪਸ 0;
+		ਜਾਓ ਪੂਰਾ;
 	}
 
 	/* B) Classic way, try first eight loop devices (default number
 	 *    of loop devices). This is enough for 99% of all cases.
 	 */
-	if (iter->default_check) {
+	ਜੇ (iter->default_check) {
 		DBG_OBJ(ITER, iter, ul_debug("next: default check"));
-		for (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
+		ਲਈ (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
 							iter->ncur++) {
-			char name[16];
-			snprintf(name, sizeof(name), "loop%d", iter->ncur);
+			ਅੱਖਰ name[16];
+			snprintf(name, ਆਕਾਰ(name), "loop%d", iter->ncur);
 
-			if (loopiter_set_device(lc, name) == 0)
-				return 0;
+			ਜੇ (loopiter_ਸੈੱਟ_device(lc, name) == 0)
+				ਵਾਪਸ 0;
 		}
 		iter->default_check = 0;
 	}
 
 	/* C) the worst possibility, scan whole /dev or /dev/loop/<N>
 	 */
-	if (!iter->minors) {
+	ਜੇ (!iter->minors) {
 		DBG_OBJ(ITER, iter, ul_debug("next: scanning /dev"));
 		iter->nminors = (lc->flags & LOOPDEV_FL_DEVSUBDIR) ?
-			loop_scandir(_PATH_DEV_LOOP, &iter->minors, 0) :
+			loop_scandir(ਰਸਤਾ_DEV_LOOP, &iter->minors, 0) :
 			loop_scandir(_PATH_DEV, &iter->minors, 1);
 		iter->ncur = -1;
 	}
-	for (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
-		char name[16];
-		snprintf(name, sizeof(name), "loop%d", iter->minors[iter->ncur]);
+	ਲਈ (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
+		ਅੱਖਰ name[16];
+		snprintf(name, ਆਕਾਰ(name), "loop%d", iter->minors[iter->ncur]);
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		ਜੇ (loopiter_ਸੈੱਟ_device(lc, name) == 0)
+			ਵਾਪਸ 0;
 	}
-done:
+ਪੂਰਾ:
 	loopcxt_deinit_iterator(lc);
-	return 1;
+	ਵਾਪਸ 1;
 }
 
 /*
  * @device: path to device
  */
-int is_loopdev(const char *device)
+ਪੂਰਨ is_loopdev(ਅਚਲ ਅੱਖਰ *device)
 {
-	struct stat st;
-	int rc = 0;
+	ਬਣਤਰ stat st;
+	ਪੂਰਨ rc = 0;
 
-	if (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
+	ਜੇ (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
 		rc = 0;
-	else if (major(st.st_rdev) == LOOPDEV_MAJOR)
+	ਨਹੀਂਤਾਂ ਜੇ (major(st.st_rdev) == LOOPDEV_MAJOR)
 		rc = 1;
-	else if (sysfs_devno_is_wholedisk(st.st_rdev)) {
+	ਨਹੀਂਤਾਂ ਜੇ (sysfs_devno_is_wholedisk(st.st_rdev)) {
 		/* It's possible that kernel creates a device with a different
 		 * major number ... check by /sys it's really loop device.
 		 */
-		char name[PATH_MAX], *cn, *p = NULL;
+		ਅੱਖਰ name[PATH_MAX], *cn, *p = ਨਿਰਾ;
 
-		snprintf(name, sizeof(name), _PATH_SYS_DEVBLOCK "/%u:%u",
+		snprintf(name, ਆਕਾਰ(name), ਰਸਤਾ_SYS_DEVBLOCK "/%u:%u",
 				major(st.st_rdev), minor(st.st_rdev));
-		cn = ul_canonicalize_path(name);
-		if (cn)
-			p = stripoff_last_component(cn);
+		cn = ul_canonicalize_ਰਸਤਾ(name);
+		ਜੇ (cn)
+			p = stripoff_ਆਖਰੀ_component(cn);
 		rc = p && ul_startswith(p, "loop");
-		free(cn);
+		ਮੁਕਤ(cn);
 	}
 
-	if (rc == 0)
+	ਜੇ (rc == 0)
 		errno = ENODEV;
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -706,33 +706,33 @@ int is_loopdev(const char *device)
  *
  * Returns result from LOOP_GET_STAT64 ioctl or NULL on error.
  */
-struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
+ਬਣਤਰ loop_info64 *loopcxt_get_info(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int fd;
+	ਪੂਰਨ fd;
 
-	if (!lc || lc->info_failed) {
+	ਜੇ (!lc || lc->info_failed) {
 		errno = EINVAL;
-		return NULL;
+		ਵਾਪਸ ਨਿਰਾ;
 	}
 	errno = 0;
-	if (lc->has_info)
-		return &lc->config.info;
+	ਜੇ (lc->has_info)
+		ਵਾਪਸ &lc->config.info;
 
 	fd = loopcxt_get_fd(lc);
-	if (fd < 0)
-		return NULL;
+	ਜੇ (fd < 0)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	if (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
+	ਜੇ (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
 		lc->has_info = 1;
 		lc->info_failed = 0;
 		DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 OK"));
-		return &lc->config.info;
+		ਵਾਪਸ &lc->config.info;
 	}
 
 	lc->info_failed = 1;
 	DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 FAILED"));
 
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
 /*
@@ -741,30 +741,30 @@ struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
  * Returns (allocated) string with path to the file associated
  * with the current loop device.
  */
-char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
+ਅੱਖਰ *loopcxt_get_backing_file(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	char *res = NULL;
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਅੱਖਰ *res = ਨਿਰਾ;
 
-	if (sysfs)
+	ਜੇ (sysfs)
 		/*
 		 * This is always preferred, the loop_info64
 		 * has too small buffer for the filename.
 		 */
-		ul_path_read_string(sysfs, &res, "loop/backing_file");
+		ul_ਰਸਤਾ_read_string(sysfs, &res, "loop/backing_file");
 
-	if (!res && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
+	ਜੇ (!res && loopcxt_ioctl_enabled(lc)) {
+		ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
 
-		if (lo) {
-			lo->lo_file_name[LO_NAME_SIZE - 2] = '*';
-			lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
-			res = strdup((char *) lo->lo_file_name);
+		ਜੇ (lo) {
+			lo->lo_file_name[LO_NAME_ਮਾਪ - 2] = '*';
+			lo->lo_file_name[LO_NAME_ਮਾਪ - 1] = '\0';
+			res = strdup((ਅੱਖਰ *) lo->lo_file_name);
 		}
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_file [%s]", res));
-	return res;
+	ਵਾਪਸ res;
 }
 
 /*
@@ -773,18 +773,18 @@ char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
  * Returns (allocated) string with loop reference. The same as backing file by
  * default.
  */
-char *loopcxt_get_refname(struct loopdev_cxt *lc)
+ਅੱਖਰ *loopcxt_get_refname(ਬਣਤਰ loopdev_cxt *lc)
 {
-	char *res = NULL;
-	struct loop_info64 *lo = loopcxt_get_info(lc);
+	ਅੱਖਰ *res = ਨਿਰਾ;
+	ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo) {
-		lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
-		res = strdup((char *) lo->lo_file_name);
+	ਜੇ (lo) {
+		lo->lo_file_name[LO_NAME_ਮਾਪ - 1] = '\0';
+		res = strdup((ਅੱਖਰ *) lo->lo_file_name);
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_refname [%s]", res));
-	return res;
+	ਵਾਪਸ res;
 }
 
 /*
@@ -793,27 +793,27 @@ char *loopcxt_get_refname(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
+ਪੂਰਨ loopcxt_get_ਵਿੱਥ(ਬਣਤਰ loopdev_cxt *lc, uint64_t *ਵਿੱਥ)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਪੂਰਨ rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, offset, "loop/offset") == 0)
+	ਜੇ (sysfs)
+		ਜੇ (ul_ਰਸਤਾ_read_u64(sysfs, ਵਿੱਥ, "loop/offset") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (offset)
-				*offset = lo->lo_offset;
+	ਜੇ (rc && loopcxt_ioctl_enabled(lc)) {
+		ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+		ਜੇ (lo) {
+			ਜੇ (ਵਿੱਥ)
+				*ਵਿੱਥ = lo->lo_ਵਿੱਥ;
 			rc = 0;
-		} else
+		} ਨਹੀਂਤਾਂ
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_offset [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -822,31 +822,31 @@ int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
+ਪੂਰਨ loopcxt_get_blocksize(ਬਣਤਰ loopdev_cxt *lc, uint64_t *blocksize)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਪੂਰਨ rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
+	ਜੇ (sysfs)
+		ਜੇ (ul_ਰਸਤਾ_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
 			rc = 0;
 
 	/* Fallback based on BLKSSZGET ioctl */
-	if (rc) {
-		int fd = loopcxt_get_fd(lc);
-		int sz = 0;
+	ਜੇ (rc) {
+		ਪੂਰਨ fd = loopcxt_get_fd(lc);
+		ਪੂਰਨ sz = 0;
 
-		if (fd < 0)
-			return -EINVAL;
-		rc = blkdev_get_sector_size(fd, &sz);
-		if (rc)
-			return rc;
+		ਜੇ (fd < 0)
+			ਵਾਪਸ -EINVAL;
+		rc = blkdev_get_sector_ਮਾਪ(fd, &sz);
+		ਜੇ (rc)
+			ਵਾਪਸ rc;
 
 		*blocksize = sz;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_blocksize [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -855,27 +855,27 @@ int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
+ਪੂਰਨ loopcxt_get_sizelimit(ਬਣਤਰ loopdev_cxt *lc, uint64_t *ਮਾਪ)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਪੂਰਨ rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, size, "loop/sizelimit") == 0)
+	ਜੇ (sysfs)
+		ਜੇ (ul_ਰਸਤਾ_read_u64(sysfs, ਮਾਪ, "loop/sizelimit") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (size)
-				*size = lo->lo_sizelimit;
+	ਜੇ (rc && loopcxt_ioctl_enabled(lc)) {
+		ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+		ਜੇ (lo) {
+			ਜੇ (ਮਾਪ)
+				*ਮਾਪ = lo->lo_sizelimit;
 			rc = 0;
-		} else
+		} ਨਹੀਂਤਾਂ
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_sizelimit [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -886,21 +886,21 @@ int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
+ਪੂਰਨ loopcxt_get_encrypt_type(ਬਣਤਰ loopdev_cxt *lc, uint32_t *type)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+	ਪੂਰਨ rc;
 
 	/* not provided by sysfs */
-	if (lo) {
-		if (type)
+	ਜੇ (lo) {
+		ਜੇ (type)
 			*type = lo->lo_encrypt_type;
 		rc = 0;
-	} else
+	} ਨਹੀਂਤਾਂ
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_encrypt_type [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -910,15 +910,15 @@ int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
  *
  * Returns: <0 on error, 0 on success
  */
-const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
+ਅਚਲ ਅੱਖਰ *loopcxt_get_crypt_name(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
+	ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo)
-		return (char *) lo->lo_crypt_name;
+	ਜੇ (lo)
+		ਵਾਪਸ (ਅੱਖਰ *) lo->lo_crypt_name;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_crypt_name failed"));
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
 /*
@@ -927,20 +927,20 @@ const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
+ਪੂਰਨ loopcxt_get_backing_devno(ਬਣਤਰ loopdev_cxt *lc, dev_t *devno)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+	ਪੂਰਨ rc;
 
-	if (lo) {
-		if (devno)
+	ਜੇ (lo) {
+		ਜੇ (devno)
 			*devno = lo->lo_device;
 		rc = 0;
-	} else
+	} ਨਹੀਂਤਾਂ
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_devno [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -949,20 +949,20 @@ int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
+ਪੂਰਨ loopcxt_get_backing_inode(ਬਣਤਰ loopdev_cxt *lc, ino_t *ino)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+	ਪੂਰਨ rc;
 
-	if (lo) {
-		if (ino)
+	ਜੇ (lo) {
+		ਜੇ (ino)
 			*ino = lo->lo_inode;
 		rc = 0;
-	} else
+	} ਨਹੀਂਤਾਂ
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_inode [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -982,20 +982,20 @@ int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
  *
  *  See kernel commit e03c8dd14915fabc101aa495828d58598dc5af98.
  */
-int loopmod_supports_partscan(void)
+ਪੂਰਨ loopmod_supports_partscan(ਖਾਲੀ)
 {
-	int rc, ret = 0;
+	ਪੂਰਨ rc, ret = 0;
 	FILE *f;
 
-	if (get_linux_version() >= KERNEL_VERSION(3,2,0))
-		return 1;
+	ਜੇ (get_linux_ਸੰਸਕਰਣ() >= KERNEL_ਸੰਸਕਰਣ(3,2,0))
+		ਵਾਪਸ 1;
 
 	f = fopen("/sys/module/loop/parameters/max_part", "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	ਜੇ (!f)
+		ਵਾਪਸ 0;
 	rc = fscanf(f, "%d", &ret);
 	fclose(f);
-	return rc == 1 ? ret : 0;
+	ਵਾਪਸ rc == 1 ? ret : 0;
 }
 
 /*
@@ -1004,19 +1004,19 @@ int loopmod_supports_partscan(void)
  * Returns: 1 if the partscan flags is set *or* (for old kernels) partitions
  * scanning is enabled for all loop devices.
  */
-int loopcxt_is_partscan(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_is_partscan(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
+	ਜੇ (sysfs) {
 		/* kernel >= 3.2 */
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/partscan") == 0)
-			return fl;
+		ਪੂਰਨ fl;
+		ਜੇ (ul_ਰਸਤਾ_read_s32(sysfs, &fl, "loop/partscan") == 0)
+			ਵਾਪਸ fl;
 	}
 
 	/* old kernels (including kernels without loopN/loop/<flags> directory */
-	return loopmod_supports_partscan();
+	ਵਾਪਸ loopmod_supports_partscan();
 }
 
 /*
@@ -1024,22 +1024,22 @@ int loopcxt_is_partscan(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the autoclear flags is set.
  */
-int loopcxt_is_autoclear(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_is_autoclear(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/autoclear") == 0)
-			return fl;
+	ਜੇ (sysfs) {
+		ਪੂਰਨ fl;
+		ਜੇ (ul_ਰਸਤਾ_read_s32(sysfs, &fl, "loop/autoclear") == 0)
+			ਵਾਪਸ fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_AUTOCLEAR;
+	ਜੇ (loopcxt_ioctl_enabled(lc)) {
+		ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+		ਜੇ (lo)
+			ਵਾਪਸ lo->lo_flags & LO_FLAGS_AUTOCLEAR;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1047,22 +1047,22 @@ int loopcxt_is_autoclear(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the readonly flags is set.
  */
-int loopcxt_is_readonly(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_is_readonly(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "ro") == 0)
-			return fl;
+	ਜੇ (sysfs) {
+		ਪੂਰਨ fl;
+		ਜੇ (ul_ਰਸਤਾ_read_s32(sysfs, &fl, "ro") == 0)
+			ਵਾਪਸ fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_READ_ONLY;
+	ਜੇ (loopcxt_ioctl_enabled(lc)) {
+		ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+		ਜੇ (lo)
+			ਵਾਪਸ lo->lo_flags & LO_FLAGS_READ_ONLY;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1070,21 +1070,21 @@ int loopcxt_is_readonly(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the dio flags is set.
  */
-int loopcxt_is_dio(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_is_dio(ਬਣਤਰ loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ਬਣਤਰ ਰਸਤਾ_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/dio") == 0)
-			return fl;
+	ਜੇ (sysfs) {
+		ਪੂਰਨ fl;
+		ਜੇ (ul_ਰਸਤਾ_read_s32(sysfs, &fl, "loop/dio") == 0)
+			ਵਾਪਸ fl;
 	}
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_DIRECT_IO;
+	ਜੇ (loopcxt_ioctl_enabled(lc)) {
+		ਬਣਤਰ loop_info64 *lo = loopcxt_get_info(lc);
+		ਜੇ (lo)
+			ਵਾਪਸ lo->lo_flags & LO_FLAGS_ਸਿੱਧਾ_IO;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1105,84 +1105,84 @@ int loopcxt_is_dio(struct loopdev_cxt *lc)
  * Don't forget that old kernels provide very restricted (in size) backing
  * filename by LOOP_GET_STAT64 ioctl only.
  */
-int loopcxt_is_used(struct loopdev_cxt *lc,
-		    struct stat *st,
-		    const char *backing_file,
-		    uint64_t offset,
+ਪੂਰਨ loopcxt_is_ਵਰਤਿਆ(ਬਣਤਰ loopdev_cxt *lc,
+		    ਬਣਤਰ stat *st,
+		    ਅਚਲ ਅੱਖਰ *backing_file,
+		    uint64_t ਵਿੱਥ,
 		    uint64_t sizelimit,
-		    int flags)
+		    ਪੂਰਨ flags)
 {
 	ino_t ino = 0;
 	dev_t dev = 0;
 
-	if (!lc)
-		return 0;
+	ਜੇ (!lc)
+		ਵਾਪਸ 0;
 
 	DBG_OBJ(CXT, lc, ul_debug("checking %s vs. %s",
 				loopcxt_get_device(lc),
 				backing_file));
 
-	if (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
+	ਜੇ (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
 		  loopcxt_get_backing_devno(lc, &dev) == 0) {
 
-		if (ino == st->st_ino && dev == st->st_dev)
-			goto found;
+		ਜੇ (ino == st->st_ino && dev == st->st_dev)
+			ਜਾਓ ਮਿਲਿਆ;
 
 		/* don't use filename if we have devno and inode */
-		return 0;
+		ਵਾਪਸ 0;
 	}
 
 	/* poor man's solution */
-	if (backing_file) {
-		char *name = loopcxt_get_backing_file(lc);
-		int rc = name && strcmp(name, backing_file) == 0;
+	ਜੇ (backing_file) {
+		ਅੱਖਰ *name = loopcxt_get_backing_file(lc);
+		ਪੂਰਨ rc = name && strcmp(name, backing_file) == 0;
 
-		free(name);
-		if (rc)
-			goto found;
+		ਮੁਕਤ(name);
+		ਜੇ (rc)
+			ਜਾਓ ਮਿਲਿਆ;
 	}
 
-	return 0;
-found:
-	if (flags & LOOPDEV_FL_OFFSET) {
+	ਵਾਪਸ 0;
+ਮਿਲਿਆ:
+	ਜੇ (flags & LOOPDEV_FL_ਵਿੱਥ) {
 		uint64_t off = 0;
 
-		int rc = loopcxt_get_offset(lc, &off) == 0 && off == offset;
+		ਪੂਰਨ rc = loopcxt_get_ਵਿੱਥ(lc, &off) == 0 && off == ਵਿੱਥ;
 
-		if (rc && flags & LOOPDEV_FL_SIZELIMIT) {
+		ਜੇ (rc && flags & LOOPDEV_FL_SIZELIMIT) {
 			uint64_t sz = 0;
 
-			return loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
+			ਵਾਪਸ loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
 		}
-		return rc;
+		ਵਾਪਸ rc;
 	}
-	return 1;
+	ਵਾਪਸ 1;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_offset(struct loopdev_cxt *lc, uint64_t offset)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_ਵਿੱਥ(ਬਣਤਰ loopdev_cxt *lc, uint64_t ਵਿੱਥ)
 {
-	if (!lc)
-		return -EINVAL;
-	lc->config.info.lo_offset = offset;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
+	lc->config.info.lo_ਵਿੱਥ = ਵਿੱਥ;
 
-	DBG_OBJ(CXT, lc, ul_debug("set offset=%"PRIu64, offset));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set offset=%"PRIu64, ਵਿੱਥ));
+	ਵਾਪਸ 0;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_sizelimit(ਬਣਤਰ loopdev_cxt *lc, uint64_t sizelimit)
 {
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 	lc->config.info.lo_sizelimit = sizelimit;
 
 	DBG_OBJ(CXT, lc, ul_debug("set sizelimit=%"PRIu64, sizelimit));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1191,14 +1191,14 @@ int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
  *
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_blocksize(ਬਣਤਰ loopdev_cxt *lc, uint64_t blocksize)
 {
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 	lc->blocksize = blocksize;
 
 	DBG_OBJ(CXT, lc, ul_debug("set blocksize=%"PRIu64, blocksize));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1209,14 +1209,14 @@ int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_flags(ਬਣਤਰ loopdev_cxt *lc, uint32_t flags)
 {
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 	lc->config.info.lo_flags = flags;
 
-	DBG_OBJ(CXT, lc, ul_debug("set flags=%u", (unsigned) flags));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set flags=%u", (ਬਿਨਾਨਿਸ਼ਾਨੀ) flags));
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1228,17 +1228,17 @@ int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_refname(ਬਣਤਰ loopdev_cxt *lc, ਅਚਲ ਅੱਖਰ *refname)
 {
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
-	memset(lc->config.info.lo_file_name, 0, sizeof(lc->config.info.lo_file_name));
-	if (refname)
-		xstrncpy((char *)lc->config.info.lo_file_name, refname, LO_NAME_SIZE);
+	memset(lc->config.info.lo_file_name, 0, ਆਕਾਰ(lc->config.info.lo_file_name));
+	ਜੇ (refname)
+		xstrncpy((ਅੱਖਰ *)lc->config.info.lo_file_name, refname, LO_NAME_ਮਾਪ);
 
-	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (char *)lc->config.info.lo_file_name));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (ਅੱਖਰ *)lc->config.info.lo_file_name));
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1249,23 +1249,23 @@ int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
+ਪੂਰਨ loopcxt_ਸੈੱਟ_backing_file(ਬਣਤਰ loopdev_cxt *lc, ਅਚਲ ਅੱਖਰ *filename)
 {
-	if (!lc)
-		return -EINVAL;
+	ਜੇ (!lc)
+		ਵਾਪਸ -EINVAL;
 
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+	ਜੇ (lc->flags & LOOPDEV_FL_NOFOLLOW)
 		lc->filename = strdup(filename);
-	else
-		lc->filename = ul_canonicalize_path(filename);
-	if (!lc->filename)
-		return -errno;
+	ਨਹੀਂਤਾਂ
+		lc->filename = ul_canonicalize_ਰਸਤਾ(filename);
+	ਜੇ (!lc->filename)
+		ਵਾਪਸ -errno;
 
-	if (!lc->config.info.lo_file_name[0])
-		loopcxt_set_refname(lc, lc->filename);
+	ਜੇ (!lc->config.info.lo_file_name[0])
+		loopcxt_ਸੈੱਟ_refname(lc, lc->filename);
 
 	DBG_OBJ(CXT, lc, ul_debug("set backing file=%s", lc->filename));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1281,80 +1281,80 @@ int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
  * it closes the device when it exits and whatever consumes the device
  * next will re-open it, causing the resync.
  */
-static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
+ਸਥਿਰ ਪੂਰਨ loopcxt_check_ਮਾਪ(ਬਣਤਰ loopdev_cxt *lc, ਪੂਰਨ file_fd)
 {
-	uint64_t size, expected_size;
-	int dev_fd;
-	struct stat st;
+	uint64_t ਮਾਪ, expected_ਮਾਪ;
+	ਪੂਰਨ dev_fd;
+	ਬਣਤਰ stat st;
 
-	if (!lc->config.info.lo_offset && !lc->config.info.lo_sizelimit)
-		return 0;
+	ਜੇ (!lc->config.info.lo_ਵਿੱਥ && !lc->config.info.lo_sizelimit)
+		ਵਾਪਸ 0;
 
-	if (fstat(file_fd, &st)) {
+	ਜੇ (fstat(file_fd, &st)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to fstat backing file"));
-		return -errno;
+		ਵਾਪਸ -errno;
 	}
-	if (S_ISBLK(st.st_mode)) {
-		if (blkdev_get_size(file_fd, &expected_size)) {
+	ਜੇ (S_ISBLK(st.st_mode)) {
+		ਜੇ (blkdev_get_ਮਾਪ(file_fd, &expected_ਮਾਪ)) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to determine device size"));
-			return -errno;
+			ਵਾਪਸ -errno;
 		}
-	} else
-		expected_size = st.st_size;
+	} ਨਹੀਂਤਾਂ
+		expected_ਮਾਪ = st.st_size;
 
-	if (expected_size == 0 || expected_size <= lc->config.info.lo_offset) {
+	ਜੇ (expected_ਮਾਪ == 0 || expected_ਮਾਪ <= lc->config.info.lo_ਵਿੱਥ) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine expected size"));
-		return 0;	/* ignore this error */
+		ਵਾਪਸ 0;	/* ignore this error */
 	}
 
-	if (lc->config.info.lo_offset > 0)
-		expected_size -= lc->config.info.lo_offset;
+	ਜੇ (lc->config.info.lo_ਵਿੱਥ > 0)
+		expected_ਮਾਪ -= lc->config.info.lo_ਵਿੱਥ;
 
-	if (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_size)
-		expected_size = lc->config.info.lo_sizelimit;
+	ਜੇ (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_ਮਾਪ)
+		expected_ਮਾਪ = lc->config.info.lo_sizelimit;
 
 	dev_fd = loopcxt_get_fd(lc);
-	if (dev_fd < 0) {
+	ਜੇ (dev_fd < 0) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to get loop FD"));
-		return -errno;
+		ਵਾਪਸ -errno;
 	}
 
-	if (blkdev_get_size(dev_fd, &size)) {
+	ਜੇ (blkdev_get_ਮਾਪ(dev_fd, &ਮਾਪ)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine loopdev size"));
-		return -errno;
+		ਵਾਪਸ -errno;
 	}
 
 	/* It's block device, so, align to 512-byte sectors */
-	if (expected_size % 512) {
+	ਜੇ (expected_ਮਾਪ % 512) {
 		DBG_OBJ(CXT, lc, ul_debug("expected size misaligned to 512-byte sectors"));
-		expected_size = (expected_size >> 9) << 9;
+		expected_ਮਾਪ = (expected_ਮਾਪ >> 9) << 9;
 	}
 
-	if (expected_size != size) {
+	ਜੇ (expected_ਮਾਪ != ਮਾਪ) {
 		DBG_OBJ(CXT, lc, ul_debug("warning: loopdev and expected "
 				      "size mismatch (%ju/%ju)",
-				      size, expected_size));
+				      ਮਾਪ, expected_ਮਾਪ));
 
-		if (loopcxt_ioctl_capacity(lc)) {
+		ਜੇ (loopcxt_ioctl_ਸਮਰੱਥਾ(lc)) {
 			/* ioctl not available */
-			if (errno == ENOTTY || errno == EINVAL)
+			ਜੇ (errno == ENOTTY || errno == EINVAL)
 				errno = ERANGE;
-			return -errno;
+			ਵਾਪਸ -errno;
 		}
 
-		if (blkdev_get_size(dev_fd, &size))
-			return -errno;
+		ਜੇ (blkdev_get_ਮਾਪ(dev_fd, &ਮਾਪ))
+			ਵਾਪਸ -errno;
 
-		if (expected_size != size) {
+		ਜੇ (expected_ਮਾਪ != ਮਾਪ) {
 			errno = ERANGE;
 			DBG_OBJ(CXT, lc, ul_debug("failed to set loopdev size, "
 					"size: %ju, expected: %ju",
-					size, expected_size));
-			return -errno;
+					ਮਾਪ, expected_ਮਾਪ));
+			ਵਾਪਸ -errno;
 		}
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 
@@ -1376,139 +1376,139 @@ static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_setup_device(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_ਤਿਆਰੀ_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int file_fd, dev_fd;
-	mode_t flags = O_CLOEXEC, mode = O_RDWR;
-	int rc = -1, cnt = 0;
-	int errsv = 0;
-	int fallback = 0;
+	ਪੂਰਨ file_fd, dev_fd;
+	mode_t flags = O_CLOEXEC, ਬਹੁਲਕ = O_RDWR;
+	ਪੂਰਨ rc = -1, cnt = 0;
+	ਪੂਰਨ errsv = 0;
+	ਪੂਰਨ fallback = 0;
 
-	if (!lc || !*lc->device || !lc->filename)
-		return -EINVAL;
+	ਜੇ (!lc || !*lc->device || !lc->filename)
+		ਵਾਪਸ -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("device setup requested"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("device setup requested"));
 
 	/*
 	 * Open backing file and device
 	 */
-	if (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
-		mode = O_RDONLY;
+	ਜੇ (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
+		ਬਹੁਲਕ = O_RDONLY;
 
-	if (lc->config.info.lo_flags & LO_FLAGS_DIRECT_IO)
-		flags |= O_DIRECT;
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
-		file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-	else
-		file_fd = open(lc->filename, mode | flags);
+	ਜੇ (lc->config.info.lo_flags & LO_FLAGS_ਸਿੱਧਾ_IO)
+		flags |= O_ਸਿੱਧਾ;
+	ਜੇ (lc->flags & LOOPDEV_FL_NOFOLLOW)
+		file_fd = ul_open_no_symlinks(lc->filename, ਬਹੁਲਕ | flags, 0);
+	ਨਹੀਂਤਾਂ
+		file_fd = open(lc->filename, ਬਹੁਲਕ | flags);
 
-	if (file_fd < 0 && mode != O_RDONLY
+	ਜੇ (file_fd < 0 && ਬਹੁਲਕ != O_RDONLY
 	    && (errno == EROFS || errno == EACCES)) {
-		mode = O_RDONLY;
-		if (lc->flags & LOOPDEV_FL_NOFOLLOW)
-			file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-		else
-			file_fd = open(lc->filename, mode | flags);
+		ਬਹੁਲਕ = O_RDONLY;
+		ਜੇ (lc->flags & LOOPDEV_FL_NOFOLLOW)
+			file_fd = ul_open_no_symlinks(lc->filename, ਬਹੁਲਕ | flags, 0);
+		ਨਹੀਂਤਾਂ
+			file_fd = open(lc->filename, ਬਹੁਲਕ | flags);
 	}
-	if (file_fd < 0) {
-		DBG_OBJ(SETUP, lc, ul_debug("open backing file failed: %m"));
-		return -errno;
+	ਜੇ (file_fd < 0) {
+		DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("open backing file failed: %m"));
+		ਵਾਪਸ -errno;
 	}
-	DBG_OBJ(SETUP, lc, ul_debug("backing file open: OK"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("backing file open: OK"));
 
-	if (mode == O_RDONLY)
+	ਜੇ (ਬਹੁਲਕ == O_RDONLY)
 		lc->config.info.lo_flags |= LO_FLAGS_READ_ONLY;	/* kernel loopdev mode */
-	else
+	ਨਹੀਂਤਾਂ
 		lc->config.info.lo_flags &= ~LO_FLAGS_READ_ONLY;
 
-	do {
+	ਕਰੋ {
 		errno = 0;
 
-		dev_fd = __loopcxt_get_fd(lc, mode);
-		if (dev_fd >= 0 || lc->control_ok == 0)
-			break;
-		if (errno != EACCES && errno != ENOENT)
-			break;
+		dev_fd = __loopcxt_get_fd(lc, ਬਹੁਲਕ);
+		ਜੇ (dev_fd >= 0 || lc->control_ok == 0)
+			ਰੋਕੋ;
+		ਜੇ (errno != EACCES && errno != ENOENT)
+			ਰੋਕੋ;
 		/* We have permissions to open /dev/loop-control, but open
 		 * /dev/loopN failed with EACCES, it's probably because udevd
 		 * does not applied chown yet. Let's wait a moment. */
 		xusleep(25000);
-	} while (cnt++ < 16);
+	} ਜਦੋਂ (cnt++ < 16);
 
-	if (dev_fd < 0) {
+	ਜੇ (dev_fd < 0) {
 		rc = -errno;
-		goto err;
+		ਜਾਓ err;
 	}
 
-	DBG_OBJ(SETUP, lc, ul_debug("device open: OK"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("device open: OK"));
 
 	/*
 	 * Atomic way to configure all by one ioctl call
 	 * -- since Linux v5.8-rc1, commit 3448914e8cc550ba792d4ccc74471d1ca4293aae
 	 */
 	lc->config.fd = file_fd;
-	if (lc->blocksize > 0)
-		lc->config.block_size = lc->blocksize;
+	ਜੇ (lc->blocksize > 0)
+		lc->config.ਖੰਡ_ਮਾਪ = lc->blocksize;
 
 	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_CONFIGURE, &lc->config) );
-	if (rc != 0) {
+	ਜੇ (rc != 0) {
 		errsv = errno;
-		if (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
-			DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE failed: %m"));
-			goto err;
+		ਜੇ (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
+			DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("LOOP_CONFIGURE failed: %m"));
+			ਜਾਓ err;
 		}
 		fallback = 1;
-	} else {
-		DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE: OK"));
+	} ਨਹੀਂਤਾਂ {
+		DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("LOOP_CONFIGURE: OK"));
 	}
 
 	/*
 	 * Old deprecated way; first assign backing file FD and then in the
 	 * second step set loop device properties.
 	 */
-	if (fallback) {
-		if (ioctl(dev_fd, LOOP_SET_FD, file_fd) < 0) {
+	ਜੇ (fallback) {
+		ਜੇ (ioctl(dev_fd, LOOP_ਸੈੱਟ_FD, file_fd) < 0) {
 			rc = -errno;
 			errsv = errno;
-			DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD failed: %m"));
-			goto err;
+			DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("LOOP_SET_FD failed: %m"));
+			ਜਾਓ err;
 		}
 
-		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD: OK"));
+		DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("LOOP_SET_FD: OK"));
 
-		if (lc->blocksize > 0
+		ਜੇ (lc->blocksize > 0
 			&& (rc = loopcxt_ioctl_blocksize(lc, lc->blocksize)) < 0) {
 			errsv = -rc;
-			goto err;
+			ਜਾਓ err;
 		}
 
-		if ((rc = loopcxt_ioctl_status(lc)) < 0) {
+		ਜੇ ((rc = loopcxt_ioctl_ਸਥਿਤੀ(lc)) < 0) {
 			errsv = -rc;
-			goto err;
+			ਜਾਓ err;
 		}
 	}
 
-	if ((rc = loopcxt_check_size(lc, file_fd)))
-		goto err;
+	ਜੇ ((rc = loopcxt_check_ਮਾਪ(lc, file_fd)))
+		ਜਾਓ err;
 
 	close(file_fd);
 
-	memset(&lc->config, 0, sizeof(lc->config));
+	memset(&lc->config, 0, ਆਕਾਰ(lc->config));
 	lc->has_info = 0;
 	lc->info_failed = 0;
 
-	DBG_OBJ(SETUP, lc, ul_debug("success [rc=0]"));
-	return 0;
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("success [rc=0]"));
+	ਵਾਪਸ 0;
 err:
-	if (file_fd >= 0)
+	ਜੇ (file_fd >= 0)
 		close(file_fd);
-	if (dev_fd >= 0 && rc != -EBUSY)
+	ਜੇ (dev_fd >= 0 && rc != -EBUSY)
 		ioctl(dev_fd, LOOP_CLR_FD, 0);
-	if (errsv)
+	ਜੇ (errsv)
 		errno = errsv;
 
-	DBG_OBJ(SETUP, lc, ul_debug("failed [rc=%d]", rc));
-	return rc;
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("failed [rc=%d]", rc));
+	ਵਾਪਸ rc;
 }
 
 
@@ -1523,90 +1523,90 @@ err:
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_ioctl_status(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_ioctl_ਸਥਿਤੀ(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int dev_fd, rc;
+	ਪੂਰਨ dev_fd, rc;
 
 	errno = 0;
 	dev_fd = loopcxt_get_fd(lc);
 
-	if (dev_fd < 0)
-		return -errno;
+	ਜੇ (dev_fd < 0)
+		ਵਾਪਸ -errno;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_STATUS64"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("calling LOOP_SET_STATUS64"));
 
-	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_SET_STATUS64, &lc->config.info) );
-	if (rc != 0) {
-		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64 failed: %m"));
-		return rc;
+	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_ਸੈੱਟ_STATUS64, &lc->config.info) );
+	ਜੇ (rc != 0) {
+		DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("LOOP_SET_STATUS64 failed: %m"));
+		ਵਾਪਸ rc;
 	}
 
-	DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64: OK"));
-	return 0;
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("LOOP_SET_STATUS64: OK"));
+	ਵਾਪਸ 0;
 }
 
-int loopcxt_ioctl_capacity(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_ioctl_ਸਮਰੱਥਾ(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ਪੂਰਨ rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ਜੇ (fd < 0)
+		ਵਾਪਸ -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_CAPACITY"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("calling LOOP_SET_CAPACITY"));
 
 	/* Kernels prior to v2.6.30 don't support this ioctl */
-	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_CAPACITY, 0) );
-	if (rc != 0) {
+	rc = repeat_on_eagain( ioctl(fd, LOOP_ਸੈੱਟ_ਸਮਰੱਥਾ, 0) );
+	ਜੇ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_CAPACITY failed: %m"));
-		return rc;
+		ਵਾਪਸ rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("capacity set"));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-int loopcxt_ioctl_dio(struct loopdev_cxt *lc, unsigned long use_dio)
+ਪੂਰਨ loopcxt_ioctl_dio(ਬਣਤਰ loopdev_cxt *lc, ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ use_dio)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ਪੂਰਨ rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ਜੇ (fd < 0)
+		ਵਾਪਸ -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_DIRECT_IO"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("calling LOOP_SET_DIRECT_IO"));
 
 	/* Kernels prior to v4.4 don't support this ioctl */
-	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_DIRECT_IO, use_dio) );
-	if (rc != 0) {
+	rc = repeat_on_eagain( ioctl(fd, LOOP_ਸੈੱਟ_ਸਿੱਧਾ_IO, use_dio) );
+	ਜੇ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_DIRECT_IO failed: %m"));
-		return rc;
+		ਵਾਪਸ rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("direct io set"));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
  * Kernel uses "unsigned long" as ioctl arg, but we use u64 for all sizes to
  * keep loopdev internal API simple.
  */
-int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+ਪੂਰਨ loopcxt_ioctl_blocksize(ਬਣਤਰ loopdev_cxt *lc, uint64_t blocksize)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ਪੂਰਨ rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ਜੇ (fd < 0)
+		ਵਾਪਸ -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_BLOCK_SIZE"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("calling LOOP_SET_BLOCK_SIZE"));
 
 	rc = repeat_on_eagain(
-		ioctl(fd, LOOP_SET_BLOCK_SIZE, (unsigned long) blocksize) );
-	if (rc != 0) {
+		ioctl(fd, LOOP_ਸੈੱਟ_ਖੰਡ_ਮਾਪ, (ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ) blocksize) );
+	ਜੇ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_BLOCK_SIZE failed: %m"));
-		return rc;
+		ਵਾਪਸ rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("logical block size set"));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
@@ -1618,106 +1618,106 @@ int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error
  */
-static int loopcxt_get_device_nr(struct loopdev_cxt *lc, int *nr)
+ਸਥਿਰ ਪੂਰਨ loopcxt_get_device_nr(ਬਣਤਰ loopdev_cxt *lc, ਪੂਰਨ *nr)
 {
-	const char *p, *dev;
-	int rc = -EINVAL;
+	ਅਚਲ ਅੱਖਰ *p, *dev;
+	ਪੂਰਨ rc = -EINVAL;
 
 	errno = 0;
-	if (!lc || !nr)
-		return rc;
+	ਜੇ (!lc || !nr)
+		ਵਾਪਸ rc;
 	*nr = -1;
 
 	dev = loopcxt_get_device(lc);
-	if (!dev)
-		goto done;
+	ਜੇ (!dev)
+		ਜਾਓ ਪੂਰਾ;
 
 	p = strrchr(dev, '/');
-	if (!p)
-		goto done;
+	ਜੇ (!p)
+		ਜਾਓ ਪੂਰਾ;
 
-	if (sscanf(p, "/loop%d", nr) != 1 && sscanf(p, "/%d", nr) != 1)
-		goto done;
+	ਜੇ (ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(p, "/loop%d", nr) != 1 && ਲੜੀ_ਤੋਂ_ਪੜ੍ਹੋ(p, "/%d", nr) != 1)
+		ਜਾਓ ਪੂਰਾ;
 
-	if (*nr < 0)
-		goto done;
+	ਜੇ (*nr < 0)
+		ਜਾਓ ਪੂਰਾ;
 	rc = 0;
-done:
-	if (rc && !errno)
+ਪੂਰਾ:
+	ਜੇ (rc && !errno)
 		errno = -rc;
 	DBG_OBJ(CXT, lc, ul_debug("get_device_nr [nr=%d]", *nr));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
-int loopcxt_detach_device(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_detach_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ਪੂਰਨ rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ਜੇ (fd < 0)
+		ਵਾਪਸ -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_CLR_FD"));
+	DBG_OBJ(ਤਿਆਰੀ, lc, ul_debug("calling LOOP_CLR_FD"));
 
 	rc = repeat_on_eagain( ioctl(fd, LOOP_CLR_FD, 0) );
-	if (rc != 0) {
+	ਜੇ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_CLR_FD failed: %m"));
-		return rc;
+		ਵਾਪਸ rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("device removed"));
-	return 0;
+	ਵਾਪਸ 0;
 }
 
-int loopcxt_remove_device(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_remove_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	ਪੂਰਨ rc = -EINVAL;
+	ਪੂਰਨ ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	ਜੇ (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
-		goto done;
+		ਜਾਓ ਪੂਰਾ;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
-		goto done;
+	ਜੇ (rc)
+		ਜਾਓ ਪੂਰਾ;
 
-	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	ctl = open(ਰਸਤਾ_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
+	ਜੇ (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("remove_device %d", nr));
 		rc = ioctl(ctl, LOOP_CTL_REMOVE, nr);
 		close(ctl);
 	}
 	lc->control_ok = rc >= 0 ? 1 : 0;
-done:
+ਪੂਰਾ:
 	DBG_OBJ(CXT, lc, ul_debug("remove_device done [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
-int loopcxt_add_device(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_ਜੋੜੋ_device(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	ਪੂਰਨ rc = -EINVAL;
+	ਪੂਰਨ ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	ਜੇ (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
-		goto done;
+		ਜਾਓ ਪੂਰਾ;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
-		goto done;
+	ਜੇ (rc)
+		ਜਾਓ ਪੂਰਾ;
 
-	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	ctl = open(ਰਸਤਾ_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
+	ਜੇ (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("add_device %d", nr));
-		rc = ioctl(ctl, LOOP_CTL_ADD, nr);
+		rc = ioctl(ctl, LOOP_CTL_ਜੋੜੋ, nr);
 		close(ctl);
 	}
 	lc->control_ok = rc >= 0 ? 1 : 0;
-done:
+ਪੂਰਾ:
 	DBG_OBJ(CXT, lc, ul_debug("add_device done [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
@@ -1728,47 +1728,47 @@ done:
  *
  * Returns: 0 = success, < 0 error
  */
-int loopcxt_find_unused(struct loopdev_cxt *lc)
+ਪੂਰਨ loopcxt_ਲੱਭੋ_ਅਣਵਰਤਿਆ(ਬਣਤਰ loopdev_cxt *lc)
 {
-	int rc = -1;
+	ਪੂਰਨ rc = -1;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_unused requested"));
 
-	if (lc->flags & LOOPDEV_FL_CONTROL) {
-		int ctl;
+	ਜੇ (lc->flags & LOOPDEV_FL_CONTROL) {
+		ਪੂਰਨ ctl;
 
 		DBG_OBJ(CXT, lc, ul_debug("using loop-control"));
 
-		ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-		if (ctl >= 0)
+		ctl = open(ਰਸਤਾ_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
+		ਜੇ (ctl >= 0)
 			rc = ioctl(ctl, LOOP_CTL_GET_FREE);
-		else
+		ਨਹੀਂਤਾਂ
 			rc = -errno;
-		if (rc >= 0) {
-			char name[16];
-			snprintf(name, sizeof(name), "loop%d", rc);
+		ਜੇ (rc >= 0) {
+			ਅੱਖਰ name[16];
+			snprintf(name, ਆਕਾਰ(name), "loop%d", rc);
 
-			rc = loopiter_set_device(lc, name);
+			rc = loopiter_ਸੈੱਟ_device(lc, name);
 		}
 		lc->control_ok = ctl >= 0 && rc == 0 ? 1 : 0;
-		if (ctl >= 0)
+		ਜੇ (ctl >= 0)
 			close(ctl);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by loop-control [rc=%d]", rc));
 	}
 
-	if (rc < 0 && rc != -EACCES) {
+	ਜੇ (rc < 0 && rc != -EACCES) {
 		DBG_OBJ(CXT, lc, ul_debug("using loop scan"));
 		rc = loopcxt_init_iterator(lc, LOOPITER_FL_FREE);
-		if (rc)
-			return rc;
+		ਜੇ (rc)
+			ਵਾਪਸ rc;
 
-		rc = loopcxt_next(lc);
+		rc = loopcxt_ਅਗਲਾ(lc);
 		loopcxt_deinit_iterator(lc);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by scan [rc=%d]", rc));
-		if (rc)
-			return -ENOENT;
+		ਜੇ (rc)
+			ਵਾਪਸ -ENOENT;
 	}
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 
@@ -1776,223 +1776,223 @@ int loopcxt_find_unused(struct loopdev_cxt *lc)
 /*
  * Return: TRUE/FALSE
  */
-int loopdev_is_autoclear(const char *device)
+ਪੂਰਨ loopdev_is_autoclear(ਅਚਲ ਅੱਖਰ *device)
 {
-	struct loopdev_cxt lc;
-	int rc;
+	ਬਣਤਰ loopdev_cxt lc;
+	ਪੂਰਨ rc;
 
-	if (!device)
-		return 0;
+	ਜੇ (!device)
+		ਵਾਪਸ 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
-		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	ਜੇ (!rc)
+		rc = loopcxt_ਸੈੱਟ_device(&lc, device);
+	ਜੇ (!rc)
 		rc = loopcxt_is_autoclear(&lc);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	ਵਾਪਸ rc;
 }
 
-char *loopdev_get_backing_file(const char *device)
+ਅੱਖਰ *loopdev_get_backing_file(ਅਚਲ ਅੱਖਰ *device)
 {
-	struct loopdev_cxt lc;
-	char *res = NULL;
+	ਬਣਤਰ loopdev_cxt lc;
+	ਅੱਖਰ *res = ਨਿਰਾ;
 
-	if (!device)
-		return NULL;
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_set_device(&lc, device) == 0)
+	ਜੇ (!device)
+		ਵਾਪਸ ਨਿਰਾ;
+	ਜੇ (loopcxt_init(&lc, 0))
+		ਵਾਪਸ ਨਿਰਾ;
+	ਜੇ (loopcxt_ਸੈੱਟ_device(&lc, device) == 0)
 		res = loopcxt_get_backing_file(&lc);
 
 	loopcxt_deinit(&lc);
-	return res;
+	ਵਾਪਸ res;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_has_backing_file(const char *device)
+ਪੂਰਨ loopdev_has_backing_file(ਅਚਲ ਅੱਖਰ *device)
 {
-	char *tmp = loopdev_get_backing_file(device);
+	ਅੱਖਰ *tmp = loopdev_get_backing_file(device);
 
-	if (tmp) {
-		free(tmp);
-		return 1;
+	ਜੇ (tmp) {
+		ਮੁਕਤ(tmp);
+		ਵਾਪਸ 1;
 	}
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_is_used(const char *device, const char *filename,
-		    uint64_t offset, uint64_t sizelimit, int flags)
+ਪੂਰਨ loopdev_is_ਵਰਤਿਆ(ਅਚਲ ਅੱਖਰ *device, ਅਚਲ ਅੱਖਰ *filename,
+		    uint64_t ਵਿੱਥ, uint64_t sizelimit, ਪੂਰਨ flags)
 {
-	struct loopdev_cxt lc;
-	struct stat st;
-	int rc = 0;
+	ਬਣਤਰ loopdev_cxt lc;
+	ਬਣਤਰ stat st;
+	ਪੂਰਨ rc = 0;
 
-	if (!device || !filename)
-		return 0;
+	ਜੇ (!device || !filename)
+		ਵਾਪਸ 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
-		rc = loopcxt_set_device(&lc, device);
-	if (rc)
-		return rc;
+	ਜੇ (!rc)
+		rc = loopcxt_ਸੈੱਟ_device(&lc, device);
+	ਜੇ (rc)
+		ਵਾਪਸ rc;
 
 	rc = !stat(filename, &st);
-	rc = loopcxt_is_used(&lc, rc ? &st : NULL, filename, offset, sizelimit, flags);
+	rc = loopcxt_is_ਵਰਤਿਆ(&lc, rc ? &st : ਨਿਰਾ, filename, ਵਿੱਥ, sizelimit, flags);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error
  */
-int loopdev_detach(const char *device)
+ਪੂਰਨ loopdev_detach(ਅਚਲ ਅੱਖਰ *device)
 {
-	struct loopdev_cxt lc;
-	int rc;
+	ਬਣਤਰ loopdev_cxt lc;
+	ਪੂਰਨ rc;
 
-	if (!device)
-		return -EINVAL;
+	ਜੇ (!device)
+		ਵਾਪਸ -EINVAL;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
-		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	ਜੇ (!rc)
+		rc = loopcxt_ਸੈੱਟ_device(&lc, device);
+	ਜੇ (!rc)
 		rc = loopcxt_detach_device(&lc);
 	loopcxt_deinit(&lc);
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error, 1 not found
  */
-int loopcxt_find_by_backing_file(struct loopdev_cxt *lc, const char *filename,
-				 uint64_t offset, uint64_t sizelimit, int flags)
+ਪੂਰਨ loopcxt_ਲੱਭੋ_by_backing_file(ਬਣਤਰ loopdev_cxt *lc, ਅਚਲ ਅੱਖਰ *filename,
+				 uint64_t ਵਿੱਥ, uint64_t sizelimit, ਪੂਰਨ flags)
 {
-	int rc, hasst;
-	struct stat st;
+	ਪੂਰਨ rc, hasst;
+	ਬਣਤਰ stat st;
 
-	if (!filename)
-		return -EINVAL;
+	ਜੇ (!filename)
+		ਵਾਪਸ -EINVAL;
 
 	hasst = !stat(filename, &st);
 
-	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	rc = loopcxt_init_iterator(lc, LOOPITER_FL_ਵਰਤਿਆ);
+	ਜੇ (rc)
+		ਵਾਪਸ rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
+	ਜਦੋਂ ((rc = loopcxt_ਅਗਲਾ(lc)) == 0) {
 
-		if (loopcxt_is_used(lc, hasst ? &st : NULL,
-				    filename, offset, sizelimit, flags))
-			break;
+		ਜੇ (loopcxt_is_ਵਰਤਿਆ(lc, hasst ? &st : ਨਿਰਾ,
+				    filename, ਵਿੱਥ, sizelimit, flags))
+			ਰੋਕੋ;
 	}
 
 	loopcxt_deinit_iterator(lc);
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
  * Returns: 0 = not found, < 0 error, 1 found, 2 found full size and offset match
  */
-int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
-			   uint64_t offset, uint64_t sizelimit)
+ਪੂਰਨ loopcxt_ਲੱਭੋ_overlap(ਬਣਤਰ loopdev_cxt *lc, ਅਚਲ ਅੱਖਰ *filename,
+			   uint64_t ਵਿੱਥ, uint64_t sizelimit)
 {
-	int rc, hasst;
-	struct stat st;
+	ਪੂਰਨ rc, hasst;
+	ਬਣਤਰ stat st;
 
-	if (!filename)
-		return -EINVAL;
+	ਜੇ (!filename)
+		ਵਾਪਸ -EINVAL;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap requested"));
 	hasst = !stat(filename, &st);
 
-	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	rc = loopcxt_init_iterator(lc, LOOPITER_FL_ਵਰਤਿਆ);
+	ਜੇ (rc)
+		ਵਾਪਸ rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
-		uint64_t lc_sizelimit, lc_offset;
+	ਜਦੋਂ ((rc = loopcxt_ਅਗਲਾ(lc)) == 0) {
+		uint64_t lc_sizelimit, lc_ਵਿੱਥ;
 
-		rc = loopcxt_is_used(lc, hasst ? &st : NULL,
-				     filename, offset, sizelimit, 0);
+		rc = loopcxt_is_ਵਰਤਿਆ(lc, hasst ? &st : ਨਿਰਾ,
+				     filename, ਵਿੱਥ, sizelimit, 0);
 		/*
 		 * Either the loopdev is unused or we've got an error which can
 		 * happen when we are racing with device autoclear. Just ignore
 		 * this loopdev...
 		 */
-		if (rc <= 0)
-			continue;
+		ਜੇ (rc <= 0)
+			ਜਾਰੀ;
 
 		DBG_OBJ(CXT, lc, ul_debug("found %s backed by %s",
 			loopcxt_get_device(lc), filename));
 
-		rc = loopcxt_get_offset(lc, &lc_offset);
-		if (rc) {
+		rc = loopcxt_get_ਵਿੱਥ(lc, &lc_ਵਿੱਥ);
+		ਜੇ (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get offset for device %s",
 				loopcxt_get_device(lc)));
-			continue;
+			ਜਾਰੀ;
 		}
 		rc = loopcxt_get_sizelimit(lc, &lc_sizelimit);
-		if (rc) {
+		ਜੇ (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get sizelimit for device %s",
 				loopcxt_get_device(lc)));
-			continue;
+			ਜਾਰੀ;
 		}
 
 		/* full match */
-		if (lc_sizelimit == sizelimit && lc_offset == offset) {
+		ਜੇ (lc_sizelimit == sizelimit && lc_ਵਿੱਥ == ਵਿੱਥ) {
 			DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s (full match)",
 						loopcxt_get_device(lc)));
 			rc = 2;
-			goto found;
+			ਜਾਓ ਮਿਲਿਆ;
 		}
 
 		/* overlap */
-		if (lc_sizelimit != 0 && offset >= lc_offset + lc_sizelimit)
-			continue;
-		if (sizelimit != 0 && offset + sizelimit <= lc_offset)
-			continue;
+		ਜੇ (lc_sizelimit != 0 && ਵਿੱਥ >= lc_ਵਿੱਥ + lc_sizelimit)
+			ਜਾਰੀ;
+		ਜੇ (sizelimit != 0 && ਵਿੱਥ + sizelimit <= lc_ਵਿੱਥ)
+			ਜਾਰੀ;
 
 		DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s",
 			loopcxt_get_device(lc)));
 			rc = 1;
-			goto found;
+			ਜਾਓ ਮਿਲਿਆ;
 	}
 
-	if (rc == 1)
+	ਜੇ (rc == 1)
 		rc = 0;	/* not found */
-found:
+ਮਿਲਿਆ:
 	loopcxt_deinit_iterator(lc);
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap done [rc=%d]", rc));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
 /*
  * Returns allocated string with device name
  */
-char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64_t sizelimit, int flags)
+ਅੱਖਰ *loopdev_ਲੱਭੋ_by_backing_file(ਅਚਲ ਅੱਖਰ *filename, uint64_t ਵਿੱਥ, uint64_t sizelimit, ਪੂਰਨ flags)
 {
-	struct loopdev_cxt lc;
-	char *res = NULL;
+	ਬਣਤਰ loopdev_cxt lc;
+	ਅੱਖਰ *res = ਨਿਰਾ;
 
-	if (!filename)
-		return NULL;
+	ਜੇ (!filename)
+		ਵਾਪਸ ਨਿਰਾ;
 
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_find_by_backing_file(&lc, filename, offset, sizelimit, flags) == 0)
+	ਜੇ (loopcxt_init(&lc, 0))
+		ਵਾਪਸ ਨਿਰਾ;
+	ਜੇ (loopcxt_ਲੱਭੋ_by_backing_file(&lc, filename, ਵਿੱਥ, sizelimit, flags) == 0)
 		res = loopcxt_strdup_device(&lc);
 	loopcxt_deinit(&lc);
 
-	return res;
+	ਵਾਪਸ res;
 }
 
 /*
@@ -2000,59 +2000,59 @@ char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64
  * device is associated with the given @filename and @loopdev is not NULL then
  * @loopdev returns name of the device.
  */
-int loopdev_count_by_backing_file(const char *filename, char **loopdev)
+ਪੂਰਨ loopdev_ਗਿਣਤੀ_by_backing_file(ਅਚਲ ਅੱਖਰ *filename, ਅੱਖਰ **loopdev)
 {
-	struct loopdev_cxt lc;
-	int count = 0, rc;
+	ਬਣਤਰ loopdev_cxt lc;
+	ਪੂਰਨ ਗਿਣਤੀ_2 = 0, rc;
 
-	if (!filename)
-		return -1;
+	ਜੇ (!filename)
+		ਵਾਪਸ -1;
 
 	rc = loopcxt_init(&lc, 0);
-	if (rc)
-		return rc;
-	if (loopcxt_init_iterator(&lc, LOOPITER_FL_USED))
-		return -1;
+	ਜੇ (rc)
+		ਵਾਪਸ rc;
+	ਜੇ (loopcxt_init_iterator(&lc, LOOPITER_FL_ਵਰਤਿਆ))
+		ਵਾਪਸ -1;
 
-	while(loopcxt_next(&lc) == 0) {
-		char *backing = loopcxt_get_backing_file(&lc);
+	ਜਦੋਂ(loopcxt_ਅਗਲਾ(&lc) == 0) {
+		ਅੱਖਰ *backing = loopcxt_get_backing_file(&lc);
 
-		if (!backing || strcmp(backing, filename) != 0) {
-			free(backing);
-			continue;
+		ਜੇ (!backing || strcmp(backing, filename) != 0) {
+			ਮੁਕਤ(backing);
+			ਜਾਰੀ;
 		}
 
-		free(backing);
-		if (loopdev && count == 0)
+		ਮੁਕਤ(backing);
+		ਜੇ (loopdev && ਗਿਣਤੀ_2 == 0)
 			*loopdev = loopcxt_strdup_device(&lc);
-		count++;
+		ਗਿਣਤੀ_2++;
 	}
 
 	loopcxt_deinit(&lc);
 
-	if (loopdev && count > 1) {
-		free(*loopdev);
-		*loopdev = NULL;
+	ਜੇ (loopdev && ਗਿਣਤੀ_2 > 1) {
+		ਮੁਕਤ(*loopdev);
+		*loopdev = ਨਿਰਾ;
 	}
-	return count;
+	ਵਾਪਸ ਗਿਣਤੀ_2;
 }
 
-#ifdef TEST_PROGRAM_LOOPDEV
-int main(int argc, char *argv[])
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ_LOOPDEV
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ *argv[])
 {
-	if (argc < 2)
-		goto usage;
+	ਜੇ (argc < 2)
+		ਜਾਓ usage;
 
-	if (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
-		printf("%s: %s\n", argv[2], is_loopdev(argv[2]) ? "OK" : "FAIL");
-	else
-		goto usage;
+	ਜੇ (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
+		ਲਿਖੋ("%s: %s\n", argv[2], is_loopdev(argv[2]) ? "OK" : "FAIL");
+	ਨਹੀਂਤਾਂ
+		ਜਾਓ usage;
 
-	return EXIT_SUCCESS;
+	ਵਾਪਸ EXIT_SUCCESS;
 usage:
 	fprintf(stderr, "usage: %1$s --is-loopdev <dev>\n",
-			program_invocation_short_name);
-	return EXIT_FAILURE;
+			ਪ੍ਰੋਗਰਾਮ_invocation_short_name);
+	ਵਾਪਸ EXIT_FAILURE;
 }
-#endif
+#ਜੇ_ਅੰਤ
 

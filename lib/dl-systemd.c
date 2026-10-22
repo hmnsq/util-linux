@@ -2,46 +2,46 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <dlfcn.h>
 
-#include "c.h"
-#include "dl-systemd.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "dl-systemd.h"
 
-#if defined(HAVE_LIBSYSTEMD) && defined(USE_DLOPEN_SYSTEMD)
+#ਜੇ defined(HAVE_LIBSYSTEMD) && defined(USE_DLOPEN_SYSTEMD)
 
 UL_ELF_NOTE_DLOPEN("systemd",
 		    "Support for systemd",
-		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
+		    UL_ELF_NOTE_DLOPEN_ਤਰਜੀਹ_RECOMMENDED,
 		    "libsystemd.so.0");
 
-struct ul_systemd_opers ul_systemd;
+ਬਣਤਰ ul_systemd_opers ul_systemd;
 
-static const struct ul_dlsym ul_systemd_symbols[] =
+ਸਥਿਰ ਅਚਲ ਬਣਤਰ ul_dlsym ul_systemd_symbols[] =
 {
 	UL_DLSYM( ul_systemd_opers, sd_booted ),
 	UL_DLSYM( ul_systemd_opers, sd_listen_fds ),
 
 	UL_DLSYM( ul_systemd_opers, sd_get_sessions ),
-#if HAVE_DECL_SD_SESSION_GET_USERNAME
+#ਜੇ HAVE_DECL_SD_SESSION_GET_USERNAME
 	UL_DLSYM( ul_systemd_opers, sd_session_get_username ),
 	UL_DLSYM( ul_systemd_opers, sd_session_get_tty ),
-#endif
+#ਜੇ_ਅੰਤ
 
 	UL_DLSYM( ul_systemd_opers, sd_journal_open ),
 	UL_DLSYM( ul_systemd_opers, sd_journal_open_directory ),
 	UL_DLSYM( ul_systemd_opers, sd_journal_close ),
-	UL_DLSYM( ul_systemd_opers, sd_journal_next ),
-	UL_DLSYM( ul_systemd_opers, sd_journal_previous_skip ),
+	UL_DLSYM( ul_systemd_opers, sd_journal_ਅਗਲਾ ),
+	UL_DLSYM( ul_systemd_opers, sd_journal_ਪਿਛਲਾ_skip ),
 	UL_DLSYM( ul_systemd_opers, sd_journal_get_realtime_usec ),
-	UL_DLSYM( ul_systemd_opers, sd_journal_get_data ),
-	UL_DLSYM( ul_systemd_opers, sd_journal_add_match ),
+	UL_DLSYM( ul_systemd_opers, sd_journal_get_ਅੰਕੜੇ ),
+	UL_DLSYM( ul_systemd_opers, sd_journal_ਜੋੜੋ_ਮੇਲ ),
 	UL_DLSYM( ul_systemd_opers, sd_journal_flush_matches ),
-	UL_DLSYM( ul_systemd_opers, sd_journal_seek_tail ),
+	UL_DLSYM( ul_systemd_opers, sd_journal_seek_ਪੂਛ ),
 	UL_DLSYM( ul_systemd_opers, sd_journal_sendv ),
 
-#if HAVE_DECL_SD_DEVICE_NEW_FROM_SYSPATH
+#ਜੇ HAVE_DECL_SD_DEVICE_NEW_FROM_SYSPATH
 	UL_DLSYM( ul_systemd_opers, sd_device_new_from_syspath ),
-	UL_DLSYM( ul_systemd_opers, sd_device_get_property_value ),
+	UL_DLSYM( ul_systemd_opers, sd_device_get_property_ਮੁੱਲ ),
 	UL_DLSYM( ul_systemd_opers, sd_device_ref ),
 	UL_DLSYM( ul_systemd_opers, sd_device_unref ),
 	UL_DLSYM( ul_systemd_opers, sd_device_get_action ),
@@ -51,38 +51,38 @@ static const struct ul_dlsym ul_systemd_symbols[] =
 	UL_DLSYM( ul_systemd_opers, sd_device_monitor_new ),
 	UL_DLSYM( ul_systemd_opers, sd_device_monitor_unref ),
 	UL_DLSYM( ul_systemd_opers, sd_device_monitor_get_event ),
-	UL_DLSYM( ul_systemd_opers, sd_device_monitor_start ),
-	UL_DLSYM( ul_systemd_opers, sd_device_monitor_filter_add_match_subsystem_devtype ),
+	UL_DLSYM( ul_systemd_opers, sd_device_monitor_ਸ਼ੁਰੂ ),
+	UL_DLSYM( ul_systemd_opers, sd_device_monitor_filter_ਜੋੜੋ_ਮੇਲ_subsystem_devtype ),
 
-	UL_DLSYM( ul_systemd_opers, sd_event_add_time_relative ),
+	UL_DLSYM( ul_systemd_opers, sd_event_ਜੋੜੋ_ਸਮਾਂ_relative ),
 	UL_DLSYM( ul_systemd_opers, sd_event_loop ),
 	UL_DLSYM( ul_systemd_opers, sd_event_exit ),
-#endif
-#if HAVE_DECL_SD_DEVICE_OPEN
+#ਜੇ_ਅੰਤ
+#ਜੇ HAVE_DECL_SD_DEVICE_OPEN
 	UL_DLSYM( ul_systemd_opers, sd_device_open ),
 	UL_DLSYM( ul_systemd_opers, sd_device_new_from_devname ),
-#endif
+#ਜੇ_ਅੰਤ
 };
 
-int ul_dlopen_libsystemd(void)
+ਪੂਰਨ ul_dlopen_libsystemd(ਖਾਲੀ)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	ਸਥਿਰ ਪੂਰਨ ਸਥਿਤੀ = 0;
+	ਸਥਿਰ ਖਾਲੀ *dl = ਨਿਰਾ;
+	ਪੂਰਨ flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ਜੇ (ਸਥਿਤੀ)
+		ਵਾਪਸ ਸਥਿਤੀ > 0 ? 0 : -ENOSYS;
 
-#ifdef RTLD_NODELETE
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ RTLD_NODELETE
 	flags |= RTLD_NODELETE;
-#endif
-	status = ul_dlopen_symbols("libsystemd.so.0", flags,
+#ਜੇ_ਅੰਤ
+	ਸਥਿਤੀ = ul_dlopen_symbols("libsystemd.so.0", flags,
 				   ul_systemd_symbols,
-				   ARRAY_SIZE(ul_systemd_symbols),
+				   ARRAY_ਮਾਪ(ul_systemd_symbols),
 				   &ul_systemd, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	ਵਾਪਸ ਸਥਿਤੀ > 0 ? 0 : -ENOSYS;
 }
 
-#endif /* HAVE_LIBSYSTEMD && USE_DLOPEN_SYSTEMD */
+#ਜੇ_ਅੰਤ /* HAVE_LIBSYSTEMD && USE_DLOPEN_SYSTEMD */

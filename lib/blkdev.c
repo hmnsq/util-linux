@@ -4,135 +4,135 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdint.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/types.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/stat.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/file.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/ioctl.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <errno.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <unistd.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdint.h>
 
-#ifdef HAVE_LINUX_FD_H
-#include <linux/fd.h>
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_LINUX_FD_H
+#ਅਨ੍ਤਰ੍ਭਾਵ <linux/fd.h>
+#ਜੇ_ਅੰਤ
 
-#ifdef HAVE_LINUX_BLKZONED_H
-#include <linux/blkzoned.h>
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_LINUX_BLKZONED_H
+#ਅਨ੍ਤਰ੍ਭਾਵ <linux/blkzoned.h>
+#ਜੇ_ਅੰਤ
 
-#ifdef HAVE_SYS_DISKLABEL_H
-#include <sys/disklabel.h>
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_SYS_DISKLABEL_H
+#ਅਨ੍ਤਰ੍ਭਾਵ <sys/disklabel.h>
+#ਜੇ_ਅੰਤ
 
-#ifdef HAVE_SYS_DISK_H
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_SYS_DISK_H
 # include <sys/disk.h>
-#endif
+#ਜੇ_ਅੰਤ
 
-#ifndef EBADFD
+#ਜੇ_ਅਪਰਿਭਾਸ਼ਿਤ EBADFD
 # define EBADFD 77		/* File descriptor in bad state */
-#endif
+#ਜੇ_ਅੰਤ
 
-#include "all-io.h"
-#include "blkdev.h"
-#include "c.h"
-#include "cctype.h"
-#include "linux_version.h"
-#include "fileutils.h"
-#include "nls.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "all-io.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "blkdev.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "c.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "cctype.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "linux_version.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "fileutils.h"
+#ਅਨ੍ਤਰ੍ਭਾਵ "nls.h"
 
-static long blkdev_valid_offset(int fd, off_t offset)
+ਸਥਿਰ ਲੰਮਾ blkdev_valid_ਵਿੱਥ(ਪੂਰਨ fd, off_t ਵਿੱਥ)
 {
-	char ch;
+	ਅੱਖਰ ch;
 
-	if (lseek (fd, offset, 0) < 0)
-		return 0;
-	if (ul_read_all (fd, &ch, 1) < 1)
-		return 0;
-	return 1;
+	ਜੇ (lseek (fd, ਵਿੱਥ, 0) < 0)
+		ਵਾਪਸ 0;
+	ਜੇ (ul_read_all (fd, &ch, 1) < 1)
+		ਵਾਪਸ 0;
+	ਵਾਪਸ 1;
 }
 
-int is_blkdev(int fd)
+ਪੂਰਨ is_blkdev(ਪੂਰਨ fd)
 {
-	struct stat st;
-	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+	ਬਣਤਰ stat st;
+	ਵਾਪਸ (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
 }
 
-off_t blkdev_find_size (int fd)
+off_t blkdev_ਲੱਭੋ_ਮਾਪ (ਪੂਰਨ fd)
 {
-	off_t high, low = 0;
+	off_t high, ਨੀਵਾਂ = 0;
 
-	for (high = 1024; blkdev_valid_offset(fd, high); ) {
-		if (high == SINT_MAX(off_t)) {
+	ਲਈ (high = 1024; blkdev_valid_ਵਿੱਥ(fd, high); ) {
+		ਜੇ (high == SINT_MAX(off_t)) {
 			errno = EFBIG;
-			return -1;
+			ਵਾਪਸ -1;
 		}
 
-		low = high;
+		ਨੀਵਾਂ = high;
 
-		if (high >= SINT_MAX(off_t)/2)
+		ਜੇ (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
-		else
+		ਨਹੀਂਤਾਂ
 			high *= 2;
 	}
 
-	while (low < high - 1) {
-		off_t mid = (low + high) / 2;
+	ਜਦੋਂ (ਨੀਵਾਂ < high - 1) {
+		off_t mid = (ਨੀਵਾਂ + high) / 2;
 
-		if (blkdev_valid_offset (fd, mid))
-			low = mid;
-		else
+		ਜੇ (blkdev_valid_ਵਿੱਥ (fd, mid))
+			ਨੀਵਾਂ = mid;
+		ਨਹੀਂਤਾਂ
 			high = mid;
 	}
-	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	blkdev_valid_ਵਿੱਥ (fd, 0);
+	ਵਾਪਸ (ਨੀਵਾਂ + 1);
 }
 
 /* get size in bytes */
-int blkdev_get_size(int fd, uint64_t *bytes)
+ਪੂਰਨ blkdev_get_ਮਾਪ(ਪੂਰਨ fd, uint64_t *ਬਾਈਟਾਂ)
 {
-#ifdef DKIOCGETBLOCKCOUNT
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ DKIOCGETBLOCKCOUNT
 	/* Apple Darwin */
-	if (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
-		*bytes <<= 9;
-		return 0;
+	ਜੇ (ioctl(fd, DKIOCGETBLOCKCOUNT, ਬਾਈਟਾਂ) >= 0) {
+		*ਬਾਈਟਾਂ <<= 9;
+		ਵਾਪਸ 0;
 	}
-#endif
+#ਜੇ_ਅੰਤ
 
-#ifdef BLKGETSIZE64
-	if (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
-		return 0;
-#endif
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ BLKGETSIZE64
+	ਜੇ (ioctl(fd, BLKGETSIZE64, ਬਾਈਟਾਂ) >= 0)
+		ਵਾਪਸ 0;
+#ਜੇ_ਅੰਤ
 
-#ifdef BLKGETSIZE
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ BLKGETSIZE
 	{
-		unsigned long size;
+		ਬਿਨਾਨਿਸ਼ਾਨੀ ਲੰਮਾ ਮਾਪ;
 
-		if (ioctl(fd, BLKGETSIZE, &size) >= 0) {
-			*bytes = ((uint64_t) size) << 9;
-			return 0;
+		ਜੇ (ioctl(fd, BLKGETSIZE, &ਮਾਪ) >= 0) {
+			*ਬਾਈਟਾਂ = ((uint64_t) ਮਾਪ) << 9;
+			ਵਾਪਸ 0;
 		}
 	}
 
-#endif /* BLKGETSIZE */
+#ਜੇ_ਅੰਤ /* BLKGETSIZE */
 
-#ifdef DIOCGMEDIASIZE
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ DIOCGMEDIASIZE
 	/* FreeBSD */
-	if (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
-		return 0;
-#endif
+	ਜੇ (ioctl(fd, DIOCGMEDIASIZE, ਬਾਈਟਾਂ) >= 0)
+		ਵਾਪਸ 0;
+#ਜੇ_ਅੰਤ
 
-#ifdef FDGETPRM
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ FDGETPRM
 	{
-		struct floppy_struct this_floppy;
+		ਬਣਤਰ floppy_struct this_floppy;
 
-		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
-			*bytes = ((uint64_t) this_floppy.size) << 9;
-			return 0;
+		ਜੇ (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+			*ਬਾਈਟਾਂ = ((uint64_t) this_floppy.ਮਾਪ) << 9;
+			ਵਾਪਸ 0;
 		}
 	}
-#endif /* FDGETPRM */
+#ਜੇ_ਅੰਤ /* FDGETPRM */
 
-#if defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
+#ਜੇ defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
 	{
 		/*
 		 * This code works for FreeBSD 4.11 i386, except for the full device
@@ -143,63 +143,63 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 		 * Note that FreeBSD >= 4.0 has disk devices as unbuffered (raw,
 		 * character) devices, so we need to check for S_ISCHR, too.
 		 */
-		int part = -1;
-		struct disklabel lab;
-		struct partition *pp;
-		struct stat st;
+		ਪੂਰਨ part = -1;
+		ਬਣਤਰ disklabel lab;
+		ਬਣਤਰ ਹਿੱਸੇ_ਕਰੋ *pp;
+		ਬਣਤਰ stat st;
 
-		if ((fstat(fd, &st) >= 0) &&
+		ਜੇ ((fstat(fd, &st) >= 0) &&
 		    (S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode)))
 			part = st.st_rdev & 7;
 
-		if (part >= 0 && (ioctl(fd, DIOCGDINFO, (char *)&lab) >= 0)) {
+		ਜੇ (part >= 0 && (ioctl(fd, DIOCGDINFO, (ਅੱਖਰ *)&lab) >= 0)) {
 			pp = &lab.d_partitions[part];
-			if (pp->p_size) {
-				 *bytes = ((uint64_t) pp->p_size) << 9;
-				 return 0;
+			ਜੇ (pp->p_ਮਾਪ) {
+				 *ਬਾਈਟਾਂ = ((uint64_t) pp->p_ਮਾਪ) << 9;
+				 ਵਾਪਸ 0;
 			}
 		}
 	}
-#endif /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
+#ਜੇ_ਅੰਤ /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
 
 	{
-		struct stat st;
+		ਬਣਤਰ stat st;
 
-		if (fstat(fd, &st) != 0)
-			return -1;
-		if (S_ISREG(st.st_mode)) {
-			*bytes = (uint64_t) st.st_size;
-			return 0;
+		ਜੇ (fstat(fd, &st) != 0)
+			ਵਾਪਸ -1;
+		ਜੇ (S_ISREG(st.st_mode)) {
+			*ਬਾਈਟਾਂ = (uint64_t) st.st_size;
+			ਵਾਪਸ 0;
 		}
-		if (!S_ISBLK(st.st_mode)) {
+		ਜੇ (!S_ISBLK(st.st_mode)) {
 			errno = ENOTBLK;
-			return -1;
+			ਵਾਪਸ -1;
 		}
 	}
 
 	{
-		off_t size = blkdev_find_size(fd);
+		off_t ਮਾਪ = blkdev_ਲੱਭੋ_ਮਾਪ(fd);
 
-		if (size < 0)
-			return -1;
+		ਜੇ (ਮਾਪ < 0)
+			ਵਾਪਸ -1;
 
-		*bytes = (uint64_t) size;
+		*ਬਾਈਟਾਂ = (uint64_t) ਮਾਪ;
 	}
 
-	return 0;
+	ਵਾਪਸ 0;
 }
 
 /* get 512-byte sector count */
-int blkdev_get_sectors(int fd, uint64_t *sectors)
+ਪੂਰਨ blkdev_get_sectors(ਪੂਰਨ fd, uint64_t *sectors)
 {
-	uint64_t bytes;
+	uint64_t ਬਾਈਟਾਂ;
 
-	if (blkdev_get_size(fd, &bytes) == 0) {
-		*sectors = (bytes >> 9);
-		return 0;
+	ਜੇ (blkdev_get_ਮਾਪ(fd, &ਬਾਈਟਾਂ) == 0) {
+		*sectors = (ਬਾਈਟਾਂ >> 9);
+		ਵਾਪਸ 0;
 	}
 
-	return -1;
+	ਵਾਪਸ -1;
 }
 
 /*
@@ -208,20 +208,20 @@ int blkdev_get_sectors(int fd, uint64_t *sectors)
  * This is the smallest unit the storage device can
  * address. It is typically 512 bytes.
  */
-#ifdef BLKSSZGET
-int blkdev_get_sector_size(int fd, int *sector_size)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ BLKSSZGET
+ਪੂਰਨ blkdev_get_sector_ਮਾਪ(ਪੂਰਨ fd, ਪੂਰਨ *sector_ਮਾਪ)
 {
-	if (ioctl(fd, BLKSSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ਜੇ (ioctl(fd, BLKSSZGET, sector_ਮਾਪ) >= 0)
+		ਵਾਪਸ 0;
+	ਵਾਪਸ -1;
 }
-#else
-int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
+#ਨਹੀਂਤਾਂ
+ਪੂਰਨ blkdev_get_sector_ਮਾਪ(ਪੂਰਨ fd __attribute__((__unused__)), ਪੂਰਨ *sector_ਮਾਪ)
 {
-	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	*sector_ਮਾਪ = DEFAULT_SECTOR_ਮਾਪ;
+	ਵਾਪਸ 0;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 /*
  * Get physical block device size. The BLKPBSZGET is supported since Linux
@@ -237,74 +237,74 @@ int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
  *		physec = DEFAULT_SECTOR_SIZE;
  * }
  */
-#ifdef BLKPBSZGET
-int blkdev_get_physector_size(int fd, int *sector_size)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ BLKPBSZGET
+ਪੂਰਨ blkdev_get_physector_ਮਾਪ(ਪੂਰਨ fd, ਪੂਰਨ *sector_ਮਾਪ)
 {
-	if (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ਜੇ (ioctl(fd, BLKPBSZGET, sector_ਮਾਪ) >= 0)
+		ਵਾਪਸ 0;
+	ਵਾਪਸ -1;
 }
-#else
-int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_size)
+#ਨਹੀਂਤਾਂ
+ਪੂਰਨ blkdev_get_physector_ਮਾਪ(ਪੂਰਨ fd __attribute__((__unused__)), ਪੂਰਨ *sector_ਮਾਪ)
 {
-	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	*sector_ਮਾਪ = DEFAULT_SECTOR_ਮਾਪ;
+	ਵਾਪਸ 0;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 /*
  * Return the alignment status of a device
  */
-#ifdef BLKALIGNOFF
-int blkdev_is_misaligned(int fd)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ BLKALIGNOFF
+ਪੂਰਨ blkdev_is_misaligned(ਪੂਰਨ fd)
 {
-	int aligned;
+	ਪੂਰਨ aligned;
 
-	if (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
-		return 0; /* probably kernel < 2.6.32 */
+	ਜੇ (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
+		ਵਾਪਸ 0; /* probably kernel < 2.6.32 */
 	/*
 	 * Note that kernel returns -1 as alignment offset if no compatible
 	 * sizes and alignments exist for stacked devices
 	 */
-	return aligned != 0 ? 1 : 0;
+	ਵਾਪਸ aligned != 0 ? 1 : 0;
 }
-#else
-int blkdev_is_misaligned(int fd __attribute__((__unused__)))
+#ਨਹੀਂਤਾਂ
+ਪੂਰਨ blkdev_is_misaligned(ਪੂਰਨ fd __attribute__((__unused__)))
 {
-	return 0;
+	ਵਾਪਸ 0;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
-int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+ਪੂਰਨ open_blkdev_or_file(ਅਚਲ ਬਣਤਰ stat *st, ਅਚਲ ਅੱਖਰ *name, ਅਚਲ ਪੂਰਨ oflag)
 {
-	int fd;
+	ਪੂਰਨ fd;
 
-	if (S_ISBLK(st->st_mode)) {
+	ਜੇ (S_ISBLK(st->st_mode)) {
 		fd = open(name, oflag | O_EXCL | O_CLOEXEC);
-	} else
+	} ਨਹੀਂਤਾਂ
 		fd = open(name, oflag);
-	if (-1 < fd && !is_same_inode(fd, st)) {
+	ਜੇ (-1 < fd && !is_same_inode(fd, st)) {
 		close(fd);
 		errno = EBADFD;
-		return -1;
+		ਵਾਪਸ -1;
 	}
-	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+	ਜੇ (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
 		warnx(_("warning: %s is misaligned"), name);
-	return fd;
+	ਵਾਪਸ fd;
 }
 
-#ifdef CDROM_GET_CAPABILITY
-int blkdev_is_cdrom(int fd)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ CDROM_GET_CAPABILITY
+ਪੂਰਨ blkdev_is_cdrom(ਪੂਰਨ fd)
 {
-	int ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
-	return ret < 0 ? 0 : ret;
+	ਪੂਰਨ ret = ioctl(fd, CDROM_GET_CAPABILITY, ਨਿਰਾ);
+	ਵਾਪਸ ret < 0 ? 0 : ret;
 }
-#else
-int blkdev_is_cdrom(int fd __attribute__((__unused__)))
+#ਨਹੀਂਤਾਂ
+ਪੂਰਨ blkdev_is_cdrom(ਪੂਰਨ fd __attribute__((__unused__)))
 {
-	return 0;
+	ਵਾਪਸ 0;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 /*
  * Get kernel's interpretation of the device's geometry.
@@ -314,177 +314,177 @@ int blkdev_is_cdrom(int fd __attribute__((__unused__)))
  *
  * Note that this is deprecated in favor of LBA addressing.
  */
-#ifdef HDIO_GETGEO
-int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HDIO_GETGEO
+ਪੂਰਨ blkdev_get_geometry(ਪੂਰਨ fd, ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ *h, ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ *s)
 {
-	struct hd_geometry geometry;
+	ਬਣਤਰ hd_geometry geometry;
 
-	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+	ਜੇ (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
 		*h = geometry.heads;
 		*s = geometry.sectors;
-		return 0;
+		ਵਾਪਸ 0;
 	}
-#else
-int blkdev_get_geometry(int fd __attribute__((__unused__)),
-		unsigned int *h, unsigned int *s)
+#ਨਹੀਂਤਾਂ
+ਪੂਰਨ blkdev_get_geometry(ਪੂਰਨ fd __attribute__((__unused__)),
+		ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ *h, ਬਿਨਾਨਿਸ਼ਾਨੀ ਪੂਰਨ *s)
 {
 	*h = 0;
 	*s = 0;
-#endif
-	return -1;
+#ਜੇ_ਅੰਤ
+	ਵਾਪਸ -1;
 }
 
 /*
  * Convert scsi type to human readable string.
  */
-const char *blkdev_scsi_type_to_name(int type)
+ਅਚਲ ਅੱਖਰ *blkdev_scsi_type_ਮੰਜ਼ਿਲ_name(ਪੂਰਨ type)
 {
-	switch (type) {
-	case SCSI_TYPE_DISK:
-		return "disk";
-	case SCSI_TYPE_TAPE:
-		return "tape";
-	case SCSI_TYPE_PRINTER:
-		return "printer";
-	case SCSI_TYPE_PROCESSOR:
-		return "processor";
-	case SCSI_TYPE_WORM:
-		return "worm";
-	case SCSI_TYPE_ROM:
-		return "rom";
-	case SCSI_TYPE_SCANNER:
-		return "scanner";
-	case SCSI_TYPE_MOD:
-		return "mo-disk";
-	case SCSI_TYPE_MEDIUM_CHANGER:
-		return "changer";
-	case SCSI_TYPE_COMM:
-		return "comm";
-	case SCSI_TYPE_RAID:
-		return "raid";
-	case SCSI_TYPE_ENCLOSURE:
-		return "enclosure";
-	case SCSI_TYPE_RBC:
-		return "rbc";
-	case SCSI_TYPE_OSD:
-		return "osd";
-	case SCSI_TYPE_NO_LUN:
-		return "no-lun";
-	default:
-		break;
+	ਚੋਣ (type) {
+	ਹਾਲਤ SCSI_TYPE_DISK:
+		ਵਾਪਸ "disk";
+	ਹਾਲਤ SCSI_TYPE_ਫੀਤਾ:
+		ਵਾਪਸ "tape";
+	ਹਾਲਤ SCSI_TYPE_PRINTER:
+		ਵਾਪਸ "printer";
+	ਹਾਲਤ SCSI_TYPE_PROCESSOR:
+		ਵਾਪਸ "processor";
+	ਹਾਲਤ SCSI_TYPE_WORM:
+		ਵਾਪਸ "worm";
+	ਹਾਲਤ SCSI_TYPE_ROM:
+		ਵਾਪਸ "rom";
+	ਹਾਲਤ SCSI_TYPE_SCANNER:
+		ਵਾਪਸ "scanner";
+	ਹਾਲਤ SCSI_TYPE_MOD:
+		ਵਾਪਸ "mo-disk";
+	ਹਾਲਤ SCSI_TYPE_MEDIUM_CHANGER:
+		ਵਾਪਸ "changer";
+	ਹਾਲਤ SCSI_TYPE_COMM:
+		ਵਾਪਸ "comm";
+	ਹਾਲਤ SCSI_TYPE_RAID:
+		ਵਾਪਸ "raid";
+	ਹਾਲਤ SCSI_TYPE_ENCLOSURE:
+		ਵਾਪਸ "enclosure";
+	ਹਾਲਤ SCSI_TYPE_RBC:
+		ਵਾਪਸ "rbc";
+	ਹਾਲਤ SCSI_TYPE_OSD:
+		ਵਾਪਸ "osd";
+	ਹਾਲਤ SCSI_TYPE_NO_LUN:
+		ਵਾਪਸ "no-lun";
+	ਮੂਲ:
+		ਰੋਕੋ;
 	}
-	return NULL;
+	ਵਾਪਸ ਨਿਰਾ;
 }
 
 /* return 0 on success */
-int blkdev_lock(int fd, const char *devname, const char *lockmode)
+ਪੂਰਨ blkdev_ਤਾਲਾ(ਪੂਰਨ fd, ਅਚਲ ਅੱਖਰ *devname, ਅਚਲ ਅੱਖਰ *lockmode)
 {
-	int oper, rc, msg = 0;
+	ਪੂਰਨ oper, rc, ਸੁਨੇਹਾ = 0;
 
-	if (!lockmode)
+	ਜੇ (!lockmode)
 		lockmode = getenv("LOCK_BLOCK_DEVICE");
-	if (!lockmode)
-		return 0;
+	ਜੇ (!lockmode)
+		ਵਾਪਸ 0;
 
-	if (c_strcasecmp(lockmode, "yes") == 0 ||
+	ਜੇ (c_strcasecmp(lockmode, "yes") == 0 ||
 	    strcmp(lockmode, "1") == 0)
 		oper = LOCK_EX;
 
-	else if (c_strcasecmp(lockmode, "nonblock") == 0)
+	ਨਹੀਂਤਾਂ ਜੇ (c_strcasecmp(lockmode, "nonblock") == 0)
 		oper = LOCK_EX | LOCK_NB;
 
-	else if (c_strcasecmp(lockmode, "no") == 0 ||
+	ਨਹੀਂਤਾਂ ਜੇ (c_strcasecmp(lockmode, "no") == 0 ||
 		 strcmp(lockmode, "0") == 0)
-		return 0;
-	else {
+		ਵਾਪਸ 0;
+	ਨਹੀਂਤਾਂ {
 		warnx(_("unsupported lock mode: %s"), lockmode);
-		return -EINVAL;
+		ਵਾਪਸ -EINVAL;
 	}
 
-	if (!(oper & LOCK_NB)) {
+	ਜੇ (!(oper & LOCK_NB)) {
 		/* Try non-block first to provide message */
 		rc = flock(fd, oper | LOCK_NB);
-		if (rc == 0)
-			return 0;
-		if (rc != 0 && errno == EWOULDBLOCK) {
+		ਜੇ (rc == 0)
+			ਵਾਪਸ 0;
+		ਜੇ (rc != 0 && errno == EWOULDBLOCK) {
 			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
-					program_invocation_short_name, devname);
-			msg = 1;
+					ਪ੍ਰੋਗਰਾਮ_invocation_short_name, devname);
+			ਸੁਨੇਹਾ = 1;
 		}
 	}
 	rc = flock(fd, oper);
-	if (rc != 0) {
-		switch (errno) {
-		case EWOULDBLOCK: /* LOCK_NB */
+	ਜੇ (rc != 0) {
+		ਚੋਣ (errno) {
+		ਹਾਲਤ EWOULDBLOCK: /* LOCK_NB */
 			warnx(_("%s: device already locked"), devname);
-			break;
-		default:
+			ਰੋਕੋ;
+		ਮੂਲ:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
+	} ਨਹੀਂਤਾਂ ਜੇ (ਸੁਨੇਹਾ)
 		fprintf(stderr, _("OK\n"));
-	return rc;
+	ਵਾਪਸ rc;
 }
 
-#ifdef HAVE_LINUX_BLKZONED_H
-struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t nzones)
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ HAVE_LINUX_BLKZONED_H
+ਬਣਤਰ blk_zone_report *blkdev_get_zonereport(ਪੂਰਨ fd, uint64_t sector, uint32_t nzones)
 {
-	struct blk_zone_report *rep;
-	size_t rep_size;
-	int ret;
+	ਬਣਤਰ blk_zone_report *rep;
+	size_t rep_ਮਾਪ;
+	ਪੂਰਨ ret;
 
-	rep_size = sizeof(struct blk_zone_report) + sizeof(struct blk_zone) * nzones;
-	rep = calloc(1, rep_size);
-	if (!rep)
-		return NULL;
+	rep_ਮਾਪ = ਆਕਾਰ(ਬਣਤਰ blk_zone_report) + ਆਕਾਰ(ਬਣਤਰ blk_zone) * nzones;
+	rep = ਸਿਫਰ_ਸਮ੍ਰਿਤੀ_ਦਿਓ(1, rep_ਮਾਪ);
+	ਜੇ (!rep)
+		ਵਾਪਸ ਨਿਰਾ;
 
 	rep->sector = sector;
 	rep->nr_zones = nzones;
 
 	ret = ioctl(fd, BLKREPORTZONE, rep);
-	if (ret || rep->nr_zones != nzones) {
-		free(rep);
-		return NULL;
+	ਜੇ (ret || rep->nr_zones != nzones) {
+		ਮੁਕਤ(rep);
+		ਵਾਪਸ ਨਿਰਾ;
 	}
 
-	return rep;
+	ਵਾਪਸ rep;
 }
-#endif
+#ਜੇ_ਅੰਤ
 
 
-#ifdef TEST_PROGRAM_BLKDEV
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
+#ਜੇ_ਪਰਿਭਾਸ਼ਿਤ TEST_ਪ੍ਰੋਗਰਾਮ_BLKDEV
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdio.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <stdlib.h>
+#ਅਨ੍ਤਰ੍ਭਾਵ <fcntl.h>
 
-int main(int argc, char **argv)
+ਪੂਰਨ ਮੁੱਖ(ਪੂਰਨ argc, ਅੱਖਰ **argv)
 {
-	uint64_t bytes, sectors;
-	int sector_size, phy_sector_size;
-	int fd;
+	uint64_t ਬਾਈਟਾਂ, sectors;
+	ਪੂਰਨ sector_ਮਾਪ, phy_sector_ਮਾਪ;
+	ਪੂਰਨ fd;
 
-	if (argc != 2) {
+	ਜੇ (argc != 2) {
 		fprintf(stderr, "usage: %s device\n", argv[0]);
-		exit(EXIT_FAILURE);
+		ਬਾਹਰ_ਨਿਕਲੋ(EXIT_FAILURE);
 	}
 
-	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+	ਜੇ ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
 		err(EXIT_FAILURE, "open %s failed", argv[1]);
 
-	if (blkdev_get_size(fd, &bytes) < 0)
+	ਜੇ (blkdev_get_ਮਾਪ(fd, &ਬਾਈਟਾਂ) < 0)
 		err(EXIT_FAILURE, "blkdev_get_size() failed");
-	if (blkdev_get_sectors(fd, &sectors) < 0)
+	ਜੇ (blkdev_get_sectors(fd, &sectors) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sectors() failed");
-	if (blkdev_get_sector_size(fd, &sector_size) < 0)
+	ਜੇ (blkdev_get_sector_ਮਾਪ(fd, &sector_ਮਾਪ) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sector_size() failed");
-	if (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
+	ਜੇ (blkdev_get_physector_ਮਾਪ(fd, &phy_sector_ਮਾਪ) < 0)
 		err(EXIT_FAILURE, "blkdev_get_physector_size() failed");
 
-	printf("          bytes: %" PRIu64 "\n", bytes);
-	printf("        sectors: %" PRIu64 "\n", sectors);
-	printf("    sector size: %d\n", sector_size);
-	printf("phy-sector size: %d\n", phy_sector_size);
+	ਲਿਖੋ("          bytes: %" PRIu64 "\n", ਬਾਈਟਾਂ);
+	ਲਿਖੋ("        sectors: %" PRIu64 "\n", sectors);
+	ਲਿਖੋ("    sector size: %d\n", sector_ਮਾਪ);
+	ਲਿਖੋ("phy-sector size: %d\n", phy_sector_ਮਾਪ);
 
-	return EXIT_SUCCESS;
+	ਵਾਪਸ EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BLKDEV */
+#ਜੇ_ਅੰਤ /* TEST_PROGRAM_BLKDEV */
