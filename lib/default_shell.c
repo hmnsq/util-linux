@@ -1,28 +1,28 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include <paths.h>
+#ضمن <paths.h>
 
-#include "c.h"
-#include "default_shell.h"
+#ضمن "c.h"
+#ضمن "default_shell.h"
 
-const char *ul_default_shell(int flags, const struct passwd *pw)
+ثابت حرف *ul_default_shell(صحيح flags, ثابت بنية passwd *pw)
 {
-	const char *shell = NULL;
+	ثابت حرف *shell = عدم;
 
-	if (!(flags & UL_SHELL_NOENV)) {
+	𐤀𐤌 (!(flags & UL_SHELL_NOENV)) {
 		shell = getenv("SHELL");
-		if (shell && *shell)
-			return shell;
+		𐤀𐤌 (shell && *shell)
+			أرجع shell;
 	}
-	if (!(flags & UL_SHELL_NOPWD)) {
-		if (!pw)
+	𐤀𐤌 (!(flags & UL_SHELL_NOPWD)) {
+		𐤀𐤌 (!pw)
 			pw = getpwuid(getuid());
-		if (pw)
+		𐤀𐤌 (pw)
 			shell = pw->pw_shell;
-		if (shell && *shell)
-			return shell;
+		𐤀𐤌 (shell && *shell)
+			أرجع shell;
 	}
 
-	return _PATH_BSHELL;
+	أرجع _PATH_BSHELL;
 }
