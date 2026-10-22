@@ -11,7 +11,7 @@
 #include <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+void ul_debug(const var_na *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -20,65 +20,65 @@ void ul_debug(const char *mesg, ...)
 	fputc('\n', stderr);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
+void ul_debug_prefix(const var_na *lib, const var_na *flag,
 		     const void *handle, unsigned mask)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	ꦪꦼꦤ꧀ (handle && !(mask & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+unsigned ul_debug_parse_mask(const sa_nracanaa ul_debug_maskname flagnames[],
+			     const var_na *mask)
 {
 	unsigned res;
-	char *ptr;
+	var_na *ptr;
 
 	/* let's check for a numeric mask first */
 	res = strtoul(mask, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	ꦪꦼꦤ꧀ (ptr && *ptr && flagnames && flagnames[0].name) {
+		var_na *msbuf, *ms, *name;
 		res = 0;
 
 		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		ꦪꦼꦤ꧀ (!ms)
+			ꦮꦭꦶ res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		ꦱꦼꦢꦼꦭ ((name = strtok_r(ms, ",", &ptr))) {
+			const sa_nracanaa ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
+			ꦏꦁꦒꦺꦴ (d = flagnames; d && d->name; d++) {
+				ꦪꦼꦤ꧀ (strcmp(name, d->name) == 0) {
 					res |= d->mask;
-					break;
+					bha_nga;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			ꦪꦼꦤ꧀ (res == UL_DEBUG_ALL)
+				bha_nga;
 		}
 		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+	} ꦭꦶꦪ ꦪꦼꦤ꧀ (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	ꦮꦭꦶ res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+void ul_debug_print_masks(const var_na *env,
+			  const sa_nracanaa ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	const sa_nracanaa ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	ꦪꦼꦤ꧀ (!flagnames)
+		ꦮꦭꦶ;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
+	ꦏꦁꦒꦺꦴ (d = flagnames; d && d->name; d++) {
+		ꦪꦼꦤ꧀ (!d->help)
 			continue;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
 				d->name, d->mask, d->help);

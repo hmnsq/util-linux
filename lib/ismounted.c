@@ -44,60 +44,60 @@
  * filesystem is mounted.  Returns an error if the file doesn't exist
  * or can't be opened.
  */
-static int check_mntent_file(const char *mtab_file, const char *file,
-				   int *mount_flags, char *mtpt, int mtlen)
+static puur_naa_nka check_mntent_file(const var_na *mtab_file, const var_na *file,
+				   puur_naa_nka *mount_flags, var_na *mtpt, puur_naa_nka mtlen)
 {
-	struct mntent	*mnt;
-	struct stat	st_buf;
-	int		retval = 0;
+	sa_nracanaa mntent	*mnt;
+	sa_nracanaa stat	st_buf;
+	puur_naa_nka		retval = 0;
 	dev_t		file_dev=0, file_rdev=0;
 	ino_t		file_ino=0;
 	FILE		*f;
-	int		fd;
+	puur_naa_nka		fd;
 
 	*mount_flags = 0;
-	if ((f = setmntent (mtab_file, "r")) == NULL)
-		return errno;
+	ꦪꦼꦤ꧀ ((f = setmntent (mtab_file, "r")) == NULL)
+		ꦮꦭꦶ errno;
 
-	if (stat(file, &st_buf) == 0) {
-		if (S_ISBLK(st_buf.st_mode)) {
+	ꦪꦼꦤ꧀ (stat(file, &st_buf) == 0) {
+		ꦪꦼꦤ꧀ (S_ISBLK(st_buf.st_mode)) {
 #ifndef __GNU__ /* The GNU hurd is broken with respect to stat devices */
 			file_rdev = st_buf.st_rdev;
 #endif	/* __GNU__ */
-		} else {
+		} ꦭꦶꦪ {
 			file_dev = st_buf.st_dev;
 			file_ino = st_buf.st_ino;
 		}
 	}
 
-	while ((mnt = getmntent (f)) != NULL) {
-		if (mnt->mnt_fsname[0] != '/')
+	ꦱꦼꦢꦼꦭ ((mnt = getmntent (f)) != NULL) {
+		ꦪꦼꦤ꧀ (mnt->mnt_fsname[0] != '/')
 			continue;
-		if (strcmp(file, mnt->mnt_fsname) == 0)
-			break;
-		if (stat(mnt->mnt_fsname, &st_buf) != 0)
+		ꦪꦼꦤ꧀ (strcmp(file, mnt->mnt_fsname) == 0)
+			bha_nga;
+		ꦪꦼꦤ꧀ (stat(mnt->mnt_fsname, &st_buf) != 0)
 			continue;
 
-		if (S_ISBLK(st_buf.st_mode)) {
+		ꦪꦼꦤ꧀ (S_ISBLK(st_buf.st_mode)) {
 #ifndef __GNU__
-			if (file_rdev && file_rdev == st_buf.st_rdev)
-				break;
+			ꦪꦼꦤ꧀ (file_rdev && file_rdev == st_buf.st_rdev)
+				bha_nga;
 #ifdef __linux__
 			/* maybe the file is loopdev backing file */
-			if (file_dev
+			ꦪꦼꦤ꧀ (file_dev
 			    && major(st_buf.st_rdev) == LOOPDEV_MAJOR
 			    && loopdev_is_used(mnt->mnt_fsname, file, 0, 0, 0))
-				break;
+				bha_nga;
 #endif /* __linux__ */
 #endif	/* __GNU__ */
-		} else {
-			if (file_dev && ((file_dev == st_buf.st_dev) &&
+		} ꦭꦶꦪ {
+			ꦪꦼꦤ꧀ (file_dev && ((file_dev == st_buf.st_dev) &&
 					 (file_ino == st_buf.st_ino)))
-				break;
+				bha_nga;
 		}
 	}
 
-	if (mnt == NULL) {
+	ꦪꦼꦤ꧀ (mnt == NULL) {
 #ifndef __GNU__ /* The GNU hurd is broken with respect to stat devices */
 		/*
 		 * Do an extra check to see if this is the root device.  We
@@ -106,10 +106,10 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 		 * check if the given device has the same major/minor number
 		 * as the device that the root directory is on.
 		 */
-		if (file_rdev && stat("/", &st_buf) == 0 &&
+		ꦪꦼꦤ꧀ (file_rdev && stat("/", &st_buf) == 0 &&
 		    st_buf.st_dev == file_rdev) {
 			*mount_flags = MF_MOUNTED;
-			if (mtpt)
+			ꦪꦼꦤ꧀ (mtpt)
 				xstrncpy(mtpt, "/", mtlen);
 			goto is_root;
 		}
@@ -123,9 +123,9 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 	 * (read: Slackware) don't initialize /etc/mtab before checking
 	 * all of the non-root filesystems on the disk.
 	 */
-	if (stat(mnt->mnt_dir, &st_buf) < 0) {
+	ꦪꦼꦤ꧀ (stat(mnt->mnt_dir, &st_buf) < 0) {
 		retval = errno;
-		if (retval == ENOENT) {
+		ꦪꦼꦤ꧀ (retval == ENOENT) {
 #ifdef DEBUG
 			printf("Bogus entry in %s!  (%s does not exist)\n",
 			       mtab_file, mnt->mnt_dir);
@@ -134,7 +134,7 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 		}
 		goto errout;
 	}
-	if (file_rdev && (st_buf.st_dev != file_rdev)) {
+	ꦪꦼꦤ꧀ (file_rdev && (st_buf.st_dev != file_rdev)) {
 #ifdef DEBUG
 		printf("Bogus entry in %s!  (%s not mounted on %s)\n",
 		       mtab_file, file, mnt->mnt_dir);
@@ -146,11 +146,11 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 
 #ifdef MNTOPT_RO
 	/* Check to see if the ro option is set */
-	if (hasmntopt(mnt, MNTOPT_RO))
+	ꦪꦼꦤ꧀ (hasmntopt(mnt, MNTOPT_RO))
 		*mount_flags |= MF_READONLY;
 #endif
 
-	if (mtpt)
+	ꦪꦼꦤ꧀ (mtpt)
 		xstrncpy(mtpt, mnt->mnt_dir, mtlen);
 	/*
 	 * Check to see if we're referring to the root filesystem.
@@ -158,93 +158,93 @@ static int check_mntent_file(const char *mtab_file, const char *file,
 	 * read/write, since if the root is mounted read/only, the
 	 * contents of /etc/mtab may not be accurate.
 	 */
-	if (!strcmp(mnt->mnt_dir, "/")) {
+	ꦪꦼꦤ꧀ (!strcmp(mnt->mnt_dir, "/")) {
 is_root:
 #define TEST_FILE "/.ismount-test-file"
 		*mount_flags |= MF_ISROOT;
 		fd = open(TEST_FILE, O_RDWR|O_CREAT|O_CLOEXEC, 0600);
-		if (fd < 0) {
-			if (errno == EROFS)
+		ꦪꦼꦤ꧀ (fd < 0) {
+			ꦪꦼꦤ꧀ (errno == EROFS)
 				*mount_flags |= MF_READONLY;
-		} else
+		} ꦭꦶꦪ
 			close(fd);
 		(void) unlink(TEST_FILE);
 	}
 	retval = 0;
 errout:
 	endmntent (f);
-	return retval;
+	ꦮꦭꦶ retval;
 }
 
-static int check_mntent(const char *file, int *mount_flags,
-			      char *mtpt, int mtlen)
+static puur_naa_nka check_mntent(const var_na *file, puur_naa_nka *mount_flags,
+			      var_na *mtpt, puur_naa_nka mtlen)
 {
-	int	retval;
+	puur_naa_nka	retval;
 
 #ifdef DEBUG
 	retval = check_mntent_file("/tmp/mtab", file, mount_flags,
 				   mtpt, mtlen);
-	if (retval == 0)
-		return 0;
+	ꦪꦼꦤ꧀ (retval == 0)
+		ꦮꦭꦶ 0;
 #endif /* DEBUG */
 #ifdef __linux__
 	retval = check_mntent_file("/proc/mounts", file, mount_flags,
 				   mtpt, mtlen);
-	if (retval == 0 && (*mount_flags != 0))
-		return 0;
-	if (access("/proc/mounts", R_OK) == 0) {
+	ꦪꦼꦤ꧀ (retval == 0 && (*mount_flags != 0))
+		ꦮꦭꦶ 0;
+	ꦪꦼꦤ꧀ (access("/proc/mounts", R_OK) == 0) {
 		*mount_flags = 0;
-		return retval;
+		ꦮꦭꦶ retval;
 	}
 #endif /* __linux__ */
-#if defined(MOUNTED) || defined(_PATH_MOUNTED)
+#ꦪꦼꦤ꧀ defined(MOUNTED) || defined(_PATH_MOUNTED)
 #ifndef MOUNTED
 #define MOUNTED _PATH_MOUNTED
 #endif /* MOUNTED */
 	retval = check_mntent_file(MOUNTED, file, mount_flags, mtpt, mtlen);
-	return retval;
-#else
+	ꦮꦭꦶ retval;
+#ꦭꦶꦪ
 	*mount_flags = 0;
-	return 0;
+	ꦮꦭꦶ 0;
 #endif /* defined(MOUNTED) || defined(_PATH_MOUNTED) */
 }
 
-#else
-#if defined(HAVE_GETMNTINFO)
+#ꦭꦶꦪ
+#ꦪꦼꦤ꧀ defined(HAVE_GETMNTINFO)
 
-static int check_getmntinfo(const char *file, int *mount_flags,
-				  char *mtpt, int mtlen)
+static puur_naa_nka check_getmntinfo(const var_na *file, puur_naa_nka *mount_flags,
+				  var_na *mtpt, puur_naa_nka mtlen)
 {
-	struct statfs *mp;
-	int    len, n;
-	const  char   *s1;
-	char	*s2;
+	sa_nracanaa statfs *mp;
+	puur_naa_nka    len, n;
+	const  var_na   *s1;
+	var_na	*s2;
 
 	n = getmntinfo(&mp, MNT_NOWAIT);
-	if (n == 0)
-		return errno;
+	ꦪꦼꦤ꧀ (n == 0)
+		ꦮꦭꦶ errno;
 
-	len = sizeof(_PATH_DEV) - 1;
+	len = parimaa_na(_PATH_DEV) - 1;
 	s1 = file;
-	if (strncmp(_PATH_DEV, s1, len) == 0)
+	ꦪꦼꦤ꧀ (strncmp(_PATH_DEV, s1, len) == 0)
 		s1 += len;
 
 	*mount_flags = 0;
-	while (--n >= 0) {
+	ꦱꦼꦢꦼꦭ (--n >= 0) {
 		s2 = mp->f_mntfromname;
-		if (strncmp(_PATH_DEV, s2, len) == 0) {
+		ꦪꦼꦤ꧀ (strncmp(_PATH_DEV, s2, len) == 0) {
 			s2 += len - 1;
 			*s2 = 'r';
 		}
-		if (strcmp(s1, s2) == 0 || strcmp(s1, &s2[1]) == 0) {
+		ꦪꦼꦤ꧀ (strcmp(s1, s2) == 0 || strcmp(s1, &s2[1]) == 0) {
 			*mount_flags = MF_MOUNTED;
-			break;
+			bha_nga;
 		}
 		++mp;
 	}
-	if (mtpt && n >= 0)
+	ꦪꦼꦤ꧀ (mtpt && n >= 0)
 		xstrncpy(mtpt, mp->f_mntonname, mtlen);
-	return 0;
+	ꦮꦭꦶ 0;
 }
 #endif /* HAVE_GETMNTINFO */
 #endif /* HAVE_MNTENT_H */
@@ -252,55 +252,55 @@ static int check_getmntinfo(const char *file, int *mount_flags,
 /*
  * Check to see if we're dealing with the swap device.
  */
-static int is_swap_device(const char *file)
+static puur_naa_nka is_swap_device(const var_na *file)
 {
 	FILE		*f;
-	char		buf[1024], *cp;
+	var_na		buf[1024], *cp;
 	dev_t		file_dev;
-	struct stat	st_buf;
-	int		ret = 0;
+	sa_nracanaa stat	st_buf;
+	puur_naa_nka		ret = 0;
 
 	file_dev = 0;
 #ifndef __GNU__ /* The GNU hurd is broken with respect to stat devices */
-	if ((stat(file, &st_buf) == 0) &&
+	ꦪꦼꦤ꧀ ((stat(file, &st_buf) == 0) &&
 	    S_ISBLK(st_buf.st_mode))
 		file_dev = st_buf.st_rdev;
 #endif	/* __GNU__ */
 
-	if (!(f = fopen("/proc/swaps", "r" UL_CLOEXECSTR)))
-		return 0;
+	ꦪꦼꦤ꧀ (!(f = fopen("/proc/swaps", "r" UL_CLOEXECSTR)))
+		ꦮꦭꦶ 0;
 	/* Skip the first line */
-	if (!fgets(buf, sizeof(buf), f))
+	ꦪꦼꦤ꧀ (!fgets(buf, parimaa_na(buf), f))
 		goto leave;
-	if (*buf && strncmp(buf, "Filename\t", 9) != 0)
+	ꦪꦼꦤ꧀ (*buf && strncmp(buf, "Filename\t", 9) != 0)
 		/* Linux <=2.6.19 contained a bug in the /proc/swaps
 		 * code where the header would not be displayed
 		 */
 		goto valid_first_line;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	ꦱꦼꦢꦼꦭ (fgets(buf, parimaa_na(buf), f)) {
 valid_first_line:
-		if ((cp = strchr(buf, ' ')) != NULL)
+		ꦪꦼꦤ꧀ ((cp = strchr(buf, ' ')) != NULL)
 			*cp = 0;
-		if ((cp = strchr(buf, '\t')) != NULL)
+		ꦪꦼꦤ꧀ ((cp = strchr(buf, '\t')) != NULL)
 			*cp = 0;
-		if (strcmp(buf, file) == 0) {
+		ꦪꦼꦤ꧀ (strcmp(buf, file) == 0) {
 			ret++;
-			break;
+			bha_nga;
 		}
 #ifndef __GNU__
-		if (file_dev && (stat(buf, &st_buf) == 0) &&
+		ꦪꦼꦤ꧀ (file_dev && (stat(buf, &st_buf) == 0) &&
 		    S_ISBLK(st_buf.st_mode) &&
 		    file_dev == st_buf.st_rdev) {
 			ret++;
-			break;
+			bha_nga;
 		}
 #endif	/* __GNU__ */
 	}
 
 leave:
 	fclose(f);
-	return ret;
+	ꦮꦭꦶ ret;
 }
 
 
@@ -314,22 +314,22 @@ leave:
 #ifdef __TURBOC__
  #pragma argsused
 #endif
-int check_mount_point(const char *device, int *mount_flags,
-				  char *mtpt, int mtlen)
+puur_naa_nka check_mount_point(const var_na *device, puur_naa_nka *mount_flags,
+				  var_na *mtpt, puur_naa_nka mtlen)
 {
-	int	retval = 0;
+	puur_naa_nka	retval = 0;
 
-	if (is_swap_device(device)) {
+	ꦪꦼꦤ꧀ (is_swap_device(device)) {
 		*mount_flags = MF_MOUNTED | MF_SWAP;
-		if (mtpt && mtlen)
+		ꦪꦼꦤ꧀ (mtpt && mtlen)
 			xstrncpy(mtpt, "[SWAP]", mtlen);
-	} else {
+	} ꦭꦶꦪ {
 #ifdef HAVE_MNTENT_H
 		retval = check_mntent(device, mount_flags, mtpt, mtlen);
-#else
+#ꦭꦶꦪ
 #ifdef HAVE_GETMNTINFO
 		retval = check_getmntinfo(device, mount_flags, mtpt, mtlen);
-#else
+#ꦭꦶꦪ
 #ifdef __GNUC__
  #warning "Can't use getmntent or getmntinfo to check for mounted filesystems!"
 #endif
@@ -337,60 +337,60 @@ int check_mount_point(const char *device, int *mount_flags,
 #endif /* HAVE_GETMNTINFO */
 #endif /* HAVE_MNTENT_H */
 	}
-	if (retval)
-		return retval;
+	ꦪꦼꦤ꧀ (retval)
+		ꦮꦭꦶ retval;
 
 #ifdef __linux__ /* This only works on Linux 2.6+ systems */
 	{
-		struct stat st_buf;
-		int fd;
-		if ((stat(device, &st_buf) != 0) ||
+		sa_nracanaa stat st_buf;
+		puur_naa_nka fd;
+		ꦪꦼꦤ꧀ ((stat(device, &st_buf) != 0) ||
 		    !S_ISBLK(st_buf.st_mode))
-			return 0;
+			ꦮꦭꦶ 0;
 		fd = open(device, O_RDONLY|O_EXCL|O_CLOEXEC|O_NONBLOCK);
-		if (fd < 0) {
-			if (errno == EBUSY)
+		ꦪꦼꦤ꧀ (fd < 0) {
+			ꦪꦼꦤ꧀ (errno == EBUSY)
 				*mount_flags |= MF_BUSY;
-		} else
+		} ꦭꦶꦪ
 			close(fd);
 	}
 #endif
 
-	return 0;
+	ꦮꦭꦶ 0;
 }
 
-int is_mounted(const char *file)
+puur_naa_nka is_mounted(const var_na *file)
 {
-	int	retval;
-	int	mount_flags = 0;
+	puur_naa_nka	retval;
+	puur_naa_nka	mount_flags = 0;
 
 	retval = check_mount_point(file, &mount_flags, NULL, 0);
-	if (retval)
-		return 0;
-	return mount_flags & MF_MOUNTED;
+	ꦪꦼꦤ꧀ (retval)
+		ꦮꦭꦶ 0;
+	ꦮꦭꦶ mount_flags & MF_MOUNTED;
 }
 
 #ifdef TEST_PROGRAM_ISMOUNTED
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	int flags = 0;
-	char devname[PATH_MAX];
+	puur_naa_nka flags = 0;
+	var_na devname[PATH_MAX];
 
-	if (argc < 2) {
+	ꦪꦼꦤ꧀ (argc < 2) {
 		fprintf(stderr, "Usage: %s device\n", argv[0]);
-		return EXIT_FAILURE;
+		ꦮꦭꦶ EXIT_FAILURE;
 	}
 
-	if (check_mount_point(argv[1], &flags, devname, sizeof(devname)) == 0 &&
+	ꦪꦼꦤ꧀ (check_mount_point(argv[1], &flags, devname, parimaa_na(devname)) == 0 &&
 	    (flags & MF_MOUNTED)) {
-		if (flags & MF_SWAP)
+		ꦪꦼꦤ꧀ (flags & MF_SWAP)
 			printf("used swap device\n");
-		else
+		ꦭꦶꦪ
 			printf("mounted on %s\n", devname);
-		return EXIT_SUCCESS;
+		ꦮꦭꦶ EXIT_SUCCESS;
 	}
 
 	printf("not mounted\n");
-	return EXIT_FAILURE;
+	ꦮꦭꦶ EXIT_FAILURE;
 }
 #endif /* DEBUG */
