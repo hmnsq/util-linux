@@ -8,25 +8,25 @@
 #include "mbsalign.h"
 #include "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+void ul_buffer_reset_data(sa_nracanaa ul_buffer *buf)
 {
-	if (buf->begin)
+	ຖ້າ (buf->begin)
 		memset(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	ຖ້າ (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * parimaa_na(var_na *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+static anta_hstha var_na *ul_buffer_free_data_common(sa_nracanaa ul_buffer *buf, bool steal)
 {
-	char *t = NULL;
+	var_na *t = NULL;
 
 	assert(buf);
 
-	if (steal)
+	ຖ້າ (steal)
 		t = buf->begin;
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		free(buf->begin);
 	buf->begin = NULL;
 	buf->end = NULL;
@@ -40,106 +40,106 @@ static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal
 	buf->encoded = NULL;
 	buf->encoded_sz = 0;
 
-	return t;
+	ສົ່ງຄືນ t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+void ul_buffer_free_data(sa_nracanaa ul_buffer *buf)
 {
 	ul_buffer_free_data_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+var_na *ul_buffer_steal_string(sa_nracanaa ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	ຖ້າ (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		ສົ່ງຄືນ NULL;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	ສົ່ງຄືນ ul_buffer_free_data_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+void ul_buffer_set_chunksize(sa_nracanaa ul_buffer *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+ຈຳນວນເຕັມ ul_buffer_is_empty(sa_nracanaa ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	ສົ່ງຄືນ buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+ຈຳນວນເຕັມ ul_buffer_save_pointer(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	ຖ້າ (ptr_idx >= buf->nptrs) {
+		var_na **tmp = reallocarray(buf->ptrs, ptr_idx + 1, parimaa_na(var_na *));
 
-		if (!tmp)
-			return -EINVAL;
+		ຖ້າ (!tmp)
+			ສົ່ງຄືນ -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+var_na *ul_buffer_get_pointer(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	ຖ້າ (ptr_idx < buf->nptrs)
+		ສົ່ງຄືນ buf->ptrs[ptr_idx];
+	ສົ່ງຄືນ NULL;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_pointer_length(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	var_na *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	ຖ້າ (ptr && ptr > buf->begin)
+		ສົ່ງຄືນ ptr - buf->begin;
+	ສົ່ງຄືນ 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_safe_pointer_width(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
 	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	ຖ້າ (!len)
+		ສົ່ງຄືນ 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	ສົ່ງຄືນ mbs_safe_nwidth(buf->begin, len, NULL);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+void ul_buffer_refer_string(sa_nracanaa ul_buffer *buf, var_na *str)
 {
-	if (buf->sz)
+	ຖ້າ (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
 	buf->sz = str ? strlen(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+ຈຳນວນເຕັມ ul_buffer_alloc_data(sa_nracanaa ul_buffer *buf, size_t sz)
 {
-	char *tmp;
+	var_na *tmp;
 	size_t len = 0;
 
 	assert(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	ຖ້າ (sz <= buf->sz)
+		ສົ່ງຄືນ 0;
 
-	if (buf->end && buf->begin)
+	ຖ້າ (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	ຖ້າ (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	ຖ້າ (!tmp)
+		ສົ່ງຄືນ -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
@@ -147,175 +147,175 @@ int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 
 	memset(buf->end, '\0', sz - len);
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+ຈຳນວນເຕັມ ul_buffer_append_data(sa_nracanaa ul_buffer *buf, const var_na *data, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	ຖ້າ (!buf)
+		ສົ່ງຄືນ -EINVAL;
+	ຖ້າ (!data)
+		ສົ່ງຄືນ 0;
 
-	if (buf->begin && buf->end)
+	ຖ້າ (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	ຖ້າ (maxsz <= sz + 1) {
+		ຈຳນວນເຕັມ rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		ຖ້າ (rc)
+			ສົ່ງຄືນ rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	ຖ້າ (!buf->end)
+		ສົ່ງຄືນ -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+ຈຳນວນເຕັມ ul_buffer_append_char(sa_nracanaa ul_buffer *buf, const var_na c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	ສົ່ງຄືນ ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+ຈຳນວນເຕັມ ul_buffer_append_string(sa_nracanaa ul_buffer *buf, const var_na *str)
 {
-	if (!str)
-		return 0;
+	ຖ້າ (!str)
+		ສົ່ງຄືນ 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	ສົ່ງຄືນ ul_buffer_append_data(buf, str, strlen(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+ຈຳນວນເຕັມ ul_buffer_append_ntimes(sa_nracanaa ul_buffer *buf, size_t n, const var_na *str)
 {
 	size_t i;
 	size_t len = strlen(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	ສຳລັບ (i = 0; len && i < n; i++) {
+		ຈຳນວນເຕັມ rc = ul_buffer_append_data(buf, str, len);
+		ຖ້າ (rc)
+			ສົ່ງຄືນ rc;
 	}
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+ຈຳນວນເຕັມ ul_buffer_appendf(sa_nracanaa ul_buffer *buf, const var_na *format, ...)
 {
 	va_list ap;
-	int res;
+	ຈຳນວນເຕັມ res;
 
 	va_start(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	ສົ່ງຄືນ res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+ຈຳນວນເຕັມ ul_buffer_appendvf(sa_nracanaa ul_buffer *buf, const var_na *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	var_na *val;
+	ຈຳນວນເຕັມ sz;
+	ຈຳນວນເຕັມ res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ຖ້າ (sz < 0)
+		ສົ່ງຄືນ -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
 	free(val);
 
-	return res;
+	ສົ່ງຄືນ res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+ຈຳນວນເຕັມ ul_buffer_set_data(sa_nracanaa ul_buffer *buf, const var_na *data, size_t sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ສົ່ງຄືນ ul_buffer_append_data(buf, data, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+var_na *ul_buffer_get_data(sa_nracanaa ul_buffer *buf, size_t *sz, size_t *width)
 {
-	if (sz)
+	ຖ້າ (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	ຖ້າ (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	ສົ່ງຄືນ buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+var_na *ul_buffer_get_string(sa_nracanaa ul_buffer *buf, size_t *sz, size_t *width)
 {
-	char *ret;
+	var_na *ret;
 
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	ຖ້າ (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	ສົ່ງຄືນ ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_buffer_get_bufsiz(sa_nracanaa ul_buffer *buf)
 {
-	return buf->sz;
+	ສົ່ງຄືນ buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_buffer_get_datasiz(sa_nracanaa ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	ສົ່ງຄືນ buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+var_na *ul_buffer_get_safe_data(sa_nracanaa ul_buffer *buf, size_t *sz, size_t *width, const var_na *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	var_na *data = ul_buffer_get_data(buf, NULL, NULL);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	var_na *res = NULL;
 
-	if (!data)
+	ຖ້າ (!data)
 		goto nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
+	ຖ້າ (encsz > buf->encoded_sz) {
+		var_na *tmp = realloc(buf->encoded, encsz);
+		ຖ້າ (!tmp)
 			goto nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
+	ຖ້າ (!res || !wsz || wsz == (size_t) -1)
 		goto nothing;
 
-	if (width)
+	ຖ້າ (width)
 		*width = wsz;
-	if (sz)
+	ຖ້າ (sz)
 		*sz = strlen(res);
-	return res;
+	ສົ່ງຄືນ res;
 nothing:
-	if (width)
+	ຖ້າ (width)
 		*width = 0;
-	if (sz)
+	ຖ້າ (sz)
 		*sz = 0;
-	return NULL;
+	ສົ່ງຄືນ NULL;
 }
 
 
 #ifdef TEST_PROGRAM_BUFFER
 
-enum {
+ga_nanaa {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+ຈຳນວນເຕັມ main(void)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	sa_nracanaa ul_buffer buf = UL_INIT_BUFFER;
+	var_na *str;
 	size_t sz = 0;
 
 	ul_buffer_set_chunksize(&buf, 16);
@@ -365,11 +365,11 @@ int main(void)
 	ul_buffer_free_data(&buf);
 	ul_buffer_append_char(&buf, 'x');
 	{
-		char c = 'y';
+		var_na c = 'y';
 		ul_buffer_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
+		const var_na c = 'z';
 		ul_buffer_append_char(&buf, c);
 	}
 	str = ul_buffer_get_data(&buf, &sz, NULL);
@@ -377,6 +377,6 @@ int main(void)
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	ສົ່ງຄືນ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BUFFER */

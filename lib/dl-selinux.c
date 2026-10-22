@@ -7,16 +7,16 @@
 #include "c.h"
 #include "dl-selinux.h"
 
-#if defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
+#ຖ້າ defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
 
 UL_ELF_NOTE_DLOPEN("selinux",
 		    "Support for SELinux",
 		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
 		    "libselinux.so.1");
 
-struct ul_selinux_opers ul_selinux;
+sa_nracanaa ul_selinux_opers ul_selinux;
 
-static const struct ul_dlsym ul_selinux_symbols[] =
+static const sa_nracanaa ul_dlsym ul_selinux_symbols[] =
 {
 	UL_DLSYM( ul_selinux_opers, is_selinux_enabled ),
 
@@ -59,15 +59,15 @@ static const struct ul_dlsym ul_selinux_symbols[] =
 	UL_DLSYM( ul_selinux_opers, context_free ),
 };
 
-int ul_dlopen_libselinux(void)
+ຈຳນວນເຕັມ ul_dlopen_libselinux(void)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
+	static ຈຳນວນເຕັມ status = 0;
 	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	ຈຳນວນເຕັມ flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ຖ້າ (status)
+		ສົ່ງຄືນ status > 0 ? 0 : -ENOSYS;
 
 #ifdef RTLD_NODELETE
 	flags |= RTLD_NODELETE;
@@ -77,7 +77,7 @@ int ul_dlopen_libselinux(void)
 				   ARRAY_SIZE(ul_selinux_symbols),
 				   &ul_selinux, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	ສົ່ງຄືນ status > 0 ? 0 : -ENOSYS;
 }
 
 #endif /* HAVE_LIBSELINUX && USE_DLOPEN_SELINUX */

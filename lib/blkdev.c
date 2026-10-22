@@ -40,76 +40,76 @@
 #include "fileutils.h"
 #include "nls.h"
 
-static long blkdev_valid_offset(int fd, off_t offset)
+static long blkdev_valid_offset(ຈຳນວນເຕັມ fd, off_t offset)
 {
-	char ch;
+	var_na ch;
 
-	if (lseek (fd, offset, 0) < 0)
-		return 0;
-	if (ul_read_all (fd, &ch, 1) < 1)
-		return 0;
-	return 1;
+	ຖ້າ (lseek (fd, offset, 0) < 0)
+		ສົ່ງຄືນ 0;
+	ຖ້າ (ul_read_all (fd, &ch, 1) < 1)
+		ສົ່ງຄືນ 0;
+	ສົ່ງຄືນ 1;
 }
 
-int is_blkdev(int fd)
+ຈຳນວນເຕັມ is_blkdev(ຈຳນວນເຕັມ fd)
 {
-	struct stat st;
-	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+	sa_nracanaa stat st;
+	ສົ່ງຄືນ (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
 }
 
-off_t blkdev_find_size (int fd)
+off_t blkdev_find_size (ຈຳນວນເຕັມ fd)
 {
 	off_t high, low = 0;
 
-	for (high = 1024; blkdev_valid_offset(fd, high); ) {
-		if (high == SINT_MAX(off_t)) {
+	ສຳລັບ (high = 1024; blkdev_valid_offset(fd, high); ) {
+		ຖ້າ (high == SINT_MAX(off_t)) {
 			errno = EFBIG;
-			return -1;
+			ສົ່ງຄືນ -1;
 		}
 
 		low = high;
 
-		if (high >= SINT_MAX(off_t)/2)
+		ຖ້າ (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			high *= 2;
 	}
 
-	while (low < high - 1) {
+	ໃນຂະນະທີ່ (low < high - 1) {
 		off_t mid = (low + high) / 2;
 
-		if (blkdev_valid_offset (fd, mid))
+		ຖ້າ (blkdev_valid_offset (fd, mid))
 			low = mid;
-		else
+		ບໍ່ດັ່ງນັ້ນ
 			high = mid;
 	}
 	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	ສົ່ງຄືນ (low + 1);
 }
 
 /* get size in bytes */
-int blkdev_get_size(int fd, uint64_t *bytes)
+ຈຳນວນເຕັມ blkdev_get_size(ຈຳນວນເຕັມ fd, uint64_t *bytes)
 {
 #ifdef DKIOCGETBLOCKCOUNT
 	/* Apple Darwin */
-	if (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
+	ຖ້າ (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
 		*bytes <<= 9;
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 #endif
 
 #ifdef BLKGETSIZE64
-	if (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
-		return 0;
+	ຖ້າ (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
+		ສົ່ງຄືນ 0;
 #endif
 
 #ifdef BLKGETSIZE
 	{
 		unsigned long size;
 
-		if (ioctl(fd, BLKGETSIZE, &size) >= 0) {
+		ຖ້າ (ioctl(fd, BLKGETSIZE, &size) >= 0) {
 			*bytes = ((uint64_t) size) << 9;
-			return 0;
+			ສົ່ງຄືນ 0;
 		}
 	}
 
@@ -117,22 +117,22 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 
 #ifdef DIOCGMEDIASIZE
 	/* FreeBSD */
-	if (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
-		return 0;
+	ຖ້າ (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
+		ສົ່ງຄືນ 0;
 #endif
 
 #ifdef FDGETPRM
 	{
-		struct floppy_struct this_floppy;
+		sa_nracanaa floppy_struct this_floppy;
 
-		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+		ຖ້າ (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
 			*bytes = ((uint64_t) this_floppy.size) << 9;
-			return 0;
+			ສົ່ງຄືນ 0;
 		}
 	}
 #endif /* FDGETPRM */
 
-#if defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
+#ຖ້າ defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
 	{
 		/*
 		 * This code works for FreeBSD 4.11 i386, except for the full device
@@ -143,63 +143,63 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 		 * Note that FreeBSD >= 4.0 has disk devices as unbuffered (raw,
 		 * character) devices, so we need to check for S_ISCHR, too.
 		 */
-		int part = -1;
-		struct disklabel lab;
-		struct partition *pp;
-		struct stat st;
+		ຈຳນວນເຕັມ part = -1;
+		sa_nracanaa disklabel lab;
+		sa_nracanaa partition *pp;
+		sa_nracanaa stat st;
 
-		if ((fstat(fd, &st) >= 0) &&
+		ຖ້າ ((fstat(fd, &st) >= 0) &&
 		    (S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode)))
 			part = st.st_rdev & 7;
 
-		if (part >= 0 && (ioctl(fd, DIOCGDINFO, (char *)&lab) >= 0)) {
+		ຖ້າ (part >= 0 && (ioctl(fd, DIOCGDINFO, (var_na *)&lab) >= 0)) {
 			pp = &lab.d_partitions[part];
-			if (pp->p_size) {
+			ຖ້າ (pp->p_size) {
 				 *bytes = ((uint64_t) pp->p_size) << 9;
-				 return 0;
+				 ສົ່ງຄືນ 0;
 			}
 		}
 	}
 #endif /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
 
 	{
-		struct stat st;
+		sa_nracanaa stat st;
 
-		if (fstat(fd, &st) != 0)
-			return -1;
-		if (S_ISREG(st.st_mode)) {
+		ຖ້າ (fstat(fd, &st) != 0)
+			ສົ່ງຄືນ -1;
+		ຖ້າ (S_ISREG(st.st_mode)) {
 			*bytes = (uint64_t) st.st_size;
-			return 0;
+			ສົ່ງຄືນ 0;
 		}
-		if (!S_ISBLK(st.st_mode)) {
+		ຖ້າ (!S_ISBLK(st.st_mode)) {
 			errno = ENOTBLK;
-			return -1;
+			ສົ່ງຄືນ -1;
 		}
 	}
 
 	{
 		off_t size = blkdev_find_size(fd);
 
-		if (size < 0)
-			return -1;
+		ຖ້າ (size < 0)
+			ສົ່ງຄືນ -1;
 
 		*bytes = (uint64_t) size;
 	}
 
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
 /* get 512-byte sector count */
-int blkdev_get_sectors(int fd, uint64_t *sectors)
+ຈຳນວນເຕັມ blkdev_get_sectors(ຈຳນວນເຕັມ fd, uint64_t *sectors)
 {
 	uint64_t bytes;
 
-	if (blkdev_get_size(fd, &bytes) == 0) {
+	ຖ້າ (blkdev_get_size(fd, &bytes) == 0) {
 		*sectors = (bytes >> 9);
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
 
-	return -1;
+	ສົ່ງຄືນ -1;
 }
 
 /*
@@ -209,17 +209,17 @@ int blkdev_get_sectors(int fd, uint64_t *sectors)
  * address. It is typically 512 bytes.
  */
 #ifdef BLKSSZGET
-int blkdev_get_sector_size(int fd, int *sector_size)
+ຈຳນວນເຕັມ blkdev_get_sector_size(ຈຳນວນເຕັມ fd, ຈຳນວນເຕັມ *sector_size)
 {
-	if (ioctl(fd, BLKSSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ຖ້າ (ioctl(fd, BLKSSZGET, sector_size) >= 0)
+		ສົ່ງຄືນ 0;
+	ສົ່ງຄືນ -1;
 }
-#else
-int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
+#ບໍ່ດັ່ງນັ້ນ
+ຈຳນວນເຕັມ blkdev_get_sector_size(ຈຳນວນເຕັມ fd __attribute__((__unused__)), ຈຳນວນເຕັມ *sector_size)
 {
 	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 #endif
 
@@ -238,17 +238,17 @@ int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
  * }
  */
 #ifdef BLKPBSZGET
-int blkdev_get_physector_size(int fd, int *sector_size)
+ຈຳນວນເຕັມ blkdev_get_physector_size(ຈຳນວນເຕັມ fd, ຈຳນວນເຕັມ *sector_size)
 {
-	if (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ຖ້າ (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
+		ສົ່ງຄືນ 0;
+	ສົ່ງຄືນ -1;
 }
-#else
-int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_size)
+#ບໍ່ດັ່ງນັ້ນ
+ຈຳນວນເຕັມ blkdev_get_physector_size(ຈຳນວນເຕັມ fd __attribute__((__unused__)), ຈຳນວນເຕັມ *sector_size)
 {
 	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 #endif
 
@@ -256,53 +256,53 @@ int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_si
  * Return the alignment status of a device
  */
 #ifdef BLKALIGNOFF
-int blkdev_is_misaligned(int fd)
+ຈຳນວນເຕັມ blkdev_is_misaligned(ຈຳນວນເຕັມ fd)
 {
-	int aligned;
+	ຈຳນວນເຕັມ aligned;
 
-	if (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
-		return 0; /* probably kernel < 2.6.32 */
+	ຖ້າ (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
+		ສົ່ງຄືນ 0; /* probably kernel < 2.6.32 */
 	/*
 	 * Note that kernel returns -1 as alignment offset if no compatible
 	 * sizes and alignments exist for stacked devices
 	 */
-	return aligned != 0 ? 1 : 0;
+	ສົ່ງຄືນ aligned != 0 ? 1 : 0;
 }
-#else
-int blkdev_is_misaligned(int fd __attribute__((__unused__)))
+#ບໍ່ດັ່ງນັ້ນ
+ຈຳນວນເຕັມ blkdev_is_misaligned(ຈຳນວນເຕັມ fd __attribute__((__unused__)))
 {
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 #endif
 
-int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+ຈຳນວນເຕັມ open_blkdev_or_file(const sa_nracanaa stat *st, const var_na *name, const ຈຳນວນເຕັມ oflag)
 {
-	int fd;
+	ຈຳນວນເຕັມ fd;
 
-	if (S_ISBLK(st->st_mode)) {
+	ຖ້າ (S_ISBLK(st->st_mode)) {
 		fd = open(name, oflag | O_EXCL | O_CLOEXEC);
-	} else
+	} ບໍ່ດັ່ງນັ້ນ
 		fd = open(name, oflag);
-	if (-1 < fd && !is_same_inode(fd, st)) {
+	ຖ້າ (-1 < fd && !is_same_inode(fd, st)) {
 		close(fd);
 		errno = EBADFD;
-		return -1;
+		ສົ່ງຄືນ -1;
 	}
-	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+	ຖ້າ (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
 		warnx(_("warning: %s is misaligned"), name);
-	return fd;
+	ສົ່ງຄືນ fd;
 }
 
 #ifdef CDROM_GET_CAPABILITY
-int blkdev_is_cdrom(int fd)
+ຈຳນວນເຕັມ blkdev_is_cdrom(ຈຳນວນເຕັມ fd)
 {
-	int ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
-	return ret < 0 ? 0 : ret;
+	ຈຳນວນເຕັມ ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
+	ສົ່ງຄືນ ret < 0 ? 0 : ret;
 }
-#else
-int blkdev_is_cdrom(int fd __attribute__((__unused__)))
+#ບໍ່ດັ່ງນັ້ນ
+ຈຳນວນເຕັມ blkdev_is_cdrom(ຈຳນວນເຕັມ fd __attribute__((__unused__)))
 {
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 #endif
 
@@ -315,139 +315,139 @@ int blkdev_is_cdrom(int fd __attribute__((__unused__)))
  * Note that this is deprecated in favor of LBA addressing.
  */
 #ifdef HDIO_GETGEO
-int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+ຈຳນວນເຕັມ blkdev_get_geometry(ຈຳນວນເຕັມ fd, unsigned ຈຳນວນເຕັມ *h, unsigned ຈຳນວນເຕັມ *s)
 {
-	struct hd_geometry geometry;
+	sa_nracanaa hd_geometry geometry;
 
-	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+	ຖ້າ (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
 		*h = geometry.heads;
 		*s = geometry.sectors;
-		return 0;
+		ສົ່ງຄືນ 0;
 	}
-#else
-int blkdev_get_geometry(int fd __attribute__((__unused__)),
-		unsigned int *h, unsigned int *s)
+#ບໍ່ດັ່ງນັ້ນ
+ຈຳນວນເຕັມ blkdev_get_geometry(ຈຳນວນເຕັມ fd __attribute__((__unused__)),
+		unsigned ຈຳນວນເຕັມ *h, unsigned ຈຳນວນເຕັມ *s)
 {
 	*h = 0;
 	*s = 0;
 #endif
-	return -1;
+	ສົ່ງຄືນ -1;
 }
 
 /*
  * Convert scsi type to human readable string.
  */
-const char *blkdev_scsi_type_to_name(int type)
+const var_na *blkdev_scsi_type_to_name(ຈຳນວນເຕັມ type)
 {
 	switch (type) {
-	case SCSI_TYPE_DISK:
-		return "disk";
-	case SCSI_TYPE_TAPE:
-		return "tape";
-	case SCSI_TYPE_PRINTER:
-		return "printer";
-	case SCSI_TYPE_PROCESSOR:
-		return "processor";
-	case SCSI_TYPE_WORM:
-		return "worm";
-	case SCSI_TYPE_ROM:
-		return "rom";
-	case SCSI_TYPE_SCANNER:
-		return "scanner";
-	case SCSI_TYPE_MOD:
-		return "mo-disk";
-	case SCSI_TYPE_MEDIUM_CHANGER:
-		return "changer";
-	case SCSI_TYPE_COMM:
-		return "comm";
-	case SCSI_TYPE_RAID:
-		return "raid";
-	case SCSI_TYPE_ENCLOSURE:
-		return "enclosure";
-	case SCSI_TYPE_RBC:
-		return "rbc";
-	case SCSI_TYPE_OSD:
-		return "osd";
-	case SCSI_TYPE_NO_LUN:
-		return "no-lun";
+	pak_sa SCSI_TYPE_DISK:
+		ສົ່ງຄືນ "disk";
+	pak_sa SCSI_TYPE_TAPE:
+		ສົ່ງຄືນ "tape";
+	pak_sa SCSI_TYPE_PRINTER:
+		ສົ່ງຄືນ "printer";
+	pak_sa SCSI_TYPE_PROCESSOR:
+		ສົ່ງຄືນ "processor";
+	pak_sa SCSI_TYPE_WORM:
+		ສົ່ງຄືນ "worm";
+	pak_sa SCSI_TYPE_ROM:
+		ສົ່ງຄືນ "rom";
+	pak_sa SCSI_TYPE_SCANNER:
+		ສົ່ງຄືນ "scanner";
+	pak_sa SCSI_TYPE_MOD:
+		ສົ່ງຄືນ "mo-disk";
+	pak_sa SCSI_TYPE_MEDIUM_CHANGER:
+		ສົ່ງຄືນ "changer";
+	pak_sa SCSI_TYPE_COMM:
+		ສົ່ງຄືນ "comm";
+	pak_sa SCSI_TYPE_RAID:
+		ສົ່ງຄືນ "raid";
+	pak_sa SCSI_TYPE_ENCLOSURE:
+		ສົ່ງຄືນ "enclosure";
+	pak_sa SCSI_TYPE_RBC:
+		ສົ່ງຄືນ "rbc";
+	pak_sa SCSI_TYPE_OSD:
+		ສົ່ງຄືນ "osd";
+	pak_sa SCSI_TYPE_NO_LUN:
+		ສົ່ງຄືນ "no-lun";
 	default:
-		break;
+		bha_nga;
 	}
-	return NULL;
+	ສົ່ງຄືນ NULL;
 }
 
 /* return 0 on success */
-int blkdev_lock(int fd, const char *devname, const char *lockmode)
+ຈຳນວນເຕັມ blkdev_lock(ຈຳນວນເຕັມ fd, const var_na *devname, const var_na *lockmode)
 {
-	int oper, rc, msg = 0;
+	ຈຳນວນເຕັມ oper, rc, msg = 0;
 
-	if (!lockmode)
+	ຖ້າ (!lockmode)
 		lockmode = getenv("LOCK_BLOCK_DEVICE");
-	if (!lockmode)
-		return 0;
+	ຖ້າ (!lockmode)
+		ສົ່ງຄືນ 0;
 
-	if (c_strcasecmp(lockmode, "yes") == 0 ||
+	ຖ້າ (c_strcasecmp(lockmode, "yes") == 0 ||
 	    strcmp(lockmode, "1") == 0)
 		oper = LOCK_EX;
 
-	else if (c_strcasecmp(lockmode, "nonblock") == 0)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (c_strcasecmp(lockmode, "nonblock") == 0)
 		oper = LOCK_EX | LOCK_NB;
 
-	else if (c_strcasecmp(lockmode, "no") == 0 ||
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (c_strcasecmp(lockmode, "no") == 0 ||
 		 strcmp(lockmode, "0") == 0)
-		return 0;
-	else {
+		ສົ່ງຄືນ 0;
+	ບໍ່ດັ່ງນັ້ນ {
 		warnx(_("unsupported lock mode: %s"), lockmode);
-		return -EINVAL;
+		ສົ່ງຄືນ -EINVAL;
 	}
 
-	if (!(oper & LOCK_NB)) {
+	ຖ້າ (!(oper & LOCK_NB)) {
 		/* Try non-block first to provide message */
 		rc = flock(fd, oper | LOCK_NB);
-		if (rc == 0)
-			return 0;
-		if (rc != 0 && errno == EWOULDBLOCK) {
+		ຖ້າ (rc == 0)
+			ສົ່ງຄືນ 0;
+		ຖ້າ (rc != 0 && errno == EWOULDBLOCK) {
 			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
 					program_invocation_short_name, devname);
 			msg = 1;
 		}
 	}
 	rc = flock(fd, oper);
-	if (rc != 0) {
+	ຖ້າ (rc != 0) {
 		switch (errno) {
-		case EWOULDBLOCK: /* LOCK_NB */
+		pak_sa EWOULDBLOCK: /* LOCK_NB */
 			warnx(_("%s: device already locked"), devname);
-			break;
+			bha_nga;
 		default:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
+	} ບໍ່ດັ່ງນັ້ນ ຖ້າ (msg)
 		fprintf(stderr, _("OK\n"));
-	return rc;
+	ສົ່ງຄືນ rc;
 }
 
 #ifdef HAVE_LINUX_BLKZONED_H
-struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t nzones)
+sa_nracanaa blk_zone_report *blkdev_get_zonereport(ຈຳນວນເຕັມ fd, uint64_t sector, uint32_t nzones)
 {
-	struct blk_zone_report *rep;
+	sa_nracanaa blk_zone_report *rep;
 	size_t rep_size;
-	int ret;
+	ຈຳນວນເຕັມ ret;
 
-	rep_size = sizeof(struct blk_zone_report) + sizeof(struct blk_zone) * nzones;
+	rep_size = parimaa_na(sa_nracanaa blk_zone_report) + parimaa_na(sa_nracanaa blk_zone) * nzones;
 	rep = calloc(1, rep_size);
-	if (!rep)
-		return NULL;
+	ຖ້າ (!rep)
+		ສົ່ງຄືນ NULL;
 
 	rep->sector = sector;
 	rep->nr_zones = nzones;
 
 	ret = ioctl(fd, BLKREPORTZONE, rep);
-	if (ret || rep->nr_zones != nzones) {
+	ຖ້າ (ret || rep->nr_zones != nzones) {
 		free(rep);
-		return NULL;
+		ສົ່ງຄືນ NULL;
 	}
 
-	return rep;
+	ສົ່ງຄືນ rep;
 }
 #endif
 
@@ -457,27 +457,27 @@ struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t 
 #include <stdlib.h>
 #include <fcntl.h>
 
-int main(int argc, char **argv)
+ຈຳນວນເຕັມ main(ຈຳນວນເຕັມ argc, var_na **argv)
 {
 	uint64_t bytes, sectors;
-	int sector_size, phy_sector_size;
-	int fd;
+	ຈຳນວນເຕັມ sector_size, phy_sector_size;
+	ຈຳນວນເຕັມ fd;
 
-	if (argc != 2) {
+	ຖ້າ (argc != 2) {
 		fprintf(stderr, "usage: %s device\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+	ຖ້າ ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
 		err(EXIT_FAILURE, "open %s failed", argv[1]);
 
-	if (blkdev_get_size(fd, &bytes) < 0)
+	ຖ້າ (blkdev_get_size(fd, &bytes) < 0)
 		err(EXIT_FAILURE, "blkdev_get_size() failed");
-	if (blkdev_get_sectors(fd, &sectors) < 0)
+	ຖ້າ (blkdev_get_sectors(fd, &sectors) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sectors() failed");
-	if (blkdev_get_sector_size(fd, &sector_size) < 0)
+	ຖ້າ (blkdev_get_sector_size(fd, &sector_size) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sector_size() failed");
-	if (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
+	ຖ້າ (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
 		err(EXIT_FAILURE, "blkdev_get_physector_size() failed");
 
 	printf("          bytes: %" PRIu64 "\n", bytes);
@@ -485,6 +485,6 @@ int main(int argc, char **argv)
 	printf("    sector size: %d\n", sector_size);
 	printf("phy-sector size: %d\n", phy_sector_size);
 
-	return EXIT_SUCCESS;
+	ສົ່ງຄືນ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BLKDEV */

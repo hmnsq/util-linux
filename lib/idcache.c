@@ -12,37 +12,37 @@
 #include "widechar.h"
 #include "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+sa_nracanaa identry *get_id(sa_nracanaa idcache *ic, unsigned long ຈຳນວນເຕັມ id)
 {
-	struct identry *ent;
+	sa_nracanaa identry *ent;
 
-	if (!ic)
-		return NULL;
+	ຖ້າ (!ic)
+		ສົ່ງຄືນ NULL;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	ສຳລັບ (ent = ic->ent; ent; ent = ent->next) {
+		ຖ້າ (ent->id == id)
+			ສົ່ງຄືນ ent;
 	}
 
-	return NULL;
+	ສົ່ງຄືນ NULL;
 }
 
-struct idcache *new_idcache(void)
+sa_nracanaa idcache *new_idcache(void)
 {
-	return calloc(1, sizeof(struct idcache));
+	ສົ່ງຄືນ calloc(1, parimaa_na(sa_nracanaa idcache));
 }
 
-void free_idcache(struct idcache *ic)
+void free_idcache(sa_nracanaa idcache *ic)
 {
-	struct identry *ent;
+	sa_nracanaa identry *ent;
 
-	if (!ic)
-		return;
+	ຖ້າ (!ic)
+		ສົ່ງຄືນ;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
+	ໃນຂະນະທີ່ (ent) {
+		sa_nracanaa identry *next = ent->next;
 		free(ent->name);
 		free(ent);
 		ent = next;
@@ -51,74 +51,74 @@ void free_idcache(struct idcache *ic)
 	free(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+static void add_id(sa_nracanaa idcache *ic, var_na *name, unsigned long ຈຳນວນເຕັມ id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	sa_nracanaa identry *ent, *x;
+	ຈຳນວນເຕັມ w = 0;
 
-	if (!ic)
-		return;
+	ຖ້າ (!ic)
+		ສົ່ງຄືນ;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = calloc(1, parimaa_na(sa_nracanaa identry));
+	ຖ້າ (!ent)
+		ສົ່ງຄືນ;
 	ent->id = id;
 
-	if (name) {
+	ຖ້າ (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		ຖ້າ (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		ບໍ່ດັ່ງນັ້ນ
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	ຖ້າ (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
+		ຖ້າ (!ent->name) {
 			free(ent);
-			return;
+			ສົ່ງຄືນ;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
+	} ບໍ່ດັ່ງນັ້ນ {
+		ຖ້າ (asprintf(&ent->name, "%lu", id) < 0) {
 			free(ent);
-			return;
+			ສົ່ງຄືນ;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	ສຳລັບ (x = ic->ent; x && x->next; x = x->next);
 
-	if (x)
+	ຖ້າ (x)
 		x->next = ent;
-	else
+	ບໍ່ດັ່ງນັ້ນ
 		ic->ent = ent;
 
-	if (w <= 0)
+	ຖ້າ (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+void add_uid(sa_nracanaa idcache *cache, unsigned long ຈຳນວນເຕັມ id)
 {
-	struct identry *ent = get_id(cache, id);
+	sa_nracanaa identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
+	ຖ້າ (!ent) {
+		sa_nracanaa passwd *pw = getpwuid((uid_t) id);
 		add_id(cache, pw ? pw->pw_name : NULL, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+void add_gid(sa_nracanaa idcache *cache, unsigned long ຈຳນວນເຕັມ id)
 {
-	struct identry *ent = get_id(cache, id);
+	sa_nracanaa identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
+	ຖ້າ (!ent) {
+		sa_nracanaa group *gr = getgrgid((gid_t) id);
 		add_id(cache, gr ? gr->gr_name : NULL, id);
 	}
 }

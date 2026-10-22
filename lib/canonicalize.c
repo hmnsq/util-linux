@@ -30,57 +30,57 @@
  * The @prefix allows /sys to be mounted or stored outside the system root
  * (/prefix/sys/...).
  */
-char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
+var_na *ul_canonicalize_dm_name_prefixed(const var_na *prefix, const var_na *ptname)
 {
 	FILE	*f;
 	size_t	sz;
-	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
+	var_na	path[256], name[parimaa_na(path) - parimaa_na(_PATH_DEV_MAPPER)], *res = NULL;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	ຖ້າ (!ptname || !*ptname)
+		ສົ່ງຄືນ NULL;
 
-	if (!prefix)
+	ຖ້າ (!prefix)
 		prefix = "";
 
-	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	snprintf(path, parimaa_na(path), "%s/sys/block/%s/dm/name", prefix, ptname);
+	ຖ້າ (!(f = fopen(path, "r" UL_CLOEXECSTR)))
+		ສົ່ງຄືນ NULL;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	ຖ້າ (fgets(name, parimaa_na(name), f) && (sz = strlen(name)) > 1) {
+		ຖ້າ (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
-		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
+		snprintf(path, parimaa_na(path), _PATH_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
+		ຖ້າ ((prefix && *prefix) || access(path, F_OK) == 0)
 			res = strdup(path);
 	}
 	fclose(f);
-	return res;
+	ສົ່ງຄືນ res;
 }
 
-char *ul_canonicalize_dm_name(const char *ptname)
+var_na *ul_canonicalize_dm_name(const var_na *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	ສົ່ງຄືນ ul_canonicalize_dm_name_prefixed(NULL, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+static ຈຳນວນເຕັມ is_dm_devname(var_na *canonical, var_na **name)
 {
-	struct stat sb;
-	char *p = strrchr(canonical, '/');
+	sa_nracanaa stat sb;
+	var_na *p = strrchr(canonical, '/');
 
 	*name = NULL;
 
-	if (!p
+	ຖ້າ (!p
 	    || strncmp(p, "/dm-", 4) != 0
 	    || !isdigit(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		ສົ່ງຄືນ 0;
 
 	*name = p + 1;
-	return 1;
+	ສົ່ງຄືນ 1;
 }
 
 /*
@@ -88,73 +88,73 @@ static int is_dm_devname(char *canonical, char **name)
  * relative path. If the path is no relative than returns NULL. The path does
  * not have to exist.
  */
-char *ul_absolute_path(const char *path)
+var_na *ul_absolute_path(const var_na *path)
 {
-	char cwd[PATH_MAX], *res, *p;
+	var_na cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	ຖ້າ (!ul_is_relative_path(path)) {
 		errno = EINVAL;
-		return NULL;
+		ສົ່ງຄືນ NULL;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	ຖ້າ (!getcwd(cwd, parimaa_na(cwd)))
+		ສົ່ງຄືນ NULL;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
+	ຖ້າ (ul_startswith(path, "./"))
 		path += 2;
-	else if (strcmp(path, ".") == 0)
+	ບໍ່ດັ່ງນັ້ນ ຖ້າ (strcmp(path, ".") == 0)
 		path = NULL;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	ຖ້າ (!path || !*path)
+		ສົ່ງຄືນ strdup(cwd);
 
 	csz = strlen(cwd);
 	psz = strlen(path);
 
 	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	ຖ້າ (!res)
+		ສົ່ງຄືນ NULL;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
 	memcpy(p, path, psz + 1);
 
-	return res;
+	ສົ່ງຄືນ res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
-do_canonicalize(const char *path, char **result,
+static ຈຳນວນເຕັມ __attribute__((nonnull(2)))
+do_canonicalize(const var_na *path, var_na **result,
 		void *data __attribute__((__unused__)))
 {
-	char *canonical, *dmname;
+	var_na *canonical, *dmname;
 
 	*result = NULL;
 
-	if (!path || !*path) {
+	ຖ້າ (!path || !*path) {
 		errno = EINVAL;
-		return -errno;
+		ສົ່ງຄືນ -errno;
 	}
 
 	errno = 0;
 	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	ຖ້າ (!canonical)
+		ສົ່ງຄືນ 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
-		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
+	ຖ້າ (is_dm_devname(canonical, &dmname)) {
+		var_na *dm = ul_canonicalize_dm_name(dmname);
+		ຖ້າ (dm) {
 			free(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
+	ຖ້າ (canonical)
 		*result = canonical;
-	return 0;
+	ສົ່ງຄືນ 0;
 }
 
 /*
@@ -162,31 +162,31 @@ do_canonicalize(const char *path, char **result,
  * unreachable path is not an error (!), and in this case, it just duplicates
  * @path.
  */
-char *ul_canonicalize_path(const char *path)
+var_na *ul_canonicalize_path(const var_na *path)
 {
-	char *canonical = NULL;
+	var_na *canonical = NULL;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	ຖ້າ (do_canonicalize(path, &canonical, NULL) == 1)
+		ສົ່ງຄືນ strdup(path);
 
-	return canonical;
+	ສົ່ງຄືນ canonical;
 }
 
 /*
  * Drop permissions (e.g., suid) and canonicalize the path. If the path is
  * unreadable (for example, due to missing permissions), it returns NULL.
  */
-char *ul_canonicalize_path_restricted(const char *path)
+var_na *ul_canonicalize_path_restricted(const var_na *path)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	ສົ່ງຄືນ ul_restricted_path_oper(path, do_canonicalize, NULL);
 }
 
 #ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+ຈຳນວນເຕັມ main(ຈຳນວນເຕັມ argc, var_na **argv)
 {
-	char *p;
+	var_na *p;
 
-	if (argc < 2) {
+	ຖ້າ (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
