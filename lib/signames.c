@@ -8,20 +8,20 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#অন্তর্ভাব <ctype.h>		/* for isdigit() */
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "cctype.h"
+#অন্তর্ভাব "strutils.h"
+#অন্তর্ভাব "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+স্থির ধ্রুব সংরচনা ul_signal_name {
+	ধ্রুব বর্ণ *name;
+	পূর্ণাঙ্ক val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+স্থির পূর্ণাঙ্ক rtsig_to_signum(ধ্রুব বর্ণ *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	পূর্ণাঙ্ক অঙ্ক, maxi = 0;
+	বর্ণ *ep = রিক্ত;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	যদি (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	অন্যথা যদি (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	যদি (!isdigit(*sig))
+		প্রত্যাগম -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	অঙ্ক = strtol(sig, &ep, 10);
+	যদি (!ep || sig == ep || errno || অঙ্ক < 0)
+		প্রত্যাগম -1;
+	অঙ্ক = maxi ? SIGRTMAX - অঙ্ক : SIGRTMIN + অঙ্ক;
+	যদি (অঙ্ক < SIGRTMIN || SIGRTMAX < অঙ্ক)
+		প্রত্যাগম -1;
+	প্রত্যাগম অঙ্ক;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+পূর্ণাঙ্ক signame_to_signum(ধ্রুব বর্ণ *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	যদি (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	যদি (!c_strncasecmp(sig, "rt", 2))
+		প্রত্যাগম rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	প্রতি (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		যদি (!c_strcasecmp(ul_signames[n].name, sig))
+			প্রত্যাগম ul_signames[n].val;
 	}
-	return -1;
+	প্রত্যাগম -1;
 }
 
-const char *signum_to_signame(int signum)
+ধ্রুব বর্ণ *signum_to_signame(পূর্ণাঙ্ক signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	প্রতি (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		যদি (ul_signames[n].val == signum) {
+			প্রত্যাগম ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	প্রত্যাগম রিক্ত;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+পূর্ণাঙ্ক get_signame_by_idx(size_t idx, ধ্রুব বর্ণ **signame, পূর্ণাঙ্ক *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	যদি (idx >= ARRAY_SIZE(ul_signames))
+		প্রত্যাগম -1;
 
-	if (signame)
+	যদি (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	যদি (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	প্রত্যাগম 0;
 
 }
 

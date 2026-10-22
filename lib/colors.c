@@ -5,21 +5,21 @@
  * Authors: 2012 Ondrej Oprala <ooprala@redhat.com>
  *          2012-2025 Karel Zak <kzak@redhat.com>
  */
-#include <assert.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <ctype.h>
+#অন্তর্ভাব <assert.h>
+#অন্তর্ভাব <sys/stat.h>
+#অন্তর্ভাব <sys/types.h>
+#অন্তর্ভাব <dirent.h>
+#অন্তর্ভাব <ctype.h>
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
-# if defined(HAVE_NCURSESW_NCURSES_H)
+#যদি defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+# যদি defined(HAVE_NCURSESW_NCURSES_H)
 #  include <ncursesw/ncurses.h>
 # elif defined(HAVE_NCURSES_NCURSES_H)
 #  include <ncurses/ncurses.h>
 # elif defined(HAVE_NCURSES_H)
 #  include <ncurses.h>
 # endif
-# if defined(HAVE_NCURSESW_TERM_H)
+# যদি defined(HAVE_NCURSESW_TERM_H)
 #  include <ncursesw/term.h>
 # elif defined(HAVE_NCURSES_TERM_H)
 #  include <ncurses/term.h>
@@ -28,28 +28,28 @@
 # endif
 #endif
 
-#include "c.h"
-#include "cctype.h"
-#include "colors.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "strutils.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "cctype.h"
+#অন্তর্ভাব "colors.h"
+#অন্তর্ভাব "nls.h"
+#অন্তর্ভাব "pathnames.h"
+#অন্তর্ভাব "strutils.h"
 
-#include "debug.h"
+#অন্তর্ভাব "debug.h"
 
 /*
  * Default behavior, may be overridden by terminal-colors.d/{enable,disable}.
  */
 #ifdef USE_COLORS_BY_DEFAULT
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_AUTO	/* check isatty() */
-#else
+#অন্যথা
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_NEVER	/* no colors by default */
 #endif
 
 /*
  * terminal-colors.d debug stuff
  */
-static UL_DEBUG_DEFINE_MASK(termcolors);
+স্থির UL_DEBUG_DEFINE_MASK(termcolors);
 UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define TERMCOLORS_DEBUG_INIT	(1 << 1)
@@ -62,7 +62,7 @@ UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 /*
  * terminal-colors.d file types
  */
-enum {
+গণনা {
 	UL_COLORFILE_DISABLE,		/* .disable */
 	UL_COLORFILE_ENABLE,		/* .enable */
 	UL_COLORFILE_SCHEME,		/* .scheme */
@@ -70,9 +70,9 @@ enum {
 	__UL_COLORFILE_COUNT
 };
 
-struct ul_color_scheme {
-	char *name;
-	char *seq;
+সংরচনা ul_color_scheme {
+	বর্ণ *name;
+	বর্ণ *seq;
 };
 
 /*
@@ -89,69 +89,69 @@ struct ul_color_scheme {
  *
  * the match with higher score wins. The score is per type.
  */
-struct ul_color_ctl {
-	const char	*utilname;	/* util name */
-	const char	*termname;	/* terminal name ($TERM) */
+সংরচনা ul_color_ctl {
+	ধ্রুব বর্ণ	*utilname;	/* util name */
+	ধ্রুব বর্ণ	*termname;	/* terminal name ($TERM) */
 
-	char		*sfile;	/* path to scheme */
+	বর্ণ		*sfile;	/* path to scheme */
 
-	struct ul_color_scheme	*schemes;	/* array with color schemes */
+	সংরচনা ul_color_scheme	*schemes;	/* array with color schemes */
 	size_t			nschemes;	/* number of the items */
 	size_t			schemes_sz;	/* number of the allocated items */
 
-	int		mode;		/* UL_COLORMODE_* */
-	unsigned int	has_colors : 1,	/* based on mode and scores[] */
+	পূর্ণাঙ্ক		mode;		/* UL_COLORMODE_* */
+	unsigned পূর্ণাঙ্ক	has_colors : 1,	/* based on mode and scores[] */
 			disabled   : 1, /* disable colors */
 			cs_configured : 1, /* color schemes read */
 			configured : 1; /* terminal-colors.d parsed */
 
-	int		scores[__UL_COLORFILE_COUNT];	/* the best match */
+	পূর্ণাঙ্ক		scores[__UL_COLORFILE_COUNT];	/* the best match */
 };
 
 /*
  * Control struct, globally shared.
  */
-static struct ul_color_ctl ul_colors;
+স্থির সংরচনা ul_color_ctl ul_colors;
 
-static void colors_free_schemes(struct ul_color_ctl *cc);
-static int colors_read_schemes(struct ul_color_ctl *cc);
+স্থির শূন্য colors_free_schemes(সংরচনা ul_color_ctl *cc);
+স্থির পূর্ণাঙ্ক colors_read_schemes(সংরচনা ul_color_ctl *cc);
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_scheme_name(const void *a0, const void *b0)
+স্থির পূর্ণাঙ্ক cmp_scheme_name(ধ্রুব শূন্য *a0, ধ্রুব শূন্য *b0)
 {
-	const struct ul_color_scheme *a = (const struct ul_color_scheme *) a0,
-				     *b = (const struct ul_color_scheme *) b0;
-	return strcmp(a->name, b->name);
+	ধ্রুব সংরচনা ul_color_scheme *a = (ধ্রুব সংরচনা ul_color_scheme *) a0,
+				     *b = (ধ্রুব সংরচনা ul_color_scheme *) b0;
+	প্রত্যাগম strcmp(a->name, b->name);
 }
 
 /*
  * Resets control struct (note that we don't allocate the struct)
  */
-static void colors_reset(struct ul_color_ctl *cc)
+স্থির শূন্য colors_reset(সংরচনা ul_color_ctl *cc)
 {
-	if (!cc)
-		return;
+	যদি (!cc)
+		প্রত্যাগম;
 
 	colors_free_schemes(cc);
 
-	free(cc->sfile);
+	মুক্ত(cc->sfile);
 
-	cc->sfile = NULL;
-	cc->utilname = NULL;
-	cc->termname = NULL;
+	cc->sfile = রিক্ত;
+	cc->utilname = রিক্ত;
+	cc->termname = রিক্ত;
 	cc->mode = UL_COLORMODE_UNDEF;
 
-	memset(cc->scores, 0, sizeof(cc->scores));
+	memset(cc->scores, 0, পরিমাণ(cc->scores));
 }
 
-static void colors_debug(struct ul_color_ctl *cc)
+স্থির শূন্য colors_debug(সংরচনা ul_color_ctl *cc)
 {
 	size_t i;
 
-	if (!cc)
-		return;
+	যদি (!cc)
+		প্রত্যাগম;
 
 	printf("Colors:\n");
 	printf("\tutilname = '%s'\n", cc->utilname);
@@ -169,7 +169,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < ARRAY_SIZE(cc->scores); i++)
+	প্রতি (i = 0; i < ARRAY_SIZE(cc->scores); i++)
 		printf("\tscore %s = %d\n",
 				i == UL_COLORFILE_DISABLE ? "disable" :
 				i == UL_COLORFILE_ENABLE ? "enable" :
@@ -178,9 +178,9 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < cc->nschemes; i++) {
+	প্রতি (i = 0; i < cc->nschemes; i++) {
 		printf("\tscheme #%02zu ", i);
-		color_scheme_enable(cc->schemes[i].name, NULL);
+		color_scheme_enable(cc->schemes[i].name, রিক্ত);
 		fputs(cc->schemes[i].name, stdout);
 		color_disable();
 		fputc('\n', stdout);
@@ -191,42 +191,42 @@ static void colors_debug(struct ul_color_ctl *cc)
 /*
  * Parses [[<utilname>][@<termname>].]<type>
  */
-static int filename_to_tokens(const char *str,
-			      const char **name, size_t *namesz,
-			      const char **term, size_t *termsz,
-			      int  *filetype)
+স্থির পূর্ণাঙ্ক filename_to_tokens(ধ্রুব বর্ণ *str,
+			      ধ্রুব বর্ণ **name, size_t *namesz,
+			      ধ্রুব বর্ণ **term, size_t *termsz,
+			      পূর্ণাঙ্ক  *filetype)
 {
-	const char *type_start, *term_start, *p;
+	ধ্রুব বর্ণ *type_start, *term_start, *p;
 
-	if (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
-		return -EINVAL;
+	যদি (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
+		প্রত্যাগম -EINVAL;
 
 	/* parse .type */
 	p = strrchr(str, '.');
 	type_start = p ? p + 1 : str;
 
-	if (strcmp(type_start, "disable") == 0)
+	যদি (strcmp(type_start, "disable") == 0)
 		*filetype = UL_COLORFILE_DISABLE;
-	else if (strcmp(type_start, "enable") == 0)
+	অন্যথা যদি (strcmp(type_start, "enable") == 0)
 		*filetype = UL_COLORFILE_ENABLE;
-	else if (strcmp(type_start, "scheme") == 0)
+	অন্যথা যদি (strcmp(type_start, "scheme") == 0)
 		*filetype = UL_COLORFILE_SCHEME;
-	else {
+	অন্যথা {
 		DBG(CONF, ul_debug("unknown type '%s'", type_start));
-		return 1;				/* unknown type */
+		প্রত্যাগম 1;				/* unknown type */
 	}
 
-	if (type_start == str)
-		return 0;				/* "type" only */
+	যদি (type_start == str)
+		প্রত্যাগম 0;				/* "type" only */
 
 	/* parse @termname */
 	p = strchr(str, '@');
-	term_start = p ? p + 1 : NULL;
-	if (term_start) {
+	term_start = p ? p + 1 : রিক্ত;
+	যদি (term_start) {
 		*term = term_start;
 		*termsz = type_start - term_start - 1;
-		if (term_start - 1 == str)
-			return 0;			/* "@termname.type" */
+		যদি (term_start - 1 == str)
+			প্রত্যাগম 0;			/* "@termname.type" */
 	}
 
 	/* parse utilname */
@@ -234,7 +234,7 @@ static int filename_to_tokens(const char *str,
 	*name = str;
 	*namesz = p - str - 1;
 
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /*
@@ -242,48 +242,48 @@ static int filename_to_tokens(const char *str,
  * The result is stored to cc->scores. The path to the best "scheme"
  * file is stored to cc->scheme.
  */
-static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
+স্থির পূর্ণাঙ্ক colors_readdir(সংরচনা ul_color_ctl *cc, ধ্রুব বর্ণ *dirname)
 {
 	DIR *dir;
-	int rc = -ENOENT;
-	struct dirent *d;
-	char sfile[PATH_MAX] = { '\0' };
+	পূর্ণাঙ্ক rc = -ENOENT;
+	সংরচনা dirent *d;
+	বর্ণ sfile[PATH_MAX] = { '\0' };
 	size_t namesz, termsz;
 
-	if (!dirname || !cc || !cc->utilname || !*cc->utilname)
-		return -EINVAL;
+	যদি (!dirname || !cc || !cc->utilname || !*cc->utilname)
+		প্রত্যাগম -EINVAL;
 
 	DBG(CONF, ul_debug("reading dir: '%s'", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return -errno;
+	যদি (!dir)
+		প্রত্যাগম -errno;
 
 	namesz = strlen(cc->utilname);
 	termsz = cc->termname ? strlen(cc->termname) : 0;
 
-	while ((d = readdir(dir))) {
-		int type, score = 1;
-		const char *tk_name = NULL, *tk_term = NULL;
+	যাবত্ ((d = readdir(dir))) {
+		পূর্ণাঙ্ক type, score = 1;
+		ধ্রুব বর্ণ *tk_name = রিক্ত, *tk_term = রিক্ত;
 		size_t tk_namesz = 0, tk_termsz = 0;
 
-		if (*d->d_name == '.')
-			continue;
+		যদি (*d->d_name == '.')
+			অনুবর্ত;
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
+		যদি (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
 		    d->d_type != DT_REG)
-			continue;
+			অনুবর্ত;
 #endif
-		if (filename_to_tokens(d->d_name,
+		যদি (filename_to_tokens(d->d_name,
 				       &tk_name, &tk_namesz,
 				       &tk_term, &tk_termsz, &type) != 0)
-			continue;
+			অনুবর্ত;
 
 		/* count theoretical score before we check names to avoid
 		 * unnecessary strcmp() */
-		if (tk_name)
+		যদি (tk_name)
 			score += 20;
-		if (tk_term)
+		যদি (tk_term)
 			score += 10;
 
 		DBG(CONF, ul_debug("item '%s': score=%d "
@@ -293,17 +293,17 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 			tk_termsz, tk_term));
 
 
-		if (score < cc->scores[type])
-			continue;
+		যদি (score < cc->scores[type])
+			অনুবর্ত;
 
 		/* filter out by names */
-		if (tk_namesz && (tk_namesz != namesz ||
+		যদি (tk_namesz && (tk_namesz != namesz ||
 				 strncmp(tk_name, cc->utilname, namesz) != 0))
-			continue;
+			অনুবর্ত;
 
-		if (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
+		যদি (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
 				  strncmp(tk_term, cc->termname, termsz) != 0))
-			continue;
+			অনুবর্ত;
 
 		DBG(CONF, ul_debug("setting '%s' from %d -to-> %d",
 					type == UL_COLORFILE_SCHEME ? "scheme" :
@@ -312,22 +312,22 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 					cc->scores[type], score));
 		cc->scores[type] = score;
 		rc = 0;
-		if (type == UL_COLORFILE_SCHEME)
-			strncpy(sfile, d->d_name, sizeof(sfile));
+		যদি (type == UL_COLORFILE_SCHEME)
+			strncpy(sfile, d->d_name, পরিমাণ(sfile));
 	}
 
-	if (*sfile) {
-		sfile[sizeof(sfile) - 1] = '\0';
-		if (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
+	যদি (*sfile) {
+		sfile[পরিমাণ(sfile) - 1] = '\0';
+		যদি (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
 			rc = -ENOMEM;
 	}
 
 	closedir(dir);
-	return rc;
+	প্রত্যাগম rc;
 }
 
 /* atexit() wrapper */
-static void colors_deinit(void)
+স্থির শূন্য colors_deinit(শূন্য)
 {
 	colors_reset(&ul_colors);
 }
@@ -335,51 +335,51 @@ static void colors_deinit(void)
 /*
  * Returns path to $XDG_CONFIG_HOME/terminal-colors.d
  */
-static char *colors_get_homedir(char *buf, size_t bufsz)
+স্থির বর্ণ *colors_get_homedir(বর্ণ *buf, size_t bufsz)
 {
-	char *p = getenv("XDG_CONFIG_HOME");
+	বর্ণ *p = getenv("XDG_CONFIG_HOME");
 
-	if (p) {
+	যদি (p) {
 		snprintf(buf, bufsz, "%s/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		প্রত্যাগম buf;
 	}
 
 	p = getenv("HOME");
-	if (p) {
+	যদি (p) {
 		snprintf(buf, bufsz, "%s/.config/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		প্রত্যাগম buf;
 	}
 
-	return NULL;
+	প্রত্যাগম রিক্ত;
 }
 
 /*
  * Adds one color sequence to array with color scheme.
  */
-static int colors_add_scheme(struct ul_color_ctl *cc,
-			     const char *name,
-			     const char *seq0)
+স্থির পূর্ণাঙ্ক colors_add_scheme(সংরচনা ul_color_ctl *cc,
+			     ধ্রুব বর্ণ *name,
+			     ধ্রুব বর্ণ *seq0)
 {
-	struct ul_color_scheme *cs = NULL;
-	char *seq = NULL;
-	int rc;
+	সংরচনা ul_color_scheme *cs = রিক্ত;
+	বর্ণ *seq = রিক্ত;
+	পূর্ণাঙ্ক rc;
 
-	if (!cc || !name || !*name || !seq0 || !*seq0)
-		return -EINVAL;
+	যদি (!cc || !name || !*name || !seq0 || !*seq0)
+		প্রত্যাগম -EINVAL;
 
 	DBG(SCHEME, ul_debug("add '%s'", name));
 
 	seq = color_get_sequence(seq0);
-	if (!seq)
-		return -EINVAL;
+	যদি (!seq)
+		প্রত্যাগম -EINVAL;
 	rc = -ENOMEM;
 
 	/* enlarge the array */
-	if (cc->nschemes == cc->schemes_sz) {
-		void *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
-					 sizeof(struct ul_color_scheme));
-		if (!tmp)
-			goto err;
+	যদি (cc->nschemes == cc->schemes_sz) {
+		শূন্য *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
+					 পরিমাণ(সংরচনা ul_color_scheme));
+		যদি (!tmp)
+			গচ্ছ err;
 		cc->schemes = tmp;
 		cc->schemes_sz = cc->nschemes + 10;
 	}
@@ -388,37 +388,37 @@ static int colors_add_scheme(struct ul_color_ctl *cc,
 	cs = &cc->schemes[cc->nschemes];
 	cs->seq = seq;
 	cs->name = strdup(name);
-	if (!cs->name)
-		goto err;
+	যদি (!cs->name)
+		গচ্ছ err;
 
 	cc->nschemes++;
-	return 0;
+	প্রত্যাগম 0;
 err:
-	if (cs) {
-		free(cs->seq);
-		free(cs->name);
-		cs->seq = cs->name = NULL;
-	} else
-		free(seq);
-	return rc;
+	যদি (cs) {
+		মুক্ত(cs->seq);
+		মুক্ত(cs->name);
+		cs->seq = cs->name = রিক্ত;
+	} অন্যথা
+		মুক্ত(seq);
+	প্রত্যাগম rc;
 }
 
 /*
  * Deallocates all regards to color schemes
  */
-static void colors_free_schemes(struct ul_color_ctl *cc)
+স্থির শূন্য colors_free_schemes(সংরচনা ul_color_ctl *cc)
 {
 	size_t i;
 
 	DBG(SCHEME, ul_debug("free scheme"));
 
-	for (i = 0; i < cc->nschemes; i++) {
-		free(cc->schemes[i].name);
-		free(cc->schemes[i].seq);
+	প্রতি (i = 0; i < cc->nschemes; i++) {
+		মুক্ত(cc->schemes[i].name);
+		মুক্ত(cc->schemes[i].seq);
 	}
 
-	free(cc->schemes);
-	cc->schemes = NULL;
+	মুক্ত(cc->schemes);
+	cc->schemes = রিক্ত;
 	cc->nschemes = 0;
 	cc->schemes_sz = 0;
 }
@@ -426,152 +426,152 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
 /*
  * The scheme configuration has to be sorted for bsearch
  */
-static void colors_sort_schemes(struct ul_color_ctl *cc)
+স্থির শূন্য colors_sort_schemes(সংরচনা ul_color_ctl *cc)
 {
-	if (!cc->nschemes)
-		return;
+	যদি (!cc->nschemes)
+		প্রত্যাগম;
 
 	DBG(SCHEME, ul_debug("sort scheme"));
 
 	qsort(cc->schemes, cc->nschemes,
-	      sizeof(struct ul_color_scheme), cmp_scheme_name);
+	      পরিমাণ(সংরচনা ul_color_scheme), cmp_scheme_name);
 }
 
 /*
  * Returns just one color scheme
  */
-static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
-						 const char *name)
+স্থির সংরচনা ul_color_scheme *colors_get_scheme(সংরচনা ul_color_ctl *cc,
+						 ধ্রুব বর্ণ *name)
 {
-	struct ul_color_scheme key = { .name = (char *) name}, *res;
+	সংরচনা ul_color_scheme চাবি = { .name = (বর্ণ *) name}, *res;
 
-	if (!cc || !name || !*name)
-		return NULL;
+	যদি (!cc || !name || !*name)
+		প্রত্যাগম রিক্ত;
 
-	if (!cc->cs_configured) {
-		int rc = colors_read_schemes(cc);
-		if (rc)
-			return NULL;
+	যদি (!cc->cs_configured) {
+		পূর্ণাঙ্ক rc = colors_read_schemes(cc);
+		যদি (rc)
+			প্রত্যাগম রিক্ত;
 	}
-	if (!cc->nschemes)
-		return NULL;
+	যদি (!cc->nschemes)
+		প্রত্যাগম রিক্ত;
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
-	res = bsearch(&key, cc->schemes, cc->nschemes,
-				sizeof(struct ul_color_scheme),
+	res = bsearch(&চাবি, cc->schemes, cc->nschemes,
+				পরিমাণ(সংরচনা ul_color_scheme),
 				cmp_scheme_name);
 
-	return res && res->seq ? res  : NULL;
+	প্রত্যাগম res && res->seq ? res  : রিক্ত;
 }
 
 /*
  * Parses filenames in terminal-colors.d
  */
-static int colors_read_configuration(struct ul_color_ctl *cc)
+স্থির পূর্ণাঙ্ক colors_read_configuration(সংরচনা ul_color_ctl *cc)
 {
-	int rc = -ENOENT;
-	char *dirname, buf[PATH_MAX];
+	পূর্ণাঙ্ক rc = -ENOENT;
+	বর্ণ *dirname, buf[PATH_MAX];
 
 	cc->termname = getenv("TERM");
 
-	dirname = colors_get_homedir(buf, sizeof(buf));
-	if (dirname)
+	dirname = colors_get_homedir(buf, পরিমাণ(buf));
+	যদি (dirname)
 		rc = colors_readdir(cc, dirname);		/* ~/.config */
-	if (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
+	যদি (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
 		rc = colors_readdir(cc, _PATH_TERMCOLORS_DIR);	/* /etc */
 
 	cc->configured = 1;
-	return rc;
+	প্রত্যাগম rc;
 }
 
 /*
  * Reads terminal-colors.d/ scheme file into array schemes
  */
-static int colors_read_schemes(struct ul_color_ctl *cc)
+স্থির পূর্ণাঙ্ক colors_read_schemes(সংরচনা ul_color_ctl *cc)
 {
-	int rc = 0;
-	FILE *f = NULL;
-	char buf[BUFSIZ],
+	পূর্ণাঙ্ক rc = 0;
+	FILE *f = রিক্ত;
+	বর্ণ buf[BUFSIZ],
 	     cn[129], seq[129];
 
-	if (!cc->configured)
+	যদি (!cc->configured)
 		rc = colors_read_configuration(cc);
 
 	cc->cs_configured = 1;
 
-	if (rc || !cc->sfile)
-		goto done;
+	যদি (rc || !cc->sfile)
+		গচ্ছ done;
 
 	DBG(SCHEME, ul_debug("reading file '%s'", cc->sfile));
 
 	f = fopen(cc->sfile, "r" UL_CLOEXECSTR);
-	if (!f) {
+	যদি (!f) {
 		rc = -errno;
-		goto done;
+		গচ্ছ done;
 	}
 
-	while (fgets(buf, sizeof(buf), f)) {
-		char *p = strchr(buf, '\n');
+	যাবত্ (fgets(buf, পরিমাণ(buf), f)) {
+		বর্ণ *p = strchr(buf, '\n');
 
-		if (!p) {
-			if (feof(f))
+		যদি (!p) {
+			যদি (feof(f))
 				p = strchr(buf, '\0');
-			else {
+			অন্যথা {
 				rc = -errno;
-				goto done;
+				গচ্ছ done;
 			}
 		}
 		*p = '\0';
-		p = (char *) skip_blank(buf);
-		if (*p == '\0' || *p == '#')
-			continue;
+		p = (বর্ণ *) skip_blank(buf);
+		যদি (*p == '\0' || *p == '#')
+			অনুবর্ত;
 
 		rc = sscanf(p, "%128[^ ] %128[^\n ]", cn, seq);
-		if (rc == 2 && *cn && *seq) {
+		যদি (rc == 2 && *cn && *seq) {
 			rc = colors_add_scheme(cc, cn, seq);	/* set rc=0 on success */
-			if (rc)
-				goto done;
+			যদি (rc)
+				গচ্ছ done;
 		}
 	}
 	rc = 0;
 
 done:
-	if (f)
+	যদি (f)
 		fclose(f);
 	colors_sort_schemes(cc);
 
-	return rc;
+	প্রত্যাগম rc;
 }
 
 
-static void termcolors_init_debug(void)
+স্থির শূন্য termcolors_init_debug(শূন্য)
 {
 	__UL_INIT_DEBUG_FROM_ENV(termcolors, TERMCOLORS_DEBUG_, 0, TERMINAL_COLORS_DEBUG);
 }
 
-static int colors_terminal_is_ready(void)
+স্থির পূর্ণাঙ্ক colors_terminal_is_ready(শূন্য)
 {
-	int ncolors = -1;
+	পূর্ণাঙ্ক ncolors = -1;
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+#যদি defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 	{
-		int ret;
+		পূর্ণাঙ্ক ret;
 
 		/* setupterm() allocates memory, del_curterm() deallocates it */
-		if (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
+		যদি (setupterm(রিক্ত, STDOUT_FILENO, &ret) == 0 && ret == 1) {
 			ncolors = tigetnum("colors");
 			del_curterm(cur_term);
 		}
 	}
 #endif
-	if (1 < ncolors) {
+	যদি (1 < ncolors) {
 		DBG(CONF, ul_debug("terminal is ready (supports %d colors)", ncolors));
-		return 1;
+		প্রত্যাগম 1;
 	}
 
 	DBG(CONF, ul_debug("terminal is NOT ready (no colors)"));
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /**
@@ -584,61 +584,61 @@ static int colors_terminal_is_ready(void)
  *
  * Returns: >0 on success.
  */
-int colors_init(int mode, const char *name)
+পূর্ণাঙ্ক colors_init(পূর্ণাঙ্ক mode, ধ্রুব বর্ণ *name)
 {
-	int ready = -1;
-	struct ul_color_ctl *cc = &ul_colors;
+	পূর্ণাঙ্ক ready = -1;
+	সংরচনা ul_color_ctl *cc = &ul_colors;
 
 	cc->utilname = name;
 
 	termcolors_init_debug();
 
-	if (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
+	যদি (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
 		cc->mode = UL_COLORMODE_NEVER;
-	else
+	অন্যথা
 		cc->mode = mode;
 
-	if (cc->mode == UL_COLORMODE_UNDEF
-	    && getenv("NO_COLOR") == NULL
+	যদি (cc->mode == UL_COLORMODE_UNDEF
+	    && getenv("NO_COLOR") == রিক্ত
 	    && (ready = colors_terminal_is_ready())) {
 
-		int rc = colors_read_configuration(cc);
-		if (rc)
+		পূর্ণাঙ্ক rc = colors_read_configuration(cc);
+		যদি (rc)
 			cc->mode = UL_COLORMODE_DEFAULT;
-		else {
+		অন্যথা {
 
 			/* evaluate scores */
-			if (cc->scores[UL_COLORFILE_DISABLE] >
+			যদি (cc->scores[UL_COLORFILE_DISABLE] >
 			    cc->scores[UL_COLORFILE_ENABLE])
 				cc->mode = UL_COLORMODE_NEVER;
-			else
+			অন্যথা
 				cc->mode = UL_COLORMODE_DEFAULT;
 
 			atexit(colors_deinit);
 		}
 	}
 
-	switch (cc->mode) {
-	case UL_COLORMODE_AUTO:
+	বিকল্প (cc->mode) {
+	পক্ষ UL_COLORMODE_AUTO:
 		cc->has_colors = ready == -1 ? colors_terminal_is_ready() : ready;
-		break;
-	case UL_COLORMODE_ALWAYS:
+		ভঙ্গ;
+	পক্ষ UL_COLORMODE_ALWAYS:
 		cc->has_colors = 1;
-		break;
-	case UL_COLORMODE_NEVER:
-	default:
+		ভঙ্গ;
+	পক্ষ UL_COLORMODE_NEVER:
+	স্বভাব:
 		cc->has_colors = 0;
 	}
 
 	ON_DBG(CONF, colors_debug(cc));
 
-	return cc->has_colors;
+	প্রত্যাগম cc->has_colors;
 }
 
 /*
  * Temporary disable colors (this setting is independent on terminal-colors.d/)
  */
-void colors_off(void)
+শূন্য colors_off(শূন্য)
 {
 	ul_colors.disabled = 1;
 }
@@ -646,7 +646,7 @@ void colors_off(void)
 /*
  * Enable colors
  */
-void colors_on(void)
+শূন্য colors_on(শূন্য)
 {
 	ul_colors.disabled = 0;
 }
@@ -654,51 +654,51 @@ void colors_on(void)
 /*
  * Is terminal-colors.d/ configured to use colors?
  */
-int colors_wanted(void)
+পূর্ণাঙ্ক colors_wanted(শূন্য)
 {
-	return ul_colors.has_colors;
+	প্রত্যাগম ul_colors.has_colors;
 }
 
 /*
  * Returns mode
  */
-int colors_mode(void)
+পূর্ণাঙ্ক colors_mode(শূন্য)
 {
-	return ul_colors.mode;
+	প্রত্যাগম ul_colors.mode;
 }
 
 /*
  * Enable @seq color
  */
-void color_fenable(const char *seq, FILE *f)
+শূন্য color_fenable(ধ্রুব বর্ণ *seq, FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors && seq)
+	যদি (!ul_colors.disabled && ul_colors.has_colors && seq)
 		fputs(seq, f);
 }
 
 /*
  * Returns escape sequence by logical @name, if undefined then returns @dflt.
  */
-const char *color_scheme_get_sequence(const char *name, const char *dflt)
+ধ্রুব বর্ণ *color_scheme_get_sequence(ধ্রুব বর্ণ *name, ধ্রুব বর্ণ *dflt)
 {
-	struct ul_color_scheme *cs;
+	সংরচনা ul_color_scheme *cs;
 
-	if (ul_colors.disabled || !ul_colors.has_colors)
-		return NULL;
+	যদি (ul_colors.disabled || !ul_colors.has_colors)
+		প্রত্যাগম রিক্ত;
 
 	cs = colors_get_scheme(&ul_colors, name);
-	return cs && cs->seq ? cs->seq : dflt;
+	প্রত্যাগম cs && cs->seq ? cs->seq : dflt;
 }
 
 /*
  * Enable color by logical @name, if undefined enable @dflt.
  */
-void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
+শূন্য color_scheme_fenable(ধ্রুব বর্ণ *name, ধ্রুব বর্ণ *dflt, FILE *f)
 {
-	const char *seq = color_scheme_get_sequence(name, dflt);
+	ধ্রুব বর্ণ *seq = color_scheme_get_sequence(name, dflt);
 
-	if (!seq)
-		return;
+	যদি (!seq)
+		প্রত্যাগম;
 	color_fenable(seq, f);
 }
 
@@ -706,122 +706,122 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
 /*
  * Disable previously enabled color
  */
-void color_fdisable(FILE *f)
+শূন্য color_fdisable(FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
+	যদি (!ul_colors.disabled && ul_colors.has_colors)
 		fputs(UL_COLOR_RESET, f);
 }
 
 /*
  * Get reset sequence
  */
-const char *color_get_disable_sequence(void)
+ধ্রুব বর্ণ *color_get_disable_sequence(শূন্য)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
-		return UL_COLOR_RESET;
-	else
-		return "";
+	যদি (!ul_colors.disabled && ul_colors.has_colors)
+		প্রত্যাগম UL_COLOR_RESET;
+	অন্যথা
+		প্রত্যাগম "";
 }
 
 /*
  * Parses @str to return UL_COLORMODE_*
  */
-int colormode_from_string(const char *str)
+পূর্ণাঙ্ক colormode_from_string(ধ্রুব বর্ণ *str)
 {
 	size_t i;
-	static const char *const modes[] = {
+	স্থির ধ্রুব বর্ণ *ধ্রুব modes[] = {
 		[UL_COLORMODE_AUTO]   = "auto",
 		[UL_COLORMODE_NEVER]  = "never",
 		[UL_COLORMODE_ALWAYS] = "always",
 		[UL_COLORMODE_UNDEF] = ""
 	};
 
-	if (!str || !*str)
-		return -EINVAL;
+	যদি (!str || !*str)
+		প্রত্যাগম -EINVAL;
 
-	assert(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
+	প্রতিজ্ঞা(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
 
-	for (i = 0; i < ARRAY_SIZE(modes); i++) {
-		if (c_strcasecmp(str, modes[i]) == 0)
-			return i;
+	প্রতি (i = 0; i < ARRAY_SIZE(modes); i++) {
+		যদি (c_strcasecmp(str, modes[i]) == 0)
+			প্রত্যাগম i;
 	}
 
-	return -EINVAL;
+	প্রত্যাগম -EINVAL;
 }
 
 /*
  * Parses @str and exit(EXIT_FAILURE) on error
  */
-int colormode_or_err(const char *str)
+পূর্ণাঙ্ক colormode_or_err(ধ্রুব বর্ণ *str)
 {
-	const char *p = str && *str == '=' ? str + 1 : str;
-	int colormode;
+	ধ্রুব বর্ণ *p = str && *str == '=' ? str + 1 : str;
+	পূর্ণাঙ্ক colormode;
 
 	colormode = colormode_from_string(p);
-	if (colormode < 0)
+	যদি (colormode < 0)
 		errx(EXIT_FAILURE, _("unsupported color mode: %s"), p);
 
-	return colormode;
+	প্রত্যাগম colormode;
 }
 
 #ifdef TEST_PROGRAM_COLORS
 # include <getopt.h>
-int main(int argc, char *argv[])
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	static const struct option longopts[] = {
-		{ "mode",	required_argument, NULL, 'm' },
-		{ "color",	required_argument, NULL, 'c' },
-		{ "color-scheme", required_argument, NULL, 'C' },
-		{ "name",	required_argument, NULL, 'n' },
-		{ NULL, 0, NULL, 0 }
+	স্থির ধ্রুব সংরচনা option longopts[] = {
+		{ "mode",	required_argument, রিক্ত, 'm' },
+		{ "color",	required_argument, রিক্ত, 'c' },
+		{ "color-scheme", required_argument, রিক্ত, 'C' },
+		{ "name",	required_argument, রিক্ত, 'n' },
+		{ রিক্ত, 0, রিক্ত, 0 }
 	};
-	int c, mode = UL_COLORMODE_UNDEF;	/* default */
-	const char *color = "red", *name = NULL, *color_scheme = NULL;
-	char *seq = NULL;
+	পূর্ণাঙ্ক c, mode = UL_COLORMODE_UNDEF;	/* default */
+	ধ্রুব বর্ণ *color = "red", *name = রিক্ত, *color_scheme = রিক্ত;
+	বর্ণ *seq = রিক্ত;
 
-	while ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
-		switch (c) {
-		case 'c':
+	যাবত্ ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, রিক্ত)) != -1) {
+		বিকল্প (c) {
+		পক্ষ 'c':
 			color = optarg;
-			break;
-		case 'C':
+			ভঙ্গ;
+		পক্ষ 'C':
 			color_scheme = optarg;
-			break;
-		case 'm':
+			ভঙ্গ;
+		পক্ষ 'm':
 			mode = colormode_or_err(optarg);
-			break;
-		case 'n':
+			ভঙ্গ;
+		পক্ষ 'n':
 			name = optarg;
-			break;
-		default:
+			ভঙ্গ;
+		স্বভাব:
 			fprintf(stderr, "usage: %s [options]\n"
 			" -m, --mode <auto|never|always>  default is undefined\n"
 			" -c, --color <red|blue|...>      color for the test message\n"
 			" -C, --color-scheme <name>       color for the test message\n"
 			" -n, --name <utilname>           util name\n",
 			program_invocation_short_name);
-			return EXIT_FAILURE;
+			প্রত্যাগম EXIT_FAILURE;
 		}
 	}
 
 	colors_init(mode, name ? name : program_invocation_short_name);
 
-	if (color_is_sequence(color))
+	যদি (color_is_sequence(color))
 		seq = strdup(color);
-	else
+	অন্যথা
 		seq = color_get_sequence(color);
 
-	if (color_scheme)
+	যদি (color_scheme)
 		color_scheme_enable(color_scheme, seq);
-	else
+	অন্যথা
 		color_enable(seq);
 	printf("Hello World!");
 	color_disable();
 	fputc('\n', stdout);
 
-	free(seq);
+	মুক্ত(seq);
 
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_COLORS */
 

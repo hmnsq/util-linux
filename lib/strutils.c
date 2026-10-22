@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <inttypes.h>
+#অন্তর্ভাব <ctype.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <sys/stat.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <strings.h>
+#অন্তর্ভাব <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "cctype.h"
+#অন্তর্ভাব "nls.h"
+#অন্তর্ভাব "strutils.h"
+#অন্তর্ভাব "timeutils.h"
+#অন্তর্ভাব "bitops.h"
+#অন্তর্ভাব "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+স্থির পূর্ণাঙ্ক STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+শূন্য strutils_set_exitcode(পূর্ণাঙ্ক ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+স্থির পূর্ণাঙ্ক do_scale_by_power (uintmax_t *x, পূর্ণাঙ্ক base, পূর্ণাঙ্ক power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	যাবত্ (power--) {
+		যদি (UINTMAX_MAX / base < *x)
+			প্রত্যাগম -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+পূর্ণাঙ্ক ul_parse_size(ধ্রুব বর্ণ *str, uintmax_t *res, পূর্ণাঙ্ক *power)
 {
-	const char *p;
-	char *end;
+	ধ্রুব বর্ণ *p;
+	বর্ণ *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	পূর্ণাঙ্ক base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	স্থির ধ্রুব বর্ণ *suf  = "KMGTPEZY";
+	স্থির ধ্রুব বর্ণ *suf2 = "kmgtpezy";
+	ধ্রুব বর্ণ *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	যদি (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		গচ্ছ err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	যাবত্ (isspace((unsigned বর্ণ) *p))
 		p++;
-	if (*p == '-') {
+	যদি (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		গচ্ছ err;
 	}
 
-	errno = 0, end = NULL;
+	errno = 0, end = রিক্ত;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	যদি (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		গচ্ছ err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
+	যদি (!end || !*end)
+		গচ্ছ done;			/* without suffix */
 	p = end;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	যদি (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	অন্যথা যদি ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
+	অন্যথা যদি (*(p + 1)) {
+		সংরচনা lconv ধ্রুব *l = localeconv();
+		ধ্রুব বর্ণ *dp = l ? l->decimal_point : রিক্ত;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		যদি (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+			ধ্রুব বর্ণ *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			প্রতি (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
+			যদি (isdigit(*fstr)) {
+				errno = 0, end = রিক্ত;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				যদি (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					গচ্ছ err;
 				}
-			} else
-				end = (char *) p;
+			} অন্যথা
+				end = (বর্ণ *) p;
 
-			if (!end || !*end) {
+			যদি (!end || !*end) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				গচ্ছ err;	/* without suffix, but with fractions */
 			}
 			p = end;
-			goto check_suffix;
+			গচ্ছ check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		গচ্ছ err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	যদি (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	অন্যথা {
 		sp = strchr(suf2, *p);
-		if (sp)
+		যদি (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		অন্যথা {
 			rc = -EINVAL;
-			goto err;
+			গচ্ছ err;
 		}
 	}
 
-	if (power)
+	যদি (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	যদি (rc)
+		গচ্ছ err;
 
-	if (frac && pwr) {
-		int i;
+	যদি (frac && pwr) {
+		পূর্ণাঙ্ক i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		যদি (rc)
+			গচ্ছ err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
+		কুরু {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} যাবত্ (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		প্রতি (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		যদি (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			গচ্ছ err;
 		}
 		x += frac_val;
 	}
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	যদি (rc < 0)
 		errno = -rc;
-	return rc;
+	প্রত্যাগম rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+পূর্ণাঙ্ক strtosize(ধ্রুব বর্ণ *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	প্রত্যাগম ul_parse_size(str, res, রিক্ত);
 }
 
-int isdigit_strend(const char *str, const char **end)
+পূর্ণাঙ্ক isdigit_strend(ধ্রুব বর্ণ *str, ধ্রুব বর্ণ **end)
 {
-	const char *p;
+	ধ্রুব বর্ণ *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	প্রতি (p = str; p && *p && isdigit((unsigned বর্ণ) *p); p++);
 
-	if (end)
+	যদি (end)
 		*end = p;
-	return p && p > str && !*p;
+	প্রত্যাগম p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+পূর্ণাঙ্ক isxdigit_strend(ধ্রুব বর্ণ *str, ধ্রুব বর্ণ **end)
 {
-	const char *p;
+	ধ্রুব বর্ণ *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	প্রতি (p = str; p && *p && isxdigit((unsigned বর্ণ) *p); p++);
 
-	if (end)
+	যদি (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	প্রত্যাগম p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+পূর্ণাঙ্ক ul_strtobool(ধ্রুব বর্ণ *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	স্থির ধ্রুব বর্ণ *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	স্থির ধ্রুব বর্ণ *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	যদি (!str || !result)
+		প্রত্যাগম -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	প্রতি (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		যদি (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			প্রত্যাগম 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	প্রতি (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		যদি (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			প্রত্যাগম 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	প্রত্যাগম -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+পূর্ণাঙ্ক ul_parse_switch(ধ্রুব বর্ণ *arg, ...)
 {
-	const char *a, *b;
+	ধ্রুব বর্ণ *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	কুরু {
+		a = va_arg(ap, বর্ণ *);
+		যদি (!a)
+			ভঙ্গ;
+		b = va_arg(ap, বর্ণ *);
+		যদি (!b)
+			ভঙ্গ;
 
-		if (strcmp(arg, a) == 0) {
+		যদি (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			প্রত্যাগম 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		যদি (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			প্রত্যাগম 0;
 		}
-	} while (1);
+	} যাবত্ (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
 }
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+শূন্য *mempcpy(শূন্য *restrict dest, ধ্রুব শূন্য *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	প্রত্যাগম ((বর্ণ *)memcpy(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+size_t strnlen(ধ্রুব বর্ণ *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	প্রতি (i = 0; i < maxlen; i++) {
+		যদি (s[i] == '\0')
+			প্রত্যাগম i;
 	}
-	return maxlen;
+	প্রত্যাগম maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+বর্ণ *strnchr(ধ্রুব বর্ণ *s, size_t maxlen, পূর্ণাঙ্ক c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	প্রতি (; maxlen-- && *s != '\0'; ++s)
+		যদি (*s == (বর্ণ)c)
+			প্রত্যাগম (বর্ণ *)s;
+	প্রত্যাগম রিক্ত;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+বর্ণ *strndup(ধ্রুব বর্ণ *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	বর্ণ *new = malloc((len + 1) * পরিমাণ(বর্ণ));
+	যদি (!new)
+		প্রত্যাগম রিক্ত;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	প্রত্যাগম (বর্ণ *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+পূর্ণাঙ্ক ul_strtos64(ধ্রুব বর্ণ *str, int64_t *অঙ্ক, পূর্ণাঙ্ক base)
 {
-	char *end = NULL;
+	বর্ণ *end = রিক্ত;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	যদি (str == রিক্ত || *str == '\0')
+		প্রত্যাগম -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*অঙ্ক = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	যদি (errno != 0)
+		প্রত্যাগম -errno;
+	যদি (str == end || (end && *end))
+		প্রত্যাগম -(errno = EINVAL);
+	প্রত্যাগম 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+পূর্ণাঙ্ক ul_strtou64(ধ্রুব বর্ণ *str, uint64_t *অঙ্ক, পূর্ণাঙ্ক base)
 {
-	char *end = NULL;
+	বর্ণ *end = রিক্ত;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	যদি (str == রিক্ত || *str == '\0')
+		প্রত্যাগম -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	যদি (tmp < 0)
 		errno = ERANGE;
-	else {
+	অন্যথা {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*অঙ্ক = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	যদি (errno != 0)
+		প্রত্যাগম -errno;
+	যদি (str == end || (end && *end))
+		প্রত্যাগম -(errno = EINVAL);
+	প্রত্যাগম 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+পূর্ণাঙ্ক ul_strtos32(ধ্রুব বর্ণ *str, int32_t *অঙ্ক, পূর্ণাঙ্ক base)
 {
 	int64_t tmp;
-	int rc;
+	পূর্ণাঙ্ক rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	যদি (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	যদি (rc == 0)
+		*অঙ্ক = (int32_t) tmp;
+	প্রত্যাগম rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+পূর্ণাঙ্ক ul_strtou32(ধ্রুব বর্ণ *str, uint32_t *অঙ্ক, পূর্ণাঙ্ক base)
 {
 	uint64_t tmp;
-	int rc;
+	পূর্ণাঙ্ক rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	যদি (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	যদি (rc == 0)
+		*অঙ্ক = (uint32_t) tmp;
+	প্রত্যাগম rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+পূর্ণাঙ্ক ul_strtou16(ধ্রুব বর্ণ *str, uint16_t *অঙ্ক, পূর্ণাঙ্ক base)
 {
 	uint64_t tmp;
-	int rc;
+	পূর্ণাঙ্ক rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	যদি (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	যদি (rc == 0)
+		*অঙ্ক = (uint16_t) tmp;
+	প্রত্যাগম rc;
 }
 
 /*
@@ -432,154 +432,154 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(ধ্রুব বর্ণ *str, পূর্ণাঙ্ক base, ধ্রুব বর্ণ *errmesg,
+			     int64_t নিচের, int64_t up)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t অঙ্ক = 0;
+	পূর্ণাঙ্ক rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &অঙ্ক, base);
+	যদি (rc == 0 && ((নিচের && অঙ্ক < নিচের) || (up && অঙ্ক > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	যদি (rc) {
+		যদি (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	প্রত্যাগম অঙ্ক;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(ধ্রুব বর্ণ *str, পূর্ণাঙ্ক base, ধ্রুব বর্ণ *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t অঙ্ক = 0;
+	পূর্ণাঙ্ক rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &অঙ্ক, base);
+	যদি (rc == 0 && (up && অঙ্ক > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	যদি (rc) {
+		যদি (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	প্রত্যাগম অঙ্ক;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+দ্বিগুণ strtod_or_err(ধ্রুব বর্ণ *str, ধ্রুব বর্ণ *errmesg)
 {
-	double num;
-	char *end = NULL;
+	দ্বিগুণ অঙ্ক;
+	বর্ণ *end = রিক্ত;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	যদি (str == রিক্ত || *str == '\0')
+		গচ্ছ err;
+	অঙ্ক = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	যদি (errno || str == end || (end && *end))
+		গচ্ছ err;
 
-	return num;
+	প্রত্যাগম অঙ্ক;
 err:
-	if (errno == ERANGE)
+	যদি (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+পূর্ণাঙ্ক ul_strtold(ধ্রুব বর্ণ *str, long দ্বিগুণ *অঙ্ক)
 {
-	char *end = NULL;
+	বর্ণ *end = রিক্ত;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	যদি (str == রিক্ত || *str == '\0')
+		প্রত্যাগম -(errno = EINVAL);
+	*অঙ্ক = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	যদি (errno != 0)
+		প্রত্যাগম -errno;
+	যদি (str == end || (end && *end))
+		প্রত্যাগম -(errno = EINVAL);
+	প্রত্যাগম 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+long দ্বিগুণ strtold_or_err(ধ্রুব বর্ণ *str, ধ্রুব বর্ণ *errmesg)
 {
-	long double num = 0;
+	long দ্বিগুণ অঙ্ক = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	যদি (ul_strtold(str, &অঙ্ক) == 0)
+		প্রত্যাগম অঙ্ক;
+	যদি (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(ধ্রুব বর্ণ *str, ধ্রুব বর্ণ *errmesg)
 {
-	uintmax_t num;
+	uintmax_t অঙ্ক;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	যদি (strtosize(str, &অঙ্ক) == 0)
+		প্রত্যাগম অঙ্ক;
 
-	if (errno)
+	যদি (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+শূন্য strtotimeval_or_err(ধ্রুব বর্ণ *str, সংরচনা timeval *tv, ধ্রুব বর্ণ *errmesg)
 {
-	long double user_input;
+	long দ্বিগুণ user_প্রবেশ;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_প্রবেশ = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_প্রবেশ;
+	tv->tv_usec = (suseconds_t)((user_প্রবেশ - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+শূন্য strtotimespec_or_err(ধ্রুব বর্ণ *str, সংরচনা timespec *ts, ধ্রুব বর্ণ *errmesg)
 {
-	long double user_input;
+	long দ্বিগুণ user_প্রবেশ;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_প্রবেশ = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_প্রবেশ;
+	ts->tv_nsec = (long)((user_প্রবেশ - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(ধ্রুব বর্ণ *str, ধ্রুব বর্ণ *errmesg)
 {
-	int64_t user_input;
+	int64_t user_প্রবেশ;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_প্রবেশ = strtos64_or_err(str, errmesg);
+	প্রত্যাগম (time_t) user_প্রবেশ;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(ধ্রুব বর্ণ *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	যদি (mode && strcmp(mode, "never") == 0)
+		প্রত্যাগম false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	যদি (mode && strcmp(mode, "always") == 0)
+		প্রত্যাগম true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	যদি (!mode || strcmp(mode, "auto") == 0)
+		প্রত্যাগম isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(ধ্রুব বর্ণ *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	যদি (mode && strcmp(mode, "never") == 0)
+		প্রত্যাগম false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	যদি (mode && strcmp(mode, "always") == 0)
+		প্রত্যাগম true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	যদি (!mode || strcmp(mode, "auto") == 0)
+		প্রত্যাগম isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -588,23 +588,23 @@ bool annotationwanted(const char *mode)
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+বর্ণ *xstrmode(mode_t mode, বর্ণ *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	যদি (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	অন্যথা যদি (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	অন্যথা যদি (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	অন্যথা যদি (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	অন্যথা যদি (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	অন্যথা যদি (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	অন্যথা যদি (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	প্রত্যাগম str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+স্থির পূর্ণাঙ্ক get_exp(uint64_t n)
 {
-	int shft;
+	পূর্ণাঙ্ক shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	প্রতি (shft = 10; shft <= 60; shft += 10) {
+		যদি (n < (1ULL << shft))
+			ভঙ্গ;
 	}
-	return shft - 10;
+	প্রত্যাগম shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+বর্ণ *size_to_human_string(পূর্ণাঙ্ক options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	বর্ণ buf[32];
+	পূর্ণাঙ্ক dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	ধ্রুব বর্ণ *letters = "BKMGTPE";
+	বর্ণ suffix[পরিমাণ(" KiB")], *psuf = suffix;
+	বর্ণ c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	যদি (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	যদি ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	যদি (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		যদি (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		অন্যথা
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		যদি (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} অন্যথা {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		যদি (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	যদি (frac) {
+		সংরচনা lconv ধ্রুব *l = localeconv();
+		বর্ণ *dp = l ? l->decimal_point : রিক্ত;
+		পূর্ণাঙ্ক len;
 
-		if (!dp || !*dp)
+		যদি (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, পরিমাণ(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		যদি (len > 0 && (size_t) len < পরিমাণ(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			যদি (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, পরিমাণ(buf) - len);
+		} অন্যথা
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} অন্যথা
+		snprintf(buf, পরিমাণ(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	প্রত্যাগম strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+পূর্ণাঙ্ক string_to_idarray(ধ্রুব বর্ণ *list, পূর্ণাঙ্ক ary[], size_t arysz,
+			পূর্ণাঙ্ক (name2id)(ধ্রুব বর্ণ *, size_t))
 {
-	const char *begin = NULL, *p;
+	ধ্রুব বর্ণ *begin = রিক্ত, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	যদি (!list || !*list || !ary || !arysz || !name2id)
+		প্রত্যাগম -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	প্রতি (p = list; p && *p; p++) {
+		ধ্রুব বর্ণ *end = রিক্ত;
+		পূর্ণাঙ্ক id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		যদি (n >= arysz)
+			প্রত্যাগম -2;
+		যদি (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		যদি (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		যদি (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		যদি (!begin || !end)
+			অনুবর্ত;
+		যদি (end <= begin)
+			প্রত্যাগম -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		যদি (id == -1)
+			প্রত্যাগম -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = রিক্ত;
+		যদি (end && !*end)
+			ভঙ্গ;
 	}
-	return n;
+	প্রত্যাগম n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+পূর্ণাঙ্ক string_add_to_idarray(ধ্রুব বর্ণ *list, পূর্ণাঙ্ক ary[], size_t arysz,
+			size_t *ary_pos, পূর্ণাঙ্ক (name2id)(ধ্রুব বর্ণ *, size_t))
 {
-	const char *list_add;
-	int r;
+	ধ্রুব বর্ণ *list_add;
+	পূর্ণাঙ্ক r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	যদি (!list || !*list || !ary_pos || *ary_pos > arysz)
+		প্রত্যাগম -1;
 
-	if (list[0] == '+')
+	যদি (list[0] == '+')
 		list_add = &list[1];
-	else {
+	অন্যথা {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	যদি (r > 0)
 		*ary_pos += r;
-	return r;
+	প্রত্যাগম r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+পূর্ণাঙ্ক string_to_bitarray(ধ্রুব বর্ণ *list,
+		     বর্ণ *ary,
+		     পূর্ণাঙ্ক (*name2bit)(ধ্রুব বর্ণ *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	ধ্রুব বর্ণ *begin = রিক্ত, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	যদি (!list || !name2bit || !ary)
+		প্রত্যাগম -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	প্রতি (p = list; p && *p; p++) {
+		ধ্রুব বর্ণ *end = রিক্ত;
+		পূর্ণাঙ্ক bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		যদি (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		যদি (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		যদি (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		যদি (!begin || !end)
+			অনুবর্ত;
+		যদি (end <= begin)
+			প্রত্যাগম -1;
+		যদি (allow_range) {
+			যদি (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} অন্যথা যদি (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		যদি (bit < 0)
+			প্রত্যাগম bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		যদি (set_lower)
+			যাবত্ (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		অন্যথা যদি (set_higher)
+			যাবত্ (++bit < (পূর্ণাঙ্ক) allow_range)
 				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = রিক্ত;
+		যদি (end && !*end)
+			ভঙ্গ;
 	}
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+পূর্ণাঙ্ক string_to_bitmask(ধ্রুব বর্ণ *list,
 		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+		     long (*name2flag)(ধ্রুব বর্ণ *, size_t))
 {
-	const char *begin = NULL, *p;
+	ধ্রুব বর্ণ *begin = রিক্ত, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	যদি (!list || !name2flag || !mask)
+		প্রত্যাগম -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
+	প্রতি (p = list; p && *p; p++) {
+		ধ্রুব বর্ণ *end = রিক্ত;
 		long flag;
 
-		if (!begin)
+		যদি (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		যদি (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		যদি (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		যদি (!begin || !end)
+			অনুবর্ত;
+		যদি (end <= begin)
+			প্রত্যাগম -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		যদি (flag < 0)
+			প্রত্যাগম flag;	/* error */
 		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = রিক্ত;
+		যদি (end && !*end)
+			ভঙ্গ;
 	}
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+পূর্ণাঙ্ক ul_parse_range(ধ্রুব বর্ণ *str, পূর্ণাঙ্ক *lower, পূর্ণাঙ্ক *upper, পূর্ণাঙ্ক def)
 {
-	char *end = NULL;
+	বর্ণ *end = রিক্ত;
 
-	if (!str)
-		return 0;
+	যদি (!str)
+		প্রত্যাগম 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	যদি (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		যদি (errno || !end || *end || end == str)
+			প্রত্যাগম -1;
+	} অন্যথা {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		যদি (errno || !end || end == str)
+			প্রত্যাগম -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		যদি (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		অন্যথা যদি (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
-			end = NULL;
+			end = রিক্ত;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			যদি (errno || !end || *end || end == str)
+				প্রত্যাগম -1;
 		}
 	}
-	return 0;
+	প্রত্যাগম 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+ধ্রুব বর্ণ *ul_path_next_segment(ধ্রুব বর্ণ *str, size_t *sz)
 {
-	const char *start, *p;
+	ধ্রুব বর্ণ *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	যাবত্ (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	যদি (!start || !*start)
+		প্রত্যাগম রিক্ত;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	প্রতি (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	প্রত্যাগম start;
 }
 
-int streq_paths(const char *a, const char *b)
+পূর্ণাঙ্ক streq_paths(ধ্রুব বর্ণ *a, ধ্রুব বর্ণ *b)
 {
-	while (a && b) {
+	যাবত্ (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		ধ্রুব বর্ণ *a_seg = ul_path_next_segment(a, &a_sz);
+		ধ্রুব বর্ণ *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		যদি (a_sz + b_sz == 0)
+			প্রত্যাগম 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		যদি (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			প্রত্যাগম 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		যদি (!a_seg || !b_seg)
+			ভঙ্গ;
+		যদি (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+			ভঙ্গ;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+পূর্ণাঙ্ক ul_path_is_within(ধ্রুব বর্ণ *path, ধ্রুব বর্ণ *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	যদি (!path || !dir || !*path || !*dir)
+		প্রত্যাগম 0;
 
-	while (path && dir) {
+	যাবত্ (path && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		ধ্রুব বর্ণ *p_seg = ul_path_next_segment(path, &p_sz);
+		ধ্রুব বর্ণ *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		যদি (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			প্রত্যাগম 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		যদি (!p_seg || !d_seg)
+			ভঙ্গ;
+		যদি (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+			ভঙ্গ;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+বর্ণ *ul_strnconcat(ধ্রুব বর্ণ *s, ধ্রুব বর্ণ *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	বর্ণ *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	যদি (!s && !suffix)
+		প্রত্যাগম strdup("");
+	যদি (!s)
+		প্রত্যাগম strndup(suffix, b);
+	যদি (!suffix)
+		প্রত্যাগম strdup(s);
 
-	assert(s);
-	assert(suffix);
+	প্রতিজ্ঞা(s);
+	প্রতিজ্ঞা(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	যদি (b > ((size_t) -1) - a)
+		প্রত্যাগম রিক্ত;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	যদি (!r)
+		প্রত্যাগম রিক্ত;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	প্রত্যাগম r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+বর্ণ *ul_strconcat(ধ্রুব বর্ণ *s, ধ্রুব বর্ণ *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	প্রত্যাগম ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+বর্ণ *ul_strfconcat(ধ্রুব বর্ণ *s, ধ্রুব বর্ণ *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	বর্ণ *val, *res;
+	পূর্ণাঙ্ক sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	যদি (sz < 0)
+		প্রত্যাগম রিক্ত;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	মুক্ত(val);
+	প্রত্যাগম res;
 }
 
-int ul_strappend(char **a, const char *b)
+পূর্ণাঙ্ক ul_strappend(বর্ণ **a, ধ্রুব বর্ণ *b)
 {
 	size_t al, bl;
-	char *tmp;
+	বর্ণ *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	যদি (!a)
+		প্রত্যাগম -EINVAL;
+	যদি (!b || !*b)
+		প্রত্যাগম 0;
+	যদি (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		প্রত্যাগম !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	যদি (!tmp)
+		প্রত্যাগম -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	প্রত্যাগম 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+পূর্ণাঙ্ক strfappend(বর্ণ **a, ধ্রুব বর্ণ *format, ...)
 {
 	va_list ap;
-	int res;
+	পূর্ণাঙ্ক res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	প্রত্যাগম res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+বাহ্য পূর্ণাঙ্ক ul_strvfappend(বর্ণ **a, ধ্রুব বর্ণ *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	বর্ণ *val;
+	পূর্ণাঙ্ক sz;
+	পূর্ণাঙ্ক res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	যদি (sz < 0)
+		প্রত্যাগম -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	মুক্ত(val);
+	প্রত্যাগম res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+স্থির size_t strcspn_escaped(ধ্রুব বর্ণ *s, ধ্রুব বর্ণ *reject)
 {
-	int escaped = 0;
-	int n;
+	পূর্ণাঙ্ক escaped = 0;
+	পূর্ণাঙ্ক n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	প্রতি (n=0; s[n]; n++) {
+		যদি (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		অন্যথা যদি (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		অন্যথা যদি (strchr(reject, s[n]))
+			ভঙ্গ;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	প্রত্যাগম n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+বর্ণ *ul_strchr_escaped(ধ্রুব বর্ণ *s, পূর্ণাঙ্ক c)
 {
-	char *p;
-	int esc = 0;
+	বর্ণ *p;
+	পূর্ণাঙ্ক esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	প্রতি (p = (বর্ণ *) s; p && *p; p++) {
+		যদি (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			অনুবর্ত;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		যদি (*p == c && (!esc || c == '\\'))
+			প্রত্যাগম p;
 		esc = 0;
 	}
 
-	return NULL;
+	প্রত্যাগম রিক্ত;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+ধ্রুব বর্ণ *ul_split(ধ্রুব বর্ণ **state, size_t *l, ধ্রুব বর্ণ *separator, পূর্ণাঙ্ক quoted)
 {
-	const char *current;
+	ধ্রুব বর্ণ *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	যদি (!*current) {
+		প্রতিজ্ঞা(**state == '\0');
+		প্রত্যাগম রিক্ত;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	যদি (!*current) {
 		*state = current;
-		return NULL;
+		প্রত্যাগম রিক্ত;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	যদি (quoted && strchr("\'\"", *current)) {
+		বর্ণ quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		যদি (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			প্রত্যাগম রিক্ত;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} অন্যথা যদি (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		যদি (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			প্রত্যাগম রিক্ত;
 		}
 		*state = current + *l;
-	} else {
+	} অন্যথা {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	প্রত্যাগম current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+পূর্ণাঙ্ক skip_fline(FILE *fp)
 {
-	int ch;
+	পূর্ণাঙ্ক ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	কুরু {
+		যদি ((ch = fgetc(fp)) == EOF)
+			প্রত্যাগম 1;
+		যদি (ch == '\n')
+			প্রত্যাগম 0;
+	} যাবত্ (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+পূর্ণাঙ্ক ul_stralnumcmp(ধ্রুব বর্ণ *p1, ধ্রুব বর্ণ *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	ধ্রুব unsigned বর্ণ *s1 = (ধ্রুব unsigned বর্ণ *) p1;
+	ধ্রুব unsigned বর্ণ *s2 = (ধ্রুব unsigned বর্ণ *) p2;
+	unsigned বর্ণ c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	কুরু {
+		কুরু {
+			c1 = (unsigned বর্ণ) *s1++;
+		} যাবত্ (c1 != '\0' && !isalnum((unsigned পূর্ণাঙ্ক) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		কুরু {
+			c2 = (unsigned বর্ণ) *s2++;
+		} যাবত্ (c2 != '\0' && !isalnum((unsigned পূর্ণাঙ্ক) c2));
 
-		if (c1 != '\0')
+		যদি (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		যদি (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		যদি (c1 == '\0')
+			প্রত্যাগম c1 - c2;
+	} যাবত্ (c1 == c2);
 
-	return c1 - c2;
+	প্রত্যাগম c1 - c2;
 }
 
 /*
@@ -1277,163 +1277,163 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+পূর্ণাঙ্ক ul_optstr_next(বর্ণ **optstr, বর্ণ **name, size_t *namesz,
+		   বর্ণ **মান, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	পূর্ণাঙ্ক open_quote = 0;
+	বর্ণ *start = রিক্ত, *stop = রিক্ত, *p, *sep = রিক্ত;
+	বর্ণ *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	প্রতিজ্ঞা(optstr);
+	প্রতিজ্ঞা(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	যদি (name)
+		*name = রিক্ত;
+	যদি (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	যদি (মান)
+		*মান = রিক্ত;
+	যদি (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	যাবত্ (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	প্রতি (p = optstr0; p && *p; p++) {
+		যদি (!start && *p == '=')
+			প্রত্যাগম -EINVAL;
+		যদি (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		যদি (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		যদি (open_quote)
+			অনুবর্ত;		/* still in quoted block */
+		যদি (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		যদি (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		অন্যথা যদি (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		যদি (!start || !stop)
+			অনুবর্ত;
+		যদি (stop <= start)
+			প্রত্যাগম -EINVAL;
 
-		if (name)
+		যদি (name)
 			*name = start;
-		if (namesz)
+		যদি (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		যদি (sep) {
+			যদি (মান)
+				*মান = sep + 1;
+			যদি (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		প্রত্যাগম 0;
 	}
 
-	return 1;				/* end of optstr */
+	প্রত্যাগম 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+পূর্ণাঙ্ক ul_optstr_is_valid(ধ্রুব বর্ণ *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	পূর্ণাঙ্ক rc;
+	বর্ণ *p = (বর্ণ *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	যাবত্ ((rc = ul_optstr_next(&p, রিক্ত, রিক্ত, রিক্ত, রিক্ত)) == 0);
+	প্রত্যাগম rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+বর্ণ *ul_optstr_get_মান(ধ্রুব বর্ণ *optstr, ধ্রুব বর্ণ *চাবি)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	বর্ণ *name = রিক্ত, *মান = রিক্ত;
+	বর্ণ *p = (বর্ণ *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	যদি (!optstr || !চাবি || !*চাবি)
+		প্রত্যাগম রিক্ত;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = strlen(চাবি);
+	যাবত্ (ul_optstr_next(&p, &name, &namesz, &মান, &valsz) == 0) {
+		যদি (namesz != sz || !valsz)
+			অনুবর্ত;
+		যদি (strncmp(name, চাবি, namesz) == 0)
+			প্রত্যাগম strndup(মান, valsz);
 	}
-	return NULL;
+	প্রত্যাগম রিক্ত;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(বর্ণ *str)
 {
 	size_t len;
-	char q;
+	বর্ণ q;
 
-	if (!str || !*str)
-		return 0;
+	যদি (!str || !*str)
+		প্রত্যাগম 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	যদি ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		প্রত্যাগম len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	প্রত্যাগম len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+সংরচনা testS {
+	বর্ণ *name;
+	বর্ণ *মান;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+স্থির পূর্ণাঙ্ক test_strdup_to_member(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	struct testS *xx;
+	সংরচনা testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	যদি (argc < 3)
+		প্রত্যাগম EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = calloc(1, পরিমাণ(*xx));
+	যদি (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, মান, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	যদি (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->মান, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	printf("1: '%s', 2: '%s'\n", xx->name, xx->মান);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	মুক্ত(xx->name);
+	মুক্ত(xx->মান);
+	মুক্ত(xx);
+	প্রত্যাগম EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+স্থির পূর্ণাঙ্ক test_strutils_sizes(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	বর্ণ *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	যদি (argc < 2)
+		প্রত্যাগম EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	যদি (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1444,52 +1444,52 @@ static int test_strutils_sizes(int argc, char *argv[])
 				    SIZE_DECIMAL_2DIGITS, size);
 
 	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	মুক্ত(hum1);
+	মুক্ত(hum2);
+	মুক্ত(hum3);
 
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+স্থির পূর্ণাঙ্ক test_strutils_cmp_paths(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	পূর্ণাঙ্ক rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	যদি (argc < 3)
+		প্রত্যাগম EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+স্থির পূর্ণাঙ্ক test_strutils_path_is_within(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	int rc;
+	পূর্ণাঙ্ক rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	যদি (argc < 3)
+		প্রত্যাগম EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+স্থির পূর্ণাঙ্ক test_strutils_normalize(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	unsigned char *src, *dst, *org;
+	unsigned বর্ণ *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	যদি (argc < 2)
+		প্রত্যাগম EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
+	org = (unsigned বর্ণ *) strdup(argv[1]);
+	src = (unsigned বর্ণ *) strdup((বর্ণ *) org);
+	len = strlen((বর্ণ *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	যদি (!org || !src || !dst)
+		গচ্ছ done;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
@@ -1500,136 +1500,136 @@ static int test_strutils_normalize(int argc, char *argv[])
 	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
 done:
-	free(src);
-	free(dst);
-	free(org);
+	মুক্ত(src);
+	মুক্ত(dst);
+	মুক্ত(org);
 
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+স্থির পূর্ণাঙ্ক test_strutils_cstrcasecmp(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	char *a, *b;
+	বর্ণ *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	যদি (argc < 3)
+		প্রত্যাগম EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	যদি (!a || !b)
+		প্রত্যাগম EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	যদি (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		প্রত্যাগম test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						রিক্ত));
+		প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		যদি (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		প্রত্যাগম EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} অন্যথা যদি (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		প্রত্যাগম test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} অন্যথা যদি (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		প্রত্যাগম test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} অন্যথা যদি (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		প্রত্যাগম test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} অন্যথা যদি  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		প্রত্যাগম EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} অন্যথা যদি (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		প্রত্যাগম test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		প্রত্যাগম test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		প্রত্যাগম EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} অন্যথা যদি (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		প্রত্যাগম EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} অন্যথা যদি (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		বর্ণ *buf = "abc\0Y\0\0xyz\0X";
+		বর্ণ *end = buf + 12;
+		বর্ণ *p = buf;
 
-		do {
+		কুরু {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} যাবত্ ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		প্রত্যাগম EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		বর্ণ *name = রিক্ত, *val = রিক্ত;
+		বর্ণ *p = argv[2];
+		পূর্ণাঙ্ক rc;
 
-		if (!ul_optstr_is_valid(p))
+		যদি (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		যাবত্ ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (পূর্ণাঙ্ক) namesz, name,
+						   (পূর্ণাঙ্ক) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		যদি (rc == 1)
+			প্রত্যাগম EXIT_SUCCESS;
+	} অন্যথা যদি (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		বর্ণ *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		যদি (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		মুক্ত(unquoted);
+		প্রত্যাগম EXIT_SUCCESS;
 
-	} else {
+	} অন্যথা {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	প্রত্যাগম EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

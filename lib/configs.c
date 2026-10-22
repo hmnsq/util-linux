@@ -1,35 +1,35 @@
 /*
  * configs_file.c instantiates functions defined and described in configs_file.h
  */
-#include <errno.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
-#include <dirent.h>
+#অন্তর্ভাব <errno.h>
+#অন্তর্ভাব <sys/syslog.h>
+#অন্তর্ভাব <sys/stat.h>
+#অন্তর্ভাব <stdarg.h>
+#অন্তর্ভাব <stdbool.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <stdio.h>
+#যদি defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#অন্তর্ভাব <dirent.h>
 #endif
 
-#include "c.h"
-#include "configs.h"
-#include "strutils.h"
-#include "list.h"
-#include "fileutils.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "configs.h"
+#অন্তর্ভাব "strutils.h"
+#অন্তর্ভাব "list.h"
+#অন্তর্ভাব "fileutils.h"
 
-struct file_element {
-	struct list_head file_list;
-	char *filename;
+সংরচনা file_element {
+	সংরচনা list_head file_list;
+	বর্ণ *filename;
 };
 
-static __attribute__ ((__format__ (__printf__, 2, 0)))
-	char *config_mk_path(int types, const char *fmt, ...)
+স্থির __attribute__ ((__format__ (__printf__, 2, 0)))
+	বর্ণ *config_mk_path(পূর্ণাঙ্ক types, ধ্রুব বর্ণ *fmt, ...)
 {
 	va_list ap;
-	char *path = NULL;
-	int rc;
+	বর্ণ *path = রিক্ত;
+	পূর্ণাঙ্ক rc;
 
 	errno = 0;
 
@@ -37,19 +37,19 @@ static __attribute__ ((__format__ (__printf__, 2, 0)))
 	rc = vasprintf(&path, fmt, ap);
 	va_end(ap);
 
-	if (rc > 0 && types) {
-		struct stat st;
+	যদি (rc > 0 && types) {
+		সংরচনা stat st;
 
-		if (stat(path, &st) != 0 ||
+		যদি (stat(path, &st) != 0 ||
 		    !((st.st_mode & S_IFMT) & types))
-			goto fail;
+			গচ্ছ fail;
 
 	}
 
-	return path;
+	প্রত্যাগম path;
 fail:
-	free(path);
-	return NULL;
+	মুক্ত(path);
+	প্রত্যাগম রিক্ত;
 }
 
 /* Checking for main configuration file
@@ -57,234 +57,234 @@ fail:
  * Returning absolute path or NULL if not found The return value has to be
  * freed by the caller.
  */
-static char *main_configs(const char *root,
-			  const char *project,
-			  const char *confname,
-			  const char *suffix)
+স্থির বর্ণ *main_configs(ধ্রুব বর্ণ *মূল,
+			  ধ্রুব বর্ণ *project,
+			  ধ্রুব বর্ণ *confname,
+			  ধ্রুব বর্ণ *suffix)
 {
-	char *path = NULL;
+	বর্ণ *path = রিক্ত;
 
-	if (suffix)
+	যদি (suffix)
 		path = config_mk_path(S_IFREG, "%s/%s/%s.%s",
-				root, project, confname, suffix);
-	if (!path)
+				মূল, project, confname, suffix);
+	যদি (!path)
 		path = config_mk_path(S_IFREG, "%s/%s/%s",
-				root, project, confname);
-	return path;
+				মূল, project, confname);
+	প্রত্যাগম path;
 }
 
-static int configs_refer_filename(struct list_head *list, char *filename, int head)
+স্থির পূর্ণাঙ্ক configs_refer_filename(সংরচনা list_head *list, বর্ণ *filename, পূর্ণাঙ্ক head)
 {
-	struct file_element *e;
+	সংরচনা file_element *e;
 
-	e = calloc(1, sizeof(*e));
-	if (e == NULL)
-		return -ENOMEM;
+	e = calloc(1, পরিমাণ(*e));
+	যদি (e == রিক্ত)
+		প্রত্যাগম -ENOMEM;
 
 	INIT_LIST_HEAD(&e->file_list);
 	e->filename = filename;
-	if (head)
+	যদি (head)
 		list_add(&e->file_list, list);
-	else
+	অন্যথা
 		list_add_tail(&e->file_list, list);
-	return 0;
+	প্রত্যাগম 0;
 }
 
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#যদি defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 
-static int filter(const struct dirent *d)
+স্থির পূর্ণাঙ্ক filter(ধ্রুব সংরচনা dirent *d)
 {
 #ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_UNKNOWN && d->d_type != DT_REG &&
+	যদি (d->d_type != DT_UNKNOWN && d->d_type != DT_REG &&
 	    d->d_type != DT_LNK)
-		return 0;
+		প্রত্যাগম 0;
 #endif
-	if (is_dotdir_dirent(d))
-		return 0;
+	যদি (is_dotdir_dirent(d))
+		প্রত্যাগম 0;
 
-	return 1;
+	প্রত্যাগম 1;
 }
 
-static int read_dir(struct list_head *file_list,
-		    const char *project,
-		    const char *root,
-		    const char *confname,
-		    const char *suffix)
+স্থির পূর্ণাঙ্ক read_dir(সংরচনা list_head *file_list,
+		    ধ্রুব বর্ণ *project,
+		    ধ্রুব বর্ণ *মূল,
+		    ধ্রুব বর্ণ *confname,
+		    ধ্রুব বর্ণ *suffix)
 {
-	char *dirname = NULL;
-	char *filename = NULL;
-	int dd = -1, nfiles = 0, i;
-	int ret = 0;
-	struct dirent **namelist = NULL;
+	বর্ণ *dirname = রিক্ত;
+	বর্ণ *filename = রিক্ত;
+	পূর্ণাঙ্ক dd = -1, nfiles = 0, i;
+	পূর্ণাঙ্ক ret = 0;
+	সংরচনা dirent **namelist = রিক্ত;
 
-	if (suffix)
+	যদি (suffix)
 		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.%s.d",
-				root, project, confname, suffix);
-	if (!dirname)
+				মূল, project, confname, suffix);
+	যদি (!dirname)
 		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.d",
-				root, project, confname);
-	if (!dirname)
-		return errno == ENOMEM ? -ENOMEM : 0;
+				মূল, project, confname);
+	যদি (!dirname)
+		প্রত্যাগম errno == ENOMEM ? -ENOMEM : 0;
 
 	dd = open(dirname, O_RDONLY|O_CLOEXEC|O_DIRECTORY);
-	if (dd < 0)
-		goto finish;
+	যদি (dd < 0)
+		গচ্ছ finish;
 
 	nfiles = scandirat(dd, ".", &namelist, filter, alphasort);
-	if (nfiles <= 0)
-		goto finish;
+	যদি (nfiles <= 0)
+		গচ্ছ finish;
 
-	for (i = 0; i < nfiles; i++) {
-		struct dirent *d = namelist[i];
+	প্রতি (i = 0; i < nfiles; i++) {
+		সংরচনা dirent *d = namelist[i];
 
-		if (suffix) {
-			const char *p = ul_endswith(d->d_name, suffix);
+		যদি (suffix) {
+			ধ্রুব বর্ণ *p = ul_endswith(d->d_name, suffix);
 
-			if (!p || p == d->d_name || *(p - 1) != '.')
-				continue;
+			যদি (!p || p == d->d_name || *(p - 1) != '.')
+				অনুবর্ত;
 		}
 
-		if (asprintf(&filename, "%s/%s", dirname, d->d_name) < 0) {
+		যদি (asprintf(&filename, "%s/%s", dirname, d->d_name) < 0) {
 			ret = -ENOMEM;
-			break;
+			ভঙ্গ;
 		}
 
 		ret = configs_refer_filename(file_list, filename, 0);
-		if (ret < 0) {
-			free(filename);
-			break;
+		যদি (ret < 0) {
+			মুক্ত(filename);
+			ভঙ্গ;
 		}
 	}
 
 finish:
-	for (i = 0; i < nfiles; i++)
-		free(namelist[i]);
-	free(namelist);
-	free(dirname);
-	if (dd >= 0)
+	প্রতি (i = 0; i < nfiles; i++)
+		মুক্ত(namelist[i]);
+	মুক্ত(namelist);
+	মুক্ত(dirname);
+	যদি (dd >= 0)
 		close(dd);
-	return ret;
+	প্রত্যাগম ret;
 }
 
 #endif /* HAVE_SCANDIRAT */
 
-static int config_cmp(struct list_head *a, struct list_head *b,
-		      void *data __attribute__((__unused__)))
+স্থির পূর্ণাঙ্ক config_cmp(সংরচনা list_head *a, সংরচনা list_head *b,
+		      শূন্য *data __attribute__((__unused__)))
 {
-	struct file_element *ea = list_entry(a, struct file_element, file_list);
-	struct file_element *eb = list_entry(b, struct file_element, file_list);
-	char *na = ul_basename(ea->filename);
-	char *nb = ul_basename(eb->filename);
+	সংরচনা file_element *ea = list_entry(a, সংরচনা file_element, file_list);
+	সংরচনা file_element *eb = list_entry(b, সংরচনা file_element, file_list);
+	বর্ণ *na = ul_basename(ea->filename);
+	বর্ণ *nb = ul_basename(eb->filename);
 
-	return strcoll(na, nb);
+	প্রত্যাগম strcoll(na, nb);
 }
 
-static void free_list_entry(struct file_element *element)
+স্থির শূন্য free_list_entry(সংরচনা file_element *element)
 {
-	free(element->filename);
-	free(element);
+	মুক্ত(element->filename);
+	মুক্ত(element);
 }
 
-static int config_merge_list(struct list_head *main_list,
-			      struct list_head *new_list)
+স্থির পূর্ণাঙ্ক config_merge_list(সংরচনা list_head *main_list,
+			      সংরচনা list_head *new_list)
 {
-	struct list_head *n, *m, *next;
+	সংরচনা list_head *n, *m, *next;
 
 	list_for_each_safe(n, next, new_list) {
-		struct file_element *ne = list_entry(n, struct file_element, file_list);
-		char *nn = ul_basename(ne->filename);
-		int duplicate = 0;
+		সংরচনা file_element *ne = list_entry(n, সংরচনা file_element, file_list);
+		বর্ণ *nn = ul_basename(ne->filename);
+		পূর্ণাঙ্ক duplicate = 0;
 
 		list_for_each(m, main_list) {
-			struct file_element *me = list_entry(m, struct file_element, file_list);
-			char *mn = ul_basename(me->filename);
+			সংরচনা file_element *me = list_entry(m, সংরচনা file_element, file_list);
+			বর্ণ *mn = ul_basename(me->filename);
 
-			if (strcoll(mn, nn) == 0) {
+			যদি (strcoll(mn, nn) == 0) {
 				duplicate = 1;
-				break;
+				ভঙ্গ;
 			}
 		}
 
-		if (!duplicate) {
+		যদি (!duplicate) {
 			list_del_init(n);
 			list_add_tail(n, main_list);
 		}
 	}
 
-	list_sort(main_list, config_cmp, NULL);
-	return 0;
+	list_sort(main_list, config_cmp, রিক্ত);
+	প্রত্যাগম 0;
 }
 
-int ul_configs_file_list(struct list_head *file_list,
-			 const char *project,
-			 const char *etcdir,
-			 const char *rundir,
-			 const char *usrdir,
-			 const char *confname,
-			 const char *suffix)
+পূর্ণাঙ্ক ul_configs_file_list(সংরচনা list_head *file_list,
+			 ধ্রুব বর্ণ *project,
+			 ধ্রুব বর্ণ *etcdir,
+			 ধ্রুব বর্ণ *rundir,
+			 ধ্রুব বর্ণ *usrdir,
+			 ধ্রুব বর্ণ *confname,
+			 ধ্রুব বর্ণ *suffix)
 {
-	char *main_file = NULL;
-	struct list_head etc_list;
-	struct list_head run_list;
-	struct list_head usr_list;
-	int ret;
+	বর্ণ *main_file = রিক্ত;
+	সংরচনা list_head etc_list;
+	সংরচনা list_head run_list;
+	সংরচনা list_head usr_list;
+	পূর্ণাঙ্ক ret;
 
 	INIT_LIST_HEAD(file_list);
 
-	if (!confname)
-		return -ENOTEMPTY;
+	যদি (!confname)
+		প্রত্যাগম -ENOTEMPTY;
 
 	/* Default is /etc */
-	if (!etcdir)
+	যদি (!etcdir)
 		etcdir = _PATH_SYSCONFDIR;
-	if (!rundir)
+	যদি (!rundir)
 		rundir = "";
-	if (!usrdir)
+	যদি (!usrdir)
 		usrdir = "";
 
-	if (!project)
+	যদি (!project)
 		project = "";
 
 	/* Find "main" config file (but don't add to list yet) */
 	/* Search order: /etc /run /usr */
 	main_file = main_configs(etcdir, project, confname, suffix);
-	if (main_file == NULL)
+	যদি (main_file == রিক্ত)
 		main_file = main_configs(rundir, project, confname, suffix);
-	if (main_file == NULL)
+	যদি (main_file == রিক্ত)
 		main_file = main_configs(usrdir, project, confname, suffix);
 
 	INIT_LIST_HEAD(&etc_list);
 	INIT_LIST_HEAD(&run_list);
 	INIT_LIST_HEAD(&usr_list);
 
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#যদি defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 	ret = read_dir(&etc_list, project, etcdir, confname, suffix);
-	if (ret == -ENOMEM)
-		goto finish;
+	যদি (ret == -ENOMEM)
+		গচ্ছ finish;
 
 	ret = read_dir(&run_list, project, rundir, confname, suffix);
-	if (ret == -ENOMEM)
-		goto finish;
+	যদি (ret == -ENOMEM)
+		গচ্ছ finish;
 
 	ret = read_dir(&usr_list, project, usrdir, confname, suffix);
-	if (ret == -ENOMEM)
-		goto finish;
+	যদি (ret == -ENOMEM)
+		গচ্ছ finish;
 #endif
 
 	/* Merge drop-in directories in priority order (high to low) */
-	if ((ret = config_merge_list(file_list, &etc_list)) < 0 ||
+	যদি ((ret = config_merge_list(file_list, &etc_list)) < 0 ||
 	    (ret = config_merge_list(file_list, &run_list)) < 0 ||
 	    (ret = config_merge_list(file_list, &usr_list)) < 0)
-		goto finish;
+		গচ্ছ finish;
 
 	/* Add main config file at the beginning; the list is in parsing
 	 * order, so the main file is parsed first and the drop-ins which
 	 * follow it overwrite its settings. */
-	if (main_file != NULL) {
+	যদি (main_file != রিক্ত) {
 		ret = configs_refer_filename(file_list, main_file, 1);
-		if (ret < 0) {
-			free(main_file);
-			goto finish;
+		যদি (ret < 0) {
+			মুক্ত(main_file);
+			গচ্ছ finish;
 		}
 	}
 
@@ -293,80 +293,80 @@ finish:
 	ul_configs_free_list(&run_list);
 	ul_configs_free_list(&usr_list);
 
-	return ret < 0 ? ret : (int) list_count_entries(file_list);
+	প্রত্যাগম ret < 0 ? ret : (পূর্ণাঙ্ক) list_গুনতি_entries(file_list);
 }
 
-void ul_configs_free_list(struct list_head *file_list)
+শূন্য ul_configs_free_list(সংরচনা list_head *file_list)
 {
-	list_free(file_list, struct file_element,  file_list, free_list_entry);
+	list_free(file_list, সংরচনা file_element,  file_list, free_list_entry);
 }
 
-int ul_configs_next_filename(struct list_head *file_list,
-			     struct list_head **current_entry,
-			     char **name)
+পূর্ণাঙ্ক ul_configs_next_filename(সংরচনা list_head *file_list,
+			     সংরচনা list_head **current_entry,
+			     বর্ণ **name)
 {
-	struct file_element *element = NULL;
+	সংরচনা file_element *element = রিক্ত;
 
-	if (list_empty(file_list) || *current_entry == file_list)
-		return 1;
+	যদি (list_empty(file_list) || *current_entry == file_list)
+		প্রত্যাগম 1;
 
-	if (*current_entry == NULL)
+	যদি (*current_entry == রিক্ত)
 		*current_entry = file_list->next;
 
-	element = list_entry(*current_entry, struct file_element, file_list);
+	element = list_entry(*current_entry, সংরচনা file_element, file_list);
 	*name = element->filename;
 	*current_entry = (*current_entry)->next;
 
-	return 0;
+	প্রত্যাগম 0;
 }
 
 #ifdef TEST_PROGRAM_CONFIGS
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
-	struct list_head file_list;
-	struct list_head *current = NULL;
-	char *name = NULL;
-	const char *etc_path = NULL;
-	const char *run_path = NULL;
-	const char *usr_path = NULL;
-	const char *project = NULL;
-	const char *config_name = NULL;
-	const char *config_suffix = NULL;
-	static const struct option longopts[] = {
-		{ "etc", required_argument, NULL, 'e' },
-		{ "run", required_argument, NULL, 'r' },
-		{ "usr", required_argument, NULL, 'u' },
-		{ "project", required_argument, NULL, 'p' },
-		{ "name", required_argument, NULL, 'n' },
-		{ "suffix", required_argument, NULL, 's' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	সংরচনা list_head file_list;
+	সংরচনা list_head *current = রিক্ত;
+	বর্ণ *name = রিক্ত;
+	ধ্রুব বর্ণ *etc_path = রিক্ত;
+	ধ্রুব বর্ণ *run_path = রিক্ত;
+	ধ্রুব বর্ণ *usr_path = রিক্ত;
+	ধ্রুব বর্ণ *project = রিক্ত;
+	ধ্রুব বর্ণ *config_name = রিক্ত;
+	ধ্রুব বর্ণ *config_suffix = রিক্ত;
+	স্থির ধ্রুব সংরচনা option longopts[] = {
+		{ "etc", required_argument, রিক্ত, 'e' },
+		{ "run", required_argument, রিক্ত, 'r' },
+		{ "usr", required_argument, রিক্ত, 'u' },
+		{ "project", required_argument, রিক্ত, 'p' },
+		{ "name", required_argument, রিক্ত, 'n' },
+		{ "suffix", required_argument, রিক্ত, 's' },
+		{ "help", no_argument, রিক্ত, 'h' },
+		{ রিক্ত, 0, রিক্ত, 0 }
 	};
-	int ch, count;
+	পূর্ণাঙ্ক ch, গুনতি;
 
-	while ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'e':
+	যাবত্ ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, রিক্ত)) != -1) {
+		বিকল্প (ch) {
+		পক্ষ 'e':
 			etc_path = optarg;
-			break;
-		case 'r':
+			ভঙ্গ;
+		পক্ষ 'r':
 			run_path = optarg;
-			break;
-		case 'u':
+			ভঙ্গ;
+		পক্ষ 'u':
 			usr_path = optarg;
-			break;
-		case 'p':
+			ভঙ্গ;
+		পক্ষ 'p':
 			project = optarg;
-			break;
-		case 'n':
+			ভঙ্গ;
+		পক্ষ 'n':
 			config_name = optarg;
-			break;
-		case 's':
+			ভঙ্গ;
+		পক্ষ 's':
 			config_suffix = optarg;
-			break;
-		case 'h':
+			ভঙ্গ;
+		পক্ষ 'h':
 			printf("usage: %s [options]\n"
 				" -e, --etc <path>      path to /etc directory\n"
 				" -r, --run <path>      path to /run directory\n"
@@ -376,29 +376,29 @@ int main(int argc, char *argv[])
 				" -s, --suffix <suffix> config file suffix\n"
 				" -h, --help            display this help\n",
 				program_invocation_short_name);
-			return EXIT_SUCCESS;
-		default:
-			return EXIT_FAILURE;
+			প্রত্যাগম EXIT_SUCCESS;
+		স্বভাব:
+			প্রত্যাগম EXIT_FAILURE;
 		}
 	}
 
-	if (!config_name) {
+	যদি (!config_name) {
 		fprintf(stderr, "config name is required (use --name)\n");
-		return EXIT_FAILURE;
+		প্রত্যাগম EXIT_FAILURE;
 	}
 
-	count = ul_configs_file_list(&file_list, project, etc_path, run_path, usr_path,
+	গুনতি = ul_configs_file_list(&file_list, project, etc_path, run_path, usr_path,
 				     config_name, config_suffix);
-	if (count < 0) {
-		fprintf(stderr, "failed to get config file list: %d\n", count);
-		return EXIT_FAILURE;
+	যদি (গুনতি < 0) {
+		fprintf(stderr, "failed to get config file list: %d\n", গুনতি);
+		প্রত্যাগম EXIT_FAILURE;
 	}
 
-	printf("Found %d configuration file(s):\n", count);
-	while (ul_configs_next_filename(&file_list, &current, &name) == 0)
+	printf("Found %d configuration file(s):\n", গুনতি);
+	যাবত্ (ul_configs_next_filename(&file_list, &current, &name) == 0)
 		printf("  %s\n", name);
 
 	ul_configs_free_list(&file_list);
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_CONFIGS */

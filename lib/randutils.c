@@ -7,37 +7,37 @@
  * the terms of the Modified BSD License. The complete text of the license is
  * available in the Documentation/licenses/COPYING.BSD-3-Clause file.
  */
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
+#অন্তর্ভাব <stdio.h>
+#অন্তর্ভাব <unistd.h>
+#অন্তর্ভাব <fcntl.h>
+#অন্তর্ভাব <stdlib.h>
+#অন্তর্ভাব <string.h>
+#অন্তর্ভাব <sys/time.h>
 #ifdef HAVE_SYS_SYSCALL_H
-#include <sys/syscall.h>
+#অন্তর্ভাব <sys/syscall.h>
 #endif
-#include "c.h"
-#include "timeutils.h"
-#include "randutils.h"
-#include "nls.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "timeutils.h"
+#অন্তর্ভাব "randutils.h"
+#অন্তর্ভাব "nls.h"
 
 
 #ifdef HAVE_GETRANDOM
 # include <sys/random.h>
-#elif defined (__linux__)
-# if !defined(SYS_getrandom) && defined(__NR_getrandom)
+#নোচেদ্যদি defined (__linux__)
+# যদি !defined(SYS_getrandom) && defined(__NR_getrandom)
    /* usable kernel-headers, but old glibc-headers */
 #  define SYS_getrandom __NR_getrandom
 # endif
 #endif
 
-#if !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
+#যদি !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
 /* libc without function, but we have syscall */
 #define GRND_NONBLOCK 0x01
 #define GRND_RANDOM 0x02
-static int getrandom(void *buf, size_t buflen, unsigned int flags)
+স্থির পূর্ণাঙ্ক getrandom(শূন্য *buf, size_t buflen, unsigned পূর্ণাঙ্ক flags)
 {
-	return (syscall(SYS_getrandom, buf, buflen, flags));
+	প্রত্যাগম (syscall(SYS_getrandom, buf, buflen, flags));
 }
 # define HAVE_GETRANDOM
 #endif
@@ -47,18 +47,18 @@ static int getrandom(void *buf, size_t buflen, unsigned int flags)
 #define rand()		random()
 #endif
 
-#if defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
+#যদি defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
 #define DO_JRAND_MIX
 THREAD_LOCAL unsigned short ul_jrand_seed[3];
 #endif
 
-static void crank_random(void)
+স্থির শূন্য crank_random(শূন্য)
 {
-	int i;
-	struct timeval tv;
-	unsigned int n_pid, n_uid;
+	পূর্ণাঙ্ক i;
+	সংরচনা timeval tv;
+	unsigned পূর্ণাঙ্ক n_pid, n_uid;
 
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, রিক্ত);
 	n_pid = getpid();
 	n_uid = getuid();
 	srand((n_pid << 16) ^ n_uid ^ tv.tv_sec ^ tv.tv_usec);
@@ -69,23 +69,23 @@ static void crank_random(void)
 	ul_jrand_seed[2] = (tv.tv_sec ^ tv.tv_usec) >> 16;
 #endif
 	/* Crank the random number generator a few times */
-	gettimeofday(&tv, NULL);
-	for (i = (tv.tv_sec ^ tv.tv_usec) & 0x1F; i > 0; i--)
+	gettimeofday(&tv, রিক্ত);
+	প্রতি (i = (tv.tv_sec ^ tv.tv_usec) & 0x1F; i > 0; i--)
 		rand();
 }
 
-static int random_get_fd(ul_random_src_t *src)
+স্থির পূর্ণাঙ্ক random_get_fd(ul_random_src_t *src)
 {
-	int fd;
+	পূর্ণাঙ্ক fd;
 
 	*src = UL_RAND_URANDOM;
 	fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
-	if (fd == -1) {
+	যদি (fd == -1) {
 		*src = UL_RAND_RANDOM;
 		fd = open("/dev/random", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	}
 	crank_random();
-	return fd;
+	প্রত্যাগম fd;
 }
 
 /*
@@ -101,37 +101,37 @@ static int random_get_fd(ul_random_src_t *src)
  *
  * Returns source of random bytes (0 for weak quality).
  */
-ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
+ul_random_src_t ul_random_get_bytes(শূন্য *buf, size_t nbytes)
 {
-	unsigned char *cp = (unsigned char *)buf;
+	unsigned বর্ণ *cp = (unsigned বর্ণ *)buf;
 	size_t i, n = nbytes;
 	ul_random_src_t src;
-	int lose_counter = 0;
+	পূর্ণাঙ্ক lose_counter = 0;
 
 #ifdef HAVE_GETRANDOM
-	while (n > 0) {
-		int x;
+	যাবত্ (n > 0) {
+		পূর্ণাঙ্ক x;
 
 		errno = 0;
 		x = getrandom(cp, n, GRND_NONBLOCK);
-		if (x > 0) {			/* success */
+		যদি (x > 0) {			/* success */
 		       n -= x;
 		       cp += x;
 		       lose_counter = 0;
 		       errno = 0;
-		} else if (errno == ENOSYS) {	/* kernel without getrandom() */
-			break;
+		} অন্যথা যদি (errno == ENOSYS) {	/* kernel without getrandom() */
+			ভঙ্গ;
 
-		} else if (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
+		} অন্যথা যদি (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
 			xusleep(UL_RAND_READ_DELAY);	/* no entropy, wait and try again */
 			lose_counter++;
-		} else
-			break;
+		} অন্যথা
+			ভঙ্গ;
 	}
-	if (n == 0)
-		return UL_RAND_GETRANDOM;
+	যদি (n == 0)
+		প্রত্যাগম UL_RAND_GETRANDOM;
 
-	if (errno == ENOSYS)
+	যদি (errno == ENOSYS)
 	/*
 	 * We've been built against headers that support getrandom, but the
 	 * running kernel does not.  Fallback to reading from /dev/{u,}random
@@ -139,17 +139,17 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 	 */
 #endif
 	{
-		int fd = random_get_fd(&src);
+		পূর্ণাঙ্ক fd = random_get_fd(&src);
 
 		lose_counter = 0;
-		if (fd >= 0) {
-			while (n > 0) {
-				ssize_t x = read(fd, cp, n);
-				if (x <= 0) {
-					if (lose_counter++ > UL_RAND_READ_ATTEMPTS)
-						break;
+		যদি (fd >= 0) {
+			যাবত্ (n > 0) {
+				ssize_t x = পঠ(fd, cp, n);
+				যদি (x <= 0) {
+					যদি (lose_counter++ > UL_RAND_READ_ATTEMPTS)
+						ভঙ্গ;
 					xusleep(UL_RAND_READ_DELAY);
-					continue;
+					অনুবর্ত;
 				}
 				n -= x;
 				cp += x;
@@ -158,90 +158,90 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 
 			close(fd);
 		}
-		if (n == 0)
-			return src;
+		যদি (n == 0)
+			প্রত্যাগম src;
 	}
 	/*
 	 * We do this all the time, but this is the only source of
 	 * randomness if /dev/random/urandom is out to lunch.
 	 */
 	crank_random();
-	for (cp = buf, i = 0; i < nbytes; i++)
+	প্রতি (cp = buf, i = 0; i < nbytes; i++)
 		*cp++ ^= (rand() >> 7) & 0xFF;
 
 #ifdef DO_JRAND_MIX
 	{
 		unsigned short tmp_seed[3];
 
-		memcpy(tmp_seed, ul_jrand_seed, sizeof(tmp_seed));
+		memcpy(tmp_seed, ul_jrand_seed, পরিমাণ(tmp_seed));
 		ul_jrand_seed[2] = ul_jrand_seed[2] ^ syscall(__NR_gettid);
-		for (cp = buf, i = 0; i < nbytes; i++)
+		প্রতি (cp = buf, i = 0; i < nbytes; i++)
 			*cp++ ^= (jrand48(tmp_seed) >> 7) & 0xFF;
 		memcpy(ul_jrand_seed, tmp_seed,
-		       sizeof(ul_jrand_seed)-sizeof(unsigned short));
+		       পরিমাণ(ul_jrand_seed)-পরিমাণ(unsigned short));
 	}
 #endif
 
-	return UL_RAND_WEAK;
+	প্রত্যাগম UL_RAND_WEAK;
 }
 
 
 /*
  * Tell source of randomness.
  */
-const char *ul_random_tell_source(ul_random_src_t src)
+ধ্রুব বর্ণ *ul_random_tell_source(ul_random_src_t src)
 {
-	const char *s;
+	ধ্রুব বর্ণ *s;
 
-	switch (src) {
-	case UL_RAND_GETRANDOM:
+	বিকল্প (src) {
+	পক্ষ UL_RAND_GETRANDOM:
 		s = _("getrandom() function");
-		break;
-	case UL_RAND_RANDOM:
+		ভঙ্গ;
+	পক্ষ UL_RAND_RANDOM:
 		s = "/dev/random";
-		break;
-	case UL_RAND_URANDOM:
+		ভঙ্গ;
+	পক্ষ UL_RAND_URANDOM:
 		s = "/dev/urandom";
-		break;
-	default:
+		ভঙ্গ;
+	স্বভাব:
 		s = _("libc pseudo-random functions");
-		break;
+		ভঙ্গ;
 	}
 
-	return s;
+	প্রত্যাগম s;
 }
 
 #ifdef TEST_PROGRAM_RANDUTILS
-#include <inttypes.h>
+#অন্তর্ভাব <inttypes.h>
 
-int main(int argc, char *argv[])
+পূর্ণাঙ্ক main(পূর্ণাঙ্ক argc, বর্ণ *argv[])
 {
 	size_t i, n;
 	int64_t *vp, v;
-	char *buf;
+	বর্ণ *buf;
 	size_t bufsz;
 
 	n = argc == 1 ? 16 : atoi(argv[1]);
 
 	printf("Multiple random calls:\n");
-	for (i = 0; i < n; i++) {
-		ul_random_get_bytes(&v, sizeof(v));
+	প্রতি (i = 0; i < n; i++) {
+		ul_random_get_bytes(&v, পরিমাণ(v));
 		printf("#%02zu: %25"PRId64"\n", i, v);
 	}
 
 
 	printf("One random call:\n");
-	bufsz = n * sizeof(*vp);
+	bufsz = n * পরিমাণ(*vp);
 	buf = malloc(bufsz);
-	if (!buf)
+	যদি (!buf)
 		err(EXIT_FAILURE, "failed to allocate buffer");
 
 	ul_random_get_bytes(buf, bufsz);
-	for (i = 0; i < n; i++) {
-		vp = (int64_t *) (buf + (i * sizeof(*vp)));
+	প্রতি (i = 0; i < n; i++) {
+		vp = (int64_t *) (buf + (i * পরিমাণ(*vp)));
 		printf("#%02zu: %25"PRId64"\n", i, *vp);
 	}
 
-	return EXIT_SUCCESS;
+	প্রত্যাগম EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_RANDUTILS */

@@ -6,13 +6,13 @@
  * -lrt on systems with old libc (and probably also -lpthread for static
  *  build).
  */
-#include <time.h>
-#include <signal.h>
-#include <sys/time.h>
+#অন্তর্ভাব <time.h>
+#অন্তর্ভাব <signal.h>
+#অন্তর্ভাব <sys/time.h>
 
-#include "c.h"
-#include "timeutils.h"
-#include "timer.h"
+#অন্তর্ভাব "c.h"
+#অন্তর্ভাব "timeutils.h"
+#অন্তর্ভাব "timer.h"
 
 /*
  * Note the timeout is used for the first signal, then the signal is sent
@@ -32,68 +32,68 @@
  * deliveries.
  */
 #ifdef HAVE_TIMER_CREATE
-int setup_timer(struct ul_timer *timer,
-		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+পূর্ণাঙ্ক setup_timer(সংরচনা ul_timer *timer,
+		সংরচনা itimerval *timeout,
+		শূন্য (*timeout_handler)(পূর্ণাঙ্ক, siginfo_t *, শূন্য *))
 {
 	time_t sec = timeout->it_value.tv_sec;
 	long usec = timeout->it_value.tv_usec;
-	struct sigaction sig_a;
-	static struct sigevent sig_e = {
+	সংরচনা sigaction sig_a;
+	স্থির সংরচনা sigevent sig_e = {
 		.sigev_notify = SIGEV_SIGNAL,
 		.sigev_signo = SIGALRM
 	};
-	struct itimerspec val = {
+	সংরচনা itimerspec val = {
 		.it_value.tv_sec = sec,
 		.it_value.tv_nsec = usec * NSEC_PER_USEC,
 		.it_interval.tv_sec = sec / 100,
 		.it_interval.tv_nsec = (sec ? sec % 100 : 1) * 10 * NSEC_PER_MSEC
 	};
 
-	if (sigemptyset(&sig_a.sa_mask))
-		return 1;
+	যদি (sigemptyset(&sig_a.sa_mask))
+		প্রত্যাগম 1;
 
 	sig_a.sa_flags = SA_SIGINFO;
 	sig_a.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sig_a, NULL))
-		return 1;
-	if (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
-		return 1;
-	if (timer_settime(timer->t_id, 0, &val, NULL))
-		return 1;
-	return 0;
+	যদি (sigaction(SIGALRM, &sig_a, রিক্ত))
+		প্রত্যাগম 1;
+	যদি (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
+		প্রত্যাগম 1;
+	যদি (timer_settime(timer->t_id, 0, &val, রিক্ত))
+		প্রত্যাগম 1;
+	প্রত্যাগম 0;
 }
-void cancel_timer(struct ul_timer *timer)
+শূন্য cancel_timer(সংরচনা ul_timer *timer)
 {
 	timer_delete(timer->t_id);
 }
 
-#else /* !HAVE_TIMER_CREATE */
+#অন্যথা /* !HAVE_TIMER_CREATE */
 
-int setup_timer(struct ul_timer *timer,
-		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+পূর্ণাঙ্ক setup_timer(সংরচনা ul_timer *timer,
+		সংরচনা itimerval *timeout,
+		শূন্য (*timeout_handler)(পূর্ণাঙ্ক, siginfo_t *, শূন্য *))
 {
-	struct sigaction sa;
+	সংরচনা sigaction sa;
 
-	memset(&sa, 0, sizeof sa);
-	memset(timer, 0, sizeof(*timer));
+	memset(&sa, 0, পরিমাণ sa);
+	memset(timer, 0, পরিমাণ(*timer));
 
 	sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
 	sa.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sa, &timer->old_sa))
-		return 1;
-	if (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
-		return 1;
-	return 0;
+	যদি (sigaction(SIGALRM, &sa, &timer->old_sa))
+		প্রত্যাগম 1;
+	যদি (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
+		প্রত্যাগম 1;
+	প্রত্যাগম 0;
 }
 
-void cancel_timer(struct ul_timer *timer)
+শূন্য cancel_timer(সংরচনা ul_timer *timer)
 {
-	setitimer(ITIMER_REAL, &timer->old_timer, NULL);
-	sigaction(SIGALRM, &timer->old_sa, NULL);
+	setitimer(ITIMER_REAL, &timer->old_timer, রিক্ত);
+	sigaction(SIGALRM, &timer->old_sa, রিক্ত);
 
 }
 #endif /* !HAVE_TIMER_CREATE */
