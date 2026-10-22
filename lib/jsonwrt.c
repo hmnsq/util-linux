@@ -6,13 +6,13 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <cctype.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <cctype.h>
 
-#include "c.h"
-#include "jsonwrt.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "jsonwrt.h"
 
 /*
  * Requirements enumerated via testing (V8, Firefox, IE11):
@@ -26,14 +26,14 @@
  *	}
  * }
  */
-static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t size)
+स्थिर शून्य fputs_quoted_case_json(स्थिरांक अक्षर *data, खाता *out, पूर्णांक dir, माप_प्रकार size)
 {
-	const char *p;
+	स्थिरांक अक्षर *p;
 
-	fputc('"', out);
-	for (p = data; p && *p && (!size || p < data + size); p++) {
+	ख_अक्षर_दो('"', out);
+	साठी (p = data; p && *p && (!size || p < data + size); p++) {
 
-		const unsigned int c = (unsigned int) *p;
+		स्थिरांक अचिन्हित पूर्णांक c = (अचिन्हित पूर्णांक) *p;
 
 		/* From http://www.json.org
 		 *
@@ -43,66 +43,66 @@ static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t 
 		 * Note that single-quotes and forward slashes, while they're
 		 * in the JSON spec, don't break double-quoted strings.
 		 */
-		if (c == '"' || c == '\\') {
-			fputc('\\', out);
-			fputc(c, out);
-			continue;
+		जर (c == '"' || c == '\\') {
+			ख_अक्षर_दो('\\', out);
+			ख_अक्षर_दो(c, out);
+			सुरूठेवा;
 		}
 
 		/* All non-control characters OK; do the case swap as required. */
-		if (c >= 0x20) {
+		जर (c >= 0x20) {
 			/*
 			 * Don't use locale sensitive ctype.h functions for regular
 			 * ASCII chars, because for example with Turkish locale
 			 * (aka LANG=tr_TR.UTF-8) toupper('I') returns 'I'.
 			 */
-			if (c <= 127)
-				fputc(dir ==  1 ? c_toupper(c) :
+			जर (c <= 127)
+				ख_अक्षर_दो(dir ==  1 ? c_toupper(c) :
 				      dir == -1 ? c_tolower(c) : *p, out);
-			else
-				fputc(dir ==  1 ? toupper(c) :
-				      dir == -1 ? tolower(c) : *p, out);
-			continue;
+			अन्यथा
+				ख_अक्षर_दो(dir ==  1 ? बड़े(c) :
+				      dir == -1 ? छोटे(c) : *p, out);
+			सुरूठेवा;
 		}
 
 		/* In addition, all chars under ' ' break Node's/V8/Chrome's, and
 		 * Firefox's JSON.parse function
 		 */
-		switch (c) {
+		निवड (c) {
 			/* Handle short-hand cases to reduce output size.  C
 			 * has most of the same stuff here, so if there's an
 			 * "Escape for C" function somewhere in the STL, we
 			 * should probably be using it.
 			 */
-			case '\b':
-				fputs("\\b", out);
-				break;
-			case '\t':
-				fputs("\\t", out);
-				break;
-			case '\n':
-				fputs("\\n", out);
-				break;
-			case '\f':
-				fputs("\\f", out);
-				break;
-			case '\r':
-				fputs("\\r", out);
-				break;
-			default:
+			स्थिती '\b':
+				ख_माला_दो("\\b", out);
+				थांबा;
+			स्थिती '\t':
+				ख_माला_दो("\\t", out);
+				थांबा;
+			स्थिती '\n':
+				ख_माला_दो("\\n", out);
+				थांबा;
+			स्थिती '\f':
+				ख_माला_दो("\\f", out);
+				थांबा;
+			स्थिती '\r':
+				ख_माला_दो("\\r", out);
+				थांबा;
+			पूर्वनिर्धारित:
 				/* Other assorted control characters */
-				fprintf(out, "\\u00%02x", c);
-				break;
+				ख_लिखो(out, "\\u00%02x", c);
+				थांबा;
 		}
 	}
-	fputc('"', out);
+	ख_अक्षर_दो('"', out);
 }
 
 #define fputs_quoted_json(_d, _o)       fputs_quoted_case_json(_d, _o, 0, 0)
 #define fputs_quoted_json_upper(_d, _o) fputs_quoted_case_json(_d, _o, 1, 0)
 #define fputs_quoted_json_lower(_d, _o) fputs_quoted_case_json(_d, _o, -1, 0)
 
-void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json_format json_format)
+शून्य ul_jsonwrt_init(संरचना ul_jsonwrt *fmt, खाता *out, पूर्णांक indent, गणना ul_json_format json_format)
 {
 	fmt->out = out;
 	fmt->indent = indent;
@@ -110,229 +110,229 @@ void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json
 	fmt->after_close = 0;
 }
 
-int ul_jsonwrt_is_ready(struct ul_jsonwrt *fmt)
+पूर्णांक ul_jsonwrt_is_ready(संरचना ul_jsonwrt *fmt)
 {
-	return fmt->out == NULL ? 0 : 1;
+	परत fmt->out == रिक्त ? 0 : 1;
 }
 
-void ul_jsonwrt_indent(struct ul_jsonwrt *fmt)
+शून्य ul_jsonwrt_indent(संरचना ul_jsonwrt *fmt)
 {
-	int i;
+	पूर्णांक i;
 
-	for (i = 0; i < fmt->indent; i++)
-		fputs("   ", fmt->out);
+	साठी (i = 0; i < fmt->indent; i++)
+		ख_माला_दो("   ", fmt->out);
 }
 
-static void print_name(struct ul_jsonwrt *fmt, const char *name)
+स्थिर शून्य print_name(संरचना ul_jsonwrt *fmt, स्थिरांक अक्षर *name)
 {
 	/* Values on the top level are not members of an array or object, so
 	 * they are never comma separated; ul_jsonwrt_close() has already
 	 * terminated the previous one by a newline. */
-	if (fmt->after_close && (fmt->indent > 0 || name)) {
-		if (fmt->json_format == UL_JSON_LINE
+	जर (fmt->after_close && (fmt->indent > 0 || name)) {
+		जर (fmt->json_format == UL_JSON_ओळ
 		    || fmt->json_format == UL_JSON_COMPACT)
-			fputs(",", fmt->out);
-		else
-			fputs(name ? ",\n" : ",", fmt->out);
+			ख_माला_दो(",", fmt->out);
+		अन्यथा
+			ख_माला_दो(name ? ",\n" : ",", fmt->out);
 	}
 
-	switch (fmt->json_format) {
-	case UL_JSON_LINE:
-	case UL_JSON_COMPACT:
-		break;
-	case UL_JSON_PRETTY:
-	default:
-		if (name || !fmt->after_close)
+	निवड (fmt->json_format) {
+	स्थिती UL_JSON_ओळ:
+	स्थिती UL_JSON_COMPACT:
+		थांबा;
+	स्थिती UL_JSON_PRETTY:
+	पूर्वनिर्धारित:
+		जर (name || !fmt->after_close)
 			ul_jsonwrt_indent(fmt);
-		break;
+		थांबा;
 	}
-	if (name)
+	जर (name)
 		fputs_quoted_json_lower(name, fmt->out);
 }
 
-void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
+शून्य ul_jsonwrt_open(संरचना ul_jsonwrt *fmt, स्थिरांक अक्षर *name, पूर्णांक type)
 {
-	const char *s = "";
+	स्थिरांक अक्षर *s = "";
 
 	print_name(fmt, name);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_LINE)
+	निवड (type) {
+	स्थिती UL_JSON_OBJECT:
+		जर (fmt->json_format == UL_JSON_ओळ)
 			s = "{";
-		else if (fmt->json_format == UL_JSON_COMPACT) {
+		अन्यथा जर (fmt->json_format == UL_JSON_COMPACT) {
 			/* At nesting depth 2, put the object opens on a new line
 			 * for readability; otherwise keep fully compact (no newline). */
-			if (fmt->indent == 2)
+			जर (fmt->indent == 2)
 				s = name ? ":{" : "\n{";
-			else
+			अन्यथा
 				s = "{";
-		} else
+		} अन्यथा
 			s = name ? ": {\n" : "{\n";
 		fmt->indent++;
-		break;
-	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_LINE)
+		थांबा;
+	स्थिती UL_JSON_ARRAY:
+		जर (fmt->json_format == UL_JSON_ओळ)
 			s = "[";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		अन्यथा जर (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":[" : "[";
-		else
+		अन्यथा
 			s = name ? ": [\n" : "[\n";
 		fmt->indent++;
-		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_LINE)
+		थांबा;
+	स्थिती UL_JSON_मूल्य:
+		जर (fmt->json_format == UL_JSON_ओळ)
 			s = name ? ":" : "";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		अन्यथा जर (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":" : "";
-		else
+		अन्यथा
 			s = name ? ": " : " ";
-		break;
+		थांबा;
 	}
-	fputs(s, fmt->out);
+	ख_माला_दो(s, fmt->out);
 	fmt->after_close = 0;
 }
 
-void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
+शून्य ul_jsonwrt_empty(संरचना ul_jsonwrt *fmt, स्थिरांक अक्षर *name, पूर्णांक type)
 {
-	const char *s = "";
+	स्थिरांक अक्षर *s = "";
 
 	print_name(fmt, name);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_PRETTY)
+	निवड (type) {
+	स्थिती UL_JSON_OBJECT:
+		जर (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": {}" : "{}";
-		else
+		अन्यथा
 			s = name ? ":{}" : "{}";
-		break;
-	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		थांबा;
+	स्थिती UL_JSON_ARRAY:
+		जर (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": []" : "[]";
-		else
+		अन्यथा
 			s = name ? ":[]" : "[]";
-		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		थांबा;
+	स्थिती UL_JSON_मूल्य:
+		जर (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": null" : "null";
-		else
+		अन्यथा
 			s = name ? ":null" : "null";
-		break;
+		थांबा;
 	}
-	fputs(s, fmt->out);
+	ख_माला_दो(s, fmt->out);
 	fmt->after_close = 1;
 }
 
-void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
+शून्य ul_jsonwrt_close(संरचना ul_jsonwrt *fmt, पूर्णांक type)
 {
-	char endchr;
+	अक्षर endchr;
 
-	assert(fmt->indent > 0);
+	प्रतिज्ञा(fmt->indent > 0);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
+	निवड (type) {
+	स्थिती UL_JSON_OBJECT:
 		fmt->indent--;
 		endchr = '}';
-		break;
-	case UL_JSON_ARRAY:
+		थांबा;
+	स्थिती UL_JSON_ARRAY:
 		fmt->indent--;
 		endchr = ']';
-		break;
-	case UL_JSON_VALUE:
+		थांबा;
+	स्थिती UL_JSON_मूल्य:
 		fmt->after_close = 1;
-		return;
-	default:
+		परत;
+	पूर्वनिर्धारित:
 		fmt->after_close = 1;
-		return;
+		परत;
 	}
 
 	/* In COMPACT, when closing a direct child of root (indent==1),
 	 * insert a newline so the closing bracket starts on its own line. */
-	if (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
-		fputc('\n', fmt->out);
+	जर (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
+		ख_अक्षर_दो('\n', fmt->out);
 
-	switch (fmt->json_format) {
-	case UL_JSON_LINE:
-	case UL_JSON_COMPACT:
-		break;
-	case UL_JSON_PRETTY:
-	default:
-		fputs("\n", fmt->out);
+	निवड (fmt->json_format) {
+	स्थिती UL_JSON_ओळ:
+	स्थिती UL_JSON_COMPACT:
+		थांबा;
+	स्थिती UL_JSON_PRETTY:
+	पूर्वनिर्धारित:
+		ख_माला_दो("\n", fmt->out);
 		ul_jsonwrt_indent(fmt);
-		break;
+		थांबा;
 	}
 
-	fputc(endchr, fmt->out);
+	ख_अक्षर_दो(endchr, fmt->out);
 
 	/* Terminate the value on the top level. The writer may be re-initialized
 	 * between the values (for example libsmartcols does it for every
 	 * scols_table_print_range() call), so the terminator has to be printed
 	 * by the value itself rather than by the next one (see print_name()). */
-	if (fmt->indent == 0)
-		fputc('\n', fmt->out);
+	जर (fmt->indent == 0)
+		ख_अक्षर_दो('\n', fmt->out);
 
 	fmt->after_close = 1;
 }
 
 
-void ul_jsonwrt_flush(struct ul_jsonwrt *fmt)
+शून्य ul_jsonwrt_flush(संरचना ul_jsonwrt *fmt)
 {
-	fflush(fmt->out);
+	ख_साफ(fmt->out);
 }
 
-void ul_jsonwrt_value_raw(struct ul_jsonwrt *fmt,
-			const char *name, const char *data)
+शून्य ul_jsonwrt_मूल्य_raw(संरचना ul_jsonwrt *fmt,
+			स्थिरांक अक्षर *name, स्थिरांक अक्षर *data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
-		fputs(data, fmt->out);
-	else
-		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_मूल्य_open(fmt, name);
+	जर (data && *data)
+		ख_माला_दो(data, fmt->out);
+	अन्यथा
+		ख_माला_दो("null", fmt->out);
+	ul_jsonwrt_मूल्य_close(fmt);
 }
 
-void ul_jsonwrt_value_s(struct ul_jsonwrt *fmt,
-			const char *name, const char *data)
+शून्य ul_jsonwrt_मूल्य_s(संरचना ul_jsonwrt *fmt,
+			स्थिरांक अक्षर *name, स्थिरांक अक्षर *data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ul_jsonwrt_मूल्य_open(fmt, name);
+	जर (data && *data)
 		fputs_quoted_json(data, fmt->out);
-	else
-		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	अन्यथा
+		ख_माला_दो("null", fmt->out);
+	ul_jsonwrt_मूल्य_close(fmt);
 }
 
-void ul_jsonwrt_value_s_sized(struct ul_jsonwrt *fmt,
-			      const char *name, const char *data, size_t size)
+शून्य ul_jsonwrt_मूल्य_s_sized(संरचना ul_jsonwrt *fmt,
+			      स्थिरांक अक्षर *name, स्थिरांक अक्षर *data, माप_प्रकार size)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ul_jsonwrt_मूल्य_open(fmt, name);
+	जर (data && *data)
 		fputs_quoted_case_json(data, fmt->out, 0, size);
-	else
-		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	अन्यथा
+		ख_माला_दो("null", fmt->out);
+	ul_jsonwrt_मूल्य_close(fmt);
 }
 
-void ul_jsonwrt_value_u64(struct ul_jsonwrt *fmt,
-			const char *name, uint64_t data)
+शून्य ul_jsonwrt_मूल्य_u64(संरचना ul_jsonwrt *fmt,
+			स्थिरांक अक्षर *name, uint64_t data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	fprintf(fmt->out, "%"PRIu64, data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_मूल्य_open(fmt, name);
+	ख_लिखो(fmt->out, "%"PRIu64, data);
+	ul_jsonwrt_मूल्य_close(fmt);
 }
 
-void ul_jsonwrt_value_double(struct ul_jsonwrt *fmt,
-			const char *name, long double data)
+शून्य ul_jsonwrt_मूल्य_double(संरचना ul_jsonwrt *fmt,
+			स्थिरांक अक्षर *name, दीर्घ द्विगुण data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	fprintf(fmt->out, "%Lg", data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_मूल्य_open(fmt, name);
+	ख_लिखो(fmt->out, "%Lg", data);
+	ul_jsonwrt_मूल्य_close(fmt);
 }
 
-void ul_jsonwrt_value_boolean(struct ul_jsonwrt *fmt,
-			const char *name, int data)
+शून्य ul_jsonwrt_मूल्य_boolean(संरचना ul_jsonwrt *fmt,
+			स्थिरांक अक्षर *name, पूर्णांक data)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	fputs(data ? "true" : "false", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_मूल्य_open(fmt, name);
+	ख_माला_दो(data ? "true" : "false", fmt->out);
+	ul_jsonwrt_मूल्य_close(fmt);
 }

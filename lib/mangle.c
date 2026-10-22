@@ -6,67 +6,67 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <ctype.h>
 
-#include "mangle.h"
-#include "c.h"
+#अन्तर्भाव "mangle.h"
+#अन्तर्भाव "c.h"
 
 #define isoctal(a)		(((a) & ~7) == '0')
 
-#define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
+#define from_hex(c)		(है_अंक(c) ? c - '0' : छोटे(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+स्थिर ओळीत पूर्णांक is_unwanted_char(अचिन्हित अक्षर c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	परत c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+अक्षर *mangle(स्थिरांक अक्षर *s)
 {
-	char *ss, *sp;
+	अक्षर *ss, *sp;
 
-	if (!s)
-		return NULL;
+	जर (!s)
+		परत रिक्त;
 
-	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	ss = sp = दो_स्मृति(4 * म_माप(s) + 1);
+	जर (!sp)
+		परत रिक्त;
+	पर्यंत(1) {
+		जर (!*s) {
 			*sp = '\0';
-			break;
+			थांबा;
 		}
-		if (is_unwanted_char(*s)) {
+		जर (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} अन्यथा
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	परत ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+शून्य unmangle_to_buffer(स्थिरांक अक्षर *s, अक्षर *buf, माप_प्रकार len)
 {
-	size_t sz = 0;
+	माप_प्रकार sz = 0;
 
-	if (!s)
-		return;
+	जर (!s)
+		परत;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	पर्यंत(*s && sz < len - 1) {
+		जर (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} अन्यथा {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,128 +74,128 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+माप_प्रकार unhexmangle_to_buffer(स्थिरांक अक्षर *s, अक्षर *buf, माप_प्रकार len)
 {
-	size_t sz = 0;
-	const char *buf0 = buf;
+	माप_प्रकार sz = 0;
+	स्थिरांक अक्षर *buf0 = buf;
 
-	if (!s)
-		return 0;
+	जर (!s)
+		परत 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
-		    isxdigit(s[2]) && isxdigit(s[3])) {
+	पर्यंत(*s && sz < len - 1) {
+		जर (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+		    है_षष्ठादशक(s[2]) && है_षष्ठादशक(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} अन्यथा {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	परत buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+माप_प्रकार unescape_to_buffer(स्थिरांक अक्षर *s, स्थिरांक अक्षर *wanted, अक्षर *buf, माप_प्रकार len)
 {
-	size_t sz = 0;
-	const char *buf0 = buf;
+	माप_प्रकार sz = 0;
+	स्थिरांक अक्षर *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	पर्यंत (*s && sz < len - 1) {
+		जर (*s == '\\' && sz + 1 < len - 1 && म_अक्षर(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} अन्यथा {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	परत buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+स्थिर ओळीत स्थिरांक अक्षर *skip_nonspaces(स्थिरांक अक्षर *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	पर्यंत (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	परत s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+अक्षर *unmangle(स्थिरांक अक्षर *s, स्थिरांक अक्षर **end)
 {
-	char *buf;
-	const char *e;
-	size_t sz;
+	अक्षर *buf;
+	स्थिरांक अक्षर *e;
+	माप_प्रकार sz;
 
-	if (!s)
-		return NULL;
+	जर (!s)
+		परत रिक्त;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
+	जर (end)
 		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	जर (e == s)
+		परत रिक्त;	/* empty string */
 
-	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	buf = दो_स्मृति(sz);
+	जर (!buf)
+		परत रिक्त;
 
 	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	परत buf;
 }
 
 #ifdef TEST_PROGRAM_MANGLE
-#include <errno.h>
-int main(int argc, char *argv[])
+#अन्तर्भाव <errno.h>
+पूर्णांक main(पूर्णांक argc, अक्षर *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
-		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
+	अक्षर *p = रिक्त;
+	जर (argc < 3) {
+		ख_लिखो(मानक_त्रुटि, "usage: %s --mangle|unmangle|unescape <string>\n",
 						program_invocation_short_name);
-		return EXIT_FAILURE;
+		परत निकास_त्रुटि;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	जर (!म_भेद(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
-		printf("mangled: '%s'\n", p);
-		free(p);
+		म_लिखो("mangled: '%s'\n", p);
+		मुक्त(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	अन्यथा जर (!म_भेद(argv[1], "--unmangle")) {
+		अक्षर *x = unmangle(argv[2], रिक्त);
 
-		if (x) {
-			printf("unmangled: '%s'\n", x);
-			free(x);
+		जर (x) {
+			म_लिखो("unmangled: '%s'\n", x);
+			मुक्त(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
-			unmangle_to_buffer(x, x, strlen(x) + 1);
+		जर (x) {
+			unmangle_to_buffer(x, x, म_माप(x) + 1);
 
-			printf("self-unmangled: '%s'\n", x);
-			free(x);
+			म_लिखो("self-unmangled: '%s'\n", x);
+			मुक्त(x);
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
-			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
+	अन्यथा जर (!म_भेद(argv[1], "--unescape")) {
+		अक्षर *x = strdup(argv[2]);
+		जर (x) {
+			unescape_to_buffer(x, ",\"", x, म_माप(x) + 1);
 
-			printf("self-unescaped: '%s'\n", x);
-			free(x);
+			म_लिखो("self-unescaped: '%s'\n", x);
+			मुक्त(x);
 		}
 	}
 
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }
 #endif /* TEST_PROGRAM_MANGLE */

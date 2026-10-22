@@ -3,84 +3,84 @@
  * it what you wish.
  */
 
-#include "debug.h"
+#अन्तर्भाव "debug.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#अन्तर्भाव <stdarg.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+शून्य ul_debug(स्थिरांक अक्षर *mesg, ...)
 {
-	va_list ap;
-	va_start(ap, mesg);
-	vfprintf(stderr, mesg, ap);
-	va_end(ap);
-	fputc('\n', stderr);
+	बहु_सूची ap;
+	बहु_शुरू(ap, mesg);
+	भख_लिखो(मानक_त्रुटि, mesg, ap);
+	बहु_पूर्ण(ap);
+	ख_अक्षर_दो('\n', मानक_त्रुटि);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
-		     const void *handle, unsigned mask)
+शून्य ul_debug_prefix(स्थिरांक अक्षर *lib, स्थिरांक अक्षर *flag,
+		     स्थिरांक शून्य *handle, अचिन्हित mask)
 {
-	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
-		fprintf(stderr, "[%p]: ", handle);
+	ख_लिखो(मानक_त्रुटि, "%d: %s: %8s: ", getpid(), lib, flag);
+	जर (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+		ख_लिखो(मानक_त्रुटि, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+अचिन्हित ul_debug_parse_mask(स्थिरांक संरचना ul_debug_maskname flagnames[],
+			     स्थिरांक अक्षर *mask)
 {
-	unsigned res;
-	char *ptr;
+	अचिन्हित res;
+	अक्षर *ptr;
 
 	/* let's check for a numeric mask first */
-	res = strtoul(mask, &ptr, 0);
+	res = म_से_अदीर्घ(mask, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	जर (ptr && *ptr && flagnames && flagnames[0].name) {
+		अक्षर *msbuf, *ms, *name;
 		res = 0;
 
 		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		जर (!ms)
+			परत res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		पर्यंत ((name = strtok_r(ms, ",", &ptr))) {
+			स्थिरांक संरचना ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
+			साठी (d = flagnames; d && d->name; d++) {
+				जर (म_भेद(name, d->name) == 0) {
 					res |= d->mask;
-					break;
+					थांबा;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			जर (res == UL_DEBUG_ALL)
+				थांबा;
 		}
-		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+		मुक्त(msbuf);
+	} अन्यथा जर (ptr && म_भेद(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	परत res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+शून्य ul_debug_print_masks(स्थिरांक अक्षर *env,
+			  स्थिरांक संरचना ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	स्थिरांक संरचना ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	जर (!flagnames)
+		परत;
 
-	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
+	ख_लिखो(मानक_त्रुटि, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
-			continue;
-		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
+	साठी (d = flagnames; d && d->name; d++) {
+		जर (!d->help)
+			सुरूठेवा;
+		ख_लिखो(मानक_त्रुटि, "   %-8s [0x%06x] : %s\n",
 				d->name, d->mask, d->help);
 	}
 }

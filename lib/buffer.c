@@ -4,319 +4,319 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#अन्तर्भाव "buffer.h"
+#अन्तर्भाव "mbsalign.h"
+#अन्तर्भाव "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+शून्य ul_buffer_reset_data(संरचना ul_buffer *buf)
 {
-	if (buf->begin)
-		memset(buf->begin, 0, buf->sz);
+	जर (buf->begin)
+		स_रखो(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	जर (buf->ptrs && buf->nptrs)
+		स_रखो(buf->ptrs, 0, buf->nptrs * आकार(अक्षर *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+स्थिर ओळीत अक्षर *ul_buffer_free_data_common(संरचना ul_buffer *buf, bool steal)
 {
-	char *t = NULL;
+	अक्षर *t = रिक्त;
 
-	assert(buf);
+	प्रतिज्ञा(buf);
 
-	if (steal)
+	जर (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	अन्यथा
+		मुक्त(buf->begin);
+	buf->begin = रिक्त;
+	buf->end = रिक्त;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	मुक्त(buf->ptrs);
+	buf->ptrs = रिक्त;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	मुक्त(buf->encoded);
+	buf->encoded = रिक्त;
 	buf->encoded_sz = 0;
 
-	return t;
+	परत t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+शून्य ul_buffer_free_data(संरचना ul_buffer *buf)
 {
 	ul_buffer_free_data_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+अक्षर *ul_buffer_steal_string(संरचना ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	जर (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		परत रिक्त;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	परत ul_buffer_free_data_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+शून्य ul_buffer_set_chunksize(संरचना ul_buffer *buf, माप_प्रकार sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+पूर्णांक ul_buffer_is_empty(संरचना ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	परत buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+पूर्णांक ul_buffer_save_pointer(संरचना ul_buffer *buf, अचिन्हित लघु ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	जर (ptr_idx >= buf->nptrs) {
+		अक्षर **tmp = reallocarray(buf->ptrs, ptr_idx + 1, आकार(अक्षर *));
 
-		if (!tmp)
-			return -EINVAL;
+		जर (!tmp)
+			परत -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	परत 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+अक्षर *ul_buffer_get_pointer(संरचना ul_buffer *buf, अचिन्हित लघु ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	जर (ptr_idx < buf->nptrs)
+		परत buf->ptrs[ptr_idx];
+	परत रिक्त;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+माप_प्रकार ul_buffer_get_pointer_length(संरचना ul_buffer *buf, अचिन्हित लघु ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	अक्षर *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	जर (ptr && ptr > buf->begin)
+		परत ptr - buf->begin;
+	परत 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+माप_प्रकार ul_buffer_get_safe_pointer_width(संरचना ul_buffer *buf, अचिन्हित लघु ptr_idx)
 {
-	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
+	माप_प्रकार len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	जर (!len)
+		परत 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	परत mbs_safe_nwidth(buf->begin, len, रिक्त);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+शून्य ul_buffer_refer_string(संरचना ul_buffer *buf, अक्षर *str)
 {
-	if (buf->sz)
+	जर (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
-	buf->sz = str ? strlen(str) : 0;
+	buf->sz = str ? म_माप(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+पूर्णांक ul_buffer_alloc_data(संरचना ul_buffer *buf, माप_प्रकार sz)
 {
-	char *tmp;
-	size_t len = 0;
+	अक्षर *tmp;
+	माप_प्रकार len = 0;
 
-	assert(buf);
+	प्रतिज्ञा(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	जर (sz <= buf->sz)
+		परत 0;
 
-	if (buf->end && buf->begin)
+	जर (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	जर (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
-	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	tmp = पुनः_स्मृति(buf->begin, sz);
+	जर (!tmp)
+		परत -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
 	buf->sz = sz;
 
-	memset(buf->end, '\0', sz - len);
+	स_रखो(buf->end, '\0', sz - len);
 
-	return 0;
+	परत 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+पूर्णांक ul_buffer_append_data(संरचना ul_buffer *buf, स्थिरांक अक्षर *data, माप_प्रकार sz)
 {
-	size_t maxsz = 0;
+	माप_प्रकार maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	जर (!buf)
+		परत -EINVAL;
+	जर (!data)
+		परत 0;
 
-	if (buf->begin && buf->end)
+	जर (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	जर (maxsz <= sz + 1) {
+		पूर्णांक rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		जर (rc)
+			परत rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	जर (!buf->end)
+		परत -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	परत 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+पूर्णांक ul_buffer_append_char(संरचना ul_buffer *buf, स्थिरांक अक्षर c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	परत ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+पूर्णांक ul_buffer_append_string(संरचना ul_buffer *buf, स्थिरांक अक्षर *str)
 {
-	if (!str)
-		return 0;
+	जर (!str)
+		परत 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	परत ul_buffer_append_data(buf, str, म_माप(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+पूर्णांक ul_buffer_append_ntimes(संरचना ul_buffer *buf, माप_प्रकार n, स्थिरांक अक्षर *str)
 {
-	size_t i;
-	size_t len = strlen(str);
+	माप_प्रकार i;
+	माप_प्रकार len = म_माप(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	साठी (i = 0; len && i < n; i++) {
+		पूर्णांक rc = ul_buffer_append_data(buf, str, len);
+		जर (rc)
+			परत rc;
 	}
-	return 0;
+	परत 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+पूर्णांक ul_buffer_appendf(संरचना ul_buffer *buf, स्थिरांक अक्षर *format, ...)
 {
-	va_list ap;
-	int res;
+	बहु_सूची ap;
+	पूर्णांक res;
 
-	va_start(ap, format);
+	बहु_शुरू(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
-	va_end(ap);
+	बहु_पूर्ण(ap);
 
-	return res;
+	परत res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+पूर्णांक ul_buffer_appendvf(संरचना ul_buffer *buf, स्थिरांक अक्षर *format, बहु_सूची ap)
 {
-	char *val;
-	int sz;
-	int res;
+	अक्षर *val;
+	पूर्णांक sz;
+	पूर्णांक res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	जर (sz < 0)
+		परत -त्रुटि_सं;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	मुक्त(val);
 
-	return res;
+	परत res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+पूर्णांक ul_buffer_set_data(संरचना ul_buffer *buf, स्थिरांक अक्षर *data, माप_प्रकार sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	परत ul_buffer_append_data(buf, data, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+अक्षर *ul_buffer_get_data(संरचना ul_buffer *buf, माप_प्रकार *sz, माप_प्रकार *width)
 {
-	if (sz)
+	जर (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	जर (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	परत buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+अक्षर *ul_buffer_get_string(संरचना ul_buffer *buf, माप_प्रकार *sz, माप_प्रकार *width)
 {
-	char *ret;
+	अक्षर *ret;
 
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	जर (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	परत ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+माप_प्रकार ul_buffer_get_bufsiz(संरचना ul_buffer *buf)
 {
-	return buf->sz;
+	परत buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+माप_प्रकार ul_buffer_get_datasiz(संरचना ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	परत buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+अक्षर *ul_buffer_get_safe_data(संरचना ul_buffer *buf, माप_प्रकार *sz, माप_प्रकार *width, स्थिरांक अक्षर *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
-	size_t encsz, wsz = 0;
-	char *res = NULL;
+	अक्षर *data = ul_buffer_get_data(buf, रिक्त, रिक्त);
+	माप_प्रकार encsz, wsz = 0;
+	अक्षर *res = रिक्त;
 
-	if (!data)
-		goto nothing;
+	जर (!data)
+		जा nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	जर (encsz > buf->encoded_sz) {
+		अक्षर *tmp = पुनः_स्मृति(buf->encoded, encsz);
+		जर (!tmp)
+			जा nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	जर (!res || !wsz || wsz == (माप_प्रकार) -1)
+		जा nothing;
 
-	if (width)
+	जर (width)
 		*width = wsz;
-	if (sz)
-		*sz = strlen(res);
-	return res;
+	जर (sz)
+		*sz = म_माप(res);
+	परत res;
 nothing:
-	if (width)
+	जर (width)
 		*width = 0;
-	if (sz)
+	जर (sz)
 		*sz = 0;
-	return NULL;
+	परत रिक्त;
 }
 
 
 #ifdef TEST_PROGRAM_BUFFER
 
-enum {
+गणना {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+पूर्णांक main(शून्य)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
-	size_t sz = 0;
+	संरचना ul_buffer buf = UL_INIT_BUFFER;
+	अक्षर *str;
+	माप_प्रकार sz = 0;
 
 	ul_buffer_set_chunksize(&buf, 16);
 
@@ -331,13 +331,13 @@ int main(void)
 	ul_buffer_append_string(&buf, "bbb");
 	ul_buffer_save_pointer(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_buffer_get_data(&buf, &sz, रिक्त);
+	म_लिखो("data [%zu] '%s'\n", sz, str);
 
-	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
+	म_लिखो(" pointer data len: AAA=%zu, BBB=%zu\n",
 			ul_buffer_get_pointer_length(&buf, PTR_AAA),
 			ul_buffer_get_pointer_length(&buf, PTR_BBB));
-	printf(" pointer data width: AAA=%zu, BBB=%zu\n",
+	म_लिखो(" pointer data width: AAA=%zu, BBB=%zu\n",
 			ul_buffer_get_safe_pointer_width(&buf, PTR_AAA),
 			ul_buffer_get_safe_pointer_width(&buf, PTR_BBB));
 
@@ -345,38 +345,38 @@ int main(void)
 	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
 	ul_buffer_save_pointer(&buf, PTR_AAA);
 	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
-	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
+	str = ul_buffer_get_data(&buf, &sz, रिक्त);
+	म_लिखो("data [%zu] '%s'\n", sz, str);
+	म_लिखो(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
 
 	ul_buffer_free_data(&buf);
 	str = strdup("foo");
 	ul_buffer_refer_string(&buf, str);
 	ul_buffer_append_data(&buf, ",", 1);
 	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_buffer_get_data(&buf, &sz, रिक्त);
+	म_लिखो("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_buffer_get_data(&buf, &sz, रिक्त);
+	म_लिखो("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_append_char(&buf, 'x');
 	{
-		char c = 'y';
+		अक्षर c = 'y';
 		ul_buffer_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
+		स्थिरांक अक्षर c = 'z';
 		ul_buffer_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_buffer_get_data(&buf, &sz, रिक्त);
+	म_लिखो("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }
 #endif /* TEST_PROGRAM_BUFFER */

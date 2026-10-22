@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <ctype.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <strings.h>
+#अन्तर्भाव <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "cctype.h"
+#अन्तर्भाव "nls.h"
+#अन्तर्भाव "strutils.h"
+#अन्तर्भाव "timeutils.h"
+#अन्तर्भाव "bitops.h"
+#अन्तर्भाव "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+स्थिर पूर्णांक STRTOXX_EXIT_CODE = निकास_त्रुटि;
 
-void strutils_set_exitcode(int ex)
+शून्य strutils_set_exitcode(पूर्णांक ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+स्थिर पूर्णांक do_scale_by_power (uintmax_t *x, पूर्णांक base, पूर्णांक power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	पर्यंत (power--) {
+		जर (UINTMAX_MAX / base < *x)
+			परत -दुस्फल;
 		*x *= base;
 	}
-	return 0;
+	परत 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+पूर्णांक ul_parse_size(स्थिरांक अक्षर *str, uintmax_t *res, पूर्णांक *power)
 {
-	const char *p;
-	char *end;
+	स्थिरांक अक्षर *p;
+	अक्षर *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	पूर्णांक base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	स्थिर स्थिरांक अक्षर *suf  = "KMGTPEZY";
+	स्थिर स्थिरांक अक्षर *suf2 = "kmgtpezy";
+	स्थिरांक अक्षर *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	जर (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		जा err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	पर्यंत (है_खाली((अचिन्हित अक्षर) *p))
 		p++;
-	if (*p == '-') {
+	जर (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		जा err;
 	}
 
-	errno = 0, end = NULL;
+	त्रुटि_सं = 0, end = रिक्त;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
-	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
-		rc = errno ? -errno : -EINVAL;
-		goto err;
+	जर (end == str ||
+	    (त्रुटि_सं != 0 && (x == UINTMAX_MAX || x == 0))) {
+		rc = त्रुटि_सं ? -त्रुटि_सं : -EINVAL;
+		जा err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
+	जर (!end || !*end)
+		जा done;			/* without suffix */
 	p = end;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	जर (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	अन्यथा जर ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
-		size_t dpsz = dp ? strlen(dp) : 0;
+	अन्यथा जर (*(p + 1)) {
+		संरचना स्था_बदल स्थिरांक *l = क्षेत्र_बदलो();
+		स्थिरांक अक्षर *dp = l ? l->decimal_point : रिक्त;
+		माप_प्रकार dpsz = dp ? म_माप(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		जर (frac == 0 && *p && dp && म_भेदन(dp, p, dpsz) == 0) {
+			स्थिरांक अक्षर *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			साठी (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
+			जर (है_अंक(*fstr)) {
+				त्रुटि_सं = 0, end = रिक्त;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
-				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
-					rc = errno ? -errno : -EINVAL;
-					goto err;
+				जर (end == fstr ||
+				    (त्रुटि_सं != 0 && (frac == UINTMAX_MAX || frac == 0))) {
+					rc = त्रुटि_सं ? -त्रुटि_सं : -EINVAL;
+					जा err;
 				}
-			} else
-				end = (char *) p;
+			} अन्यथा
+				end = (अक्षर *) p;
 
-			if (!end || !*end) {
+			जर (!end || !*end) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				जा err;	/* without suffix, but with fractions */
 			}
 			p = end;
-			goto check_suffix;
+			जा check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		जा err;			/* unexpected suffix */
 	}
 
-	sp = strchr(suf, *p);
-	if (sp)
+	sp = म_अक्षर(suf, *p);
+	जर (sp)
 		pwr = (sp - suf) + 1;
-	else {
-		sp = strchr(suf2, *p);
-		if (sp)
+	अन्यथा {
+		sp = म_अक्षर(suf2, *p);
+		जर (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		अन्यथा {
 			rc = -EINVAL;
-			goto err;
+			जा err;
 		}
 	}
 
-	if (power)
+	जर (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	जर (rc)
+		जा err;
 
-	if (frac && pwr) {
-		int i;
+	जर (frac && pwr) {
+		पूर्णांक i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		जर (rc)
+			जा err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
+		करा {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} पर्यंत (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		साठी (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
-			rc = -ERANGE;
-			goto err;
+		जर (UINTMAX_MAX - x < frac_val) {
+			rc = -दुस्फल;
+			जा err;
 		}
 		x += frac_val;
 	}
 done:
 	*res = x;
 err:
-	if (rc < 0)
-		errno = -rc;
-	return rc;
+	जर (rc < 0)
+		त्रुटि_सं = -rc;
+	परत rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+पूर्णांक strtosize(स्थिरांक अक्षर *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	परत ul_parse_size(str, res, रिक्त);
 }
 
-int isdigit_strend(const char *str, const char **end)
+पूर्णांक isdigit_strend(स्थिरांक अक्षर *str, स्थिरांक अक्षर **end)
 {
-	const char *p;
+	स्थिरांक अक्षर *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	साठी (p = str; p && *p && है_अंक((अचिन्हित अक्षर) *p); p++);
 
-	if (end)
+	जर (end)
 		*end = p;
-	return p && p > str && !*p;
+	परत p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+पूर्णांक isxdigit_strend(स्थिरांक अक्षर *str, स्थिरांक अक्षर **end)
 {
-	const char *p;
+	स्थिरांक अक्षर *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	साठी (p = str; p && *p && है_षष्ठादशक((अचिन्हित अक्षर) *p); p++);
 
-	if (end)
+	जर (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	परत p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+पूर्णांक ul_strtobool(स्थिरांक अक्षर *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
-	size_t i;
+	स्थिर स्थिरांक अक्षर *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	स्थिर स्थिरांक अक्षर *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	माप_प्रकार i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	जर (!str || !result)
+		परत -(त्रुटि_सं = EINVAL);
 
-	errno = 0;
+	त्रुटि_सं = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	साठी (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		जर (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			परत 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	साठी (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		जर (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			परत 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	परत -(त्रुटि_सं = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+पूर्णांक ul_parse_switch(स्थिरांक अक्षर *arg, ...)
 {
-	const char *a, *b;
-	va_list ap;
+	स्थिरांक अक्षर *a, *b;
+	बहु_सूची ap;
 
-	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	बहु_शुरू(ap, arg);
+	करा {
+		a = बहु_तर्क(ap, अक्षर *);
+		जर (!a)
+			थांबा;
+		b = बहु_तर्क(ap, अक्षर *);
+		जर (!b)
+			थांबा;
 
-		if (strcmp(arg, a) == 0) {
-			va_end(ap);
-			return 1;
+		जर (म_भेद(arg, a) == 0) {
+			बहु_पूर्ण(ap);
+			परत 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
-			va_end(ap);
-			return 0;
+		जर (म_भेद(arg, b) == 0) {
+			बहु_पूर्ण(ap);
+			परत 0;
 		}
-	} while (1);
-	va_end(ap);
+	} पर्यंत (1);
+	बहु_पूर्ण(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
 }
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+शून्य *mempcpy(शून्य *restrict dest, स्थिरांक शून्य *restrict src, माप_प्रकार n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	परत ((अक्षर *)स_नकल(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+माप_प्रकार strnlen(स्थिरांक अक्षर *s, माप_प्रकार maxlen)
 {
-	size_t i;
+	माप_प्रकार i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	साठी (i = 0; i < maxlen; i++) {
+		जर (s[i] == '\0')
+			परत i;
 	}
-	return maxlen;
+	परत maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+अक्षर *strnchr(स्थिरांक अक्षर *s, माप_प्रकार maxlen, पूर्णांक c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	साठी (; maxlen-- && *s != '\0'; ++s)
+		जर (*s == (अक्षर)c)
+			परत (अक्षर *)s;
+	परत रिक्त;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+अक्षर *strndup(स्थिरांक अक्षर *s, माप_प्रकार n)
 {
-	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	माप_प्रकार len = strnlen(s, n);
+	अक्षर *new = दो_स्मृति((len + 1) * आकार(अक्षर));
+	जर (!new)
+		परत रिक्त;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	परत (अक्षर *) स_नकल(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+पूर्णांक ul_strtos64(स्थिरांक अक्षर *str, int64_t *अंक, पूर्णांक base)
 {
-	char *end = NULL;
+	अक्षर *end = रिक्त;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	जर (str == रिक्त || *str == '\0')
+		परत -(त्रुटि_सं = EINVAL);
 
-	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	त्रुटि_सं = 0;
+	*अंक = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	जर (त्रुटि_सं != 0)
+		परत -त्रुटि_सं;
+	जर (str == end || (end && *end))
+		परत -(त्रुटि_सं = EINVAL);
+	परत 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+पूर्णांक ul_strtou64(स्थिरांक अक्षर *str, uint64_t *अंक, पूर्णांक base)
 {
-	char *end = NULL;
+	अक्षर *end = रिक्त;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	जर (str == रिक्त || *str == '\0')
+		परत -(त्रुटि_सं = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
-	errno = 0;
+	त्रुटि_सं = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
-		errno = ERANGE;
-	else {
-		errno = 0;
-		*num = strtoumax(str, &end, base);
+	जर (tmp < 0)
+		त्रुटि_सं = दुस्फल;
+	अन्यथा {
+		त्रुटि_सं = 0;
+		*अंक = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	जर (त्रुटि_सं != 0)
+		परत -त्रुटि_सं;
+	जर (str == end || (end && *end))
+		परत -(त्रुटि_सं = EINVAL);
+	परत 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+पूर्णांक ul_strtos32(स्थिरांक अक्षर *str, int32_t *अंक, पूर्णांक base)
 {
 	int64_t tmp;
-	int rc;
+	पूर्णांक rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
-		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	जर (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+		rc = -(त्रुटि_सं = दुस्फल);
+	जर (rc == 0)
+		*अंक = (int32_t) tmp;
+	परत rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+पूर्णांक ul_strtou32(स्थिरांक अक्षर *str, uint32_t *अंक, पूर्णांक base)
 {
 	uint64_t tmp;
-	int rc;
+	पूर्णांक rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
-		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	जर (rc == 0 && tmp > UINT32_MAX)
+		rc = -(त्रुटि_सं = दुस्फल);
+	जर (rc == 0)
+		*अंक = (uint32_t) tmp;
+	परत rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+पूर्णांक ul_strtou16(स्थिरांक अक्षर *str, uint16_t *अंक, पूर्णांक base)
 {
 	uint64_t tmp;
-	int rc;
+	पूर्णांक rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
-		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	जर (rc == 0 && tmp > UINT16_MAX)
+		rc = -(त्रुटि_सं = दुस्फल);
+	जर (rc == 0)
+		*अंक = (uint16_t) tmp;
+	परत rc;
 }
 
 /*
@@ -432,179 +432,179 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(स्थिरांक अक्षर *str, पूर्णांक base, स्थिरांक अक्षर *errmesg,
+			     int64_t खालचा, int64_t up)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t अंक = 0;
+	पूर्णांक rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
-		rc = -(errno = ERANGE);
+	rc = ul_strtos64(str, &अंक, base);
+	जर (rc == 0 && ((खालचा && अंक < खालचा) || (up && अंक > up)))
+		rc = -(त्रुटि_सं = दुस्फल);
 
-	if (rc) {
-		if (errno == ERANGE)
+	जर (rc) {
+		जर (त्रुटि_सं == दुस्फल)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	परत अंक;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(स्थिरांक अक्षर *str, पूर्णांक base, स्थिरांक अक्षर *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t अंक = 0;
+	पूर्णांक rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
-		rc = -(errno = ERANGE);
+	rc = ul_strtou64(str, &अंक, base);
+	जर (rc == 0 && (up && अंक > up))
+		rc = -(त्रुटि_सं = दुस्फल);
 
-	if (rc) {
-		if (errno == ERANGE)
+	जर (rc) {
+		जर (त्रुटि_सं == दुस्फल)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	परत अंक;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+द्विगुण strtod_or_err(स्थिरांक अक्षर *str, स्थिरांक अक्षर *errmesg)
 {
-	double num;
-	char *end = NULL;
+	द्विगुण अंक;
+	अक्षर *end = रिक्त;
 
-	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	त्रुटि_सं = 0;
+	जर (str == रिक्त || *str == '\0')
+		जा err;
+	अंक = म_से_भग्न(str, &end);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	जर (त्रुटि_सं || str == end || (end && *end))
+		जा err;
 
-	return num;
+	परत अंक;
 err:
-	if (errno == ERANGE)
+	जर (त्रुटि_सं == दुस्फल)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+पूर्णांक ul_strtold(स्थिरांक अक्षर *str, दीर्घ द्विगुण *अंक)
 {
-	char *end = NULL;
+	अक्षर *end = रिक्त;
 
-	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	त्रुटि_सं = 0;
+	जर (str == रिक्त || *str == '\0')
+		परत -(त्रुटि_सं = EINVAL);
+	*अंक = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	जर (त्रुटि_सं != 0)
+		परत -त्रुटि_सं;
+	जर (str == end || (end && *end))
+		परत -(त्रुटि_सं = EINVAL);
+	परत 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+दीर्घ द्विगुण strtold_or_err(स्थिरांक अक्षर *str, स्थिरांक अक्षर *errmesg)
 {
-	long double num = 0;
+	दीर्घ द्विगुण अंक = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	जर (ul_strtold(str, &अंक) == 0)
+		परत अंक;
+	जर (त्रुटि_सं == दुस्फल)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(स्थिरांक अक्षर *str, स्थिरांक अक्षर *errmesg)
 {
-	uintmax_t num;
+	uintmax_t अंक;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	जर (strtosize(str, &अंक) == 0)
+		परत अंक;
 
-	if (errno)
+	जर (त्रुटि_सं)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+शून्य strtotimeval_or_err(स्थिरांक अक्षर *str, संरचना timeval *tv, स्थिरांक अक्षर *errmesg)
 {
-	long double user_input;
+	दीर्घ द्विगुण user_आदान;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_आदान = strtold_or_err(str, errmesg);
+	tv->tv_sec = (समय_प्रकार) user_आदान;
+	tv->tv_usec = (suseconds_t)((user_आदान - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+शून्य strtotimespec_or_err(स्थिरांक अक्षर *str, संरचना timespec *ts, स्थिरांक अक्षर *errmesg)
 {
-	long double user_input;
+	दीर्घ द्विगुण user_आदान;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_आदान = strtold_or_err(str, errmesg);
+	ts->tv_sec = (समय_प्रकार) user_आदान;
+	ts->tv_nsec = (दीर्घ)((user_आदान - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+समय_प्रकार strtotime_or_err(स्थिरांक अक्षर *str, स्थिरांक अक्षर *errmesg)
 {
-	int64_t user_input;
+	int64_t user_आदान;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_आदान = strtos64_or_err(str, errmesg);
+	परत (समय_प्रकार) user_आदान;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(स्थिरांक अक्षर *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	जर (mode && म_भेद(mode, "never") == 0)
+		परत false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	जर (mode && म_भेद(mode, "always") == 0)
+		परत true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	जर (!mode || म_भेद(mode, "auto") == 0)
+		परत isatty(STDOUT_FILENO) ? true : false;
 
-	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
+	errx(निकास_त्रुटि, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(स्थिरांक अक्षर *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	जर (mode && म_भेद(mode, "never") == 0)
+		परत false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	जर (mode && म_भेद(mode, "always") == 0)
+		परत true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	जर (!mode || म_भेद(mode, "auto") == 0)
+		परत isatty(STDOUT_FILENO) ? true : false;
 
-	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
+	errx(निकास_त्रुटि, _("invalid argument of --annotate: %s"), mode);
 }
 
 /*
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+अक्षर *xstrmode(mode_t mode, अक्षर *str)
 {
-	unsigned short i = 0;
+	अचिन्हित लघु i = 0;
 
-	if (S_ISDIR(mode))
+	जर (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	अन्यथा जर (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	अन्यथा जर (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	अन्यथा जर (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	अन्यथा जर (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	अन्यथा जर (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	अन्यथा जर (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	परत str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+स्थिर पूर्णांक get_exp(uint64_t n)
 {
-	int shft;
+	पूर्णांक shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	साठी (shft = 10; shft <= 60; shft += 10) {
+		जर (n < (1ULL << shft))
+			थांबा;
 	}
-	return shft - 10;
+	परत shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+अक्षर *size_to_human_string(पूर्णांक options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	अक्षर buf[32];
+	पूर्णांक dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	स्थिरांक अक्षर *letters = "BKMGTPE";
+	अक्षर suffix[आकार(" KiB")], *psuf = suffix;
+	अक्षर c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	जर (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	जर ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	जर (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		जर (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		अन्यथा
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		जर (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} अन्यथा {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		जर (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	जर (frac) {
+		संरचना स्था_बदल स्थिरांक *l = क्षेत्र_बदलो();
+		अक्षर *dp = l ? l->decimal_point : रिक्त;
+		पूर्णांक len;
 
-		if (!dp || !*dp)
+		जर (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, आकार(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		जर (len > 0 && (माप_प्रकार) len < आकार(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			जर (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, आकार(buf) - len);
+		} अन्यथा
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} अन्यथा
+		snprintf(buf, आकार(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	परत strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+पूर्णांक string_to_idarray(स्थिरांक अक्षर *list, पूर्णांक ary[], माप_प्रकार arysz,
+			पूर्णांक (name2id)(स्थिरांक अक्षर *, माप_प्रकार))
 {
-	const char *begin = NULL, *p;
-	size_t n = 0;
+	स्थिरांक अक्षर *begin = रिक्त, *p;
+	माप_प्रकार n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	जर (!list || !*list || !ary || !arysz || !name2id)
+		परत -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	साठी (p = list; p && *p; p++) {
+		स्थिरांक अक्षर *end = रिक्त;
+		पूर्णांक id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		जर (n >= arysz)
+			परत -2;
+		जर (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		जर (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		जर (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		जर (!begin || !end)
+			सुरूठेवा;
+		जर (end <= begin)
+			परत -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		जर (id == -1)
+			परत -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = रिक्त;
+		जर (end && !*end)
+			थांबा;
 	}
-	return n;
+	परत n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+पूर्णांक string_add_to_idarray(स्थिरांक अक्षर *list, पूर्णांक ary[], माप_प्रकार arysz,
+			माप_प्रकार *ary_pos, पूर्णांक (name2id)(स्थिरांक अक्षर *, माप_प्रकार))
 {
-	const char *list_add;
-	int r;
+	स्थिरांक अक्षर *list_add;
+	पूर्णांक r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	जर (!list || !*list || !ary_pos || *ary_pos > arysz)
+		परत -1;
 
-	if (list[0] == '+')
+	जर (list[0] == '+')
 		list_add = &list[1];
-	else {
+	अन्यथा {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	जर (r > 0)
 		*ary_pos += r;
-	return r;
+	परत r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
-		     size_t allow_range)
+पूर्णांक string_to_bitarray(स्थिरांक अक्षर *list,
+		     अक्षर *ary,
+		     पूर्णांक (*name2bit)(स्थिरांक अक्षर *, माप_प्रकार),
+		     माप_प्रकार allow_range)
 {
-	const char *begin = NULL, *p;
+	स्थिरांक अक्षर *begin = रिक्त, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	जर (!list || !name2bit || !ary)
+		परत -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	साठी (p = list; p && *p; p++) {
+		स्थिरांक अक्षर *end = रिक्त;
+		पूर्णांक bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		जर (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		जर (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		जर (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		जर (!begin || !end)
+			सुरूठेवा;
+		जर (end <= begin)
+			परत -1;
+		जर (allow_range) {
+			जर (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} अन्यथा जर (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		जर (bit < 0)
+			परत bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		जर (set_lower)
+			पर्यंत (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		अन्यथा जर (set_higher)
+			पर्यंत (++bit < (पूर्णांक) allow_range)
 				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = रिक्त;
+		जर (end && !*end)
+			थांबा;
 	}
-	return 0;
+	परत 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
-		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+पूर्णांक string_to_bitmask(स्थिरांक अक्षर *list,
+		     अचिन्हित दीर्घ *mask,
+		     दीर्घ (*name2flag)(स्थिरांक अक्षर *, माप_प्रकार))
 {
-	const char *begin = NULL, *p;
+	स्थिरांक अक्षर *begin = रिक्त, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	जर (!list || !name2flag || !mask)
+		परत -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		long flag;
+	साठी (p = list; p && *p; p++) {
+		स्थिरांक अक्षर *end = रिक्त;
+		दीर्घ flag;
 
-		if (!begin)
+		जर (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		जर (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		जर (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		जर (!begin || !end)
+			सुरूठेवा;
+		जर (end <= begin)
+			परत -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		जर (flag < 0)
+			परत flag;	/* error */
 		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = रिक्त;
+		जर (end && !*end)
+			थांबा;
 	}
-	return 0;
+	परत 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+पूर्णांक ul_parse_range(स्थिरांक अक्षर *str, पूर्णांक *lower, पूर्णांक *upper, पूर्णांक def)
 {
-	char *end = NULL;
+	अक्षर *end = रिक्त;
 
-	if (!str)
-		return 0;
+	जर (!str)
+		परत 0;
 
 	*upper = *lower = def;
-	errno = 0;
+	त्रुटि_सं = 0;
 
-	if (*str == ':') {				/* <:N> */
+	जर (*str == ':') {				/* <:N> */
 		str++;
-		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
-		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		*upper = म_से_दीर्घ(str, &end, 10);
+		जर (त्रुटि_सं || !end || *end || end == str)
+			परत -1;
+	} अन्यथा {
+		*upper = *lower = म_से_दीर्घ(str, &end, 10);
+		जर (त्रुटि_सं || !end || end == str)
+			परत -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		जर (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		अन्यथा जर (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
-			end = NULL;
-			errno = 0;
-			*upper = strtol(str, &end, 10);
+			end = रिक्त;
+			त्रुटि_सं = 0;
+			*upper = म_से_दीर्घ(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			जर (त्रुटि_सं || !end || *end || end == str)
+				परत -1;
 		}
 	}
-	return 0;
+	परत 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+स्थिरांक अक्षर *ul_path_next_segment(स्थिरांक अक्षर *str, माप_प्रकार *sz)
 {
-	const char *start, *p;
+	स्थिरांक अक्षर *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	पर्यंत (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	जर (!start || !*start)
+		परत रिक्त;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	साठी (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	परत start;
 }
 
-int streq_paths(const char *a, const char *b)
+पूर्णांक streq_paths(स्थिरांक अक्षर *a, स्थिरांक अक्षर *b)
 {
-	while (a && b) {
-		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+	पर्यंत (a && b) {
+		माप_प्रकार a_sz, b_sz;
+		स्थिरांक अक्षर *a_seg = ul_path_next_segment(a, &a_sz);
+		स्थिरांक अक्षर *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		जर (a_sz + b_sz == 0)
+			परत 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		जर (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			परत 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		जर (!a_seg || !b_seg)
+			थांबा;
+		जर (a_sz != b_sz || म_भेदन(a_seg, b_seg, a_sz) != 0)
+			थांबा;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	परत 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+पूर्णांक ul_path_is_within(स्थिरांक अक्षर *path, स्थिरांक अक्षर *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	जर (!path || !dir || !*path || !*dir)
+		परत 0;
 
-	while (path && dir) {
-		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+	पर्यंत (path && dir) {
+		माप_प्रकार p_sz, d_sz;
+		स्थिरांक अक्षर *p_seg = ul_path_next_segment(path, &p_sz);
+		स्थिरांक अक्षर *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		जर (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			परत 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		जर (!p_seg || !d_seg)
+			थांबा;
+		जर (p_sz != d_sz || म_भेदन(p_seg, d_seg, p_sz) != 0)
+			थांबा;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	परत 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+अक्षर *ul_strnconcat(स्थिरांक अक्षर *s, स्थिरांक अक्षर *suffix, माप_प्रकार b)
 {
-	size_t a;
-	char *r;
+	माप_प्रकार a;
+	अक्षर *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	जर (!s && !suffix)
+		परत strdup("");
+	जर (!s)
+		परत strndup(suffix, b);
+	जर (!suffix)
+		परत strdup(s);
 
-	assert(s);
-	assert(suffix);
+	प्रतिज्ञा(s);
+	प्रतिज्ञा(suffix);
 
-	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	a = म_माप(s);
+	जर (b > ((माप_प्रकार) -1) - a)
+		परत रिक्त;
 
-	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	r = दो_स्मृति(a + b + 1);
+	जर (!r)
+		परत रिक्त;
 
-	memcpy(r, s, a);
-	memcpy(r + a, suffix, b);
+	स_नकल(r, s, a);
+	स_नकल(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	परत r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+अक्षर *ul_strconcat(स्थिरांक अक्षर *s, स्थिरांक अक्षर *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	परत ul_strnconcat(s, suffix, suffix ? म_माप(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+अक्षर *ul_strfconcat(स्थिरांक अक्षर *s, स्थिरांक अक्षर *format, ...)
 {
-	va_list ap;
-	char *val, *res;
-	int sz;
+	बहु_सूची ap;
+	अक्षर *val, *res;
+	पूर्णांक sz;
 
-	va_start(ap, format);
+	बहु_शुरू(ap, format);
 	sz = vasprintf(&val, format, ap);
-	va_end(ap);
+	बहु_पूर्ण(ap);
 
-	if (sz < 0)
-		return NULL;
+	जर (sz < 0)
+		परत रिक्त;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	मुक्त(val);
+	परत res;
 }
 
-int ul_strappend(char **a, const char *b)
+पूर्णांक ul_strappend(अक्षर **a, स्थिरांक अक्षर *b)
 {
-	size_t al, bl;
-	char *tmp;
+	माप_प्रकार al, bl;
+	अक्षर *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	जर (!a)
+		परत -EINVAL;
+	जर (!b || !*b)
+		परत 0;
+	जर (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		परत !*a ? -ENOMEM : 0;
 	}
 
-	al = strlen(*a);
-	bl = strlen(b);
+	al = म_माप(*a);
+	bl = म_माप(b);
 
-	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	tmp = पुनः_स्मृति(*a, al + bl + 1);
+	जर (!tmp)
+		परत -ENOMEM;
 	*a = tmp;
-	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	स_नकल((*a) + al, b, bl + 1);
+	परत 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+पूर्णांक strfappend(अक्षर **a, स्थिरांक अक्षर *format, ...)
 {
-	va_list ap;
-	int res;
+	बहु_सूची ap;
+	पूर्णांक res;
 
-	va_start(ap, format);
+	बहु_शुरू(ap, format);
 	res = ul_strvfappend(a, format, ap);
-	va_end(ap);
+	बहु_पूर्ण(ap);
 
-	return res;
+	परत res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+बाह्य पूर्णांक ul_strvfappend(अक्षर **a, स्थिरांक अक्षर *format, बहु_सूची ap)
 {
-	char *val;
-	int sz;
-	int res;
+	अक्षर *val;
+	पूर्णांक sz;
+	पूर्णांक res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	जर (sz < 0)
+		परत -त्रुटि_सं;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	मुक्त(val);
+	परत res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+स्थिर माप_प्रकार strcspn_escaped(स्थिरांक अक्षर *s, स्थिरांक अक्षर *reject)
 {
-	int escaped = 0;
-	int n;
+	पूर्णांक escaped = 0;
+	पूर्णांक n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	साठी (n=0; s[n]; n++) {
+		जर (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		अन्यथा जर (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		अन्यथा जर (म_अक्षर(reject, s[n]))
+			थांबा;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	परत n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+अक्षर *ul_strchr_escaped(स्थिरांक अक्षर *s, पूर्णांक c)
 {
-	char *p;
-	int esc = 0;
+	अक्षर *p;
+	पूर्णांक esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	साठी (p = (अक्षर *) s; p && *p; p++) {
+		जर (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			सुरूठेवा;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		जर (*p == c && (!esc || c == '\\'))
+			परत p;
 		esc = 0;
 	}
 
-	return NULL;
+	परत रिक्त;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+स्थिरांक अक्षर *ul_split(स्थिरांक अक्षर **state, माप_प्रकार *l, स्थिरांक अक्षर *separator, पूर्णांक quoted)
 {
-	const char *current;
+	स्थिरांक अक्षर *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	जर (!*current) {
+		प्रतिज्ञा(**state == '\0');
+		परत रिक्त;
 	}
 
-	current += strspn(current, separator);
-	if (!*current) {
+	current += म_अखोज(current, separator);
+	जर (!*current) {
 		*state = current;
-		return NULL;
+		परत रिक्त;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	जर (quoted && म_अक्षर("\'\"", *current)) {
+		अक्षर quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
-		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
+		जर (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		    (current[*l + 2] && !म_अक्षर(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			परत रिक्त;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} अन्यथा जर (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		जर (current[*l] && !म_अक्षर(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			परत रिक्त;
 		}
 		*state = current + *l;
-	} else {
-		*l = strcspn(current, separator);
+	} अन्यथा {
+		*l = म_खोज(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	परत current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+पूर्णांक skip_fline(खाता *fp)
 {
-	int ch;
+	पूर्णांक ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	करा {
+		जर ((ch = ख_अक्षर_लो(fp)) == खातापूर्ण)
+			परत 1;
+		जर (ch == '\n')
+			परत 0;
+	} पर्यंत (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+पूर्णांक ul_stralnumcmp(स्थिरांक अक्षर *p1, स्थिरांक अक्षर *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	स्थिरांक अचिन्हित अक्षर *s1 = (स्थिरांक अचिन्हित अक्षर *) p1;
+	स्थिरांक अचिन्हित अक्षर *s2 = (स्थिरांक अचिन्हित अक्षर *) p2;
+	अचिन्हित अक्षर c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	करा {
+		करा {
+			c1 = (अचिन्हित अक्षर) *s1++;
+		} पर्यंत (c1 != '\0' && !है_अक्षर_अंक((अचिन्हित पूर्णांक) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		करा {
+			c2 = (अचिन्हित अक्षर) *s2++;
+		} पर्यंत (c2 != '\0' && !है_अक्षर_अंक((अचिन्हित पूर्णांक) c2));
 
-		if (c1 != '\0')
-			c1 = tolower(c1);
-		if (c2 != '\0')
-			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		जर (c1 != '\0')
+			c1 = छोटे(c1);
+		जर (c2 != '\0')
+			c2 = छोटे(c2);
+		जर (c1 == '\0')
+			परत c1 - c2;
+	} पर्यंत (c1 == c2);
 
-	return c1 - c2;
+	परत c1 - c2;
 }
 
 /*
@@ -1277,164 +1277,164 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+पूर्णांक ul_optstr_next(अक्षर **optstr, अक्षर **name, माप_प्रकार *namesz,
+		   अक्षर **मूल्य, माप_प्रकार *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	पूर्णांक open_quote = 0;
+	अक्षर *start = रिक्त, *stop = रिक्त, *p, *sep = रिक्त;
+	अक्षर *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	प्रतिज्ञा(optstr);
+	प्रतिज्ञा(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	जर (name)
+		*name = रिक्त;
+	जर (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	जर (मूल्य)
+		*मूल्य = रिक्त;
+	जर (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	पर्यंत (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	साठी (p = optstr0; p && *p; p++) {
+		जर (!start && *p == '=')
+			परत -EINVAL;
+		जर (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		जर (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		जर (open_quote)
+			सुरूठेवा;		/* still in quoted block */
+		जर (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		जर (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		अन्यथा जर (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		जर (!start || !stop)
+			सुरूठेवा;
+		जर (stop <= start)
+			परत -EINVAL;
 
-		if (name)
+		जर (name)
 			*name = start;
-		if (namesz)
+		जर (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		जर (sep) {
+			जर (मूल्य)
+				*मूल्य = sep + 1;
+			जर (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		परत 0;
 	}
 
-	return 1;				/* end of optstr */
+	परत 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+पूर्णांक ul_optstr_is_valid(स्थिरांक अक्षर *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	पूर्णांक rc;
+	अक्षर *p = (अक्षर *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	पर्यंत ((rc = ul_optstr_next(&p, रिक्त, रिक्त, रिक्त, रिक्त)) == 0);
+	परत rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+अक्षर *ul_optstr_get_मूल्य(स्थिरांक अक्षर *optstr, स्थिरांक अक्षर *किल्ली)
 {
-	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	माप_प्रकार sz, namesz = 0, valsz = 0;
+	अक्षर *name = रिक्त, *मूल्य = रिक्त;
+	अक्षर *p = (अक्षर *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	जर (!optstr || !किल्ली || !*किल्ली)
+		परत रिक्त;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = म_माप(किल्ली);
+	पर्यंत (ul_optstr_next(&p, &name, &namesz, &मूल्य, &valsz) == 0) {
+		जर (namesz != sz || !valsz)
+			सुरूठेवा;
+		जर (म_भेदन(name, किल्ली, namesz) == 0)
+			परत strndup(मूल्य, valsz);
 	}
-	return NULL;
+	परत रिक्त;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+माप_प्रकार ul_unquote(अक्षर *str)
 {
-	size_t len;
-	char q;
+	माप_प्रकार len;
+	अक्षर q;
 
-	if (!str || !*str)
-		return 0;
+	जर (!str || !*str)
+		परत 0;
 
-	len = strlen(str);
+	len = म_माप(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	जर ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		परत len;
 
-	memmove(str, str + 1, len - 2);
+	स_हटाओ(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	परत len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+संरचना testS {
+	अक्षर *name;
+	अक्षर *मूल्य;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+स्थिर पूर्णांक test_strdup_to_member(पूर्णांक argc, अक्षर *argv[])
 {
-	struct testS *xx;
+	संरचना testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	जर (argc < 3)
+		परत निकास_त्रुटि;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
-		err(EXIT_FAILURE, "calloc() failed");
+	xx = सुस्मृति(1, आकार(*xx));
+	जर (!xx)
+		err(निकास_त्रुटि, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, मूल्य, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
-		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
+	जर (म_भेद(xx->name, argv[1]) != 0 &&
+	    म_भेद(xx->मूल्य, argv[2]) != 0)
+		errx(निकास_त्रुटि, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	म_लिखो("1: '%s', 2: '%s'\n", xx->name, xx->मूल्य);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	मुक्त(xx->name);
+	मुक्त(xx->मूल्य);
+	मुक्त(xx);
+	परत निकास_सफल;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+स्थिर पूर्णांक test_strutils_sizes(पूर्णांक argc, अक्षर *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	अक्षर *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	जर (argc < 2)
+		परत निकास_त्रुटि;
 
-	if (strtosize(argv[1], &size))
-		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
+	जर (strtosize(argv[1], &size))
+		errx(निकास_त्रुटि, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
 	hum2 = size_to_human_string(SIZE_SUFFIX_3LETTER |
@@ -1443,194 +1443,194 @@ static int test_strutils_sizes(int argc, char *argv[])
 				    SIZE_SUFFIX_SPACE |
 				    SIZE_DECIMAL_2DIGITS, size);
 
-	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	म_लिखो("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
+	मुक्त(hum1);
+	मुक्त(hum2);
+	मुक्त(hum3);
 
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+स्थिर पूर्णांक test_strutils_cmp_paths(पूर्णांक argc, अक्षर *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	पूर्णांक rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	जर (argc < 3)
+		परत निकास_त्रुटि;
 
-	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	म_लिखो("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
+	परत निकास_सफल;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+स्थिर पूर्णांक test_strutils_path_is_within(पूर्णांक argc, अक्षर *argv[])
 {
-	int rc;
+	पूर्णांक rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	जर (argc < 3)
+		परत निकास_त्रुटि;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
-	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	म_लिखो("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
+	परत निकास_सफल;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+स्थिर पूर्णांक test_strutils_normalize(पूर्णांक argc, अक्षर *argv[])
 {
-	unsigned char *src, *dst, *org;
-	size_t sz, len;
+	अचिन्हित अक्षर *src, *dst, *org;
+	माप_प्रकार sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	जर (argc < 2)
+		परत निकास_त्रुटि;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
-	dst = malloc(len + 1);
+	org = (अचिन्हित अक्षर *) strdup(argv[1]);
+	src = (अचिन्हित अक्षर *) strdup((अक्षर *) org);
+	len = म_माप((अक्षर *) src);
+	dst = दो_स्मृति(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	जर (!org || !src || !dst)
+		जा done;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
-	printf("1: '%s' --> '%s' [sz=%zu]\n", src, dst, sz);
+	म_लिखो("1: '%s' --> '%s' [sz=%zu]\n", src, dst, sz);
 
 	/* one buffer */
 	sz = normalize_whitespace(src);
-	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
+	म_लिखो("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
 done:
-	free(src);
-	free(dst);
-	free(org);
+	मुक्त(src);
+	मुक्त(dst);
+	मुक्त(org);
 
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+स्थिर पूर्णांक test_strutils_cstrcasecmp(पूर्णांक argc, अक्षर *argv[])
 {
-	char *a, *b;
+	अक्षर *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	जर (argc < 3)
+		परत निकास_त्रुटि;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	जर (!a || !b)
+		परत निकास_त्रुटि;
 
-	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
-	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
-	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
+	म_लिखो("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
+	म_लिखो("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
+	म_लिखो("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, म_माप(a)));
 
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }
 
-int main(int argc, char *argv[])
+पूर्णांक main(पूर्णांक argc, अक्षर *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	जर (argc == 3 && म_भेद(argv[1], "--size") == 0) {
+		परत test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
-		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--parse-switch") == 0) {
+		म_लिखो("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						रिक्त));
+		परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
-			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
-		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		जर (ul_strtobool(argv[2], &val))
+			err(निकास_त्रुटि, "could not parse '%s'", argv[2]);
+		म_लिखो("'%s'-->%s\n", argv[2], val ? "true" : "false");
+		परत निकास_सफल;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} अन्यथा जर (argc == 4 && म_भेद(argv[1], "--cmp-paths") == 0) {
+		परत test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} अन्यथा जर (argc == 4 && म_भेद(argv[1], "--path-is-within") == 0) {
+		परत test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} अन्यथा जर (argc == 4 && म_भेद(argv[1], "--strdup-member") == 0) {
+		परत test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
-		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
+	} अन्यथा जर  (argc == 4 && म_भेद(argv[1], "--stralnumcmp") == 0) {
+		म_लिखो("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		परत निकास_सफल;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} अन्यथा जर (argc == 4 && म_भेद(argv[1], "--cstrcasecmp") == 0) {
+		परत test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--normalize") == 0) {
+		परत test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
-		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
-		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
-		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
-		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
-		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
-		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtos64") == 0) {
+		म_लिखो("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
+		परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtou64") == 0) {
+		म_लिखो("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
+		परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtos32") == 0) {
+		म_लिखो("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
+		परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtou32") == 0) {
+		म_लिखो("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
+		परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtos16") == 0) {
+		म_लिखो("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
+		परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--strtou16") == 0) {
+		म_लिखो("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
+		परत निकास_सफल;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
-		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+	} अन्यथा जर (argc == 4 && म_भेद(argv[1], "--strchr-escaped") == 0) {
+		म_लिखो("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
+		परत निकास_सफल;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} अन्यथा जर (argc == 2 && म_भेद(argv[1], "--next-string") == 0) {
+		अक्षर *buf = "abc\0Y\0\0xyz\0X";
+		अक्षर *end = buf + 12;
+		अक्षर *p = buf;
 
-		do {
-			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		करा {
+			म_लिखो("str: '%s'\n", p);
+		} पर्यंत ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		परत निकास_सफल;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--optstr") == 0) {
 
-		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		माप_प्रकार namesz, valsz;
+		अक्षर *name = रिक्त, *val = रिक्त;
+		अक्षर *p = argv[2];
+		पूर्णांक rc;
 
-		if (!ul_optstr_is_valid(p))
-			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
+		जर (!ul_optstr_is_valid(p))
+			errx(निकास_त्रुटि, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		पर्यंत ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			म_लिखो("'%.*s' : '%.*s'\n", (पूर्णांक) namesz, name,
+						   (पूर्णांक) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		जर (rc == 1)
+			परत निकास_सफल;
+	} अन्यथा जर (argc == 3 && म_भेद(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		अक्षर *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
-			err(EXIT_FAILURE, "strdup() failed");
+		जर (!unquoted)
+			err(निकास_त्रुटि, "strdup() failed");
 
 		ul_unquote(unquoted);
-		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		म_लिखो("%s-->%s\n", argv[2], unquoted);
+		मुक्त(unquoted);
+		परत निकास_सफल;
 
-	} else {
-		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
+	} अन्यथा {
+		ख_लिखो(मानक_त्रुटि, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
 				"       %1$s --cmp-paths <path> <path>\n"
@@ -1643,9 +1643,9 @@ int main(int argc, char *argv[])
 				"       %1$s --optstr <str>\n"
 				"       %1$s --unquote <str>\n",
 				argv[0]);
-		exit(EXIT_FAILURE);
+		निकास(निकास_त्रुटि);
 	}
 
-	return EXIT_FAILURE;
+	परत निकास_त्रुटि;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

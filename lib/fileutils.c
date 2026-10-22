@@ -4,176 +4,176 @@
  * Copyright (C) 2012 Sami Kerola <kerolasa@iki.fi>
  * Copyright (C) 2012-2024 Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/resource.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <unistd.h>
+#अन्तर्भाव <sys/time.h>
+#अन्तर्भाव <sys/resource.h>
 #ifdef HAVE_SYS_SYSCALL_H
 # include <sys/syscall.h>
 #endif
-#include <string.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <errno.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <sys/wait.h>
+#अन्तर्भाव <fcntl.h>
+#अन्तर्भाव <errno.h>
 
-#include "c.h"
-#include "all-io.h"
-#include "canonicalize.h"
-#include "fileutils.h"
-#include "pathnames.h"
-#include "strutils.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "all-io.h"
+#अन्तर्भाव "canonicalize.h"
+#अन्तर्भाव "fileutils.h"
+#अन्तर्भाव "pathnames.h"
+#अन्तर्भाव "strutils.h"
 
-int mkstemp_cloexec(char *template)
+पूर्णांक mkstemp_cloexec(अक्षर *ढाँचा)
 {
 #ifdef HAVE_MKOSTEMP
-	return mkostemp(template, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
-#else
-	int fd, old_flags, errno_save;
+	परत mkostemp(ढाँचा, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
+#अन्यथा
+	पूर्णांक fd, old_flags, errno_save;
 
-	fd = mkstemp(template);
-	if (fd < 0)
-		return fd;
+	fd = mkstemp(ढाँचा);
+	जर (fd < 0)
+		परत fd;
 
 	old_flags = fcntl(fd, F_GETFD, 0);
-	if (old_flags < 0)
-		goto unwind;
-	if (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
-		goto unwind;
+	जर (old_flags < 0)
+		जा unwind;
+	जर (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
+		जा unwind;
 
-	return fd;
+	परत fd;
 
 unwind:
-	errno_save = errno;
-	unlink(template);
-	close(fd);
-	errno = errno_save;
+	errno_save = त्रुटि_सं;
+	unlink(ढाँचा);
+	बंद(fd);
+	त्रुटि_सं = errno_save;
 
-	return -1;
+	परत -1;
 #endif
 }
 
 /* Create open temporary file in safe way.  Please notice that the
  * file permissions are -rw------- by default. */
-int xmkstemp(char **tmpname, const char *dir, const char *prefix)
+पूर्णांक xmkstemp(अक्षर **tmpname, स्थिरांक अक्षर *dir, स्थिरांक अक्षर *prefix)
 {
-	char *localtmp;
-	const char *tmpenv;
+	अक्षर *localtmp;
+	स्थिरांक अक्षर *tmpenv;
 	mode_t old_mode;
-	int fd, rc;
+	पूर्णांक fd, rc;
 
 	/* Some use cases must be capable of being moved atomically
 	 * with rename(2), which is the reason why dir is here.  */
-	tmpenv = dir ? dir : getenv("TMPDIR");
-	if (!tmpenv)
+	tmpenv = dir ? dir : दो_पर्या("TMPDIR");
+	जर (!tmpenv)
 		tmpenv = _PATH_TMP;
 
 	rc = asprintf(&localtmp, "%s/%s.XXXXXX", tmpenv, prefix);
-	if (rc < 0)
-		return -1;
+	जर (rc < 0)
+		परत -1;
 
 	old_mode = umask(077);
 	fd = mkstemp_cloexec(localtmp);
 	umask(old_mode);
-	if (fd == -1) {
-		free(localtmp);
-		localtmp = NULL;
+	जर (fd == -1) {
+		मुक्त(localtmp);
+		localtmp = रिक्त;
 	}
 	*tmpname = localtmp;
-	return fd;
+	परत fd;
 }
 
 #ifdef F_DUPFD_CLOEXEC
-int dup_fd_cloexec(int oldfd, int lowfd)
-#else
-int dup_fd_cloexec(int oldfd, int lowfd  __attribute__((__unused__)))
+पूर्णांक dup_fd_cloexec(पूर्णांक oldfd, पूर्णांक lowfd)
+#अन्यथा
+पूर्णांक dup_fd_cloexec(पूर्णांक oldfd, पूर्णांक lowfd  __attribute__((__unused__)))
 #endif
 {
-	int fd, flags, errno_save;
+	पूर्णांक fd, flags, errno_save;
 
 #ifdef F_DUPFD_CLOEXEC
 	fd = fcntl(oldfd, F_DUPFD_CLOEXEC, lowfd);
-	if (fd >= 0)
-		return fd;
+	जर (fd >= 0)
+		परत fd;
 #endif
 
 	fd = dup(oldfd);
-	if (fd < 0)
-		return fd;
+	जर (fd < 0)
+		परत fd;
 
 	flags = fcntl(fd, F_GETFD);
-	if (flags < 0)
-		goto unwind;
-	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
-		goto unwind;
+	जर (flags < 0)
+		जा unwind;
+	जर (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
+		जा unwind;
 
-	return fd;
+	परत fd;
 
 unwind:
-	errno_save = errno;
-	close(fd);
-	errno = errno_save;
+	errno_save = त्रुटि_सं;
+	बंद(fd);
+	त्रुटि_सं = errno_save;
 
-	return -1;
+	परत -1;
 }
 
 /*
  * portable getdtablesize()
  */
-unsigned int get_fd_tabsize(void)
+अचिन्हित पूर्णांक get_fd_tabsize(शून्य)
 {
-	int m;
+	पूर्णांक m;
 
-#if defined(HAVE_GETDTABLESIZE)
+#जर defined(HAVE_GETDTABLESIZE)
 	m = getdtablesize();
-#elif defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
-	struct rlimit rl;
+#किंवाजर defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
+	संरचना rlimit rl;
 
 	getrlimit(RLIMIT_NOFILE, &rl);
 	m = rl.rlim_cur;
-#elif defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
+#किंवाजर defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
 	m = sysconf(_SC_OPEN_MAX);
-#else
+#अन्यथा
 	m = OPEN_MAX;
 #endif
-	return m;
+	परत m;
 }
 
-void ul_close_all_fds(unsigned int first, unsigned int last)
+शून्य ul_close_all_fds(अचिन्हित पूर्णांक first, अचिन्हित पूर्णांक last)
 {
-	struct dirent *d;
-	DIR *dir;
+	संरचना dirent *d;
+	सूची *dir;
 
-	dir = opendir(_PATH_PROC_FDDIR);
-	if (dir) {
-		while ((d = xreaddir(dir))) {
-			char *end;
-			unsigned int fd;
-			int dfd;
+	dir = सूची_खोलो(_PATH_PROC_FDDIR);
+	जर (dir) {
+		पर्यंत ((d = xreaddir(dir))) {
+			अक्षर *end;
+			अचिन्हित पूर्णांक fd;
+			पूर्णांक dfd;
 
-			errno = 0;
-			fd = strtoul(d->d_name, &end, 10);
+			त्रुटि_सं = 0;
+			fd = म_से_अदीर्घ(d->d_name, &end, 10);
 
-			if (errno || end == d->d_name || !end || *end)
-				continue;
+			जर (त्रुटि_सं || end == d->d_name || !end || *end)
+				सुरूठेवा;
 			dfd = dirfd(dir);
-			if (dfd < 0)
-				continue;
-			if ((unsigned int)dfd == fd)
-				continue;
-			if (fd < first || last < fd)
-				continue;
-			close(fd);
+			जर (dfd < 0)
+				सुरूठेवा;
+			जर ((अचिन्हित पूर्णांक)dfd == fd)
+				सुरूठेवा;
+			जर (fd < first || last < fd)
+				सुरूठेवा;
+			बंद(fd);
 		}
-		closedir(dir);
-	} else {
-		unsigned fd, tbsz = get_fd_tabsize();
+		बंद_सूची(dir);
+	} अन्यथा {
+		अचिन्हित fd, tbsz = get_fd_tabsize();
 
-		for (fd = 0; fd < tbsz; fd++) {
-			if (first <= fd && fd <= last)
-				close(fd);
+		साठी (fd = 0; fd < tbsz; fd++) {
+			जर (first <= fd && fd <= last)
+				बंद(fd);
 		}
 	}
 }
@@ -181,174 +181,174 @@ void ul_close_all_fds(unsigned int first, unsigned int last)
 /*
  * Fork, drop permissions, and call oper() and return result.
  */
-char *ul_restricted_path_oper(const char *path,
-		  int (*oper)(const char *path, char **result, void *data),
-		  void *data)
+अक्षर *ul_restricted_path_oper(स्थिरांक अक्षर *path,
+		  पूर्णांक (*oper)(स्थिरांक अक्षर *path, अक्षर **result, शून्य *data),
+		  शून्य *data)
 {
-	char *result = NULL;
-	int errsv = 0;
-	int pipes[2];
+	अक्षर *result = रिक्त;
+	पूर्णांक errsv = 0;
+	पूर्णांक pipes[2];
 	ssize_t len;
 	pid_t pid;
 
-	if (!path || !*path)
-		return NULL;
+	जर (!path || !*path)
+		परत रिक्त;
 
-	if (pipe(pipes) != 0)
-		return NULL;
+	जर (pipe(pipes) != 0)
+		परत रिक्त;
 	/*
 	 * To accurately assume identity of getuid() we must use setuid()
 	 * but if we do that, we lose ability to reassume euid of 0, so
 	 * we fork to do the check to keep euid intact.
 	 */
-	pid = fork();
-	switch (pid) {
-	case -1:
-		close(pipes[0]);
-		close(pipes[1]);
-		return NULL;			/* fork error */
-	case 0:
-		close(pipes[0]);		/* close unused end */
+	pid = विभाजन();
+	निवड (pid) {
+	स्थिती -1:
+		बंद(pipes[0]);
+		बंद(pipes[1]);
+		परत रिक्त;			/* fork error */
+	स्थिती 0:
+		बंद(pipes[0]);		/* close unused end */
 		pipes[0] = -1;
-		errno = 0;
+		त्रुटि_सं = 0;
 
-		if (drop_permissions() != 0)
-			result = NULL;	/* failed */
-		else
+		जर (drop_permissions() != 0)
+			result = रिक्त;	/* failed */
+		अन्यथा
 			oper(path, &result, data);
 
-		len = result ? (ssize_t) strlen(result) :
-		          errno ? -errno : -EINVAL;
+		len = result ? (ssize_t) म_माप(result) :
+		          त्रुटि_सं ? -त्रुटि_सं : -EINVAL;
 
 		/* send length or errno */
-		ul_write_all(pipes[1], (char *) &len, sizeof(len));
-		if (result)
+		ul_write_all(pipes[1], (अक्षर *) &len, आकार(len));
+		जर (result)
 			ul_write_all(pipes[1], result, len);
 		_exit(0);
-	default:
-		break;
+	पूर्वनिर्धारित:
+		थांबा;
 	}
 
-	close(pipes[1]);		/* close unused end */
+	बंद(pipes[1]);		/* close unused end */
 	pipes[1] = -1;
 
 	/* read size or -errno */
-	if (ul_read_all(pipes[0], (char *) &len, sizeof(len)) != sizeof(len))
-		goto done;
-	if (len < 0) {
+	जर (ul_read_all(pipes[0], (अक्षर *) &len, आकार(len)) != आकार(len))
+		जा done;
+	जर (len < 0) {
 		errsv = -len;
-		goto done;
+		जा done;
 	}
 
-	result = malloc(len + 1);
-	if (!result) {
+	result = दो_स्मृति(len + 1);
+	जर (!result) {
 		errsv = ENOMEM;
-		goto done;
+		जा done;
 	}
 	/* read path */
-	if (ul_read_all(pipes[0], result, len) != len) {
-		errsv = errno;
-		goto done;
+	जर (ul_read_all(pipes[0], result, len) != len) {
+		errsv = त्रुटि_सं;
+		जा done;
 	}
 	result[len] = '\0';
 done:
-	if (errsv) {
-		free(result);
-		result = NULL;
+	जर (errsv) {
+		मुक्त(result);
+		result = रिक्त;
 	}
-	close(pipes[0]);
+	बंद(pipes[0]);
 
 	/* We make a best effort to reap child */
-	ignore_result( waitpid(pid, NULL, 0) );
+	ignore_result( waitpid(pid, रिक्त, 0) );
 
-	errno = errsv;
-	return result;
+	त्रुटि_सं = errsv;
+	परत result;
 
 }
 
-int ul_mkdir_p(const char *path, mode_t mode)
+पूर्णांक ul_mkdir_p(स्थिरांक अक्षर *path, mode_t mode)
 {
-	char *p, *dir;
-	int rc = 0;
+	अक्षर *p, *dir;
+	पूर्णांक rc = 0;
 
-	if (!path || !*path)
-		return -EINVAL;
+	जर (!path || !*path)
+		परत -EINVAL;
 
 	dir = p = strdup(path);
-	if (!dir)
-		return -ENOMEM;
+	जर (!dir)
+		परत -ENOMEM;
 
-	if (*p == '/')
+	जर (*p == '/')
 		p++;
 
-	while (p && *p) {
-		char *e = strchr(p, '/');
-		if (e)
+	पर्यंत (p && *p) {
+		अक्षर *e = म_अक्षर(p, '/');
+		जर (e)
 			*e = '\0';
-		if (*p) {
-			rc = mkdir(dir, mode);
-			if (rc && errno != EEXIST)
-				break;
+		जर (*p) {
+			rc = सूची_गढ़ो(dir, mode);
+			जर (rc && त्रुटि_सं != EEXIST)
+				थांबा;
 			rc = 0;
 		}
-		if (!e)
-			break;
+		जर (!e)
+			थांबा;
 		*e = '/';
 		p = e + 1;
 	}
 
-	free(dir);
-	return rc;
+	मुक्त(dir);
+	परत rc;
 }
 
 /* returns basename and keeps dirname in the @path, if @path is "/" (root)
  * then returns empty string */
-char *stripoff_last_component(char *path)
+अक्षर *stripoff_last_component(अक्षर *path)
 {
-	char *p = path ? strrchr(path, '/') : NULL;
+	अक्षर *p = path ? म_खोजप(path, '/') : रिक्त;
 
-	if (!p)
-		return NULL;
+	जर (!p)
+		परत रिक्त;
 	*p = '\0';
-	return p + 1;
+	परत p + 1;
 }
 
-static int copy_file_simple(int from, int to)
+स्थिर पूर्णांक copy_file_simple(पूर्णांक from, पूर्णांक to)
 {
 	ssize_t nr;
-	char buf[BUFSIZ];
+	अक्षर buf[बफ_मान];
 
-	while ((nr = ul_read_all(from, buf, sizeof(buf))) > 0)
-		if (ul_write_all(to, buf, nr) == -1)
-			return UL_COPY_WRITE_ERROR;
-	if (nr < 0)
-		return UL_COPY_READ_ERROR;
+	पर्यंत ((nr = ul_read_all(from, buf, आकार(buf))) > 0)
+		जर (ul_write_all(to, buf, nr) == -1)
+			परत UL_COPY_WRITE_ERROR;
+	जर (nr < 0)
+		परत UL_COPY_READ_ERROR;
 #ifdef HAVE_EXPLICIT_BZERO
-	explicit_bzero(buf, sizeof(buf));
+	explicit_bzero(buf, आकार(buf));
 #endif
-	return 0;
+	परत 0;
 }
 
 /* Copies the contents of a file. Returns -1 on read error, -2 on write error. */
-int ul_copy_file(int from, int to)
+पूर्णांक ul_copy_file(पूर्णांक from, पूर्णांक to)
 {
 #ifdef HAVE_SENDFILE
-	struct stat st;
+	संरचना stat st;
 	ssize_t nw;
 
-	if (fstat(from, &st) == -1)
-		return UL_COPY_READ_ERROR;
-	if (!S_ISREG(st.st_mode))
-		return copy_file_simple(from, to);
-	if (ul_sendfile_all(to, from, NULL, st.st_size) < 0)
-		return copy_file_simple(from, to);
+	जर (ख_स्थिति(from, &st) == -1)
+		परत UL_COPY_READ_ERROR;
+	जर (!S_ISREG(st.st_mode))
+		परत copy_file_simple(from, to);
+	जर (ul_sendfile_all(to, from, रिक्त, st.st_size) < 0)
+		परत copy_file_simple(from, to);
 	/* ensure we either get an EOF or an error */
-	while ((nw = ul_sendfile_all(to, from, NULL, 16*1024*1024)) != 0)
-		if (nw < 0)
-			return copy_file_simple(from, to);
-	return 0;
-#else
-	return copy_file_simple(from, to);
+	पर्यंत ((nw = ul_sendfile_all(to, from, रिक्त, 16*1024*1024)) != 0)
+		जर (nw < 0)
+			परत copy_file_simple(from, to);
+	परत 0;
+#अन्यथा
+	परत copy_file_simple(from, to);
 #endif
 }
 
@@ -359,45 +359,45 @@ int ul_copy_file(int from, int to)
  *
  * Returns @buf, or NULL on error.
  */
-char *ul_fd_mkpath(char *buf, size_t bufsz, int fd)
+अक्षर *ul_fd_mkpath(अक्षर *buf, माप_प्रकार bufsz, पूर्णांक fd)
 {
-	int len;
+	पूर्णांक len;
 
-	if (fd < 0) {
-		errno = EBADF;
-		return NULL;
+	जर (fd < 0) {
+		त्रुटि_सं = EBADF;
+		परत रिक्त;
 	}
 
 	len = snprintf(buf, bufsz, _PATH_PROC_FDDIR "/%d", fd);
-	if (len < 0 || (size_t) len >= bufsz) {
-		errno = ENAMETOOLONG;
-		return NULL;
+	जर (len < 0 || (माप_प्रकार) len >= bufsz) {
+		त्रुटि_सं = ENAMETOOLONG;
+		परत रिक्त;
 	}
 
-	return buf;
+	परत buf;
 }
 
 /* Returns the pathname the @fd refers to as used by the kernel, or NULL on
  * error. The result has to be deallocated by free().
  */
-char *ul_fd_get_path(int fd)
+अक्षर *ul_fd_get_path(पूर्णांक fd)
 {
 	ssize_t ssz;
-	char buf[PATH_MAX];
-	char fdpath[UL_FDPATH_BUFSIZ];
+	अक्षर buf[PATH_MAX];
+	अक्षर fdpath[UL_FDPATH_BUFSIZ];
 
-	if (!ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
-		return NULL;
+	जर (!ul_fd_mkpath(fdpath, आकार(fdpath), fd))
+		परत रिक्त;
 
-	ssz = readlink(fdpath, buf, sizeof(buf));
-	if (ssz < 0)
-		return NULL;
+	ssz = readlink(fdpath, buf, आकार(buf));
+	जर (ssz < 0)
+		परत रिक्त;
 
 	/* readlink() does not terminate the result and it does not report
 	 * truncation; a name we cannot read completely is unusable */
-	if ((size_t) ssz >= sizeof(buf)) {
-		errno = ENAMETOOLONG;
-		return NULL;
+	जर ((माप_प्रकार) ssz >= आकार(buf)) {
+		त्रुटि_सं = ENAMETOOLONG;
+		परत रिक्त;
 	}
 
 	buf[ssz] = '\0';
@@ -410,26 +410,26 @@ char *ul_fd_get_path(int fd)
 	 * tell it apart we would have to stat() the name, and such a path
 	 * lookup may trigger an automount or block on an unreachable NFS
 	 * server. */
-	if (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
-		errno = ENOENT;
-		return NULL;
+	जर (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
+		त्रुटि_सं = ENOENT;
+		परत रिक्त;
 	}
 
-	return strdup(buf);
+	परत strdup(buf);
 }
 
-int ul_reopen(int fd, int flags)
+पूर्णांक ul_reopen(पूर्णांक fd, पूर्णांक flags)
 {
-	char *path = ul_fd_get_path(fd);
-	int ret;
+	अक्षर *path = ul_fd_get_path(fd);
+	पूर्णांक ret;
 
-	if (!path)
-		return -errno;
+	जर (!path)
+		परत -त्रुटि_सं;
 
-	ret = open(path, flags);
-	free(path);
+	ret = खोलो(path, flags);
+	मुक्त(path);
 
-	return ret;
+	परत ret;
 }
 
 
@@ -437,31 +437,31 @@ int ul_reopen(int fd, int flags)
  * maintain functionality across different libc implementations. It was
  * inspired by the behavior and implementation of glibc.
  */
-char *ul_basename(char *path)
+अक्षर *ul_basename(अक्षर *path)
 {
-	char *p;
+	अक्षर *p;
 
-	if (!path || !*path)
-		return (char *) ".";	/* ugly, static string */
+	जर (!path || !*path)
+		परत (अक्षर *) ".";	/* ugly, static string */
 
-	p = strrchr(path, '/');
-	if (!p)
-		return path;		/* no '/', return original */
+	p = म_खोजप(path, '/');
+	जर (!p)
+		परत path;		/* no '/', return original */
 
-	if (*(p + 1) != '\0')
-		return p + 1;		/* begin of the name */
+	जर (*(p + 1) != '\0')
+		परत p + 1;		/* begin of the name */
 
-	while (p > path && *(p - 1) == '/')
+	पर्यंत (p > path && *(p - 1) == '/')
 		--p;			/* remove trailing '/' */
 
-	if (p > path) {
+	जर (p > path) {
 		*p-- = '\0';
-		while (p > path && *(p - 1) != '/')
+		पर्यंत (p > path && *(p - 1) != '/')
 			--p;		/* move to the beginning of the name */
-	} else while (*(p + 1) != '\0')
+	} अन्यथा पर्यंत (*(p + 1) != '\0')
 		++p;
 
-	return p;
+	परत p;
 }
 
 #ifdef HAVE_OPENAT
@@ -483,12 +483,12 @@ char *ul_basename(char *path)
  * Return: On success, a valid pointer to a file stream is returned.
  *         On failure, NULL is returned and errno is set to indicate the issue.
  */
-FILE *fopen_at_no_link(int dir, const char *filename,
-                             int flags, mode_t perm, const char *mode)
+खाता *fopen_at_no_link(पूर्णांक dir, स्थिरांक अक्षर *filename,
+                             पूर्णांक flags, mode_t perm, स्थिरांक अक्षर *mode)
 {
-	FILE *fp;
-	int fd;
-	struct stat st;
+	खाता *fp;
+	पूर्णांक fd;
+	संरचना stat st;
 
 	/* We temporarily clear the O_TRUNC bit because we do not want
 	 * to accidentally truncate the target file if it is a hard link
@@ -497,54 +497,54 @@ FILE *fopen_at_no_link(int dir, const char *filename,
 	 * with fstat()...
 	 */
 	fd = openat(dir, filename, ((flags & ~O_TRUNC) | O_NOFOLLOW | O_CLOEXEC), perm);
-	if (fd < 0)
-		return NULL;
+	जर (fd < 0)
+		परत रिक्त;
 
-	if (fstat(fd, &st)) {
-		close(fd);
-		return NULL;
+	जर (ख_स्थिति(fd, &st)) {
+		बंद(fd);
+		परत रिक्त;
 	}
 
-	if (st.st_nlink > 1) {
-		close(fd);
-		errno = EMLINK;
-		return NULL;
+	जर (st.st_nlink > 1) {
+		बंद(fd);
+		त्रुटि_सं = EMLINK;
+		परत रिक्त;
 	}
 
-	if ((flags & O_TRUNC) && ftruncate(fd, 0)) {
-		close(fd);
-		return NULL;
+	जर ((flags & O_TRUNC) && ftruncate(fd, 0)) {
+		बंद(fd);
+		परत रिक्त;
 	}
 
 	fp = fdopen(fd, mode);
-	if (!fp)
-		close(fd);
-	return fp;
+	जर (!fp)
+		बंद(fd);
+	परत fp;
 }
 #endif /* HAVE_OPENAT */
 
-#if defined(SYS_openat2)
-int ul_openat_resolve(int dirfd, const char *path, int flags,
-		      mode_t mode, unsigned long long resolve)
+#जर defined(SYS_openat2)
+पूर्णांक ul_openat_resolve(पूर्णांक dirfd, स्थिरांक अक्षर *path, पूर्णांक flags,
+		      mode_t mode, अचिन्हित दीर्घ दीर्घ resolve)
 {
-	struct open_how how = {
+	संरचना open_how how = {
 		.flags = (__u64) flags,
 		.mode = (__u64) mode,
 		.resolve = resolve,
 	};
 
-	return syscall(SYS_openat2, dirfd, path, &how, sizeof(how));
+	परत syscall(SYS_openat2, dirfd, path, &how, आकार(how));
 }
-#else
-int ul_openat_resolve(
-		int dirfd __attribute__((__unused__)),
-		const char *path __attribute__((__unused__)),
-		int flags __attribute__((__unused__)),
+#अन्यथा
+पूर्णांक ul_openat_resolve(
+		पूर्णांक dirfd __attribute__((__unused__)),
+		स्थिरांक अक्षर *path __attribute__((__unused__)),
+		पूर्णांक flags __attribute__((__unused__)),
 		mode_t mode __attribute__((__unused__)),
-		unsigned long long resolve __attribute__((__unused__)))
+		अचिन्हित दीर्घ दीर्घ resolve __attribute__((__unused__)))
 {
-	errno = ENOSYS;
-	return -1;
+	त्रुटि_सं = ENOSYS;
+	परत -1;
 }
 #endif
 
@@ -567,107 +567,107 @@ int ul_openat_resolve(
  * Returns a file descriptor, or -1 and sets errno to ELOOP when a symlink has
  * been detected, or to ENOSYS when the check is not possible.
  */
-static int open_no_symlinks_fallback(const char *path, int flags, mode_t mode)
+स्थिर पूर्णांक open_no_symlinks_fallback(स्थिरांक अक्षर *path, पूर्णांक flags, mode_t mode)
 {
-	char *abspath = NULL, *kpath = NULL;
-	struct stat st;
-	int fd = -1, errsv;
+	अक्षर *abspath = रिक्त, *kpath = रिक्त;
+	संरचना stat st;
+	पूर्णांक fd = -1, errsv;
 
 	/* we cannot verify a file we have to create first */
-	if (!path || (flags & O_CREAT)) {
-		errno = ENOSYS;
-		return -1;
+	जर (!path || (flags & O_CREAT)) {
+		त्रुटि_सं = ENOSYS;
+		परत -1;
 	}
 
-	if (ul_is_relative_path(path)) {
+	जर (ul_is_relative_path(path)) {
 		/* the kernel reports an absolute pathname; note that
 		 * ul_absolute_path() only prepends the CWD as returned by
 		 * getcwd(), it resolves nothing */
 		abspath = ul_absolute_path(path);
-		if (!abspath)
-			return -1;
+		जर (!abspath)
+			परत -1;
 	}
 
-	if (flags & O_PATH)
-		fd = open(path, flags);
-	else
-		fd = open(path, O_PATH | O_CLOEXEC |
+	जर (flags & O_PATH)
+		fd = खोलो(path, flags);
+	अन्यथा
+		fd = खोलो(path, O_PATH | O_CLOEXEC |
 				(flags & (O_NOFOLLOW | O_DIRECTORY)));
-	if (fd < 0)
-		goto fail;
+	जर (fd < 0)
+		जा fail;
 
 	/* O_PATH|O_NOFOLLOW returns a FD to the symlink itself */
-	if (fstat(fd, &st) != 0)
-		goto fail;
-	if (S_ISLNK(st.st_mode)) {
-		errno = ELOOP;
-		goto fail;
+	जर (ख_स्थिति(fd, &st) != 0)
+		जा fail;
+	जर (S_ISLNK(st.st_mode)) {
+		त्रुटि_सं = ELOOP;
+		जा fail;
 	}
 
 	kpath = ul_fd_get_path(fd);
-	if (!kpath) {
-		errno = ENOSYS;		/* no /proc, no verification */
-		goto fail;
+	जर (!kpath) {
+		त्रुटि_सं = ENOSYS;		/* no /proc, no verification */
+		जा fail;
 	}
 
 	/* streq_paths() ignores duplicate and trailing slashes, but "." and
 	 * ".." in the requested path are refused as a symlink */
-	if (streq_paths(abspath ? abspath : path, kpath) != 1) {
-		errno = ELOOP;
-		goto fail;
+	जर (streq_paths(abspath ? abspath : path, kpath) != 1) {
+		त्रुटि_सं = ELOOP;
+		जा fail;
 	}
 
-	if (!(flags & O_PATH)) {
-		char fdpath[UL_FDPATH_BUFSIZ];
-		int nfd = -1;
+	जर (!(flags & O_PATH)) {
+		अक्षर fdpath[UL_FDPATH_BUFSIZ];
+		पूर्णांक nfd = -1;
 
 		/* apply the caller's flags; the /proc link refers to the
 		 * verified file, the path is not resolved for the second time */
-		if (ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
-			nfd = open(fdpath, flags, mode);
-		if (nfd < 0)
-			goto fail;
-		close(fd);
+		जर (ul_fd_mkpath(fdpath, आकार(fdpath), fd))
+			nfd = खोलो(fdpath, flags, mode);
+		जर (nfd < 0)
+			जा fail;
+		बंद(fd);
 		fd = nfd;
 	}
 
-	free(abspath);
-	free(kpath);
-	return fd;
+	मुक्त(abspath);
+	मुक्त(kpath);
+	परत fd;
 fail:
-	errsv = errno;
-	free(abspath);
-	free(kpath);
-	if (fd >= 0)
-		close(fd);
-	errno = errsv;
-	return -1;
+	errsv = त्रुटि_सं;
+	मुक्त(abspath);
+	मुक्त(kpath);
+	जर (fd >= 0)
+		बंद(fd);
+	त्रुटि_सं = errsv;
+	परत -1;
 }
-#else /* !__linux__ */
+#अन्यथा /* !__linux__ */
 /* O_PATH and the /proc/self/fd/ names are Linux specific */
-static int open_no_symlinks_fallback(
-			const char *path __attribute__((__unused__)),
-			int flags __attribute__((__unused__)),
+स्थिर पूर्णांक open_no_symlinks_fallback(
+			स्थिरांक अक्षर *path __attribute__((__unused__)),
+			पूर्णांक flags __attribute__((__unused__)),
 			mode_t mode __attribute__((__unused__)))
 {
-	errno = ENOSYS;
-	return -1;
+	त्रुटि_सं = ENOSYS;
+	परत -1;
 }
 #endif /* __linux__ */
 
 /* Opens @path with the guarantee that no component of the path is a symbolic
  * link, otherwise it fails with ELOOP.
  */
-int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
+पूर्णांक ul_open_no_symlinks(स्थिरांक अक्षर *path, पूर्णांक flags, mode_t mode)
 {
-	int fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
+	पूर्णांक fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
 				   RESOLVE_NO_SYMLINKS);
 
 	/* openat2() is Linux 5.6+ */
-	if (fd < 0 && errno == ENOSYS)
+	जर (fd < 0 && त्रुटि_सं == ENOSYS)
 		fd = open_no_symlinks_fallback(path, flags, mode);
 
-	return fd;
+	परत fd;
 }
 
 #ifdef HAVE_UL_SAFE_STATX
@@ -682,23 +682,23 @@ int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
  *
  * Returns 0 on success, otherwise negative errno (and errno is set too).
  */
-int ul_safe_statx(int dirfd, const char *path, int flags,
-		  unsigned int mask, struct statx *stx)
+पूर्णांक ul_safe_statx(पूर्णांक dirfd, स्थिरांक अक्षर *path, पूर्णांक flags,
+		  अचिन्हित पूर्णांक mask, संरचना statx *stx)
 {
-	assert(stx);
+	प्रतिज्ञा(stx);
 
-	memset(stx, 0, sizeof(*stx));
+	स_रखो(stx, 0, आकार(*stx));
 
 	flags |= AT_STATX_DONT_SYNC | AT_NO_AUTOMOUNT;
 
 #ifdef AT_EMPTY_PATH
-	if (!path || !*path)
+	जर (!path || !*path)
 		flags |= AT_EMPTY_PATH;
 #endif
-	if (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
-		return -errno;
+	जर (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
+		परत -त्रुटि_सं;
 
-	return 0;
+	परत 0;
 }
 
 /* Converts @stx to @st. statx(2) is not obliged to return everything the
@@ -706,9 +706,9 @@ int ul_safe_statx(int dirfd, const char *path, int flags,
  * attributes advertised by stx_mask and leave the rest zeroed. Callers that
  * care have to check stx_mask themselves.
  */
-void ul_statx_to_stat(const struct statx *stx, struct stat *st)
+शून्य ul_statx_to_stat(स्थिरांक संरचना statx *stx, संरचना stat *st)
 {
-	memset(st, 0, sizeof(*st));
+	स_रखो(st, 0, आकार(*st));
 
 	/* no bit in stx_mask, always returned by the kernel */
 	st->st_dev     = makedev(stx->stx_dev_major, stx->stx_dev_minor);
@@ -716,33 +716,33 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
 	st->st_blksize = stx->stx_blksize;
 
 	/* st_mode mixes two independently reported things */
-	if (stx->stx_mask & STATX_TYPE)
+	जर (stx->stx_mask & STATX_TYPE)
 		st->st_mode |= stx->stx_mode & S_IFMT;
-	if (stx->stx_mask & STATX_MODE)
+	जर (stx->stx_mask & STATX_MODE)
 		st->st_mode |= stx->stx_mode & ~S_IFMT;
 
-	if (stx->stx_mask & STATX_INO)
+	जर (stx->stx_mask & STATX_INO)
 		st->st_ino = stx->stx_ino;
-	if (stx->stx_mask & STATX_NLINK)
+	जर (stx->stx_mask & STATX_NLINK)
 		st->st_nlink = stx->stx_nlink;
-	if (stx->stx_mask & STATX_UID)
+	जर (stx->stx_mask & STATX_UID)
 		st->st_uid = stx->stx_uid;
-	if (stx->stx_mask & STATX_GID)
+	जर (stx->stx_mask & STATX_GID)
 		st->st_gid = stx->stx_gid;
-	if (stx->stx_mask & STATX_SIZE)
+	जर (stx->stx_mask & STATX_SIZE)
 		st->st_size = stx->stx_size;
-	if (stx->stx_mask & STATX_BLOCKS)
+	जर (stx->stx_mask & STATX_BLOCKS)
 		st->st_blocks = stx->stx_blocks;
 
-	if (stx->stx_mask & STATX_ATIME) {
+	जर (stx->stx_mask & STATX_ATIME) {
 		st->st_atim.tv_sec  = stx->stx_atime.tv_sec;
 		st->st_atim.tv_nsec = stx->stx_atime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_MTIME) {
+	जर (stx->stx_mask & STATX_MTIME) {
 		st->st_mtim.tv_sec  = stx->stx_mtime.tv_sec;
 		st->st_mtim.tv_nsec = stx->stx_mtime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_CTIME) {
+	जर (stx->stx_mask & STATX_CTIME) {
 		st->st_ctim.tv_sec  = stx->stx_ctime.tv_sec;
 		st->st_ctim.tv_nsec = stx->stx_ctime.tv_nsec;
 	}
@@ -766,143 +766,143 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
  * -EOPNOTSUPP means the kernel did not provide the essential attributes and
  * the caller should fall back to stat().
  */
-int ul_safe_stat(const char *target, struct stat *st,
-		 int nofollow __attribute__((__unused__)),
-		 unsigned int mask __attribute__((__unused__)),
-		 unsigned int *retmask)
+पूर्णांक ul_safe_stat(स्थिरांक अक्षर *target, संरचना stat *st,
+		 पूर्णांक nofollow __attribute__((__unused__)),
+		 अचिन्हित पूर्णांक mask __attribute__((__unused__)),
+		 अचिन्हित पूर्णांक *retmask)
 {
-	assert(target);
-	assert(st);
+	प्रतिज्ञा(target);
+	प्रतिज्ञा(st);
 
-	memset(st, 0, sizeof(struct stat));
-	if (retmask)
+	स_रखो(st, 0, आकार(संरचना stat));
+	जर (retmask)
 		*retmask = 0;
 
 #ifdef HAVE_UL_SAFE_STAT
 	{
-		struct statx stx = { 0 };
-		int rc;
+		संरचना statx stx = { 0 };
+		पूर्णांक rc;
 
 		mask |= UL_STATX_ESSENTIAL;
 
 		rc = ul_safe_statx(AT_FDCWD, target,
 				nofollow ? AT_SYMLINK_NOFOLLOW : 0, mask, &stx);
-		if (rc)
-			return rc;
+		जर (rc)
+			परत rc;
 
 		ul_statx_to_stat(&stx, st);
 
-		if (retmask)
+		जर (retmask)
 			*retmask = stx.stx_mask;
 
-		if ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
-			errno = EOPNOTSUPP;
-			return -EOPNOTSUPP;
+		जर ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
+			त्रुटि_सं = EOPNOTSUPP;
+			परत -EOPNOTSUPP;
 		}
 
-		return 0;
+		परत 0;
 	}
-#else
-	errno = ENOSYS;
-	return -ENOSYS;
+#अन्यथा
+	त्रुटि_सं = ENOSYS;
+	परत -ENOSYS;
 #endif
 }
 
 
 #ifdef TEST_PROGRAM_FILEUTILS
-int main(int argc, char *argv[])
+पूर्णांक main(पूर्णांक argc, अक्षर *argv[])
 {
-	if (argc < 2)
-		errx(EXIT_FAILURE, "Usage %s --{mkstemp,close-fds,copy-file,open-no-symlinks,safe-stat}",
+	जर (argc < 2)
+		errx(निकास_त्रुटि, "Usage %s --{mkstemp,close-fds,copy-file,open-no-symlinks,safe-stat}",
 				argv[0]);
 
-	if (strcmp(argv[1], "--mkstemp") == 0) {
-		FILE *f;
-		char *tmpname = NULL;
+	जर (म_भेद(argv[1], "--mkstemp") == 0) {
+		खाता *f;
+		अक्षर *tmpname = रिक्त;
 
-		f = xfmkstemp(&tmpname, NULL, "test");
+		f = xfmkstemp(&tmpname, रिक्त, "test");
 		unlink(tmpname);
-		free(tmpname);
-		fclose(f);
+		मुक्त(tmpname);
+		ख_बंद(f);
 
-	} else if (strcmp(argv[1], "--close-fds") == 0) {
+	} अन्यथा जर (म_भेद(argv[1], "--close-fds") == 0) {
 		ignore_result( dup(STDIN_FILENO) );
 		ignore_result( dup(STDIN_FILENO) );
 		ignore_result( dup(STDIN_FILENO) );
 
 # ifdef HAVE_CLOSE_RANGE
-		if (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
+		जर (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
 # endif
 			ul_close_all_fds(STDERR_FILENO + 1, ~0U);
 
-	} else if (strcmp(argv[1], "--copy-file") == 0) {
-		int ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
-		if (ret == UL_COPY_READ_ERROR)
-			err(EXIT_FAILURE, "read");
-		else if (ret == UL_COPY_WRITE_ERROR)
-			err(EXIT_FAILURE, "write");
+	} अन्यथा जर (म_भेद(argv[1], "--copy-file") == 0) {
+		पूर्णांक ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
+		जर (ret == UL_COPY_READ_ERROR)
+			err(निकास_त्रुटि, "read");
+		अन्यथा जर (ret == UL_COPY_WRITE_ERROR)
+			err(निकास_त्रुटि, "write");
 
-	} else if (strcmp(argv[1], "--open-no-symlinks") == 0) {
+	} अन्यथा जर (म_भेद(argv[1], "--open-no-symlinks") == 0) {
 #ifdef __linux__
-		int flags = O_PATH | O_CLOEXEC;
-#else
-		int flags = O_RDONLY | O_CLOEXEC;
+		पूर्णांक flags = O_PATH | O_CLOEXEC;
+#अन्यथा
+		पूर्णांक flags = O_RDONLY | O_CLOEXEC;
 #endif
-		int fallback = 0;
-		char *name;
-		int fd, i;
+		पूर्णांक fallback = 0;
+		अक्षर *name;
+		पूर्णांक fd, i;
 
-		if (argc < 3)
-			errx(EXIT_FAILURE, "no path specified");
+		जर (argc < 3)
+			errx(निकास_त्रुटि, "no path specified");
 
-		for (i = 3; i < argc; i++) {
+		साठी (i = 3; i < argc; i++) {
 			/* the fallback is used on kernels without openat2()
 			 * only, "--fallback" makes it testable anywhere */
-			if (strcmp(argv[i], "--fallback") == 0)
+			जर (म_भेद(argv[i], "--fallback") == 0)
 				fallback = 1;
-			else if (strcmp(argv[i], "--rdonly") == 0)
+			अन्यथा जर (म_भेद(argv[i], "--rdonly") == 0)
 				flags = O_RDONLY | O_CLOEXEC;
 		}
 
-		if (fallback)
+		जर (fallback)
 			fd = open_no_symlinks_fallback(argv[2], flags, 0);
-		else
+		अन्यथा
 			fd = ul_open_no_symlinks(argv[2], flags, 0);
-		if (fd < 0)
-			err(EXIT_FAILURE, "%s", argv[2]);
+		जर (fd < 0)
+			err(निकास_त्रुटि, "%s", argv[2]);
 
 		name = ul_fd_get_path(fd);
-		printf("%s\n", name);
-		free(name);
-		close(fd);
+		म_लिखो("%s\n", name);
+		मुक्त(name);
+		बंद(fd);
 
-	} else if (strcmp(argv[1], "--safe-stat") == 0) {
-		unsigned int mask = 0, retmask = 0;
-		int nofollow = 0;
-		struct stat st, ref;
-		int rc, i;
+	} अन्यथा जर (म_भेद(argv[1], "--safe-stat") == 0) {
+		अचिन्हित पूर्णांक mask = 0, retmask = 0;
+		पूर्णांक nofollow = 0;
+		संरचना stat st, ref;
+		पूर्णांक rc, i;
 
-		if (argc < 3)
-			errx(EXIT_FAILURE, "no path specified");
+		जर (argc < 3)
+			errx(निकास_त्रुटि, "no path specified");
 
-		for (i = 3; i < argc; i++) {
-			if (strcmp(argv[i], "--nofollow") == 0)
+		साठी (i = 3; i < argc; i++) {
+			जर (म_भेद(argv[i], "--nofollow") == 0)
 				nofollow = 1;
-			else if (strcmp(argv[i], "--basic") == 0)
+			अन्यथा जर (म_भेद(argv[i], "--basic") == 0)
 				mask |= UL_STATX_BASIC;
 		}
 
-		printf("%s:\n", argv[2]);
+		म_लिखो("%s:\n", argv[2]);
 
 		rc = ul_safe_stat(argv[2], &st, nofollow, mask, &retmask);
 
 		/* the function returns -errno and it sets errno too */
-		printf("      rc: %d\n", rc);
-		printf("   errno: %d\n", rc ? errno : 0);
-		if (rc)
-			return EXIT_FAILURE;
+		म_लिखो("      rc: %d\n", rc);
+		म_लिखो("   errno: %d\n", rc ? त्रुटि_सं : 0);
+		जर (rc)
+			परत निकास_त्रुटि;
 
-		printf("    type: %s\n", S_ISDIR(st.st_mode)  ? "dir" :
+		म_लिखो("    type: %s\n", S_ISDIR(st.st_mode)  ? "dir" :
 					 S_ISREG(st.st_mode)  ? "reg" :
 					 S_ISLNK(st.st_mode)  ? "lnk" :
 					 S_ISBLK(st.st_mode)  ? "blk" :
@@ -915,11 +915,11 @@ int main(int argc, char *argv[])
 		 * attributes advertised by @retmask are comparable, the rest
 		 * is zero in @st.
 		 */
-		if (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
-			err(EXIT_FAILURE, "%s", argv[2]);
+		जर (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
+			err(निकास_त्रुटि, "%s", argv[2]);
 
-		printf("  st_dev: %s\n", st.st_dev == ref.st_dev ? "OK" : "FAILED");
-		printf(" st_rdev: %s\n", st.st_rdev == ref.st_rdev ? "OK" : "FAILED");
+		म_लिखो("  st_dev: %s\n", st.st_dev == ref.st_dev ? "OK" : "FAILED");
+		म_लिखो(" st_rdev: %s\n", st.st_rdev == ref.st_rdev ? "OK" : "FAILED");
 #ifdef HAVE_UL_SAFE_STAT
 		{
 			/* Report all the attributes we asked for, so that
@@ -930,35 +930,35 @@ int main(int argc, char *argv[])
 			 * design, there is nothing to compare and it's not a
 			 * failure.
 			 */
-			unsigned int emask = mask | UL_STATX_ESSENTIAL;
+			अचिन्हित पूर्णांक emask = mask | UL_STATX_ESSENTIAL;
 
 # define RESULT(bit, x)	(!(retmask & (bit)) || (x) ? "OK" : "FAILED")
 
-			if (emask & STATX_TYPE)
-				printf("  S_IFMT: %s\n", RESULT(STATX_TYPE,
+			जर (emask & STATX_TYPE)
+				म_लिखो("  S_IFMT: %s\n", RESULT(STATX_TYPE,
 					(st.st_mode & S_IFMT) == (ref.st_mode & S_IFMT)));
-			if (emask & STATX_MODE)
-				printf(" st_mode: %s\n", RESULT(STATX_MODE,
+			जर (emask & STATX_MODE)
+				म_लिखो(" st_mode: %s\n", RESULT(STATX_MODE,
 					(st.st_mode & ~S_IFMT) == (ref.st_mode & ~S_IFMT)));
-			if (emask & STATX_INO)
-				printf("  st_ino: %s\n",
+			जर (emask & STATX_INO)
+				म_लिखो("  st_ino: %s\n",
 					RESULT(STATX_INO, st.st_ino == ref.st_ino));
-			if (emask & STATX_NLINK)
-				printf("st_nlink: %s\n",
+			जर (emask & STATX_NLINK)
+				म_लिखो("st_nlink: %s\n",
 					RESULT(STATX_NLINK, st.st_nlink == ref.st_nlink));
-			if (emask & STATX_UID)
-				printf("  st_uid: %s\n",
+			जर (emask & STATX_UID)
+				म_लिखो("  st_uid: %s\n",
 					RESULT(STATX_UID, st.st_uid == ref.st_uid));
-			if (emask & STATX_GID)
-				printf("  st_gid: %s\n",
+			जर (emask & STATX_GID)
+				म_लिखो("  st_gid: %s\n",
 					RESULT(STATX_GID, st.st_gid == ref.st_gid));
-			if (emask & STATX_SIZE)
-				printf(" st_size: %s\n",
+			जर (emask & STATX_SIZE)
+				म_लिखो(" st_size: %s\n",
 					RESULT(STATX_SIZE, st.st_size == ref.st_size));
 # undef RESULT
 		}
 #endif
 	}
-	return EXIT_SUCCESS;
+	परत निकास_सफल;
 }
 #endif

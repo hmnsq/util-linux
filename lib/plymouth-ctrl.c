@@ -23,120 +23,120 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <limits.h>
+#अन्तर्भाव <poll.h>
+#अन्तर्भाव <signal.h>
+#अन्तर्भाव <stdarg.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <sys/mman.h>
+#अन्तर्भाव <sys/socket.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/un.h>
+#अन्तर्भाव <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#अन्तर्भाव "all-io.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "nls.h"
+#अन्तर्भाव "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+स्थिर पूर्णांक can_read(पूर्णांक fd, स्थिरांक दीर्घ timeout)
 {
-	struct pollfd fds = {
+	संरचना pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	पूर्णांक ret;
 
-	do {
+	करा {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} पर्यंत ((ret < 0) && (त्रुटि_सं == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	परत (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+स्थिर पूर्णांक open_un_socket_and_connect(शून्य)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	संरचना sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	स्थिरांक पूर्णांक one = 1;
+	पूर्णांक fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	जर (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		जा err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, आकार(one));
+	जर (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
-		close(fd);
+		बंद(fd);
 		fd = -1;
-		goto err;
+		जा err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (संरचना sockaddr *) &su,
+		दुरत्व(संरचना sockaddr_un, sun_path) + 1 + म_माप(su.sun_path+1));
+	जर (ret < 0) {
+		जर (त्रुटि_सं != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
-		close(fd);
+		बंद(fd);
 		fd = -1;
-		goto err;
+		जा err;
 	}
 err:
-	return fd;
+	परत fd;
 }
 
-int plymouth_command(int cmd, ...)
+पूर्णांक plymouth_command(पूर्णांक cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	संरचना sigaction sp, op;
+	पूर्णांक fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
-	sp.sa_handler = SIG_IGN;
+	sp.sa_handler = संक_छोड़ो;
 	sp.sa_flags = SA_RESTART;
 	sigaction(SIGPIPE, &sp, &op);
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	निवड (cmd) {
+	स्थिती MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		जर (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, आकार(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		थांबा;
+	स्थिती MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		जर (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, आकार(command));
 		}
-		break;
-	default:
+		थांबा;
+	पूर्वनिर्धारित:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	स्थिती '?':
+		जा err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
-		close(fdsock);
+	जर (fdsock >= 0) {
+		जर (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (अक्षर *) &answer[0], आकार(answer));
+		बंद(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, रिक्त);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	परत ret;
 }
 
