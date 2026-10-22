@@ -14,7 +14,7 @@
 struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
 {
 	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	정수 rc;
 
 	assert(pwdbuf);
 
@@ -23,19 +23,19 @@ struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
 
 	errno = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
+	만약 (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	만약 (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return pwd;
+	반환 pwd;
 failed:
 	free(pwd);
 	free(*pwdbuf);
-	return NULL;
+	반환 NULL;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
@@ -45,7 +45,7 @@ failed:
 struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
 {
 	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	정수 rc;
 	uint64_t uid;
 
 	assert(pwdbuf);
@@ -56,34 +56,34 @@ struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
+	만약 (rc == -ERANGE) {
 		errno = ERANGE;
 		goto failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	만약 (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
+	} 아니면 {
+		만약 (uid > MAX_OF_UINT_TYPE(uid_t)) {
 			errno = ERANGE;
 			goto failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	만약 (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	만약 (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return pwd;
+	반환 pwd;
 failed:
 	free(pwd);
 	free(*pwdbuf);
-	return NULL;
+	반환 NULL;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
@@ -93,7 +93,7 @@ failed:
 struct group *xgetgroup(const char *str, char **grpbuf)
 {
 	struct group *grp = NULL, *res = NULL;
-	int rc;
+	정수 rc;
 	uint64_t gid;
 
 	assert(grpbuf);
@@ -104,34 +104,34 @@ struct group *xgetgroup(const char *str, char **grpbuf)
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
+	만약 (rc == -ERANGE) {
 		errno = ERANGE;
 		goto failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	만약 (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
+	} 아니면 {
+		만약 (gid > MAX_OF_UINT_TYPE(gid_t)) {
 			errno = ERANGE;
 			goto failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	만약 (rc != 0) {
 		errno = rc;
 		goto failed;
 	}
-	if (!res) {
+	만약 (!res) {
 		errno = EINVAL;
 		goto failed;
 	}
-	return grp;
+	반환 grp;
 failed:
 	free(grp);
 	free(*grpbuf);
-	return NULL;
+	반환 NULL;
 }
 
 char *xgetlogin(void)
@@ -153,12 +153,12 @@ char *xgetlogin(void)
 	errno = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	만약 (errno == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	만약 (pw && pw->pw_name && *pw->pw_name)
+		반환 xstrdup(pw->pw_name);
 
-	return NULL;
+	반환 NULL;
 }
 
 /*
@@ -171,39 +171,39 @@ char *xgetlogin(void)
  */
 struct group *ul_getgrp_str(const char *str, gid_t *result)
 {
-	int rc;
+	정수 rc;
 	uint64_t num = 0;
 	struct group *gr;
 
-	if (result)
+	만약 (result)
 		*result = (gid_t) -1;
 
 	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	만약 (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
-		return NULL;
+		반환 NULL;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	만약 (rc == -EINVAL) {
 		errno = 0;
 		gr = getgrnam(str);
-		if (gr && result)
+		만약 (gr && result)
 			*result = gr->gr_gid;
-		else if (!gr && !errno)
+		아니면 만약 (!gr && !errno)
 			errno = EINVAL;
-		return gr;
+		반환 gr;
 	}
 
-	if (result)
+	만약 (result)
 		*result = (gid_t) num;
 
 	errno = 0;
 	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
+	만약 (!gr && !errno)
 		errno = EINVAL;
 
-	return gr;
+	반환 gr;
 }
 
 /*
@@ -216,54 +216,54 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  */
 struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
 {
-	int rc;
+	정수 rc;
 	uint64_t num = 0;
 	struct passwd *pw;
 
-	if (result)
+	만약 (result)
 		*result = (uid_t) -1;
 
 	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	만약 (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
-		return NULL;
+		반환 NULL;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	만약 (rc == -EINVAL) {
 		errno = 0;
 		pw = getpwnam(str);
-		if (pw && result)
+		만약 (pw && result)
 			*result = pw->pw_uid;
-		else if (!pw && !errno)
+		아니면 만약 (!pw && !errno)
 			errno = EINVAL;
-		return pw;
+		반환 pw;
 	}
 
-	if (result)
+	만약 (result)
 		*result = (uid_t) num;
 
 	errno = 0;
 	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
+	만약 (!pw && !errno)
 		errno = EINVAL;
 
-	return pw;
+	반환 pw;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+정수 main(정수 argc, char *argv[])
 {
 	char *buf = NULL;
 	struct passwd *pwd = NULL;
 
-	if (argc != 2) {
+	만약 (argc != 2) {
 		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+		반환 EXIT_FAILURE;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
+	만약 (!pwd)
 		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
 
 	printf("Username: %s\n", pwd->pw_name);
@@ -277,6 +277,6 @@ int main(int argc, char *argv[])
 	printf("Current:  %s\n", (buf = xgetlogin()));
 	free(buf);
 
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM */

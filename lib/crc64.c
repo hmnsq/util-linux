@@ -318,12 +318,12 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
 	crc = CRC_START_64_ECMA;
 	ptr = input_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	만약 ( ptr != NULL ) 위해 (a=0; a<num_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc;
+	반환 crc;
 
 }  /* crc_64_ecma */
 
@@ -345,12 +345,12 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
 	crc = CRC_START_64_WE;
 	ptr = input_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	만약 ( ptr != NULL ) 위해 (a=0; a<num_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc ^ 0xFFFFFFFFFFFFFFFFull;
+	반환 crc ^ 0xFFFFFFFFFFFFFFFFull;
 
 }  /* crc_64_we */
 
@@ -364,6 +364,6 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
 uint64_t ul_update_crc64( uint64_t crc, unsigned char c )
 {
 
-	return (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
+	반환 (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
 
 }  /* update_crc_64 */

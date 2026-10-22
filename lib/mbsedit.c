@@ -21,14 +21,14 @@ struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
 {
 	struct mbs_editor *edit = calloc(1, sizeof(*edit));
 
-	if (edit) {
+	만약 (edit) {
 		edit->buf = buf;
 		edit->max_bytes = bufsz;
 		edit->max_cells = ncells;
 		edit->cur_cells = mbs_safe_width(buf);
 		edit->cur_bytes = strlen(buf);
 	}
-	return edit;
+	반환 edit;
 }
 
 char *mbs_free_edit(struct mbs_editor *edit)
@@ -36,7 +36,7 @@ char *mbs_free_edit(struct mbs_editor *edit)
 	char *ret = edit ? edit->buf : NULL;
 
 	free(edit);
-	return ret;
+	반환 ret;
 }
 
 static size_t mbs_next(const char *str, size_t *ncells)
@@ -45,17 +45,17 @@ static size_t mbs_next(const char *str, size_t *ncells)
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	만약 (!str || !*str)
+		반환 0;
 
 	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	반환 n;
+#아니면
+	만약 (!str || !*str)
+		반환 0;
 	*ncells = 1;
-	return 1;
+	반환 1;
 #endif
 }
 
@@ -66,54 +66,54 @@ static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
 	const char *p, *prev;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	만약 (!start || !end || start == end || !*start)
+		반환 0;
 
 	prev = p = start;
-	while (p < end) {
+	동안 (p < end) {
 		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
 		prev = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		만약 (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		아니면
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	만약 (prev == end)
+		반환 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	반환 n;
+#아니면
+	만약 (!start || !end || start == end || !*start)
+		반환 0;
 	*ncells = 1;
-	return 1;
+	반환 1;
 #endif
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+정수 mbs_edit_goto(struct mbs_editor *edit, 정수 where)
 {
 	switch (where) {
 	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+		만약 (edit->cursor == 0)
+			반환 1;
+		아니면 {
 			size_t n, cells;
 			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			만약 (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
 		break;
 	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		만약 (edit->cursor_cells >= edit->cur_cells)
+			반환 1;
+		아니면 {
 			size_t n, cells;
 			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			만약 (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
@@ -128,10 +128,10 @@ int mbs_edit_goto(struct mbs_editor *edit, int where)
 		edit->cursor_cells = edit->cur_cells;
 		break;
 	default:
-		return -EINVAL;
+		반환 -EINVAL;
 	}
 
-	return 0;
+	반환 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
@@ -146,7 +146,7 @@ static size_t remove_next(char *str, size_t *ncells)
 
 	memmove(str, str + n, move_bytes);
 	str[bytes - n] = '\0';
-	return n;
+	반환 n;
 }
 
 static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
@@ -158,14 +158,14 @@ static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
 	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	만약 (!in)
+		반환 -1;
 
 	n = wctomb(in, wc);
-	if (n == (size_t) -1)
+	만약 (n == (size_t) -1)
 		goto out;
 	*ncells = wcwidth(wc);
-#else
+#아니면
 	*ncells = 1;
 	in = (char *) &c;
 #endif
@@ -178,55 +178,55 @@ static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
 out:
 	free(in);
 #endif
-	return n;
+	반환 n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+static 정수 mbs_edit_remove(struct mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	만약 (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
+		반환 1;
 
 	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	만약 (n == (size_t)-1)
+		반환 1;
 
 	edit->cur_bytes -= n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	반환 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+정수 mbs_edit_delete(struct mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
+	만약 (edit->cursor >= edit->cur_bytes
 	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+		반환 1;
 
-	return mbs_edit_remove(edit);
+	반환 mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+정수 mbs_edit_backspace(struct mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	만약 (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
+		반환 mbs_edit_remove(edit);
+	반환 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+정수 mbs_edit_insert(struct mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	만약 (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
+		반환 1;
 
 	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	만약 (n == (size_t)-1)
+		반환 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
 	edit->cur_bytes += n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	반환 0;
 }

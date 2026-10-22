@@ -23,21 +23,21 @@
 #include "bitops.h"
 #include "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+static 정수 STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+void strutils_set_exitcode(정수 ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+static 정수 do_scale_by_power (uintmax_t *x, 정수 base, 정수 power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	동안 (power--) {
+		만약 (UINTMAX_MAX / base < *x)
+			반환 -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	반환 0;
 }
 
 /*
@@ -67,12 +67,12 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+정수 ul_parse_size(const char *str, uintmax_t *res, 정수 *power)
 {
 	const char *p;
 	char *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	정수 base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
 	static const char *suf  = "KMGTPEZY";
 	static const char *suf2 = "kmgtpezy";
@@ -80,7 +80,7 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 
 	*res = 0;
 
-	if (!str || !*str) {
+	만약 (!str || !*str) {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -92,9 +92,9 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	동안 (isspace((unsigned char) *p))
 		p++;
-	if (*p == '-') {
+	만약 (*p == '-') {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -102,12 +102,12 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	errno = 0, end = NULL;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	만약 (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
 		goto err;
 	}
-	if (!end || !*end)
+	만약 (!end || !*end)
 		goto done;			/* without suffix */
 	p = end;
 
@@ -115,33 +115,33 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	만약 (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	아니면 만약 ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
+	아니면 만약 (*(p + 1)) {
 		struct lconv const *l = localeconv();
 		const char *dp = l ? l->decimal_point : NULL;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+		만약 (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
 			const char *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			위해 (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
+			만약 (isdigit(*fstr)) {
 				errno = 0, end = NULL;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				만약 (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
 					goto err;
 				}
-			} else
+			} 아니면
 				end = (char *) p;
 
-			if (!end || !*end) {
+			만약 (!end || !*end) {
 				rc = -EINVAL;
 				goto err;	/* without suffix, but with fractions */
 			}
@@ -153,32 +153,32 @@ check_suffix:
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	만약 (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	아니면 {
 		sp = strchr(suf2, *p);
-		if (sp)
+		만약 (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		아니면 {
 			rc = -EINVAL;
 			goto err;
 		}
 	}
 
-	if (power)
+	만약 (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
+	만약 (rc)
 		goto err;
 
-	if (frac && pwr) {
-		int i;
+	만약 (frac && pwr) {
+		정수 i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
+		만약 (rc)
 			goto err;
 
 		/*
@@ -189,13 +189,13 @@ check_suffix:
 		do {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} 동안 (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		위해 (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		만약 (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
 			goto err;
 		}
@@ -204,71 +204,71 @@ check_suffix:
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	만약 (rc < 0)
 		errno = -rc;
-	return rc;
+	반환 rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+정수 strtosize(const char *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	반환 ul_parse_size(str, res, NULL);
 }
 
-int isdigit_strend(const char *str, const char **end)
-{
-	const char *p;
-
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
-
-	if (end)
-		*end = p;
-	return p && p > str && !*p;
-}
-
-int isxdigit_strend(const char *str, const char **end)
+정수 isdigit_strend(const char *str, const char **end)
 {
 	const char *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	위해 (p = str; p && *p && isdigit((unsigned char) *p); p++);
 
-	if (end)
+	만약 (end)
+		*end = p;
+	반환 p && p > str && !*p;
+}
+
+정수 isxdigit_strend(const char *str, const char **end)
+{
+	const char *p;
+
+	위해 (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+
+	만약 (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	반환 p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+정수 ul_strtobool(const char *str, bool *result)
 {
 	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
 	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	만약 (!str || !result)
+		반환 -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	위해 (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		만약 (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			반환 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	위해 (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		만약 (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			반환 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	반환 -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+정수 ul_parse_switch(const char *arg, ...)
 {
 	const char *a, *b;
 	va_list ap;
@@ -276,22 +276,22 @@ int ul_parse_switch(const char *arg, ...)
 	va_start(ap, arg);
 	do {
 		a = va_arg(ap, char *);
-		if (!a)
+		만약 (!a)
 			break;
 		b = va_arg(ap, char *);
-		if (!b)
+		만약 (!b)
 			break;
 
-		if (strcmp(arg, a) == 0) {
+		만약 (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			반환 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		만약 (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			반환 0;
 		}
-	} while (1);
+	} 동안 (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
@@ -300,7 +300,7 @@ int ul_parse_switch(const char *arg, ...)
 #ifndef HAVE_MEMPCPY
 void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	반환 ((char *)memcpy(dest, src, n)) + n;
 }
 #endif
 
@@ -309,21 +309,21 @@ size_t strnlen(const char *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	위해 (i = 0; i < maxlen; i++) {
+		만약 (s[i] == '\0')
+			반환 i;
 	}
-	return maxlen;
+	반환 maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+char *strnchr(const char *s, size_t maxlen, 정수 c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	위해 (; maxlen-- && *s != '\0'; ++s)
+		만약 (*s == (char)c)
+			반환 (char *)s;
+	반환 NULL;
 }
 #endif
 
@@ -332,97 +332,97 @@ char *strndup(const char *s, size_t n)
 {
 	size_t len = strnlen(s, n);
 	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	만약 (!new)
+		반환 NULL;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	반환 (char *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+정수 ul_strtos64(const char *str, int64_t *num, 정수 base)
 {
 	char *end = NULL;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	만약 (str == NULL || *str == '\0')
+		반환 -(errno = EINVAL);
 
 	errno = 0;
 	*num = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	만약 (errno != 0)
+		반환 -errno;
+	만약 (str == end || (end && *end))
+		반환 -(errno = EINVAL);
+	반환 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+정수 ul_strtou64(const char *str, uint64_t *num, 정수 base)
 {
 	char *end = NULL;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	만약 (str == NULL || *str == '\0')
+		반환 -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	만약 (tmp < 0)
 		errno = ERANGE;
-	else {
+	아니면 {
 		errno = 0;
 		*num = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	만약 (errno != 0)
+		반환 -errno;
+	만약 (str == end || (end && *end))
+		반환 -(errno = EINVAL);
+	반환 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+정수 ul_strtos32(const char *str, int32_t *num, 정수 base)
 {
 	int64_t tmp;
-	int rc;
+	정수 rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	만약 (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	만약 (rc == 0)
 		*num = (int32_t) tmp;
-	return rc;
+	반환 rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+정수 ul_strtou32(const char *str, uint32_t *num, 정수 base)
 {
 	uint64_t tmp;
-	int rc;
+	정수 rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	만약 (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	만약 (rc == 0)
 		*num = (uint32_t) tmp;
-	return rc;
+	반환 rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+정수 ul_strtou16(const char *str, uint16_t *num, 정수 base)
 {
 	uint64_t tmp;
-	int rc;
+	정수 rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	만약 (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	만약 (rc == 0)
 		*num = (uint16_t) tmp;
-	return rc;
+	반환 rc;
 }
 
 /*
@@ -432,39 +432,39 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
+int64_t str2num_or_err(const char *str, 정수 base, const char *errmesg,
 			     int64_t low, int64_t up)
 {
 	int64_t num = 0;
-	int rc;
+	정수 rc;
 
 	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	만약 (rc == 0 && ((low && num < low) || (up && num > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	만약 (rc) {
+		만약 (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	반환 num;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(const char *str, 정수 base, const char *errmesg, uint64_t up)
 {
 	uint64_t num = 0;
-	int rc;
+	정수 rc;
 
 	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	만약 (rc == 0 && (up && num > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	만약 (rc) {
+		만약 (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	반환 num;
 }
 
 double strtod_or_err(const char *str, const char *errmesg)
@@ -473,44 +473,44 @@ double strtod_or_err(const char *str, const char *errmesg)
 	char *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
+	만약 (str == NULL || *str == '\0')
 		goto err;
 	num = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
+	만약 (errno || str == end || (end && *end))
 		goto err;
 
-	return num;
+	반환 num;
 err:
-	if (errno == ERANGE)
+	만약 (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+정수 ul_strtold(const char *str, long double *num)
 {
 	char *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	만약 (str == NULL || *str == '\0')
+		반환 -(errno = EINVAL);
 	*num = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	만약 (errno != 0)
+		반환 -errno;
+	만약 (str == end || (end && *end))
+		반환 -(errno = EINVAL);
+	반환 0;
 }
 
 long double strtold_or_err(const char *str, const char *errmesg)
 {
 	long double num = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	만약 (ul_strtold(str, &num) == 0)
+		반환 num;
+	만약 (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -520,10 +520,10 @@ uintmax_t strtosize_or_err(const char *str, const char *errmesg)
 {
 	uintmax_t num;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	만약 (strtosize(str, &num) == 0)
+		반환 num;
 
-	if (errno)
+	만약 (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -553,33 +553,33 @@ time_t strtotime_or_err(const char *str, const char *errmesg)
 	int64_t user_input;
 
 	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	반환 (time_t) user_input;
 }
 
 bool hyperlinkwanted(const char *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	만약 (mode && strcmp(mode, "never") == 0)
+		반환 false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	만약 (mode && strcmp(mode, "always") == 0)
+		반환 true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	만약 (!mode || strcmp(mode, "auto") == 0)
+		반환 isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
 bool annotationwanted(const char *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	만약 (mode && strcmp(mode, "never") == 0)
+		반환 false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	만약 (mode && strcmp(mode, "always") == 0)
+		반환 true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	만약 (!mode || strcmp(mode, "auto") == 0)
+		반환 isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -592,19 +592,19 @@ char *xstrmode(mode_t mode, char *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	만약 (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	아니면 만약 (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	아니면 만약 (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	아니면 만약 (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	아니면 만약 (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	아니면 만약 (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	아니면 만약 (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	반환 str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+static 정수 get_exp(uint64_t n)
 {
-	int shft;
+	정수 shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
+	위해 (shft = 10; shft <= 60; shft += 10) {
+		만약 (n < (1ULL << shft))
 			break;
 	}
-	return shft - 10;
+	반환 shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+char *size_to_human_string(정수 options, uint64_t bytes)
 {
 	char buf[32];
-	int dec, exp;
+	정수 dec, exp;
 	uint64_t frac;
 	const char *letters = "BKMGTPE";
 	char suffix[sizeof(" KiB")], *psuf = suffix;
 	char c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	만약 (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	만약 ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	만약 (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		만약 (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		아니면
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		만약 (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} 아니면 {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		만약 (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
+	만약 (frac) {
 		struct lconv const *l = localeconv();
 		char *dp = l ? l->decimal_point : NULL;
-		int len;
+		정수 len;
 
-		if (!dp || !*dp)
+		만약 (!dp || !*dp)
 			dp = ".";
 
 		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		만약 (len > 0 && (size_t) len < sizeof(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			만약 (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
 			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+		} 아니면
 			*buf = '\0';	/* snprintf error */
-	} else
+	} 아니면
 		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	반환 strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+정수 string_to_idarray(const char *list, 정수 ary[], size_t arysz,
+			정수 (name2id)(const char *, size_t))
 {
 	const char *begin = NULL, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	만약 (!list || !*list || !ary || !arysz || !name2id)
+		반환 -1;
 
-	for (p = list; p && *p; p++) {
+	위해 (p = list; p && *p; p++) {
 		const char *end = NULL;
-		int id;
+		정수 id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		만약 (n >= arysz)
+			반환 -2;
+		만약 (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		만약 (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		만약 (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		만약 (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		만약 (end <= begin)
+			반환 -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		만약 (id == -1)
+			반환 -1;
 		ary[ n++ ] = id;
 		begin = NULL;
-		if (end && !*end)
+		만약 (end && !*end)
 			break;
 	}
-	return n;
+	반환 n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+정수 string_add_to_idarray(const char *list, 정수 ary[], size_t arysz,
+			size_t *ary_pos, 정수 (name2id)(const char *, size_t))
 {
 	const char *list_add;
-	int r;
+	정수 r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	만약 (!list || !*list || !ary_pos || *ary_pos > arysz)
+		반환 -1;
 
-	if (list[0] == '+')
+	만약 (list[0] == '+')
 		list_add = &list[1];
-	else {
+	아니면 {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	만약 (r > 0)
 		*ary_pos += r;
-	return r;
+	반환 r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
+정수 string_to_bitarray(const char *list,
 		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+		     정수 (*name2bit)(const char *, size_t),
 		     size_t allow_range)
 {
 	const char *begin = NULL, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	만약 (!list || !name2bit || !ary)
+		반환 -EINVAL;
 
-	for (p = list; p && *p; p++) {
+	위해 (p = list; p && *p; p++) {
 		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+		정수 bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		만약 (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		만약 (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		만약 (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		만약 (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		만약 (end <= begin)
+			반환 -1;
+		만약 (allow_range) {
+			만약 (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} 아니면 만약 (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		만약 (bit < 0)
+			반환 bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		만약 (set_lower)
+			동안 (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		아니면 만약 (set_higher)
+			동안 (++bit < (정수) allow_range)
 				setbit(ary, bit);
 		begin = NULL;
-		if (end && !*end)
+		만약 (end && !*end)
 			break;
 	}
-	return 0;
+	반환 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+정수 string_to_bitmask(const char *list,
 		     unsigned long *mask,
 		     long (*name2flag)(const char *, size_t))
 {
 	const char *begin = NULL, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	만약 (!list || !name2flag || !mask)
+		반환 -EINVAL;
 
-	for (p = list; p && *p; p++) {
+	위해 (p = list; p && *p; p++) {
 		const char *end = NULL;
 		long flag;
 
-		if (!begin)
+		만약 (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		만약 (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		만약 (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		만약 (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		만약 (end <= begin)
+			반환 -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		만약 (flag < 0)
+			반환 flag;	/* error */
 		*mask |= flag;
 		begin = NULL;
-		if (end && !*end)
+		만약 (end && !*end)
 			break;
 	}
-	return 0;
+	반환 0;
 }
 
 /*
@@ -909,39 +909,39 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+정수 ul_parse_range(const char *str, 정수 *lower, 정수 *upper, 정수 def)
 {
 	char *end = NULL;
 
-	if (!str)
-		return 0;
+	만약 (!str)
+		반환 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	만약 (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		만약 (errno || !end || *end || end == str)
+			반환 -1;
+	} 아니면 {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		만약 (errno || !end || end == str)
+			반환 -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		만약 (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		아니면 만약 (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
 			end = NULL;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			만약 (errno || !end || *end || end == str)
+				반환 -1;
 		}
 	}
-	return 0;
+	반환 0;
 }
 
 const char *ul_path_next_segment(const char *str, size_t *sz)
@@ -950,22 +950,22 @@ const char *ul_path_next_segment(const char *str, size_t *sz)
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	동안 (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	만약 (!start || !*start)
+		반환 NULL;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	위해 (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	반환 start;
 }
 
-int streq_paths(const char *a, const char *b)
+정수 streq_paths(const char *a, const char *b)
 {
-	while (a && b) {
+	동안 (a && b) {
 		size_t a_sz, b_sz;
 		const char *a_seg = ul_path_next_segment(a, &a_sz);
 		const char *b_seg = ul_path_next_segment(b, &b_sz);
@@ -976,51 +976,51 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		만약 (a_sz + b_sz == 0)
+			반환 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		만약 (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			반환 1;
 
-		if (!a_seg || !b_seg)
+		만약 (!a_seg || !b_seg)
 			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+		만약 (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
 			break;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	반환 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+정수 ul_path_is_within(const char *path, const char *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	만약 (!path || !dir || !*path || !*dir)
+		반환 0;
 
-	while (path && dir) {
+	동안 (path && dir) {
 		size_t p_sz, d_sz;
 		const char *p_seg = ul_path_next_segment(path, &p_sz);
 		const char *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		만약 (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			반환 1;
 
-		if (!p_seg || !d_seg)
+		만약 (!p_seg || !d_seg)
 			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+		만약 (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
 			break;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	반환 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
@@ -1029,35 +1029,35 @@ char *ul_strnconcat(const char *s, const char *suffix, size_t b)
 	size_t a;
 	char *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	만약 (!s && !suffix)
+		반환 strdup("");
+	만약 (!s)
+		반환 strndup(suffix, b);
+	만약 (!suffix)
+		반환 strdup(s);
 
 	assert(s);
 	assert(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	만약 (b > ((size_t) -1) - a)
+		반환 NULL;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	만약 (!r)
+		반환 NULL;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	반환 r;
 }
 
 /* concatenate two strings to a new string */
 char *ul_strconcat(const char *s, const char *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	반환 ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
@@ -1065,89 +1065,89 @@ char *ul_strfconcat(const char *s, const char *format, ...)
 {
 	va_list ap;
 	char *val, *res;
-	int sz;
+	정수 sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	만약 (sz < 0)
+		반환 NULL;
 
 	res = ul_strnconcat(s, val, sz);
 	free(val);
-	return res;
+	반환 res;
 }
 
-int ul_strappend(char **a, const char *b)
+정수 ul_strappend(char **a, const char *b)
 {
 	size_t al, bl;
 	char *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	만약 (!a)
+		반환 -EINVAL;
+	만약 (!b || !*b)
+		반환 0;
+	만약 (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		반환 !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	만약 (!tmp)
+		반환 -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	반환 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+정수 strfappend(char **a, const char *format, ...)
 {
 	va_list ap;
-	int res;
+	정수 res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	반환 res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+extern 정수 ul_strvfappend(char **a, const char *format, va_list ap)
 {
 	char *val;
-	int sz;
-	int res;
+	정수 sz;
+	정수 res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	만약 (sz < 0)
+		반환 -errno;
 
 	res = ul_strappend(a, val);
 	free(val);
-	return res;
+	반환 res;
 }
 
 static size_t strcspn_escaped(const char *s, const char *reject)
 {
-	int escaped = 0;
-	int n;
+	정수 escaped = 0;
+	정수 n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	위해 (n=0; s[n]; n++) {
+		만약 (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		아니면 만약 (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
+		아니면 만약 (strchr(reject, s[n]))
 			break;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	반환 n - escaped;
 }
 
 /*
@@ -1163,87 +1163,87 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+char *ul_strchr_escaped(const char *s, 정수 c)
 {
 	char *p;
-	int esc = 0;
+	정수 esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	위해 (p = (char *) s; p && *p; p++) {
+		만약 (!esc && *p == '\\') {
 			esc = 1;
 			continue;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		만약 (*p == c && (!esc || c == '\\'))
+			반환 p;
 		esc = 0;
 	}
 
-	return NULL;
+	반환 NULL;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+const char *ul_split(const char **state, size_t *l, const char *separator, 정수 quoted)
 {
 	const char *current;
 
 	current = *state;
 
-	if (!*current) {
+	만약 (!*current) {
 		assert(**state == '\0');
-		return NULL;
+		반환 NULL;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	만약 (!*current) {
 		*state = current;
-		return NULL;
+		반환 NULL;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
+	만약 (quoted && strchr("\'\"", *current)) {
 		char quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		만약 (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			반환 NULL;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} 아니면 만약 (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		만약 (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			반환 NULL;
 		}
 		*state = current + *l;
-	} else {
+	} 아니면 {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	반환 current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+정수 skip_fline(FILE *fp)
 {
-	int ch;
+	정수 ch;
 
 	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+		만약 ((ch = fgetc(fp)) == EOF)
+			반환 1;
+		만약 (ch == '\n')
+			반환 0;
+	} 동안 (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+정수 ul_stralnumcmp(const char *p1, const char *p2)
 {
 	const unsigned char *s1 = (const unsigned char *) p1;
 	const unsigned char *s2 = (const unsigned char *) p2;
@@ -1252,21 +1252,21 @@ int ul_stralnumcmp(const char *p1, const char *p2)
 	do {
 		do {
 			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+		} 동안 (c1 != '\0' && !isalnum((unsigned 정수) c1));
 
 		do {
 			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		} 동안 (c2 != '\0' && !isalnum((unsigned 정수) c2));
 
-		if (c1 != '\0')
+		만약 (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		만약 (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		만약 (c1 == '\0')
+			반환 c1 - c2;
+	} 동안 (c1 == c2);
 
-	return c1 - c2;
+	반환 c1 - c2;
 }
 
 /*
@@ -1277,10 +1277,10 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
+정수 ul_optstr_next(char **optstr, char **name, size_t *namesz,
 		   char **value, size_t *valsz)
 {
-	int open_quote = 0;
+	정수 open_quote = 0;
 	char *start = NULL, *stop = NULL, *p, *sep = NULL;
 	char *optstr0;
 
@@ -1289,65 +1289,65 @@ int ul_optstr_next(char **optstr, char **name, size_t *namesz,
 
 	optstr0 = *optstr;
 
-	if (name)
+	만약 (name)
 		*name = NULL;
-	if (namesz)
+	만약 (namesz)
 		*namesz = 0;
-	if (value)
+	만약 (value)
 		*value = NULL;
-	if (valsz)
+	만약 (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	동안 (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	위해 (p = optstr0; p && *p; p++) {
+		만약 (!start && *p == '=')
+			반환 -EINVAL;
+		만약 (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		만약 (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
+		만약 (open_quote)
 			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		만약 (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		만약 (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		아니면 만약 (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
+		만약 (!start || !stop)
 			continue;
-		if (stop <= start)
-			return -EINVAL;
+		만약 (stop <= start)
+			반환 -EINVAL;
 
-		if (name)
+		만약 (name)
 			*name = start;
-		if (namesz)
+		만약 (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
+		만약 (sep) {
+			만약 (value)
 				*value = sep + 1;
-			if (valsz)
+			만약 (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		반환 0;
 	}
 
-	return 1;				/* end of optstr */
+	반환 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+정수 ul_optstr_is_valid(const char *optstr)
 {
-	int rc;
+	정수 rc;
 	char *p = (char *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	동안 ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
+	반환 rc < 0 ? 0 : 1;
 }
 
 char *ul_optstr_get_value(const char *optstr, const char *key)
@@ -1356,17 +1356,17 @@ char *ul_optstr_get_value(const char *optstr, const char *key)
 	char *name = NULL, *value = NULL;
 	char *p = (char *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	만약 (!optstr || !key || !*key)
+		반환 NULL;
 
 	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
+	동안 (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
+		만약 (namesz != sz || !valsz)
 			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+		만약 (strncmp(name, key, namesz) == 0)
+			반환 strndup(value, valsz);
 	}
-	return NULL;
+	반환 NULL;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
@@ -1378,18 +1378,18 @@ size_t ul_unquote(char *str)
 	size_t len;
 	char q;
 
-	if (!str || !*str)
-		return 0;
+	만약 (!str || !*str)
+		반환 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	만약 ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		반환 len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	반환 len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
@@ -1399,21 +1399,21 @@ struct testS {
 	char *value;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+static 정수 test_strdup_to_member(정수 argc, char *argv[])
 {
 	struct testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	만약 (argc < 3)
+		반환 EXIT_FAILURE;
 
 	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	만약 (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
 	strdup_to_struct_member(xx, value, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
+	만약 (strcmp(xx->name, argv[1]) != 0 &&
 	    strcmp(xx->value, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
@@ -1422,18 +1422,18 @@ static int test_strdup_to_member(int argc, char *argv[])
 	free(xx->name);
 	free(xx->value);
 	free(xx);
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+static 정수 test_strutils_sizes(정수 argc, char *argv[])
 {
 	uintmax_t size = 0;
 	char *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	만약 (argc < 2)
+		반환 EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	만약 (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1448,47 +1448,47 @@ static int test_strutils_sizes(int argc, char *argv[])
 	free(hum2);
 	free(hum3);
 
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+static 정수 test_strutils_cmp_paths(정수 argc, char *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	정수 rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	만약 (argc < 3)
+		반환 EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+static 정수 test_strutils_path_is_within(정수 argc, char *argv[])
 {
-	int rc;
+	정수 rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	만약 (argc < 3)
+		반환 EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+static 정수 test_strutils_normalize(정수 argc, char *argv[])
 {
 	unsigned char *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	만약 (argc < 2)
+		반환 EXIT_FAILURE;
 
 	org = (unsigned char *) strdup(argv[1]);
 	src = (unsigned char *) strdup((char *) org);
 	len = strlen((char *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
+	만약 (!org || !src || !dst)
 		goto done;
 
 	/* two buffers */
@@ -1504,132 +1504,132 @@ done:
 	free(dst);
 	free(org);
 
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+static 정수 test_strutils_cstrcasecmp(정수 argc, char *argv[])
 {
 	char *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	만약 (argc < 3)
+		반환 EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	만약 (!a || !b)
+		반환 EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	반환 EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+정수 main(정수 argc, char *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	만약 (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		반환 test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
 						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+		반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		만약 (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} 아니면 만약 (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		반환 test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} 아니면 만약 (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		반환 test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} 아니면 만약 (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		반환 test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} 아니면 만약  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} 아니면 만약 (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		반환 test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		반환 test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} 아니면 만약 (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+	} 아니면 만약 (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
 		char *buf = "abc\0Y\0\0xyz\0X";
 		char *end = buf + 12;
 		char *p = buf;
 
 		do {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} 동안 ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
 		char *name = NULL, *val = NULL;
 		char *p = argv[2];
-		int rc;
+		정수 rc;
 
-		if (!ul_optstr_is_valid(p))
+		만약 (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		동안 ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (정수) namesz, name,
+						   (정수) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		만약 (rc == 1)
+			반환 EXIT_SUCCESS;
+	} 아니면 만약 (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
 		char *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		만약 (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
 		free(unquoted);
-		return EXIT_SUCCESS;
+		반환 EXIT_SUCCESS;
 
-	} else {
+	} 아니면 {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	반환 EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

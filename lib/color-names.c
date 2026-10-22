@@ -17,12 +17,12 @@ struct ul_color_name {
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+static 정수 cmp_color_name(const void *a0, const void *b0)
 {
 	const struct ul_color_name
 		*a = (const struct ul_color_name *) a0,
 		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	반환 strcmp(a->name, b->name);
 }
 
 /*
@@ -57,59 +57,59 @@ const char *color_sequence_from_colorname(const char *str)
 	struct ul_color_name key = { .name = str };
 	const struct ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	만약 (!str)
+		반환 NULL;
 
 	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
 				sizeof(struct ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	반환 res ? res->seq : NULL;
 }
 
 
-int color_is_sequence(const char *color)
+정수 color_is_sequence(const char *color)
 {
-	if (color && *color == 0x1B) {
+	만약 (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		만약 (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		반환 1;
 	}
 
-	return 0;
+	반환 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+static 정수 __color_canonicalize(const char *str, char **seq)
 {
 	char *in, *out;
-	int len;
+	정수 len;
 
-	if (!str)
-		return -EINVAL;
+	만약 (!str)
+		반환 -EINVAL;
 
 	*seq = NULL;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+	만약 (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
 		const char *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		만약 (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			반환 *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		반환 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	만약 ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		반환 -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	위해 (in = *seq, out = *seq; in && *in; in++) {
+		만약 (*in != '\\') {
 			*out++ = *in;
 			continue;
 		}
@@ -158,18 +158,18 @@ static int __color_canonicalize(const char *str, char **seq)
 		in++;
 	}
 
-	if (out) {
+	만약 (out) {
 		assert ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	반환 0;
 }
 
 char *color_get_sequence(const char *color)
 {
 	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	정수 rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	반환 rc ? NULL : seq;
 }

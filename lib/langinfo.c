@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		반환 "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		반환 ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		반환 "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		반환 "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		반환 "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		반환 "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		반환 "AM";
 	case PM_STR:
-		return "PM";
+		반환 "PM";
 	case DAY_1:
-		return "Sunday";
+		반환 "Sunday";
 	case DAY_2:
-		return "Monday";
+		반환 "Monday";
 	case DAY_3:
-		return "Tuesday";
+		반환 "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		반환 "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		반환 "Thursday";
 	case DAY_6:
-		return "Friday";
+		반환 "Friday";
 	case DAY_7:
-		return "Saturday";
+		반환 "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		반환 "Sun";
 	case ABDAY_2:
-		return "Mon";
+		반환 "Mon";
 	case ABDAY_3:
-		return "Tue";
+		반환 "Tue";
 	case ABDAY_4:
-		return "Wed";
+		반환 "Wed";
 	case ABDAY_5:
-		return "Thu";
+		반환 "Thu";
 	case ABDAY_6:
-		return "Fri";
+		반환 "Fri";
 	case ABDAY_7:
-		return "Sat";
+		반환 "Sat";
 	case MON_1:
-		return "January";
+		반환 "January";
 	case MON_2:
-		return "February";
+		반환 "February";
 	case MON_3:
-		return "March";
+		반환 "March";
 	case MON_4:
-		return "April";
+		반환 "April";
 	case MON_5:
-		return "May";
+		반환 "May";
 	case MON_6:
-		return "June";
+		반환 "June";
 	case MON_7:
-		return "July";
+		반환 "July";
 	case MON_8:
-		return "August";
+		반환 "August";
 	case MON_9:
-		return "September";
+		반환 "September";
 	case MON_10:
-		return "October";
+		반환 "October";
 	case MON_11:
-		return "November";
+		반환 "November";
 	case MON_12:
-		return "December";
+		반환 "December";
 	case ABMON_1:
-		return "Jan";
+		반환 "Jan";
 	case ABMON_2:
-		return "Feb";
+		반환 "Feb";
 	case ABMON_3:
-		return "Mar";
+		반환 "Mar";
 	case ABMON_4:
-		return "Apr";
+		반환 "Apr";
 	case ABMON_5:
-		return "May";
+		반환 "May";
 	case ABMON_6:
-		return "Jun";
+		반환 "Jun";
 	case ABMON_7:
-		return "Jul";
+		반환 "Jul";
 	case ABMON_8:
-		return "Aug";
+		반환 "Aug";
 	case ABMON_9:
-		return "Sep";
+		반환 "Sep";
 	case ABMON_10:
-		return "Oct";
+		반환 "Oct";
 	case ABMON_11:
-		return "Nov";
+		반환 "Nov";
 	case ABMON_12:
-		return "Dec";
+		반환 "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		반환 "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		반환 "-";
 	case YESEXPR:
-		return "^[yY]";
+		반환 "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		반환 "^[nN]";
 	default:
-		return "";
+		반환 "";
 	}
 }
 

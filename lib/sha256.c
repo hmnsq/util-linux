@@ -26,7 +26,7 @@ struct sha256 {
 	uint8_t buf[64]; /* message block buffer */
 };
 
-static uint32_t ror(uint32_t n, int k) { return (n >> k) | (n << (32-k)); }
+static uint32_t ror(uint32_t n, 정수 k) { 반환 (n >> k) | (n << (32-k)); }
 #define Ch(x,y,z)  (z ^ (x & (y ^ z)))
 #define Maj(x,y,z) ((x & y) | (z & (x | y)))
 #define S0(x)      (ror(x,2) ^ ror(x,13) ^ ror(x,22))
@@ -48,15 +48,15 @@ static const uint32_t K[64] = {
 static void processblock(struct sha256 *s, const uint8_t *buf)
 {
 	uint32_t W[64], t1, t2, a, b, c, d, e, f, g, h;
-	int i;
+	정수 i;
 
-	for (i = 0; i < 16; i++) {
+	위해 (i = 0; i < 16; i++) {
 		W[i] = (uint32_t)buf[4*i]<<24;
 		W[i] |= (uint32_t)buf[4*i+1]<<16;
 		W[i] |= (uint32_t)buf[4*i+2]<<8;
 		W[i] |= buf[4*i+3];
 	}
-	for (; i < 64; i++)
+	위해 (; i < 64; i++)
 		W[i] = R1(W[i-2]) + W[i-7] + R0(W[i-15]) + W[i-16];
 	a = s->h[0];
 	b = s->h[1];
@@ -66,7 +66,7 @@ static void processblock(struct sha256 *s, const uint8_t *buf)
 	f = s->h[5];
 	g = s->h[6];
 	h = s->h[7];
-	for (i = 0; i < 64; i++) {
+	위해 (i = 0; i < 64; i++) {
 		t1 = h + S1(e) + Ch(e,f,g) + K[i] + W[i];
 		t2 = S0(a) + Maj(a,b,c);
 		h = g;
@@ -93,7 +93,7 @@ static void pad(struct sha256 *s)
 	unsigned r = s->len % 64;
 
 	s->buf[r++] = 0x80;
-	if (r > 56) {
+	만약 (r > 56) {
 		memset(s->buf + r, 0, 64 - r);
 		r = 0;
 		processblock(s, s->buf);
@@ -126,10 +126,10 @@ static void sha256_init(struct sha256 *s)
 
 static void sha256_sum(struct sha256 *s, uint8_t *md)
 {
-	int i;
+	정수 i;
 
 	pad(s);
-	for (i = 0; i < 8; i++) {
+	위해 (i = 0; i < 8; i++) {
 		md[4*i] = s->h[i] >> 24;
 		md[4*i+1] = s->h[i] >> 16;
 		md[4*i+2] = s->h[i] >> 8;
@@ -143,17 +143,17 @@ static void sha256_update(struct sha256 *s, const void *m, unsigned long len)
 	unsigned r = s->len % 64;
 
 	s->len += len;
-	if (r) {
-		if (len < 64 - r) {
+	만약 (r) {
+		만약 (len < 64 - r) {
 			memcpy(s->buf + r, p, len);
-			return;
+			반환;
 		}
 		memcpy(s->buf + r, p, 64 - r);
 		len -= 64 - r;
 		p += 64 - r;
 		processblock(s, s->buf);
 	}
-	for (; len >= 64; len -= 64, p += 64)
+	위해 (; len >= 64; len -= 64, p += 64)
 		processblock(s, p);
 	memcpy(s->buf, p, len);
 }

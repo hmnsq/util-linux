@@ -22,9 +22,9 @@
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#만약 __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 # define blk0(i) block->l[i]
-#else
+#아니면
 # define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
     |(rol(block->l[i],8)&0x00FF00FF))
 #endif
@@ -54,7 +54,7 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	CHAR64LONG16 block[1];	/* use array to appear as a pointer */
 
 	memcpy(block, buffer, 64);
-#else
+#아니면
 	/* The following had better never be used because it causes the
 	 * pointer-to-const buffer to be cast into a pointer to non-const.
 	 * And the result is written through.  I threw a "const" in, hoping
@@ -162,7 +162,7 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	explicit_bzero(&c, sizeof(c));
 	explicit_bzero(&d, sizeof(d));
 	explicit_bzero(&e, sizeof(e));
-#else
+#아니면
 	a = b = c = d = e = 0;
 #endif
 #ifdef UL_SHA1HANDSOFF
@@ -192,18 +192,18 @@ void ul_SHA1Update(UL_SHA1_CTX *context, const unsigned char *data, uint32_t len
 	uint32_t j;
 
 	j = context->count[0];
-	if ((context->count[0] += len << 3) < j)
+	만약 ((context->count[0] += len << 3) < j)
 		context->count[1]++;
 	context->count[1] += (len >> 29);
 	j = (j >> 3) & 63;
-	if ((j + len) > 63) {
+	만약 ((j + len) > 63) {
 		memcpy(&context->buffer[j], data, (i = 64 - j));
 		ul_SHA1Transform(context->state, context->buffer);
-		for (; i + 63 < len; i += 64) {
+		위해 (; i + 63 < len; i += 64) {
 			ul_SHA1Transform(context->state, &data[i]);
 		}
 		j = 0;
-	} else
+	} 아니면
 		i = 0;
 	memcpy(&context->buffer[j], &data[i], len - i);
 }
@@ -218,7 +218,7 @@ void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
 
 	unsigned char c;
 
-#if 0				/* untested "improvement" by DHR */
+#만약 0				/* untested "improvement" by DHR */
 	/* Convert context->count to a sequence of bytes
 	 * in finalcount.  Second element first, but
 	 * big-endian order within element.
@@ -226,26 +226,26 @@ void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
 	 */
 	unsigned char *fcp = &finalcount[8];
 
-	for (i = 0; i < 2; i++) {
+	위해 (i = 0; i < 2; i++) {
 		uint32_t t = context->count[i];
 
-		int j;
+		정수 j;
 
-		for (j = 0; j < 4; t >>= 8, j++)
+		위해 (j = 0; j < 4; t >>= 8, j++)
 			*--fcp = (unsigned char)t}
-#else
-	for (i = 0; i < 8; i++) {
+#아니면
+	위해 (i = 0; i < 8; i++) {
 		finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
 	}
 #endif
 	c = 0200;
 	ul_SHA1Update(context, &c, 1);
-	while ((context->count[0] & 504) != 448) {
+	동안 ((context->count[0] & 504) != 448) {
 		c = 0000;
 		ul_SHA1Update(context, &c, 1);
 	}
 	ul_SHA1Update(context, finalcount, 8);	/* Should cause a SHA1Transform() */
-	for (i = 0; i < 20; i++) {
+	위해 (i = 0; i < 20; i++) {
 		digest[i] = (unsigned char)
 		    ((context->state[i >> 2] >> ((3 - (i & 3)) * 8)) & 255);
 	}
@@ -257,10 +257,10 @@ void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
 void ul_SHA1(char *hash_out, const char *str, unsigned len)
 {
 	UL_SHA1_CTX ctx;
-	unsigned int ii;
+	unsigned 정수 ii;
 
 	ul_SHA1Init(&ctx);
-	for (ii = 0; ii < len; ii += 1)
+	위해 (ii = 0; ii < len; ii += 1)
 		ul_SHA1Update(&ctx, (const unsigned char *)str + ii, 1);
 	ul_SHA1Final((unsigned char *)hash_out, &ctx);
 	hash_out[20] = '\0';

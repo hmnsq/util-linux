@@ -36,51 +36,51 @@ char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
 	size_t	sz;
 	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	만약 (!ptname || !*ptname)
+		반환 NULL;
 
-	if (!prefix)
+	만약 (!prefix)
 		prefix = "";
 
 	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	만약 (!(f = fopen(path, "r" UL_CLOEXECSTR)))
+		반환 NULL;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	만약 (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
+		만약 (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
 		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
+		만약 ((prefix && *prefix) || access(path, F_OK) == 0)
 			res = strdup(path);
 	}
 	fclose(f);
-	return res;
+	반환 res;
 }
 
 char *ul_canonicalize_dm_name(const char *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	반환 ul_canonicalize_dm_name_prefixed(NULL, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+static 정수 is_dm_devname(char *canonical, char **name)
 {
 	struct stat sb;
 	char *p = strrchr(canonical, '/');
 
 	*name = NULL;
 
-	if (!p
+	만약 (!p
 	    || strncmp(p, "/dm-", 4) != 0
 	    || !isdigit(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		반환 0;
 
 	*name = p + 1;
-	return 1;
+	반환 1;
 }
 
 /*
@@ -93,40 +93,40 @@ char *ul_absolute_path(const char *path)
 	char cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	만약 (!ul_is_relative_path(path)) {
 		errno = EINVAL;
-		return NULL;
+		반환 NULL;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	만약 (!getcwd(cwd, sizeof(cwd)))
+		반환 NULL;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
+	만약 (ul_startswith(path, "./"))
 		path += 2;
-	else if (strcmp(path, ".") == 0)
+	아니면 만약 (strcmp(path, ".") == 0)
 		path = NULL;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	만약 (!path || !*path)
+		반환 strdup(cwd);
 
 	csz = strlen(cwd);
 	psz = strlen(path);
 
 	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	만약 (!res)
+		반환 NULL;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
 	memcpy(p, path, psz + 1);
 
-	return res;
+	반환 res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
+static 정수 __attribute__((nonnull(2)))
 do_canonicalize(const char *path, char **result,
 		void *data __attribute__((__unused__)))
 {
@@ -134,27 +134,27 @@ do_canonicalize(const char *path, char **result,
 
 	*result = NULL;
 
-	if (!path || !*path) {
+	만약 (!path || !*path) {
 		errno = EINVAL;
-		return -errno;
+		반환 -errno;
 	}
 
 	errno = 0;
 	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	만약 (!canonical)
+		반환 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
+	만약 (is_dm_devname(canonical, &dmname)) {
 		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
+		만약 (dm) {
 			free(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
+	만약 (canonical)
 		*result = canonical;
-	return 0;
+	반환 0;
 }
 
 /*
@@ -166,10 +166,10 @@ char *ul_canonicalize_path(const char *path)
 {
 	char *canonical = NULL;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	만약 (do_canonicalize(path, &canonical, NULL) == 1)
+		반환 strdup(path);
 
-	return canonical;
+	반환 canonical;
 }
 
 /*
@@ -178,15 +178,15 @@ char *ul_canonicalize_path(const char *path)
  */
 char *ul_canonicalize_path_restricted(const char *path)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	반환 ul_restricted_path_oper(path, do_canonicalize, NULL);
 }
 
 #ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+정수 main(정수 argc, char **argv)
 {
 	char *p;
 
-	if (argc < 2) {
+	만약 (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
