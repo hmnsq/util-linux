@@ -25,44 +25,44 @@
 #include "procfs.h"
 #include "nls.h"
 
-static int test_cap(unsigned int cap)
+static ཧྲིལ test_cap(unsigned ཧྲིལ cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	ཕྱིར prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+static ཧྲིལ cap_last_by_bsearch(ཧྲིལ *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	ཧྲིལ cap = INT_MAX;
+	unsigned ཧྲིལ cap0 = 0, cap1 = INT_MAX;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	སྐབས ((ཧྲིལ)cap0 < cap) {
+		གལ་ཏེ (test_cap(cap))
 			cap0 = cap;
-		else
+		དེ་མིན
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	ཕྱིར 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+static ཧྲིལ cap_last_by_procfs(ཧྲིལ *ret)
 {
 	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	ཧྲིལ rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	གལ་ཏེ (f && fd_is_procfs(fileno(f))) {
+		ཧྲིལ cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
+		གལ་ཏེ (fscanf(f, "%d", &cap) == 1 &&
 		    cap < INT_MAX && !test_cap(cap + 1)) {
 
 			*ret = cap;
@@ -70,21 +70,21 @@ static int cap_last_by_procfs(int *ret)
 		}
 	}
 
-	if (f)
+	གལ་ཏེ (f)
 		fclose(f);
-	return rc;
+	ཕྱིར rc;
 }
 
-int cap_last_cap(void)
+ཧྲིལ cap_last_cap(void)
 {
-	static int cap = -1;
+	static ཧྲིལ cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
+	གལ་ཏེ (cap != -1)
+		ཕྱིར cap;
+	གལ་ཏེ (cap_last_by_procfs(&cap) < 0)
 		cap_last_by_bsearch(&cap);
 
-	return cap;
+	ཕྱིར cap;
 }
 
 void cap_permitted_to_ambient(void)
@@ -92,14 +92,14 @@ void cap_permitted_to_ambient(void)
 	/* We use capabilities system calls to propagate the permitted
 	 * capabilities into the ambient set because we may have
 	 * already forked so be in async-signal-safe context. */
-	struct __user_cap_header_struct header = {
+	sa_nracanaa __user_cap_header_struct header = {
 		.version = _LINUX_CAPABILITY_VERSION_3,
 		.pid = 0,
 	};
-	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
+	sa_nracanaa __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
+	གལ་ཏེ (capget(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
@@ -107,49 +107,49 @@ void cap_permitted_to_ambient(void)
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
+	གལ་ཏེ (capset(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	ཆེད་དུ (cap = 0; cap < (parimaa_na(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
+		གལ་ཏེ (cap > (uint64_t) cap_last_cap())
 			continue;
 
-		if ((effective & (1ULL << cap))
+		གལ་ཏེ ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
 			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
 #ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+ཧྲིལ གཙོ(ཧྲིལ argc, var_na *argv[])
 {
-	int rc = 0, cap;
+	ཧྲིལ rc = 0, cap;
 
-	if (argc < 2) {
+	གལ་ཏེ (argc < 2) {
 		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		ཕྱིར EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
+	གལ་ཏེ (strcmp(argv[1], "--last-by-procfs") == 0) {
 		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
+		གལ་ཏེ (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
+	} དེ་མིན གལ་ཏེ (strcmp(argv[1], "--last-by-bsearch") == 0) {
 		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
+		གལ་ཏེ (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
+	} དེ་མིན གལ་ཏེ (strcmp(argv[1], "--last") == 0)
 		printf("last cap: %d\n", cap_last_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	ཕྱིར rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 #endif

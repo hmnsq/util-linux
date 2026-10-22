@@ -19,9 +19,9 @@
 #include "strutils.h"
 #include "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+static const sa_nracanaa ul_signal_name {
+	const var_na *name;
+	ཧྲིལ val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+static ཧྲིལ rtsig_to_signum(const var_na *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	ཧྲིལ num, maxi = 0;
+	var_na *ep = NULL;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	གལ་ཏེ (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	དེ་མིན གལ་ཏེ (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	གལ་ཏེ (!isdigit(*sig))
+		ཕྱིར -1;
 	errno = 0;
 	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
+	གལ་ཏེ (!ep || sig == ep || errno || num < 0)
+		ཕྱིར -1;
 	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	གལ་ཏེ (num < SIGRTMIN || SIGRTMAX < num)
+		ཕྱིར -1;
+	ཕྱིར num;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+ཧྲིལ signame_to_signum(const var_na *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	གལ་ཏེ (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	གལ་ཏེ (!c_strncasecmp(sig, "rt", 2))
+		ཕྱིར rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	ཆེད་དུ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		གལ་ཏེ (!c_strcasecmp(ul_signames[n].name, sig))
+			ཕྱིར ul_signames[n].val;
 	}
-	return -1;
+	ཕྱིར -1;
 }
 
-const char *signum_to_signame(int signum)
+const var_na *signum_to_signame(ཧྲིལ signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	ཆེད་དུ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		གལ་ཏེ (ul_signames[n].val == signum) {
+			ཕྱིར ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	ཕྱིར NULL;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+ཧྲིལ get_signame_by_idx(size_t idx, const var_na **signame, ཧྲིལ *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	གལ་ཏེ (idx >= ARRAY_SIZE(ul_signames))
+		ཕྱིར -1;
 
-	if (signame)
+	གལ་ཏེ (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	གལ་ཏེ (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	ཕྱིར 0;
 
 }
 

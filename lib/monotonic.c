@@ -15,66 +15,66 @@
 #include "c.h"
 #include "monotonic.h"
 
-int get_boot_time(struct timeval *boot_time __attribute__((__unused__)))
+ཧྲིལ get_boot_time(sa_nracanaa timeval *boot_time __attribute__((__unused__)))
 {
 #ifdef CLOCK_BOOTTIME
-	struct timespec hires_uptime = { 0 };
-	struct timeval lores_uptime = { 0 };
+	sa_nracanaa timespec hires_uptime = { 0 };
+	sa_nracanaa timeval lores_uptime = { 0 };
 #endif
-	struct timeval now = { 0 };
+	sa_nracanaa timeval now = { 0 };
 #ifdef HAVE_SYSINFO
-	struct sysinfo info;
+	sa_nracanaa sysinfo info;
 #endif
 
-	if (gettimeofday(&now, NULL) != 0)
-		return -errno;
+	གལ་ཏེ (gettimeofday(&now, NULL) != 0)
+		ཕྱིར -errno;
 #ifdef CLOCK_BOOTTIME
-	if (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
+	གལ་ཏེ (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
 		TIMESPEC_TO_TIMEVAL(&lores_uptime, &hires_uptime);
 		timersub(&now, &lores_uptime, boot_time);
-		return 0;
+		ཕྱིར 0;
 	}
 #endif
 #ifdef HAVE_SYSINFO
 	/* fallback */
-	if (sysinfo(&info) != 0)
-		return -errno;
+	གལ་ཏེ (sysinfo(&info) != 0)
+		ཕྱིར -errno;
 
 	boot_time->tv_sec = now.tv_sec - info.uptime;
 	boot_time->tv_usec = 0;
-	return 0;
-#else
-	return -ENOSYS;
+	ཕྱིར 0;
+#དེ་མིན
+	ཕྱིར -ENOSYS;
 #endif
 }
 
 usec_t get_suspended_time(void)
 {
-#if defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
-	struct timespec boot, mono;
+#གལ་ཏེ defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
+	sa_nracanaa timespec boot, mono;
 
-	if (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
+	གལ་ཏེ (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
 	    clock_gettime(CLOCK_MONOTONIC, &mono) == 0)
-		return timespec_to_usec(&boot) - timespec_to_usec(&mono);
+		ཕྱིར timespec_to_usec(&boot) - timespec_to_usec(&mono);
 #endif
-	return 0;
+	ཕྱིར 0;
 }
 
-int gettime_monotonic(struct timeval *tv)
+ཧྲིལ gettime_monotonic(sa_nracanaa timeval *tv)
 {
 #ifdef CLOCK_MONOTONIC
 	/* Can slew only by ntp and adjtime */
-	int ret;
-	struct timespec ts;
+	ཧྲིལ ret;
+	sa_nracanaa timespec ts;
 
 	/* Linux specific, can't slew */
-	if (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
+	གལ་ཏེ (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
 		tv->tv_sec = ts.tv_sec;
 		tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
 	}
-	return ret;
-#else
-	return gettimeofday(tv, NULL);
+	ཕྱིར ret;
+#དེ་མིན
+	ཕྱིར gettimeofday(tv, NULL);
 #endif
 }
 

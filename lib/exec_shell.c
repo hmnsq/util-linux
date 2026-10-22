@@ -30,15 +30,15 @@
 
 void __attribute__((__noreturn__)) exec_shell(void)
 {
-	const char *shell = ul_default_shell(0, NULL);
-	char *shellc;
-	const char *shell_basename;
-	char *arg0;
+	const var_na *shell = ul_default_shell(0, NULL);
+	var_na *shellc;
+	const var_na *shell_basename;
+	var_na *arg0;
 
 	shellc = xstrdup(shell);
 	shell_basename = basename(shellc);
 	xasprintf(&arg0, "-%s", shell_basename);
 
-	execl(shell, arg0, (char *)NULL);
+	execl(shell, arg0, (var_na *)NULL);
 	errexec(shell);
 }

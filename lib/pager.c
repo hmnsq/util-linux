@@ -27,31 +27,31 @@
 #include "pager.h"
 #include "env.h"
 
-static const char *pager_argv[] = { "sh", "-c", NULL, NULL };
+static const var_na *pager_argv[] = { "sh", "-c", NULL, NULL };
 
-struct child_process {
-	const char **argv;
+sa_nracanaa child_process {
+	const var_na **argv;
 	pid_t pid;
-	int in;
+	ཧྲིལ in;
 
-	int header_lines;
-	int header_width;
+	ཧྲིལ header_lines;
+	ཧྲིལ header_width;
 
-	int org_err;
-	int org_out;
-	struct sigaction orig_sigchld;
-	struct sigaction orig_sigint;
-	struct sigaction orig_sighup;
-	struct sigaction orig_sigterm;
-	struct sigaction orig_sigquit;
-	struct sigaction orig_sigpipe;
+	ཧྲིལ org_err;
+	ཧྲིལ org_out;
+	sa_nracanaa sigaction orig_sigchld;
+	sa_nracanaa sigaction orig_sigint;
+	sa_nracanaa sigaction orig_sighup;
+	sa_nracanaa sigaction orig_sigterm;
+	sa_nracanaa sigaction orig_sigquit;
+	sa_nracanaa sigaction orig_sigpipe;
 };
-static struct child_process pager_process;
+static sa_nracanaa child_process pager_process;
 
-static volatile sig_atomic_t pager_caught_signal;
-static volatile sig_atomic_t pager_caught_sigpipe;
+static ca_ncala sig_atomic_t pager_caught_signal;
+static ca_ncala sig_atomic_t pager_caught_sigpipe;
 
-static inline void close_pair(int fd[2])
+static anta_hstha void close_pair(ཧྲིལ fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
@@ -59,189 +59,189 @@ static inline void close_pair(int fd[2])
 
 static void pager_preexec(void)
 {
-	const char *less_env = getenv("LESS");
-	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
-	int header_width = pager_process.header_width;
-	char *less_val = NULL;
+	const var_na *less_env = getenv("LESS");
+	const var_na *base = less_env ? less_env : "FRSX";
+	ཧྲིལ header_lines = pager_process.header_lines;
+	ཧྲིལ header_width = pager_process.header_width;
+	var_na *less_val = NULL;
 
-	if (header_lines > 0 && header_width > 0)
+	གལ་ཏེ (header_lines > 0 && header_width > 0)
 		less_val = ul_strfconcat(base, " --header %d,%d",
 					 header_lines, header_width);
-	else if (header_width > 0)
+	དེ་མིན གལ་ཏེ (header_width > 0)
 		less_val = ul_strfconcat(base, " --header 0,%d",
 					 header_width);
-	else if (header_lines > 0)
+	དེ་མིན གལ་ཏེ (header_lines > 0)
 		less_val = ul_strfconcat(base, " --header %d",
 					 header_lines);
 
-	if (less_val) {
-		if (setenv("LESS", less_val, 1) != 0)
+	གལ་ཏེ (less_val) {
+		གལ་ཏེ (setenv("LESS", less_val, 1) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 		free(less_val);
-	} else if (less_env == NULL) {
-		if (setenv("LESS", "FRSX", 0) != 0)
+	} དེ་མིན གལ་ཏེ (less_env == NULL) {
+		གལ་ཏེ (setenv("LESS", "FRSX", 0) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 	}
 
-	if (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
+	གལ་ཏེ (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LV");
 }
 
-static int start_command(struct child_process *cmd)
+static ཧྲིལ start_command(sa_nracanaa child_process *cmd)
 {
-	int fdin[2];
+	ཧྲིལ fdin[2];
 
-	if (pipe(fdin) < 0)
-		return -1;
+	གལ་ཏེ (pipe(fdin) < 0)
+		ཕྱིར -1;
 	cmd->in = fdin[1];
 
 	fflush(NULL);
 	cmd->pid = fork();
-	if (!cmd->pid) {
+	གལ་ཏེ (!cmd->pid) {
 		dup2(fdin[0], STDIN_FILENO);
 		close_pair(fdin);
 
 		pager_preexec();
-		execvp(cmd->argv[0], (char *const*) cmd->argv);
+		execvp(cmd->argv[0], (var_na *const*) cmd->argv);
 		errexec(cmd->argv[0]);
 	}
 
-	if (cmd->pid < 0) {
+	གལ་ཏེ (cmd->pid < 0) {
 		cmd->pid = 0;
 		close_pair(fdin);
-		return -1;
+		ཕྱིར -1;
 	}
 
 	close(fdin[0]);
-	return 0;
+	ཕྱིར 0;
 }
 
-static int wait_for_pager(void)
+static ཧྲིལ wait_for_pager(void)
 {
 	pid_t waiting;
-	int ret, status;
+	ཧྲིལ ret, status;
 
 	do {
 		waiting = waitpid(pager_process.pid, &status, 0);
-	} while (waiting == -1 && errno == EINTR);
+	} སྐབས (waiting == -1 && errno == EINTR);
 
-	if (waiting == -1)
+	གལ་ཏེ (waiting == -1)
 		ret = -1;
-	else if (waiting == pager_process.pid && WIFEXITED(status))
+	དེ་མིན གལ་ཏེ (waiting == pager_process.pid && WIFEXITED(status))
 		ret = WEXITSTATUS(status);
-	else
+	དེ་མིན
 		ret = 1;
 
 	pager_process.pid = 0;
 
-	return ret;
+	ཕྱིར ret;
 }
 
-static void catch_signal(int signo)
+static void catch_signal(ཧྲིལ signo)
 {
 	pager_caught_signal = signo;
 }
 
-static void catch_sigpipe(int signo)
+static void catch_sigpipe(ཧྲིལ signo)
 {
 	pager_caught_sigpipe = signo;
 }
 
-static void wait_for_pager_signal(int signo __attribute__ ((__unused__)))
+static void wait_for_pager_signal(ཧྲིལ signo __attribute__ ((__unused__)))
 {
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* async-signal safe: wait for all children, including pager */
-	while (wait(NULL) != -1 || errno == EINTR)
+	སྐབས (wait(NULL) != -1 || errno == EINTR)
 		;
 
 	_exit(EXIT_FAILURE);
 }
 
-static int has_command(const char *cmd)
+static ཧྲིལ has_command(const var_na *cmd)
 {
-	const char *path;
-	char *b, *c, *p, *s;
-	int rc = 0;
+	const var_na *path;
+	var_na *b, *c, *p, *s;
+	ཧྲིལ rc = 0;
 
-	if (!cmd)
+	གལ་ཏེ (!cmd)
 		goto done;
 
 	c = xstrdup(cmd);
-	if (!c)
+	གལ་ཏེ (!c)
 		goto done;
 	b = strtok(c, " ");	/* cmd may contain options */
-	if (!b)
+	གལ་ཏེ (!b)
 		goto cleanup;
 
-	if (strchr(b, '/')) {
+	གལ་ཏེ (strchr(b, '/')) {
 		rc = access(b, X_OK) == 0;
 		goto cleanup;
 	}
 
 	path = getenv("PATH");
-	if (!path)
+	གལ་ཏེ (!path)
 		goto cleanup;
 	p = xstrdup(path);
-	if (!p)
+	གལ་ཏེ (!p)
 		goto cleanup;
 
-	for (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
-		int fd = open(s, O_RDONLY|O_CLOEXEC);
-		if (fd < 0)
+	ཆེད་དུ (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
+		ཧྲིལ fd = open(s, O_RDONLY|O_CLOEXEC);
+		གལ་ཏེ (fd < 0)
 			continue;
 		rc = faccessat(fd, b, X_OK, 0) == 0;
 		close(fd);
-		if (rc)
-			break;
+		གལ་ཏེ (rc)
+			bha_nga;
 	}
 	free(p);
 cleanup:
 	free(c);
 done:
 	/*fprintf(stderr, "has PAGER '%s': rc=%d\n", cmd, rc);*/
-	return rc;
+	ཕྱིར rc;
 }
 
 static void __setup_pager(void)
 {
-	const char *pager = getenv("PAGER");
-	struct sigaction sa;
+	const var_na *pager = getenv("PAGER");
+	sa_nracanaa sigaction sa;
 
-	if (!isatty(STDOUT_FILENO))
-		return;
+	གལ་ཏེ (!isatty(STDOUT_FILENO))
+		ཕྱིར;
 
-	if (!pager)
+	གལ་ཏེ (!pager)
 		pager = "less";
-	else if (!*pager || !strcmp(pager, "cat"))
-		return;
+	དེ་མིན གལ་ཏེ (!*pager || !strcmp(pager, "cat"))
+		ཕྱིར;
 
-	if (!has_command(pager))
-		return;
+	གལ་ཏེ (!has_command(pager))
+		ཕྱིར;
 
 	/* spawn the pager */
 	pager_argv[2] = pager;
 	pager_process.argv = pager_argv;
 	pager_process.in = -1;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, parimaa_na(sa));
 	sa.sa_handler = SIG_DFL;
 
 	/* this makes sure that waitpid works as expected */
 	sigaction(SIGCHLD, &sa, &pager_process.orig_sigchld);
 
-	if (start_command(&pager_process)) {
+	གལ་ཏེ (start_command(&pager_process)) {
 		sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-		return;
+		ཕྱིར;
 	}
 
 	/* original process continues, but writes to the pipe */
 	dup2(pager_process.in, STDOUT_FILENO);
 	setvbuf(stdout, NULL, _IOLBF, 0);
-	if (isatty(STDERR_FILENO)) {
+	གལ་ཏེ (isatty(STDERR_FILENO)) {
 		dup2(pager_process.in, STDERR_FILENO);
 		setvbuf(stderr, NULL, _IOLBF, 0);
 	}
@@ -276,10 +276,10 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+void pager_open_header(ཧྲིལ header_lines, ཧྲིལ first_col_width)
 {
-	if (pager_process.pid)
-		return;		/* already running */
+	གལ་ཏེ (pager_process.pid)
+		ཕྱིར;		/* already running */
 
 	pager_process.header_lines = header_lines;
 	pager_process.header_width = first_col_width;
@@ -287,15 +287,15 @@ void pager_open_header(int header_lines, int first_col_width)
 	pager_process.org_out = dup(STDOUT_FILENO);
 	pager_process.org_err = dup(STDERR_FILENO);
 
-	if (pager_process.org_out != -1 && pager_process.org_err != -1)
+	གལ་ཏེ (pager_process.org_out != -1 && pager_process.org_err != -1)
 		__setup_pager();
 
-	if (!pager_process.pid) {
-		if (pager_process.org_out != -1)
+	གལ་ཏེ (!pager_process.pid) {
+		གལ་ཏེ (pager_process.org_out != -1)
 			close(pager_process.org_out);
-		if (pager_process.org_err != -1)
+		གལ་ཏེ (pager_process.org_err != -1)
 			close(pager_process.org_err);
-		memset(&pager_process, 0, sizeof(pager_process));
+		memset(&pager_process, 0, parimaa_na(pager_process));
 	}
 }
 
@@ -303,13 +303,13 @@ void pager_open_header(int header_lines, int first_col_width)
  */
 void pager_close(void)
 {
-	struct sigaction sa;
-	int ret, safe_errno;
+	sa_nracanaa sigaction sa;
+	ཧྲིལ ret, safe_errno;
 
-	if (pager_process.pid == 0)
-		return;
+	གལ་ཏེ (pager_process.pid == 0)
+		ཕྱིར;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, parimaa_na(sa));
 	sa.sa_handler = catch_signal;
 
 	/* set flag instead of calling wait_for_pager again */
@@ -345,13 +345,13 @@ void pager_close(void)
 	sigaction(SIGPIPE, &pager_process.orig_sigpipe, NULL);
 	errno = safe_errno;
 
-	if (ret == -1)
+	གལ་ཏེ (ret == -1)
 		err(EXIT_FAILURE, _("waitpid failed"));
 
-	if (pager_caught_signal || (pager_caught_sigpipe && ret))
+	གལ་ཏེ (pager_caught_signal || (pager_caught_sigpipe && ret))
 		exit(EXIT_FAILURE);
 
-	memset(&pager_process, 0, sizeof(pager_process));
+	memset(&pager_process, 0, parimaa_na(pager_process));
 	pager_caught_signal = 0;
 	pager_caught_sigpipe = 0;
 }
@@ -367,26 +367,26 @@ void pager_close(void)
  * a pager. The variable is also suppressed in privileged (SUID/SGID)
  * contexts via safe_getenv().
  */
-bool pager_is_enabled(enum ul_pagermode mode)
+bool pager_is_enabled(ga_nanaa ul_pagermode mode)
 {
 	switch (mode) {
-	case UL_PAGER_ALWAYS:
-		return true;
-	case UL_PAGER_NEVER:
-		return false;
-	case UL_PAGER_AUTO: {
-		const char *s;
+	pak_sa UL_PAGER_ALWAYS:
+		ཕྱིར true;
+	pak_sa UL_PAGER_NEVER:
+		ཕྱིར false;
+	pak_sa UL_PAGER_AUTO: {
+		const var_na *s;
 		bool val;
 
-		if (!isatty(STDOUT_FILENO))
-			return false;
+		གལ་ཏེ (!isatty(STDOUT_FILENO))
+			ཕྱིར false;
 		s = safe_getenv("PAGER_ENABLE");
-		if (!s || ul_strtobool(s, &val) != 0)
-			return false;
-		return val;
+		གལ་ཏེ (!s || ul_strtobool(s, &val) != 0)
+			ཕྱིར false;
+		ཕྱིར val;
 	}
 	default:
-		return false;
+		ཕྱིར false;
 	}
 }
 
@@ -394,15 +394,15 @@ bool pager_is_enabled(enum ul_pagermode mode)
 
 #define MAX 255
 
-int main(int argc __attribute__ ((__unused__)),
-	 char *argv[] __attribute__ ((__unused__)))
+ཧྲིལ གཙོ(ཧྲིལ argc __attribute__ ((__unused__)),
+	 var_na *argv[] __attribute__ ((__unused__)))
 {
-	int i;
+	ཧྲིལ i;
 
 	pager_open();
-	for (i = 0; i < MAX; i++)
+	ཆེད་དུ (i = 0; i < MAX; i++)
 		printf("%d\n", i);
 	pager_close();
-	return EXIT_SUCCESS;
+	ཕྱིར EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PAGER */
