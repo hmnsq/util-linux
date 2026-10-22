@@ -2,21 +2,21 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#समावेश <dlfcn.h>
 
-#include "c.h"
-#include "dl-selinux.h"
+#समावेश "c.h"
+#समावेश "dl-selinux.h"
 
-#if defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
+#अगर defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
 
 UL_ELF_NOTE_DLOPEN("selinux",
 		    "Support for SELinux",
 		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
 		    "libselinux.so.1");
 
-struct ul_selinux_opers ul_selinux;
+काष्ठा ul_selinux_opers ul_selinux;
 
-static const struct ul_dlsym ul_selinux_symbols[] =
+अटल स्थिर काष्ठा ul_dlsym ul_selinux_symbols[] =
 {
 	UL_DLSYM( ul_selinux_opers, is_selinux_enabled ),
 
@@ -40,9 +40,9 @@ static const struct ul_dlsym ul_selinux_symbols[] =
 
 	UL_DLSYM( ul_selinux_opers, selinux_check_access ),
 	UL_DLSYM( ul_selinux_opers, security_compute_relabel ),
-#ifdef HAVE_SECURITY_GET_INITIAL_CONTEXT
+#अगर_घोषित HAVE_SECURITY_GET_INITIAL_CONTEXT
 	UL_DLSYM( ul_selinux_opers, security_get_initial_context ),
-#endif
+#पूर्ण_अगर
 	UL_DLSYM( ul_selinux_opers, selinux_file_context_cmp ),
 	UL_DLSYM( ul_selinux_opers, selinux_trans_to_raw_context ),
 	UL_DLSYM( ul_selinux_opers, string_to_security_class ),
@@ -59,25 +59,25 @@ static const struct ul_dlsym ul_selinux_symbols[] =
 	UL_DLSYM( ul_selinux_opers, context_free ),
 };
 
-int ul_dlopen_libselinux(void)
+पूर्णांक ul_dlopen_libselinux(व्योम)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	अटल पूर्णांक status = 0;
+	अटल व्योम *dl = शून्य;
+	पूर्णांक flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	अगर (status)
+		वापस status > 0 ? 0 : -ENOSYS;
 
-#ifdef RTLD_NODELETE
+#अगर_घोषित RTLD_NODELETE
 	flags |= RTLD_NODELETE;
-#endif
+#पूर्ण_अगर
 	status = ul_dlopen_symbols("libselinux.so.1", flags,
 				   ul_selinux_symbols,
-				   ARRAY_SIZE(ul_selinux_symbols),
+				   ARRAY_आकार(ul_selinux_symbols),
 				   &ul_selinux, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	वापस status > 0 ? 0 : -ENOSYS;
 }
 
-#endif /* HAVE_LIBSELINUX && USE_DLOPEN_SELINUX */
+#पूर्ण_अगर /* HAVE_LIBSELINUX && USE_DLOPEN_SELINUX */

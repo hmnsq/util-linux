@@ -4,122 +4,122 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
+#समावेश <pwd.h>
+#समावेश <grp.h>
+#समावेश <sys/types.h>
 
-#include "c.h"
-#include "widechar.h"
-#include "idcache.h"
+#समावेश "c.h"
+#समावेश "widechar.h"
+#समावेश "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+काष्ठा identry *get_id(काष्ठा idcache *ic, अचिन्हित दीर्घ पूर्णांक id)
 {
-	struct identry *ent;
+	काष्ठा identry *ent;
 
-	if (!ic)
-		return NULL;
+	अगर (!ic)
+		वापस शून्य;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	क्रम (ent = ic->ent; ent; ent = ent->अग्र) {
+		अगर (ent->id == id)
+			वापस ent;
 	}
 
-	return NULL;
+	वापस शून्य;
 }
 
-struct idcache *new_idcache(void)
+काष्ठा idcache *new_idcache(व्योम)
 {
-	return calloc(1, sizeof(struct idcache));
+	वापस सुस्मृति(1, माप(काष्ठा idcache));
 }
 
-void free_idcache(struct idcache *ic)
+व्योम free_idcache(काष्ठा idcache *ic)
 {
-	struct identry *ent;
+	काष्ठा identry *ent;
 
-	if (!ic)
-		return;
+	अगर (!ic)
+		वापस;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
-		free(ent->name);
-		free(ent);
-		ent = next;
+	जबतक (ent) {
+		काष्ठा identry *अग्र = ent->अग्र;
+		मुक्त(ent->name);
+		मुक्त(ent);
+		ent = अग्र;
 	}
 
-	free(ic);
+	मुक्त(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+अटल व्योम add_id(काष्ठा idcache *ic, अक्षर *name, अचिन्हित दीर्घ पूर्णांक id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	काष्ठा identry *ent, *x;
+	पूर्णांक w = 0;
 
-	if (!ic)
-		return;
+	अगर (!ic)
+		वापस;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = सुस्मृति(1, माप(काष्ठा identry));
+	अगर (!ent)
+		वापस;
 	ent->id = id;
 
-	if (name) {
-#ifdef HAVE_WIDECHAR
-		wchar_t wc[LOGIN_NAME_MAX + 1];
+	अगर (name) {
+#अगर_घोषित HAVE_WIDECHAR
+		ब_अक्षर_प्रकार wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		अगर (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
-#endif
-			w = strlen(name);
+		अन्यथा
+#पूर्ण_अगर
+			w = म_माप(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	अगर (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
-			free(ent);
-			return;
+		अगर (!ent->name) {
+			मुक्त(ent);
+			वापस;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
-			free(ent);
-			return;
+	} अन्यथा {
+		अगर (asprintf(&ent->name, "%lu", id) < 0) {
+			मुक्त(ent);
+			वापस;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	क्रम (x = ic->ent; x && x->अग्र; x = x->अग्र);
 
-	if (x)
-		x->next = ent;
-	else
+	अगर (x)
+		x->अग्र = ent;
+	अन्यथा
 		ic->ent = ent;
 
-	if (w <= 0)
-		w = ent->name ? strlen(ent->name) : 0;
+	अगर (w <= 0)
+		w = ent->name ? म_माप(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+व्योम add_uid(काष्ठा idcache *cache, अचिन्हित दीर्घ पूर्णांक id)
 {
-	struct identry *ent = get_id(cache, id);
+	काष्ठा identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
-		add_id(cache, pw ? pw->pw_name : NULL, id);
+	अगर (!ent) {
+		काष्ठा passwd *pw = getpwuid((uid_t) id);
+		add_id(cache, pw ? pw->pw_name : शून्य, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+व्योम add_gid(काष्ठा idcache *cache, अचिन्हित दीर्घ पूर्णांक id)
 {
-	struct identry *ent = get_id(cache, id);
+	काष्ठा identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
-		add_id(cache, gr ? gr->gr_name : NULL, id);
+	अगर (!ent) {
+		काष्ठा group *gr = getgrgid((gid_t) id);
+		add_id(cache, gr ? gr->gr_name : शून्य, id);
 	}
 }
 

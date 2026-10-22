@@ -13,143 +13,143 @@
  * along with this program.  If not, see <https://gnu.org/licenses/>.
  */
 
-#include <sys/prctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <errno.h>
+#समावेश <sys/prctl.h>
+#समावेश <stdio.h>
+#समावेश <stdlib.h>
+#समावेश <limits.h>
+#समावेश <errno.h>
 
-#include "c.h"
-#include "caputils.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "nls.h"
+#समावेश "c.h"
+#समावेश "caputils.h"
+#समावेश "pathnames.h"
+#समावेश "procfs.h"
+#समावेश "nls.h"
 
-static int test_cap(unsigned int cap)
+अटल पूर्णांक test_cap(अचिन्हित पूर्णांक cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	वापस prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+अटल पूर्णांक cap_last_by_bsearch(पूर्णांक *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	पूर्णांक cap = पूर्णांक_उच्च;
+	अचिन्हित पूर्णांक cap0 = 0, cap1 = पूर्णांक_उच्च;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	जबतक ((पूर्णांक)cap0 < cap) {
+		अगर (test_cap(cap))
 			cap0 = cap;
-		else
+		अन्यथा
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	वापस 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+अटल पूर्णांक cap_last_by_procfs(पूर्णांक *ret)
 {
-	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	खाता *f = ख_खोलो(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
+	पूर्णांक rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	अगर (f && fd_is_procfs(fileno(f))) {
+		पूर्णांक cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
-		    cap < INT_MAX && !test_cap(cap + 1)) {
+		अगर (ख_पूछो(f, "%d", &cap) == 1 &&
+		    cap < पूर्णांक_उच्च && !test_cap(cap + 1)) {
 
 			*ret = cap;
 			rc = 0;
 		}
 	}
 
-	if (f)
-		fclose(f);
-	return rc;
+	अगर (f)
+		ख_बंद(f);
+	वापस rc;
 }
 
-int cap_last_cap(void)
+पूर्णांक cap_last_cap(व्योम)
 {
-	static int cap = -1;
+	अटल पूर्णांक cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
+	अगर (cap != -1)
+		वापस cap;
+	अगर (cap_last_by_procfs(&cap) < 0)
 		cap_last_by_bsearch(&cap);
 
-	return cap;
+	वापस cap;
 }
 
-void cap_permitted_to_ambient(void)
+व्योम cap_permitted_to_ambient(व्योम)
 {
 	/* We use capabilities system calls to propagate the permitted
 	 * capabilities into the ambient set because we may have
 	 * already forked so be in async-signal-safe context. */
-	struct __user_cap_header_struct header = {
+	काष्ठा __user_cap_header_struct header = {
 		.version = _LINUX_CAPABILITY_VERSION_3,
 		.pid = 0,
 	};
-	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
+	काष्ठा __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
-		err(EXIT_FAILURE, _("capget failed"));
+	अगर (capget(&header, payload) < 0)
+		err(निकास_त्रुटि, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
 	 * that they are all inheritable. */
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
-		err(EXIT_FAILURE, _("capset failed"));
+	अगर (capset(&header, payload) < 0)
+		err(निकास_त्रुटि, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	क्रम (cap = 0; cap < (माप(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
-			continue;
+		अगर (cap > (uint64_t) cap_last_cap())
+			जारी;
 
-		if ((effective & (1ULL << cap))
+		अगर ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
-			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
+			err(निकास_त्रुटि, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
-#ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+#अगर_घोषित TEST_PROGRAM_CAPUTILS
+पूर्णांक मुख्य(पूर्णांक argc, अक्षर *argv[])
 {
-	int rc = 0, cap;
+	पूर्णांक rc = 0, cap;
 
-	if (argc < 2) {
-		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
+	अगर (argc < 2) {
+		ख_लिखो(मानक_त्रुटि, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		वापस निकास_त्रुटि;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
+	अगर (म_भेद(argv[1], "--last-by-procfs") == 0) {
 		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
-			printf("last cap: %d\n", cap);
+		अगर (rc == 0)
+			म_लिखो("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
+	} अन्यथा अगर (म_भेद(argv[1], "--last-by-bsearch") == 0) {
 		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
-			printf("last cap: %d\n", cap);
+		अगर (rc == 0)
+			म_लिखो("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
-		printf("last cap: %d\n", cap_last_cap());
+	} अन्यथा अगर (म_भेद(argv[1], "--last") == 0)
+		म_लिखो("last cap: %d\n", cap_last_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	वापस rc == 0 ? निकास_सफल : निकास_त्रुटि;
 }
-#endif
+#पूर्ण_अगर

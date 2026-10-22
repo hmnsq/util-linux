@@ -32,15 +32,15 @@
  * calculate a 64 bit CRC value of a sequence of bytes.
  */
 
-#include <stdbool.h>
-#include <stdlib.h>
+#समावेश <stdbool.h>
+#समावेश <stdlib.h>
 
-#include "crc64.h"
+#समावेश "crc64.h"
 
-#define		CRC_START_64_ECMA	0x0000000000000000ull
-#define		CRC_START_64_WE		0xFFFFFFFFFFFFFFFFull
+#घोषणा		CRC_START_64_ECMA	0x0000000000000000ull
+#घोषणा		CRC_START_64_WE		0xFFFFFFFFFFFFFFFFull
 
-const uint64_t crc_tab64[256] = {
+स्थिर uint64_t crc_tab64[256] = {
 	0x0000000000000000ull,
 	0x42F0E1EBA9EA3693ull,
 	0x85E1C3D753D46D26ull,
@@ -308,22 +308,22 @@ const uint64_t crc_tab64[256] = {
  * indicating the length.
  */
 
-uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_ecma( स्थिर अचिन्हित अक्षर *निवेश_str, माप_प्रकार अंक_bytes )
 {
 
 	uint64_t crc;
-	const unsigned char *ptr;
-	size_t a;
+	स्थिर अचिन्हित अक्षर *ptr;
+	माप_प्रकार a;
 
 	crc = CRC_START_64_ECMA;
-	ptr = input_str;
+	ptr = निवेश_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	अगर ( ptr != शून्य ) क्रम (a=0; a<अंक_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc;
+	वापस crc;
 
 }  /* crc_64_ecma */
 
@@ -335,22 +335,22 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
  * parameter indicating the length.
  */
 
-uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_we( स्थिर अचिन्हित अक्षर *निवेश_str, माप_प्रकार अंक_bytes )
 {
 
 	uint64_t crc;
-	const unsigned char *ptr;
-	size_t a;
+	स्थिर अचिन्हित अक्षर *ptr;
+	माप_प्रकार a;
 
 	crc = CRC_START_64_WE;
-	ptr = input_str;
+	ptr = निवेश_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	अगर ( ptr != शून्य ) क्रम (a=0; a<अंक_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc ^ 0xFFFFFFFFFFFFFFFFull;
+	वापस crc ^ 0xFFFFFFFFFFFFFFFFull;
 
 }  /* crc_64_we */
 
@@ -361,9 +361,9 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
  * previous value of the CRC and the next byte of the data to be checked.
  */
 
-uint64_t ul_update_crc64( uint64_t crc, unsigned char c )
+uint64_t ul_update_crc64( uint64_t crc, अचिन्हित अक्षर c )
 {
 
-	return (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
+	वापस (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
 
 }  /* update_crc_64 */
