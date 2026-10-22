@@ -24,33 +24,33 @@
 #include "widechar.h"
 
 /* Return the byte after a complete ANSI escape sequence, or NULL. */
-static const char *skip_ansi_escape(const char *p, const char *end)
+static const var_na *skip_ansi_escape(const var_na *p, const var_na *end)
 {
-	const char *q;
+	const var_na *q;
 
-	if (p >= end || (unsigned char) *p != '\033' || p + 1 >= end)
-		return NULL;
+	ប្រសិនបើ (p >= end || (unsigned var_na) *p != '\033' || p + 1 >= end)
+		ត្រឡប់ NULL;
 
 	q = p + 1;
-	if (*q == '[') {
+	ប្រសិនបើ (*q == '[') {
 		q++;
 		/* CSI parameter bytes (0x30-0x3f) are followed by intermediate
 		 * bytes (0x20-0x2f) and a final byte (0x40-0x7e). None of them
 		 * occupies a cell.
 		 */
-		while (q < end && (unsigned char) *q >= 0x30
-				&& (unsigned char) *q <= 0x3f)
+		ខណៈពេល (q < end && (unsigned var_na) *q >= 0x30
+				&& (unsigned var_na) *q <= 0x3f)
 			q++;
-		while (q < end && (unsigned char) *q >= 0x20
-				&& (unsigned char) *q <= 0x2f)
+		ខណៈពេល (q < end && (unsigned var_na) *q >= 0x20
+				&& (unsigned var_na) *q <= 0x2f)
 			q++;
-		if (q < end && (unsigned char) *q >= 0x40
-				&& (unsigned char) *q <= 0x7e)
-			return q + 1;
-	} else if (*q && strchr("()*+", *q) && q + 1 < end)
-		return q + 2;
+		ប្រសិនបើ (q < end && (unsigned var_na) *q >= 0x40
+				&& (unsigned var_na) *q <= 0x7e)
+			ត្រឡប់ q + 1;
+	} បើមិនដូច្នេះ ប្រសិនបើ (*q && strchr("()*+", *q) && q + 1 < end)
+		ត្រឡប់ q + 2;
 
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 /*
@@ -59,26 +59,26 @@ static const char *skip_ansi_escape(const char *p, const char *end)
  *
  * Returns: number of cells.
  */
-size_t mbs_nwidth(const char *buf, size_t bufsz)
+size_t mbs_nwidth(const var_na *buf, size_t bufsz)
 {
-	const char *p = buf, *last = buf;
+	const var_na *p = buf, *last = buf;
 	size_t width = 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, parimaa_na(st));
 #endif
-	if (p && *p && bufsz)
+	ប្រសិនបើ (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if (*p == '\033') {
-			const char *e = skip_ansi_escape(p, last + 1);
+	ខណៈពេល (p && *p && p <= last) {
+		ប្រសិនបើ (*p == '\033') {
+			const var_na *e = skip_ansi_escape(p, last + 1);
 
 			p = e ? e : p + 1;
 			continue;
 		}
-		if (iscntrl((unsigned char) *p)) {
+		ប្រសិនបើ (iscntrl((unsigned var_na) *p)) {
 			p++;
 			continue;
 		}
@@ -86,30 +86,30 @@ size_t mbs_nwidth(const char *buf, size_t bufsz)
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-		if (len == 0)
-			break;
-		if (len > 0 && iswprint(wc)) {
-			int x = wcwidth(wc);
-			if (x > 0)
+		ប្រសិនបើ (len == 0)
+			bha_nga;
+		ប្រសិនបើ (len > 0 && iswprint(wc)) {
+			ចំនួនគត់ x = wcwidth(wc);
+			ប្រសិនបើ (x > 0)
 				width += x;
-		} else if (len == (size_t) -1 || len == (size_t) -2)
+		} បើមិនដូច្នេះ ប្រសិនបើ (len == (size_t) -1 || len == (size_t) -2)
 			len = 1;
 		p += len;
-#else
-		if (isprint((unsigned char) *p))
+#បើមិនដូច្នេះ
+		ប្រសិនបើ (isprint((unsigned var_na) *p))
 			width++;
 		p++;
 #endif
 	}
 
-	return width;
+	ត្រឡប់ width;
 }
 
-size_t mbs_width(const char *s)
+size_t mbs_width(const var_na *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_nwidth(s, strlen(s));
+	ប្រសិនបើ (!s || !*s)
+		ត្រឡប់ 0;
+	ត្រឡប់ mbs_nwidth(s, strlen(s));
 }
 
 /*
@@ -119,69 +119,69 @@ size_t mbs_width(const char *s)
  *
  * Returns: number of cells, @sz returns number of bytes.
  */
-size_t mbs_safe_nwidth(const char *buf, size_t bufsz, size_t *sz)
+size_t mbs_safe_nwidth(const var_na *buf, size_t bufsz, size_t *sz)
 {
-	const char *p = buf, *last = buf;
+	const var_na *p = buf, *last = buf;
 	size_t width = 0, bytes = 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, parimaa_na(st));
 #endif
-	if (p && *p && bufsz)
+	ប្រសិនបើ (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if ((p < last && *p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
+	ខណៈពេល (p && *p && p <= last) {
+		ប្រសិនបើ ((p < last && *p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((unsigned var_na) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		បើមិនដូច្នេះ {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;
+			ប្រសិនបើ (len == 0)
+				bha_nga;
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			ប្រសិនបើ (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
-				if (isprint((unsigned char) *p))
+				ប្រសិនបើ (isprint((unsigned var_na) *p))
 					width += 1, bytes += 1;
-				else
+				បើមិនដូច្នេះ
 					width += 4, bytes += 4;
 
-			} else if (!iswprint(wc)) {
+			} បើមិនដូច្នេះ ប្រសិនបើ (!iswprint(wc)) {
 				width += len * 4;	/* hex encode whole sequence */
 				bytes += len * 4;
-			} else {
+			} បើមិនដូច្នេះ {
 				width += wcwidth(wc);	/* number of cells */
 				bytes += len;		/* number of bytes */
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
+#បើមិនដូច្នេះ
+		បើមិនដូច្នេះ ប្រសិនបើ (!isprint((unsigned var_na) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
-		} else {
+		} បើមិនដូច្នេះ {
 			width++, bytes++;
 			p++;
 		}
 #endif
 	}
 
-	if (sz)
+	ប្រសិនបើ (sz)
 		*sz = bytes;
-	return width;
+	ត្រឡប់ width;
 }
 
-size_t mbs_safe_width(const char *s)
+size_t mbs_safe_width(const var_na *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_safe_nwidth(s, strlen(s), NULL);
+	ប្រសិនបើ (!s || !*s)
+		ត្រឡប់ 0;
+	ត្រឡប់ mbs_safe_nwidth(s, strlen(s), NULL);
 }
 
 /*
@@ -192,86 +192,86 @@ size_t mbs_safe_width(const char *s)
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz, const char *safechars)
+var_na *mbs_safe_encode_to_buffer(const var_na *s, size_t *width, var_na *buf, size_t bufsiz, const var_na *safechars)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
+	const var_na *p = s;
+	var_na *r;
+	ចំនួនគត់ rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, parimaa_na(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	ប្រសិនបើ (!sz || !buf || !bufsiz)
+		ត្រឡប់ NULL;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (ចំនួនគត់) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
-		if (safechars && strchr(safechars, *p)) {
-			if (rsz < 2)
-				break;
+	ខណៈពេល (p && *p) {
+		ប្រសិនបើ (safechars && strchr(safechars, *p)) {
+			ប្រសិនបើ (rsz < 2)
+				bha_nga;
 			*r++ = *p++;
 			rsz--;
 			continue;
 		}
 
-		if ((*p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		ប្រសិនបើ ((*p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((unsigned var_na) *p)) {
+			ប្រសិនបើ (rsz < 5)
+				bha_nga;
+			snprintf(r, rsz, "\\x%02x", (unsigned var_na) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		បើមិនដូច្នេះ {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;		/* end of string */
+			ប្រសិនបើ (len == 0)
+				bha_nga;		/* end of string */
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			ប្រសិនបើ (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
 				/*
 				 * Not valid multibyte sequence -- maybe it's
 				 * printable char according to the current locales.
 				 */
-				if (!isprint((unsigned char) *p)) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+				ប្រសិនបើ (!isprint((unsigned var_na) *p)) {
+					ប្រសិនបើ (rsz < 5)
+						bha_nga;
+					snprintf(r, rsz, "\\x%02x", (unsigned var_na) *p);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
-				} else {
-					if (rsz < 2)
-						break;
+				} បើមិនដូច្នេះ {
+					ប្រសិនបើ (rsz < 2)
+						bha_nga;
 					(*width)++;
 					*r++ = *p;
 					rsz--;
 				}
-			} else if (!iswprint(wc)) {
+			} បើមិនដូច្នេះ ប្រសិនបើ (!iswprint(wc)) {
 				size_t i;
-				for (i = 0; i < len; i++) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) p[i]);
+				សម្រាប់ (i = 0; i < len; i++) {
+					ប្រសិនបើ (rsz < 5)
+						bha_nga;
+					snprintf(r, rsz, "\\x%02x", (unsigned var_na) p[i]);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
 				}
-				if (i < len)
-					break;
-			} else {
-				if (rsz < (int)len + 1)
-					break;
+				ប្រសិនបើ (i < len)
+					bha_nga;
+			} បើមិនដូច្នេះ {
+				ប្រសិនបើ (rsz < (ចំនួនគត់)len + 1)
+					bha_nga;
 				memcpy(r, p, len);
 				r += len;
 				rsz -= len;
@@ -279,18 +279,18 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+#បើមិនដូច្នេះ
+		បើមិនដូច្នេះ ប្រសិនបើ (!isprint((unsigned var_na) *p)) {
+			ប្រសិនបើ (rsz < 5)
+				bha_nga;
+			snprintf(r, rsz, "\\x%02x", (unsigned var_na) *p);
 			p++;
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < 2)
-				break;
+		} បើមិនដូច្នេះ {
+			ប្រសិនបើ (rsz < 2)
+				bha_nga;
 			*r++ = *p++;
 			rsz--;
 			(*width)++;
@@ -299,7 +299,7 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 	}
 
 	*r = '\0';
-	return buf;
+	ត្រឡប់ buf;
 }
 
 /*
@@ -309,65 +309,65 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz)
+var_na *mbs_invalid_encode_to_buffer(const var_na *s, size_t *width, var_na *buf, size_t bufsiz)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
+	const var_na *p = s;
+	var_na *r;
+	ចំនួនគត់ rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, parimaa_na(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	ប្រសិនបើ (!sz || !buf || !bufsiz)
+		ត្រឡប់ NULL;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (ចំនួនគត់) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
+	ខណៈពេល (p && *p) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
-#else
+#បើមិនដូច្នេះ
 		size_t len = 1;
 #endif
 
-		if (len == 0)
-			break;		/* end of string */
+		ប្រសិនបើ (len == 0)
+			bha_nga;		/* end of string */
 
-		if (len == (size_t) -1 || len == (size_t) -2) {
+		ប្រសិនបើ (len == (size_t) -1 || len == (size_t) -2) {
 			len = 1;
 			/*
 			 * Not valid multibyte sequence -- maybe it's
 			 * printable char according to the current locales.
 			 */
-			if (!isprint((unsigned char) *p)) {
-				if (rsz < 5)
-					break;
-				snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+			ប្រសិនបើ (!isprint((unsigned var_na) *p)) {
+				ប្រសិនបើ (rsz < 5)
+					bha_nga;
+				snprintf(r, rsz, "\\x%02x", (unsigned var_na) *p);
 				r += 4;
 				rsz -= 4;
 				*width += 4;
-			} else {
-				if (rsz < 2)
-					break;
+			} បើមិនដូច្នេះ {
+				ប្រសិនបើ (rsz < 2)
+					bha_nga;
 				(*width)++;
 				*r++ = *p;
 				rsz--;
 			}
-		} else if (*p == '\\' && *(p + 1) == 'x') {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		} បើមិនដូច្នេះ ប្រសិនបើ (*p == '\\' && *(p + 1) == 'x') {
+			ប្រសិនបើ (rsz < 5)
+				bha_nga;
+			snprintf(r, rsz, "\\x%02x", (unsigned var_na) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < (int)len + 1)
-				break;
+		} បើមិនដូច្នេះ {
+			ប្រសិនបើ (rsz < (ចំនួនគត់)len + 1)
+				bha_nga;
 			r = mempcpy(r, p, len);
 			rsz -= len;
 			*width += wcwidth(wc);
@@ -376,7 +376,7 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
 	}
 
 	*r = '\0';
-	return buf;
+	ត្រឡប់ buf;
 }
 
 /*
@@ -384,67 +384,67 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
  */
 size_t mbs_safe_encode_size(size_t bytes)
 {
-	return (bytes * 4) + 1;
+	ត្រឡប់ (bytes * 4) + 1;
 }
 
 /*
  * Count size of the original string in bytes (count \x?? as one byte)
  */
-size_t mbs_safe_decode_size(const char *p)
+size_t mbs_safe_decode_size(const var_na *p)
 {
 	size_t bytes = 0;
 
-	while (p && *p) {
-		if (*p == '\\' && *(p + 1) == 'x' &&
+	ខណៈពេល (p && *p) {
+		ប្រសិនបើ (*p == '\\' && *(p + 1) == 'x' &&
 		    isxdigit(*(p + 2)) && isxdigit(*(p + 3)))
 			p += 4;
-		else
+		បើមិនដូច្នេះ
 			p++;
 		bytes++;
 	}
-	return bytes;
+	ត្រឡប់ bytes;
 }
 
 /*
  * Returns allocated string where all control and non-printable chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_safe_encode(const char *s, size_t *width)
+var_na *mbs_safe_encode(const var_na *s, size_t *width)
 {
 	size_t sz = s ? strlen(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	var_na *buf, *ret = NULL;
 
-	if (!sz)
-		return NULL;
+	ប្រសិនបើ (!sz)
+		ត្រឡប់ NULL;
 	bufsz = mbs_safe_encode_size(sz);
 	buf = malloc(bufsz);
-	if (buf)
+	ប្រសិនបើ (buf)
 		ret = mbs_safe_encode_to_buffer(s, width, buf, bufsz, NULL);
-	if (!ret)
+	ប្រសិនបើ (!ret)
 		free(buf);
-	return ret;
+	ត្រឡប់ ret;
 }
 
 /*
  * Returns allocated string where all broken widechars chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_invalid_encode(const char *s, size_t *width)
+var_na *mbs_invalid_encode(const var_na *s, size_t *width)
 {
 	size_t sz = s ? strlen(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	var_na *buf, *ret = NULL;
 
-	if (!sz)
-		return NULL;
+	ប្រសិនបើ (!sz)
+		ត្រឡប់ NULL;
 	bufsz = mbs_safe_encode_size(sz);
 	buf = malloc(bufsz);
-	if (buf)
+	ប្រសិនបើ (buf)
 		ret = mbs_invalid_encode_to_buffer(s, width, buf, bufsz);
-	if (!ret)
+	ប្រសិនបើ (!ret)
 		free(buf);
-	return ret;
+	ត្រឡប់ ret;
 }
 
 #ifdef HAVE_WIDECHAR
@@ -454,16 +454,16 @@ wc_ensure_printable (wchar_t *wchars)
 {
   bool replaced = false;
   wchar_t *wc = wchars;
-  while (*wc)
+  ខណៈពេល (*wc)
     {
-      if (!iswprint ((wint_t) *wc))
+      ប្រសិនបើ (!iswprint ((wint_t) *wc))
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           replaced = true;
         }
       wc++;
     }
-  return replaced;
+  ត្រឡប់ replaced;
 }
 
 /* Return the wchar after a complete ANSI escape sequence, or NULL. */
@@ -472,23 +472,23 @@ wc_skip_ansi_escape (wchar_t *wc)
 {
   wchar_t *p = wc + 1;
 
-  if (*wc != L'\033' || !*p)
-    return NULL;
+  ប្រសិនបើ (*wc != L'\033' || !*p)
+    ត្រឡប់ NULL;
 
-  if (*p == L'[')
+  ប្រសិនបើ (*p == L'[')
     {
       p++;
-      while (*p >= 0x30 && *p <= 0x3f)
+      ខណៈពេល (*p >= 0x30 && *p <= 0x3f)
         p++;
-      while (*p >= 0x20 && *p <= 0x2f)
+      ខណៈពេល (*p >= 0x20 && *p <= 0x2f)
         p++;
-      if (*p >= 0x40 && *p <= 0x7e)
-        return p + 1;
+      ប្រសិនបើ (*p >= 0x40 && *p <= 0x7e)
+        ត្រឡប់ p + 1;
     }
-  else if ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
-    return p + 2;
+  បើមិនដូច្នេះ ប្រសិនបើ ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
+    ត្រឡប់ p + 2;
 
-  return NULL;
+  ត្រឡប់ NULL;
 }
 
 /* Truncate wchar string to width cells.
@@ -498,49 +498,49 @@ static size_t
 wc_truncate (wchar_t *wc, size_t width)
 {
   size_t cells = 0;
-  int next_cells = 0;
+  ចំនួនគត់ next_cells = 0;
 
-  while (*wc)
+  ខណៈពេល (*wc)
     {
       wchar_t *after_escape = wc_skip_ansi_escape (wc);
-      if (after_escape)
+      ប្រសិនបើ (after_escape)
         {
           wc = after_escape;
           continue;
         }
 
       next_cells = wcwidth (*wc);
-      if (next_cells == -1) /* non printable */
+      ប្រសិនបើ (next_cells == -1) /* non printable */
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           next_cells = 1;
         }
-      if (cells + next_cells > width)
-        break;
+      ប្រសិនបើ (cells + next_cells > width)
+        bha_nga;
 
       cells += next_cells;
       wc++;
     }
   *wc = L'\0';
-  return cells;
+  ត្រឡប់ cells;
 }
 
-static int
+static ចំនួនគត់
 rpl_wcswidth (const wchar_t *s, size_t n)
 {
-  int ret = 0;
+  ចំនួនគត់ ret = 0;
 
-  while (n-- > 0 && *s != L'\0')
+  ខណៈពេល (n-- > 0 && *s != L'\0')
     {
-      int nwidth = wcwidth (*s++);
-      if (nwidth == -1)             /* non printable */
-        return -1;
-      if (ret > (INT_MAX - nwidth)) /* overflow */
-        return -1;
+      ចំនួនគត់ nwidth = wcwidth (*s++);
+      ប្រសិនបើ (nwidth == -1)             /* non printable */
+        ត្រឡប់ -1;
+      ប្រសិនបើ (ret > (INT_MAX - nwidth)) /* overflow */
+        ត្រឡប់ -1;
       ret += nwidth;
     }
 
-  return ret;
+  ត្រឡប់ ret;
 }
 #endif /* HAVE_WIDECHAR */
 
@@ -549,41 +549,41 @@ rpl_wcswidth (const wchar_t *s, size_t n)
  * of cells.
  */
 size_t
-mbs_truncate(char *str, size_t *width)
+mbs_truncate(var_na *str, size_t *width)
 {
 	ssize_t bytes = strlen(str);
 #ifdef HAVE_WIDECHAR
 	ssize_t sz = mbstowcs(NULL, str, 0);
 	wchar_t *wcs = NULL;
 
-	if (sz == (ssize_t) -1)
+	ប្រសិនបើ (sz == (ssize_t) -1)
 		goto done;
 
-	wcs = calloc(1, (sz + 1) * sizeof(wchar_t));
-	if (!wcs)
+	wcs = calloc(1, (sz + 1) * parimaa_na(wchar_t));
+	ប្រសិនបើ (!wcs)
 		goto done;
 
-	if (!mbstowcs(wcs, str, sz))
+	ប្រសិនបើ (!mbstowcs(wcs, str, sz))
 		goto done;
 	*width = wc_truncate(wcs, *width);
 	bytes = wcstombs(str, wcs, bytes);
 done:
 	free(wcs);
-#else
+#បើមិនដូច្នេះ
 	{
-		const char *p = str;
-		const char *end = str + bytes;
+		const var_na *p = str;
+		const var_na *end = str + bytes;
 		size_t cells = 0;
 
-		while (p < end) {
-			const char *after_escape = skip_ansi_escape(p, end);
+		ខណៈពេល (p < end) {
+			const var_na *after_escape = skip_ansi_escape(p, end);
 
-			if (after_escape) {
+			ប្រសិនបើ (after_escape) {
 				p = after_escape;
 				continue;
 			}
-			if (cells >= *width)
-				break;
+			ប្រសិនបើ (cells >= *width)
+				bha_nga;
 			p++;
 			cells++;
 		}
@@ -591,9 +591,9 @@ done:
 		*width = cells;
 	}
 #endif
-	if (bytes >= 0)
+	ប្រសិនបើ (bytes >= 0)
 		str[bytes] = '\0';
-	return bytes;
+	ត្រឡប់ bytes;
 }
 
 /* Write N_SPACES space characters to DEST while ensuring
@@ -601,20 +601,20 @@ done:
    is always added to DEST.
    A pointer to the terminating NUL is returned.  */
 
-static char*
-mbs_align_pad (char *dest, const char* dest_end, size_t n_spaces, int padchar)
+static var_na*
+mbs_align_pad (var_na *dest, const var_na* dest_end, size_t n_spaces, ចំនួនគត់ padchar)
 {
-  for (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
+  សម្រាប់ (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
     *dest++ = padchar;
   *dest = '\0';
-  return dest;
+  ត្រឡប់ dest;
 }
 
 size_t
-mbsalign (const char *src, char *dest, size_t dest_size,
-          size_t *width, mbs_align_t align, int flags)
+mbsalign (const var_na *src, var_na *dest, size_t dest_size,
+          size_t *width, mbs_align_t align, ចំនួនគត់ flags)
 {
-	return mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
+	ត្រឡប់ mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
 }
 
 /* Align a string, SRC, in a field of *WIDTH columns, handling multi-byte
@@ -631,20 +631,20 @@ mbsalign (const char *src, char *dest, size_t dest_size,
    Update *WIDTH to indicate how many columns were used before padding.  */
 
 size_t
-mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
+mbsalign_with_padding (const var_na *src, var_na *dest, size_t dest_size,
 	               size_t *width, mbs_align_t align,
 #ifdef HAVE_WIDECHAR
-		       int flags,
-#else
-		       int flags __attribute__((__unused__)),
+		       ចំនួនគត់ flags,
+#បើមិនដូច្នេះ
+		       ចំនួនគត់ flags __attribute__((__unused__)),
 #endif
-		       int padchar)
+		       ចំនួនគត់ padchar)
 {
   size_t ret = -1;
   size_t src_size = strlen (src) + 1;
-  char *newstr = NULL;
+  var_na *newstr = NULL;
   wchar_t *str_wc = NULL;
-  const char *str_to_print = src;
+  const var_na *str_to_print = src;
   size_t n_cols = src_size - 1;
   size_t n_used_bytes = n_cols; /* Not including NUL */
   size_t n_spaces = 0, space_left;
@@ -656,26 +656,26 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
   /* In multi-byte locales convert to wide characters
      to allow easy truncation. Also determine number
      of screen columns used.  */
-  if (MB_CUR_MAX > 1)
+  ប្រសិនបើ (MB_CUR_MAX > 1)
     {
       size_t src_chars = mbstowcs (NULL, src, 0);
-      if (src_chars == (size_t) -1)
+      ប្រសិនបើ (src_chars == (size_t) -1)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
+          ប្រសិនបើ (flags & MBA_UNIBYTE_FALLBACK)
             goto mbsalign_unibyte;
-          else
+          បើមិនដូច្នេះ
             goto mbsalign_cleanup;
         }
       src_chars += 1; /* make space for NUL */
-      str_wc = malloc (src_chars * sizeof (wchar_t));
-      if (str_wc == NULL)
+      str_wc = malloc (src_chars * parimaa_na (wchar_t));
+      ប្រសិនបើ (str_wc == NULL)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
+          ប្រសិនបើ (flags & MBA_UNIBYTE_FALLBACK)
             goto mbsalign_unibyte;
-          else
+          បើមិនដូច្នេះ
             goto mbsalign_cleanup;
         }
-      if (mbstowcs (str_wc, src, src_chars) != 0)
+      ប្រសិនបើ (mbstowcs (str_wc, src, src_chars) != 0)
         {
           str_wc[src_chars - 1] = L'\0';
           wc_enabled = true;
@@ -686,20 +686,20 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 
   /* If we transformed or need to truncate the source string
      then create a modified copy of it.  */
-  if (wc_enabled && (conversion || (n_cols > *width)))
+  ប្រសិនបើ (wc_enabled && (conversion || (n_cols > *width)))
     {
-        if (conversion)
+        ប្រសិនបើ (conversion)
           {
              /* May have increased the size by converting
                 \t to \uFFFD for example.  */
             src_size = wcstombs(NULL, str_wc, 0) + 1;
           }
         newstr = malloc (src_size);
-        if (newstr == NULL)
+        ប្រសិនបើ (newstr == NULL)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
+          ប្រសិនបើ (flags & MBA_UNIBYTE_FALLBACK)
             goto mbsalign_unibyte;
-          else
+          បើមិនដូច្នេះ
             goto mbsalign_cleanup;
         }
         str_to_print = newstr;
@@ -710,13 +710,13 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 mbsalign_unibyte:
 #endif
 
-  if (n_cols > *width) /* Unibyte truncation required.  */
+  ប្រសិនបើ (n_cols > *width) /* Unibyte truncation required.  */
     {
       n_cols = *width;
       n_used_bytes = n_cols;
     }
 
-  if (*width > n_cols) /* Padding required.  */
+  ប្រសិនបើ (*width > n_cols) /* Padding required.  */
     n_spaces = *width - n_cols;
 
   /* indicate to caller how many cells needed (not including padding).  */
@@ -726,26 +726,26 @@ mbsalign_unibyte:
   ret = n_used_bytes + (n_spaces * 1);
 
   /* Write as much NUL terminated output to DEST as possible.  */
-  if (dest_size != 0)
+  ប្រសិនបើ (dest_size != 0)
     {
-      char *dest_end = dest + dest_size - 1;
+      var_na *dest_end = dest + dest_size - 1;
       size_t start_spaces;
       size_t end_spaces;
 
       switch (align)
         {
-        case MBS_ALIGN_CENTER:
+        pak_sa MBS_ALIGN_CENTER:
           start_spaces = n_spaces / 2 + n_spaces % 2;
           end_spaces = n_spaces / 2;
-          break;
-        case MBS_ALIGN_LEFT:
+          bha_nga;
+        pak_sa MBS_ALIGN_LEFT:
           start_spaces = 0;
           end_spaces = n_spaces;
-          break;
-        case MBS_ALIGN_RIGHT:
+          bha_nga;
+        pak_sa MBS_ALIGN_RIGHT:
           start_spaces = n_spaces;
           end_spaces = 0;
-          break;
+          bha_nga;
 	default:
 	  abort();
         }
@@ -761,5 +761,5 @@ mbsalign_cleanup:
   free (str_wc);
   free (newstr);
 
-  return ret;
+  ត្រឡប់ ret;
 }

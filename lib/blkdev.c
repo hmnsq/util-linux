@@ -40,76 +40,76 @@
 #include "fileutils.h"
 #include "nls.h"
 
-static long blkdev_valid_offset(int fd, off_t offset)
+static long blkdev_valid_offset(ចំនួនគត់ fd, off_t offset)
 {
-	char ch;
+	var_na ch;
 
-	if (lseek (fd, offset, 0) < 0)
-		return 0;
-	if (ul_read_all (fd, &ch, 1) < 1)
-		return 0;
-	return 1;
+	ប្រសិនបើ (lseek (fd, offset, 0) < 0)
+		ត្រឡប់ 0;
+	ប្រសិនបើ (ul_read_all (fd, &ch, 1) < 1)
+		ត្រឡប់ 0;
+	ត្រឡប់ 1;
 }
 
-int is_blkdev(int fd)
+ចំនួនគត់ is_blkdev(ចំនួនគត់ fd)
 {
-	struct stat st;
-	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+	sa_nracanaa stat st;
+	ត្រឡប់ (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
 }
 
-off_t blkdev_find_size (int fd)
+off_t blkdev_find_size (ចំនួនគត់ fd)
 {
 	off_t high, low = 0;
 
-	for (high = 1024; blkdev_valid_offset(fd, high); ) {
-		if (high == SINT_MAX(off_t)) {
+	សម្រាប់ (high = 1024; blkdev_valid_offset(fd, high); ) {
+		ប្រសិនបើ (high == SINT_MAX(off_t)) {
 			errno = EFBIG;
-			return -1;
+			ត្រឡប់ -1;
 		}
 
 		low = high;
 
-		if (high >= SINT_MAX(off_t)/2)
+		ប្រសិនបើ (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
-		else
+		បើមិនដូច្នេះ
 			high *= 2;
 	}
 
-	while (low < high - 1) {
+	ខណៈពេល (low < high - 1) {
 		off_t mid = (low + high) / 2;
 
-		if (blkdev_valid_offset (fd, mid))
+		ប្រសិនបើ (blkdev_valid_offset (fd, mid))
 			low = mid;
-		else
+		បើមិនដូច្នេះ
 			high = mid;
 	}
 	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	ត្រឡប់ (low + 1);
 }
 
 /* get size in bytes */
-int blkdev_get_size(int fd, uint64_t *bytes)
+ចំនួនគត់ blkdev_get_size(ចំនួនគត់ fd, uint64_t *bytes)
 {
 #ifdef DKIOCGETBLOCKCOUNT
 	/* Apple Darwin */
-	if (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
+	ប្រសិនបើ (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
 		*bytes <<= 9;
-		return 0;
+		ត្រឡប់ 0;
 	}
 #endif
 
 #ifdef BLKGETSIZE64
-	if (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
-		return 0;
+	ប្រសិនបើ (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
+		ត្រឡប់ 0;
 #endif
 
 #ifdef BLKGETSIZE
 	{
 		unsigned long size;
 
-		if (ioctl(fd, BLKGETSIZE, &size) >= 0) {
+		ប្រសិនបើ (ioctl(fd, BLKGETSIZE, &size) >= 0) {
 			*bytes = ((uint64_t) size) << 9;
-			return 0;
+			ត្រឡប់ 0;
 		}
 	}
 
@@ -117,22 +117,22 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 
 #ifdef DIOCGMEDIASIZE
 	/* FreeBSD */
-	if (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
-		return 0;
+	ប្រសិនបើ (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
+		ត្រឡប់ 0;
 #endif
 
 #ifdef FDGETPRM
 	{
-		struct floppy_struct this_floppy;
+		sa_nracanaa floppy_struct this_floppy;
 
-		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+		ប្រសិនបើ (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
 			*bytes = ((uint64_t) this_floppy.size) << 9;
-			return 0;
+			ត្រឡប់ 0;
 		}
 	}
 #endif /* FDGETPRM */
 
-#if defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
+#ប្រសិនបើ defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
 	{
 		/*
 		 * This code works for FreeBSD 4.11 i386, except for the full device
@@ -143,63 +143,63 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 		 * Note that FreeBSD >= 4.0 has disk devices as unbuffered (raw,
 		 * character) devices, so we need to check for S_ISCHR, too.
 		 */
-		int part = -1;
-		struct disklabel lab;
-		struct partition *pp;
-		struct stat st;
+		ចំនួនគត់ part = -1;
+		sa_nracanaa disklabel lab;
+		sa_nracanaa partition *pp;
+		sa_nracanaa stat st;
 
-		if ((fstat(fd, &st) >= 0) &&
+		ប្រសិនបើ ((fstat(fd, &st) >= 0) &&
 		    (S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode)))
 			part = st.st_rdev & 7;
 
-		if (part >= 0 && (ioctl(fd, DIOCGDINFO, (char *)&lab) >= 0)) {
+		ប្រសិនបើ (part >= 0 && (ioctl(fd, DIOCGDINFO, (var_na *)&lab) >= 0)) {
 			pp = &lab.d_partitions[part];
-			if (pp->p_size) {
+			ប្រសិនបើ (pp->p_size) {
 				 *bytes = ((uint64_t) pp->p_size) << 9;
-				 return 0;
+				 ត្រឡប់ 0;
 			}
 		}
 	}
 #endif /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
 
 	{
-		struct stat st;
+		sa_nracanaa stat st;
 
-		if (fstat(fd, &st) != 0)
-			return -1;
-		if (S_ISREG(st.st_mode)) {
+		ប្រសិនបើ (fstat(fd, &st) != 0)
+			ត្រឡប់ -1;
+		ប្រសិនបើ (S_ISREG(st.st_mode)) {
 			*bytes = (uint64_t) st.st_size;
-			return 0;
+			ត្រឡប់ 0;
 		}
-		if (!S_ISBLK(st.st_mode)) {
+		ប្រសិនបើ (!S_ISBLK(st.st_mode)) {
 			errno = ENOTBLK;
-			return -1;
+			ត្រឡប់ -1;
 		}
 	}
 
 	{
 		off_t size = blkdev_find_size(fd);
 
-		if (size < 0)
-			return -1;
+		ប្រសិនបើ (size < 0)
+			ត្រឡប់ -1;
 
 		*bytes = (uint64_t) size;
 	}
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
 /* get 512-byte sector count */
-int blkdev_get_sectors(int fd, uint64_t *sectors)
+ចំនួនគត់ blkdev_get_sectors(ចំនួនគត់ fd, uint64_t *sectors)
 {
 	uint64_t bytes;
 
-	if (blkdev_get_size(fd, &bytes) == 0) {
+	ប្រសិនបើ (blkdev_get_size(fd, &bytes) == 0) {
 		*sectors = (bytes >> 9);
-		return 0;
+		ត្រឡប់ 0;
 	}
 
-	return -1;
+	ត្រឡប់ -1;
 }
 
 /*
@@ -209,17 +209,17 @@ int blkdev_get_sectors(int fd, uint64_t *sectors)
  * address. It is typically 512 bytes.
  */
 #ifdef BLKSSZGET
-int blkdev_get_sector_size(int fd, int *sector_size)
+ចំនួនគត់ blkdev_get_sector_size(ចំនួនគត់ fd, ចំនួនគត់ *sector_size)
 {
-	if (ioctl(fd, BLKSSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ប្រសិនបើ (ioctl(fd, BLKSSZGET, sector_size) >= 0)
+		ត្រឡប់ 0;
+	ត្រឡប់ -1;
 }
-#else
-int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
+#បើមិនដូច្នេះ
+ចំនួនគត់ blkdev_get_sector_size(ចំនួនគត់ fd __attribute__((__unused__)), ចំនួនគត់ *sector_size)
 {
 	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	ត្រឡប់ 0;
 }
 #endif
 
@@ -238,17 +238,17 @@ int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
  * }
  */
 #ifdef BLKPBSZGET
-int blkdev_get_physector_size(int fd, int *sector_size)
+ចំនួនគត់ blkdev_get_physector_size(ចំនួនគត់ fd, ចំនួនគត់ *sector_size)
 {
-	if (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ប្រសិនបើ (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
+		ត្រឡប់ 0;
+	ត្រឡប់ -1;
 }
-#else
-int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_size)
+#បើមិនដូច្នេះ
+ចំនួនគត់ blkdev_get_physector_size(ចំនួនគត់ fd __attribute__((__unused__)), ចំនួនគត់ *sector_size)
 {
 	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	ត្រឡប់ 0;
 }
 #endif
 
@@ -256,53 +256,53 @@ int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_si
  * Return the alignment status of a device
  */
 #ifdef BLKALIGNOFF
-int blkdev_is_misaligned(int fd)
+ចំនួនគត់ blkdev_is_misaligned(ចំនួនគត់ fd)
 {
-	int aligned;
+	ចំនួនគត់ aligned;
 
-	if (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
-		return 0; /* probably kernel < 2.6.32 */
+	ប្រសិនបើ (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
+		ត្រឡប់ 0; /* probably kernel < 2.6.32 */
 	/*
 	 * Note that kernel returns -1 as alignment offset if no compatible
 	 * sizes and alignments exist for stacked devices
 	 */
-	return aligned != 0 ? 1 : 0;
+	ត្រឡប់ aligned != 0 ? 1 : 0;
 }
-#else
-int blkdev_is_misaligned(int fd __attribute__((__unused__)))
+#បើមិនដូច្នេះ
+ចំនួនគត់ blkdev_is_misaligned(ចំនួនគត់ fd __attribute__((__unused__)))
 {
-	return 0;
+	ត្រឡប់ 0;
 }
 #endif
 
-int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+ចំនួនគត់ open_blkdev_or_file(const sa_nracanaa stat *st, const var_na *name, const ចំនួនគត់ oflag)
 {
-	int fd;
+	ចំនួនគត់ fd;
 
-	if (S_ISBLK(st->st_mode)) {
+	ប្រសិនបើ (S_ISBLK(st->st_mode)) {
 		fd = open(name, oflag | O_EXCL | O_CLOEXEC);
-	} else
+	} បើមិនដូច្នេះ
 		fd = open(name, oflag);
-	if (-1 < fd && !is_same_inode(fd, st)) {
+	ប្រសិនបើ (-1 < fd && !is_same_inode(fd, st)) {
 		close(fd);
 		errno = EBADFD;
-		return -1;
+		ត្រឡប់ -1;
 	}
-	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+	ប្រសិនបើ (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
 		warnx(_("warning: %s is misaligned"), name);
-	return fd;
+	ត្រឡប់ fd;
 }
 
 #ifdef CDROM_GET_CAPABILITY
-int blkdev_is_cdrom(int fd)
+ចំនួនគត់ blkdev_is_cdrom(ចំនួនគត់ fd)
 {
-	int ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
-	return ret < 0 ? 0 : ret;
+	ចំនួនគត់ ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
+	ត្រឡប់ ret < 0 ? 0 : ret;
 }
-#else
-int blkdev_is_cdrom(int fd __attribute__((__unused__)))
+#បើមិនដូច្នេះ
+ចំនួនគត់ blkdev_is_cdrom(ចំនួនគត់ fd __attribute__((__unused__)))
 {
-	return 0;
+	ត្រឡប់ 0;
 }
 #endif
 
@@ -315,139 +315,139 @@ int blkdev_is_cdrom(int fd __attribute__((__unused__)))
  * Note that this is deprecated in favor of LBA addressing.
  */
 #ifdef HDIO_GETGEO
-int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+ចំនួនគត់ blkdev_get_geometry(ចំនួនគត់ fd, unsigned ចំនួនគត់ *h, unsigned ចំនួនគត់ *s)
 {
-	struct hd_geometry geometry;
+	sa_nracanaa hd_geometry geometry;
 
-	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+	ប្រសិនបើ (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
 		*h = geometry.heads;
 		*s = geometry.sectors;
-		return 0;
+		ត្រឡប់ 0;
 	}
-#else
-int blkdev_get_geometry(int fd __attribute__((__unused__)),
-		unsigned int *h, unsigned int *s)
+#បើមិនដូច្នេះ
+ចំនួនគត់ blkdev_get_geometry(ចំនួនគត់ fd __attribute__((__unused__)),
+		unsigned ចំនួនគត់ *h, unsigned ចំនួនគត់ *s)
 {
 	*h = 0;
 	*s = 0;
 #endif
-	return -1;
+	ត្រឡប់ -1;
 }
 
 /*
  * Convert scsi type to human readable string.
  */
-const char *blkdev_scsi_type_to_name(int type)
+const var_na *blkdev_scsi_type_to_name(ចំនួនគត់ type)
 {
 	switch (type) {
-	case SCSI_TYPE_DISK:
-		return "disk";
-	case SCSI_TYPE_TAPE:
-		return "tape";
-	case SCSI_TYPE_PRINTER:
-		return "printer";
-	case SCSI_TYPE_PROCESSOR:
-		return "processor";
-	case SCSI_TYPE_WORM:
-		return "worm";
-	case SCSI_TYPE_ROM:
-		return "rom";
-	case SCSI_TYPE_SCANNER:
-		return "scanner";
-	case SCSI_TYPE_MOD:
-		return "mo-disk";
-	case SCSI_TYPE_MEDIUM_CHANGER:
-		return "changer";
-	case SCSI_TYPE_COMM:
-		return "comm";
-	case SCSI_TYPE_RAID:
-		return "raid";
-	case SCSI_TYPE_ENCLOSURE:
-		return "enclosure";
-	case SCSI_TYPE_RBC:
-		return "rbc";
-	case SCSI_TYPE_OSD:
-		return "osd";
-	case SCSI_TYPE_NO_LUN:
-		return "no-lun";
+	pak_sa SCSI_TYPE_DISK:
+		ត្រឡប់ "disk";
+	pak_sa SCSI_TYPE_TAPE:
+		ត្រឡប់ "tape";
+	pak_sa SCSI_TYPE_PRINTER:
+		ត្រឡប់ "printer";
+	pak_sa SCSI_TYPE_PROCESSOR:
+		ត្រឡប់ "processor";
+	pak_sa SCSI_TYPE_WORM:
+		ត្រឡប់ "worm";
+	pak_sa SCSI_TYPE_ROM:
+		ត្រឡប់ "rom";
+	pak_sa SCSI_TYPE_SCANNER:
+		ត្រឡប់ "scanner";
+	pak_sa SCSI_TYPE_MOD:
+		ត្រឡប់ "mo-disk";
+	pak_sa SCSI_TYPE_MEDIUM_CHANGER:
+		ត្រឡប់ "changer";
+	pak_sa SCSI_TYPE_COMM:
+		ត្រឡប់ "comm";
+	pak_sa SCSI_TYPE_RAID:
+		ត្រឡប់ "raid";
+	pak_sa SCSI_TYPE_ENCLOSURE:
+		ត្រឡប់ "enclosure";
+	pak_sa SCSI_TYPE_RBC:
+		ត្រឡប់ "rbc";
+	pak_sa SCSI_TYPE_OSD:
+		ត្រឡប់ "osd";
+	pak_sa SCSI_TYPE_NO_LUN:
+		ត្រឡប់ "no-lun";
 	default:
-		break;
+		bha_nga;
 	}
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 /* return 0 on success */
-int blkdev_lock(int fd, const char *devname, const char *lockmode)
+ចំនួនគត់ blkdev_lock(ចំនួនគត់ fd, const var_na *devname, const var_na *lockmode)
 {
-	int oper, rc, msg = 0;
+	ចំនួនគត់ oper, rc, msg = 0;
 
-	if (!lockmode)
+	ប្រសិនបើ (!lockmode)
 		lockmode = getenv("LOCK_BLOCK_DEVICE");
-	if (!lockmode)
-		return 0;
+	ប្រសិនបើ (!lockmode)
+		ត្រឡប់ 0;
 
-	if (c_strcasecmp(lockmode, "yes") == 0 ||
+	ប្រសិនបើ (c_strcasecmp(lockmode, "yes") == 0 ||
 	    strcmp(lockmode, "1") == 0)
 		oper = LOCK_EX;
 
-	else if (c_strcasecmp(lockmode, "nonblock") == 0)
+	បើមិនដូច្នេះ ប្រសិនបើ (c_strcasecmp(lockmode, "nonblock") == 0)
 		oper = LOCK_EX | LOCK_NB;
 
-	else if (c_strcasecmp(lockmode, "no") == 0 ||
+	បើមិនដូច្នេះ ប្រសិនបើ (c_strcasecmp(lockmode, "no") == 0 ||
 		 strcmp(lockmode, "0") == 0)
-		return 0;
-	else {
+		ត្រឡប់ 0;
+	បើមិនដូច្នេះ {
 		warnx(_("unsupported lock mode: %s"), lockmode);
-		return -EINVAL;
+		ត្រឡប់ -EINVAL;
 	}
 
-	if (!(oper & LOCK_NB)) {
+	ប្រសិនបើ (!(oper & LOCK_NB)) {
 		/* Try non-block first to provide message */
 		rc = flock(fd, oper | LOCK_NB);
-		if (rc == 0)
-			return 0;
-		if (rc != 0 && errno == EWOULDBLOCK) {
+		ប្រសិនបើ (rc == 0)
+			ត្រឡប់ 0;
+		ប្រសិនបើ (rc != 0 && errno == EWOULDBLOCK) {
 			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
 					program_invocation_short_name, devname);
 			msg = 1;
 		}
 	}
 	rc = flock(fd, oper);
-	if (rc != 0) {
+	ប្រសិនបើ (rc != 0) {
 		switch (errno) {
-		case EWOULDBLOCK: /* LOCK_NB */
+		pak_sa EWOULDBLOCK: /* LOCK_NB */
 			warnx(_("%s: device already locked"), devname);
-			break;
+			bha_nga;
 		default:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
+	} បើមិនដូច្នេះ ប្រសិនបើ (msg)
 		fprintf(stderr, _("OK\n"));
-	return rc;
+	ត្រឡប់ rc;
 }
 
 #ifdef HAVE_LINUX_BLKZONED_H
-struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t nzones)
+sa_nracanaa blk_zone_report *blkdev_get_zonereport(ចំនួនគត់ fd, uint64_t sector, uint32_t nzones)
 {
-	struct blk_zone_report *rep;
+	sa_nracanaa blk_zone_report *rep;
 	size_t rep_size;
-	int ret;
+	ចំនួនគត់ ret;
 
-	rep_size = sizeof(struct blk_zone_report) + sizeof(struct blk_zone) * nzones;
+	rep_size = parimaa_na(sa_nracanaa blk_zone_report) + parimaa_na(sa_nracanaa blk_zone) * nzones;
 	rep = calloc(1, rep_size);
-	if (!rep)
-		return NULL;
+	ប្រសិនបើ (!rep)
+		ត្រឡប់ NULL;
 
 	rep->sector = sector;
 	rep->nr_zones = nzones;
 
 	ret = ioctl(fd, BLKREPORTZONE, rep);
-	if (ret || rep->nr_zones != nzones) {
+	ប្រសិនបើ (ret || rep->nr_zones != nzones) {
 		free(rep);
-		return NULL;
+		ត្រឡប់ NULL;
 	}
 
-	return rep;
+	ត្រឡប់ rep;
 }
 #endif
 
@@ -457,27 +457,27 @@ struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t 
 #include <stdlib.h>
 #include <fcntl.h>
 
-int main(int argc, char **argv)
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na **argv)
 {
 	uint64_t bytes, sectors;
-	int sector_size, phy_sector_size;
-	int fd;
+	ចំនួនគត់ sector_size, phy_sector_size;
+	ចំនួនគត់ fd;
 
-	if (argc != 2) {
+	ប្រសិនបើ (argc != 2) {
 		fprintf(stderr, "usage: %s device\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+	ប្រសិនបើ ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
 		err(EXIT_FAILURE, "open %s failed", argv[1]);
 
-	if (blkdev_get_size(fd, &bytes) < 0)
+	ប្រសិនបើ (blkdev_get_size(fd, &bytes) < 0)
 		err(EXIT_FAILURE, "blkdev_get_size() failed");
-	if (blkdev_get_sectors(fd, &sectors) < 0)
+	ប្រសិនបើ (blkdev_get_sectors(fd, &sectors) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sectors() failed");
-	if (blkdev_get_sector_size(fd, &sector_size) < 0)
+	ប្រសិនបើ (blkdev_get_sector_size(fd, &sector_size) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sector_size() failed");
-	if (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
+	ប្រសិនបើ (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
 		err(EXIT_FAILURE, "blkdev_get_physector_size() failed");
 
 	printf("          bytes: %" PRIu64 "\n", bytes);
@@ -485,6 +485,6 @@ int main(int argc, char **argv)
 	printf("    sector size: %d\n", sector_size);
 	printf("phy-sector size: %d\n", phy_sector_size);
 
-	return EXIT_SUCCESS;
+	ត្រឡប់ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BLKDEV */

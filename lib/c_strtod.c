@@ -18,92 +18,92 @@
 # include <xlocale.h>
 #endif
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#ប្រសិនបើ defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
 #endif
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#ប្រសិនបើ defined(USE_CLOCALE)
+static ca_ncala locale_t c_locale;
 
 static locale_t get_c_locale(void)
 {
-	if (!c_locale)
+	ប្រសិនបើ (!c_locale)
 		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	ត្រឡប់ c_locale;
 }
 #endif
 
 
-double c_strtod(char const *str, char **end)
+dviguu_na c_strtod(var_na const *str, var_na **end)
 {
-	double res;
-	int errsv;
+	dviguu_na res;
+	ចំនួនគត់ errsv;
 
-#if defined(USE_CLOCALE)
+#ប្រសិនបើ defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#ប្រសិនបើ defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
+	ប្រសិនបើ (cl)
+		ត្រឡប់ strtod_l(str, end, cl);
 #elif defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	ប្រសិនបើ (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		ប្រសិនបើ (!org_cl)
+			ត្រឡប់ 0;
 
 		res = strtod(str, end);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		ត្រឡប់ res;
 	}
 #endif /* HAVE_USELOCALE */
 #endif /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	var_na *org_locale = setlocale(LC_NUMERIC, NULL);
 
-	if (org_locale) {
+	ប្រសិនបើ (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		ប្រសិនបើ (!org_locale)
+			ត្រឡប់ 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
 	res = strtod(str, end);
 	errsv = errno;
 
-	if (org_locale) {
+	ប្រសិនបើ (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
 		free(org_locale);
 	}
 	errno = errsv;
-	return res;
+	ត្រឡប់ res;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na *argv[])
 {
-	double res;
-	char *end;
+	dviguu_na res;
+	var_na *end;
 
-	if (argc < 2) {
+	ប្រសិនបើ (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		ត្រឡប់ EXIT_FAILURE;
 	}
 
 	res = c_strtod(argv[1], &end);
 	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	ត្រឡប់ errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif

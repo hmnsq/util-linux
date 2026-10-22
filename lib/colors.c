@@ -11,15 +11,15 @@
 #include <dirent.h>
 #include <ctype.h>
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
-# if defined(HAVE_NCURSESW_NCURSES_H)
+#ប្រសិនបើ defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+# ប្រសិនបើ defined(HAVE_NCURSESW_NCURSES_H)
 #  include <ncursesw/ncurses.h>
 # elif defined(HAVE_NCURSES_NCURSES_H)
 #  include <ncurses/ncurses.h>
 # elif defined(HAVE_NCURSES_H)
 #  include <ncurses.h>
 # endif
-# if defined(HAVE_NCURSESW_TERM_H)
+# ប្រសិនបើ defined(HAVE_NCURSESW_TERM_H)
 #  include <ncursesw/term.h>
 # elif defined(HAVE_NCURSES_TERM_H)
 #  include <ncurses/term.h>
@@ -42,7 +42,7 @@
  */
 #ifdef USE_COLORS_BY_DEFAULT
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_AUTO	/* check isatty() */
-#else
+#បើមិនដូច្នេះ
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_NEVER	/* no colors by default */
 #endif
 
@@ -62,7 +62,7 @@ UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 /*
  * terminal-colors.d file types
  */
-enum {
+ga_nanaa {
 	UL_COLORFILE_DISABLE,		/* .disable */
 	UL_COLORFILE_ENABLE,		/* .enable */
 	UL_COLORFILE_SCHEME,		/* .scheme */
@@ -70,9 +70,9 @@ enum {
 	__UL_COLORFILE_COUNT
 };
 
-struct ul_color_scheme {
-	char *name;
-	char *seq;
+sa_nracanaa ul_color_scheme {
+	var_na *name;
+	var_na *seq;
 };
 
 /*
@@ -89,50 +89,50 @@ struct ul_color_scheme {
  *
  * the match with higher score wins. The score is per type.
  */
-struct ul_color_ctl {
-	const char	*utilname;	/* util name */
-	const char	*termname;	/* terminal name ($TERM) */
+sa_nracanaa ul_color_ctl {
+	const var_na	*utilname;	/* util name */
+	const var_na	*termname;	/* terminal name ($TERM) */
 
-	char		*sfile;	/* path to scheme */
+	var_na		*sfile;	/* path to scheme */
 
-	struct ul_color_scheme	*schemes;	/* array with color schemes */
+	sa_nracanaa ul_color_scheme	*schemes;	/* array with color schemes */
 	size_t			nschemes;	/* number of the items */
 	size_t			schemes_sz;	/* number of the allocated items */
 
-	int		mode;		/* UL_COLORMODE_* */
-	unsigned int	has_colors : 1,	/* based on mode and scores[] */
+	ចំនួនគត់		mode;		/* UL_COLORMODE_* */
+	unsigned ចំនួនគត់	has_colors : 1,	/* based on mode and scores[] */
 			disabled   : 1, /* disable colors */
 			cs_configured : 1, /* color schemes read */
 			configured : 1; /* terminal-colors.d parsed */
 
-	int		scores[__UL_COLORFILE_COUNT];	/* the best match */
+	ចំនួនគត់		scores[__UL_COLORFILE_COUNT];	/* the best match */
 };
 
 /*
  * Control struct, globally shared.
  */
-static struct ul_color_ctl ul_colors;
+static sa_nracanaa ul_color_ctl ul_colors;
 
-static void colors_free_schemes(struct ul_color_ctl *cc);
-static int colors_read_schemes(struct ul_color_ctl *cc);
+static void colors_free_schemes(sa_nracanaa ul_color_ctl *cc);
+static ចំនួនគត់ colors_read_schemes(sa_nracanaa ul_color_ctl *cc);
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_scheme_name(const void *a0, const void *b0)
+static ចំនួនគត់ cmp_scheme_name(const void *a0, const void *b0)
 {
-	const struct ul_color_scheme *a = (const struct ul_color_scheme *) a0,
-				     *b = (const struct ul_color_scheme *) b0;
-	return strcmp(a->name, b->name);
+	const sa_nracanaa ul_color_scheme *a = (const sa_nracanaa ul_color_scheme *) a0,
+				     *b = (const sa_nracanaa ul_color_scheme *) b0;
+	ត្រឡប់ strcmp(a->name, b->name);
 }
 
 /*
  * Resets control struct (note that we don't allocate the struct)
  */
-static void colors_reset(struct ul_color_ctl *cc)
+static void colors_reset(sa_nracanaa ul_color_ctl *cc)
 {
-	if (!cc)
-		return;
+	ប្រសិនបើ (!cc)
+		ត្រឡប់;
 
 	colors_free_schemes(cc);
 
@@ -143,15 +143,15 @@ static void colors_reset(struct ul_color_ctl *cc)
 	cc->termname = NULL;
 	cc->mode = UL_COLORMODE_UNDEF;
 
-	memset(cc->scores, 0, sizeof(cc->scores));
+	memset(cc->scores, 0, parimaa_na(cc->scores));
 }
 
-static void colors_debug(struct ul_color_ctl *cc)
+static void colors_debug(sa_nracanaa ul_color_ctl *cc)
 {
 	size_t i;
 
-	if (!cc)
-		return;
+	ប្រសិនបើ (!cc)
+		ត្រឡប់;
 
 	printf("Colors:\n");
 	printf("\tutilname = '%s'\n", cc->utilname);
@@ -169,7 +169,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < ARRAY_SIZE(cc->scores); i++)
+	សម្រាប់ (i = 0; i < ARRAY_SIZE(cc->scores); i++)
 		printf("\tscore %s = %d\n",
 				i == UL_COLORFILE_DISABLE ? "disable" :
 				i == UL_COLORFILE_ENABLE ? "enable" :
@@ -178,7 +178,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < cc->nschemes; i++) {
+	សម្រាប់ (i = 0; i < cc->nschemes; i++) {
 		printf("\tscheme #%02zu ", i);
 		color_scheme_enable(cc->schemes[i].name, NULL);
 		fputs(cc->schemes[i].name, stdout);
@@ -191,42 +191,42 @@ static void colors_debug(struct ul_color_ctl *cc)
 /*
  * Parses [[<utilname>][@<termname>].]<type>
  */
-static int filename_to_tokens(const char *str,
-			      const char **name, size_t *namesz,
-			      const char **term, size_t *termsz,
-			      int  *filetype)
+static ចំនួនគត់ filename_to_tokens(const var_na *str,
+			      const var_na **name, size_t *namesz,
+			      const var_na **term, size_t *termsz,
+			      ចំនួនគត់  *filetype)
 {
-	const char *type_start, *term_start, *p;
+	const var_na *type_start, *term_start, *p;
 
-	if (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
-		return -EINVAL;
+	ប្រសិនបើ (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
+		ត្រឡប់ -EINVAL;
 
 	/* parse .type */
 	p = strrchr(str, '.');
 	type_start = p ? p + 1 : str;
 
-	if (strcmp(type_start, "disable") == 0)
+	ប្រសិនបើ (strcmp(type_start, "disable") == 0)
 		*filetype = UL_COLORFILE_DISABLE;
-	else if (strcmp(type_start, "enable") == 0)
+	បើមិនដូច្នេះ ប្រសិនបើ (strcmp(type_start, "enable") == 0)
 		*filetype = UL_COLORFILE_ENABLE;
-	else if (strcmp(type_start, "scheme") == 0)
+	បើមិនដូច្នេះ ប្រសិនបើ (strcmp(type_start, "scheme") == 0)
 		*filetype = UL_COLORFILE_SCHEME;
-	else {
+	បើមិនដូច្នេះ {
 		DBG(CONF, ul_debug("unknown type '%s'", type_start));
-		return 1;				/* unknown type */
+		ត្រឡប់ 1;				/* unknown type */
 	}
 
-	if (type_start == str)
-		return 0;				/* "type" only */
+	ប្រសិនបើ (type_start == str)
+		ត្រឡប់ 0;				/* "type" only */
 
 	/* parse @termname */
 	p = strchr(str, '@');
 	term_start = p ? p + 1 : NULL;
-	if (term_start) {
+	ប្រសិនបើ (term_start) {
 		*term = term_start;
 		*termsz = type_start - term_start - 1;
-		if (term_start - 1 == str)
-			return 0;			/* "@termname.type" */
+		ប្រសិនបើ (term_start - 1 == str)
+			ត្រឡប់ 0;			/* "@termname.type" */
 	}
 
 	/* parse utilname */
@@ -234,7 +234,7 @@ static int filename_to_tokens(const char *str,
 	*name = str;
 	*namesz = p - str - 1;
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
 /*
@@ -242,48 +242,48 @@ static int filename_to_tokens(const char *str,
  * The result is stored to cc->scores. The path to the best "scheme"
  * file is stored to cc->scheme.
  */
-static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
+static ចំនួនគត់ colors_readdir(sa_nracanaa ul_color_ctl *cc, const var_na *dirname)
 {
 	DIR *dir;
-	int rc = -ENOENT;
-	struct dirent *d;
-	char sfile[PATH_MAX] = { '\0' };
+	ចំនួនគត់ rc = -ENOENT;
+	sa_nracanaa dirent *d;
+	var_na sfile[PATH_MAX] = { '\0' };
 	size_t namesz, termsz;
 
-	if (!dirname || !cc || !cc->utilname || !*cc->utilname)
-		return -EINVAL;
+	ប្រសិនបើ (!dirname || !cc || !cc->utilname || !*cc->utilname)
+		ត្រឡប់ -EINVAL;
 
 	DBG(CONF, ul_debug("reading dir: '%s'", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return -errno;
+	ប្រសិនបើ (!dir)
+		ត្រឡប់ -errno;
 
 	namesz = strlen(cc->utilname);
 	termsz = cc->termname ? strlen(cc->termname) : 0;
 
-	while ((d = readdir(dir))) {
-		int type, score = 1;
-		const char *tk_name = NULL, *tk_term = NULL;
+	ខណៈពេល ((d = readdir(dir))) {
+		ចំនួនគត់ type, score = 1;
+		const var_na *tk_name = NULL, *tk_term = NULL;
 		size_t tk_namesz = 0, tk_termsz = 0;
 
-		if (*d->d_name == '.')
+		ប្រសិនបើ (*d->d_name == '.')
 			continue;
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
+		ប្រសិនបើ (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
 		    d->d_type != DT_REG)
 			continue;
 #endif
-		if (filename_to_tokens(d->d_name,
+		ប្រសិនបើ (filename_to_tokens(d->d_name,
 				       &tk_name, &tk_namesz,
 				       &tk_term, &tk_termsz, &type) != 0)
 			continue;
 
 		/* count theoretical score before we check names to avoid
 		 * unnecessary strcmp() */
-		if (tk_name)
+		ប្រសិនបើ (tk_name)
 			score += 20;
-		if (tk_term)
+		ប្រសិនបើ (tk_term)
 			score += 10;
 
 		DBG(CONF, ul_debug("item '%s': score=%d "
@@ -293,15 +293,15 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 			tk_termsz, tk_term));
 
 
-		if (score < cc->scores[type])
+		ប្រសិនបើ (score < cc->scores[type])
 			continue;
 
 		/* filter out by names */
-		if (tk_namesz && (tk_namesz != namesz ||
+		ប្រសិនបើ (tk_namesz && (tk_namesz != namesz ||
 				 strncmp(tk_name, cc->utilname, namesz) != 0))
 			continue;
 
-		if (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
+		ប្រសិនបើ (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
 				  strncmp(tk_term, cc->termname, termsz) != 0))
 			continue;
 
@@ -312,18 +312,18 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 					cc->scores[type], score));
 		cc->scores[type] = score;
 		rc = 0;
-		if (type == UL_COLORFILE_SCHEME)
-			strncpy(sfile, d->d_name, sizeof(sfile));
+		ប្រសិនបើ (type == UL_COLORFILE_SCHEME)
+			strncpy(sfile, d->d_name, parimaa_na(sfile));
 	}
 
-	if (*sfile) {
-		sfile[sizeof(sfile) - 1] = '\0';
-		if (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
+	ប្រសិនបើ (*sfile) {
+		sfile[parimaa_na(sfile) - 1] = '\0';
+		ប្រសិនបើ (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
 			rc = -ENOMEM;
 	}
 
 	closedir(dir);
-	return rc;
+	ត្រឡប់ rc;
 }
 
 /* atexit() wrapper */
@@ -335,50 +335,50 @@ static void colors_deinit(void)
 /*
  * Returns path to $XDG_CONFIG_HOME/terminal-colors.d
  */
-static char *colors_get_homedir(char *buf, size_t bufsz)
+static var_na *colors_get_homedir(var_na *buf, size_t bufsz)
 {
-	char *p = getenv("XDG_CONFIG_HOME");
+	var_na *p = getenv("XDG_CONFIG_HOME");
 
-	if (p) {
+	ប្រសិនបើ (p) {
 		snprintf(buf, bufsz, "%s/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		ត្រឡប់ buf;
 	}
 
 	p = getenv("HOME");
-	if (p) {
+	ប្រសិនបើ (p) {
 		snprintf(buf, bufsz, "%s/.config/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		ត្រឡប់ buf;
 	}
 
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 /*
  * Adds one color sequence to array with color scheme.
  */
-static int colors_add_scheme(struct ul_color_ctl *cc,
-			     const char *name,
-			     const char *seq0)
+static ចំនួនគត់ colors_add_scheme(sa_nracanaa ul_color_ctl *cc,
+			     const var_na *name,
+			     const var_na *seq0)
 {
-	struct ul_color_scheme *cs = NULL;
-	char *seq = NULL;
-	int rc;
+	sa_nracanaa ul_color_scheme *cs = NULL;
+	var_na *seq = NULL;
+	ចំនួនគត់ rc;
 
-	if (!cc || !name || !*name || !seq0 || !*seq0)
-		return -EINVAL;
+	ប្រសិនបើ (!cc || !name || !*name || !seq0 || !*seq0)
+		ត្រឡប់ -EINVAL;
 
 	DBG(SCHEME, ul_debug("add '%s'", name));
 
 	seq = color_get_sequence(seq0);
-	if (!seq)
-		return -EINVAL;
+	ប្រសិនបើ (!seq)
+		ត្រឡប់ -EINVAL;
 	rc = -ENOMEM;
 
 	/* enlarge the array */
-	if (cc->nschemes == cc->schemes_sz) {
+	ប្រសិនបើ (cc->nschemes == cc->schemes_sz) {
 		void *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
-					 sizeof(struct ul_color_scheme));
-		if (!tmp)
+					 parimaa_na(sa_nracanaa ul_color_scheme));
+		ប្រសិនបើ (!tmp)
 			goto err;
 		cc->schemes = tmp;
 		cc->schemes_sz = cc->nschemes + 10;
@@ -388,31 +388,31 @@ static int colors_add_scheme(struct ul_color_ctl *cc,
 	cs = &cc->schemes[cc->nschemes];
 	cs->seq = seq;
 	cs->name = strdup(name);
-	if (!cs->name)
+	ប្រសិនបើ (!cs->name)
 		goto err;
 
 	cc->nschemes++;
-	return 0;
+	ត្រឡប់ 0;
 err:
-	if (cs) {
+	ប្រសិនបើ (cs) {
 		free(cs->seq);
 		free(cs->name);
 		cs->seq = cs->name = NULL;
-	} else
+	} បើមិនដូច្នេះ
 		free(seq);
-	return rc;
+	ត្រឡប់ rc;
 }
 
 /*
  * Deallocates all regards to color schemes
  */
-static void colors_free_schemes(struct ul_color_ctl *cc)
+static void colors_free_schemes(sa_nracanaa ul_color_ctl *cc)
 {
 	size_t i;
 
 	DBG(SCHEME, ul_debug("free scheme"));
 
-	for (i = 0; i < cc->nschemes; i++) {
+	សម្រាប់ (i = 0; i < cc->nschemes; i++) {
 		free(cc->schemes[i].name);
 		free(cc->schemes[i].seq);
 	}
@@ -426,122 +426,122 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
 /*
  * The scheme configuration has to be sorted for bsearch
  */
-static void colors_sort_schemes(struct ul_color_ctl *cc)
+static void colors_sort_schemes(sa_nracanaa ul_color_ctl *cc)
 {
-	if (!cc->nschemes)
-		return;
+	ប្រសិនបើ (!cc->nschemes)
+		ត្រឡប់;
 
 	DBG(SCHEME, ul_debug("sort scheme"));
 
 	qsort(cc->schemes, cc->nschemes,
-	      sizeof(struct ul_color_scheme), cmp_scheme_name);
+	      parimaa_na(sa_nracanaa ul_color_scheme), cmp_scheme_name);
 }
 
 /*
  * Returns just one color scheme
  */
-static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
-						 const char *name)
+static sa_nracanaa ul_color_scheme *colors_get_scheme(sa_nracanaa ul_color_ctl *cc,
+						 const var_na *name)
 {
-	struct ul_color_scheme key = { .name = (char *) name}, *res;
+	sa_nracanaa ul_color_scheme key = { .name = (var_na *) name}, *res;
 
-	if (!cc || !name || !*name)
-		return NULL;
+	ប្រសិនបើ (!cc || !name || !*name)
+		ត្រឡប់ NULL;
 
-	if (!cc->cs_configured) {
-		int rc = colors_read_schemes(cc);
-		if (rc)
-			return NULL;
+	ប្រសិនបើ (!cc->cs_configured) {
+		ចំនួនគត់ rc = colors_read_schemes(cc);
+		ប្រសិនបើ (rc)
+			ត្រឡប់ NULL;
 	}
-	if (!cc->nschemes)
-		return NULL;
+	ប្រសិនបើ (!cc->nschemes)
+		ត្រឡប់ NULL;
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
 	res = bsearch(&key, cc->schemes, cc->nschemes,
-				sizeof(struct ul_color_scheme),
+				parimaa_na(sa_nracanaa ul_color_scheme),
 				cmp_scheme_name);
 
-	return res && res->seq ? res  : NULL;
+	ត្រឡប់ res && res->seq ? res  : NULL;
 }
 
 /*
  * Parses filenames in terminal-colors.d
  */
-static int colors_read_configuration(struct ul_color_ctl *cc)
+static ចំនួនគត់ colors_read_configuration(sa_nracanaa ul_color_ctl *cc)
 {
-	int rc = -ENOENT;
-	char *dirname, buf[PATH_MAX];
+	ចំនួនគត់ rc = -ENOENT;
+	var_na *dirname, buf[PATH_MAX];
 
 	cc->termname = getenv("TERM");
 
-	dirname = colors_get_homedir(buf, sizeof(buf));
-	if (dirname)
+	dirname = colors_get_homedir(buf, parimaa_na(buf));
+	ប្រសិនបើ (dirname)
 		rc = colors_readdir(cc, dirname);		/* ~/.config */
-	if (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
+	ប្រសិនបើ (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
 		rc = colors_readdir(cc, _PATH_TERMCOLORS_DIR);	/* /etc */
 
 	cc->configured = 1;
-	return rc;
+	ត្រឡប់ rc;
 }
 
 /*
  * Reads terminal-colors.d/ scheme file into array schemes
  */
-static int colors_read_schemes(struct ul_color_ctl *cc)
+static ចំនួនគត់ colors_read_schemes(sa_nracanaa ul_color_ctl *cc)
 {
-	int rc = 0;
+	ចំនួនគត់ rc = 0;
 	FILE *f = NULL;
-	char buf[BUFSIZ],
+	var_na buf[BUFSIZ],
 	     cn[129], seq[129];
 
-	if (!cc->configured)
+	ប្រសិនបើ (!cc->configured)
 		rc = colors_read_configuration(cc);
 
 	cc->cs_configured = 1;
 
-	if (rc || !cc->sfile)
+	ប្រសិនបើ (rc || !cc->sfile)
 		goto done;
 
 	DBG(SCHEME, ul_debug("reading file '%s'", cc->sfile));
 
 	f = fopen(cc->sfile, "r" UL_CLOEXECSTR);
-	if (!f) {
+	ប្រសិនបើ (!f) {
 		rc = -errno;
 		goto done;
 	}
 
-	while (fgets(buf, sizeof(buf), f)) {
-		char *p = strchr(buf, '\n');
+	ខណៈពេល (fgets(buf, parimaa_na(buf), f)) {
+		var_na *p = strchr(buf, '\n');
 
-		if (!p) {
-			if (feof(f))
+		ប្រសិនបើ (!p) {
+			ប្រសិនបើ (feof(f))
 				p = strchr(buf, '\0');
-			else {
+			បើមិនដូច្នេះ {
 				rc = -errno;
 				goto done;
 			}
 		}
 		*p = '\0';
-		p = (char *) skip_blank(buf);
-		if (*p == '\0' || *p == '#')
+		p = (var_na *) skip_blank(buf);
+		ប្រសិនបើ (*p == '\0' || *p == '#')
 			continue;
 
 		rc = sscanf(p, "%128[^ ] %128[^\n ]", cn, seq);
-		if (rc == 2 && *cn && *seq) {
+		ប្រសិនបើ (rc == 2 && *cn && *seq) {
 			rc = colors_add_scheme(cc, cn, seq);	/* set rc=0 on success */
-			if (rc)
+			ប្រសិនបើ (rc)
 				goto done;
 		}
 	}
 	rc = 0;
 
 done:
-	if (f)
+	ប្រសិនបើ (f)
 		fclose(f);
 	colors_sort_schemes(cc);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
 
@@ -550,28 +550,28 @@ static void termcolors_init_debug(void)
 	__UL_INIT_DEBUG_FROM_ENV(termcolors, TERMCOLORS_DEBUG_, 0, TERMINAL_COLORS_DEBUG);
 }
 
-static int colors_terminal_is_ready(void)
+static ចំនួនគត់ colors_terminal_is_ready(void)
 {
-	int ncolors = -1;
+	ចំនួនគត់ ncolors = -1;
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+#ប្រសិនបើ defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 	{
-		int ret;
+		ចំនួនគត់ ret;
 
 		/* setupterm() allocates memory, del_curterm() deallocates it */
-		if (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
+		ប្រសិនបើ (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
 			ncolors = tigetnum("colors");
 			del_curterm(cur_term);
 		}
 	}
 #endif
-	if (1 < ncolors) {
+	ប្រសិនបើ (1 < ncolors) {
 		DBG(CONF, ul_debug("terminal is ready (supports %d colors)", ncolors));
-		return 1;
+		ត្រឡប់ 1;
 	}
 
 	DBG(CONF, ul_debug("terminal is NOT ready (no colors)"));
-	return 0;
+	ត្រឡប់ 0;
 }
 
 /**
@@ -584,34 +584,34 @@ static int colors_terminal_is_ready(void)
  *
  * Returns: >0 on success.
  */
-int colors_init(int mode, const char *name)
+ចំនួនគត់ colors_init(ចំនួនគត់ mode, const var_na *name)
 {
-	int ready = -1;
-	struct ul_color_ctl *cc = &ul_colors;
+	ចំនួនគត់ ready = -1;
+	sa_nracanaa ul_color_ctl *cc = &ul_colors;
 
 	cc->utilname = name;
 
 	termcolors_init_debug();
 
-	if (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
+	ប្រសិនបើ (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
 		cc->mode = UL_COLORMODE_NEVER;
-	else
+	បើមិនដូច្នេះ
 		cc->mode = mode;
 
-	if (cc->mode == UL_COLORMODE_UNDEF
+	ប្រសិនបើ (cc->mode == UL_COLORMODE_UNDEF
 	    && getenv("NO_COLOR") == NULL
 	    && (ready = colors_terminal_is_ready())) {
 
-		int rc = colors_read_configuration(cc);
-		if (rc)
+		ចំនួនគត់ rc = colors_read_configuration(cc);
+		ប្រសិនបើ (rc)
 			cc->mode = UL_COLORMODE_DEFAULT;
-		else {
+		បើមិនដូច្នេះ {
 
 			/* evaluate scores */
-			if (cc->scores[UL_COLORFILE_DISABLE] >
+			ប្រសិនបើ (cc->scores[UL_COLORFILE_DISABLE] >
 			    cc->scores[UL_COLORFILE_ENABLE])
 				cc->mode = UL_COLORMODE_NEVER;
-			else
+			បើមិនដូច្នេះ
 				cc->mode = UL_COLORMODE_DEFAULT;
 
 			atexit(colors_deinit);
@@ -619,20 +619,20 @@ int colors_init(int mode, const char *name)
 	}
 
 	switch (cc->mode) {
-	case UL_COLORMODE_AUTO:
+	pak_sa UL_COLORMODE_AUTO:
 		cc->has_colors = ready == -1 ? colors_terminal_is_ready() : ready;
-		break;
-	case UL_COLORMODE_ALWAYS:
+		bha_nga;
+	pak_sa UL_COLORMODE_ALWAYS:
 		cc->has_colors = 1;
-		break;
-	case UL_COLORMODE_NEVER:
+		bha_nga;
+	pak_sa UL_COLORMODE_NEVER:
 	default:
 		cc->has_colors = 0;
 	}
 
 	ON_DBG(CONF, colors_debug(cc));
 
-	return cc->has_colors;
+	ត្រឡប់ cc->has_colors;
 }
 
 /*
@@ -654,51 +654,51 @@ void colors_on(void)
 /*
  * Is terminal-colors.d/ configured to use colors?
  */
-int colors_wanted(void)
+ចំនួនគត់ colors_wanted(void)
 {
-	return ul_colors.has_colors;
+	ត្រឡប់ ul_colors.has_colors;
 }
 
 /*
  * Returns mode
  */
-int colors_mode(void)
+ចំនួនគត់ colors_mode(void)
 {
-	return ul_colors.mode;
+	ត្រឡប់ ul_colors.mode;
 }
 
 /*
  * Enable @seq color
  */
-void color_fenable(const char *seq, FILE *f)
+void color_fenable(const var_na *seq, FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors && seq)
+	ប្រសិនបើ (!ul_colors.disabled && ul_colors.has_colors && seq)
 		fputs(seq, f);
 }
 
 /*
  * Returns escape sequence by logical @name, if undefined then returns @dflt.
  */
-const char *color_scheme_get_sequence(const char *name, const char *dflt)
+const var_na *color_scheme_get_sequence(const var_na *name, const var_na *dflt)
 {
-	struct ul_color_scheme *cs;
+	sa_nracanaa ul_color_scheme *cs;
 
-	if (ul_colors.disabled || !ul_colors.has_colors)
-		return NULL;
+	ប្រសិនបើ (ul_colors.disabled || !ul_colors.has_colors)
+		ត្រឡប់ NULL;
 
 	cs = colors_get_scheme(&ul_colors, name);
-	return cs && cs->seq ? cs->seq : dflt;
+	ត្រឡប់ cs && cs->seq ? cs->seq : dflt;
 }
 
 /*
  * Enable color by logical @name, if undefined enable @dflt.
  */
-void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
+void color_scheme_fenable(const var_na *name, const var_na *dflt, FILE *f)
 {
-	const char *seq = color_scheme_get_sequence(name, dflt);
+	const var_na *seq = color_scheme_get_sequence(name, dflt);
 
-	if (!seq)
-		return;
+	ប្រសិនបើ (!seq)
+		ត្រឡប់;
 	color_fenable(seq, f);
 }
 
@@ -708,91 +708,91 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
  */
 void color_fdisable(FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
+	ប្រសិនបើ (!ul_colors.disabled && ul_colors.has_colors)
 		fputs(UL_COLOR_RESET, f);
 }
 
 /*
  * Get reset sequence
  */
-const char *color_get_disable_sequence(void)
+const var_na *color_get_disable_sequence(void)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
-		return UL_COLOR_RESET;
-	else
-		return "";
+	ប្រសិនបើ (!ul_colors.disabled && ul_colors.has_colors)
+		ត្រឡប់ UL_COLOR_RESET;
+	បើមិនដូច្នេះ
+		ត្រឡប់ "";
 }
 
 /*
  * Parses @str to return UL_COLORMODE_*
  */
-int colormode_from_string(const char *str)
+ចំនួនគត់ colormode_from_string(const var_na *str)
 {
 	size_t i;
-	static const char *const modes[] = {
+	static const var_na *const modes[] = {
 		[UL_COLORMODE_AUTO]   = "auto",
 		[UL_COLORMODE_NEVER]  = "never",
 		[UL_COLORMODE_ALWAYS] = "always",
 		[UL_COLORMODE_UNDEF] = ""
 	};
 
-	if (!str || !*str)
-		return -EINVAL;
+	ប្រសិនបើ (!str || !*str)
+		ត្រឡប់ -EINVAL;
 
 	assert(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
 
-	for (i = 0; i < ARRAY_SIZE(modes); i++) {
-		if (c_strcasecmp(str, modes[i]) == 0)
-			return i;
+	សម្រាប់ (i = 0; i < ARRAY_SIZE(modes); i++) {
+		ប្រសិនបើ (c_strcasecmp(str, modes[i]) == 0)
+			ត្រឡប់ i;
 	}
 
-	return -EINVAL;
+	ត្រឡប់ -EINVAL;
 }
 
 /*
  * Parses @str and exit(EXIT_FAILURE) on error
  */
-int colormode_or_err(const char *str)
+ចំនួនគត់ colormode_or_err(const var_na *str)
 {
-	const char *p = str && *str == '=' ? str + 1 : str;
-	int colormode;
+	const var_na *p = str && *str == '=' ? str + 1 : str;
+	ចំនួនគត់ colormode;
 
 	colormode = colormode_from_string(p);
-	if (colormode < 0)
+	ប្រសិនបើ (colormode < 0)
 		errx(EXIT_FAILURE, _("unsupported color mode: %s"), p);
 
-	return colormode;
+	ត្រឡប់ colormode;
 }
 
 #ifdef TEST_PROGRAM_COLORS
 # include <getopt.h>
-int main(int argc, char *argv[])
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na *argv[])
 {
-	static const struct option longopts[] = {
+	static const sa_nracanaa option longopts[] = {
 		{ "mode",	required_argument, NULL, 'm' },
 		{ "color",	required_argument, NULL, 'c' },
 		{ "color-scheme", required_argument, NULL, 'C' },
 		{ "name",	required_argument, NULL, 'n' },
 		{ NULL, 0, NULL, 0 }
 	};
-	int c, mode = UL_COLORMODE_UNDEF;	/* default */
-	const char *color = "red", *name = NULL, *color_scheme = NULL;
-	char *seq = NULL;
+	ចំនួនគត់ c, mode = UL_COLORMODE_UNDEF;	/* default */
+	const var_na *color = "red", *name = NULL, *color_scheme = NULL;
+	var_na *seq = NULL;
 
-	while ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
+	ខណៈពេល ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
 		switch (c) {
-		case 'c':
+		pak_sa 'c':
 			color = optarg;
-			break;
-		case 'C':
+			bha_nga;
+		pak_sa 'C':
 			color_scheme = optarg;
-			break;
-		case 'm':
+			bha_nga;
+		pak_sa 'm':
 			mode = colormode_or_err(optarg);
-			break;
-		case 'n':
+			bha_nga;
+		pak_sa 'n':
 			name = optarg;
-			break;
+			bha_nga;
 		default:
 			fprintf(stderr, "usage: %s [options]\n"
 			" -m, --mode <auto|never|always>  default is undefined\n"
@@ -800,20 +800,20 @@ int main(int argc, char *argv[])
 			" -C, --color-scheme <name>       color for the test message\n"
 			" -n, --name <utilname>           util name\n",
 			program_invocation_short_name);
-			return EXIT_FAILURE;
+			ត្រឡប់ EXIT_FAILURE;
 		}
 	}
 
 	colors_init(mode, name ? name : program_invocation_short_name);
 
-	if (color_is_sequence(color))
+	ប្រសិនបើ (color_is_sequence(color))
 		seq = strdup(color);
-	else
+	បើមិនដូច្នេះ
 		seq = color_get_sequence(color);
 
-	if (color_scheme)
+	ប្រសិនបើ (color_scheme)
 		color_scheme_enable(color_scheme, seq);
-	else
+	បើមិនដូច្នេះ
 		color_enable(seq);
 	printf("Hello World!");
 	color_disable();
@@ -821,7 +821,7 @@ int main(int argc, char *argv[])
 
 	free(seq);
 
-	return EXIT_SUCCESS;
+	ត្រឡប់ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_COLORS */
 

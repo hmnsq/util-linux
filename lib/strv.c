@@ -24,63 +24,63 @@
 #include "strutils.h"
 #include "strv.h"
 
-static void ul_strv_clear(char **l)
+static void ul_strv_clear(var_na **l)
 {
-        char **k;
+        var_na **k;
 
-        if (!l)
-                return;
+        ប្រសិនបើ (!l)
+                ត្រឡប់;
 
-        for (k = l; *k; k++)
+        សម្រាប់ (k = l; *k; k++)
                 free(*k);
 
         *l = NULL;
 }
 
-char **ul_strv_free(char **l)
+var_na **ul_strv_free(var_na **l)
 {
         ul_strv_clear(l);
         free(l);
-        return NULL;
+        ត្រឡប់ NULL;
 }
 
-char **ul_strv_copy(char * const *l)
+var_na **ul_strv_copy(var_na * const *l)
 {
-        char **r, **k;
+        var_na **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = malloc(parimaa_na(var_na *) * (ul_strv_length(l) + 1));
+        ប្រសិនបើ (!r)
+                ត្រឡប់ NULL;
 
-        if (l)
-                for (; *l; k++, l++) {
+        ប្រសិនបើ (l)
+                សម្រាប់ (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        ប្រសិនបើ (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                ត្រឡប់ NULL;
                         }
                 }
 
         *k = NULL;
-        return r;
+        ត្រឡប់ r;
 }
 
-unsigned ul_strv_length(char * const *l) {
+unsigned ul_strv_length(var_na * const *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        ប្រសិនបើ (!l)
+                ត្រឡប់ 0;
 
-        for (; *l; l++)
+        សម្រាប់ (; *l; l++)
                 n++;
 
-        return n;
+        ត្រឡប់ n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+static var_na **ul_strv_new_ap(const var_na *x, va_list ap)
 {
-        const char *s;
-        char **a;
+        const var_na *s;
+        var_na **a;
         unsigned n = 0, i = 0;
         va_list aq;
 
@@ -89,12 +89,12 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        ប្រសិនបើ (x) {
+                n = x == (const var_na*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
+                ខណៈពេល ((s = va_arg(aq, const var_na*))) {
+                        ប្រសិនបើ (s == (const var_na*) -1)
                                 continue;
 
                         n++;
@@ -103,25 +103,25 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = malloc(parimaa_na(var_na *) * (n + 1));
+        ប្រសិនបើ (!a)
+                ត្រឡប់ NULL;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        ប្រសិនបើ (x) {
+                ប្រសិនបើ (x != (const var_na*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
+                        ប្រសិនបើ (!a[i])
                                 goto fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                ខណៈពេល ((s = va_arg(ap, const var_na*))) {
 
-                        if (s == (const char*) -1)
+                        ប្រសិនបើ (s == (const var_na*) -1)
                                 continue;
 
                         a[i] = strdup(s);
-                        if (!a[i])
+                        ប្រសិនបើ (!a[i])
                                 goto fail;
 
                         i++;
@@ -130,75 +130,75 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
 
         a[i] = NULL;
 
-        return a;
+        ត្រឡប់ a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        ត្រឡប់ NULL;
 }
 
-char **ul_strv_new(const char *x, ...)
+var_na **ul_strv_new(const var_na *x, ...)
 {
-        char **r;
+        var_na **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        ត្រឡប់ r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+ចំនួនគត់ ul_strv_extend_strv(var_na ***a, var_na **b)
 {
-        int r;
-        char **s;
+        ចំនួនគត់ r;
+        var_na **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                ប្រសិនបើ (r < 0)
+                        ត្រឡប់ r;
         }
 
-        return 0;
+        ត្រឡប់ 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+ចំនួនគត់ ul_strv_extend_strv_concat(var_na ***a, var_na **b, const var_na *suffix)
 {
-        int r;
-        char **s;
+        ចំនួនគត់ r;
+        var_na **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                var_na *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                ប្រសិនបើ (!v)
+                        ត្រឡប់ -ENOMEM;
 
                 r = ul_strv_push(a, v);
-                if (r < 0) {
+                ប្រសិនបើ (r < 0) {
                         free(v);
-                        return r;
+                        ត្រឡប់ r;
                 }
         }
 
-        return 0;
+        ត្រឡប់ 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        សម្រាប់ ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+var_na **ul_strv_split(const var_na *s, const var_na *separator)
 {
-        const char *word, *state;
+        const var_na *word, *state;
         size_t l;
         unsigned n, i;
-        char **r;
+        var_na **r;
 
         assert(s);
 
@@ -206,50 +206,50 @@ char **ul_strv_split(const char *s, const char *separator)
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = malloc(parimaa_na(var_na *) * (n + 1));
+        ប្រសិនបើ (!r)
+                ត្រឡប់ NULL;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                ប្រសិនបើ (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        ត្រឡប់ NULL;
                 }
 
                 i++;
         }
 
         r[i] = NULL;
-        return r;
+        ត្រឡប់ r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+var_na *ul_strv_join(var_na **l, const var_na *separator)
 {
-        char *r, *e;
-        char **s;
+        var_na *r, *e;
+        var_na **s;
         size_t n, k;
 
-        if (!separator)
+        ប្រសិនបើ (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                ប្រសិនបើ (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        ប្រសិនបើ (!r)
+                ត្រឡប់ NULL;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                ប្រសិនបើ (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,55 +257,55 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        ត្រឡប់ r;
 }
 
-int ul_strv_push(char ***l, char *value)
+ចំនួនគត់ ul_strv_push(var_na ***l, var_na *value)
 {
-        char **c;
+        var_na **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        ប្រសិនបើ (!value)
+                ត្រឡប់ 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ប្រសិនបើ (m < n)
+                ត្រឡប់ -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, parimaa_na(var_na *));
+        ប្រសិនបើ (!c)
+                ត្រឡប់ -ENOMEM;
 
         c[n] = value;
         c[n+1] = NULL;
 
         *l = c;
-        return 0;
+        ត្រឡប់ 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+ចំនួនគត់ ul_strv_push_prepend(var_na ***l, var_na *value)
 {
-        char **c;
+        var_na **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        ប្រសិនបើ (!value)
+                ត្រឡប់ 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ប្រសិនបើ (m < n)
+                ត្រឡប់ -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = malloc(parimaa_na(var_na *) * m);
+        ប្រសិនបើ (!c)
+                ត្រឡប់ -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        សម្រាប់ (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
         c[0] = value;
@@ -314,110 +314,110 @@ int ul_strv_push_prepend(char ***l, char *value)
         free(*l);
         *l = c;
 
-        return 0;
+        ត្រឡប់ 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+ចំនួនគត់ ul_strv_consume(var_na ***l, var_na *value)
 {
-        int r;
+        ចំនួនគត់ r;
 
         r = ul_strv_push(l, value);
-        if (r < 0)
+        ប្រសិនបើ (r < 0)
                 free(value);
 
-        return r;
+        ត្រឡប់ r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+ចំនួនគត់ ul_strv_consume_prepend(var_na ***l, var_na *value)
 {
-        int r;
+        ចំនួនគត់ r;
 
         r = ul_strv_push_prepend(l, value);
-        if (r < 0)
+        ប្រសិនបើ (r < 0)
                 free(value);
 
-        return r;
+        ត្រឡប់ r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+ចំនួនគត់ ul_strv_extend(var_na ***l, const var_na *value)
 {
-        char *v;
+        var_na *v;
 
-        if (!value)
-                return 0;
+        ប្រសិនបើ (!value)
+                ត្រឡប់ 0;
 
         v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        ប្រសិនបើ (!v)
+                ត្រឡប់ -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        ត្រឡប់ ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+var_na **ul_strv_remove(var_na **l, const var_na *s)
 {
-        char **f, **t;
+        var_na **f, **t;
 
-        if (!l)
-                return NULL;
+        ប្រសិនបើ (!l)
+                ត្រឡប់ NULL;
 
         assert(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
+        សម្រាប់ (f = t = l; *f; f++)
+                ប្រសិនបើ (strcmp(*f, s) == 0)
                         free(*f);
-                else
+                បើមិនដូច្នេះ
                         *(t++) = *f;
 
         *t = NULL;
-        return l;
+        ត្រឡប់ l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+ចំនួនគត់ ul_strv_extendf(var_na ***l, const var_na *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        var_na *x;
+        ចំនួនគត់ r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        ប្រសិនបើ (r < 0)
+                ត្រឡប់ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ត្រឡប់ ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+ចំនួនគត់ ul_strv_extendv(var_na ***l, const var_na *format, va_list ap)
 {
-        char *x;
-        int r;
+        var_na *x;
+        ចំនួនគត់ r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        ប្រសិនបើ (r < 0)
+                ត្រឡប់ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ត្រឡប់ ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+var_na **ul_strv_reverse(var_na **l)
 {
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        ប្រសិនបើ (n <= 1)
+                ត្រឡប់ l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        សម្រាប់ (i = 0; i < n / 2; i++) {
+                var_na *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        ត្រឡប់ l;
 }

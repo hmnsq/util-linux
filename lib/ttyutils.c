@@ -18,7 +18,7 @@
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  ប្រសិនបើ defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -33,7 +33,7 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#បើមិនដូច្នេះ
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,163 +42,163 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+static ចំនួនគត់ get_env_int(const var_na *name)
 {
-	const char *cp = getenv(name);
+	const var_na *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	ប្រសិនបើ (cp) {
+		var_na *end = NULL;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		ប្រសិនបើ (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			ត្រឡប់ x;
 	}
 
-	return -1;
+	ត្រឡប់ -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+ចំនួនគត់ get_terminal_dimension(ចំនួនគត់ *cols, ចំនួនគត់ *lines)
 {
-	int c = 0, l = 0;
+	ចំនួនគត់ c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#ប្រសិនបើ defined(TIOCGWINSZ)
+	sa_nracanaa winsize	w_win;
+	ប្រសិនបើ (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
 #elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+	sa_nracanaa ttysize	t_win;
+	ប្រសិនបើ (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
 		l = t_win.ts_lines;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	ប្រសិនបើ (cols) {
+		ប្រសិនបើ (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	ប្រសិនបើ (lines) {
+		ប្រសិនបើ (l <= 0)
 			l = get_env_int("LINES");
 		*lines = l;
 	}
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int get_terminal_width(int default_width)
+ចំនួនគត់ get_terminal_width(ចំនួនគត់ default_width)
 {
-	int width = 0;
+	ចំនួនគត់ width = 0;
 
 	get_terminal_dimension(&width, NULL);
 
-	return width > 0 ? width : default_width;
+	ត្រឡប់ width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+ចំនួនគត់ get_terminal_stdfd(void)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	ប្រសិនបើ (isatty(STDIN_FILENO))
+		ត្រឡប់ STDIN_FILENO;
+	ប្រសិនបើ (isatty(STDOUT_FILENO))
+		ត្រឡប់ STDOUT_FILENO;
+	ប្រសិនបើ (isatty(STDERR_FILENO))
+		ត្រឡប់ STDERR_FILENO;
 
-	return -EINVAL;
+	ត្រឡប់ -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+ចំនួនគត់ get_terminal_name(const var_na **path,
+		      const var_na **name,
+		      const var_na **number)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	const var_na *tty;
+	const var_na *p;
+	ចំនួនគត់ fd;
 
 
-	if (name)
+	ប្រសិនបើ (name)
 		*name = NULL;
-	if (path)
+	ប្រសិនបើ (path)
 		*path = NULL;
-	if (number)
+	ប្រសិនបើ (number)
 		*number = NULL;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	ប្រសិនបើ (!tty)
+		ត្រឡប់ -1;
 
-	if (path)
+	ប្រសិនបើ (path)
 		*path = tty;
-	if (name || number)
+	ប្រសិនបើ (name || number)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	ប្រសិនបើ (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
+	ប្រសិនបើ (number) {
+		សម្រាប់ (p = tty; p && *p; p++) {
+			ប្រសិនបើ (isdigit(*p)) {
 				*number = p;
-				break;
+				bha_nga;
 			}
 		}
 	}
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int get_terminal_type(const char **type)
+ចំនួនគត់ get_terminal_type(const var_na **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	ប្រសិនបើ (*type)
+		ត្រឡប់ -EINVAL;
+	ត្រឡប់ 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+var_na *get_terminal_default_type(const var_na *ttyname, ចំនួនគត់ is_serial)
 {
-	if (ttyname) {
+	ប្រសិនបើ (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		sa_nracanaa ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		ប្រសិនបើ (ent && ent->ty_type)
+			ត្រឡប់ strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#ប្រសិនបើ defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		ប្រសិនបើ (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			ត្រឡប់ strdup(DEFAULT_TTYS0);
+		បើមិនដូច្នេះ ប្រសិនបើ (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			ត្រឡប់ strdup(DEFAULT_TTY32);
+		បើមិនដូច្នេះ ប្រសិនបើ (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			ត្រឡប់ strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	ត្រឡប់ strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+ចំនួនគត់ main(void)
 {
-	const char *path, *name, *num;
-	int c, l;
+	const var_na *path, *name, *num;
+	ចំនួនគត់ c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	ប្រសិនបើ (get_terminal_name(&path, &name, &num) == 0) {
+		var_na *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
@@ -215,6 +215,6 @@ int main(void)
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	ត្រឡប់ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */

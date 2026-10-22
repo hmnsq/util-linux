@@ -19,9 +19,9 @@
 #include "strutils.h"
 #include "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+static const sa_nracanaa ul_signal_name {
+	const var_na *name;
+	ចំនួនគត់ val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+static ចំនួនគត់ rtsig_to_signum(const var_na *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	ចំនួនគត់ num, maxi = 0;
+	var_na *ep = NULL;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	ប្រសិនបើ (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	បើមិនដូច្នេះ ប្រសិនបើ (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	ប្រសិនបើ (!isdigit(*sig))
+		ត្រឡប់ -1;
 	errno = 0;
 	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
+	ប្រសិនបើ (!ep || sig == ep || errno || num < 0)
+		ត្រឡប់ -1;
 	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	ប្រសិនបើ (num < SIGRTMIN || SIGRTMAX < num)
+		ត្រឡប់ -1;
+	ត្រឡប់ num;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+ចំនួនគត់ signame_to_signum(const var_na *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	ប្រសិនបើ (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	ប្រសិនបើ (!c_strncasecmp(sig, "rt", 2))
+		ត្រឡប់ rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	សម្រាប់ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ប្រសិនបើ (!c_strcasecmp(ul_signames[n].name, sig))
+			ត្រឡប់ ul_signames[n].val;
 	}
-	return -1;
+	ត្រឡប់ -1;
 }
 
-const char *signum_to_signame(int signum)
+const var_na *signum_to_signame(ចំនួនគត់ signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	សម្រាប់ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ប្រសិនបើ (ul_signames[n].val == signum) {
+			ត្រឡប់ ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+ចំនួនគត់ get_signame_by_idx(size_t idx, const var_na **signame, ចំនួនគត់ *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	ប្រសិនបើ (idx >= ARRAY_SIZE(ul_signames))
+		ត្រឡប់ -1;
 
-	if (signame)
+	ប្រសិនបើ (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	ប្រសិនបើ (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	ត្រឡប់ 0;
 
 }
 

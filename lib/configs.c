@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#ប្រសិនបើ defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 #include <dirent.h>
 #endif
 
@@ -19,17 +19,17 @@
 #include "list.h"
 #include "fileutils.h"
 
-struct file_element {
-	struct list_head file_list;
-	char *filename;
+sa_nracanaa file_element {
+	sa_nracanaa list_head file_list;
+	var_na *filename;
 };
 
 static __attribute__ ((__format__ (__printf__, 2, 0)))
-	char *config_mk_path(int types, const char *fmt, ...)
+	var_na *config_mk_path(ចំនួនគត់ types, const var_na *fmt, ...)
 {
 	va_list ap;
-	char *path = NULL;
-	int rc;
+	var_na *path = NULL;
+	ចំនួនគត់ rc;
 
 	errno = 0;
 
@@ -37,19 +37,19 @@ static __attribute__ ((__format__ (__printf__, 2, 0)))
 	rc = vasprintf(&path, fmt, ap);
 	va_end(ap);
 
-	if (rc > 0 && types) {
-		struct stat st;
+	ប្រសិនបើ (rc > 0 && types) {
+		sa_nracanaa stat st;
 
-		if (stat(path, &st) != 0 ||
+		ប្រសិនបើ (stat(path, &st) != 0 ||
 		    !((st.st_mode & S_IFMT) & types))
 			goto fail;
 
 	}
 
-	return path;
+	ត្រឡប់ path;
 fail:
 	free(path);
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
 /* Checking for main configuration file
@@ -57,222 +57,222 @@ fail:
  * Returning absolute path or NULL if not found The return value has to be
  * freed by the caller.
  */
-static char *main_configs(const char *root,
-			  const char *project,
-			  const char *confname,
-			  const char *suffix)
+static var_na *main_configs(const var_na *root,
+			  const var_na *project,
+			  const var_na *confname,
+			  const var_na *suffix)
 {
-	char *path = NULL;
+	var_na *path = NULL;
 
-	if (suffix)
+	ប្រសិនបើ (suffix)
 		path = config_mk_path(S_IFREG, "%s/%s/%s.%s",
 				root, project, confname, suffix);
-	if (!path)
+	ប្រសិនបើ (!path)
 		path = config_mk_path(S_IFREG, "%s/%s/%s",
 				root, project, confname);
-	return path;
+	ត្រឡប់ path;
 }
 
-static int configs_refer_filename(struct list_head *list, char *filename, int head)
+static ចំនួនគត់ configs_refer_filename(sa_nracanaa list_head *list, var_na *filename, ចំនួនគត់ head)
 {
-	struct file_element *e;
+	sa_nracanaa file_element *e;
 
-	e = calloc(1, sizeof(*e));
-	if (e == NULL)
-		return -ENOMEM;
+	e = calloc(1, parimaa_na(*e));
+	ប្រសិនបើ (e == NULL)
+		ត្រឡប់ -ENOMEM;
 
 	INIT_LIST_HEAD(&e->file_list);
 	e->filename = filename;
-	if (head)
+	ប្រសិនបើ (head)
 		list_add(&e->file_list, list);
-	else
+	បើមិនដូច្នេះ
 		list_add_tail(&e->file_list, list);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#ប្រសិនបើ defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 
-static int filter(const struct dirent *d)
+static ចំនួនគត់ filter(const sa_nracanaa dirent *d)
 {
 #ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_UNKNOWN && d->d_type != DT_REG &&
+	ប្រសិនបើ (d->d_type != DT_UNKNOWN && d->d_type != DT_REG &&
 	    d->d_type != DT_LNK)
-		return 0;
+		ត្រឡប់ 0;
 #endif
-	if (is_dotdir_dirent(d))
-		return 0;
+	ប្រសិនបើ (is_dotdir_dirent(d))
+		ត្រឡប់ 0;
 
-	return 1;
+	ត្រឡប់ 1;
 }
 
-static int read_dir(struct list_head *file_list,
-		    const char *project,
-		    const char *root,
-		    const char *confname,
-		    const char *suffix)
+static ចំនួនគត់ read_dir(sa_nracanaa list_head *file_list,
+		    const var_na *project,
+		    const var_na *root,
+		    const var_na *confname,
+		    const var_na *suffix)
 {
-	char *dirname = NULL;
-	char *filename = NULL;
-	int dd = -1, nfiles = 0, i;
-	int ret = 0;
-	struct dirent **namelist = NULL;
+	var_na *dirname = NULL;
+	var_na *filename = NULL;
+	ចំនួនគត់ dd = -1, nfiles = 0, i;
+	ចំនួនគត់ ret = 0;
+	sa_nracanaa dirent **namelist = NULL;
 
-	if (suffix)
+	ប្រសិនបើ (suffix)
 		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.%s.d",
 				root, project, confname, suffix);
-	if (!dirname)
+	ប្រសិនបើ (!dirname)
 		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.d",
 				root, project, confname);
-	if (!dirname)
-		return errno == ENOMEM ? -ENOMEM : 0;
+	ប្រសិនបើ (!dirname)
+		ត្រឡប់ errno == ENOMEM ? -ENOMEM : 0;
 
 	dd = open(dirname, O_RDONLY|O_CLOEXEC|O_DIRECTORY);
-	if (dd < 0)
+	ប្រសិនបើ (dd < 0)
 		goto finish;
 
 	nfiles = scandirat(dd, ".", &namelist, filter, alphasort);
-	if (nfiles <= 0)
+	ប្រសិនបើ (nfiles <= 0)
 		goto finish;
 
-	for (i = 0; i < nfiles; i++) {
-		struct dirent *d = namelist[i];
+	សម្រាប់ (i = 0; i < nfiles; i++) {
+		sa_nracanaa dirent *d = namelist[i];
 
-		if (suffix) {
-			const char *p = ul_endswith(d->d_name, suffix);
+		ប្រសិនបើ (suffix) {
+			const var_na *p = ul_endswith(d->d_name, suffix);
 
-			if (!p || p == d->d_name || *(p - 1) != '.')
+			ប្រសិនបើ (!p || p == d->d_name || *(p - 1) != '.')
 				continue;
 		}
 
-		if (asprintf(&filename, "%s/%s", dirname, d->d_name) < 0) {
+		ប្រសិនបើ (asprintf(&filename, "%s/%s", dirname, d->d_name) < 0) {
 			ret = -ENOMEM;
-			break;
+			bha_nga;
 		}
 
 		ret = configs_refer_filename(file_list, filename, 0);
-		if (ret < 0) {
+		ប្រសិនបើ (ret < 0) {
 			free(filename);
-			break;
+			bha_nga;
 		}
 	}
 
 finish:
-	for (i = 0; i < nfiles; i++)
+	សម្រាប់ (i = 0; i < nfiles; i++)
 		free(namelist[i]);
 	free(namelist);
 	free(dirname);
-	if (dd >= 0)
+	ប្រសិនបើ (dd >= 0)
 		close(dd);
-	return ret;
+	ត្រឡប់ ret;
 }
 
 #endif /* HAVE_SCANDIRAT */
 
-static int config_cmp(struct list_head *a, struct list_head *b,
+static ចំនួនគត់ config_cmp(sa_nracanaa list_head *a, sa_nracanaa list_head *b,
 		      void *data __attribute__((__unused__)))
 {
-	struct file_element *ea = list_entry(a, struct file_element, file_list);
-	struct file_element *eb = list_entry(b, struct file_element, file_list);
-	char *na = ul_basename(ea->filename);
-	char *nb = ul_basename(eb->filename);
+	sa_nracanaa file_element *ea = list_entry(a, sa_nracanaa file_element, file_list);
+	sa_nracanaa file_element *eb = list_entry(b, sa_nracanaa file_element, file_list);
+	var_na *na = ul_basename(ea->filename);
+	var_na *nb = ul_basename(eb->filename);
 
-	return strcoll(na, nb);
+	ត្រឡប់ strcoll(na, nb);
 }
 
-static void free_list_entry(struct file_element *element)
+static void free_list_entry(sa_nracanaa file_element *element)
 {
 	free(element->filename);
 	free(element);
 }
 
-static int config_merge_list(struct list_head *main_list,
-			      struct list_head *new_list)
+static ចំនួនគត់ config_merge_list(sa_nracanaa list_head *main_list,
+			      sa_nracanaa list_head *new_list)
 {
-	struct list_head *n, *m, *next;
+	sa_nracanaa list_head *n, *m, *next;
 
 	list_for_each_safe(n, next, new_list) {
-		struct file_element *ne = list_entry(n, struct file_element, file_list);
-		char *nn = ul_basename(ne->filename);
-		int duplicate = 0;
+		sa_nracanaa file_element *ne = list_entry(n, sa_nracanaa file_element, file_list);
+		var_na *nn = ul_basename(ne->filename);
+		ចំនួនគត់ duplicate = 0;
 
 		list_for_each(m, main_list) {
-			struct file_element *me = list_entry(m, struct file_element, file_list);
-			char *mn = ul_basename(me->filename);
+			sa_nracanaa file_element *me = list_entry(m, sa_nracanaa file_element, file_list);
+			var_na *mn = ul_basename(me->filename);
 
-			if (strcoll(mn, nn) == 0) {
+			ប្រសិនបើ (strcoll(mn, nn) == 0) {
 				duplicate = 1;
-				break;
+				bha_nga;
 			}
 		}
 
-		if (!duplicate) {
+		ប្រសិនបើ (!duplicate) {
 			list_del_init(n);
 			list_add_tail(n, main_list);
 		}
 	}
 
 	list_sort(main_list, config_cmp, NULL);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int ul_configs_file_list(struct list_head *file_list,
-			 const char *project,
-			 const char *etcdir,
-			 const char *rundir,
-			 const char *usrdir,
-			 const char *confname,
-			 const char *suffix)
+ចំនួនគត់ ul_configs_file_list(sa_nracanaa list_head *file_list,
+			 const var_na *project,
+			 const var_na *etcdir,
+			 const var_na *rundir,
+			 const var_na *usrdir,
+			 const var_na *confname,
+			 const var_na *suffix)
 {
-	char *main_file = NULL;
-	struct list_head etc_list;
-	struct list_head run_list;
-	struct list_head usr_list;
-	int ret;
+	var_na *main_file = NULL;
+	sa_nracanaa list_head etc_list;
+	sa_nracanaa list_head run_list;
+	sa_nracanaa list_head usr_list;
+	ចំនួនគត់ ret;
 
 	INIT_LIST_HEAD(file_list);
 
-	if (!confname)
-		return -ENOTEMPTY;
+	ប្រសិនបើ (!confname)
+		ត្រឡប់ -ENOTEMPTY;
 
 	/* Default is /etc */
-	if (!etcdir)
+	ប្រសិនបើ (!etcdir)
 		etcdir = _PATH_SYSCONFDIR;
-	if (!rundir)
+	ប្រសិនបើ (!rundir)
 		rundir = "";
-	if (!usrdir)
+	ប្រសិនបើ (!usrdir)
 		usrdir = "";
 
-	if (!project)
+	ប្រសិនបើ (!project)
 		project = "";
 
 	/* Find "main" config file (but don't add to list yet) */
 	/* Search order: /etc /run /usr */
 	main_file = main_configs(etcdir, project, confname, suffix);
-	if (main_file == NULL)
+	ប្រសិនបើ (main_file == NULL)
 		main_file = main_configs(rundir, project, confname, suffix);
-	if (main_file == NULL)
+	ប្រសិនបើ (main_file == NULL)
 		main_file = main_configs(usrdir, project, confname, suffix);
 
 	INIT_LIST_HEAD(&etc_list);
 	INIT_LIST_HEAD(&run_list);
 	INIT_LIST_HEAD(&usr_list);
 
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#ប្រសិនបើ defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 	ret = read_dir(&etc_list, project, etcdir, confname, suffix);
-	if (ret == -ENOMEM)
+	ប្រសិនបើ (ret == -ENOMEM)
 		goto finish;
 
 	ret = read_dir(&run_list, project, rundir, confname, suffix);
-	if (ret == -ENOMEM)
+	ប្រសិនបើ (ret == -ENOMEM)
 		goto finish;
 
 	ret = read_dir(&usr_list, project, usrdir, confname, suffix);
-	if (ret == -ENOMEM)
+	ប្រសិនបើ (ret == -ENOMEM)
 		goto finish;
 #endif
 
 	/* Merge drop-in directories in priority order (high to low) */
-	if ((ret = config_merge_list(file_list, &etc_list)) < 0 ||
+	ប្រសិនបើ ((ret = config_merge_list(file_list, &etc_list)) < 0 ||
 	    (ret = config_merge_list(file_list, &run_list)) < 0 ||
 	    (ret = config_merge_list(file_list, &usr_list)) < 0)
 		goto finish;
@@ -280,9 +280,9 @@ int ul_configs_file_list(struct list_head *file_list,
 	/* Add main config file at the beginning; the list is in parsing
 	 * order, so the main file is parsed first and the drop-ins which
 	 * follow it overwrite its settings. */
-	if (main_file != NULL) {
+	ប្រសិនបើ (main_file != NULL) {
 		ret = configs_refer_filename(file_list, main_file, 1);
-		if (ret < 0) {
+		ប្រសិនបើ (ret < 0) {
 			free(main_file);
 			goto finish;
 		}
@@ -293,48 +293,48 @@ finish:
 	ul_configs_free_list(&run_list);
 	ul_configs_free_list(&usr_list);
 
-	return ret < 0 ? ret : (int) list_count_entries(file_list);
+	ត្រឡប់ ret < 0 ? ret : (ចំនួនគត់) list_count_entries(file_list);
 }
 
-void ul_configs_free_list(struct list_head *file_list)
+void ul_configs_free_list(sa_nracanaa list_head *file_list)
 {
-	list_free(file_list, struct file_element,  file_list, free_list_entry);
+	list_free(file_list, sa_nracanaa file_element,  file_list, free_list_entry);
 }
 
-int ul_configs_next_filename(struct list_head *file_list,
-			     struct list_head **current_entry,
-			     char **name)
+ចំនួនគត់ ul_configs_next_filename(sa_nracanaa list_head *file_list,
+			     sa_nracanaa list_head **current_entry,
+			     var_na **name)
 {
-	struct file_element *element = NULL;
+	sa_nracanaa file_element *element = NULL;
 
-	if (list_empty(file_list) || *current_entry == file_list)
-		return 1;
+	ប្រសិនបើ (list_empty(file_list) || *current_entry == file_list)
+		ត្រឡប់ 1;
 
-	if (*current_entry == NULL)
+	ប្រសិនបើ (*current_entry == NULL)
 		*current_entry = file_list->next;
 
-	element = list_entry(*current_entry, struct file_element, file_list);
+	element = list_entry(*current_entry, sa_nracanaa file_element, file_list);
 	*name = element->filename;
 	*current_entry = (*current_entry)->next;
 
-	return 0;
+	ត្រឡប់ 0;
 }
 
 #ifdef TEST_PROGRAM_CONFIGS
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na *argv[])
 {
-	struct list_head file_list;
-	struct list_head *current = NULL;
-	char *name = NULL;
-	const char *etc_path = NULL;
-	const char *run_path = NULL;
-	const char *usr_path = NULL;
-	const char *project = NULL;
-	const char *config_name = NULL;
-	const char *config_suffix = NULL;
-	static const struct option longopts[] = {
+	sa_nracanaa list_head file_list;
+	sa_nracanaa list_head *current = NULL;
+	var_na *name = NULL;
+	const var_na *etc_path = NULL;
+	const var_na *run_path = NULL;
+	const var_na *usr_path = NULL;
+	const var_na *project = NULL;
+	const var_na *config_name = NULL;
+	const var_na *config_suffix = NULL;
+	static const sa_nracanaa option longopts[] = {
 		{ "etc", required_argument, NULL, 'e' },
 		{ "run", required_argument, NULL, 'r' },
 		{ "usr", required_argument, NULL, 'u' },
@@ -344,29 +344,29 @@ int main(int argc, char *argv[])
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, 0, NULL, 0 }
 	};
-	int ch, count;
+	ចំនួនគត់ ch, count;
 
-	while ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, NULL)) != -1) {
+	ខណៈពេល ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, NULL)) != -1) {
 		switch (ch) {
-		case 'e':
+		pak_sa 'e':
 			etc_path = optarg;
-			break;
-		case 'r':
+			bha_nga;
+		pak_sa 'r':
 			run_path = optarg;
-			break;
-		case 'u':
+			bha_nga;
+		pak_sa 'u':
 			usr_path = optarg;
-			break;
-		case 'p':
+			bha_nga;
+		pak_sa 'p':
 			project = optarg;
-			break;
-		case 'n':
+			bha_nga;
+		pak_sa 'n':
 			config_name = optarg;
-			break;
-		case 's':
+			bha_nga;
+		pak_sa 's':
 			config_suffix = optarg;
-			break;
-		case 'h':
+			bha_nga;
+		pak_sa 'h':
 			printf("usage: %s [options]\n"
 				" -e, --etc <path>      path to /etc directory\n"
 				" -r, --run <path>      path to /run directory\n"
@@ -376,29 +376,29 @@ int main(int argc, char *argv[])
 				" -s, --suffix <suffix> config file suffix\n"
 				" -h, --help            display this help\n",
 				program_invocation_short_name);
-			return EXIT_SUCCESS;
+			ត្រឡប់ EXIT_SUCCESS;
 		default:
-			return EXIT_FAILURE;
+			ត្រឡប់ EXIT_FAILURE;
 		}
 	}
 
-	if (!config_name) {
+	ប្រសិនបើ (!config_name) {
 		fprintf(stderr, "config name is required (use --name)\n");
-		return EXIT_FAILURE;
+		ត្រឡប់ EXIT_FAILURE;
 	}
 
 	count = ul_configs_file_list(&file_list, project, etc_path, run_path, usr_path,
 				     config_name, config_suffix);
-	if (count < 0) {
+	ប្រសិនបើ (count < 0) {
 		fprintf(stderr, "failed to get config file list: %d\n", count);
-		return EXIT_FAILURE;
+		ត្រឡប់ EXIT_FAILURE;
 	}
 
 	printf("Found %d configuration file(s):\n", count);
-	while (ul_configs_next_filename(&file_list, &current, &name) == 0)
+	ខណៈពេល (ul_configs_next_filename(&file_list, &current, &name) == 0)
 		printf("  %s\n", name);
 
 	ul_configs_free_list(&file_list);
-	return EXIT_SUCCESS;
+	ត្រឡប់ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_CONFIGS */

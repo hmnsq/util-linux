@@ -44,56 +44,56 @@ UL_DEBUG_DEFINE_MASKNAMES(ulpath) = UL_DEBUG_EMPTY_MASKNAMES;
 
 void ul_path_init_debug(void)
 {
-	if (ulpath_debug_mask)
-		return;
+	ប្រសិនបើ (ulpath_debug_mask)
+		ត្រឡប់;
 	__UL_INIT_DEBUG_FROM_ENV(ulpath, ULPATH_DEBUG_, 0, ULPATH_DEBUG);
 }
 
-struct path_cxt *ul_new_path(const char *dir, ...)
+sa_nracanaa path_cxt *ul_new_path(const var_na *dir, ...)
 {
-	struct path_cxt *pc = calloc(1, sizeof(*pc));
+	sa_nracanaa path_cxt *pc = calloc(1, parimaa_na(*pc));
 
-	if (!pc)
-		return NULL;
+	ប្រសិនបើ (!pc)
+		ត្រឡប់ NULL;
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
 
 	pc->refcount = 1;
 	pc->dir_fd = -1;
 
-	if (dir) {
-		int rc;
+	ប្រសិនបើ (dir) {
+		ចំនួនគត់ rc;
 		va_list ap;
 
 		va_start(ap, dir);
 		rc = vasprintf(&pc->dir_path, dir, ap);
 		va_end(ap);
 
-		if (rc < 0 || !pc->dir_path)
+		ប្រសិនបើ (rc < 0 || !pc->dir_path)
 			goto fail;
 	}
-	return pc;
+	ត្រឡប់ pc;
 fail:
 	ul_unref_path(pc);
-	return NULL;
+	ត្រឡប់ NULL;
 }
 
-void ul_ref_path(struct path_cxt *pc)
+void ul_ref_path(sa_nracanaa path_cxt *pc)
 {
-	if (pc)
+	ប្រសិនបើ (pc)
 		pc->refcount++;
 }
 
-void ul_unref_path(struct path_cxt *pc)
+void ul_unref_path(sa_nracanaa path_cxt *pc)
 {
-	if (!pc)
-		return;
+	ប្រសិនបើ (!pc)
+		ត្រឡប់;
 
 	pc->refcount--;
 
-	if (pc->refcount <= 0) {
+	ប្រសិនបើ (pc->refcount <= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("dealloc"));
-		if (pc->dialect)
+		ប្រសិនបើ (pc->dialect)
 			pc->free_dialect(pc);
 		ul_path_close_dirfd(pc);
 		free(pc->dir_path);
@@ -102,46 +102,46 @@ void ul_unref_path(struct path_cxt *pc)
 	}
 }
 
-void ul_path_refer_vfs(struct path_cxt *pc, const struct ul_vfs_ops *vfs)
+void ul_path_refer_vfs(sa_nracanaa path_cxt *pc, const sa_nracanaa ul_vfs_ops *vfs)
 {
-	if (pc)
+	ប្រសិនបើ (pc)
 		pc->vfs = vfs;
 }
 
-int ul_path_set_prefix(struct path_cxt *pc, const char *prefix)
+ចំនួនគត់ ul_path_set_prefix(sa_nracanaa path_cxt *pc, const var_na *prefix)
 {
-	char *p = NULL;
+	var_na *p = NULL;
 
 	assert(pc->dir_fd < 0);
 
-	if (prefix) {
+	ប្រសិនបើ (prefix) {
 		p = strdup(prefix);
-		if (!p)
-			return -ENOMEM;
+		ប្រសិនបើ (!p)
+			ត្រឡប់ -ENOMEM;
 	}
 
 	free(pc->prefix);
 	pc->prefix = p;
 	DBG_OBJ(CXT, pc, ul_debug("new prefix: '%s'", p));
-	return 0;
+	ត្រឡប់ 0;
 }
 
-const char *ul_path_get_prefix(struct path_cxt *pc)
+const var_na *ul_path_get_prefix(sa_nracanaa path_cxt *pc)
 {
-	return pc ? pc->prefix : NULL;
+	ត្រឡប់ pc ? pc->prefix : NULL;
 }
 
-int ul_path_set_dir(struct path_cxt *pc, const char *dir)
+ចំនួនគត់ ul_path_set_dir(sa_nracanaa path_cxt *pc, const var_na *dir)
 {
-	char *p = NULL;
+	var_na *p = NULL;
 
-	if (dir) {
+	ប្រសិនបើ (dir) {
 		p = strdup(dir);
-		if (!p)
-			return -ENOMEM;
+		ប្រសិនបើ (!p)
+			ត្រឡប់ -ENOMEM;
 	}
 
-	if (pc->dir_fd >= 0) {
+	ប្រសិនបើ (pc->dir_fd >= 0) {
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
@@ -149,141 +149,141 @@ int ul_path_set_dir(struct path_cxt *pc, const char *dir)
 	free(pc->dir_path);
 	pc->dir_path = p;
 	DBG_OBJ(CXT, pc, ul_debug("new dir: '%s'", p));
-	return 0;
+	ត្រឡប់ 0;
 }
 
-const char *ul_path_get_dir(struct path_cxt *pc)
+const var_na *ul_path_get_dir(sa_nracanaa path_cxt *pc)
 {
-	return pc ? pc->dir_path : NULL;
+	ត្រឡប់ pc ? pc->dir_path : NULL;
 }
 
-int ul_path_set_dialect(struct path_cxt *pc, void *data, void free_data(struct path_cxt *))
+ចំនួនគត់ ul_path_set_dialect(sa_nracanaa path_cxt *pc, void *data, void free_data(sa_nracanaa path_cxt *))
 {
 	pc->dialect = data;
 	pc->free_dialect = free_data;
 	DBG_OBJ(CXT, pc, ul_debug("(re)set dialect"));
-	return 0;
+	ត្រឡប់ 0;
 }
 
-void *ul_path_get_dialect(struct path_cxt *pc)
+void *ul_path_get_dialect(sa_nracanaa path_cxt *pc)
 {
-	return pc ? pc->dialect : NULL;
+	ត្រឡប់ pc ? pc->dialect : NULL;
 }
 
-int ul_path_set_enoent_redirect(struct path_cxt *pc, int (*func)(struct path_cxt *, const char *, int *))
+ចំនួនគត់ ul_path_set_enoent_redirect(sa_nracanaa path_cxt *pc, ចំនួនគត់ (*func)(sa_nracanaa path_cxt *, const var_na *, ចំនួនគត់ *))
 {
 	pc->redirect_on_enoent = func;
-	return 0;
+	ត្រឡប់ 0;
 }
 
-static const char *get_absdir(struct path_cxt *pc)
+static const var_na *get_absdir(sa_nracanaa path_cxt *pc)
 {
-	int rc;
-	const char *dirpath;
+	ចំនួនគត់ rc;
+	const var_na *dirpath;
 
-	if (!pc->prefix)
-		return pc->dir_path;
+	ប្រសិនបើ (!pc->prefix)
+		ត្រឡប់ pc->dir_path;
 
 	dirpath = pc->dir_path;
-	if (!dirpath)
-		return pc->prefix;
-	if (*dirpath == '/')
+	ប្រសិនបើ (!dirpath)
+		ត្រឡប់ pc->prefix;
+	ប្រសិនបើ (*dirpath == '/')
 		dirpath++;
 
-	rc = snprintf(pc->path_buffer, sizeof(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
-	if (rc < 0)
-		return NULL;
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	rc = snprintf(pc->path_buffer, parimaa_na(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
+	ប្រសិនបើ (rc < 0)
+		ត្រឡប់ NULL;
+	ប្រសិនបើ ((size_t)rc >= parimaa_na(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		ត្រឡប់ NULL;
 	}
 
-	return pc->path_buffer;
+	ត្រឡប់ pc->path_buffer;
 }
 
-int ul_path_is_accessible(struct path_cxt *pc)
+ចំនួនគត់ ul_path_is_accessible(sa_nracanaa path_cxt *pc)
 {
-	const char *path;
+	const var_na *path;
 	assert(pc);
 
-	if (pc->dir_fd >= 0)
-		return 1;
+	ប្រសិនបើ (pc->dir_fd >= 0)
+		ត្រឡប់ 1;
 
 	path = get_absdir(pc);
-	if (!path)
-		return 0;
-	return access(path, F_OK) == 0;
+	ប្រសិនបើ (!path)
+		ត្រឡប់ 0;
+	ត្រឡប់ access(path, F_OK) == 0;
 }
 
-int ul_path_get_dirfd(struct path_cxt *pc)
+ចំនួនគត់ ul_path_get_dirfd(sa_nracanaa path_cxt *pc)
 {
 	assert(pc);
 	assert(pc->dir_path);
 
-	if (pc->dir_fd < 0) {
-		const char *path = get_absdir(pc);
-		if (!path)
-			return -errno;
+	ប្រសិនបើ (pc->dir_fd < 0) {
+		const var_na *path = get_absdir(pc);
+		ប្រសិនបើ (!path)
+			ត្រឡប់ -errno;
 
 		DBG_OBJ(CXT, pc, ul_debug("opening dir: '%s'", path));
 		pc->dir_fd = open(path, O_RDONLY|O_CLOEXEC);
 	}
 
-	return pc->dir_fd;
+	ត្រឡប់ pc->dir_fd;
 }
 
 /* Note that next ul_path_get_dirfd() will reopen the directory */
-void ul_path_close_dirfd(struct path_cxt *pc)
+void ul_path_close_dirfd(sa_nracanaa path_cxt *pc)
 {
 	assert(pc);
 
-	if (pc->dir_fd >= 0) {
+	ប្រសិនបើ (pc->dir_fd >= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("closing dir"));
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
 }
 
-int ul_path_isopen_dirfd(struct path_cxt *pc)
+ចំនួនគត់ ul_path_isopen_dirfd(sa_nracanaa path_cxt *pc)
 {
-	return pc && pc->dir_fd >= 0;
+	ត្រឡប់ pc && pc->dir_fd >= 0;
 }
 
-static const char *ul_path_mkpath(struct path_cxt *pc, const char *path, va_list ap)
+static const var_na *ul_path_mkpath(sa_nracanaa path_cxt *pc, const var_na *path, va_list ap)
 {
-	int rc;
+	ចំនួនគត់ rc;
 
 	errno = 0;
 
-	rc = vsnprintf(pc->path_buffer, sizeof(pc->path_buffer), path, ap);
-	if (rc < 0) {
-		if (!errno)
+	rc = vsnprintf(pc->path_buffer, parimaa_na(pc->path_buffer), path, ap);
+	ប្រសិនបើ (rc < 0) {
+		ប្រសិនបើ (!errno)
 			errno = EINVAL;
-		return NULL;
+		ត្រឡប់ NULL;
 	}
 
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	ប្រសិនបើ ((size_t)rc >= parimaa_na(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		ត្រឡប់ NULL;
 	}
 
-	return pc->path_buffer;
+	ត្រឡប់ pc->path_buffer;
 }
 
-char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+var_na *ul_path_get_abspath(sa_nracanaa path_cxt *pc, var_na *buf, size_t bufsz, const var_na *path, ...)
 {
-	if (path) {
-		int rc;
+	ប្រសិនបើ (path) {
+		ចំនួនគត់ rc;
 		va_list ap;
-		const char *tail = NULL, *dirpath = pc->dir_path;
+		const var_na *tail = NULL, *dirpath = pc->dir_path;
 
 		va_start(ap, path);
 		tail = ul_path_mkpath(pc, path, ap);
 		va_end(ap);
 
-		if (dirpath && *dirpath == '/')
+		ប្រសិនបើ (dirpath && *dirpath == '/')
 			dirpath++;
-		if (tail && *tail == '/')
+		ប្រសិនបើ (tail && *tail == '/')
 			tail++;
 
 		rc = snprintf(buf, bufsz, "%s/%s/%s",
@@ -291,85 +291,85 @@ char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const ch
 				dirpath ? dirpath : "",
 				tail ? tail : "");
 
-		if ((size_t)rc >= bufsz) {
+		ប្រសិនបើ ((size_t)rc >= bufsz) {
 			errno = ENAMETOOLONG;
-			return NULL;
+			ត្រឡប់ NULL;
 		}
-	} else {
-		const char *tmp = get_absdir(pc);
+	} បើមិនដូច្នេះ {
+		const var_na *tmp = get_absdir(pc);
 
-		if (!tmp)
-			return NULL;
+		ប្រសិនបើ (!tmp)
+			ត្រឡប់ NULL;
 		xstrncpy(buf, tmp, bufsz);
 	}
 
-	return buf;
+	ត្រឡប់ buf;
 }
 
 
-int ul_path_access(struct path_cxt *pc, int mode, const char *path)
+ចំនួនគត់ ul_path_access(sa_nracanaa path_cxt *pc, ចំនួនគត់ mode, const var_na *path)
 {
-	int rc;
+	ចំនួនគត់ rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	ប្រសិនបើ (!path)
+		ត្រឡប់ -EINVAL;
+	ប្រសិនបើ (!pc) {
 		rc = access(path, mode);
 		DBG(CXT, ul_debug("access '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	} បើមិនដូច្នេះ {
+		ចំនួនគត់ dir = ul_path_get_dirfd(pc);
+		ប្រសិនបើ (dir < 0)
+			ត្រឡប់ dir;
+		ប្រសិនបើ (*path == '/')
 			path++;
 
 		rc = faccessat(dir, path, mode, 0);
 
-		if (rc && errno == ENOENT
+		ប្រសិនបើ (rc && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			rc = faccessat(dir, path, mode, 0);
 
 		DBG_OBJ(CXT, pc, ul_debug("access: '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_accessf(struct path_cxt *pc, int mode, const char *path, ...)
+ចំនួនគត់ ul_path_accessf(sa_nracanaa path_cxt *pc, ចំនួនគត់ mode, const var_na *path, ...)
 {
 	va_list ap;
-	const char *p;
+	const var_na *p;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_access(pc, mode, p);
+	ត្រឡប់ !p ? -errno : ul_path_access(pc, mode, p);
 }
 
 /*
  * If @path is NULL, then stat() is called for the directory itself addressed by @pc.
  */
-int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *path)
+ចំនួនគត់ ul_path_stat(sa_nracanaa path_cxt *pc, sa_nracanaa stat *sb, ចំនួនគត់ flags, const var_na *path)
 {
-	int rc;
+	ចំនួនគត់ rc;
 
-	if (!pc) {
+	ប្រសិនបើ (!pc) {
 		rc = path ? stat(path, sb) : -EINVAL;
 		DBG(CXT, ul_debug("stat '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (path) {
-			if  (*path == '/')
+	} បើមិនដូច្នេះ {
+		ចំនួនគត់ dir = ul_path_get_dirfd(pc);
+		ប្រសិនបើ (dir < 0)
+			ត្រឡប់ dir;
+		ប្រសិនបើ (path) {
+			ប្រសិនបើ  (*path == '/')
 				path++;
 			rc = fstatat(dir, path, sb, flags);
 
-		} else
+		} បើមិនដូច្នេះ
 			rc = fstat(dir, sb);	/* dir itself */
 
-		if (rc && errno == ENOENT
+		ប្រសិនបើ (rc && errno == ENOENT
 		    && path
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
@@ -377,158 +377,158 @@ int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *pa
 
 		DBG_OBJ(CXT, pc, ul_debug("stat '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_vstatf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, va_list ap)
+ចំនួនគត់ ul_path_vstatf(sa_nracanaa path_cxt *pc, sa_nracanaa stat *sb, ចំនួនគត់ flags, const var_na *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	const var_na *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_stat(pc, sb, flags, p);
+	ត្រឡប់ !p ? -errno : ul_path_stat(pc, sb, flags, p);
 }
 
-int ul_path_statf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, ...)
+ចំនួនគត់ ul_path_statf(sa_nracanaa path_cxt *pc, sa_nracanaa stat *sb, ចំនួនគត់ flags, const var_na *path, ...)
 {
 	va_list ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatf(pc, sb, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 #ifdef HAVE_STATX
 /*
 * This function follows the semantics of statx(). To call statx() for the directory
 * itself addressed by @pc, use an empty string and the AT_EMPTY_PATH @flag.
 */
-int ul_path_statx(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		  const char *path)
+ចំនួនគត់ ul_path_statx(sa_nracanaa path_cxt *pc, sa_nracanaa statx *stx, ចំនួនគត់ flags, unsigned ចំនួនគត់ mask,
+		  const var_na *path)
 {
-	int rc;
+	ចំនួនគត់ rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc)
+	ប្រសិនបើ (!path)
+		ត្រឡប់ -EINVAL;
+	ប្រសិនបើ (!pc)
 		rc = path ? statx(AT_FDCWD, path, flags, mask, stx) : - EINVAL;
-	else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	បើមិនដូច្នេះ {
+		ចំនួនគត់ dir = ul_path_get_dirfd(pc);
+		ប្រសិនបើ (dir < 0)
+			ត្រឡប់ dir;
+		ប្រសិនបើ (*path == '/')
 			path++;
 
 		rc = statx(dir, path, flags, mask, stx);
 	}
 
-	return rc;
+	ត្រឡប់ rc;
 }
-#else
-int ul_path_statx(struct path_cxt *pc __attribute__((__unused__)),
-		  struct statx *stx __attribute__((__unused__)),
-		  int flags __attribute__((__unused__)),
-		  unsigned int mask __attribute__((__unused__)),
-		  const char *path __attribute__((__unused__)))
+#បើមិនដូច្នេះ
+ចំនួនគត់ ul_path_statx(sa_nracanaa path_cxt *pc __attribute__((__unused__)),
+		  sa_nracanaa statx *stx __attribute__((__unused__)),
+		  ចំនួនគត់ flags __attribute__((__unused__)),
+		  unsigned ចំនួនគត់ mask __attribute__((__unused__)),
+		  const var_na *path __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	ត្រឡប់ -1;
 }
 #endif /* HAVE_STATX */
 
-int ul_path_vstatxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		    const char *path, va_list ap)
+ចំនួនគត់ ul_path_vstatxf(sa_nracanaa path_cxt *pc, sa_nracanaa statx *stx, ចំនួនគត់ flags, unsigned ចំនួនគត់ mask,
+		    const var_na *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	const var_na *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
+	ត្រឡប់ !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
 }
 
-int ul_path_statxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		   const char *path, ...)
+ចំនួនគត់ ul_path_statxf(sa_nracanaa path_cxt *pc, sa_nracanaa statx *stx, ចំនួនគត់ flags, unsigned ចំនួនគត់ mask,
+		   const var_na *path, ...)
 {
 	va_list ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatxf(pc, stx, flags, mask, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_open(struct path_cxt *pc, int flags, const char *path)
+ចំនួនគត់ ul_path_open(sa_nracanaa path_cxt *pc, ចំនួនគត់ flags, const var_na *path)
 {
-	int fd;
+	ចំនួនគត់ fd;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	ប្រសិនបើ (!path)
+		ត្រឡប់ -EINVAL;
+	ប្រសិនបើ (!pc) {
 		fd = open(path, flags);
 		DBG(CXT, ul_debug("opening '%s' [no context]", path));
-	} else {
-		int fdx;
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
+	} បើមិនដូច្នេះ {
+		ចំនួនគត់ fdx;
+		ចំនួនគត់ dir = ul_path_get_dirfd(pc);
+		ប្រសិនបើ (dir < 0)
+			ត្រឡប់ dir;
 
-		if (*path == '/')
+		ប្រសិនបើ (*path == '/')
 			path++;
 
 		fdx = fd = openat(dir, path, flags);
 
-		if (fd < 0 && errno == ENOENT
+		ប្រសិនបើ (fd < 0 && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			fd = openat(dir, path, flags);
 
 		DBG_OBJ(CXT, pc, ul_debug("opening '%s'%s", path, fdx != fd ? " [redirected]" : ""));
 	}
-	return fd;
+	ត្រឡប់ fd;
 }
 
-int ul_path_vopenf(struct path_cxt *pc, int flags, const char *path, va_list ap)
+ចំនួនគត់ ul_path_vopenf(sa_nracanaa path_cxt *pc, ចំនួនគត់ flags, const var_na *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	const var_na *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_open(pc, flags, p);
+	ត្រឡប់ !p ? -errno : ul_path_open(pc, flags, p);
 }
 
-int ul_path_openf(struct path_cxt *pc, int flags, const char *path, ...)
+ចំនួនគត់ ul_path_openf(sa_nracanaa path_cxt *pc, ចំនួនគត់ flags, const var_na *path, ...)
 {
 	va_list ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vopenf(pc, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
 /*
  * Maybe stupid, but good enough ;-)
  */
-FILE *ul_path_fopen(struct path_cxt *pc, const char *mode, const char *path)
+FILE *ul_path_fopen(sa_nracanaa path_cxt *pc, const var_na *mode, const var_na *path)
 {
-	int flags = ul_mode_to_flags(mode);
-	int fd = ul_path_open(pc, flags, path);
+	ចំនួនគត់ flags = ul_mode_to_flags(mode);
+	ចំនួនគត់ fd = ul_path_open(pc, flags, path);
 
-	if (fd < 0)
-		return NULL;
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ NULL;
 
-	return ul_vfs_fdopen(pc ? pc->vfs : NULL, fd, mode);
+	ត្រឡប់ ul_vfs_fdopen(pc ? pc->vfs : NULL, fd, mode);
 }
 
 
-FILE *ul_path_vfopenf(struct path_cxt *pc, const char *mode, const char *path, va_list ap)
+FILE *ul_path_vfopenf(sa_nracanaa path_cxt *pc, const var_na *mode, const var_na *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	const var_na *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_fopen(pc, mode, p);
+	ត្រឡប់ !p ? NULL : ul_path_fopen(pc, mode, p);
 }
 
-FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ...)
+FILE *ul_path_fopenf(sa_nracanaa path_cxt *pc, const var_na *mode, const var_na *path, ...)
 {
 	FILE *f;
 	va_list ap;
@@ -537,40 +537,40 @@ FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ..
 	f = ul_path_vfopenf(pc, mode, path, ap);
 	va_end(ap);
 
-	return f;
+	ត្រឡប់ f;
 }
 
 /*
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
+DIR *ul_path_opendir(sa_nracanaa path_cxt *pc, const var_na *path)
 {
 	DIR *dir;
-	int fd = -1;
+	ចំនួនគត់ fd = -1;
 
-	if (path)
+	ប្រសិនបើ (path)
 		fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	else if (pc->dir_path) {
-		int dirfd;
+	បើមិនដូច្នេះ ប្រសិនបើ (pc->dir_path) {
+		ចំនួនគត់ dirfd;
 
 		DBG_OBJ(CXT, pc, ul_debug("duplicate dir path"));
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd >= 0)
+		ប្រសិនបើ (dirfd >= 0)
 			fd = dup_fd_cloexec(dirfd, STDERR_FILENO + 1);
 	}
 
-	if (fd < 0)
-		return NULL;
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ NULL;
 
 	dir = fdopendir(fd);
-	if (!dir) {
+	ប្រសិនបើ (!dir) {
 		close(fd);
-		return NULL;
+		ត្រឡប់ NULL;
 	}
-	if (!path)
+	ប្រសិនបើ (!path)
 		 rewinddir(dir);
-	return dir;
+	ត្រឡប់ dir;
 }
 
 
@@ -578,18 +578,18 @@ DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_vopendirf(struct path_cxt *pc, const char *path, va_list ap)
+DIR *ul_path_vopendirf(sa_nracanaa path_cxt *pc, const var_na *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	const var_na *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_opendir(pc, p);
+	ត្រឡប់ !p ? NULL : ul_path_opendir(pc, p);
 }
 
 /*
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
+DIR *ul_path_opendirf(sa_nracanaa path_cxt *pc, const var_na *path, ...)
 {
 	va_list ap;
 	DIR *dir;
@@ -598,61 +598,61 @@ DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
 	dir = ul_path_vopendirf(pc, path, ap);
 	va_end(ap);
 
-	return dir;
+	ត្រឡប់ dir;
 }
 
 /*
  * If @path is NULL then readlink is called on @pc directory.
  */
-ssize_t ul_path_readlink(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path)
+ssize_t ul_path_readlink(sa_nracanaa path_cxt *pc, var_na *buf, size_t bufsiz, const var_na *path)
 {
-	int dirfd;
+	ចំនួនគត់ dirfd;
 	ssize_t ssz;
 
-	if (!path) {
-		const char *p = get_absdir(pc);
-		if (!p)
-			return -errno;
+	ប្រសិនបើ (!path) {
+		const var_na *p = get_absdir(pc);
+		ប្រសិនបើ (!p)
+			ត្រឡប់ -errno;
 		ssz = readlink(p, buf, bufsiz - 1);
-	} else {
+	} បើមិនដូច្នេះ {
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd < 0)
-			return dirfd;
+		ប្រសិនបើ (dirfd < 0)
+			ត្រឡប់ dirfd;
 
-		if (*path == '/')
+		ប្រសិនបើ (*path == '/')
 			path++;
 
 		ssz = readlinkat(dirfd, path, buf, bufsiz - 1);
 	}
 
-	if (ssz >= 0)
+	ប្រសិនបើ (ssz >= 0)
 		buf[ssz] = '\0';
-	return ssz;
+	ត្រឡប់ ssz;
 }
 
 /*
  * If @path is NULL then readlink is called on @pc directory.
  */
-ssize_t ul_path_readlinkf(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path, ...)
+ssize_t ul_path_readlinkf(sa_nracanaa path_cxt *pc, var_na *buf, size_t bufsiz, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
+	ត្រឡប់ !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
 }
 
-int ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
+ចំនួនគត់ ul_path_read(sa_nracanaa path_cxt *pc, var_na *buf, size_t len, const var_na *path)
 {
-	int rc, errsv;
-	int fd;
+	ចំនួនគត់ rc, errsv;
+	ចំនួនគត់ fd;
 
 	fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ -errno;
 
 	DBG(CXT, ul_debug(" reading '%s'", path));
 	rc = ul_vfs_read_all(pc ? pc->vfs : NULL, fd, buf, len);
@@ -660,26 +660,26 @@ int ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_vreadf(struct path_cxt *pc, char *buf, size_t len, const char *path, va_list ap)
+ចំនួនគត់ ul_path_vreadf(sa_nracanaa path_cxt *pc, var_na *buf, size_t len, const var_na *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	const var_na *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read(pc, buf, len, p);
+	ត្រឡប់ !p ? -errno : ul_path_read(pc, buf, len, p);
 }
 
-int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, ...)
+ចំនួនគត់ ul_path_readf(sa_nracanaa path_cxt *pc, var_na *buf, size_t len, const var_na *path, ...)
 {
 	va_list ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf(pc, buf, len, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
 
@@ -689,87 +689,87 @@ int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, 
  *
  * Returns size of the string without \0, nothing is allocated if returns <= 0.
  */
-int ul_path_read_string(struct path_cxt *pc, char **str, const char *path)
+ចំនួនគត់ ul_path_read_string(sa_nracanaa path_cxt *pc, var_na **str, const var_na *path)
 {
-	char buf[BUFSIZ];
-	int rc;
+	var_na buf[BUFSIZ];
+	ចំនួនគត់ rc;
 
-	if (!str)
-		return -EINVAL;
+	ប្រសិនបើ (!str)
+		ត្រឡប់ -EINVAL;
 
 	*str = NULL;
 
-	rc = ul_path_read_buffer(pc, buf, sizeof(buf), path);
-	if (rc < 0)
-		return rc;
+	rc = ul_path_read_buffer(pc, buf, parimaa_na(buf), path);
+	ប្រសិនបើ (rc < 0)
+		ត្រឡប់ rc;
 
 	*str = strdup(buf);
-	if (!*str)
+	ប្រសិនបើ (!*str)
 		rc = -ENOMEM;
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_readf_string(struct path_cxt *pc, char **str, const char *path, ...)
+ចំនួនគត់ ul_path_readf_string(sa_nracanaa path_cxt *pc, var_na **str, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_string(pc, str, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_string(pc, str, p);
 }
 
-int ul_path_read_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path)
+ចំនួនគត់ ul_path_read_buffer(sa_nracanaa path_cxt *pc, var_na *buf, size_t bufsz, const var_na *path)
 {
-	int rc = ul_path_read(pc, buf, bufsz - 1, path);
+	ចំនួនគត់ rc = ul_path_read(pc, buf, bufsz - 1, path);
 
-	if (rc == 0)
+	ប្រសិនបើ (rc == 0)
 		buf[0] = '\0';
 
-	else if (rc > 0) {
+	បើមិនដូច្នេះ ប្រសិនបើ (rc > 0) {
 		/* Remove trailing newline (usual in sysfs) */
-		if (*(buf + rc - 1) == '\n')
+		ប្រសិនបើ (*(buf + rc - 1) == '\n')
 			buf[--rc] = '\0';
-		else
+		បើមិនដូច្នេះ
 			buf[rc] = '\0';
 	}
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_vreadf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, va_list ap)
+ចំនួនគត់ ul_path_vreadf_buffer(sa_nracanaa path_cxt *pc, var_na *buf, size_t bufsz, const var_na *path, va_list ap)
 {
-	const char *p;
+	const var_na *p;
 
 	p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
 }
 
-int ul_path_readf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+ចំនួនគត់ ul_path_readf_buffer(sa_nracanaa path_cxt *pc, var_na *buf, size_t bufsz, const var_na *path, ...)
 {
 	va_list ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf_buffer(pc, buf, bufsz, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
+ចំនួនគត់ ul_path_scanf(sa_nracanaa path_cxt *pc, const var_na *path, const var_na *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	f = ul_path_fopen(pc, "r" UL_CLOEXECSTR, path);
-	if (!f)
-		return -EINVAL;
+	ប្រសិនបើ (!f)
+		ត្រឡប់ -EINVAL;
 
 	DBG(CXT, ul_debug(" fscanf [%s] '%s'", fmt, path));
 
@@ -778,316 +778,316 @@ int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_scanff(struct path_cxt *pc, const char *path, va_list ap, const char *fmt, ...)
+ចំនួនគត់ ul_path_scanff(sa_nracanaa path_cxt *pc, const var_na *path, va_list ap, const var_na *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	ចំនួនគត់ rc;
 
 	f = ul_path_vfopenf(pc, "r" UL_CLOEXECSTR, path, ap);
-	if (!f)
-		return -EINVAL;
+	ប្រសិនបើ (!f)
+		ត្រឡប់ -EINVAL;
 
 	va_start(fmt_ap, fmt);
 	rc = vfscanf(f, fmt, fmt_ap);
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	ត្រឡប់ rc;
 }
 
 
-int ul_path_read_s64(struct path_cxt *pc, int64_t *res, const char *path)
+ចំនួនគត់ ul_path_read_s64(sa_nracanaa path_cxt *pc, int64_t *res, const var_na *path)
 {
 	int64_t x = 0;
-	int rc;
+	ចំនួនគត់ rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNd64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ប្រសិនបើ (rc != 1)
+		ត្រឡប់ -1;
+	ប្រសិនបើ (res)
 		*res = x;
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int ul_path_readf_s64(struct path_cxt *pc, int64_t *res, const char *path, ...)
+ចំនួនគត់ ul_path_readf_s64(sa_nracanaa path_cxt *pc, int64_t *res, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s64(pc, res, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_s64(pc, res, p);
 }
 
-int ul_path_read_u64(struct path_cxt *pc, uint64_t *res, const char *path)
+ចំនួនគត់ ul_path_read_u64(sa_nracanaa path_cxt *pc, uint64_t *res, const var_na *path)
 {
 	uint64_t x = 0;
-	int rc;
+	ចំនួនគត់ rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNu64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ប្រសិនបើ (rc != 1)
+		ត្រឡប់ -1;
+	ប្រសិនបើ (res)
 		*res = x;
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int ul_path_readf_u64(struct path_cxt *pc, uint64_t *res, const char *path, ...)
+ចំនួនគត់ ul_path_readf_u64(sa_nracanaa path_cxt *pc, uint64_t *res, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u64(pc, res, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_u64(pc, res, p);
 }
 
-int ul_path_read_s32(struct path_cxt *pc, int *res, const char *path)
+ចំនួនគត់ ul_path_read_s32(sa_nracanaa path_cxt *pc, ចំនួនគត់ *res, const var_na *path)
 {
-	int rc, x = 0;
+	ចំនួនគត់ rc, x = 0;
 
 	rc = ul_path_scanf(pc, path, "%d", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ប្រសិនបើ (rc != 1)
+		ត្រឡប់ -1;
+	ប្រសិនបើ (res)
 		*res = x;
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int ul_path_readf_s32(struct path_cxt *pc, int *res, const char *path, ...)
+ចំនួនគត់ ul_path_readf_s32(sa_nracanaa path_cxt *pc, ចំនួនគត់ *res, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s32(pc, res, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_s32(pc, res, p);
 }
 
-int ul_path_read_u32(struct path_cxt *pc, unsigned int *res, const char *path)
+ចំនួនគត់ ul_path_read_u32(sa_nracanaa path_cxt *pc, unsigned ចំនួនគត់ *res, const var_na *path)
 {
-	int rc;
-	unsigned int x = 0;
+	ចំនួនគត់ rc;
+	unsigned ចំនួនគត់ x = 0;
 
 	rc = ul_path_scanf(pc, path, "%u", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	ប្រសិនបើ (rc != 1)
+		ត្រឡប់ -1;
+	ប្រសិនបើ (res)
 		*res = x;
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int ul_path_readf_u32(struct path_cxt *pc, unsigned int *res, const char *path, ...)
+ចំនួនគត់ ul_path_readf_u32(sa_nracanaa path_cxt *pc, unsigned ចំនួនគត់ *res, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u32(pc, res, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_u32(pc, res, p);
 }
 
-int ul_path_read_majmin(struct path_cxt *pc, dev_t *res, const char *path)
+ចំនួនគត់ ul_path_read_majmin(sa_nracanaa path_cxt *pc, dev_t *res, const var_na *path)
 {
-	int rc, maj = 0, min = 0;
+	ចំនួនគត់ rc, maj = 0, min = 0;
 
 	rc = ul_path_scanf(pc, path, "%d:%d", &maj, &min);
-	if (rc != 2)
-		return -1;
-	if (res)
+	ប្រសិនបើ (rc != 2)
+		ត្រឡប់ -1;
+	ប្រសិនបើ (res)
 		*res = makedev(maj, min);
-	return 0;
+	ត្រឡប់ 0;
 }
 
-int ul_path_readf_majmin(struct path_cxt *pc, dev_t *res, const char *path, ...)
+ចំនួនគត់ ul_path_readf_majmin(sa_nracanaa path_cxt *pc, dev_t *res, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_majmin(pc, res, p);
+	ត្រឡប់ !p ? -errno : ul_path_read_majmin(pc, res, p);
 }
 
-int ul_path_write_string(struct path_cxt *pc, const char *str, const char *path)
+ចំនួនគត់ ul_path_write_string(sa_nracanaa path_cxt *pc, const var_na *str, const var_na *path)
 {
-	int rc, errsv;
-	int fd;
+	ចំនួនគត់ rc, errsv;
+	ចំនួនគត់ fd;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ -errno;
 
 	rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, str, strlen(str));
 
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path, ...)
+ចំនួនគត់ ul_path_writef_string(sa_nracanaa path_cxt *pc, const var_na *str, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_string(pc, str, p);
+	ត្រឡប់ !p ? -errno : ul_path_write_string(pc, str, p);
 }
 
-int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
+ចំនួនគត់ ul_path_write_s64(sa_nracanaa path_cxt *pc, int64_t num, const var_na *path)
 {
-	char buf[sizeof(stringify_value(LLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	var_na buf[parimaa_na(stringify_value(LLONG_MAX))];
+	ចំនួនគត់ rc, errsv;
+	ចំនួនគត់ fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRId64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	len = snprintf(buf, parimaa_na(buf), "%" PRId64, num);
+	ប្រសិនបើ (len < 0 || (size_t) len >= parimaa_na(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
+	បើមិនដូច្នេះ
 		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
 
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
+ចំនួនគត់ ul_path_write_u64(sa_nracanaa path_cxt *pc, uint64_t num, const var_na *path)
 {
-	char buf[sizeof(stringify_value(ULLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	var_na buf[parimaa_na(stringify_value(ULLONG_MAX))];
+	ចំនួនគត់ rc, errsv;
+	ចំនួនគត់ fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	ប្រសិនបើ (fd < 0)
+		ត្រឡប់ -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRIu64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	len = snprintf(buf, parimaa_na(buf), "%" PRIu64, num);
+	ប្រសិនបើ (len < 0 || (size_t) len >= parimaa_na(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
+	បើមិនដូច្នេះ
 		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
 
 	errsv = errno;
 	ul_vfs_close(pc ? pc->vfs : NULL, fd);
 	errno = errsv;
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
+ចំនួនគត់ ul_path_writef_u64(sa_nracanaa path_cxt *pc, uint64_t num, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_u64(pc, num, p);
+	ត្រឡប់ !p ? -errno : ul_path_write_u64(pc, num, p);
 
 }
 
-int ul_path_count_dirents(struct path_cxt *pc, const char *path)
+ចំនួនគត់ ul_path_count_dirents(sa_nracanaa path_cxt *pc, const var_na *path)
 {
 	DIR *dir;
-	int r = 0;
+	ចំនួនគត់ r = 0;
 
 	dir = ul_path_opendir(pc, path);
-	if (!dir)
-		return 0;
+	ប្រសិនបើ (!dir)
+		ត្រឡប់ 0;
 
-	while (xreaddir(dir)) r++;
+	ខណៈពេល (xreaddir(dir)) r++;
 
 	closedir(dir);
-	return r;
+	ត្រឡប់ r;
 }
 
-int ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
+ចំនួនគត់ ul_path_countf_dirents(sa_nracanaa path_cxt *pc, const var_na *path, ...)
 {
-	const char *p;
+	const var_na *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_count_dirents(pc, p);
+	ត្រឡប់ !p ? -errno : ul_path_count_dirents(pc, p);
 }
 
 /* first call (when @sub is NULL) opens the directory, last call closes the directory */
-int ul_path_next_dirent(struct path_cxt *pc, DIR **sub, const char *dirname, struct dirent **d)
+ចំនួនគត់ ul_path_next_dirent(sa_nracanaa path_cxt *pc, DIR **sub, const var_na *dirname, sa_nracanaa dirent **d)
 {
-	if (!pc || !sub || !d)
-		return -EINVAL;
+	ប្រសិនបើ (!pc || !sub || !d)
+		ត្រឡប់ -EINVAL;
 
-	if (!*sub) {
+	ប្រសិនបើ (!*sub) {
 		*sub = ul_path_opendir(pc, dirname);
-		if (!*sub)
-			return -errno;
+		ប្រសិនបើ (!*sub)
+			ត្រឡប់ -errno;
 	}
 
 	*d = xreaddir(*sub);
-	if (*d)
-		return 0;
+	ប្រសិនបើ (*d)
+		ត្រឡប់ 0;
 
 	closedir(*sub);
 	*sub = NULL;
-	return 1;
+	ត្រឡប់ 1;
 }
 
 #ifdef HAVE_CPU_SET_T
-static int ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, int maxcpus, int islist, const char *path, va_list ap)
+static ចំនួនគត់ ul_path_cpuparse(sa_nracanaa path_cxt *pc, cpu_set_t **set, ចំនួនគត់ maxcpus, ចំនួនគត់ islist, const var_na *path, va_list ap)
 {
 	size_t setsize, len = maxcpus * 7;
-	char *buf;
-	int rc;
+	var_na *buf;
+	ចំនួនគត់ rc;
 
 	*set = NULL;
 
 	buf = malloc(len);
-	if (!buf)
-		return -ENOMEM;
+	ប្រសិនបើ (!buf)
+		ត្រឡប់ -ENOMEM;
 
 	rc = ul_path_vreadf_buffer(pc, buf, len, path, ap);
-	if (rc < 0)
+	ប្រសិនបើ (rc < 0)
 		goto out;
 
 	*set = cpuset_alloc(maxcpus, &setsize, NULL);
-	if (!*set) {
+	ប្រសិនបើ (!*set) {
 		rc = -EINVAL;
 		goto out;
 	}
 
-	if (islist) {
-		if (cpulist_parse(buf, *set, setsize, 0)) {
+	ប្រសិនបើ (islist) {
+		ប្រសិនបើ (cpulist_parse(buf, *set, setsize, 0)) {
 			errno = EINVAL;
 			rc = -errno;
 			goto out;
 		}
-	} else {
-		if (cpumask_parse(buf, *set, setsize)) {
+	} បើមិនដូច្នេះ {
+		ប្រសិនបើ (cpumask_parse(buf, *set, setsize)) {
 			errno = EINVAL;
 			rc = -errno;
 			goto out;
@@ -1096,36 +1096,36 @@ static int ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, int maxcpus, i
 	rc = 0;
 
 out:
-	if (rc) {
+	ប្រសិនបើ (rc) {
 		cpuset_free(*set);
 		*set = NULL;
 	}
 	free(buf);
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_readf_cpuset(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+ចំនួនគត់ ul_path_readf_cpuset(sa_nracanaa path_cxt *pc, cpu_set_t **set, ចំនួនគត់ maxcpus, const var_na *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	ចំនួនគត់ rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 0, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
-int ul_path_readf_cpulist(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+ចំនួនគត់ ul_path_readf_cpulist(sa_nracanaa path_cxt *pc, cpu_set_t **set, ចំនួនគត់ maxcpus, const var_na *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	ចំនួនគត់ rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 1, path, ap);
 	va_end(ap);
 
-	return rc;
+	ត្រឡប់ rc;
 }
 
 #endif /* HAVE_CPU_SET_T */
@@ -1153,180 +1153,180 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char *argv[])
+ចំនួនគត់ main(ចំនួនគត់ argc, var_na *argv[])
 {
-	int c;
-	const char *prefix = NULL, *dir, *file, *command;
-	struct path_cxt *pc = NULL;
+	ចំនួនគត់ c;
+	const var_na *prefix = NULL, *dir, *file, *command;
+	sa_nracanaa path_cxt *pc = NULL;
 
-	static const struct option longopts[] = {
+	static const sa_nracanaa option longopts[] = {
 		{ "prefix",	1, NULL, 'p' },
 		{ "help",       0, NULL, 'h' },
 		{ NULL, 0, NULL, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "p:h", longopts, NULL)) != -1) {
+	ខណៈពេល((c = getopt_long(argc, argv, "p:h", longopts, NULL)) != -1) {
 		switch(c) {
-		case 'p':
+		pak_sa 'p':
 			prefix = optarg;
-			break;
-		case 'h':
+			bha_nga;
+		pak_sa 'h':
 			usage();
-			break;
+			bha_nga;
 		default:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	ប្រសិនបើ (optind == argc)
 		errx(EXIT_FAILURE, "<dir> not defined");
 	dir = argv[optind++];
 
 	ul_path_init_debug();
 
 	pc = ul_new_path("%s", dir);
-	if (!pc)
+	ប្រសិនបើ (!pc)
 		err(EXIT_FAILURE, "failed to initialize path context");
-	if (prefix)
+	ប្រសិនបើ (prefix)
 		ul_path_set_prefix(pc, prefix);
 
-	if (optind == argc)
+	ប្រសិនបើ (optind == argc)
 		errx(EXIT_FAILURE, "<command> not defined");
 	command = argv[optind++];
 
-	if (strcmp(command, "read-u32") == 0) {
+	ប្រសិនបើ (strcmp(command, "read-u32") == 0) {
 		uint32_t res;
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u32(pc, &res, file) != 0)
+		ប្រសិនបើ (ul_path_read_u32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %u\n", file, res);
 
-		if (ul_path_readf_u32(pc, &res, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_readf_u32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %u\n", file, res);
 
-	} else if (strcmp(command, "read-s32") == 0) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "read-s32") == 0) {
 		int32_t res;
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s32(pc, &res, file) != 0)
+		ប្រសិនបើ (ul_path_read_s32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %d\n", file, res);
 
-		if (ul_path_readf_s32(pc, &res, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_readf_s32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %d\n", file, res);
 
-	} else if (strcmp(command, "read-u64") == 0) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "read-u64") == 0) {
 		uint64_t res;
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u64(pc, &res, file) != 0)
+		ប្រសិនបើ (ul_path_read_u64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRIu64 "\n", file, res);
 
-		if (ul_path_readf_u64(pc, &res, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_readf_u64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRIu64 "\n", file, res);
 
-	} else if (strcmp(command, "read-s64") == 0) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "read-s64") == 0) {
 		int64_t res;
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s64(pc, &res, file) != 0)
+		ប្រសិនបើ (ul_path_read_s64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRId64 "\n", file, res);
 
-		if (ul_path_readf_s64(pc, &res, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_readf_s64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRId64 "\n", file, res);
 
-	} else if (strcmp(command, "read-majmin") == 0) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "read-majmin") == 0) {
 		dev_t res;
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_majmin(pc, &res, file) != 0)
+		ប្រសិនបើ (ul_path_read_majmin(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read maj:min failed");
-		printf("read:  %s: %d\n", file, (int) res);
+		printf("read:  %s: %d\n", file, (ចំនួនគត់) res);
 
-		if (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf maj:min failed");
-		printf("readf: %s: %d\n", file, (int) res);
+		printf("readf: %s: %d\n", file, (ចំនួនគត់) res);
 
-	} else if (strcmp(command, "read-string") == 0) {
-		char *res;
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "read-string") == 0) {
+		var_na *res;
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_string(pc, &res, file) <= 0)
+		ប្រសិនបើ (ul_path_read_string(pc, &res, file) <= 0)
 			err(EXIT_FAILURE, "read string failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readf_string(pc, &res, "%s", file) <= 0)
+		ប្រសិនបើ (ul_path_readf_string(pc, &res, "%s", file) <= 0)
 			err(EXIT_FAILURE, "readf string failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "read-link") == 0) {
-		char res[PATH_MAX];
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "read-link") == 0) {
+		var_na res[PATH_MAX];
 
-		if (optind == argc)
+		ប្រសិនបើ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_readlink(pc, res, sizeof(res), file) < 0)
+		ប្រសិនបើ (ul_path_readlink(pc, res, parimaa_na(res), file) < 0)
 			err(EXIT_FAILURE, "read symlink failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readlinkf(pc, res, sizeof(res), "%s", file) < 0)
+		ប្រសិនបើ (ul_path_readlinkf(pc, res, parimaa_na(res), "%s", file) < 0)
 			err(EXIT_FAILURE, "readf symlink failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "write-string") == 0) {
-		char *str;
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "write-string") == 0) {
+		var_na *str;
 
-		if (optind + 1 == argc)
+		ប្រសិនបើ (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <string> not defined");
 		file = argv[optind++];
 		str = argv[optind++];
 
-		if (ul_path_write_string(pc, str, file) != 0)
+		ប្រសិនបើ (ul_path_write_string(pc, str, file) != 0)
 			err(EXIT_FAILURE, "write string failed");
-		if (ul_path_writef_string(pc, str, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_writef_string(pc, str, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef string failed");
 
-	} else if (strcmp(command, "write-u64") == 0) {
+	} បើមិនដូច្នេះ ប្រសិនបើ (strcmp(command, "write-u64") == 0) {
 		uint64_t num;
 
-		if (optind + 1 == argc)
+		ប្រសិនបើ (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <num> not defined");
 		file = argv[optind++];
 		num = strtoumax(argv[optind++], NULL, 0);
 
-		if (ul_path_write_u64(pc, num, file) != 0)
+		ប្រសិនបើ (ul_path_write_u64(pc, num, file) != 0)
 			err(EXIT_FAILURE, "write u64 failed");
-		if (ul_path_writef_u64(pc, num, "%s", file) != 0)
+		ប្រសិនបើ (ul_path_writef_u64(pc, num, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef u64 failed");
 	}
 
 	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ត្រឡប់ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PATH */
