@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <poll.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <stdarg.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <sys/mman.h>
+#அந்தர்பாவ <sys/socket.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <sys/un.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#அந்தர்பாவ "all-io.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "nls.h"
+#அந்தர்பாவ "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+நிலையான முழு can_read(முழு fd, மாறிலி long timeout)
 {
-	struct pollfd fds = {
+	கட்டமைப்பு pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	முழு ret;
 
-	do {
+	செய் {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} போது ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	திரும்பு (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+நிலையான முழு open_un_socket_and_connect(வெறுமை)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	கட்டமைப்பு sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	மாறிலி முழு one = 1;
+	முழு fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	எனில் (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		செல் err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, அளவு(one));
+	எனில் (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		செல் err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (கட்டமைப்பு sockaddr *) &su,
+		offsetof(கட்டமைப்பு sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
+	எனில் (ret < 0) {
+		எனில் (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		செல் err;
 	}
 err:
-	return fd;
+	திரும்பு fd;
 }
 
-int plymouth_command(int cmd, ...)
+முழு plymouth_command(முழு cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	கட்டமைப்பு sigaction sp, op;
+	முழு fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	தேர்வு (cmd) {
+	நிலை MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		எனில் (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, அளவு(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		நிறுத்து;
+	நிலை MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		எனில் (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, அளவு(command));
 		}
-		break;
-	default:
+		நிறுத்து;
+	இயல்பு:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	நிலை '?':
+		செல் err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	எனில் (fdsock >= 0) {
+		எனில் (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (எழுத்து *) &answer[0], அளவு(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, வெற்று);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	திரும்பு ret;
 }
 

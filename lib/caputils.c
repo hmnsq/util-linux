@@ -13,56 +13,56 @@
  * along with this program.  If not, see <https://gnu.org/licenses/>.
  */
 
-#include <sys/prctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <errno.h>
+#அந்தர்பாவ <sys/prctl.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <errno.h>
 
-#include "c.h"
-#include "caputils.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "nls.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "caputils.h"
+#அந்தர்பாவ "pathnames.h"
+#அந்தர்பாவ "procfs.h"
+#அந்தர்பாவ "nls.h"
 
-static int test_cap(unsigned int cap)
+நிலையான முழு test_cap(unsigned முழு cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	திரும்பு prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+நிலையான முழு cap_last_by_bsearch(முழு *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	முழு cap = INT_MAX;
+	unsigned முழு cap0 = 0, cap1 = INT_MAX;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	போது ((முழு)cap0 < cap) {
+		எனில் (test_cap(cap))
 			cap0 = cap;
-		else
+		இல்லையெனில்
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	திரும்பு 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+நிலையான முழு cap_last_by_procfs(முழு *ret)
 {
 	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	முழு rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	எனில் (f && fd_is_procfs(fileno(f))) {
+		முழு cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
+		எனில் (fscanf(f, "%d", &cap) == 1 &&
 		    cap < INT_MAX && !test_cap(cap + 1)) {
 
 			*ret = cap;
@@ -70,36 +70,36 @@ static int cap_last_by_procfs(int *ret)
 		}
 	}
 
-	if (f)
+	எனில் (f)
 		fclose(f);
-	return rc;
+	திரும்பு rc;
 }
 
-int cap_last_cap(void)
+முழு cap_last_cap(வெறுமை)
 {
-	static int cap = -1;
+	நிலையான முழு cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
+	எனில் (cap != -1)
+		திரும்பு cap;
+	எனில் (cap_last_by_procfs(&cap) < 0)
 		cap_last_by_bsearch(&cap);
 
-	return cap;
+	திரும்பு cap;
 }
 
-void cap_permitted_to_ambient(void)
+வெறுமை cap_permitted_to_ambient(வெறுமை)
 {
 	/* We use capabilities system calls to propagate the permitted
 	 * capabilities into the ambient set because we may have
 	 * already forked so be in async-signal-safe context. */
-	struct __user_cap_header_struct header = {
+	கட்டமைப்பு __user_cap_header_struct header = {
 		.version = _LINUX_CAPABILITY_VERSION_3,
 		.pid = 0,
 	};
-	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
+	கட்டமைப்பு __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
+	எனில் (capget(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
@@ -107,49 +107,49 @@ void cap_permitted_to_ambient(void)
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
+	எனில் (capset(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	க்கு (cap = 0; cap < (அளவு(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
-			continue;
+		எனில் (cap > (uint64_t) cap_last_cap())
+			தொடர்;
 
-		if ((effective & (1ULL << cap))
+		எனில் ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
 			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
 #ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+முழு முதன்மை(முழு argc, எழுத்து *argv[])
 {
-	int rc = 0, cap;
+	முழு rc = 0, cap;
 
-	if (argc < 2) {
+	எனில் (argc < 2) {
 		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		திரும்பு EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
+	எனில் (strcmp(argv[1], "--last-by-procfs") == 0) {
 		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
+		எனில் (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
+	} இல்லையெனில் எனில் (strcmp(argv[1], "--last-by-bsearch") == 0) {
 		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
+		எனில் (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
+	} இல்லையெனில் எனில் (strcmp(argv[1], "--last") == 0)
 		printf("last cap: %d\n", cap_last_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	திரும்பு rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 #endif

@@ -4,45 +4,45 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
-#include <errno.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <sys/vfs.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <errno.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "pidfd-utils.h"
-#include "statfs_magic.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "nls.h"
+#அந்தர்பாவ "strutils.h"
+#அந்தர்பாவ "pidfd-utils.h"
+#அந்தர்பாவ "statfs_magic.h"
 
 /*
  * Returns 1, if the pidfd has the pidfs file system type, otherwise 0.
  */
-int pfd_is_pidfs(int pidfd)
+முழு pfd_is_pidfs(முழு pidfd)
 {
-	struct statfs stfs;
-	int rc;
+	கட்டமைப்பு statfs stfs;
+	முழு rc;
 
 	rc = fstatfs(pidfd, &stfs);
-	if (rc < 0)
-		return 0;
+	எனில் (rc < 0)
+		திரும்பு 0;
 
-	return F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
+	திரும்பு F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
 }
 
 #ifdef USE_PIDFD_INO_SUPPORT
-uint64_t pidfd_get_inode(int pidfd)
+uint64_t pidfd_get_inode(முழு pidfd)
 {
-	struct statx stx;
-	int rc;
+	கட்டமைப்பு statx stx;
+	முழு rc;
 
 	rc = statx(pidfd, "", AT_EMPTY_PATH, STATX_INO, &stx);
-	if (rc < 0) {
+	எனில் (rc < 0) {
 		close(pidfd);
 		err(EXIT_FAILURE, _("failed to statx() pidfd"));
 	}
-	return stx.stx_ino;
+	திரும்பு stx.stx_ino;
 }
 #endif
 
@@ -62,18 +62,18 @@ uint64_t pidfd_get_inode(int pidfd)
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+முழு ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
+#இல்லையெனில்
+முழு ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	முழு pfd;
 
 	pfd = ul_get_valid_pidfd(pid, pidfd_ino);
-	if (pfd < 0)
+	எனில் (pfd < 0)
 		err(EXIT_FAILURE, _("failed to obtain a valid file descriptor for PID %d"), pid);
 
-	return pfd;
+	திரும்பு pfd;
 }
 
 /*
@@ -91,34 +91,34 @@ int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unu
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+முழு ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
+#இல்லையெனில்
+முழு ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	முழு pfd;
 
 	pfd = pidfd_open(pid, 0);
-	if (pfd < 0)
-		return -errno;
+	எனில் (pfd < 0)
+		திரும்பு -errno;
 
 	/* the file descriptor has to have the pidfs file system type
 	 * otherwise the inode assigned to it will not be useful.
 	 */
-	if (!pfd_is_pidfs(pfd)) {
+	எனில் (!pfd_is_pidfs(pfd)) {
 		close(pfd);
-		return -(errno = ENOTSUP);
+		திரும்பு -(errno = ENOTSUP);
 	}
 
 #ifdef USE_PIDFD_INO_SUPPORT
 	uint64_t real_pidfd_ino;
-	if (pidfd_ino) {
+	எனில் (pidfd_ino) {
 		real_pidfd_ino = pidfd_get_inode(pfd);
-		if (real_pidfd_ino != pidfd_ino) {
+		எனில் (real_pidfd_ino != pidfd_ino) {
 			close(pfd);
-			return -(errno = ESRCH);
+			திரும்பு -(errno = ESRCH);
 		}
 	}
 #endif
-	return pfd;
+	திரும்பு pfd;
 }

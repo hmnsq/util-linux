@@ -4,142 +4,142 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#அந்தர்பாவ "buffer.h"
+#அந்தர்பாவ "mbsalign.h"
+#அந்தர்பாவ "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+வெறுமை ul_buffer_reset_data(கட்டமைப்பு ul_buffer *buf)
 {
-	if (buf->begin)
+	எனில் (buf->begin)
 		memset(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	எனில் (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * அளவு(எழுத்து *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+நிலையான உள்வரி எழுத்து *ul_buffer_free_data_common(கட்டமைப்பு ul_buffer *buf, bool steal)
 {
-	char *t = NULL;
+	எழுத்து *t = வெற்று;
 
-	assert(buf);
+	ப்ரதிஜ்ஞா(buf);
 
-	if (steal)
+	எனில் (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	இல்லையெனில்
+		விடுவி(buf->begin);
+	buf->begin = வெற்று;
+	buf->end = வெற்று;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	விடுவி(buf->ptrs);
+	buf->ptrs = வெற்று;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	விடுவி(buf->encoded);
+	buf->encoded = வெற்று;
 	buf->encoded_sz = 0;
 
-	return t;
+	திரும்பு t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+வெறுமை ul_buffer_free_data(கட்டமைப்பு ul_buffer *buf)
 {
 	ul_buffer_free_data_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+எழுத்து *ul_buffer_steal_string(கட்டமைப்பு ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	எனில் (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	திரும்பு ul_buffer_free_data_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+வெறுமை ul_buffer_set_chunksize(கட்டமைப்பு ul_buffer *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+முழு ul_buffer_is_empty(கட்டமைப்பு ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	திரும்பு buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+முழு ul_buffer_save_pointer(கட்டமைப்பு ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	எனில் (ptr_idx >= buf->nptrs) {
+		எழுத்து **tmp = reallocarray(buf->ptrs, ptr_idx + 1, அளவு(எழுத்து *));
 
-		if (!tmp)
-			return -EINVAL;
+		எனில் (!tmp)
+			திரும்பு -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	திரும்பு 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+எழுத்து *ul_buffer_get_pointer(கட்டமைப்பு ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	எனில் (ptr_idx < buf->nptrs)
+		திரும்பு buf->ptrs[ptr_idx];
+	திரும்பு வெற்று;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_pointer_length(கட்டமைப்பு ul_buffer *buf, unsigned short ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	எழுத்து *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	எனில் (ptr && ptr > buf->begin)
+		திரும்பு ptr - buf->begin;
+	திரும்பு 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_safe_pointer_width(கட்டமைப்பு ul_buffer *buf, unsigned short ptr_idx)
 {
 	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	எனில் (!len)
+		திரும்பு 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	திரும்பு mbs_safe_nwidth(buf->begin, len, வெற்று);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+வெறுமை ul_buffer_refer_string(கட்டமைப்பு ul_buffer *buf, எழுத்து *str)
 {
-	if (buf->sz)
+	எனில் (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
 	buf->sz = str ? strlen(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+முழு ul_buffer_alloc_data(கட்டமைப்பு ul_buffer *buf, size_t sz)
 {
-	char *tmp;
+	எழுத்து *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	ப்ரதிஜ்ஞா(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	எனில் (sz <= buf->sz)
+		திரும்பு 0;
 
-	if (buf->end && buf->begin)
+	எனில் (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	எனில் (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	எனில் (!tmp)
+		திரும்பு -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
@@ -147,175 +147,175 @@ int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 
 	memset(buf->end, '\0', sz - len);
 
-	return 0;
+	திரும்பு 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+முழு ul_buffer_append_data(கட்டமைப்பு ul_buffer *buf, மாறிலி எழுத்து *data, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	எனில் (!buf)
+		திரும்பு -EINVAL;
+	எனில் (!data)
+		திரும்பு 0;
 
-	if (buf->begin && buf->end)
+	எனில் (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	எனில் (maxsz <= sz + 1) {
+		முழு rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		எனில் (rc)
+			திரும்பு rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	எனில் (!buf->end)
+		திரும்பு -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	திரும்பு 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+முழு ul_buffer_append_char(கட்டமைப்பு ul_buffer *buf, மாறிலி எழுத்து c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	திரும்பு ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+முழு ul_buffer_append_string(கட்டமைப்பு ul_buffer *buf, மாறிலி எழுத்து *str)
 {
-	if (!str)
-		return 0;
+	எனில் (!str)
+		திரும்பு 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	திரும்பு ul_buffer_append_data(buf, str, strlen(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+முழு ul_buffer_append_ntimes(கட்டமைப்பு ul_buffer *buf, size_t n, மாறிலி எழுத்து *str)
 {
 	size_t i;
 	size_t len = strlen(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	க்கு (i = 0; len && i < n; i++) {
+		முழு rc = ul_buffer_append_data(buf, str, len);
+		எனில் (rc)
+			திரும்பு rc;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+முழு ul_buffer_appendf(கட்டமைப்பு ul_buffer *buf, மாறிலி எழுத்து *format, ...)
 {
 	va_list ap;
-	int res;
+	முழு res;
 
 	va_start(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	திரும்பு res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+முழு ul_buffer_appendvf(கட்டமைப்பு ul_buffer *buf, மாறிலி எழுத்து *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	எழுத்து *val;
+	முழு sz;
+	முழு res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	எனில் (sz < 0)
+		திரும்பு -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	விடுவி(val);
 
-	return res;
+	திரும்பு res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+முழு ul_buffer_set_data(கட்டமைப்பு ul_buffer *buf, மாறிலி எழுத்து *data, size_t sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	திரும்பு ul_buffer_append_data(buf, data, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+எழுத்து *ul_buffer_get_data(கட்டமைப்பு ul_buffer *buf, size_t *sz, size_t *width)
 {
-	if (sz)
+	எனில் (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	எனில் (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	திரும்பு buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+எழுத்து *ul_buffer_get_string(கட்டமைப்பு ul_buffer *buf, size_t *sz, size_t *width)
 {
-	char *ret;
+	எழுத்து *ret;
 
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	எனில் (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	திரும்பு ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_buffer_get_bufsiz(கட்டமைப்பு ul_buffer *buf)
 {
-	return buf->sz;
+	திரும்பு buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_buffer_get_datasiz(கட்டமைப்பு ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	திரும்பு buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+எழுத்து *ul_buffer_get_safe_data(கட்டமைப்பு ul_buffer *buf, size_t *sz, size_t *width, மாறிலி எழுத்து *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	எழுத்து *data = ul_buffer_get_data(buf, வெற்று, வெற்று);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	எழுத்து *res = வெற்று;
 
-	if (!data)
-		goto nothing;
+	எனில் (!data)
+		செல் nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	எனில் (encsz > buf->encoded_sz) {
+		எழுத்து *tmp = realloc(buf->encoded, encsz);
+		எனில் (!tmp)
+			செல் nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	எனில் (!res || !wsz || wsz == (size_t) -1)
+		செல் nothing;
 
-	if (width)
+	எனில் (width)
 		*width = wsz;
-	if (sz)
+	எனில் (sz)
 		*sz = strlen(res);
-	return res;
+	திரும்பு res;
 nothing:
-	if (width)
+	எனில் (width)
 		*width = 0;
-	if (sz)
+	எனில் (sz)
 		*sz = 0;
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 
 #ifdef TEST_PROGRAM_BUFFER
 
-enum {
+எண்ணிக்கை {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+முழு முதன்மை(வெறுமை)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	கட்டமைப்பு ul_buffer buf = UL_INIT_BUFFER;
+	எழுத்து *str;
 	size_t sz = 0;
 
 	ul_buffer_set_chunksize(&buf, 16);
@@ -331,7 +331,7 @@ int main(void)
 	ul_buffer_append_string(&buf, "bbb");
 	ul_buffer_save_pointer(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, வெற்று);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
@@ -345,7 +345,7 @@ int main(void)
 	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
 	ul_buffer_save_pointer(&buf, PTR_AAA);
 	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, வெற்று);
 	printf("data [%zu] '%s'\n", sz, str);
 	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
 
@@ -354,29 +354,29 @@ int main(void)
 	ul_buffer_refer_string(&buf, str);
 	ul_buffer_append_data(&buf, ",", 1);
 	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, வெற்று);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, வெற்று);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_append_char(&buf, 'x');
 	{
-		char c = 'y';
+		எழுத்து c = 'y';
 		ul_buffer_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
+		மாறிலி எழுத்து c = 'z';
 		ul_buffer_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, வெற்று);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BUFFER */

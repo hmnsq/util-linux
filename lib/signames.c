@@ -8,20 +8,20 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#அந்தர்பாவ <ctype.h>		/* for isdigit() */
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "cctype.h"
+#அந்தர்பாவ "strutils.h"
+#அந்தர்பாவ "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+நிலையான மாறிலி கட்டமைப்பு ul_signal_name {
+	மாறிலி எழுத்து *name;
+	முழு val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+நிலையான முழு rtsig_to_signum(மாறிலி எழுத்து *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	முழு இலக்கம், maxi = 0;
+	எழுத்து *ep = வெற்று;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	எனில் (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	இல்லையெனில் எனில் (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	எனில் (!isdigit(*sig))
+		திரும்பு -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	இலக்கம் = strtol(sig, &ep, 10);
+	எனில் (!ep || sig == ep || errno || இலக்கம் < 0)
+		திரும்பு -1;
+	இலக்கம் = maxi ? SIGRTMAX - இலக்கம் : SIGRTMIN + இலக்கம்;
+	எனில் (இலக்கம் < SIGRTMIN || SIGRTMAX < இலக்கம்)
+		திரும்பு -1;
+	திரும்பு இலக்கம்;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+முழு signame_to_signum(மாறிலி எழுத்து *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	எனில் (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	எனில் (!c_strncasecmp(sig, "rt", 2))
+		திரும்பு rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	க்கு (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		எனில் (!c_strcasecmp(ul_signames[n].name, sig))
+			திரும்பு ul_signames[n].val;
 	}
-	return -1;
+	திரும்பு -1;
 }
 
-const char *signum_to_signame(int signum)
+மாறிலி எழுத்து *signum_to_signame(முழு signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	க்கு (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		எனில் (ul_signames[n].val == signum) {
+			திரும்பு ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+முழு get_signame_by_idx(size_t idx, மாறிலி எழுத்து **signame, முழு *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	எனில் (idx >= ARRAY_SIZE(ul_signames))
+		திரும்பு -1;
 
-	if (signame)
+	எனில் (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	எனில் (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	திரும்பு 0;
 
 }
 

@@ -6,13 +6,13 @@
  * -lrt on systems with old libc (and probably also -lpthread for static
  *  build).
  */
-#include <time.h>
-#include <signal.h>
-#include <sys/time.h>
+#அந்தர்பாவ <time.h>
+#அந்தர்பாவ <signal.h>
+#அந்தர்பாவ <sys/time.h>
 
-#include "c.h"
-#include "timeutils.h"
-#include "timer.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "timeutils.h"
+#அந்தர்பாவ "timer.h"
 
 /*
  * Note the timeout is used for the first signal, then the signal is sent
@@ -32,68 +32,68 @@
  * deliveries.
  */
 #ifdef HAVE_TIMER_CREATE
-int setup_timer(struct ul_timer *timer,
-		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+முழு setup_timer(கட்டமைப்பு ul_timer *timer,
+		கட்டமைப்பு itimerval *timeout,
+		வெறுமை (*timeout_handler)(முழு, siginfo_t *, வெறுமை *))
 {
 	time_t sec = timeout->it_value.tv_sec;
 	long usec = timeout->it_value.tv_usec;
-	struct sigaction sig_a;
-	static struct sigevent sig_e = {
+	கட்டமைப்பு sigaction sig_a;
+	நிலையான கட்டமைப்பு sigevent sig_e = {
 		.sigev_notify = SIGEV_SIGNAL,
 		.sigev_signo = SIGALRM
 	};
-	struct itimerspec val = {
+	கட்டமைப்பு itimerspec val = {
 		.it_value.tv_sec = sec,
 		.it_value.tv_nsec = usec * NSEC_PER_USEC,
 		.it_interval.tv_sec = sec / 100,
 		.it_interval.tv_nsec = (sec ? sec % 100 : 1) * 10 * NSEC_PER_MSEC
 	};
 
-	if (sigemptyset(&sig_a.sa_mask))
-		return 1;
+	எனில் (sigemptyset(&sig_a.sa_mask))
+		திரும்பு 1;
 
 	sig_a.sa_flags = SA_SIGINFO;
 	sig_a.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sig_a, NULL))
-		return 1;
-	if (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
-		return 1;
-	if (timer_settime(timer->t_id, 0, &val, NULL))
-		return 1;
-	return 0;
+	எனில் (sigaction(SIGALRM, &sig_a, வெற்று))
+		திரும்பு 1;
+	எனில் (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
+		திரும்பு 1;
+	எனில் (timer_settime(timer->t_id, 0, &val, வெற்று))
+		திரும்பு 1;
+	திரும்பு 0;
 }
-void cancel_timer(struct ul_timer *timer)
+வெறுமை cancel_timer(கட்டமைப்பு ul_timer *timer)
 {
 	timer_delete(timer->t_id);
 }
 
-#else /* !HAVE_TIMER_CREATE */
+#இல்லையெனில் /* !HAVE_TIMER_CREATE */
 
-int setup_timer(struct ul_timer *timer,
-		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+முழு setup_timer(கட்டமைப்பு ul_timer *timer,
+		கட்டமைப்பு itimerval *timeout,
+		வெறுமை (*timeout_handler)(முழு, siginfo_t *, வெறுமை *))
 {
-	struct sigaction sa;
+	கட்டமைப்பு sigaction sa;
 
-	memset(&sa, 0, sizeof sa);
-	memset(timer, 0, sizeof(*timer));
+	memset(&sa, 0, அளவு sa);
+	memset(timer, 0, அளவு(*timer));
 
 	sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
 	sa.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sa, &timer->old_sa))
-		return 1;
-	if (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
-		return 1;
-	return 0;
+	எனில் (sigaction(SIGALRM, &sa, &timer->old_sa))
+		திரும்பு 1;
+	எனில் (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
+		திரும்பு 1;
+	திரும்பு 0;
 }
 
-void cancel_timer(struct ul_timer *timer)
+வெறுமை cancel_timer(கட்டமைப்பு ul_timer *timer)
 {
-	setitimer(ITIMER_REAL, &timer->old_timer, NULL);
-	sigaction(SIGALRM, &timer->old_sa, NULL);
+	setitimer(ITIMER_REAL, &timer->old_timer, வெற்று);
+	sigaction(SIGALRM, &timer->old_sa, வெற்று);
 
 }
 #endif /* !HAVE_TIMER_CREATE */

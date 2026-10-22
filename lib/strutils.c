@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <inttypes.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <strings.h>
+#அந்தர்பாவ <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "cctype.h"
+#அந்தர்பாவ "nls.h"
+#அந்தர்பாவ "strutils.h"
+#அந்தர்பாவ "timeutils.h"
+#அந்தர்பாவ "bitops.h"
+#அந்தர்பாவ "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+நிலையான முழு STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+வெறுமை strutils_set_exitcode(முழு ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+நிலையான முழு do_scale_by_power (uintmax_t *x, முழு base, முழு power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	போது (power--) {
+		எனில் (UINTMAX_MAX / base < *x)
+			திரும்பு -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+முழு ul_parse_size(மாறிலி எழுத்து *str, uintmax_t *res, முழு *power)
 {
-	const char *p;
-	char *end;
+	மாறிலி எழுத்து *p;
+	எழுத்து *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	முழு base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	நிலையான மாறிலி எழுத்து *suf  = "KMGTPEZY";
+	நிலையான மாறிலி எழுத்து *suf2 = "kmgtpezy";
+	மாறிலி எழுத்து *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	எனில் (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		செல் err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	போது (isspace((unsigned எழுத்து) *p))
 		p++;
-	if (*p == '-') {
+	எனில் (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		செல் err;
 	}
 
-	errno = 0, end = NULL;
+	errno = 0, end = வெற்று;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	எனில் (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		செல் err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
+	எனில் (!end || !*end)
+		செல் done;			/* without suffix */
 	p = end;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	எனில் (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	இல்லையெனில் எனில் ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
+	இல்லையெனில் எனில் (*(p + 1)) {
+		கட்டமைப்பு lconv மாறிலி *l = localeconv();
+		மாறிலி எழுத்து *dp = l ? l->decimal_point : வெற்று;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		எனில் (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+			மாறிலி எழுத்து *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			க்கு (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
+			எனில் (isdigit(*fstr)) {
+				errno = 0, end = வெற்று;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				எனில் (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					செல் err;
 				}
-			} else
-				end = (char *) p;
+			} இல்லையெனில்
+				end = (எழுத்து *) p;
 
-			if (!end || !*end) {
+			எனில் (!end || !*end) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				செல் err;	/* without suffix, but with fractions */
 			}
 			p = end;
-			goto check_suffix;
+			செல் check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		செல் err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	எனில் (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	இல்லையெனில் {
 		sp = strchr(suf2, *p);
-		if (sp)
+		எனில் (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		இல்லையெனில் {
 			rc = -EINVAL;
-			goto err;
+			செல் err;
 		}
 	}
 
-	if (power)
+	எனில் (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	எனில் (rc)
+		செல் err;
 
-	if (frac && pwr) {
-		int i;
+	எனில் (frac && pwr) {
+		முழு i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		எனில் (rc)
+			செல் err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
+		செய் {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} போது (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		க்கு (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		எனில் (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			செல் err;
 		}
 		x += frac_val;
 	}
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	எனில் (rc < 0)
 		errno = -rc;
-	return rc;
+	திரும்பு rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+முழு strtosize(மாறிலி எழுத்து *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	திரும்பு ul_parse_size(str, res, வெற்று);
 }
 
-int isdigit_strend(const char *str, const char **end)
+முழு isdigit_strend(மாறிலி எழுத்து *str, மாறிலி எழுத்து **end)
 {
-	const char *p;
+	மாறிலி எழுத்து *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	க்கு (p = str; p && *p && isdigit((unsigned எழுத்து) *p); p++);
 
-	if (end)
+	எனில் (end)
 		*end = p;
-	return p && p > str && !*p;
+	திரும்பு p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+முழு isxdigit_strend(மாறிலி எழுத்து *str, மாறிலி எழுத்து **end)
 {
-	const char *p;
+	மாறிலி எழுத்து *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	க்கு (p = str; p && *p && isxdigit((unsigned எழுத்து) *p); p++);
 
-	if (end)
+	எனில் (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	திரும்பு p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+முழு ul_strtobool(மாறிலி எழுத்து *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	நிலையான மாறிலி எழுத்து *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	நிலையான மாறிலி எழுத்து *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	எனில் (!str || !result)
+		திரும்பு -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	க்கு (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		எனில் (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			திரும்பு 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	க்கு (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		எனில் (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			திரும்பு 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	திரும்பு -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+முழு ul_parse_switch(மாறிலி எழுத்து *arg, ...)
 {
-	const char *a, *b;
+	மாறிலி எழுத்து *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	செய் {
+		a = va_arg(ap, எழுத்து *);
+		எனில் (!a)
+			நிறுத்து;
+		b = va_arg(ap, எழுத்து *);
+		எனில் (!b)
+			நிறுத்து;
 
-		if (strcmp(arg, a) == 0) {
+		எனில் (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			திரும்பு 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		எனில் (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			திரும்பு 0;
 		}
-	} while (1);
+	} போது (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
 }
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+வெறுமை *mempcpy(வெறுமை *restrict dest, மாறிலி வெறுமை *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	திரும்பு ((எழுத்து *)memcpy(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+size_t strnlen(மாறிலி எழுத்து *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	க்கு (i = 0; i < maxlen; i++) {
+		எனில் (s[i] == '\0')
+			திரும்பு i;
 	}
-	return maxlen;
+	திரும்பு maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+எழுத்து *strnchr(மாறிலி எழுத்து *s, size_t maxlen, முழு c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	க்கு (; maxlen-- && *s != '\0'; ++s)
+		எனில் (*s == (எழுத்து)c)
+			திரும்பு (எழுத்து *)s;
+	திரும்பு வெற்று;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+எழுத்து *strndup(மாறிலி எழுத்து *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	எழுத்து *new = malloc((len + 1) * அளவு(எழுத்து));
+	எனில் (!new)
+		திரும்பு வெற்று;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	திரும்பு (எழுத்து *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+முழு ul_strtos64(மாறிலி எழுத்து *str, int64_t *இலக்கம், முழு base)
 {
-	char *end = NULL;
+	எழுத்து *end = வெற்று;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	எனில் (str == வெற்று || *str == '\0')
+		திரும்பு -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*இலக்கம் = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	எனில் (errno != 0)
+		திரும்பு -errno;
+	எனில் (str == end || (end && *end))
+		திரும்பு -(errno = EINVAL);
+	திரும்பு 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+முழு ul_strtou64(மாறிலி எழுத்து *str, uint64_t *இலக்கம், முழு base)
 {
-	char *end = NULL;
+	எழுத்து *end = வெற்று;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	எனில் (str == வெற்று || *str == '\0')
+		திரும்பு -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	எனில் (tmp < 0)
 		errno = ERANGE;
-	else {
+	இல்லையெனில் {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*இலக்கம் = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	எனில் (errno != 0)
+		திரும்பு -errno;
+	எனில் (str == end || (end && *end))
+		திரும்பு -(errno = EINVAL);
+	திரும்பு 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+முழு ul_strtos32(மாறிலி எழுத்து *str, int32_t *இலக்கம், முழு base)
 {
 	int64_t tmp;
-	int rc;
+	முழு rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	எனில் (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	எனில் (rc == 0)
+		*இலக்கம் = (int32_t) tmp;
+	திரும்பு rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+முழு ul_strtou32(மாறிலி எழுத்து *str, uint32_t *இலக்கம், முழு base)
 {
 	uint64_t tmp;
-	int rc;
+	முழு rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	எனில் (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	எனில் (rc == 0)
+		*இலக்கம் = (uint32_t) tmp;
+	திரும்பு rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+முழு ul_strtou16(மாறிலி எழுத்து *str, uint16_t *இலக்கம், முழு base)
 {
 	uint64_t tmp;
-	int rc;
+	முழு rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	எனில் (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	எனில் (rc == 0)
+		*இலக்கம் = (uint16_t) tmp;
+	திரும்பு rc;
 }
 
 /*
@@ -432,154 +432,154 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(மாறிலி எழுத்து *str, முழு base, மாறிலி எழுத்து *errmesg,
+			     int64_t கீழ், int64_t up)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t இலக்கம் = 0;
+	முழு rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &இலக்கம், base);
+	எனில் (rc == 0 && ((கீழ் && இலக்கம் < கீழ்) || (up && இலக்கம் > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	எனில் (rc) {
+		எனில் (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	திரும்பு இலக்கம்;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(மாறிலி எழுத்து *str, முழு base, மாறிலி எழுத்து *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t இலக்கம் = 0;
+	முழு rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &இலக்கம், base);
+	எனில் (rc == 0 && (up && இலக்கம் > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	எனில் (rc) {
+		எனில் (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	திரும்பு இலக்கம்;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+இரட்டை strtod_or_err(மாறிலி எழுத்து *str, மாறிலி எழுத்து *errmesg)
 {
-	double num;
-	char *end = NULL;
+	இரட்டை இலக்கம்;
+	எழுத்து *end = வெற்று;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	எனில் (str == வெற்று || *str == '\0')
+		செல் err;
+	இலக்கம் = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	எனில் (errno || str == end || (end && *end))
+		செல் err;
 
-	return num;
+	திரும்பு இலக்கம்;
 err:
-	if (errno == ERANGE)
+	எனில் (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+முழு ul_strtold(மாறிலி எழுத்து *str, long இரட்டை *இலக்கம்)
 {
-	char *end = NULL;
+	எழுத்து *end = வெற்று;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	எனில் (str == வெற்று || *str == '\0')
+		திரும்பு -(errno = EINVAL);
+	*இலக்கம் = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	எனில் (errno != 0)
+		திரும்பு -errno;
+	எனில் (str == end || (end && *end))
+		திரும்பு -(errno = EINVAL);
+	திரும்பு 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+long இரட்டை strtold_or_err(மாறிலி எழுத்து *str, மாறிலி எழுத்து *errmesg)
 {
-	long double num = 0;
+	long இரட்டை இலக்கம் = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	எனில் (ul_strtold(str, &இலக்கம்) == 0)
+		திரும்பு இலக்கம்;
+	எனில் (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(மாறிலி எழுத்து *str, மாறிலி எழுத்து *errmesg)
 {
-	uintmax_t num;
+	uintmax_t இலக்கம்;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	எனில் (strtosize(str, &இலக்கம்) == 0)
+		திரும்பு இலக்கம்;
 
-	if (errno)
+	எனில் (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+வெறுமை strtotimeval_or_err(மாறிலி எழுத்து *str, கட்டமைப்பு timeval *tv, மாறிலி எழுத்து *errmesg)
 {
-	long double user_input;
+	long இரட்டை user_உள்ளீடு;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_உள்ளீடு = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_உள்ளீடு;
+	tv->tv_usec = (suseconds_t)((user_உள்ளீடு - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+வெறுமை strtotimespec_or_err(மாறிலி எழுத்து *str, கட்டமைப்பு timespec *ts, மாறிலி எழுத்து *errmesg)
 {
-	long double user_input;
+	long இரட்டை user_உள்ளீடு;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_உள்ளீடு = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_உள்ளீடு;
+	ts->tv_nsec = (long)((user_உள்ளீடு - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(மாறிலி எழுத்து *str, மாறிலி எழுத்து *errmesg)
 {
-	int64_t user_input;
+	int64_t user_உள்ளீடு;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_உள்ளீடு = strtos64_or_err(str, errmesg);
+	திரும்பு (time_t) user_உள்ளீடு;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(மாறிலி எழுத்து *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	எனில் (mode && strcmp(mode, "never") == 0)
+		திரும்பு false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	எனில் (mode && strcmp(mode, "always") == 0)
+		திரும்பு true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	எனில் (!mode || strcmp(mode, "auto") == 0)
+		திரும்பு isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(மாறிலி எழுத்து *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	எனில் (mode && strcmp(mode, "never") == 0)
+		திரும்பு false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	எனில் (mode && strcmp(mode, "always") == 0)
+		திரும்பு true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	எனில் (!mode || strcmp(mode, "auto") == 0)
+		திரும்பு isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -588,23 +588,23 @@ bool annotationwanted(const char *mode)
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+எழுத்து *xstrmode(mode_t mode, எழுத்து *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	எனில் (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	இல்லையெனில் எனில் (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	இல்லையெனில் எனில் (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	இல்லையெனில் எனில் (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	இல்லையெனில் எனில் (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	இல்லையெனில் எனில் (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	இல்லையெனில் எனில் (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	திரும்பு str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+நிலையான முழு get_exp(uint64_t n)
 {
-	int shft;
+	முழு shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	க்கு (shft = 10; shft <= 60; shft += 10) {
+		எனில் (n < (1ULL << shft))
+			நிறுத்து;
 	}
-	return shft - 10;
+	திரும்பு shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+எழுத்து *size_to_human_string(முழு options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	எழுத்து buf[32];
+	முழு dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	மாறிலி எழுத்து *letters = "BKMGTPE";
+	எழுத்து suffix[அளவு(" KiB")], *psuf = suffix;
+	எழுத்து c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	எனில் (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	எனில் ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	எனில் (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		எனில் (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		இல்லையெனில்
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		எனில் (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} இல்லையெனில் {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		எனில் (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	எனில் (frac) {
+		கட்டமைப்பு lconv மாறிலி *l = localeconv();
+		எழுத்து *dp = l ? l->decimal_point : வெற்று;
+		முழு len;
 
-		if (!dp || !*dp)
+		எனில் (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, அளவு(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		எனில் (len > 0 && (size_t) len < அளவு(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			எனில் (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, அளவு(buf) - len);
+		} இல்லையெனில்
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} இல்லையெனில்
+		snprintf(buf, அளவு(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	திரும்பு strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+முழு string_to_idarray(மாறிலி எழுத்து *list, முழு ary[], size_t arysz,
+			முழு (name2id)(மாறிலி எழுத்து *, size_t))
 {
-	const char *begin = NULL, *p;
+	மாறிலி எழுத்து *begin = வெற்று, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	எனில் (!list || !*list || !ary || !arysz || !name2id)
+		திரும்பு -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	க்கு (p = list; p && *p; p++) {
+		மாறிலி எழுத்து *end = வெற்று;
+		முழு id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		எனில் (n >= arysz)
+			திரும்பு -2;
+		எனில் (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		எனில் (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		எனில் (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		எனில் (!begin || !end)
+			தொடர்;
+		எனில் (end <= begin)
+			திரும்பு -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		எனில் (id == -1)
+			திரும்பு -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = வெற்று;
+		எனில் (end && !*end)
+			நிறுத்து;
 	}
-	return n;
+	திரும்பு n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+முழு string_add_to_idarray(மாறிலி எழுத்து *list, முழு ary[], size_t arysz,
+			size_t *ary_pos, முழு (name2id)(மாறிலி எழுத்து *, size_t))
 {
-	const char *list_add;
-	int r;
+	மாறிலி எழுத்து *list_add;
+	முழு r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	எனில் (!list || !*list || !ary_pos || *ary_pos > arysz)
+		திரும்பு -1;
 
-	if (list[0] == '+')
+	எனில் (list[0] == '+')
 		list_add = &list[1];
-	else {
+	இல்லையெனில் {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	எனில் (r > 0)
 		*ary_pos += r;
-	return r;
+	திரும்பு r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+முழு string_to_bitarray(மாறிலி எழுத்து *list,
+		     எழுத்து *ary,
+		     முழு (*name2bit)(மாறிலி எழுத்து *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	மாறிலி எழுத்து *begin = வெற்று, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	எனில் (!list || !name2bit || !ary)
+		திரும்பு -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	க்கு (p = list; p && *p; p++) {
+		மாறிலி எழுத்து *end = வெற்று;
+		முழு bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		எனில் (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		எனில் (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		எனில் (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		எனில் (!begin || !end)
+			தொடர்;
+		எனில் (end <= begin)
+			திரும்பு -1;
+		எனில் (allow_range) {
+			எனில் (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} இல்லையெனில் எனில் (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		எனில் (bit < 0)
+			திரும்பு bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		எனில் (set_lower)
+			போது (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		இல்லையெனில் எனில் (set_higher)
+			போது (++bit < (முழு) allow_range)
 				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = வெற்று;
+		எனில் (end && !*end)
+			நிறுத்து;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+முழு string_to_bitmask(மாறிலி எழுத்து *list,
 		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+		     long (*name2flag)(மாறிலி எழுத்து *, size_t))
 {
-	const char *begin = NULL, *p;
+	மாறிலி எழுத்து *begin = வெற்று, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	எனில் (!list || !name2flag || !mask)
+		திரும்பு -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
+	க்கு (p = list; p && *p; p++) {
+		மாறிலி எழுத்து *end = வெற்று;
 		long flag;
 
-		if (!begin)
+		எனில் (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		எனில் (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		எனில் (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		எனில் (!begin || !end)
+			தொடர்;
+		எனில் (end <= begin)
+			திரும்பு -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		எனில் (flag < 0)
+			திரும்பு flag;	/* error */
 		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = வெற்று;
+		எனில் (end && !*end)
+			நிறுத்து;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+முழு ul_parse_range(மாறிலி எழுத்து *str, முழு *lower, முழு *upper, முழு def)
 {
-	char *end = NULL;
+	எழுத்து *end = வெற்று;
 
-	if (!str)
-		return 0;
+	எனில் (!str)
+		திரும்பு 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	எனில் (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		எனில் (errno || !end || *end || end == str)
+			திரும்பு -1;
+	} இல்லையெனில் {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		எனில் (errno || !end || end == str)
+			திரும்பு -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		எனில் (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		இல்லையெனில் எனில் (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
-			end = NULL;
+			end = வெற்று;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			எனில் (errno || !end || *end || end == str)
+				திரும்பு -1;
 		}
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+மாறிலி எழுத்து *ul_path_next_segment(மாறிலி எழுத்து *str, size_t *sz)
 {
-	const char *start, *p;
+	மாறிலி எழுத்து *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	போது (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	எனில் (!start || !*start)
+		திரும்பு வெற்று;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	க்கு (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	திரும்பு start;
 }
 
-int streq_paths(const char *a, const char *b)
+முழு streq_paths(மாறிலி எழுத்து *a, மாறிலி எழுத்து *b)
 {
-	while (a && b) {
+	போது (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		மாறிலி எழுத்து *a_seg = ul_path_next_segment(a, &a_sz);
+		மாறிலி எழுத்து *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		எனில் (a_sz + b_sz == 0)
+			திரும்பு 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		எனில் (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			திரும்பு 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		எனில் (!a_seg || !b_seg)
+			நிறுத்து;
+		எனில் (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+			நிறுத்து;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	திரும்பு 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+முழு ul_path_is_within(மாறிலி எழுத்து *path, மாறிலி எழுத்து *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	எனில் (!path || !dir || !*path || !*dir)
+		திரும்பு 0;
 
-	while (path && dir) {
+	போது (path && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		மாறிலி எழுத்து *p_seg = ul_path_next_segment(path, &p_sz);
+		மாறிலி எழுத்து *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		எனில் (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			திரும்பு 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		எனில் (!p_seg || !d_seg)
+			நிறுத்து;
+		எனில் (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+			நிறுத்து;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+எழுத்து *ul_strnconcat(மாறிலி எழுத்து *s, மாறிலி எழுத்து *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	எழுத்து *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	எனில் (!s && !suffix)
+		திரும்பு strdup("");
+	எனில் (!s)
+		திரும்பு strndup(suffix, b);
+	எனில் (!suffix)
+		திரும்பு strdup(s);
 
-	assert(s);
-	assert(suffix);
+	ப்ரதிஜ்ஞா(s);
+	ப்ரதிஜ்ஞா(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	எனில் (b > ((size_t) -1) - a)
+		திரும்பு வெற்று;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	எனில் (!r)
+		திரும்பு வெற்று;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	திரும்பு r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+எழுத்து *ul_strconcat(மாறிலி எழுத்து *s, மாறிலி எழுத்து *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	திரும்பு ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+எழுத்து *ul_strfconcat(மாறிலி எழுத்து *s, மாறிலி எழுத்து *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	எழுத்து *val, *res;
+	முழு sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	எனில் (sz < 0)
+		திரும்பு வெற்று;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	விடுவி(val);
+	திரும்பு res;
 }
 
-int ul_strappend(char **a, const char *b)
+முழு ul_strappend(எழுத்து **a, மாறிலி எழுத்து *b)
 {
 	size_t al, bl;
-	char *tmp;
+	எழுத்து *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	எனில் (!a)
+		திரும்பு -EINVAL;
+	எனில் (!b || !*b)
+		திரும்பு 0;
+	எனில் (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		திரும்பு !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	எனில் (!tmp)
+		திரும்பு -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	திரும்பு 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+முழு strfappend(எழுத்து **a, மாறிலி எழுத்து *format, ...)
 {
 	va_list ap;
-	int res;
+	முழு res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	திரும்பு res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+வெளி முழு ul_strvfappend(எழுத்து **a, மாறிலி எழுத்து *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	எழுத்து *val;
+	முழு sz;
+	முழு res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	எனில் (sz < 0)
+		திரும்பு -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	விடுவி(val);
+	திரும்பு res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+நிலையான size_t strcspn_escaped(மாறிலி எழுத்து *s, மாறிலி எழுத்து *reject)
 {
-	int escaped = 0;
-	int n;
+	முழு escaped = 0;
+	முழு n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	க்கு (n=0; s[n]; n++) {
+		எனில் (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		இல்லையெனில் எனில் (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		இல்லையெனில் எனில் (strchr(reject, s[n]))
+			நிறுத்து;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	திரும்பு n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+எழுத்து *ul_strchr_escaped(மாறிலி எழுத்து *s, முழு c)
 {
-	char *p;
-	int esc = 0;
+	எழுத்து *p;
+	முழு esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	க்கு (p = (எழுத்து *) s; p && *p; p++) {
+		எனில் (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			தொடர்;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		எனில் (*p == c && (!esc || c == '\\'))
+			திரும்பு p;
 		esc = 0;
 	}
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+மாறிலி எழுத்து *ul_split(மாறிலி எழுத்து **state, size_t *l, மாறிலி எழுத்து *separator, முழு quoted)
 {
-	const char *current;
+	மாறிலி எழுத்து *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	எனில் (!*current) {
+		ப்ரதிஜ்ஞா(**state == '\0');
+		திரும்பு வெற்று;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	எனில் (!*current) {
 		*state = current;
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	எனில் (quoted && strchr("\'\"", *current)) {
+		எழுத்து quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		எனில் (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			திரும்பு வெற்று;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} இல்லையெனில் எனில் (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		எனில் (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			திரும்பு வெற்று;
 		}
 		*state = current + *l;
-	} else {
+	} இல்லையெனில் {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	திரும்பு current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+முழு skip_fline(FILE *fp)
 {
-	int ch;
+	முழு ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	செய் {
+		எனில் ((ch = fgetc(fp)) == EOF)
+			திரும்பு 1;
+		எனில் (ch == '\n')
+			திரும்பு 0;
+	} போது (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+முழு ul_stralnumcmp(மாறிலி எழுத்து *p1, மாறிலி எழுத்து *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	மாறிலி unsigned எழுத்து *s1 = (மாறிலி unsigned எழுத்து *) p1;
+	மாறிலி unsigned எழுத்து *s2 = (மாறிலி unsigned எழுத்து *) p2;
+	unsigned எழுத்து c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	செய் {
+		செய் {
+			c1 = (unsigned எழுத்து) *s1++;
+		} போது (c1 != '\0' && !isalnum((unsigned முழு) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		செய் {
+			c2 = (unsigned எழுத்து) *s2++;
+		} போது (c2 != '\0' && !isalnum((unsigned முழு) c2));
 
-		if (c1 != '\0')
+		எனில் (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		எனில் (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		எனில் (c1 == '\0')
+			திரும்பு c1 - c2;
+	} போது (c1 == c2);
 
-	return c1 - c2;
+	திரும்பு c1 - c2;
 }
 
 /*
@@ -1277,163 +1277,163 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+முழு ul_optstr_next(எழுத்து **optstr, எழுத்து **name, size_t *namesz,
+		   எழுத்து **மதிப்பு, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	முழு open_quote = 0;
+	எழுத்து *start = வெற்று, *stop = வெற்று, *p, *sep = வெற்று;
+	எழுத்து *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	ப்ரதிஜ்ஞா(optstr);
+	ப்ரதிஜ்ஞா(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	எனில் (name)
+		*name = வெற்று;
+	எனில் (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	எனில் (மதிப்பு)
+		*மதிப்பு = வெற்று;
+	எனில் (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	போது (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	க்கு (p = optstr0; p && *p; p++) {
+		எனில் (!start && *p == '=')
+			திரும்பு -EINVAL;
+		எனில் (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		எனில் (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		எனில் (open_quote)
+			தொடர்;		/* still in quoted block */
+		எனில் (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		எனில் (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		இல்லையெனில் எனில் (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		எனில் (!start || !stop)
+			தொடர்;
+		எனில் (stop <= start)
+			திரும்பு -EINVAL;
 
-		if (name)
+		எனில் (name)
 			*name = start;
-		if (namesz)
+		எனில் (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		எனில் (sep) {
+			எனில் (மதிப்பு)
+				*மதிப்பு = sep + 1;
+			எனில் (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		திரும்பு 0;
 	}
 
-	return 1;				/* end of optstr */
+	திரும்பு 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+முழு ul_optstr_is_valid(மாறிலி எழுத்து *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	முழு rc;
+	எழுத்து *p = (எழுத்து *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	போது ((rc = ul_optstr_next(&p, வெற்று, வெற்று, வெற்று, வெற்று)) == 0);
+	திரும்பு rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+எழுத்து *ul_optstr_get_மதிப்பு(மாறிலி எழுத்து *optstr, மாறிலி எழுத்து *சாவி)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	எழுத்து *name = வெற்று, *மதிப்பு = வெற்று;
+	எழுத்து *p = (எழுத்து *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	எனில் (!optstr || !சாவி || !*சாவி)
+		திரும்பு வெற்று;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = strlen(சாவி);
+	போது (ul_optstr_next(&p, &name, &namesz, &மதிப்பு, &valsz) == 0) {
+		எனில் (namesz != sz || !valsz)
+			தொடர்;
+		எனில் (strncmp(name, சாவி, namesz) == 0)
+			திரும்பு strndup(மதிப்பு, valsz);
 	}
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(எழுத்து *str)
 {
 	size_t len;
-	char q;
+	எழுத்து q;
 
-	if (!str || !*str)
-		return 0;
+	எனில் (!str || !*str)
+		திரும்பு 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	எனில் ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		திரும்பு len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	திரும்பு len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+கட்டமைப்பு testS {
+	எழுத்து *name;
+	எழுத்து *மதிப்பு;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+நிலையான முழு test_strdup_to_member(முழு argc, எழுத்து *argv[])
 {
-	struct testS *xx;
+	கட்டமைப்பு testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	எனில் (argc < 3)
+		திரும்பு EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = calloc(1, அளவு(*xx));
+	எனில் (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, மதிப்பு, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	எனில் (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->மதிப்பு, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	printf("1: '%s', 2: '%s'\n", xx->name, xx->மதிப்பு);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	விடுவி(xx->name);
+	விடுவி(xx->மதிப்பு);
+	விடுவி(xx);
+	திரும்பு EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+நிலையான முழு test_strutils_sizes(முழு argc, எழுத்து *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	எழுத்து *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	எனில் (argc < 2)
+		திரும்பு EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	எனில் (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1444,52 +1444,52 @@ static int test_strutils_sizes(int argc, char *argv[])
 				    SIZE_DECIMAL_2DIGITS, size);
 
 	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	விடுவி(hum1);
+	விடுவி(hum2);
+	விடுவி(hum3);
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+நிலையான முழு test_strutils_cmp_paths(முழு argc, எழுத்து *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	முழு rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	எனில் (argc < 3)
+		திரும்பு EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+நிலையான முழு test_strutils_path_is_within(முழு argc, எழுத்து *argv[])
 {
-	int rc;
+	முழு rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	எனில் (argc < 3)
+		திரும்பு EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+நிலையான முழு test_strutils_normalize(முழு argc, எழுத்து *argv[])
 {
-	unsigned char *src, *dst, *org;
+	unsigned எழுத்து *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	எனில் (argc < 2)
+		திரும்பு EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
+	org = (unsigned எழுத்து *) strdup(argv[1]);
+	src = (unsigned எழுத்து *) strdup((எழுத்து *) org);
+	len = strlen((எழுத்து *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	எனில் (!org || !src || !dst)
+		செல் done;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
@@ -1500,136 +1500,136 @@ static int test_strutils_normalize(int argc, char *argv[])
 	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
 done:
-	free(src);
-	free(dst);
-	free(org);
+	விடுவி(src);
+	விடுவி(dst);
+	விடுவி(org);
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+நிலையான முழு test_strutils_cstrcasecmp(முழு argc, எழுத்து *argv[])
 {
-	char *a, *b;
+	எழுத்து *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	எனில் (argc < 3)
+		திரும்பு EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	எனில் (!a || !b)
+		திரும்பு EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+முழு முதன்மை(முழு argc, எழுத்து *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	எனில் (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		திரும்பு test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						வெற்று));
+		திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		எனில் (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} இல்லையெனில் எனில் (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		திரும்பு test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} இல்லையெனில் எனில் (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		திரும்பு test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} இல்லையெனில் எனில் (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		திரும்பு test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} இல்லையெனில் எனில்  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} இல்லையெனில் எனில் (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		திரும்பு test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		திரும்பு test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} இல்லையெனில் எனில் (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} இல்லையெனில் எனில் (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		எழுத்து *buf = "abc\0Y\0\0xyz\0X";
+		எழுத்து *end = buf + 12;
+		எழுத்து *p = buf;
 
-		do {
+		செய் {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} போது ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		எழுத்து *name = வெற்று, *val = வெற்று;
+		எழுத்து *p = argv[2];
+		முழு rc;
 
-		if (!ul_optstr_is_valid(p))
+		எனில் (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		போது ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (முழு) namesz, name,
+						   (முழு) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		எனில் (rc == 1)
+			திரும்பு EXIT_SUCCESS;
+	} இல்லையெனில் எனில் (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		எழுத்து *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		எனில் (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		விடுவி(unquoted);
+		திரும்பு EXIT_SUCCESS;
 
-	} else {
+	} இல்லையெனில் {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	திரும்பு EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

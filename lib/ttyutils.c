@@ -4,21 +4,21 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <ctype.h>
-#include <unistd.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <unistd.h>
 
 #ifdef HAVE_GETTTYNAM
 # include <ttyent.h>
 #endif
 
-#include "c.h"
-#include "ttyutils.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "ttyutils.h"
 
 #ifdef __linux__
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  எனில் defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -26,14 +26,14 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#elif defined(__GNU__)
+#அல்லதெனில் defined(__GNU__)
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "hurd"
 #  endif
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#இல்லையெனில்
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,179 +42,179 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+நிலையான முழு get_env_int(மாறிலி எழுத்து *name)
 {
-	const char *cp = getenv(name);
+	மாறிலி எழுத்து *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	எனில் (cp) {
+		எழுத்து *end = வெற்று;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		எனில் (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			திரும்பு x;
 	}
 
-	return -1;
+	திரும்பு -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+முழு get_terminal_dimension(முழு *cols, முழு *வரிகள்)
 {
-	int c = 0, l = 0;
+	முழு c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#எனில் defined(TIOCGWINSZ)
+	கட்டமைப்பு winsize	w_win;
+	எனில் (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
-#elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+#அல்லதெனில் defined(TIOCGSIZE)
+	கட்டமைப்பு ttysize	t_win;
+	எனில் (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
-		l = t_win.ts_lines;
+		l = t_win.ts_வரிகள்;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	எனில் (cols) {
+		எனில் (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	எனில் (வரிகள்) {
+		எனில் (l <= 0)
 			l = get_env_int("LINES");
-		*lines = l;
+		*வரிகள் = l;
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-int get_terminal_width(int default_width)
+முழு get_terminal_width(முழு default_width)
 {
-	int width = 0;
+	முழு width = 0;
 
-	get_terminal_dimension(&width, NULL);
+	get_terminal_dimension(&width, வெற்று);
 
-	return width > 0 ? width : default_width;
+	திரும்பு width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+முழு get_terminal_stdfd(வெறுமை)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	எனில் (isatty(STDIN_FILENO))
+		திரும்பு STDIN_FILENO;
+	எனில் (isatty(STDOUT_FILENO))
+		திரும்பு STDOUT_FILENO;
+	எனில் (isatty(STDERR_FILENO))
+		திரும்பு STDERR_FILENO;
 
-	return -EINVAL;
+	திரும்பு -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+முழு get_terminal_name(மாறிலி எழுத்து **path,
+		      மாறிலி எழுத்து **name,
+		      மாறிலி எழுத்து **எண்)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	மாறிலி எழுத்து *tty;
+	மாறிலி எழுத்து *p;
+	முழு fd;
 
 
-	if (name)
-		*name = NULL;
-	if (path)
-		*path = NULL;
-	if (number)
-		*number = NULL;
+	எனில் (name)
+		*name = வெற்று;
+	எனில் (path)
+		*path = வெற்று;
+	எனில் (எண்)
+		*எண் = வெற்று;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	எனில் (fd < 0)
+		திரும்பு fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	எனில் (!tty)
+		திரும்பு -1;
 
-	if (path)
+	எனில் (path)
 		*path = tty;
-	if (name || number)
+	எனில் (name || எண்)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	எனில் (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
-				*number = p;
-				break;
+	எனில் (எண்) {
+		க்கு (p = tty; p && *p; p++) {
+			எனில் (isdigit(*p)) {
+				*எண் = p;
+				நிறுத்து;
 			}
 		}
 	}
-	return 0;
+	திரும்பு 0;
 }
 
-int get_terminal_type(const char **type)
+முழு get_terminal_type(மாறிலி எழுத்து **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	எனில் (*type)
+		திரும்பு -EINVAL;
+	திரும்பு 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+எழுத்து *get_terminal_default_type(மாறிலி எழுத்து *ttyname, முழு is_serial)
 {
-	if (ttyname) {
+	எனில் (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		கட்டமைப்பு ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		எனில் (ent && ent->ty_type)
+			திரும்பு strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#எனில் defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		எனில் (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			திரும்பு strdup(DEFAULT_TTYS0);
+		இல்லையெனில் எனில் (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			திரும்பு strdup(DEFAULT_TTY32);
+		இல்லையெனில் எனில் (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			திரும்பு strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	திரும்பு strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+முழு முதன்மை(வெறுமை)
 {
-	const char *path, *name, *num;
-	int c, l;
+	மாறிலி எழுத்து *path, *name, *இலக்கம்;
+	முழு c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	எனில் (get_terminal_name(&path, &name, &இலக்கம்) == 0) {
+		எழுத்து *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
-		fprintf(stderr, "tty number:    %s\n", num);
+		fprintf(stderr, "tty number:    %s\n", இலக்கம்);
 
 		fprintf(stderr, "tty term:      %s\n", getenv("TERM"));
 
 		term = get_terminal_default_type(name, 0);
 		fprintf(stderr, "tty dflt term: %s\n", term);
-		free(term);
+		விடுவி(term);
 	}
 	get_terminal_dimension(&c, &l);
 	fprintf(stderr,         "tty cols:      %d\n", c);
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */

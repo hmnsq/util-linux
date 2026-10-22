@@ -19,31 +19,31 @@
  *    products derived from this software without their specific prior
  *   written permission.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <pwd.h>
+#அந்தர்பாவ <assert.h>
+#அந்தர்பாவ <ctype.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <limits.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <sys/syslog.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <pwd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "closestream.h"
-#include "logindefs.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "xalloc.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "cctype.h"
+#அந்தர்பாவ "closestream.h"
+#அந்தர்பாவ "logindefs.h"
+#அந்தர்பாவ "nls.h"
+#அந்தர்பாவ "pathnames.h"
+#அந்தர்பாவ "xalloc.h"
 
 
-static void (*logindefs_loader)(void *) = NULL;
-static void *logindefs_loader_data = NULL;
+நிலையான வெறுமை (*logindefs_loader)(வெறுமை *) = வெற்று;
+நிலையான வெறுமை *logindefs_loader_data = வெற்று;
 
-void logindefs_set_loader(void (*loader)(void *data), void *data)
+வெறுமை logindefs_set_loader(வெறுமை (*loader)(வெறுமை *data), வெறுமை *data)
 {
 	logindefs_loader = loader;
 	logindefs_loader_data = data;
@@ -51,102 +51,102 @@ void logindefs_set_loader(void (*loader)(void *data), void *data)
 
 #ifndef HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+கட்டமைப்பு item {
+	எழுத்து *name;		/* name of the option.  */
+	எழுத்து *மதிப்பு;		/* value of the option.  */
+	எழுத்து *path;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	கட்டமைப்பு item *next;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+நிலையான கட்டமைப்பு item *list = வெற்று;
 
-void free_getlogindefs_data(void)
+வெறுமை free_getlogindefs_data(வெறுமை)
 {
-	struct item *ptr;
+	கட்டமைப்பு item *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	போது (ptr) {
+		கட்டமைப்பு item *tmp = ptr->next;
 
-		free(ptr->path);
-		free(ptr->name);
-		free(ptr->value);
-		free(ptr);
+		விடுவி(ptr->path);
+		விடுவி(ptr->name);
+		விடுவி(ptr->மதிப்பு);
+		விடுவி(ptr);
 		ptr = tmp;
 	}
 
-	list = NULL;
+	list = வெற்று;
 }
 
-static void store(const char *name, const char *value, const char *path)
+நிலையான வெறுமை store(மாறிலி எழுத்து *name, மாறிலி எழுத்து *மதிப்பு, மாறிலி எழுத்து *path)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	கட்டமைப்பு item *new = xmalloc(அளவு(கட்டமைப்பு item));
 
-	if (!name)
+	எனில் (!name)
 		abort();
 
 	new->name = xstrdup(name);
-	new->value = value && *value ? xstrdup(value) : NULL;
+	new->மதிப்பு = மதிப்பு && *மதிப்பு ? xstrdup(மதிப்பு) : வெற்று;
 	new->path = xstrdup(path);
 	new->next = list;
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+வெறுமை logindefs_load_file(மாறிலி எழுத்து *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	எழுத்து buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	எனில் (!f)
+		திரும்பு;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	போது (fgets(buf, அளவு(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		எழுத்து *p, *name, *data = வெற்று;
 
-		if (*buf == '#' || *buf == '\n')
-			continue;	/* only comment or empty line */
+		எனில் (*buf == '#' || *buf == '\n')
+			தொடர்;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		எனில் (p)
 			*p = '\0';
-		else {
+		இல்லையெனில் {
 			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+			எனில் (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
-			continue;	/* empty line */
+		எனில் (!*buf)
+			தொடர்;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		போது (*name && isspace((unsigned)*name))
 			name++;
 
 		/* go to the end of the name */
 		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
+		போது (*data && !(isspace((unsigned)*data) || *data == '='))
 			data++;
-		if (data > name && *data)
+		எனில் (data > name && *data)
 			*data++ = '\0';
 
-		if (!*name || data == name)
-			continue;
+		எனில் (!*name || data == name)
+			தொடர்;
 
 		/* go to the begin of the value */
-		while (*data
+		போது (*data
 		       && (isspace((unsigned)*data) || *data == '='
 			   || *data == '"'))
 			data++;
 
 		/* remove space at the end of the value */
 		p = data + strlen(data);
-		if (p > data)
+		எனில் (p > data)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		போது (p > data && (isspace((unsigned)*p) || *p == '"'))
 			*p-- = '\0';
 
 		store(name, data, filename);
@@ -155,68 +155,68 @@ void logindefs_load_file(const char *filename)
 	fclose(f);
 }
 
-static void load_defaults(void)
+நிலையான வெறுமை load_defaults(வெறுமை)
 {
-	if (logindefs_loader)
+	எனில் (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
-	else
+	இல்லையெனில்
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+நிலையான கட்டமைப்பு item *தேடல்(மாறிலி எழுத்து *name)
 {
-	struct item *ptr;
+	கட்டமைப்பு item *ptr;
 
-	if (!list)
+	எனில் (!list)
 		load_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
+	போது (ptr != வெற்று) {
+		எனில் (c_strcasecmp(name, ptr->name) == 0)
+			திரும்பு ptr;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-static const char *search_config(const char *name)
+நிலையான மாறிலி எழுத்து *தேடல்_config(மாறிலி எழுத்து *name)
 {
-	struct item *ptr;
+	கட்டமைப்பு item *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
+	போது (ptr != வெற்று) {
+		எனில் (c_strcasecmp(name, ptr->name) == 0)
+			திரும்பு ptr->path;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+முழு getlogindefs_bool(மாறிலி எழுத்து *name, முழு dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	கட்டமைப்பு item *ptr = தேடல்(name);
+	திரும்பு ptr && ptr->மதிப்பு ? (c_strcasecmp(ptr->மதிப்பு, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_இலக்கம்(மாறிலி எழுத்து *name, unsigned long dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
+	கட்டமைப்பு item *ptr = தேடல்(name);
+	எழுத்து *end = வெற்று;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	எனில் (!ptr || !ptr->மதிப்பு)
+		திரும்பு dflt;
 
 	errno = 0;
-	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	retval = strtoul(ptr->மதிப்பு, &end, 0);
+	எனில் (end && *end == '\0' && !errno)
+		திரும்பு retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
-	       search_config(name), name, ptr->value);
-	return dflt;
+	       தேடல்_config(name), name, ptr->மதிப்பு);
+	திரும்பு dflt;
 }
 
 /*
@@ -225,142 +225,142 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+மாறிலி எழுத்து *getlogindefs_str(மாறிலி எழுத்து *name, மாறிலி எழுத்து *dflt)
 {
-	struct item *ptr = search(name);
+	கட்டமைப்பு item *ptr = தேடல்(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	எனில் (!ptr)
+		திரும்பு dflt;
+	எனில் (!ptr->மதிப்பு)
+		திரும்பு "";
+	திரும்பு ptr->மதிப்பு;
 }
 
-#else /* !HAVE_LIBECONF */
+#இல்லையெனில் /* !HAVE_LIBECONF */
 
-#include "dl-econf.h"
+#அந்தர்பாவ "dl-econf.h"
 
-static econf_file *file = NULL;
+நிலையான econf_file *file = வெற்று;
 
-void free_getlogindefs_data(void)
+வெறுமை free_getlogindefs_data(வெறுமை)
 {
-	if (file)
+	எனில் (file)
 		econf_call(econf_freeFile)(file);
-	file = NULL;
+	file = வெற்று;
 }
 
-static void load_defaults(void)
+நிலையான வெறுமை load_defaults(வெறுமை)
 {
 	econf_err error;
 
-	if (file != NULL)
+	எனில் (file != வெற்று)
 		free_getlogindefs_data();
 
-	if (ul_dlopen_libeconf() == 0) {
+	எனில் (ul_dlopen_libeconf() == 0) {
 #ifdef HAVE_ECONF_READCONFIG
-		error = econf_call(econf_readConfig)(&file, NULL,
+		error = econf_call(econf_readConfig)(&file, வெற்று,
 				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+#இல்லையெனில்
 		error = econf_call(econf_readDirs)(&file,
 				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
 #endif
-		if (error)
+		எனில் (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
+	எனில் (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
 
 }
 
-void logindefs_load_file(const char *filename)
+வெறுமை logindefs_load_file(மாறிலி எழுத்து *filename)
 {
-	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	econf_file *file_l = வெற்று, *file_m = வெற்று;
+	எழுத்து *path;
 
-	logindefs_loader = NULL; /* No recursion */
+	logindefs_loader = வெற்று; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	எனில் (ul_dlopen_libeconf() != 0)
+		திரும்பு;
 
-#if USE_VENDORDIR
+#எனில் USE_VENDORDIR
 	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	எனில் (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		எனில் (file == வெற்று)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		இல்லையெனில் எனில் (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	விடுவி (path);
 #endif
 
 	xasprintf(&path, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	எனில் (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		எனில் (file == வெற்று)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		இல்லையெனில் எனில் (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} இல்லையெனில் எனில் (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		எனில் (file == வெற்று)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		இல்லையெனில் எனில் (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	விடுவி (path);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+முழு getlogindefs_bool(மாறிலி எழுத்து *name, முழு dflt)
 {
-	bool value;
+	bool மதிப்பு;
 	econf_err error;
 
-	if (!file)
+	எனில் (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	எனில் (!file)
+		திரும்பு dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	எனில் ((error = econf_call(econf_get_Bool_மதிப்பு)(file, வெற்று, name, &மதிப்பு))) {
+		எனில் (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		திரும்பு dflt;
 	}
-	return value;
+	திரும்பு மதிப்பு;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_இலக்கம்(மாறிலி எழுத்து *name, unsigned long dflt)
 {
-	uint64_t value;
+	uint64_t மதிப்பு;
 	econf_err error;
 
-	if (!file)
+	எனில் (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	எனில் (!file)
+		திரும்பு dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	எனில் ((error = econf_call(econf_get_UInt64_மதிப்பு)(file, வெற்று, name, &மதிப்பு))) {
+		எனில் (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		திரும்பு dflt;
 	}
-	return value;
+	திரும்பு மதிப்பு;
 }
 
 /*
@@ -369,27 +369,27 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+மாறிலி எழுத்து *getlogindefs_str(மாறிலி எழுத்து *name, மாறிலி எழுத்து *dflt)
 {
-	char *value;
+	எழுத்து *மதிப்பு;
 	econf_err error;
 
-	if (!file)
+	எனில் (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	எனில் (!file)
+		திரும்பு dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	எனில் ((error = econf_call(econf_get_String_மதிப்பு)(file, வெற்று, name, &மதிப்பு))) {
+		எனில் (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		திரும்பு dflt;
 	}
-	if (value)
-		return value;
+	எனில் (மதிப்பு)
+		திரும்பு மதிப்பு;
 
-	return xstrdup("");
+	திரும்பு xstrdup("");
 }
 #endif /* !HAVE_LIBECONF */
 
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+முழு logindefs_setenv(மாறிலி எழுத்து *name, மாறிலி எழுத்து *conf, மாறிலி எழுத்து *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	மாறிலி எழுத்து *val = getlogindefs_str(conf, dflt);
+	மாறிலி எழுத்து *p;
 
-	if (!val)
-		return -1;
+	எனில் (!val)
+		திரும்பு -1;
 
 	p = strchr(val, '=');
-	if (p) {
+	எனில் (p) {
 		size_t sz = strlen(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		எனில் (strncmp(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			எனில் (*val == '"')
 				val++;
-			if (!*val)
+			எனில் (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	திரும்பு val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+முழு logindefs_setenv_path(uid_t uid)
 {
-	int rc = 0;
+	முழு rc = 0;
 
-	if (uid)
+	எனில் (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
-		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
+	இல்லையெனில் எனில் ((rc = logindefs_setenv("PATH", "ENV_SUPATH", வெற்று)) != 0)
+		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", PATH_DEFPATH_வேர்);
 
-	return rc;
+	திரும்பு rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+முழு effective_access(மாறிலி எழுத்து *path, முழு mode)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	முழு fd = open(path, mode);
+	எனில் (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	திரும்பு fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+முழு get_hushlogin_status(கட்டமைப்பு passwd *pwd, மாறிலி எழுத்து *override_home, முழு force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	மாறிலி எழுத்து *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, வெற்று };
+	மாறிலி எழுத்து *file;
+	எழுத்து buf[BUFSIZ];
+	முழு i;
 
-	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	file = getlogindefs_str("HUSHLOGIN_FILE", வெற்று);
+	எனில் (file) {
+		எனில் (!*file)
+			திரும்பு 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
-		files[1] = NULL;
+		files[1] = வெற்று;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	க்கு (i = 0; files[i]; i++) {
+		முழு ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		எனில் (*file == '/') {
+			கட்டமைப்பு stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
-				continue;	/* file does not exist */
+			எனில் (stat(file, &st) != 0)
+				தொடர்;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			எனில் (st.st_size == 0)
+				திரும்பு 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
-				continue;	/* ignore errors... */
+			எனில் (!f)
+				தொடர்;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
+			போது (ok == 0 && fgets(buf, அளவு(buf), f)) {
+				எனில் (buf[0] != '\0')
 					buf[strlen(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			எனில் (ok)
+				திரும்பு 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			திரும்பு 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
-			continue;
+		எனில் (strlen(pwd->pw_dir) + strlen(file) + 2 > அளவு(buf))
+			தொடர்;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
-			continue;
+		எனில் (snprintf(buf, அளவு(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+			தொடர்;
 
-		if (force_check) {
+		எனில் (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			எனில் (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			எனில் (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
 				exit(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			எனில் (ok)
+				திரும்பு 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		இல்லையெனில் {
+			முழு rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			எனில் (rc == 0)
+				திரும்பு 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			எனில் (rc == -1 && errno == EACCES)
+				திரும்பு -1;
 		}
 
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+முழு முதன்மை(முழு argc, எழுத்து *argv[])
 {
-	char *name, *type;
+	எழுத்து *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	எனில் (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
 	logindefs_load_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
+	எனில் (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+		முழு i;
+		எழுத்து *சாவிகள்[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
-				NULL};
+				வெற்று};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		க்கு (i = 0; file && சாவிகள்[i] != வெற்று; i++) {
+			எழுத்து *மதிப்பு = வெற்று;
 
-			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
-			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
+			econf_call(econf_get_String_மதிப்பு)(file, வெற்று, சாவிகள்[i], &மதிப்பு);
+			printf ("%s: $%s: '%s'\n", argv[1], சாவிகள்[i], மதிப்பு);
 		}
 
-		if (file)
+		எனில் (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#இல்லையெனில்
+		கட்டமைப்பு item *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
+		க்கு (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
-			       ptr->value);
+			       ptr->மதிப்பு);
 #endif
-		return EXIT_SUCCESS;
+		திரும்பு EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
+	எனில் (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
-		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
+	இல்லையெனில் எனில் (strcmp(type, "num") == 0)
+		printf("$%s: '%lu'\n", name, getlogindefs_இலக்கம்(name, 0));
+	இல்லையெனில் எனில் (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 #endif

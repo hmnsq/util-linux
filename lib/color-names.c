@@ -4,33 +4,33 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "color-names.h"
 
-#include <ctype.h>
+#அந்தர்பாவ <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+கட்டமைப்பு ul_color_name {
+	மாறிலி எழுத்து *name;
+	மாறிலி எழுத்து *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+நிலையான முழு cmp_color_name(மாறிலி வெறுமை *a0, மாறிலி வெறுமை *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	மாறிலி கட்டமைப்பு ul_color_name
+		*a = (மாறிலி கட்டமைப்பு ul_color_name *) a0,
+		*b = (மாறிலி கட்டமைப்பு ul_color_name *) b0;
+	திரும்பு strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+மாறிலி எழுத்து *color_sequence_from_colorname(மாறிலி எழுத்து *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	நிலையான மாறிலி கட்டமைப்பு ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
@@ -54,122 +54,122 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	கட்டமைப்பு ul_color_name சாவி = { .name = str };
+	மாறிலி கட்டமைப்பு ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	எனில் (!str)
+		திரும்பு வெற்று;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&சாவி, basic_schemes, ARRAY_SIZE(basic_schemes),
+				அளவு(கட்டமைப்பு ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	திரும்பு res ? res->seq : வெற்று;
 }
 
 
-int color_is_sequence(const char *color)
+முழு color_is_sequence(மாறிலி எழுத்து *color)
 {
-	if (color && *color == 0x1B) {
+	எனில் (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		எனில் (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		திரும்பு 1;
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+நிலையான முழு __color_canonicalize(மாறிலி எழுத்து *str, எழுத்து **seq)
 {
-	char *in, *out;
-	int len;
+	எழுத்து *in, *out;
+	முழு len;
 
-	if (!str)
-		return -EINVAL;
+	எனில் (!str)
+		திரும்பு -EINVAL;
 
-	*seq = NULL;
+	*seq = வெற்று;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	எனில் (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+		மாறிலி எழுத்து *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		எனில் (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			திரும்பு *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		திரும்பு 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	எனில் ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		திரும்பு -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	க்கு (in = *seq, out = *seq; in && *in; in++) {
+		எனில் (*in != '\\') {
 			*out++ = *in;
-			continue;
+			தொடர்;
 		}
-		switch(*(in + 1)) {
-		case 'a':
+		தேர்வு(*(in + 1)) {
+		நிலை 'a':
 			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
+			நிறுத்து;
+		நிலை 'b':
 			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
+			நிறுத்து;
+		நிலை 'e':
 			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
+			நிறுத்து;
+		நிலை 'f':
 			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
+			நிறுத்து;
+		நிலை 'n':
 			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
+			நிறுத்து;
+		நிலை 'r':
 			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
+			நிறுத்து;
+		நிலை 't':
 			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
+			நிறுத்து;
+		நிலை 'v':
 			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
+			நிறுத்து;
+		நிலை '\\':
 			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
+			நிறுத்து;
+		நிலை '_':
 			*out++ = ' ';	/* Space */
-			break;
-		case '#':
+			நிறுத்து;
+		நிலை '#':
 			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
+			நிறுத்து;
+		நிலை '?':
 			*out++ = '?';	/* Question mark */
-			break;
-		default:
+			நிறுத்து;
+		இயல்பு:
 			*out++ = *in;
 			*out++ = *(in + 1);
-			break;
+			நிறுத்து;
 		}
 		in++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
+	எனில் (out) {
+		ப்ரதிஜ்ஞா ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	திரும்பு 0;
 }
 
-char *color_get_sequence(const char *color)
+எழுத்து *color_get_sequence(மாறிலி எழுத்து *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	எழுத்து *seq = வெற்று;
+	முழு rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	திரும்பு rc ? வெற்று : seq;
 }

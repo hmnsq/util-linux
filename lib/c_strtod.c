@@ -6,104 +6,104 @@
  *
  * Copyright (C) 2021 Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
+#அந்தர்பாவ "c.h"
 
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
+#அந்தர்பாவ <locale.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <string.h>
 
-#include "c_strtod.h"
+#அந்தர்பாவ "c_strtod.h"
 
 #ifdef __APPLE__
 # include <xlocale.h>
 #endif
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#எனில் defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
 #endif
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#எனில் defined(USE_CLOCALE)
+நிலையான நிலையற்ற locale_t c_locale;
 
-static locale_t get_c_locale(void)
+நிலையான locale_t get_c_locale(வெறுமை)
 {
-	if (!c_locale)
+	எனில் (!c_locale)
 		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	திரும்பு c_locale;
 }
 #endif
 
 
-double c_strtod(char const *str, char **end)
+இரட்டை c_strtod(எழுத்து மாறிலி *str, எழுத்து **end)
 {
-	double res;
-	int errsv;
+	இரட்டை res;
+	முழு errsv;
 
-#if defined(USE_CLOCALE)
+#எனில் defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#எனில் defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
-#elif defined(HAVE_USELOCALE)
+	எனில் (cl)
+		திரும்பு strtod_l(str, end, cl);
+#அல்லதெனில் defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	எனில் (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		எனில் (!org_cl)
+			திரும்பு 0;
 
 		res = strtod(str, end);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		திரும்பு res;
 	}
 #endif /* HAVE_USELOCALE */
 #endif /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	எழுத்து *org_locale = setlocale(LC_NUMERIC, வெற்று);
 
-	if (org_locale) {
+	எனில் (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		எனில் (!org_locale)
+			திரும்பு 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
 	res = strtod(str, end);
 	errsv = errno;
 
-	if (org_locale) {
+	எனில் (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
-		free(org_locale);
+		விடுவி(org_locale);
 	}
 	errno = errsv;
-	return res;
+	திரும்பு res;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+முழு முதன்மை(முழு argc, எழுத்து *argv[])
 {
-	double res;
-	char *end;
+	இரட்டை res;
+	எழுத்து *end;
 
-	if (argc < 2) {
+	எனில் (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		திரும்பு EXIT_FAILURE;
 	}
 
 	res = c_strtod(argv[1], &end);
 	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	திரும்பு errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif

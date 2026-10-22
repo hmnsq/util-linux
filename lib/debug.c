@@ -3,15 +3,15 @@
  * it what you wish.
  */
 
-#include "debug.h"
+#அந்தர்பாவ "debug.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#அந்தர்பாவ <stdarg.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <stdio.h>
+#அந்தர்பாவ <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+வெறுமை ul_debug(மாறிலி எழுத்து *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -20,66 +20,66 @@ void ul_debug(const char *mesg, ...)
 	fputc('\n', stderr);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
-		     const void *handle, unsigned mask)
+வெறுமை ul_debug_prefix(மாறிலி எழுத்து *lib, மாறிலி எழுத்து *flag,
+		     மாறிலி வெறுமை *handle, unsigned mask)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	எனில் (handle && !(mask & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+unsigned ul_debug_parse_mask(மாறிலி கட்டமைப்பு ul_debug_maskname flagnames[],
+			     மாறிலி எழுத்து *mask)
 {
 	unsigned res;
-	char *ptr;
+	எழுத்து *ptr;
 
 	/* let's check for a numeric mask first */
 	res = strtoul(mask, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	எனில் (ptr && *ptr && flagnames && flagnames[0].name) {
+		எழுத்து *msbuf, *ms, *name;
 		res = 0;
 
 		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		எனில் (!ms)
+			திரும்பு res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		போது ((name = strtok_r(ms, ",", &ptr))) {
+			மாறிலி கட்டமைப்பு ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
+			க்கு (d = flagnames; d && d->name; d++) {
+				எனில் (strcmp(name, d->name) == 0) {
 					res |= d->mask;
-					break;
+					நிறுத்து;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			எனில் (res == UL_DEBUG_ALL)
+				நிறுத்து;
 		}
-		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+		விடுவி(msbuf);
+	} இல்லையெனில் எனில் (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	திரும்பு res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+வெறுமை ul_debug_print_masks(மாறிலி எழுத்து *env,
+			  மாறிலி கட்டமைப்பு ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	மாறிலி கட்டமைப்பு ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	எனில் (!flagnames)
+		திரும்பு;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
-			continue;
+	க்கு (d = flagnames; d && d->name; d++) {
+		எனில் (!d->help)
+			தொடர்;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
 				d->name, d->mask, d->help);
 	}

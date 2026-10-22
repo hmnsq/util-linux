@@ -2,141 +2,141 @@
  * No copyright is claimed. This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdlib.h>
-#include <assert.h>
-#include <unistd.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <assert.h>
+#அந்தர்பாவ <unistd.h>
 
-#include "c.h"
-#include "pwdutils.h"
-#include "xalloc.h"
-#include "strutils.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "pwdutils.h"
+#அந்தர்பாவ "xalloc.h"
+#அந்தர்பாவ "strutils.h"
 
-struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
+கட்டமைப்பு passwd *xgetpwuid(uid_t uid, எழுத்து **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	கட்டமைப்பு passwd *pwd = வெற்று, *res = வெற்று;
+	முழு rc;
 
-	assert(pwdbuf);
+	ப்ரதிஜ்ஞா(pwdbuf);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, அளவு(கட்டமைப்பு passwd));
 
 	errno = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
+	எனில் (rc != 0) {
 		errno = rc;
-		goto failed;
+		செல் failed;
 	}
-	if (!res) {
+	எனில் (!res) {
 		errno = EINVAL;
-		goto failed;
+		செல் failed;
 	}
-	return pwd;
+	திரும்பு pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	விடுவி(pwd);
+	விடுவி(*pwdbuf);
+	திரும்பு வெற்று;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
  * as @str. In case of error returns NULL and sets errno, for unknown user it
  * sets errno to EINVAL.
  */
-struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
+கட்டமைப்பு passwd *xgetuserpw(மாறிலி எழுத்து *str ,எழுத்து **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	கட்டமைப்பு passwd *pwd = வெற்று, *res = வெற்று;
+	முழு rc;
 	uint64_t uid;
 
-	assert(pwdbuf);
-	assert(str);
+	ப்ரதிஜ்ஞா(pwdbuf);
+	ப்ரதிஜ்ஞா(str);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, அளவு(கட்டமைப்பு passwd));
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
+	எனில் (rc == -ERANGE) {
 		errno = ERANGE;
-		goto failed;
+		செல் failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	எனில் (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
+	} இல்லையெனில் {
+		எனில் (uid > MAX_OF_UINT_TYPE(uid_t)) {
 			errno = ERANGE;
-			goto failed;
+			செல் failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	எனில் (rc != 0) {
 		errno = rc;
-		goto failed;
+		செல் failed;
 	}
-	if (!res) {
+	எனில் (!res) {
 		errno = EINVAL;
-		goto failed;
+		செல் failed;
 	}
-	return pwd;
+	திரும்பு pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	விடுவி(pwd);
+	விடுவி(*pwdbuf);
+	திரும்பு வெற்று;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
  * as @str. In case of error returns NULL and sets errno, for unknown group it
  * sets errno to EINVAL.
  */
-struct group *xgetgroup(const char *str, char **grpbuf)
+கட்டமைப்பு group *xgetgroup(மாறிலி எழுத்து *str, எழுத்து **grpbuf)
 {
-	struct group *grp = NULL, *res = NULL;
-	int rc;
+	கட்டமைப்பு group *grp = வெற்று, *res = வெற்று;
+	முழு rc;
 	uint64_t gid;
 
-	assert(grpbuf);
-	assert(str);
+	ப்ரதிஜ்ஞா(grpbuf);
+	ப்ரதிஜ்ஞா(str);
 
 	*grpbuf = xmalloc(UL_GETPW_BUFSIZ);
-	grp = xcalloc(1, sizeof(struct group));
+	grp = xcalloc(1, அளவு(கட்டமைப்பு group));
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
+	எனில் (rc == -ERANGE) {
 		errno = ERANGE;
-		goto failed;
+		செல் failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	எனில் (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
+	} இல்லையெனில் {
+		எனில் (gid > MAX_OF_UINT_TYPE(gid_t)) {
 			errno = ERANGE;
-			goto failed;
+			செல் failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	எனில் (rc != 0) {
 		errno = rc;
-		goto failed;
+		செல் failed;
 	}
-	if (!res) {
+	எனில் (!res) {
 		errno = EINVAL;
-		goto failed;
+		செல் failed;
 	}
-	return grp;
+	திரும்பு grp;
 failed:
-	free(grp);
-	free(*grpbuf);
-	return NULL;
+	விடுவி(grp);
+	விடுவி(*grpbuf);
+	திரும்பு வெற்று;
 }
 
-char *xgetlogin(void)
+எழுத்து *xgetlogin(வெறுமை)
 {
-	struct passwd *pw = NULL;
+	கட்டமைப்பு passwd *pw = வெற்று;
 	uid_t ruid;
 
 	/* GNU Hurd implementation has an extension where a process can exist in a
@@ -153,12 +153,12 @@ char *xgetlogin(void)
 	errno = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	எனில் (errno == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	எனில் (pw && pw->pw_name && *pw->pw_name)
+		திரும்பு xstrdup(pw->pw_name);
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
 /*
@@ -169,41 +169,41 @@ char *xgetlogin(void)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct group *ul_getgrp_str(const char *str, gid_t *result)
+கட்டமைப்பு group *ul_getgrp_str(மாறிலி எழுத்து *str, gid_t *result)
 {
-	int rc;
-	uint64_t num = 0;
-	struct group *gr;
+	முழு rc;
+	uint64_t இலக்கம் = 0;
+	கட்டமைப்பு group *gr;
 
-	if (result)
+	எனில் (result)
 		*result = (gid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	rc = ul_strtou64(str, &இலக்கம், 10);
+	எனில் (rc == -ERANGE || இலக்கம் > MAX_OF_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	எனில் (rc == -EINVAL) {
 		errno = 0;
 		gr = getgrnam(str);
-		if (gr && result)
+		எனில் (gr && result)
 			*result = gr->gr_gid;
-		else if (!gr && !errno)
+		இல்லையெனில் எனில் (!gr && !errno)
 			errno = EINVAL;
-		return gr;
+		திரும்பு gr;
 	}
 
-	if (result)
-		*result = (gid_t) num;
+	எனில் (result)
+		*result = (gid_t) இலக்கம்;
 
 	errno = 0;
-	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
+	gr = getgrgid((gid_t) இலக்கம்);
+	எனில் (!gr && !errno)
 		errno = EINVAL;
 
-	return gr;
+	திரும்பு gr;
 }
 
 /*
@@ -214,56 +214,56 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
+கட்டமைப்பு passwd *ul_getuserpw_str(மாறிலி எழுத்து *str, uid_t *result)
 {
-	int rc;
-	uint64_t num = 0;
-	struct passwd *pw;
+	முழு rc;
+	uint64_t இலக்கம் = 0;
+	கட்டமைப்பு passwd *pw;
 
-	if (result)
+	எனில் (result)
 		*result = (uid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	rc = ul_strtou64(str, &இலக்கம், 10);
+	எனில் (rc == -ERANGE || இலக்கம் > MAX_OF_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	எனில் (rc == -EINVAL) {
 		errno = 0;
 		pw = getpwnam(str);
-		if (pw && result)
+		எனில் (pw && result)
 			*result = pw->pw_uid;
-		else if (!pw && !errno)
+		இல்லையெனில் எனில் (!pw && !errno)
 			errno = EINVAL;
-		return pw;
+		திரும்பு pw;
 	}
 
-	if (result)
-		*result = (uid_t) num;
+	எனில் (result)
+		*result = (uid_t) இலக்கம்;
 
 	errno = 0;
-	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
+	pw = getpwuid((uid_t) இலக்கம்);
+	எனில் (!pw && !errno)
 		errno = EINVAL;
 
-	return pw;
+	திரும்பு pw;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+முழு முதன்மை(முழு argc, எழுத்து *argv[])
 {
-	char *buf = NULL;
-	struct passwd *pwd = NULL;
+	எழுத்து *buf = வெற்று;
+	கட்டமைப்பு passwd *pwd = வெற்று;
 
-	if (argc != 2) {
+	எனில் (argc != 2) {
 		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+		திரும்பு EXIT_FAILURE;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
+	எனில் (!pwd)
 		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
 
 	printf("Username: %s\n", pwd->pw_name);
@@ -271,12 +271,12 @@ int main(int argc, char *argv[])
 	printf("HOME:     %s\n", pwd->pw_dir);
 	printf("GECO:     %s\n", pwd->pw_gecos);
 
-	free(pwd);
-	free(buf);
+	விடுவி(pwd);
+	விடுவி(buf);
 
 	printf("Current:  %s\n", (buf = xgetlogin()));
-	free(buf);
+	விடுவி(buf);
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM */

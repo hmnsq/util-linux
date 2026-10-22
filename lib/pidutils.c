@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <sys/stat.h>
+#அந்தர்பாவ <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#அந்தர்பாவ "nls.h"
+#அந்தர்பாவ "strutils.h"
+#அந்தர்பாவ "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+முழு ul_parse_pid_str(எழுத்து *pidstr, pid_t *pid_இலக்கம், uint64_t *pfd_ino, முழு flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	முழு rc;
+	எழுத்து *end = வெற்று;
+	int64_t இலக்கம் = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	எனில் (!pidstr || !*pidstr || !pid_இலக்கம்)
+		திரும்பு -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	இலக்கம் = strtoimax(pidstr, &end, 10);
+	எனில் (இலக்கம் == 0 && end == pidstr)
+		திரும்பு -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	எனில் (errno == ERANGE || இலக்கம் < SINT_MIN(pid_t) || இலக்கம் > SINT_MAX(pid_t))
+		திரும்பு -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	எனில் (இலக்கம் == 0 && !(flags & UL_PID_ZERO))
+		திரும்பு -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	எனில் (இலக்கம் < 0 && !(flags & UL_PID_NEGATIVE))
+		திரும்பு -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_இலக்கம் = (pid_t) இலக்கம்;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	எனில் (*end == ':' && pfd_ino && இலக்கம் > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		எனில் (rc < 0)
+			திரும்பு rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		எனில் (*pfd_ino == 0)
+			திரும்பு -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	எனில் (end && *end != '\0')
+		திரும்பு -(errno = EINVAL);
+	திரும்பு 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+வெறுமை ul_parse_pid_str_or_err(எழுத்து *pidstr, pid_t *pid_இலக்கம், uint64_t *pfd_ino, முழு flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	எனில் (ul_parse_pid_str(pidstr, pid_இலக்கம், pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -92,9 +92,9 @@ void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, in
 
 #ifdef TEST_PROGRAM_PARSEPID
 
-#include <getopt.h>
+#அந்தர்பாவ <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+நிலையான வெறுமை __attribute__((__noreturn__)) usage(வெறுமை)
 {
 	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
 	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+முழு முதன்மை(முழு argc, எழுத்து **argv)
 {
-	int c, flags = 0, rc = 0;
+	முழு c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_இலக்கம் = 0;
+	எழுத்து *str = வெற்று;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	நிலையான மாறிலி கட்டமைப்பு option longopts[] = {
+		{ "zero",	0, வெற்று, 'z' },
+		{ "negative",	0, வெற்று, 'n' },
+		{ "help",       0, வெற்று, 'h' },
+		{ வெற்று, 0, வெற்று, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	போது((c = getopt_long(argc, argv, "nhz", longopts, வெற்று)) != -1) {
+		தேர்வு(c) {
+		நிலை 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			நிறுத்து;
+		நிலை 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			நிறுத்து;
+		நிலை 'h':
 			usage();
-			break;
-		default:
+			நிறுத்து;
+		இயல்பு:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	எனில் (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	rc = ul_parse_pid_str(str, &pid_இலக்கம், &pidfd_ino, flags);
+	எனில் (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	printf("PID: %d\n", pid_இலக்கம்);
+	எனில் (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	திரும்பு EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */

@@ -1,78 +1,78 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include <sys/types.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <paths.h>
-#include <unistd.h>
-#include <sys/syslog.h>
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-#include "dl-econf.h"
+#அந்தர்பாவ <sys/types.h>
+#அந்தர்பாவ <pwd.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <paths.h>
+#அந்தர்பாவ <unistd.h>
+#அந்தர்பாவ <sys/syslog.h>
+#எனில் defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+#அந்தர்பாவ "dl-econf.h"
 #endif
 
-#include "closestream.h"
-#include "shells.h"
+#அந்தர்பாவ "closestream.h"
+#அந்தர்பாவ "shells.h"
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-econf_file *open_etc_shells(void)
+#எனில் defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+econf_file *open_etc_shells(வெறுமை)
 {
 	econf_err error;
-	econf_file *key_file = NULL;
+	econf_file *சாவி_file = வெற்று;
 
-	if (ul_dlopen_libeconf() != 0)
-		return NULL;
+	எனில் (ul_dlopen_libeconf() != 0)
+		திரும்பு வெற்று;
 
-	error = econf_call(econf_readDirs)(&key_file,
+	error = econf_call(econf_readDirs)(&சாவி_file,
 			       _PATH_VENDORDIR,
 			       "/etc",
 			       "shells",
-			       NULL,
+			       வெற்று,
 			       "", /* key only */
 			       "#" /* comment */);
-	if (error) {
+	எனில் (error) {
 		syslog(LOG_ALERT,
 		       _("Cannot parse shells files: %s"),
 		       econf_call(econf_errString)(error));
-		return NULL;
+		திரும்பு வெற்று;
 	}
 
-	return key_file;
+	திரும்பு சாவி_file;
 }
 #endif
 
 /*
  *  print_shells () -- /etc/shells is outputted to stdout.
  */
-extern void print_shells(FILE *out, const char *format)
+வெளி வெறுமை print_shells(FILE *out, மாறிலி எழுத்து *format)
 {
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+#எனில் defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
 	size_t size = 0;
 	econf_err error;
-	char **keys = NULL;
-	econf_file *key_file = open_etc_shells();
+	எழுத்து **சாவிகள் = வெற்று;
+	econf_file *சாவி_file = open_etc_shells();
 
-	if (!key_file)
-	  return;
+	எனில் (!சாவி_file)
+	  திரும்பு;
 
-	error = econf_call(econf_getKeys)(key_file, NULL, &size, &keys);
-	if (error) {
-		econf_call(econf_freeFile)(key_file);
+	error = econf_call(econf_get_சாவிகள்)(சாவி_file, வெற்று, &size, &சாவிகள்);
+	எனில் (error) {
+		econf_call(econf_freeFile)(சாவி_file);
 		errx(EXIT_FAILURE,
 		  _("Cannot evaluate entries in shells files: %s"),
 		  econf_call(econf_errString)(error));
 	}
 
-	for (size_t i = 0; i < size; i++) {
-		fprintf(out, format, keys[i]);
+	க்கு (size_t i = 0; i < size; i++) {
+		fprintf(out, format, சாவிகள்[i]);
 	}
-	econf_call(econf_freeArray)(keys);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	econf_call(econf_freeArray)(சாவிகள்);
+	econf_call(econf_freeFile)(சாவி_file);
+#இல்லையெனில்
+	எழுத்து *s;
 
 	setusershell();
-	while ((s = getusershell()))
+	போது ((s = getusershell()))
 		fprintf(out, format, s);
 	endusershell();
 #endif
@@ -84,43 +84,43 @@ extern void print_shells(FILE *out, const char *format)
  *  or vendor defined files.
  *  Return 1 if found and return 0 if not found.
  */
-extern int is_known_shell(const char *shell_name)
+வெளி முழு is_known_shell(மாறிலி எழுத்து *shell_name)
 {
-	int ret = 0;
+	முழு ret = 0;
 
-	if (!shell_name)
-		return 0;
+	எனில் (!shell_name)
+		திரும்பு 0;
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-	char *val = NULL;
+#எனில் defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+	எழுத்து *val = வெற்று;
 	econf_err error;
-	econf_file *key_file = open_etc_shells();
+	econf_file *சாவி_file = open_etc_shells();
 
-	if (!key_file)
-		return 0;
+	எனில் (!சாவி_file)
+		திரும்பு 0;
 
-	error = econf_call(econf_getStringValue) (key_file, NULL, shell_name, &val);
-	if (error) {
-		if (error != ECONF_NOKEY)
+	error = econf_call(econf_get_String_மதிப்பு) (சாவி_file, வெற்று, shell_name, &val);
+	எனில் (error) {
+		எனில் (error != ECONF_NOKEY)
 			syslog(LOG_ALERT,
 			       _("Cannot evaluate entries in shells files: %s"),
 			       econf_call(econf_errString)(error));
-	} else
+	} இல்லையெனில்
 		ret = 1;
 
-	free(val);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	விடுவி(val);
+	econf_call(econf_freeFile)(சாவி_file);
+#இல்லையெனில்
+	எழுத்து *s;
 
 	setusershell();
-	while ((s = getusershell())) {
-		if (*s != '#' && strcmp(shell_name, s) == 0) {
+	போது ((s = getusershell())) {
+		எனில் (*s != '#' && strcmp(shell_name, s) == 0) {
 			ret = 1;
-			break;
+			நிறுத்து;
 		}
 	}
 	endusershell();
 #endif
-	return ret;
+	திரும்பு ret;
 }

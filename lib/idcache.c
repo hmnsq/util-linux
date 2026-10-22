@@ -4,122 +4,122 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
+#அந்தர்பாவ <pwd.h>
+#அந்தர்பாவ <grp.h>
+#அந்தர்பாவ <sys/types.h>
 
-#include "c.h"
-#include "widechar.h"
-#include "idcache.h"
+#அந்தர்பாவ "c.h"
+#அந்தர்பாவ "widechar.h"
+#அந்தர்பாவ "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+கட்டமைப்பு identry *get_id(கட்டமைப்பு idcache *ic, unsigned long முழு id)
 {
-	struct identry *ent;
+	கட்டமைப்பு identry *ent;
 
-	if (!ic)
-		return NULL;
+	எனில் (!ic)
+		திரும்பு வெற்று;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	க்கு (ent = ic->ent; ent; ent = ent->next) {
+		எனில் (ent->id == id)
+			திரும்பு ent;
 	}
 
-	return NULL;
+	திரும்பு வெற்று;
 }
 
-struct idcache *new_idcache(void)
+கட்டமைப்பு idcache *new_idcache(வெறுமை)
 {
-	return calloc(1, sizeof(struct idcache));
+	திரும்பு calloc(1, அளவு(கட்டமைப்பு idcache));
 }
 
-void free_idcache(struct idcache *ic)
+வெறுமை free_idcache(கட்டமைப்பு idcache *ic)
 {
-	struct identry *ent;
+	கட்டமைப்பு identry *ent;
 
-	if (!ic)
-		return;
+	எனில் (!ic)
+		திரும்பு;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
-		free(ent->name);
-		free(ent);
+	போது (ent) {
+		கட்டமைப்பு identry *next = ent->next;
+		விடுவி(ent->name);
+		விடுவி(ent);
 		ent = next;
 	}
 
-	free(ic);
+	விடுவி(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+நிலையான வெறுமை add_id(கட்டமைப்பு idcache *ic, எழுத்து *name, unsigned long முழு id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	கட்டமைப்பு identry *ent, *x;
+	முழு w = 0;
 
-	if (!ic)
-		return;
+	எனில் (!ic)
+		திரும்பு;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = calloc(1, அளவு(கட்டமைப்பு identry));
+	எனில் (!ent)
+		திரும்பு;
 	ent->id = id;
 
-	if (name) {
+	எனில் (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		எனில் (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		இல்லையெனில்
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	எனில் (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
-			free(ent);
-			return;
+		எனில் (!ent->name) {
+			விடுவி(ent);
+			திரும்பு;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
-			free(ent);
-			return;
+	} இல்லையெனில் {
+		எனில் (asprintf(&ent->name, "%lu", id) < 0) {
+			விடுவி(ent);
+			திரும்பு;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	க்கு (x = ic->ent; x && x->next; x = x->next);
 
-	if (x)
+	எனில் (x)
 		x->next = ent;
-	else
+	இல்லையெனில்
 		ic->ent = ent;
 
-	if (w <= 0)
+	எனில் (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+வெறுமை add_uid(கட்டமைப்பு idcache *cache, unsigned long முழு id)
 {
-	struct identry *ent = get_id(cache, id);
+	கட்டமைப்பு identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
-		add_id(cache, pw ? pw->pw_name : NULL, id);
+	எனில் (!ent) {
+		கட்டமைப்பு passwd *pw = getpwuid((uid_t) id);
+		add_id(cache, pw ? pw->pw_name : வெற்று, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+வெறுமை add_gid(கட்டமைப்பு idcache *cache, unsigned long முழு id)
 {
-	struct identry *ent = get_id(cache, id);
+	கட்டமைப்பு identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
-		add_id(cache, gr ? gr->gr_name : NULL, id);
+	எனில் (!ent) {
+		கட்டமைப்பு group *gr = getgrgid((gid_t) id);
+		add_id(cache, gr ? gr->gr_name : வெற்று, id);
 	}
 }
 

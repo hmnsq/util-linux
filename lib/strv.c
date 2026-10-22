@@ -14,73 +14,73 @@
  *    Modified the original version from systemd project for util-linux.
  */
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <assert.h>
+#அந்தர்பாவ <stdlib.h>
+#அந்தர்பாவ <stdarg.h>
+#அந்தர்பாவ <string.h>
+#அந்தர்பாவ <errno.h>
+#அந்தர்பாவ <stdbool.h>
+#அந்தர்பாவ <assert.h>
 
-#include "strutils.h"
-#include "strv.h"
+#அந்தர்பாவ "strutils.h"
+#அந்தர்பாவ "strv.h"
 
-static void ul_strv_clear(char **l)
+நிலையான வெறுமை ul_strv_clear(எழுத்து **l)
 {
-        char **k;
+        எழுத்து **k;
 
-        if (!l)
-                return;
+        எனில் (!l)
+                திரும்பு;
 
-        for (k = l; *k; k++)
-                free(*k);
+        க்கு (k = l; *k; k++)
+                விடுவி(*k);
 
-        *l = NULL;
+        *l = வெற்று;
 }
 
-char **ul_strv_free(char **l)
+எழுத்து **ul_strv_free(எழுத்து **l)
 {
         ul_strv_clear(l);
-        free(l);
-        return NULL;
+        விடுவி(l);
+        திரும்பு வெற்று;
 }
 
-char **ul_strv_copy(char * const *l)
+எழுத்து **ul_strv_copy(எழுத்து * மாறிலி *l)
 {
-        char **r, **k;
+        எழுத்து **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = malloc(அளவு(எழுத்து *) * (ul_strv_length(l) + 1));
+        எனில் (!r)
+                திரும்பு வெற்று;
 
-        if (l)
-                for (; *l; k++, l++) {
+        எனில் (l)
+                க்கு (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        எனில் (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                திரும்பு வெற்று;
                         }
                 }
 
-        *k = NULL;
-        return r;
+        *k = வெற்று;
+        திரும்பு r;
 }
 
-unsigned ul_strv_length(char * const *l) {
+unsigned ul_strv_length(எழுத்து * மாறிலி *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        எனில் (!l)
+                திரும்பு 0;
 
-        for (; *l; l++)
+        க்கு (; *l; l++)
                 n++;
 
-        return n;
+        திரும்பு n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+நிலையான எழுத்து **ul_strv_new_ap(மாறிலி எழுத்து *x, va_list ap)
 {
-        const char *s;
-        char **a;
+        மாறிலி எழுத்து *s;
+        எழுத்து **a;
         unsigned n = 0, i = 0;
         va_list aq;
 
@@ -89,13 +89,13 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        எனில் (x) {
+                n = x == (மாறிலி எழுத்து*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
-                                continue;
+                போது ((s = va_arg(aq, மாறிலி எழுத்து*))) {
+                        எனில் (s == (மாறிலி எழுத்து*) -1)
+                                தொடர்;
 
                         n++;
                 }
@@ -103,153 +103,153 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = malloc(அளவு(எழுத்து *) * (n + 1));
+        எனில் (!a)
+                திரும்பு வெற்று;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        எனில் (x) {
+                எனில் (x != (மாறிலி எழுத்து*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
-                                goto fail;
+                        எனில் (!a[i])
+                                செல் fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                போது ((s = va_arg(ap, மாறிலி எழுத்து*))) {
 
-                        if (s == (const char*) -1)
-                                continue;
+                        எனில் (s == (மாறிலி எழுத்து*) -1)
+                                தொடர்;
 
                         a[i] = strdup(s);
-                        if (!a[i])
-                                goto fail;
+                        எனில் (!a[i])
+                                செல் fail;
 
                         i++;
                 }
         }
 
-        a[i] = NULL;
+        a[i] = வெற்று;
 
-        return a;
+        திரும்பு a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        திரும்பு வெற்று;
 }
 
-char **ul_strv_new(const char *x, ...)
+எழுத்து **ul_strv_new(மாறிலி எழுத்து *x, ...)
 {
-        char **r;
+        எழுத்து **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        திரும்பு r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+முழு ul_strv_extend_strv(எழுத்து ***a, எழுத்து **b)
 {
-        int r;
-        char **s;
+        முழு r;
+        எழுத்து **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                எனில் (r < 0)
+                        திரும்பு r;
         }
 
-        return 0;
+        திரும்பு 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+முழு ul_strv_extend_strv_concat(எழுத்து ***a, எழுத்து **b, மாறிலி எழுத்து *suffix)
 {
-        int r;
-        char **s;
+        முழு r;
+        எழுத்து **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                எழுத்து *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                எனில் (!v)
+                        திரும்பு -ENOMEM;
 
-                r = ul_strv_push(a, v);
-                if (r < 0) {
-                        free(v);
-                        return r;
+                r = ul_strv_தள்ளு(a, v);
+                எனில் (r < 0) {
+                        விடுவி(v);
+                        திரும்பு r;
                 }
         }
 
-        return 0;
+        திரும்பு 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        க்கு ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+எழுத்து **ul_strv_split(மாறிலி எழுத்து *s, மாறிலி எழுத்து *separator)
 {
-        const char *word, *state;
+        மாறிலி எழுத்து *word, *state;
         size_t l;
         unsigned n, i;
-        char **r;
+        எழுத்து **r;
 
-        assert(s);
+        ப்ரதிஜ்ஞா(s);
 
         n = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = malloc(அளவு(எழுத்து *) * (n + 1));
+        எனில் (!r)
+                திரும்பு வெற்று;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                எனில் (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        திரும்பு வெற்று;
                 }
 
                 i++;
         }
 
-        r[i] = NULL;
-        return r;
+        r[i] = வெற்று;
+        திரும்பு r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+எழுத்து *ul_strv_join(எழுத்து **l, மாறிலி எழுத்து *separator)
 {
-        char *r, *e;
-        char **s;
+        எழுத்து *r, *e;
+        எழுத்து **s;
         size_t n, k;
 
-        if (!separator)
+        எனில் (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                எனில் (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        எனில் (!r)
+                திரும்பு வெற்று;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                எனில் (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,167 +257,167 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        திரும்பு r;
 }
 
-int ul_strv_push(char ***l, char *value)
+முழு ul_strv_தள்ளு(எழுத்து ***l, எழுத்து *மதிப்பு)
 {
-        char **c;
+        எழுத்து **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        எனில் (!மதிப்பு)
+                திரும்பு 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        எனில் (m < n)
+                திரும்பு -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, அளவு(எழுத்து *));
+        எனில் (!c)
+                திரும்பு -ENOMEM;
 
-        c[n] = value;
-        c[n+1] = NULL;
+        c[n] = மதிப்பு;
+        c[n+1] = வெற்று;
 
         *l = c;
-        return 0;
+        திரும்பு 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+முழு ul_strv_தள்ளு_prepend(எழுத்து ***l, எழுத்து *மதிப்பு)
 {
-        char **c;
+        எழுத்து **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        எனில் (!மதிப்பு)
+                திரும்பு 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        எனில் (m < n)
+                திரும்பு -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = malloc(அளவு(எழுத்து *) * m);
+        எனில் (!c)
+                திரும்பு -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        க்கு (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
-        c[0] = value;
-        c[n+1] = NULL;
+        c[0] = மதிப்பு;
+        c[n+1] = வெற்று;
 
-        free(*l);
+        விடுவி(*l);
         *l = c;
 
-        return 0;
+        திரும்பு 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+முழு ul_strv_consume(எழுத்து ***l, எழுத்து *மதிப்பு)
 {
-        int r;
+        முழு r;
 
-        r = ul_strv_push(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_தள்ளு(l, மதிப்பு);
+        எனில் (r < 0)
+                விடுவி(மதிப்பு);
 
-        return r;
+        திரும்பு r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+முழு ul_strv_consume_prepend(எழுத்து ***l, எழுத்து *மதிப்பு)
 {
-        int r;
+        முழு r;
 
-        r = ul_strv_push_prepend(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_தள்ளு_prepend(l, மதிப்பு);
+        எனில் (r < 0)
+                விடுவி(மதிப்பு);
 
-        return r;
+        திரும்பு r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+முழு ul_strv_extend(எழுத்து ***l, மாறிலி எழுத்து *மதிப்பு)
 {
-        char *v;
+        எழுத்து *v;
 
-        if (!value)
-                return 0;
+        எனில் (!மதிப்பு)
+                திரும்பு 0;
 
-        v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        v = strdup(மதிப்பு);
+        எனில் (!v)
+                திரும்பு -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        திரும்பு ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+எழுத்து **ul_strv_remove(எழுத்து **l, மாறிலி எழுத்து *s)
 {
-        char **f, **t;
+        எழுத்து **f, **t;
 
-        if (!l)
-                return NULL;
+        எனில் (!l)
+                திரும்பு வெற்று;
 
-        assert(s);
+        ப்ரதிஜ்ஞா(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
-                        free(*f);
-                else
+        க்கு (f = t = l; *f; f++)
+                எனில் (strcmp(*f, s) == 0)
+                        விடுவி(*f);
+                இல்லையெனில்
                         *(t++) = *f;
 
-        *t = NULL;
-        return l;
+        *t = வெற்று;
+        திரும்பு l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+முழு ul_strv_extendf(எழுத்து ***l, மாறிலி எழுத்து *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        எழுத்து *x;
+        முழு r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        எனில் (r < 0)
+                திரும்பு -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        திரும்பு ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+முழு ul_strv_extendv(எழுத்து ***l, மாறிலி எழுத்து *format, va_list ap)
 {
-        char *x;
-        int r;
+        எழுத்து *x;
+        முழு r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        எனில் (r < 0)
+                திரும்பு -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        திரும்பு ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+எழுத்து **ul_strv_reverse(எழுத்து **l)
 {
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        எனில் (n <= 1)
+                திரும்பு l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        க்கு (i = 0; i < n / 2; i++) {
+                எழுத்து *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        திரும்பு l;
 }
