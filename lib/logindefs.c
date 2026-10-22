@@ -19,31 +19,31 @@
  *    products derived from this software without their specific prior
  *   written permission.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <pwd.h>
+#ଅନ୍ତର୍ଭାଵ <assert.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <limits.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <sys/syslog.h>
+#ଅନ୍ତର୍ଭାଵ <sys/stat.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <pwd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "closestream.h"
-#include "logindefs.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "xalloc.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "cctype.h"
+#ଅନ୍ତର୍ଭାଵ "closestream.h"
+#ଅନ୍ତର୍ଭାଵ "logindefs.h"
+#ଅନ୍ତର୍ଭାଵ "nls.h"
+#ଅନ୍ତର୍ଭାଵ "pathnames.h"
+#ଅନ୍ତର୍ଭାଵ "xalloc.h"
 
 
-static void (*logindefs_loader)(void *) = NULL;
-static void *logindefs_loader_data = NULL;
+ସ୍ଥିର ଶୂନ୍ୟ (*logindefs_loader)(ଶୂନ୍ୟ *) = ଖାଲି;
+ସ୍ଥିର ଶୂନ୍ୟ *logindefs_loader_data = ଖାଲି;
 
-void logindefs_set_loader(void (*loader)(void *data), void *data)
+ଶୂନ୍ୟ logindefs_set_loader(ଶୂନ୍ୟ (*loader)(ଶୂନ୍ୟ *data), ଶୂନ୍ୟ *data)
 {
 	logindefs_loader = loader;
 	logindefs_loader_data = data;
@@ -51,102 +51,102 @@ void logindefs_set_loader(void (*loader)(void *data), void *data)
 
 #ifndef HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+ସଂରଚନା item {
+	ଅକ୍ଷର *name;		/* name of the option.  */
+	ଅକ୍ଷର *ମୂଲ୍ୟ;		/* value of the option.  */
+	ଅକ୍ଷର *path;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	ସଂରଚନା item *next;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+ସ୍ଥିର ସଂରଚନା item *list = ଖାଲି;
 
-void free_getlogindefs_data(void)
+ଶୂନ୍ୟ free_getlogindefs_data(ଶୂନ୍ୟ)
 {
-	struct item *ptr;
+	ସଂରଚନା item *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	ଯେତେବେଳେ (ptr) {
+		ସଂରଚନା item *tmp = ptr->next;
 
-		free(ptr->path);
-		free(ptr->name);
-		free(ptr->value);
-		free(ptr);
+		ମୁକ୍ତ(ptr->path);
+		ମୁକ୍ତ(ptr->name);
+		ମୁକ୍ତ(ptr->ମୂଲ୍ୟ);
+		ମୁକ୍ତ(ptr);
 		ptr = tmp;
 	}
 
-	list = NULL;
+	list = ଖାଲି;
 }
 
-static void store(const char *name, const char *value, const char *path)
+ସ୍ଥିର ଶୂନ୍ୟ store(ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ, ଅଚଳ ଅକ୍ଷର *path)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	ସଂରଚନା item *new = xmalloc(ଆକାର(ସଂରଚନା item));
 
-	if (!name)
+	ଯଦି (!name)
 		abort();
 
 	new->name = xstrdup(name);
-	new->value = value && *value ? xstrdup(value) : NULL;
+	new->ମୂଲ୍ୟ = ମୂଲ୍ୟ && *ମୂଲ୍ୟ ? xstrdup(ମୂଲ୍ୟ) : ଖାଲି;
 	new->path = xstrdup(path);
 	new->next = list;
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+ଶୂନ୍ୟ logindefs_load_file(ଅଚଳ ଅକ୍ଷର *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	ଅକ୍ଷର buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	ଯଦି (!f)
+		ଫେରନ୍ତୁ;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	ଯେତେବେଳେ (fgets(buf, ଆକାର(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		ଅକ୍ଷର *p, *name, *data = ଖାଲି;
 
-		if (*buf == '#' || *buf == '\n')
-			continue;	/* only comment or empty line */
+		ଯଦି (*buf == '#' || *buf == '\n')
+			ଜାରି;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		ଯଦି (p)
 			*p = '\0';
-		else {
+		ଅନ୍ୟଥା {
 			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+			ଯଦି (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
-			continue;	/* empty line */
+		ଯଦି (!*buf)
+			ଜାରି;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		ଯେତେବେଳେ (*name && isspace((unsigned)*name))
 			name++;
 
 		/* go to the end of the name */
 		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
+		ଯେତେବେଳେ (*data && !(isspace((unsigned)*data) || *data == '='))
 			data++;
-		if (data > name && *data)
+		ଯଦି (data > name && *data)
 			*data++ = '\0';
 
-		if (!*name || data == name)
-			continue;
+		ଯଦି (!*name || data == name)
+			ଜାରି;
 
 		/* go to the begin of the value */
-		while (*data
+		ଯେତେବେଳେ (*data
 		       && (isspace((unsigned)*data) || *data == '='
 			   || *data == '"'))
 			data++;
 
 		/* remove space at the end of the value */
 		p = data + strlen(data);
-		if (p > data)
+		ଯଦି (p > data)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		ଯେତେବେଳେ (p > data && (isspace((unsigned)*p) || *p == '"'))
 			*p-- = '\0';
 
 		store(name, data, filename);
@@ -155,68 +155,68 @@ void logindefs_load_file(const char *filename)
 	fclose(f);
 }
 
-static void load_defaults(void)
+ସ୍ଥିର ଶୂନ୍ୟ load_defaults(ଶୂନ୍ୟ)
 {
-	if (logindefs_loader)
+	ଯଦି (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
-	else
+	ଅନ୍ୟଥା
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+ସ୍ଥିର ସଂରଚନା item *ସନ୍ଧାନ(ଅଚଳ ଅକ୍ଷର *name)
 {
-	struct item *ptr;
+	ସଂରଚନା item *ptr;
 
-	if (!list)
+	ଯଦି (!list)
 		load_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
+	ଯେତେବେଳେ (ptr != ଖାଲି) {
+		ଯଦି (c_strcasecmp(name, ptr->name) == 0)
+			ଫେରନ୍ତୁ ptr;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
-static const char *search_config(const char *name)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *ସନ୍ଧାନ_config(ଅଚଳ ଅକ୍ଷର *name)
 {
-	struct item *ptr;
+	ସଂରଚନା item *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
+	ଯେତେବେଳେ (ptr != ଖାଲି) {
+		ଯଦି (c_strcasecmp(name, ptr->name) == 0)
+			ଫେରନ୍ତୁ ptr->path;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା getlogindefs_bool(ଅଚଳ ଅକ୍ଷର *name, ପୂର୍ଣ୍ଣସଂଖ୍ୟା dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	ସଂରଚନା item *ptr = ସନ୍ଧାନ(name);
+	ଫେରନ୍ତୁ ptr && ptr->ମୂଲ୍ୟ ? (c_strcasecmp(ptr->ମୂଲ୍ୟ, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_ଅଙ୍କ(ଅଚଳ ଅକ୍ଷର *name, unsigned long dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
+	ସଂରଚନା item *ptr = ସନ୍ଧାନ(name);
+	ଅକ୍ଷର *end = ଖାଲି;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	ଯଦି (!ptr || !ptr->ମୂଲ୍ୟ)
+		ଫେରନ୍ତୁ dflt;
 
 	errno = 0;
-	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	retval = strtoul(ptr->ମୂଲ୍ୟ, &end, 0);
+	ଯଦି (end && *end == '\0' && !errno)
+		ଫେରନ୍ତୁ retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
-	       search_config(name), name, ptr->value);
-	return dflt;
+	       ସନ୍ଧାନ_config(name), name, ptr->ମୂଲ୍ୟ);
+	ଫେରନ୍ତୁ dflt;
 }
 
 /*
@@ -225,142 +225,142 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+ଅଚଳ ଅକ୍ଷର *getlogindefs_str(ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *dflt)
 {
-	struct item *ptr = search(name);
+	ସଂରଚନା item *ptr = ସନ୍ଧାନ(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	ଯଦି (!ptr)
+		ଫେରନ୍ତୁ dflt;
+	ଯଦି (!ptr->ମୂଲ୍ୟ)
+		ଫେରନ୍ତୁ "";
+	ଫେରନ୍ତୁ ptr->ମୂଲ୍ୟ;
 }
 
-#else /* !HAVE_LIBECONF */
+#ଅନ୍ୟଥା /* !HAVE_LIBECONF */
 
-#include "dl-econf.h"
+#ଅନ୍ତର୍ଭାଵ "dl-econf.h"
 
-static econf_file *file = NULL;
+ସ୍ଥିର econf_file *file = ଖାଲି;
 
-void free_getlogindefs_data(void)
+ଶୂନ୍ୟ free_getlogindefs_data(ଶୂନ୍ୟ)
 {
-	if (file)
+	ଯଦି (file)
 		econf_call(econf_freeFile)(file);
-	file = NULL;
+	file = ଖାଲି;
 }
 
-static void load_defaults(void)
+ସ୍ଥିର ଶୂନ୍ୟ load_defaults(ଶୂନ୍ୟ)
 {
 	econf_err error;
 
-	if (file != NULL)
+	ଯଦି (file != ଖାଲି)
 		free_getlogindefs_data();
 
-	if (ul_dlopen_libeconf() == 0) {
+	ଯଦି (ul_dlopen_libeconf() == 0) {
 #ifdef HAVE_ECONF_READCONFIG
-		error = econf_call(econf_readConfig)(&file, NULL,
+		error = econf_call(econf_readConfig)(&file, ଖାଲି,
 				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+#ଅନ୍ୟଥା
 		error = econf_call(econf_readDirs)(&file,
 				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
 #endif
-		if (error)
+		ଯଦି (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
+	ଯଦି (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
 
 }
 
-void logindefs_load_file(const char *filename)
+ଶୂନ୍ୟ logindefs_load_file(ଅଚଳ ଅକ୍ଷର *filename)
 {
-	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	econf_file *file_l = ଖାଲି, *file_m = ଖାଲି;
+	ଅକ୍ଷର *path;
 
-	logindefs_loader = NULL; /* No recursion */
+	logindefs_loader = ଖାଲି; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	ଯଦି (ul_dlopen_libeconf() != 0)
+		ଫେରନ୍ତୁ;
 
-#if USE_VENDORDIR
+#ଯଦି USE_VENDORDIR
 	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	ଯଦି (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		ଯଦି (file == ଖାଲି)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		ଅନ୍ୟଥା ଯଦି (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	ମୁକ୍ତ (path);
 #endif
 
 	xasprintf(&path, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	ଯଦି (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		ଯଦି (file == ଖାଲି)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		ଅନ୍ୟଥା ଯଦି (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} ଅନ୍ୟଥା ଯଦି (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		ଯଦି (file == ଖାଲି)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		ଅନ୍ୟଥା ଯଦି (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	ମୁକ୍ତ (path);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା getlogindefs_bool(ଅଚଳ ଅକ୍ଷର *name, ପୂର୍ଣ୍ଣସଂଖ୍ୟା dflt)
 {
-	bool value;
+	bool ମୂଲ୍ୟ;
 	econf_err error;
 
-	if (!file)
+	ଯଦି (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	ଯଦି (!file)
+		ଫେରନ୍ତୁ dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ଯଦି ((error = econf_call(econf_get_Bool_ମୂଲ୍ୟ)(file, ଖାଲି, name, &ମୂଲ୍ୟ))) {
+		ଯଦି (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ଫେରନ୍ତୁ dflt;
 	}
-	return value;
+	ଫେରନ୍ତୁ ମୂଲ୍ୟ;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_ଅଙ୍କ(ଅଚଳ ଅକ୍ଷର *name, unsigned long dflt)
 {
-	uint64_t value;
+	uint64_t ମୂଲ୍ୟ;
 	econf_err error;
 
-	if (!file)
+	ଯଦି (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	ଯଦି (!file)
+		ଫେରନ୍ତୁ dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ଯଦି ((error = econf_call(econf_get_UInt64_ମୂଲ୍ୟ)(file, ଖାଲି, name, &ମୂଲ୍ୟ))) {
+		ଯଦି (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ଫେରନ୍ତୁ dflt;
 	}
-	return value;
+	ଫେରନ୍ତୁ ମୂଲ୍ୟ;
 }
 
 /*
@@ -369,27 +369,27 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+ଅଚଳ ଅକ୍ଷର *getlogindefs_str(ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *dflt)
 {
-	char *value;
+	ଅକ୍ଷର *ମୂଲ୍ୟ;
 	econf_err error;
 
-	if (!file)
+	ଯଦି (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	ଯଦି (!file)
+		ଫେରନ୍ତୁ dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ଯଦି ((error = econf_call(econf_get_String_ମୂଲ୍ୟ)(file, ଖାଲି, name, &ମୂଲ୍ୟ))) {
+		ଯଦି (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ଫେରନ୍ତୁ dflt;
 	}
-	if (value)
-		return value;
+	ଯଦି (ମୂଲ୍ୟ)
+		ଫେରନ୍ତୁ ମୂଲ୍ୟ;
 
-	return xstrdup("");
+	ଫେରନ୍ତୁ xstrdup("");
 }
 #endif /* !HAVE_LIBECONF */
 
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା logindefs_setenv(ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *conf, ଅଚଳ ଅକ୍ଷର *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	ଅଚଳ ଅକ୍ଷର *val = getlogindefs_str(conf, dflt);
+	ଅଚଳ ଅକ୍ଷର *p;
 
-	if (!val)
-		return -1;
+	ଯଦି (!val)
+		ଫେରନ୍ତୁ -1;
 
 	p = strchr(val, '=');
-	if (p) {
+	ଯଦି (p) {
 		size_t sz = strlen(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		ଯଦି (strncmp(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			ଯଦି (*val == '"')
 				val++;
-			if (!*val)
+			ଯଦି (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	ଫେରନ୍ତୁ val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା logindefs_setenv_path(uid_t uid)
 {
-	int rc = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = 0;
 
-	if (uid)
+	ଯଦି (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
-		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
+	ଅନ୍ୟଥା ଯଦି ((rc = logindefs_setenv("PATH", "ENV_SUPATH", ଖାଲି)) != 0)
+		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", PATH_DEFPATH_ମୂଳ);
 
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା effective_access(ଅଚଳ ଅକ୍ଷର *path, ପୂର୍ଣ୍ଣସଂଖ୍ୟା mode)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd = open(path, mode);
+	ଯଦି (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	ଫେରନ୍ତୁ fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_hushlogin_status(ସଂରଚନା passwd *pwd, ଅଚଳ ଅକ୍ଷର *override_home, ପୂର୍ଣ୍ଣସଂଖ୍ୟା force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	ଅଚଳ ଅକ୍ଷର *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, ଖାଲି };
+	ଅଚଳ ଅକ୍ଷର *file;
+	ଅକ୍ଷର buf[BUFSIZ];
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	file = getlogindefs_str("HUSHLOGIN_FILE", ଖାଲି);
+	ଯଦି (file) {
+		ଯଦି (!*file)
+			ଫେରନ୍ତୁ 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
-		files[1] = NULL;
+		files[1] = ଖାଲି;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	ପାଇଁ (i = 0; files[i]; i++) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		ଯଦି (*file == '/') {
+			ସଂରଚନା stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
-				continue;	/* file does not exist */
+			ଯଦି (stat(file, &st) != 0)
+				ଜାରି;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			ଯଦି (st.st_size == 0)
+				ଫେରନ୍ତୁ 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
-				continue;	/* ignore errors... */
+			ଯଦି (!f)
+				ଜାରି;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
+			ଯେତେବେଳେ (ok == 0 && fgets(buf, ଆକାର(buf), f)) {
+				ଯଦି (buf[0] != '\0')
 					buf[strlen(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			ଯଦି (ok)
+				ଫେରନ୍ତୁ 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			ଫେରନ୍ତୁ 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
-			continue;
+		ଯଦି (strlen(pwd->pw_dir) + strlen(file) + 2 > ଆକାର(buf))
+			ଜାରି;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
-			continue;
+		ଯଦି (snprintf(buf, ଆକାର(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+			ଜାରି;
 
-		if (force_check) {
+		ଯଦି (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			ଯଦି (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			ଯଦି (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
 				exit(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			ଯଦି (ok)
+				ଫେରନ୍ତୁ 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		ଅନ୍ୟଥା {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			ଯଦି (rc == 0)
+				ଫେରନ୍ତୁ 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			ଯଦି (rc == -1 && errno == EACCES)
+				ଫେରନ୍ତୁ -1;
 		}
 
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର *argv[])
 {
-	char *name, *type;
+	ଅକ୍ଷର *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	ଯଦି (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
 	logindefs_load_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
+	ଯଦି (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
+		ଅକ୍ଷର *ଚାବିଗୁଡ଼ିକ[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
-				NULL};
+				ଖାଲି};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		ପାଇଁ (i = 0; file && ଚାବିଗୁଡ଼ିକ[i] != ଖାଲି; i++) {
+			ଅକ୍ଷର *ମୂଲ୍ୟ = ଖାଲି;
 
-			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
-			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
+			econf_call(econf_get_String_ମୂଲ୍ୟ)(file, ଖାଲି, ଚାବିଗୁଡ଼ିକ[i], &ମୂଲ୍ୟ);
+			printf ("%s: $%s: '%s'\n", argv[1], ଚାବିଗୁଡ଼ିକ[i], ମୂଲ୍ୟ);
 		}
 
-		if (file)
+		ଯଦି (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#ଅନ୍ୟଥା
+		ସଂରଚନା item *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
+		ପାଇଁ (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
-			       ptr->value);
+			       ptr->ମୂଲ୍ୟ);
 #endif
-		return EXIT_SUCCESS;
+		ଫେରନ୍ତୁ EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
+	ଯଦି (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
-		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
+	ଅନ୍ୟଥା ଯଦି (strcmp(type, "num") == 0)
+		printf("$%s: '%lu'\n", name, getlogindefs_ଅଙ୍କ(name, 0));
+	ଅନ୍ୟଥା ଯଦି (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	ଫେରନ୍ତୁ EXIT_SUCCESS;
 }
 #endif

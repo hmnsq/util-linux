@@ -10,10 +10,10 @@
  *  code or tables extracted from it, as desired without restriction.
  */
 
-#include <assert.h>
-#include "crc32c.h"
+#ଅନ୍ତର୍ଭାଵ <assert.h>
+#ଅନ୍ତର୍ଭାଵ "crc32c.h"
 
-static const uint32_t crc32Table[256] = {
+ସ୍ଥିର ଅଚଳ uint32_t crc32Table[256] = {
 	0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
 	0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
 	0x8AD958CFL, 0x78B2DBCCL, 0x6BE22838L, 0x9989AB3BL,
@@ -92,30 +92,30 @@ static const uint32_t crc32Table[256] = {
  *
  */
 uint32_t
-crc32c(uint32_t crc, const void *buf, size_t size)
+crc32c(uint32_t crc, ଅଚଳ ଶୂନ୍ୟ *buf, size_t size)
 {
-	const uint8_t *p = buf;
+	ଅଚଳ uint8_t *p = buf;
 
-	while (size--)
+	ଯେତେବେଳେ (size--)
 		crc = crc32Table[(crc ^ *p++) & 0xff] ^ (crc >> 8);
 
-	return crc;
+	ଫେରନ୍ତୁ crc;
 }
 
 uint32_t
-ul_crc32c_exclude_offset(uint32_t crc, const unsigned char *buf, size_t size,
+ul_crc32c_exclude_offset(uint32_t crc, ଅଚଳ unsigned ଅକ୍ଷର *buf, size_t size,
 			 size_t exclude_off, size_t exclude_len)
 {
 	size_t i;
 
-	assert((exclude_off + exclude_len) <= size);
+	ପ୍ରତିଜ୍ଞା((exclude_off + exclude_len) <= size);
 
 	crc = crc32c(crc, buf, exclude_off);
-	for (i = 0; i < exclude_len; i++) {
+	ପାଇଁ (i = 0; i < exclude_len; i++) {
 		uint8_t zero = 0;
 		crc = crc32c(crc, &zero, 1);
 	}
 	crc = crc32c(crc, &buf[exclude_off + exclude_len],
 		     size - (exclude_off + exclude_len));
-	return crc;
+	ଫେରନ୍ତୁ crc;
 }

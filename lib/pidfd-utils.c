@@ -4,45 +4,45 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
-#include <errno.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <sys/stat.h>
+#ଅନ୍ତର୍ଭାଵ <sys/vfs.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "pidfd-utils.h"
-#include "statfs_magic.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "nls.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "pidfd-utils.h"
+#ଅନ୍ତର୍ଭାଵ "statfs_magic.h"
 
 /*
  * Returns 1, if the pidfd has the pidfs file system type, otherwise 0.
  */
-int pfd_is_pidfs(int pidfd)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା pfd_is_pidfs(ପୂର୍ଣ୍ଣସଂଖ୍ୟା pidfd)
 {
-	struct statfs stfs;
-	int rc;
+	ସଂରଚନା statfs stfs;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc;
 
 	rc = fstatfs(pidfd, &stfs);
-	if (rc < 0)
-		return 0;
+	ଯଦି (rc < 0)
+		ଫେରନ୍ତୁ 0;
 
-	return F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
+	ଫେରନ୍ତୁ F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
 }
 
 #ifdef USE_PIDFD_INO_SUPPORT
-uint64_t pidfd_get_inode(int pidfd)
+uint64_t pidfd_get_inode(ପୂର୍ଣ୍ଣସଂଖ୍ୟା pidfd)
 {
-	struct statx stx;
-	int rc;
+	ସଂରଚନା statx stx;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc;
 
 	rc = statx(pidfd, "", AT_EMPTY_PATH, STATX_INO, &stx);
-	if (rc < 0) {
+	ଯଦି (rc < 0) {
 		close(pidfd);
 		err(EXIT_FAILURE, _("failed to statx() pidfd"));
 	}
-	return stx.stx_ino;
+	ଫେରନ୍ତୁ stx.stx_ino;
 }
 #endif
 
@@ -62,18 +62,18 @@ uint64_t pidfd_get_inode(int pidfd)
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
+#ଅନ୍ୟଥା
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା pfd;
 
 	pfd = ul_get_valid_pidfd(pid, pidfd_ino);
-	if (pfd < 0)
+	ଯଦି (pfd < 0)
 		err(EXIT_FAILURE, _("failed to obtain a valid file descriptor for PID %d"), pid);
 
-	return pfd;
+	ଫେରନ୍ତୁ pfd;
 }
 
 /*
@@ -91,34 +91,34 @@ int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unu
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
+#ଅନ୍ୟଥା
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା pfd;
 
 	pfd = pidfd_open(pid, 0);
-	if (pfd < 0)
-		return -errno;
+	ଯଦି (pfd < 0)
+		ଫେରନ୍ତୁ -errno;
 
 	/* the file descriptor has to have the pidfs file system type
 	 * otherwise the inode assigned to it will not be useful.
 	 */
-	if (!pfd_is_pidfs(pfd)) {
+	ଯଦି (!pfd_is_pidfs(pfd)) {
 		close(pfd);
-		return -(errno = ENOTSUP);
+		ଫେରନ୍ତୁ -(errno = ENOTSUP);
 	}
 
 #ifdef USE_PIDFD_INO_SUPPORT
 	uint64_t real_pidfd_ino;
-	if (pidfd_ino) {
+	ଯଦି (pidfd_ino) {
 		real_pidfd_ino = pidfd_get_inode(pfd);
-		if (real_pidfd_ino != pidfd_ino) {
+		ଯଦି (real_pidfd_ino != pidfd_ino) {
 			close(pfd);
-			return -(errno = ESRCH);
+			ଫେରନ୍ତୁ -(errno = ESRCH);
 		}
 	}
 #endif
-	return pfd;
+	ଫେରନ୍ତୁ pfd;
 }

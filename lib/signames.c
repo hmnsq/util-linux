@@ -8,20 +8,20 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>		/* for isdigit() */
+#ଅନ୍ତର୍ଭାଵ <signal.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "cctype.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+ସ୍ଥିର ଅଚଳ ସଂରଚନା ul_signal_name {
+	ଅଚଳ ଅକ୍ଷର *name;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା rtsig_to_signum(ଅଚଳ ଅକ୍ଷର *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ଅଙ୍କ, maxi = 0;
+	ଅକ୍ଷର *ep = ଖାଲି;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	ଯଦି (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	ଅନ୍ୟଥା ଯଦି (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	ଯଦି (!isdigit(*sig))
+		ଫେରନ୍ତୁ -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	ଅଙ୍କ = strtol(sig, &ep, 10);
+	ଯଦି (!ep || sig == ep || errno || ଅଙ୍କ < 0)
+		ଫେରନ୍ତୁ -1;
+	ଅଙ୍କ = maxi ? SIGRTMAX - ଅଙ୍କ : SIGRTMIN + ଅଙ୍କ;
+	ଯଦି (ଅଙ୍କ < SIGRTMIN || SIGRTMAX < ଅଙ୍କ)
+		ଫେରନ୍ତୁ -1;
+	ଫେରନ୍ତୁ ଅଙ୍କ;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା signame_to_signum(ଅଚଳ ଅକ୍ଷର *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	ଯଦି (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	ଯଦି (!c_strncasecmp(sig, "rt", 2))
+		ଫେରନ୍ତୁ rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	ପାଇଁ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ଯଦି (!c_strcasecmp(ul_signames[n].name, sig))
+			ଫେରନ୍ତୁ ul_signames[n].val;
 	}
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
-const char *signum_to_signame(int signum)
+ଅଚଳ ଅକ୍ଷର *signum_to_signame(ପୂର୍ଣ୍ଣସଂଖ୍ୟା signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	ପାଇଁ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ଯଦି (ul_signames[n].val == signum) {
+			ଫେରନ୍ତୁ ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_signame_by_idx(size_t idx, ଅଚଳ ଅକ୍ଷର **signame, ପୂର୍ଣ୍ଣସଂଖ୍ୟା *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	ଯଦି (idx >= ARRAY_SIZE(ul_signames))
+		ଫେରନ୍ତୁ -1;
 
-	if (signame)
+	ଯଦି (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	ଯଦି (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 
 }
 

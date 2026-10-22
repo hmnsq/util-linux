@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <sys/stat.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#ଅନ୍ତର୍ଭାଵ "nls.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_parse_pid_str(ଅକ୍ଷର *pidstr, pid_t *pid_ଅଙ୍କ, uint64_t *pfd_ino, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc;
+	ଅକ୍ଷର *end = ଖାଲି;
+	int64_t ଅଙ୍କ = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	ଯଦି (!pidstr || !*pidstr || !pid_ଅଙ୍କ)
+		ଫେରନ୍ତୁ -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	ଅଙ୍କ = strtoimax(pidstr, &end, 10);
+	ଯଦି (ଅଙ୍କ == 0 && end == pidstr)
+		ଫେରନ୍ତୁ -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	ଯଦି (errno == ERANGE || ଅଙ୍କ < SINT_MIN(pid_t) || ଅଙ୍କ > SINT_MAX(pid_t))
+		ଫେରନ୍ତୁ -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	ଯଦି (ଅଙ୍କ == 0 && !(flags & UL_PID_ZERO))
+		ଫେରନ୍ତୁ -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	ଯଦି (ଅଙ୍କ < 0 && !(flags & UL_PID_NEGATIVE))
+		ଫେରନ୍ତୁ -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_ଅଙ୍କ = (pid_t) ଅଙ୍କ;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	ଯଦି (*end == ':' && pfd_ino && ଅଙ୍କ > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		ଯଦି (rc < 0)
+			ଫେରନ୍ତୁ rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		ଯଦି (*pfd_ino == 0)
+			ଫେରନ୍ତୁ -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	ଯଦି (end && *end != '\0')
+		ଫେରନ୍ତୁ -(errno = EINVAL);
+	ଫେରନ୍ତୁ 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+ଶୂନ୍ୟ ul_parse_pid_str_or_err(ଅକ୍ଷର *pidstr, pid_t *pid_ଅଙ୍କ, uint64_t *pfd_ino, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	ଯଦି (ul_parse_pid_str(pidstr, pid_ଅଙ୍କ, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -92,9 +92,9 @@ void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, in
 
 #ifdef TEST_PROGRAM_PARSEPID
 
-#include <getopt.h>
+#ଅନ୍ତର୍ଭାଵ <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+ସ୍ଥିର ଶୂନ୍ୟ __attribute__((__noreturn__)) usage(ଶୂନ୍ୟ)
 {
 	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
 	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର **argv)
 {
-	int c, flags = 0, rc = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_ଅଙ୍କ = 0;
+	ଅକ୍ଷର *str = ଖାଲି;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା option longopts[] = {
+		{ "zero",	0, ଖାଲି, 'z' },
+		{ "negative",	0, ଖାଲି, 'n' },
+		{ "help",       0, ଖାଲି, 'h' },
+		{ ଖାଲି, 0, ଖାଲି, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	ଯେତେବେଳେ((c = getopt_long(argc, argv, "nhz", longopts, ଖାଲି)) != -1) {
+		ବାଛ(c) {
+		ସ୍ଥିତି 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'h':
 			usage();
-			break;
-		default:
+			ଭାଙ୍ଗ;
+		ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	ଯଦି (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	rc = ul_parse_pid_str(str, &pid_ଅଙ୍କ, &pidfd_ino, flags);
+	ଯଦି (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	printf("PID: %d\n", pid_ଅଙ୍କ);
+	ଯଦି (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	ଫେରନ୍ତୁ EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */

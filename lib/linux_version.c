@@ -2,74 +2,74 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <sys/utsname.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <sys/utsname.h>
 
-#include "c.h"
-#include "linux_version.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "linux_version.h"
 
-int get_linux_version (void)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_linux_version (ଶୂନ୍ୟ)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା kver = -1;
+	ସଂରଚନା utsname uts;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା x = 0, y = 0, z = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	ଯଦି (kver != -1)
+		ଫେରନ୍ତୁ kver;
+	ଯଦି (uname(&uts))
+		ଫେରନ୍ତୁ kver = 0;
 
 	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	ଯଦି (n < 1 || n > 3)
+		ଫେରନ୍ତୁ kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	ଫେରନ୍ତୁ kver = KERNEL_VERSION(x, y, z);
 }
 
 #ifdef TEST_PROGRAM_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର *argv[])
 {
-	int rc = EXIT_FAILURE;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = EXIT_FAILURE;
 
-	if (argc == 1) {
+	ଯଦି (argc == 1) {
 		printf("Linux version: %d\n", get_linux_version());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} ଅନ୍ୟଥା ଯଦି (argc == 5) {
+		ଅଚଳ ଅକ୍ଷର *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା kver = get_linux_version();
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା uver = KERNEL_VERSION(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		ଯଦି (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		ଅନ୍ୟଥା ଯଦି (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		ଅନ୍ୟଥା ଯଦି (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		ଅନ୍ୟଥା
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
+		ଯଦି (rc)
 			printf("match\n");
-		else
+		ଅନ୍ୟଥା
 			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} ଅନ୍ୟଥା
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
 				 program_invocation_short_name);
 
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 #endif

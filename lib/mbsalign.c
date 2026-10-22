@@ -11,46 +11,46 @@
  *
  * Written by Pádraig Brady.
  */
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdbool.h>
+#ଅନ୍ତର୍ଭାଵ <limits.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
 
-#include "c.h"
-#include "mbsalign.h"
-#include "strutils.h"
-#include "widechar.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "mbsalign.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "widechar.h"
 
 /* Return the byte after a complete ANSI escape sequence, or NULL. */
-static const char *skip_ansi_escape(const char *p, const char *end)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *skip_ansi_escape(ଅଚଳ ଅକ୍ଷର *p, ଅଚଳ ଅକ୍ଷର *end)
 {
-	const char *q;
+	ଅଚଳ ଅକ୍ଷର *q;
 
-	if (p >= end || (unsigned char) *p != '\033' || p + 1 >= end)
-		return NULL;
+	ଯଦି (p >= end || (unsigned ଅକ୍ଷର) *p != '\033' || p + 1 >= end)
+		ଫେରନ୍ତୁ ଖାଲି;
 
 	q = p + 1;
-	if (*q == '[') {
+	ଯଦି (*q == '[') {
 		q++;
 		/* CSI parameter bytes (0x30-0x3f) are followed by intermediate
 		 * bytes (0x20-0x2f) and a final byte (0x40-0x7e). None of them
 		 * occupies a cell.
 		 */
-		while (q < end && (unsigned char) *q >= 0x30
-				&& (unsigned char) *q <= 0x3f)
+		ଯେତେବେଳେ (q < end && (unsigned ଅକ୍ଷର) *q >= 0x30
+				&& (unsigned ଅକ୍ଷର) *q <= 0x3f)
 			q++;
-		while (q < end && (unsigned char) *q >= 0x20
-				&& (unsigned char) *q <= 0x2f)
+		ଯେତେବେଳେ (q < end && (unsigned ଅକ୍ଷର) *q >= 0x20
+				&& (unsigned ଅକ୍ଷର) *q <= 0x2f)
 			q++;
-		if (q < end && (unsigned char) *q >= 0x40
-				&& (unsigned char) *q <= 0x7e)
-			return q + 1;
-	} else if (*q && strchr("()*+", *q) && q + 1 < end)
-		return q + 2;
+		ଯଦି (q < end && (unsigned ଅକ୍ଷର) *q >= 0x40
+				&& (unsigned ଅକ୍ଷର) *q <= 0x7e)
+			ଫେରନ୍ତୁ q + 1;
+	} ଅନ୍ୟଥା ଯଦି (*q && strchr("()*+", *q) && q + 1 < end)
+		ଫେରନ୍ତୁ q + 2;
 
-	return NULL;
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
 /*
@@ -59,57 +59,57 @@ static const char *skip_ansi_escape(const char *p, const char *end)
  *
  * Returns: number of cells.
  */
-size_t mbs_nwidth(const char *buf, size_t bufsz)
+size_t mbs_nwidth(ଅଚଳ ଅକ୍ଷର *buf, size_t bufsz)
 {
-	const char *p = buf, *last = buf;
+	ଅଚଳ ଅକ୍ଷର *p = buf, *last = buf;
 	size_t width = 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, ଆକାର(st));
 #endif
-	if (p && *p && bufsz)
+	ଯଦି (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if (*p == '\033') {
-			const char *e = skip_ansi_escape(p, last + 1);
+	ଯେତେବେଳେ (p && *p && p <= last) {
+		ଯଦି (*p == '\033') {
+			ଅଚଳ ଅକ୍ଷର *e = skip_ansi_escape(p, last + 1);
 
 			p = e ? e : p + 1;
-			continue;
+			ଜାରି;
 		}
-		if (iscntrl((unsigned char) *p)) {
+		ଯଦି (iscntrl((unsigned ଅକ୍ଷର) *p)) {
 			p++;
-			continue;
+			ଜାରି;
 		}
 #ifdef HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-		if (len == 0)
-			break;
-		if (len > 0 && iswprint(wc)) {
-			int x = wcwidth(wc);
-			if (x > 0)
+		ଯଦି (len == 0)
+			ଭାଙ୍ଗ;
+		ଯଦି (len > 0 && iswprint(wc)) {
+			ପୂର୍ଣ୍ଣସଂଖ୍ୟା x = wcwidth(wc);
+			ଯଦି (x > 0)
 				width += x;
-		} else if (len == (size_t) -1 || len == (size_t) -2)
+		} ଅନ୍ୟଥା ଯଦି (len == (size_t) -1 || len == (size_t) -2)
 			len = 1;
 		p += len;
-#else
-		if (isprint((unsigned char) *p))
+#ଅନ୍ୟଥା
+		ଯଦି (isprint((unsigned ଅକ୍ଷର) *p))
 			width++;
 		p++;
 #endif
 	}
 
-	return width;
+	ଫେରନ୍ତୁ width;
 }
 
-size_t mbs_width(const char *s)
+size_t mbs_width(ଅଚଳ ଅକ୍ଷର *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_nwidth(s, strlen(s));
+	ଯଦି (!s || !*s)
+		ଫେରନ୍ତୁ 0;
+	ଫେରନ୍ତୁ mbs_nwidth(s, strlen(s));
 }
 
 /*
@@ -119,69 +119,69 @@ size_t mbs_width(const char *s)
  *
  * Returns: number of cells, @sz returns number of bytes.
  */
-size_t mbs_safe_nwidth(const char *buf, size_t bufsz, size_t *sz)
+size_t mbs_safe_nwidth(ଅଚଳ ଅକ୍ଷର *buf, size_t bufsz, size_t *sz)
 {
-	const char *p = buf, *last = buf;
+	ଅଚଳ ଅକ୍ଷର *p = buf, *last = buf;
 	size_t width = 0, bytes = 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, ଆକାର(st));
 #endif
-	if (p && *p && bufsz)
+	ଯଦି (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if ((p < last && *p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
+	ଯେତେବେଳେ (p && *p && p <= last) {
+		ଯଦି ((p < last && *p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((unsigned ଅକ୍ଷର) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		ଅନ୍ୟଥା {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;
+			ଯଦି (len == 0)
+				ଭାଙ୍ଗ;
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			ଯଦି (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
-				if (isprint((unsigned char) *p))
+				ଯଦି (isprint((unsigned ଅକ୍ଷର) *p))
 					width += 1, bytes += 1;
-				else
+				ଅନ୍ୟଥା
 					width += 4, bytes += 4;
 
-			} else if (!iswprint(wc)) {
+			} ଅନ୍ୟଥା ଯଦି (!iswprint(wc)) {
 				width += len * 4;	/* hex encode whole sequence */
 				bytes += len * 4;
-			} else {
+			} ଅନ୍ୟଥା {
 				width += wcwidth(wc);	/* number of cells */
 				bytes += len;		/* number of bytes */
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
+#ଅନ୍ୟଥା
+		ଅନ୍ୟଥା ଯଦି (!isprint((unsigned ଅକ୍ଷର) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
-		} else {
+		} ଅନ୍ୟଥା {
 			width++, bytes++;
 			p++;
 		}
 #endif
 	}
 
-	if (sz)
+	ଯଦି (sz)
 		*sz = bytes;
-	return width;
+	ଫେରନ୍ତୁ width;
 }
 
-size_t mbs_safe_width(const char *s)
+size_t mbs_safe_width(ଅଚଳ ଅକ୍ଷର *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_safe_nwidth(s, strlen(s), NULL);
+	ଯଦି (!s || !*s)
+		ଫେରନ୍ତୁ 0;
+	ଫେରନ୍ତୁ mbs_safe_nwidth(s, strlen(s), ଖାଲି);
 }
 
 /*
@@ -192,86 +192,86 @@ size_t mbs_safe_width(const char *s)
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz, const char *safechars)
+ଅକ୍ଷର *mbs_safe_encode_to_buffer(ଅଚଳ ଅକ୍ଷର *s, size_t *width, ଅକ୍ଷର *buf, size_t bufsiz, ଅଚଳ ଅକ୍ଷର *safechars)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
+	ଅଚଳ ଅକ୍ଷର *p = s;
+	ଅକ୍ଷର *r;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, ଆକାର(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	ଯଦି (!sz || !buf || !bufsiz)
+		ଫେରନ୍ତୁ ଖାଲି;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (ପୂର୍ଣ୍ଣସଂଖ୍ୟା) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
-		if (safechars && strchr(safechars, *p)) {
-			if (rsz < 2)
-				break;
+	ଯେତେବେଳେ (p && *p) {
+		ଯଦି (safechars && strchr(safechars, *p)) {
+			ଯଦି (rsz < 2)
+				ଭାଙ୍ଗ;
 			*r++ = *p++;
 			rsz--;
-			continue;
+			ଜାରି;
 		}
 
-		if ((*p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		ଯଦି ((*p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((unsigned ଅକ୍ଷର) *p)) {
+			ଯଦି (rsz < 5)
+				ଭାଙ୍ଗ;
+			snprintf(r, rsz, "\\x%02x", (unsigned ଅକ୍ଷର) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		ଅନ୍ୟଥା {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;		/* end of string */
+			ଯଦି (len == 0)
+				ଭାଙ୍ଗ;		/* end of string */
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			ଯଦି (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
 				/*
 				 * Not valid multibyte sequence -- maybe it's
 				 * printable char according to the current locales.
 				 */
-				if (!isprint((unsigned char) *p)) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+				ଯଦି (!isprint((unsigned ଅକ୍ଷର) *p)) {
+					ଯଦି (rsz < 5)
+						ଭାଙ୍ଗ;
+					snprintf(r, rsz, "\\x%02x", (unsigned ଅକ୍ଷର) *p);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
-				} else {
-					if (rsz < 2)
-						break;
+				} ଅନ୍ୟଥା {
+					ଯଦି (rsz < 2)
+						ଭାଙ୍ଗ;
 					(*width)++;
 					*r++ = *p;
 					rsz--;
 				}
-			} else if (!iswprint(wc)) {
+			} ଅନ୍ୟଥା ଯଦି (!iswprint(wc)) {
 				size_t i;
-				for (i = 0; i < len; i++) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) p[i]);
+				ପାଇଁ (i = 0; i < len; i++) {
+					ଯଦି (rsz < 5)
+						ଭାଙ୍ଗ;
+					snprintf(r, rsz, "\\x%02x", (unsigned ଅକ୍ଷର) p[i]);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
 				}
-				if (i < len)
-					break;
-			} else {
-				if (rsz < (int)len + 1)
-					break;
+				ଯଦି (i < len)
+					ଭାଙ୍ଗ;
+			} ଅନ୍ୟଥା {
+				ଯଦି (rsz < (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)len + 1)
+					ଭାଙ୍ଗ;
 				memcpy(r, p, len);
 				r += len;
 				rsz -= len;
@@ -279,18 +279,18 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+#ଅନ୍ୟଥା
+		ଅନ୍ୟଥା ଯଦି (!isprint((unsigned ଅକ୍ଷର) *p)) {
+			ଯଦି (rsz < 5)
+				ଭାଙ୍ଗ;
+			snprintf(r, rsz, "\\x%02x", (unsigned ଅକ୍ଷର) *p);
 			p++;
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < 2)
-				break;
+		} ଅନ୍ୟଥା {
+			ଯଦି (rsz < 2)
+				ଭାଙ୍ଗ;
 			*r++ = *p++;
 			rsz--;
 			(*width)++;
@@ -299,7 +299,7 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 	}
 
 	*r = '\0';
-	return buf;
+	ଫେରନ୍ତୁ buf;
 }
 
 /*
@@ -309,65 +309,65 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz)
+ଅକ୍ଷର *mbs_invalid_encode_to_buffer(ଅଚଳ ଅକ୍ଷର *s, size_t *width, ଅକ୍ଷର *buf, size_t bufsiz)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
+	ଅଚଳ ଅକ୍ଷର *p = s;
+	ଅକ୍ଷର *r;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
+	memset(&st, 0, ଆକାର(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	ଯଦି (!sz || !buf || !bufsiz)
+		ଫେରନ୍ତୁ ଖାଲି;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (ପୂର୍ଣ୍ଣସଂଖ୍ୟା) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
+	ଯେତେବେଳେ (p && *p) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
-#else
+#ଅନ୍ୟଥା
 		size_t len = 1;
 #endif
 
-		if (len == 0)
-			break;		/* end of string */
+		ଯଦି (len == 0)
+			ଭାଙ୍ଗ;		/* end of string */
 
-		if (len == (size_t) -1 || len == (size_t) -2) {
+		ଯଦି (len == (size_t) -1 || len == (size_t) -2) {
 			len = 1;
 			/*
 			 * Not valid multibyte sequence -- maybe it's
 			 * printable char according to the current locales.
 			 */
-			if (!isprint((unsigned char) *p)) {
-				if (rsz < 5)
-					break;
-				snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+			ଯଦି (!isprint((unsigned ଅକ୍ଷର) *p)) {
+				ଯଦି (rsz < 5)
+					ଭାଙ୍ଗ;
+				snprintf(r, rsz, "\\x%02x", (unsigned ଅକ୍ଷର) *p);
 				r += 4;
 				rsz -= 4;
 				*width += 4;
-			} else {
-				if (rsz < 2)
-					break;
+			} ଅନ୍ୟଥା {
+				ଯଦି (rsz < 2)
+					ଭାଙ୍ଗ;
 				(*width)++;
 				*r++ = *p;
 				rsz--;
 			}
-		} else if (*p == '\\' && *(p + 1) == 'x') {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		} ଅନ୍ୟଥା ଯଦି (*p == '\\' && *(p + 1) == 'x') {
+			ଯଦି (rsz < 5)
+				ଭାଙ୍ଗ;
+			snprintf(r, rsz, "\\x%02x", (unsigned ଅକ୍ଷର) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < (int)len + 1)
-				break;
+		} ଅନ୍ୟଥା {
+			ଯଦି (rsz < (ପୂର୍ଣ୍ଣସଂଖ୍ୟା)len + 1)
+				ଭାଙ୍ଗ;
 			r = mempcpy(r, p, len);
 			rsz -= len;
 			*width += wcwidth(wc);
@@ -376,7 +376,7 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
 	}
 
 	*r = '\0';
-	return buf;
+	ଫେରନ୍ତୁ buf;
 }
 
 /*
@@ -384,163 +384,163 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
  */
 size_t mbs_safe_encode_size(size_t bytes)
 {
-	return (bytes * 4) + 1;
+	ଫେରନ୍ତୁ (bytes * 4) + 1;
 }
 
 /*
  * Count size of the original string in bytes (count \x?? as one byte)
  */
-size_t mbs_safe_decode_size(const char *p)
+size_t mbs_safe_decode_size(ଅଚଳ ଅକ୍ଷର *p)
 {
 	size_t bytes = 0;
 
-	while (p && *p) {
-		if (*p == '\\' && *(p + 1) == 'x' &&
+	ଯେତେବେଳେ (p && *p) {
+		ଯଦି (*p == '\\' && *(p + 1) == 'x' &&
 		    isxdigit(*(p + 2)) && isxdigit(*(p + 3)))
 			p += 4;
-		else
+		ଅନ୍ୟଥା
 			p++;
 		bytes++;
 	}
-	return bytes;
+	ଫେରନ୍ତୁ bytes;
 }
 
 /*
  * Returns allocated string where all control and non-printable chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_safe_encode(const char *s, size_t *width)
+ଅକ୍ଷର *mbs_safe_encode(ଅଚଳ ଅକ୍ଷର *s, size_t *width)
 {
 	size_t sz = s ? strlen(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	ଅକ୍ଷର *buf, *ret = ଖାଲି;
 
-	if (!sz)
-		return NULL;
+	ଯଦି (!sz)
+		ଫେରନ୍ତୁ ଖାଲି;
 	bufsz = mbs_safe_encode_size(sz);
 	buf = malloc(bufsz);
-	if (buf)
-		ret = mbs_safe_encode_to_buffer(s, width, buf, bufsz, NULL);
-	if (!ret)
-		free(buf);
-	return ret;
+	ଯଦି (buf)
+		ret = mbs_safe_encode_to_buffer(s, width, buf, bufsz, ଖାଲି);
+	ଯଦି (!ret)
+		ମୁକ୍ତ(buf);
+	ଫେରନ୍ତୁ ret;
 }
 
 /*
  * Returns allocated string where all broken widechars chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_invalid_encode(const char *s, size_t *width)
+ଅକ୍ଷର *mbs_invalid_encode(ଅଚଳ ଅକ୍ଷର *s, size_t *width)
 {
 	size_t sz = s ? strlen(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	ଅକ୍ଷର *buf, *ret = ଖାଲି;
 
-	if (!sz)
-		return NULL;
+	ଯଦି (!sz)
+		ଫେରନ୍ତୁ ଖାଲି;
 	bufsz = mbs_safe_encode_size(sz);
 	buf = malloc(bufsz);
-	if (buf)
+	ଯଦି (buf)
 		ret = mbs_invalid_encode_to_buffer(s, width, buf, bufsz);
-	if (!ret)
-		free(buf);
-	return ret;
+	ଯଦି (!ret)
+		ମୁକ୍ତ(buf);
+	ଫେରନ୍ତୁ ret;
 }
 
 #ifdef HAVE_WIDECHAR
 
-static bool
+ସ୍ଥିର bool
 wc_ensure_printable (wchar_t *wchars)
 {
   bool replaced = false;
   wchar_t *wc = wchars;
-  while (*wc)
+  ଯେତେବେଳେ (*wc)
     {
-      if (!iswprint ((wint_t) *wc))
+      ଯଦି (!iswprint ((wint_t) *wc))
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           replaced = true;
         }
       wc++;
     }
-  return replaced;
+  ଫେରନ୍ତୁ replaced;
 }
 
 /* Return the wchar after a complete ANSI escape sequence, or NULL. */
-static wchar_t *
+ସ୍ଥିର wchar_t *
 wc_skip_ansi_escape (wchar_t *wc)
 {
   wchar_t *p = wc + 1;
 
-  if (*wc != L'\033' || !*p)
-    return NULL;
+  ଯଦି (*wc != L'\033' || !*p)
+    ଫେରନ୍ତୁ ଖାଲି;
 
-  if (*p == L'[')
+  ଯଦି (*p == L'[')
     {
       p++;
-      while (*p >= 0x30 && *p <= 0x3f)
+      ଯେତେବେଳେ (*p >= 0x30 && *p <= 0x3f)
         p++;
-      while (*p >= 0x20 && *p <= 0x2f)
+      ଯେତେବେଳେ (*p >= 0x20 && *p <= 0x2f)
         p++;
-      if (*p >= 0x40 && *p <= 0x7e)
-        return p + 1;
+      ଯଦି (*p >= 0x40 && *p <= 0x7e)
+        ଫେରନ୍ତୁ p + 1;
     }
-  else if ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
-    return p + 2;
+  ଅନ୍ୟଥା ଯଦି ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
+    ଫେରନ୍ତୁ p + 2;
 
-  return NULL;
+  ଫେରନ୍ତୁ ଖାଲି;
 }
 
 /* Truncate wchar string to width cells.
  * Returns number of cells used.  */
 
-static size_t
+ସ୍ଥିର size_t
 wc_truncate (wchar_t *wc, size_t width)
 {
   size_t cells = 0;
-  int next_cells = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା next_cells = 0;
 
-  while (*wc)
+  ଯେତେବେଳେ (*wc)
     {
       wchar_t *after_escape = wc_skip_ansi_escape (wc);
-      if (after_escape)
+      ଯଦି (after_escape)
         {
           wc = after_escape;
-          continue;
+          ଜାରି;
         }
 
       next_cells = wcwidth (*wc);
-      if (next_cells == -1) /* non printable */
+      ଯଦି (next_cells == -1) /* non printable */
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           next_cells = 1;
         }
-      if (cells + next_cells > width)
-        break;
+      ଯଦି (cells + next_cells > width)
+        ଭାଙ୍ଗ;
 
       cells += next_cells;
       wc++;
     }
   *wc = L'\0';
-  return cells;
+  ଫେରନ୍ତୁ cells;
 }
 
-static int
-rpl_wcswidth (const wchar_t *s, size_t n)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା
+rpl_wcswidth (ଅଚଳ wchar_t *s, size_t n)
 {
-  int ret = 0;
+  ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret = 0;
 
-  while (n-- > 0 && *s != L'\0')
+  ଯେତେବେଳେ (n-- > 0 && *s != L'\0')
     {
-      int nwidth = wcwidth (*s++);
-      if (nwidth == -1)             /* non printable */
-        return -1;
-      if (ret > (INT_MAX - nwidth)) /* overflow */
-        return -1;
+      ପୂର୍ଣ୍ଣସଂଖ୍ୟା nwidth = wcwidth (*s++);
+      ଯଦି (nwidth == -1)             /* non printable */
+        ଫେରନ୍ତୁ -1;
+      ଯଦି (ret > (INT_MAX - nwidth)) /* overflow */
+        ଫେରନ୍ତୁ -1;
       ret += nwidth;
     }
 
-  return ret;
+  ଫେରନ୍ତୁ ret;
 }
 #endif /* HAVE_WIDECHAR */
 
@@ -549,41 +549,41 @@ rpl_wcswidth (const wchar_t *s, size_t n)
  * of cells.
  */
 size_t
-mbs_truncate(char *str, size_t *width)
+mbs_truncate(ଅକ୍ଷର *str, size_t *width)
 {
 	ssize_t bytes = strlen(str);
 #ifdef HAVE_WIDECHAR
-	ssize_t sz = mbstowcs(NULL, str, 0);
-	wchar_t *wcs = NULL;
+	ssize_t sz = mbstowcs(ଖାଲି, str, 0);
+	wchar_t *wcs = ଖାଲି;
 
-	if (sz == (ssize_t) -1)
-		goto done;
+	ଯଦି (sz == (ssize_t) -1)
+		ଯାଅ done;
 
-	wcs = calloc(1, (sz + 1) * sizeof(wchar_t));
-	if (!wcs)
-		goto done;
+	wcs = calloc(1, (sz + 1) * ଆକାର(wchar_t));
+	ଯଦି (!wcs)
+		ଯାଅ done;
 
-	if (!mbstowcs(wcs, str, sz))
-		goto done;
+	ଯଦି (!mbstowcs(wcs, str, sz))
+		ଯାଅ done;
 	*width = wc_truncate(wcs, *width);
 	bytes = wcstombs(str, wcs, bytes);
 done:
-	free(wcs);
-#else
+	ମୁକ୍ତ(wcs);
+#ଅନ୍ୟଥା
 	{
-		const char *p = str;
-		const char *end = str + bytes;
+		ଅଚଳ ଅକ୍ଷର *p = str;
+		ଅଚଳ ଅକ୍ଷର *end = str + bytes;
 		size_t cells = 0;
 
-		while (p < end) {
-			const char *after_escape = skip_ansi_escape(p, end);
+		ଯେତେବେଳେ (p < end) {
+			ଅଚଳ ଅକ୍ଷର *after_escape = skip_ansi_escape(p, end);
 
-			if (after_escape) {
+			ଯଦି (after_escape) {
 				p = after_escape;
-				continue;
+				ଜାରି;
 			}
-			if (cells >= *width)
-				break;
+			ଯଦି (cells >= *width)
+				ଭାଙ୍ଗ;
 			p++;
 			cells++;
 		}
@@ -591,9 +591,9 @@ done:
 		*width = cells;
 	}
 #endif
-	if (bytes >= 0)
+	ଯଦି (bytes >= 0)
 		str[bytes] = '\0';
-	return bytes;
+	ଫେରନ୍ତୁ bytes;
 }
 
 /* Write N_SPACES space characters to DEST while ensuring
@@ -601,20 +601,20 @@ done:
    is always added to DEST.
    A pointer to the terminating NUL is returned.  */
 
-static char*
-mbs_align_pad (char *dest, const char* dest_end, size_t n_spaces, int padchar)
+ସ୍ଥିର ଅକ୍ଷର*
+mbs_align_pad (ଅକ୍ଷର *dest, ଅଚଳ ଅକ୍ଷର* dest_end, size_t n_spaces, ପୂର୍ଣ୍ଣସଂଖ୍ୟା padchar)
 {
-  for (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
+  ପାଇଁ (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
     *dest++ = padchar;
   *dest = '\0';
-  return dest;
+  ଫେରନ୍ତୁ dest;
 }
 
 size_t
-mbsalign (const char *src, char *dest, size_t dest_size,
-          size_t *width, mbs_align_t align, int flags)
+mbsalign (ଅଚଳ ଅକ୍ଷର *src, ଅକ୍ଷର *dest, size_t dest_size,
+          size_t *width, mbs_align_t align, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags)
 {
-	return mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
+	ଫେରନ୍ତୁ mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
 }
 
 /* Align a string, SRC, in a field of *WIDTH columns, handling multi-byte
@@ -631,23 +631,23 @@ mbsalign (const char *src, char *dest, size_t dest_size,
    Update *WIDTH to indicate how many columns were used before padding.  */
 
 size_t
-mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
+mbsalign_with_padding (ଅଚଳ ଅକ୍ଷର *src, ଅକ୍ଷର *dest, size_t dest_size,
 	               size_t *width, mbs_align_t align,
 #ifdef HAVE_WIDECHAR
-		       int flags,
-#else
-		       int flags __attribute__((__unused__)),
+		       ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags,
+#ଅନ୍ୟଥା
+		       ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags __attribute__((__unused__)),
 #endif
-		       int padchar)
+		       ପୂର୍ଣ୍ଣସଂଖ୍ୟା padchar)
 {
   size_t ret = -1;
   size_t src_size = strlen (src) + 1;
-  char *newstr = NULL;
-  wchar_t *str_wc = NULL;
-  const char *str_to_print = src;
+  ଅକ୍ଷର *newstr = ଖାଲି;
+  wchar_t *str_wc = ଖାଲି;
+  ଅଚଳ ଅକ୍ଷର *str_to_print = src;
   size_t n_cols = src_size - 1;
   size_t n_used_bytes = n_cols; /* Not including NUL */
-  size_t n_spaces = 0, space_left;
+  size_t n_spaces = 0, space_ବାମ;
 
 #ifdef HAVE_WIDECHAR
   bool conversion = false;
@@ -656,26 +656,26 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
   /* In multi-byte locales convert to wide characters
      to allow easy truncation. Also determine number
      of screen columns used.  */
-  if (MB_CUR_MAX > 1)
+  ଯଦି (MB_CUR_MAX > 1)
     {
-      size_t src_chars = mbstowcs (NULL, src, 0);
-      if (src_chars == (size_t) -1)
+      size_t src_chars = mbstowcs (ଖାଲି, src, 0);
+      ଯଦି (src_chars == (size_t) -1)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          ଯଦି (flags & MBA_UNIBYTE_FALLBACK)
+            ଯାଅ mbsalign_unibyte;
+          ଅନ୍ୟଥା
+            ଯାଅ mbsalign_cleanup;
         }
       src_chars += 1; /* make space for NUL */
-      str_wc = malloc (src_chars * sizeof (wchar_t));
-      if (str_wc == NULL)
+      str_wc = malloc (src_chars * ଆକାର (wchar_t));
+      ଯଦି (str_wc == ଖାଲି)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          ଯଦି (flags & MBA_UNIBYTE_FALLBACK)
+            ଯାଅ mbsalign_unibyte;
+          ଅନ୍ୟଥା
+            ଯାଅ mbsalign_cleanup;
         }
-      if (mbstowcs (str_wc, src, src_chars) != 0)
+      ଯଦି (mbstowcs (str_wc, src, src_chars) != 0)
         {
           str_wc[src_chars - 1] = L'\0';
           wc_enabled = true;
@@ -686,21 +686,21 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 
   /* If we transformed or need to truncate the source string
      then create a modified copy of it.  */
-  if (wc_enabled && (conversion || (n_cols > *width)))
+  ଯଦି (wc_enabled && (conversion || (n_cols > *width)))
     {
-        if (conversion)
+        ଯଦି (conversion)
           {
              /* May have increased the size by converting
                 \t to \uFFFD for example.  */
-            src_size = wcstombs(NULL, str_wc, 0) + 1;
+            src_size = wcstombs(ଖାଲି, str_wc, 0) + 1;
           }
         newstr = malloc (src_size);
-        if (newstr == NULL)
+        ଯଦି (newstr == ଖାଲି)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          ଯଦି (flags & MBA_UNIBYTE_FALLBACK)
+            ଯାଅ mbsalign_unibyte;
+          ଅନ୍ୟଥା
+            ଯାଅ mbsalign_cleanup;
         }
         str_to_print = newstr;
         n_cols = wc_truncate (str_wc, *width);
@@ -710,13 +710,13 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 mbsalign_unibyte:
 #endif
 
-  if (n_cols > *width) /* Unibyte truncation required.  */
+  ଯଦି (n_cols > *width) /* Unibyte truncation required.  */
     {
       n_cols = *width;
       n_used_bytes = n_cols;
     }
 
-  if (*width > n_cols) /* Padding required.  */
+  ଯଦି (*width > n_cols) /* Padding required.  */
     n_spaces = *width - n_cols;
 
   /* indicate to caller how many cells needed (not including padding).  */
@@ -726,40 +726,40 @@ mbsalign_unibyte:
   ret = n_used_bytes + (n_spaces * 1);
 
   /* Write as much NUL terminated output to DEST as possible.  */
-  if (dest_size != 0)
+  ଯଦି (dest_size != 0)
     {
-      char *dest_end = dest + dest_size - 1;
+      ଅକ୍ଷର *dest_end = dest + dest_size - 1;
       size_t start_spaces;
       size_t end_spaces;
 
-      switch (align)
+      ବାଛ (align)
         {
-        case MBS_ALIGN_CENTER:
+        ସ୍ଥିତି MBS_ALIGN_CENTER:
           start_spaces = n_spaces / 2 + n_spaces % 2;
           end_spaces = n_spaces / 2;
-          break;
-        case MBS_ALIGN_LEFT:
+          ଭାଙ୍ଗ;
+        ସ୍ଥିତି MBS_ALIGN_ବାମ:
           start_spaces = 0;
           end_spaces = n_spaces;
-          break;
-        case MBS_ALIGN_RIGHT:
+          ଭାଙ୍ଗ;
+        ସ୍ଥିତି MBS_ALIGN_ଡାହାଣ:
           start_spaces = n_spaces;
           end_spaces = 0;
-          break;
-	default:
+          ଭାଙ୍ଗ;
+	ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 	  abort();
         }
 
       dest = mbs_align_pad (dest, dest_end, start_spaces, padchar);
-      space_left = dest_end - dest;
-      dest = mempcpy (dest, str_to_print, min (n_used_bytes, space_left));
+      space_ବାମ = dest_end - dest;
+      dest = mempcpy (dest, str_to_print, min (n_used_bytes, space_ବାମ));
       mbs_align_pad (dest, dest_end, end_spaces, padchar);
     }
 #ifdef HAVE_WIDECHAR
 mbsalign_cleanup:
 #endif
-  free (str_wc);
-  free (newstr);
+  ମୁକ୍ତ (str_wc);
+  ମୁକ୍ତ (newstr);
 
-  return ret;
+  ଫେରନ୍ତୁ ret;
 }

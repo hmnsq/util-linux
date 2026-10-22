@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <limits.h>
+#ଅନ୍ତର୍ଭାଵ <poll.h>
+#ଅନ୍ତର୍ଭାଵ <signal.h>
+#ଅନ୍ତର୍ଭାଵ <stdarg.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <sys/mman.h>
+#ଅନ୍ତର୍ଭାଵ <sys/socket.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <sys/un.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#ଅନ୍ତର୍ଭାଵ "all-io.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "nls.h"
+#ଅନ୍ତର୍ଭାଵ "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା can_read(ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd, ଅଚଳ long timeout)
 {
-	struct pollfd fds = {
+	ସଂରଚନା pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
 
-	do {
+	କର {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} ଯେତେବେଳେ ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	ଫେରନ୍ତୁ (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା open_un_socket_and_connect(ଶୂନ୍ୟ)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	ସଂରଚନା sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	ଅଚଳ ପୂର୍ଣ୍ଣସଂଖ୍ୟା one = 1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	ଯଦି (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		ଯାଅ err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, ଆକାର(one));
+	ଯଦି (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		ଯାଅ err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (ସଂରଚନା sockaddr *) &su,
+		offsetof(ସଂରଚନା sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
+	ଯଦି (ret < 0) {
+		ଯଦି (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		ଯାଅ err;
 	}
 err:
-	return fd;
+	ଫେରନ୍ତୁ fd;
 }
 
-int plymouth_command(int cmd, ...)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା plymouth_command(ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	ସଂରଚନା sigaction sp, op;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	ବାଛ (cmd) {
+	ସ୍ଥିତି MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ଯଦି (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, ଆକାର(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		ଭାଙ୍ଗ;
+	ସ୍ଥିତି MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ଯଦି (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, ଆକାର(command));
 		}
-		break;
-	default:
+		ଭାଙ୍ଗ;
+	ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	ସ୍ଥିତି '?':
+		ଯାଅ err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	ଯଦି (fdsock >= 0) {
+		ଯଦି (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (ଅକ୍ଷର *) &answer[0], ଆକାର(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, ଖାଲି);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 

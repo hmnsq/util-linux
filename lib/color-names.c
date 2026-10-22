@@ -4,33 +4,33 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "color-names.h"
 
-#include <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+ସଂରଚନା ul_color_name {
+	ଅଚଳ ଅକ୍ଷର *name;
+	ଅଚଳ ଅକ୍ଷର *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cmp_color_name(ଅଚଳ ଶୂନ୍ୟ *a0, ଅଚଳ ଶୂନ୍ୟ *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	ଅଚଳ ସଂରଚନା ul_color_name
+		*a = (ଅଚଳ ସଂରଚନା ul_color_name *) a0,
+		*b = (ଅଚଳ ସଂରଚନା ul_color_name *) b0;
+	ଫେରନ୍ତୁ strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+ଅଚଳ ଅକ୍ଷର *color_sequence_from_colorname(ଅଚଳ ଅକ୍ଷର *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
@@ -54,122 +54,122 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	ସଂରଚନା ul_color_name ଚାବି = { .name = str };
+	ଅଚଳ ସଂରଚନା ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	ଯଦି (!str)
+		ଫେରନ୍ତୁ ଖାଲି;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&ଚାବି, basic_schemes, ARRAY_SIZE(basic_schemes),
+				ଆକାର(ସଂରଚନା ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	ଫେରନ୍ତୁ res ? res->seq : ଖାଲି;
 }
 
 
-int color_is_sequence(const char *color)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା color_is_sequence(ଅଚଳ ଅକ୍ଷର *color)
 {
-	if (color && *color == 0x1B) {
+	ଯଦି (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		ଯଦି (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		ଫେରନ୍ତୁ 1;
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା __color_canonicalize(ଅଚଳ ଅକ୍ଷର *str, ଅକ୍ଷର **seq)
 {
-	char *in, *out;
-	int len;
+	ଅକ୍ଷର *in, *out;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା len;
 
-	if (!str)
-		return -EINVAL;
+	ଯଦି (!str)
+		ଫେରନ୍ତୁ -EINVAL;
 
-	*seq = NULL;
+	*seq = ଖାଲି;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	ଯଦି (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+		ଅଚଳ ଅକ୍ଷର *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		ଯଦି (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			ଫେରନ୍ତୁ *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		ଫେରନ୍ତୁ 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	ଯଦି ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		ଫେରନ୍ତୁ -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	ପାଇଁ (in = *seq, out = *seq; in && *in; in++) {
+		ଯଦି (*in != '\\') {
 			*out++ = *in;
-			continue;
+			ଜାରି;
 		}
-		switch(*(in + 1)) {
-		case 'a':
+		ବାଛ(*(in + 1)) {
+		ସ୍ଥିତି 'a':
 			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'b':
 			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'e':
 			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'f':
 			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'n':
 			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'r':
 			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 't':
 			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି 'v':
 			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି '\\':
 			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି '_':
 			*out++ = ' ';	/* Space */
-			break;
-		case '#':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି '#':
 			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
+			ଭାଙ୍ଗ;
+		ସ୍ଥିତି '?':
 			*out++ = '?';	/* Question mark */
-			break;
-		default:
+			ଭାଙ୍ଗ;
+		ପୂର୍ବନିର୍ଦ୍ଧାରିତ:
 			*out++ = *in;
 			*out++ = *(in + 1);
-			break;
+			ଭାଙ୍ଗ;
 		}
 		in++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
+	ଯଦି (out) {
+		ପ୍ରତିଜ୍ଞା ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-char *color_get_sequence(const char *color)
+ଅକ୍ଷର *color_get_sequence(ଅଚଳ ଅକ୍ଷର *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	ଅକ୍ଷର *seq = ଖାଲି;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	ଫେରନ୍ତୁ rc ? ଖାଲି : seq;
 }

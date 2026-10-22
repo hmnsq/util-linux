@@ -4,29 +4,29 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
 #ifdef HAVE_SYS_PRCTL_H
-#include <sys/prctl.h>
-#else
+#ଅନ୍ତର୍ଭାଵ <sys/prctl.h>
+#ଅନ୍ୟଥା
 #define PR_GET_DUMPABLE 3
 #endif
-#if (!defined(HAVE_PRCTL) && defined(linux))
-#include <sys/syscall.h>
+#ଯଦି (!defined(HAVE_PRCTL) && defined(linux))
+#ଅନ୍ତର୍ଭାଵ <sys/syscall.h>
 #endif
-#include <unistd.h>
-#include <sys/types.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <sys/types.h>
 
-#include "env.h"
-#include "strv.h"
-#include "all-io.h"
+#ଅନ୍ତର୍ଭାଵ "env.h"
+#ଅନ୍ତର୍ଭାଵ "strv.h"
+#ଅନ୍ତର୍ଭାଵ "all-io.h"
 
 #ifndef HAVE_ENVIRON_DECL
-extern char **environ;
+ବାହ୍ୟ ଅକ୍ଷର **environ;
 #endif
 
-static char * const forbid[] = {
+ସ୍ଥିର ଅକ୍ଷର * ଅଚଳ forbid[] = {
 	"BASH_ENV=",    /* GNU creeping featurism strikes again... */
 	"ENV=",
 	"HOME=",
@@ -39,126 +39,126 @@ static char * const forbid[] = {
 	"PATH=",
 	"SHELL=",
 	"SHLIB_PATH=",
-	(char *) 0
+	(ଅକ୍ଷର *) 0
 };
 
 /* these are allowed, but with no slashes inside
    (to work around security problems in GNU gettext) */
-static char * const noslash[] = {
+ସ୍ଥିର ଅକ୍ଷର * ଅଚଳ noslash[] = {
 	"LANG=",
 	"LANGUAGE=",
 	"LC_",	  /* anything with the LC_ prefix */
-	(char *) 0
+	(ଅକ୍ଷର *) 0
 };
 
 
-struct ul_env_list {
-	char	*name;
-	char	*value;
+ସଂରଚନା ul_env_list {
+	ଅକ୍ଷର	*name;
+	ଅକ୍ଷର	*ମୂଲ୍ୟ;
 
-	struct ul_env_list *next;
+	ସଂରଚନା ul_env_list *next;
 };
 
 /*
  * Saves to the list and returns a pointer to the new head of the list.
  */
-static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
-					 const char *name, size_t namesz,
-					 const char *value, size_t valsz)
+ସ୍ଥିର ସଂରଚନା ul_env_list *env_list_add( ସଂରଚନା ul_env_list *ls0,
+					 ଅଚଳ ଅକ୍ଷର *name, size_t namesz,
+					 ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ, size_t valsz)
 {
-	struct ul_env_list *ls;
+	ସଂରଚନା ul_env_list *ls;
 
-	ls = calloc(1, sizeof(struct ul_env_list) + namesz + valsz + 2);
-	if (!ls)
-		return ls0;
+	ls = calloc(1, ଆକାର(ସଂରଚନା ul_env_list) + namesz + valsz + 2);
+	ଯଦି (!ls)
+		ଫେରନ୍ତୁ ls0;
 
-	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
-	ls->value = ls->name + namesz + 1;
+	ls->name = ((ଅକ୍ଷର *) ls) + ଆକାର(ସଂରଚନା ul_env_list);
+	ls->ମୂଲ୍ୟ = ls->name + namesz + 1;
 
 	memcpy(ls->name, name, namesz);
-	memcpy(ls->value, value, valsz);
+	memcpy(ls->ମୂଲ୍ୟ, ମୂଲ୍ୟ, valsz);
 
 	ls->next = ls0;
-	return ls;
+	ଫେରନ୍ତୁ ls;
 }
 
 /*
  * Saves the @str (with the name=value string) to the @ls and returns a pointer
  * to the new head of the list.
  */
-static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
-						    const char *str)
+ସ୍ଥିର ସଂରଚନା ul_env_list *env_list_add_from_string(ସଂରଚନା ul_env_list *ls,
+						    ଅଚଳ ଅକ୍ଷର *str)
 {
 	size_t namesz = 0, valsz = 0;
-	const char *val;
+	ଅଚଳ ଅକ୍ଷର *val;
 
-	if (!str || !*str)
-		return ls;
+	ଯଦି (!str || !*str)
+		ଫେରନ୍ତୁ ls;
 
 	val = strchr(str, '=');
-	if (!val)
-		return ls;
+	ଯଦି (!val)
+		ଫେରନ୍ତୁ ls;
 	namesz = val - str;
 
 	val++;
 	valsz = strlen(val);
 
-	return env_list_add(ls, str, namesz, val, valsz);
+	ଫେରନ୍ତୁ env_list_add(ls, str, namesz, val, valsz);
 }
 
 /*
  * Saves the @name and @value to @ls0 and returns a pointer to the new head of
  * the list.
  */
-struct ul_env_list *env_list_add_variable(
-				struct ul_env_list *ls,
-				const char *name, const char *value)
+ସଂରଚନା ul_env_list *env_list_add_variable(
+				ସଂରଚନା ul_env_list *ls,
+				ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-	if (!name || !*name)
-		return ls;
+	ଯଦି (!name || !*name)
+		ଫେରନ୍ତୁ ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	ଫେରନ୍ତୁ env_list_add(ls, name, strlen(name), ମୂଲ୍ୟ, ମୂଲ୍ୟ ? strlen(ମୂଲ୍ୟ) : 0);
 }
 
 /*
  * Calls getenv() and adds the result to the list.
  */
-struct ul_env_list *env_list_add_getenv(struct ul_env_list *ls,
-				const char *name, const char *dflt)
+ସଂରଚନା ul_env_list *env_list_add_getenv(ସଂରଚନା ul_env_list *ls,
+				ଅଚଳ ଅକ୍ଷର *name, ଅଚଳ ଅକ୍ଷର *dflt)
 {
-	const char *val;
+	ଅଚଳ ଅକ୍ଷର *val;
 
-	if (!name)
-		return ls;
+	ଯଦି (!name)
+		ଫେରନ୍ତୁ ls;
 
 	val = getenv(name);
-	if (!val)
+	ଯଦି (!val)
 		val= dflt;
-	if (val)
+	ଯଦି (val)
 		ls = env_list_add_variable(ls, name, val);
-	return ls;
+	ଫେରନ୍ତୁ ls;
 }
 
 /*
  * Calls getenv() for each name (comma-separated) in @str and adds the results
  * to the list.
  */
-struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str)
+ସଂରଚନା ul_env_list *env_list_add_getenvs(ସଂରଚନା ul_env_list *ls, ଅଚଳ ଅକ୍ଷର *str)
 {
-	char **all, **name;
+	ଅକ୍ଷର **all, **name;
 
-	if (!str)
-		return ls;
+	ଯଦି (!str)
+		ଫେରନ୍ତୁ ls;
 
 	all = ul_strv_split(str, ",");
-	if (!all)
-		return ls;
+	ଯଦି (!all)
+		ଫେରନ୍ତୁ ls;
 
 	UL_STRV_FOREACH(name, all)
-		ls = env_list_add_getenv(ls, *name, NULL);
+		ls = env_list_add_getenv(ls, *name, ଖାଲି);
 
 	ul_strv_free(all);
-	return ls;
+	ଫେରନ୍ତୁ ls;
 }
 
 /*
@@ -166,49 +166,49 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
  *
  * @fd must be /proc/<pid>/environ file.
 */
-struct ul_env_list *env_list_from_fd(int fd)
+ସଂରଚନା ul_env_list *env_list_from_fd(ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd)
 {
-	char *buf = NULL, *p;
+	ଅକ୍ଷର *buf = ଖାଲି, *p;
 	ssize_t rc = 0;
-	struct ul_env_list *ls = NULL;
+	ସଂରଚନା ul_env_list *ls = ଖାଲି;
 
 	errno = 0;
-	if ((rc = ul_read_all_alloc(fd, &buf)) < 1)
-		return NULL;
+	ଯଦି ((rc = ul_read_all_alloc(fd, &buf)) < 1)
+		ଫେରନ୍ତୁ ଖାଲି;
 	buf[rc] = '\0';
 	p = buf;
 
-	while (rc > 0) {
+	ଯେତେବେଳେ (rc > 0) {
 		ls = env_list_add_from_string(ls, p);
 		p += strlen(p) + 1;
 		rc -= strlen(p) + 1;
 	}
 
-	free(buf);
-	return ls;
+	ମୁକ୍ତ(buf);
+	ଫେରନ୍ତୁ ls;
 }
 
 /*
  * Use setenv() for all stuff in @ls.
  */
-int env_list_setenv(struct ul_env_list *ls, int overwrite)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା env_list_setenv(ସଂରଚନା ul_env_list *ls, ପୂର୍ଣ୍ଣସଂଖ୍ୟା overwrite)
 {
-	int rc = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = 0;
 
-	while (ls && rc == 0) {
-		if (ls->name && ls->value)
-			rc = setenv(ls->name, ls->value, overwrite);
+	ଯେତେବେଳେ (ls && rc == 0) {
+		ଯଦି (ls->name && ls->ମୂଲ୍ୟ)
+			rc = setenv(ls->name, ls->ମୂଲ୍ୟ, overwrite);
 		ls = ls->next;
 	}
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 
-void env_list_free(struct ul_env_list *ls)
+ଶୂନ୍ୟ env_list_free(ସଂରଚନା ul_env_list *ls)
 {
-	while (ls) {
-		struct ul_env_list *x = ls;
+	ଯେତେବେଳେ (ls) {
+		ସଂରଚନା ul_env_list *x = ls;
 		ls = ls->next;
-		free(x);
+		ମୁକ୍ତ(x);
 	}
 }
 
@@ -216,84 +216,84 @@ void env_list_free(struct ul_env_list *ls)
  * Removes unwanted variables from environ[]. If @org is not NULL than stores
  * unwnated variables to the list.
  */
-void __sanitize_env(struct ul_env_list **org)
+ଶୂନ୍ୟ __sanitize_env(ସଂରଚନା ul_env_list **org)
 {
-	char **envp = environ;
-	char * const *bad;
-	char **cur;
-	int last = 0;
+	ଅକ୍ଷର **envp = environ;
+	ଅକ୍ଷର * ଅଚଳ *bad;
+	ଅକ୍ଷର **cur;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା last = 0;
 
-	for (cur = envp; *cur; cur++)
+	ପାଇଁ (cur = envp; *cur; cur++)
 		last++;
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = forbid; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) == 0) {
-				if (org)
+	ପାଇଁ (cur = envp; *cur; cur++) {
+		ପାଇଁ (bad = forbid; *bad; bad++) {
+			ଯଦି (strncmp(*cur, *bad, strlen(*bad)) == 0) {
+				ଯଦି (org)
 					*org = env_list_add_from_string(*org, *cur);
 				last = ul_remove_entry(envp, cur - envp, last);
 				cur--;
-				break;
+				ଭାଙ୍ଗ;
 			}
 		}
 	}
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = noslash; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) != 0)
-				continue;
-			if (!strchr(*cur, '/'))
-				continue;  /* OK */
-			if (org)
+	ପାଇଁ (cur = envp; *cur; cur++) {
+		ପାଇଁ (bad = noslash; *bad; bad++) {
+			ଯଦି (strncmp(*cur, *bad, strlen(*bad)) != 0)
+				ଜାରି;
+			ଯଦି (!strchr(*cur, '/'))
+				ଜାରି;  /* OK */
+			ଯଦି (org)
 				*org = env_list_add_from_string(*org, *cur);
 			last = ul_remove_entry(envp, cur - envp, last);
 			cur--;
-			break;
+			ଭାଙ୍ଗ;
 		}
 	}
 }
 
-void sanitize_env(void)
+ଶୂନ୍ୟ sanitize_env(ଶୂନ୍ୟ)
 {
-	__sanitize_env(NULL);
+	__sanitize_env(ଖାଲି);
 }
 
-char *safe_getenv(const char *arg)
+ଅକ୍ଷର *safe_getenv(ଅଚଳ ଅକ୍ଷର *arg)
 {
-	if (is_privileged_execution())
-		return NULL;
+	ଯଦି (is_privileged_execution())
+		ଫେରନ୍ତୁ ଖାଲି;
 #ifdef HAVE_PRCTL
-	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#else
-#if (defined(linux) && defined(SYS_prctl))
-	if (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
+	ଯଦି (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		ଫେରନ୍ତୁ ଖାଲି;
+#ଅନ୍ୟଥା
+#ଯଦି (defined(linux) && defined(SYS_prctl))
+	ଯଦି (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		ଫେରନ୍ତୁ ଖାଲି;
 #endif
 #endif
 #ifdef HAVE_SECURE_GETENV
-return secure_getenv(arg);
-#elif HAVE___SECURE_GETENV
-	return __secure_getenv(arg);
-#else
-	return getenv(arg);
+ଫେରନ୍ତୁ secure_getenv(arg);
+#ନଚେତଯଦି HAVE___SECURE_GETENV
+	ଫେରନ୍ତୁ __secure_getenv(arg);
+#ଅନ୍ୟଥା
+	ଫେରନ୍ତୁ getenv(arg);
 #endif
 }
 
 #ifdef TEST_PROGRAM_ENV
-int main(void)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ଶୂନ୍ୟ)
 {
-	char *const *bad;
-	char copy[32];
-	char *p;
-	int retval = EXIT_SUCCESS;
-	struct ul_env_list *removed = NULL;
+	ଅକ୍ଷର *ଅଚଳ *bad;
+	ଅକ୍ଷର copy[32];
+	ଅକ୍ଷର *p;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା retval = EXIT_SUCCESS;
+	ସଂରଚନା ul_env_list *removed = ଖାଲି;
 
 	/* define env. */
-	for (bad = forbid; *bad; bad++) {
+	ପାଇଁ (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		ଯଦି (p)
 			*p = '\0';
 		setenv(copy, "abc", 1);
 	}
@@ -302,13 +302,13 @@ int main(void)
 	__sanitize_env(&removed);
 
 	/* check removal */
-	for (bad = forbid; *bad; bad++) {
+	ପାଇଁ (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		ଯଦି (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (p) {
+		ଯଦି (p) {
 			warnx("%s was not removed", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -318,13 +318,13 @@ int main(void)
 	env_list_setenv(removed, 0);
 
 	/* check restore */
-	for (bad = forbid; *bad; bad++) {
+	ପାଇଁ (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		ଯଦି (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (!p) {
+		ଯଦି (!p) {
 			warnx("%s was not restored", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -332,6 +332,6 @@ int main(void)
 
 	env_list_free(removed);
 
-	return retval;
+	ଫେରନ୍ତୁ retval;
 }
 #endif

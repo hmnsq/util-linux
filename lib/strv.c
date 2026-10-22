@@ -14,73 +14,73 @@
  *    Modified the original version from systemd project for util-linux.
  */
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <assert.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <stdarg.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
+#ଅନ୍ତର୍ଭାଵ <stdbool.h>
+#ଅନ୍ତର୍ଭାଵ <assert.h>
 
-#include "strutils.h"
-#include "strv.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "strv.h"
 
-static void ul_strv_clear(char **l)
+ସ୍ଥିର ଶୂନ୍ୟ ul_strv_clear(ଅକ୍ଷର **l)
 {
-        char **k;
+        ଅକ୍ଷର **k;
 
-        if (!l)
-                return;
+        ଯଦି (!l)
+                ଫେରନ୍ତୁ;
 
-        for (k = l; *k; k++)
-                free(*k);
+        ପାଇଁ (k = l; *k; k++)
+                ମୁକ୍ତ(*k);
 
-        *l = NULL;
+        *l = ଖାଲି;
 }
 
-char **ul_strv_free(char **l)
+ଅକ୍ଷର **ul_strv_free(ଅକ୍ଷର **l)
 {
         ul_strv_clear(l);
-        free(l);
-        return NULL;
+        ମୁକ୍ତ(l);
+        ଫେରନ୍ତୁ ଖାଲି;
 }
 
-char **ul_strv_copy(char * const *l)
+ଅକ୍ଷର **ul_strv_copy(ଅକ୍ଷର * ଅଚଳ *l)
 {
-        char **r, **k;
+        ଅକ୍ଷର **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = malloc(ଆକାର(ଅକ୍ଷର *) * (ul_strv_length(l) + 1));
+        ଯଦି (!r)
+                ଫେରନ୍ତୁ ଖାଲି;
 
-        if (l)
-                for (; *l; k++, l++) {
+        ଯଦି (l)
+                ପାଇଁ (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        ଯଦି (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                ଫେରନ୍ତୁ ଖାଲି;
                         }
                 }
 
-        *k = NULL;
-        return r;
+        *k = ଖାଲି;
+        ଫେରନ୍ତୁ r;
 }
 
-unsigned ul_strv_length(char * const *l) {
+unsigned ul_strv_length(ଅକ୍ଷର * ଅଚଳ *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        ଯଦି (!l)
+                ଫେରନ୍ତୁ 0;
 
-        for (; *l; l++)
+        ପାଇଁ (; *l; l++)
                 n++;
 
-        return n;
+        ଫେରନ୍ତୁ n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+ସ୍ଥିର ଅକ୍ଷର **ul_strv_new_ap(ଅଚଳ ଅକ୍ଷର *x, va_list ap)
 {
-        const char *s;
-        char **a;
+        ଅଚଳ ଅକ୍ଷର *s;
+        ଅକ୍ଷର **a;
         unsigned n = 0, i = 0;
         va_list aq;
 
@@ -89,13 +89,13 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        ଯଦି (x) {
+                n = x == (ଅଚଳ ଅକ୍ଷର*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
-                                continue;
+                ଯେତେବେଳେ ((s = va_arg(aq, ଅଚଳ ଅକ୍ଷର*))) {
+                        ଯଦି (s == (ଅଚଳ ଅକ୍ଷର*) -1)
+                                ଜାରି;
 
                         n++;
                 }
@@ -103,153 +103,153 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = malloc(ଆକାର(ଅକ୍ଷର *) * (n + 1));
+        ଯଦି (!a)
+                ଫେରନ୍ତୁ ଖାଲି;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        ଯଦି (x) {
+                ଯଦି (x != (ଅଚଳ ଅକ୍ଷର*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
-                                goto fail;
+                        ଯଦି (!a[i])
+                                ଯାଅ fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                ଯେତେବେଳେ ((s = va_arg(ap, ଅଚଳ ଅକ୍ଷର*))) {
 
-                        if (s == (const char*) -1)
-                                continue;
+                        ଯଦି (s == (ଅଚଳ ଅକ୍ଷର*) -1)
+                                ଜାରି;
 
                         a[i] = strdup(s);
-                        if (!a[i])
-                                goto fail;
+                        ଯଦି (!a[i])
+                                ଯାଅ fail;
 
                         i++;
                 }
         }
 
-        a[i] = NULL;
+        a[i] = ଖାଲି;
 
-        return a;
+        ଫେରନ୍ତୁ a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        ଫେରନ୍ତୁ ଖାଲି;
 }
 
-char **ul_strv_new(const char *x, ...)
+ଅକ୍ଷର **ul_strv_new(ଅଚଳ ଅକ୍ଷର *x, ...)
 {
-        char **r;
+        ଅକ୍ଷର **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        ଫେରନ୍ତୁ r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_extend_strv(ଅକ୍ଷର ***a, ଅକ୍ଷର **b)
 {
-        int r;
-        char **s;
+        ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
+        ଅକ୍ଷର **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                ଯଦି (r < 0)
+                        ଫେରନ୍ତୁ r;
         }
 
-        return 0;
+        ଫେରନ୍ତୁ 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_extend_strv_concat(ଅକ୍ଷର ***a, ଅକ୍ଷର **b, ଅଚଳ ଅକ୍ଷର *suffix)
 {
-        int r;
-        char **s;
+        ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
+        ଅକ୍ଷର **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                ଅକ୍ଷର *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                ଯଦି (!v)
+                        ଫେରନ୍ତୁ -ENOMEM;
 
-                r = ul_strv_push(a, v);
-                if (r < 0) {
-                        free(v);
-                        return r;
+                r = ul_strv_ଠେଲ(a, v);
+                ଯଦି (r < 0) {
+                        ମୁକ୍ତ(v);
+                        ଫେରନ୍ତୁ r;
                 }
         }
 
-        return 0;
+        ଫେରନ୍ତୁ 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        ପାଇଁ ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+ଅକ୍ଷର **ul_strv_split(ଅଚଳ ଅକ୍ଷର *s, ଅଚଳ ଅକ୍ଷର *separator)
 {
-        const char *word, *state;
+        ଅଚଳ ଅକ୍ଷର *word, *state;
         size_t l;
         unsigned n, i;
-        char **r;
+        ଅକ୍ଷର **r;
 
-        assert(s);
+        ପ୍ରତିଜ୍ଞା(s);
 
         n = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = malloc(ଆକାର(ଅକ୍ଷର *) * (n + 1));
+        ଯଦି (!r)
+                ଫେରନ୍ତୁ ଖାଲି;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                ଯଦି (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        ଫେରନ୍ତୁ ଖାଲି;
                 }
 
                 i++;
         }
 
-        r[i] = NULL;
-        return r;
+        r[i] = ଖାଲି;
+        ଫେରନ୍ତୁ r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+ଅକ୍ଷର *ul_strv_join(ଅକ୍ଷର **l, ଅଚଳ ଅକ୍ଷର *separator)
 {
-        char *r, *e;
-        char **s;
+        ଅକ୍ଷର *r, *e;
+        ଅକ୍ଷର **s;
         size_t n, k;
 
-        if (!separator)
+        ଯଦି (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                ଯଦି (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        ଯଦି (!r)
+                ଫେରନ୍ତୁ ଖାଲି;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                ଯଦି (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,167 +257,167 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        ଫେରନ୍ତୁ r;
 }
 
-int ul_strv_push(char ***l, char *value)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_ଠେଲ(ଅକ୍ଷର ***l, ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-        char **c;
+        ଅକ୍ଷର **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        ଯଦି (!ମୂଲ୍ୟ)
+                ଫେରନ୍ତୁ 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ଯଦି (m < n)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, ଆକାର(ଅକ୍ଷର *));
+        ଯଦି (!c)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        c[n] = value;
-        c[n+1] = NULL;
+        c[n] = ମୂଲ୍ୟ;
+        c[n+1] = ଖାଲି;
 
         *l = c;
-        return 0;
+        ଫେରନ୍ତୁ 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_ଠେଲ_prepend(ଅକ୍ଷର ***l, ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-        char **c;
+        ଅକ୍ଷର **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        ଯଦି (!ମୂଲ୍ୟ)
+                ଫେରନ୍ତୁ 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ଯଦି (m < n)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = malloc(ଆକାର(ଅକ୍ଷର *) * m);
+        ଯଦି (!c)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        ପାଇଁ (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
-        c[0] = value;
-        c[n+1] = NULL;
+        c[0] = ମୂଲ୍ୟ;
+        c[n+1] = ଖାଲି;
 
-        free(*l);
+        ମୁକ୍ତ(*l);
         *l = c;
 
-        return 0;
+        ଫେରନ୍ତୁ 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_consume(ଅକ୍ଷର ***l, ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-        int r;
+        ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
 
-        r = ul_strv_push(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_ଠେଲ(l, ମୂଲ୍ୟ);
+        ଯଦି (r < 0)
+                ମୁକ୍ତ(ମୂଲ୍ୟ);
 
-        return r;
+        ଫେରନ୍ତୁ r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_consume_prepend(ଅକ୍ଷର ***l, ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-        int r;
+        ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
 
-        r = ul_strv_push_prepend(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_ଠେଲ_prepend(l, ମୂଲ୍ୟ);
+        ଯଦି (r < 0)
+                ମୁକ୍ତ(ମୂଲ୍ୟ);
 
-        return r;
+        ଫେରନ୍ତୁ r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_extend(ଅକ୍ଷର ***l, ଅଚଳ ଅକ୍ଷର *ମୂଲ୍ୟ)
 {
-        char *v;
+        ଅକ୍ଷର *v;
 
-        if (!value)
-                return 0;
+        ଯଦି (!ମୂଲ୍ୟ)
+                ଫେରନ୍ତୁ 0;
 
-        v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        v = strdup(ମୂଲ୍ୟ);
+        ଯଦି (!v)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        ଫେରନ୍ତୁ ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+ଅକ୍ଷର **ul_strv_remove(ଅକ୍ଷର **l, ଅଚଳ ଅକ୍ଷର *s)
 {
-        char **f, **t;
+        ଅକ୍ଷର **f, **t;
 
-        if (!l)
-                return NULL;
+        ଯଦି (!l)
+                ଫେରନ୍ତୁ ଖାଲି;
 
-        assert(s);
+        ପ୍ରତିଜ୍ଞା(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
-                        free(*f);
-                else
+        ପାଇଁ (f = t = l; *f; f++)
+                ଯଦି (strcmp(*f, s) == 0)
+                        ମୁକ୍ତ(*f);
+                ଅନ୍ୟଥା
                         *(t++) = *f;
 
-        *t = NULL;
-        return l;
+        *t = ଖାଲି;
+        ଫେରନ୍ତୁ l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_extendf(ଅକ୍ଷର ***l, ଅଚଳ ଅକ୍ଷର *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        ଅକ୍ଷର *x;
+        ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        ଯଦି (r < 0)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ଫେରନ୍ତୁ ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_strv_extendv(ଅକ୍ଷର ***l, ଅଚଳ ଅକ୍ଷର *format, va_list ap)
 {
-        char *x;
-        int r;
+        ଅକ୍ଷର *x;
+        ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        ଯଦି (r < 0)
+                ଫେରନ୍ତୁ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ଫେରନ୍ତୁ ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+ଅକ୍ଷର **ul_strv_reverse(ଅକ୍ଷର **l)
 {
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        ଯଦି (n <= 1)
+                ଫେରନ୍ତୁ l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        ପାଇଁ (i = 0; i < n / 2; i++) {
+                ଅକ୍ଷର *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        ଫେରନ୍ତୁ l;
 }

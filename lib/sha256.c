@@ -10,23 +10,23 @@
  * in the salt and rounds= setting must contain a valid iteration count,
  * on error "*" is returned.
  */
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <stdint.h>
 
-#include "sha256.h"
+#ଅନ୍ତର୍ଭାଵ "sha256.h"
 
 /* public domain sha256 implementation based on fips180-3 */
 
-struct sha256 {
+ସଂରଚନା sha256 {
 	uint64_t len;    /* processed message length */
 	uint32_t h[8];   /* hash state */
 	uint8_t buf[64]; /* message block buffer */
 };
 
-static uint32_t ror(uint32_t n, int k) { return (n >> k) | (n << (32-k)); }
+ସ୍ଥିର uint32_t ror(uint32_t n, ପୂର୍ଣ୍ଣସଂଖ୍ୟା k) { ଫେରନ୍ତୁ (n >> k) | (n << (32-k)); }
 #define Ch(x,y,z)  (z ^ (x & (y ^ z)))
 #define Maj(x,y,z) ((x & y) | (z & (x | y)))
 #define S0(x)      (ror(x,2) ^ ror(x,13) ^ ror(x,22))
@@ -34,7 +34,7 @@ static uint32_t ror(uint32_t n, int k) { return (n >> k) | (n << (32-k)); }
 #define R0(x)      (ror(x,7) ^ ror(x,18) ^ (x>>3))
 #define R1(x)      (ror(x,17) ^ ror(x,19) ^ (x>>10))
 
-static const uint32_t K[64] = {
+ସ୍ଥିର ଅଚଳ uint32_t K[64] = {
 0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -45,18 +45,18 @@ static const uint32_t K[64] = {
 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
-static void processblock(struct sha256 *s, const uint8_t *buf)
+ସ୍ଥିର ଶୂନ୍ୟ processblock(ସଂରଚନା sha256 *s, ଅଚଳ uint8_t *buf)
 {
 	uint32_t W[64], t1, t2, a, b, c, d, e, f, g, h;
-	int i;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
-	for (i = 0; i < 16; i++) {
+	ପାଇଁ (i = 0; i < 16; i++) {
 		W[i] = (uint32_t)buf[4*i]<<24;
 		W[i] |= (uint32_t)buf[4*i+1]<<16;
 		W[i] |= (uint32_t)buf[4*i+2]<<8;
 		W[i] |= buf[4*i+3];
 	}
-	for (; i < 64; i++)
+	ପାଇଁ (; i < 64; i++)
 		W[i] = R1(W[i-2]) + W[i-7] + R0(W[i-15]) + W[i-16];
 	a = s->h[0];
 	b = s->h[1];
@@ -66,7 +66,7 @@ static void processblock(struct sha256 *s, const uint8_t *buf)
 	f = s->h[5];
 	g = s->h[6];
 	h = s->h[7];
-	for (i = 0; i < 64; i++) {
+	ପାଇଁ (i = 0; i < 64; i++) {
 		t1 = h + S1(e) + Ch(e,f,g) + K[i] + W[i];
 		t2 = S0(a) + Maj(a,b,c);
 		h = g;
@@ -88,12 +88,12 @@ static void processblock(struct sha256 *s, const uint8_t *buf)
 	s->h[7] += h;
 }
 
-static void pad(struct sha256 *s)
+ସ୍ଥିର ଶୂନ୍ୟ pad(ସଂରଚନା sha256 *s)
 {
 	unsigned r = s->len % 64;
 
 	s->buf[r++] = 0x80;
-	if (r > 56) {
+	ଯଦି (r > 56) {
 		memset(s->buf + r, 0, 64 - r);
 		r = 0;
 		processblock(s, s->buf);
@@ -111,7 +111,7 @@ static void pad(struct sha256 *s)
 	processblock(s, s->buf);
 }
 
-static void sha256_init(struct sha256 *s)
+ସ୍ଥିର ଶୂନ୍ୟ sha256_init(ସଂରଚନା sha256 *s)
 {
 	s->len = 0;
 	s->h[0] = 0x6a09e667;
@@ -124,12 +124,12 @@ static void sha256_init(struct sha256 *s)
 	s->h[7] = 0x5be0cd19;
 }
 
-static void sha256_sum(struct sha256 *s, uint8_t *md)
+ସ୍ଥିର ଶୂନ୍ୟ sha256_sum(ସଂରଚନା sha256 *s, uint8_t *md)
 {
-	int i;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା i;
 
 	pad(s);
-	for (i = 0; i < 8; i++) {
+	ପାଇଁ (i = 0; i < 8; i++) {
 		md[4*i] = s->h[i] >> 24;
 		md[4*i+1] = s->h[i] >> 16;
 		md[4*i+2] = s->h[i] >> 8;
@@ -137,30 +137,30 @@ static void sha256_sum(struct sha256 *s, uint8_t *md)
 	}
 }
 
-static void sha256_update(struct sha256 *s, const void *m, unsigned long len)
+ସ୍ଥିର ଶୂନ୍ୟ sha256_update(ସଂରଚନା sha256 *s, ଅଚଳ ଶୂନ୍ୟ *m, unsigned long len)
 {
-	const uint8_t *p = m;
+	ଅଚଳ uint8_t *p = m;
 	unsigned r = s->len % 64;
 
 	s->len += len;
-	if (r) {
-		if (len < 64 - r) {
+	ଯଦି (r) {
+		ଯଦି (len < 64 - r) {
 			memcpy(s->buf + r, p, len);
-			return;
+			ଫେରନ୍ତୁ;
 		}
 		memcpy(s->buf + r, p, 64 - r);
 		len -= 64 - r;
 		p += 64 - r;
 		processblock(s, s->buf);
 	}
-	for (; len >= 64; len -= 64, p += 64)
+	ପାଇଁ (; len >= 64; len -= 64, p += 64)
 		processblock(s, p);
 	memcpy(s->buf, p, len);
 }
 
-void ul_SHA256(unsigned char hash_out[UL_SHA256LENGTH], const unsigned char *str, size_t len)
+ଶୂନ୍ୟ ul_SHA256(unsigned ଅକ୍ଷର hash_out[UL_SHA256LENGTH], ଅଚଳ unsigned ଅକ୍ଷର *str, size_t len)
 {
-	struct sha256 state = {};
+	ସଂରଚନା sha256 state = {};
 	sha256_init(&state);
 	sha256_update(&state, str, len);
 	sha256_sum(&state, hash_out);

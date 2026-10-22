@@ -5,76 +5,76 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <time.h>
-#include <signal.h>
+#ଅନ୍ତର୍ଭାଵ <time.h>
+#ଅନ୍ତର୍ଭାଵ <signal.h>
 #ifdef HAVE_SYSINFO
-#include <sys/sysinfo.h>
+#ଅନ୍ତର୍ଭାଵ <sys/sysinfo.h>
 #endif
-#include <sys/time.h>
+#ଅନ୍ତର୍ଭାଵ <sys/time.h>
 
-#include "c.h"
-#include "monotonic.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "monotonic.h"
 
-int get_boot_time(struct timeval *boot_time __attribute__((__unused__)))
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_boot_time(ସଂରଚନା timeval *boot_time __attribute__((__unused__)))
 {
 #ifdef CLOCK_BOOTTIME
-	struct timespec hires_uptime = { 0 };
-	struct timeval lores_uptime = { 0 };
+	ସଂରଚନା timespec hires_uptime = { 0 };
+	ସଂରଚନା timeval lores_uptime = { 0 };
 #endif
-	struct timeval now = { 0 };
+	ସଂରଚନା timeval now = { 0 };
 #ifdef HAVE_SYSINFO
-	struct sysinfo info;
+	ସଂରଚନା sysinfo info;
 #endif
 
-	if (gettimeofday(&now, NULL) != 0)
-		return -errno;
+	ଯଦି (gettimeofday(&now, ଖାଲି) != 0)
+		ଫେରନ୍ତୁ -errno;
 #ifdef CLOCK_BOOTTIME
-	if (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
+	ଯଦି (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
 		TIMESPEC_TO_TIMEVAL(&lores_uptime, &hires_uptime);
 		timersub(&now, &lores_uptime, boot_time);
-		return 0;
+		ଫେରନ୍ତୁ 0;
 	}
 #endif
 #ifdef HAVE_SYSINFO
 	/* fallback */
-	if (sysinfo(&info) != 0)
-		return -errno;
+	ଯଦି (sysinfo(&info) != 0)
+		ଫେରନ୍ତୁ -errno;
 
 	boot_time->tv_sec = now.tv_sec - info.uptime;
 	boot_time->tv_usec = 0;
-	return 0;
-#else
-	return -ENOSYS;
+	ଫେରନ୍ତୁ 0;
+#ଅନ୍ୟଥା
+	ଫେରନ୍ତୁ -ENOSYS;
 #endif
 }
 
-usec_t get_suspended_time(void)
+usec_t get_suspended_time(ଶୂନ୍ୟ)
 {
-#if defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
-	struct timespec boot, mono;
+#ଯଦି defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
+	ସଂରଚନା timespec boot, mono;
 
-	if (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
+	ଯଦି (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
 	    clock_gettime(CLOCK_MONOTONIC, &mono) == 0)
-		return timespec_to_usec(&boot) - timespec_to_usec(&mono);
+		ଫେରନ୍ତୁ timespec_to_usec(&boot) - timespec_to_usec(&mono);
 #endif
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int gettime_monotonic(struct timeval *tv)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା gettime_monotonic(ସଂରଚନା timeval *tv)
 {
 #ifdef CLOCK_MONOTONIC
 	/* Can slew only by ntp and adjtime */
-	int ret;
-	struct timespec ts;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା ret;
+	ସଂରଚନା timespec ts;
 
 	/* Linux specific, can't slew */
-	if (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
+	ଯଦି (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
 		tv->tv_sec = ts.tv_sec;
 		tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
 	}
-	return ret;
-#else
-	return gettimeofday(tv, NULL);
+	ଫେରନ୍ତୁ ret;
+#ଅନ୍ୟଥା
+	ଫେରନ୍ତୁ gettimeofday(tv, ଖାଲି);
 #endif
 }
 

@@ -4,142 +4,142 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "buffer.h"
+#ଅନ୍ତର୍ଭାଵ "mbsalign.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+ଶୂନ୍ୟ ul_buffer_reset_data(ସଂରଚନା ul_buffer *buf)
 {
-	if (buf->begin)
+	ଯଦି (buf->begin)
 		memset(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	ଯଦି (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * ଆକାର(ଅକ୍ଷର *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ଅକ୍ଷର *ul_buffer_free_data_common(ସଂରଚନା ul_buffer *buf, bool steal)
 {
-	char *t = NULL;
+	ଅକ୍ଷର *t = ଖାଲି;
 
-	assert(buf);
+	ପ୍ରତିଜ୍ଞା(buf);
 
-	if (steal)
+	ଯଦି (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	ଅନ୍ୟଥା
+		ମୁକ୍ତ(buf->begin);
+	buf->begin = ଖାଲି;
+	buf->end = ଖାଲି;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	ମୁକ୍ତ(buf->ptrs);
+	buf->ptrs = ଖାଲି;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	ମୁକ୍ତ(buf->encoded);
+	buf->encoded = ଖାଲି;
 	buf->encoded_sz = 0;
 
-	return t;
+	ଫେରନ୍ତୁ t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+ଶୂନ୍ୟ ul_buffer_free_data(ସଂରଚନା ul_buffer *buf)
 {
 	ul_buffer_free_data_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+ଅକ୍ଷର *ul_buffer_steal_string(ସଂରଚନା ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	ଯଦି (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		ଫେରନ୍ତୁ ଖାଲି;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	ଫେରନ୍ତୁ ul_buffer_free_data_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+ଶୂନ୍ୟ ul_buffer_set_chunksize(ସଂରଚନା ul_buffer *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_is_empty(ସଂରଚନା ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	ଫେରନ୍ତୁ buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_save_pointer(ସଂରଚନା ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	ଯଦି (ptr_idx >= buf->nptrs) {
+		ଅକ୍ଷର **tmp = reallocarray(buf->ptrs, ptr_idx + 1, ଆକାର(ଅକ୍ଷର *));
 
-		if (!tmp)
-			return -EINVAL;
+		ଯଦି (!tmp)
+			ଫେରନ୍ତୁ -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+ଅକ୍ଷର *ul_buffer_get_pointer(ସଂରଚନା ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	ଯଦି (ptr_idx < buf->nptrs)
+		ଫେରନ୍ତୁ buf->ptrs[ptr_idx];
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_pointer_length(ସଂରଚନା ul_buffer *buf, unsigned short ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	ଅକ୍ଷର *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	ଯଦି (ptr && ptr > buf->begin)
+		ଫେରନ୍ତୁ ptr - buf->begin;
+	ଫେରନ୍ତୁ 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_safe_pointer_width(ସଂରଚନା ul_buffer *buf, unsigned short ptr_idx)
 {
 	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	ଯଦି (!len)
+		ଫେରନ୍ତୁ 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	ଫେରନ୍ତୁ mbs_safe_nwidth(buf->begin, len, ଖାଲି);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+ଶୂନ୍ୟ ul_buffer_refer_string(ସଂରଚନା ul_buffer *buf, ଅକ୍ଷର *str)
 {
-	if (buf->sz)
+	ଯଦି (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
 	buf->sz = str ? strlen(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_alloc_data(ସଂରଚନା ul_buffer *buf, size_t sz)
 {
-	char *tmp;
+	ଅକ୍ଷର *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	ପ୍ରତିଜ୍ଞା(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	ଯଦି (sz <= buf->sz)
+		ଫେରନ୍ତୁ 0;
 
-	if (buf->end && buf->begin)
+	ଯଦି (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	ଯଦି (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	ଯଦି (!tmp)
+		ଫେରନ୍ତୁ -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
@@ -147,175 +147,175 @@ int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 
 	memset(buf->end, '\0', sz - len);
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_append_data(ସଂରଚନା ul_buffer *buf, ଅଚଳ ଅକ୍ଷର *data, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	ଯଦି (!buf)
+		ଫେରନ୍ତୁ -EINVAL;
+	ଯଦି (!data)
+		ଫେରନ୍ତୁ 0;
 
-	if (buf->begin && buf->end)
+	ଯଦି (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	ଯଦି (maxsz <= sz + 1) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		ଯଦି (rc)
+			ଫେରନ୍ତୁ rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	ଯଦି (!buf->end)
+		ଫେରନ୍ତୁ -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_append_char(ସଂରଚନା ul_buffer *buf, ଅଚଳ ଅକ୍ଷର c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	ଫେରନ୍ତୁ ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_append_string(ସଂରଚନା ul_buffer *buf, ଅଚଳ ଅକ୍ଷର *str)
 {
-	if (!str)
-		return 0;
+	ଯଦି (!str)
+		ଫେରନ୍ତୁ 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	ଫେରନ୍ତୁ ul_buffer_append_data(buf, str, strlen(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_append_ntimes(ସଂରଚନା ul_buffer *buf, size_t n, ଅଚଳ ଅକ୍ଷର *str)
 {
 	size_t i;
 	size_t len = strlen(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	ପାଇଁ (i = 0; len && i < n; i++) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = ul_buffer_append_data(buf, str, len);
+		ଯଦି (rc)
+			ଫେରନ୍ତୁ rc;
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_appendf(ସଂରଚନା ul_buffer *buf, ଅଚଳ ଅକ୍ଷର *format, ...)
 {
 	va_list ap;
-	int res;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା res;
 
 	va_start(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	ଫେରନ୍ତୁ res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_appendvf(ସଂରଚନା ul_buffer *buf, ଅଚଳ ଅକ୍ଷର *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	ଅକ୍ଷର *val;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା sz;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ଯଦି (sz < 0)
+		ଫେରନ୍ତୁ -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	ମୁକ୍ତ(val);
 
-	return res;
+	ଫେରନ୍ତୁ res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_buffer_set_data(ସଂରଚନା ul_buffer *buf, ଅଚଳ ଅକ୍ଷର *data, size_t sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ଫେରନ୍ତୁ ul_buffer_append_data(buf, data, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+ଅକ୍ଷର *ul_buffer_get_data(ସଂରଚନା ul_buffer *buf, size_t *sz, size_t *width)
 {
-	if (sz)
+	ଯଦି (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	ଯଦି (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	ଫେରନ୍ତୁ buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+ଅକ୍ଷର *ul_buffer_get_string(ସଂରଚନା ul_buffer *buf, size_t *sz, size_t *width)
 {
-	char *ret;
+	ଅକ୍ଷର *ret;
 
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	ଯଦି (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_buffer_get_bufsiz(ସଂରଚନା ul_buffer *buf)
 {
-	return buf->sz;
+	ଫେରନ୍ତୁ buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_buffer_get_datasiz(ସଂରଚନା ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	ଫେରନ୍ତୁ buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+ଅକ୍ଷର *ul_buffer_get_safe_data(ସଂରଚନା ul_buffer *buf, size_t *sz, size_t *width, ଅଚଳ ଅକ୍ଷର *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	ଅକ୍ଷର *data = ul_buffer_get_data(buf, ଖାଲି, ଖାଲି);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	ଅକ୍ଷର *res = ଖାଲି;
 
-	if (!data)
-		goto nothing;
+	ଯଦି (!data)
+		ଯାଅ nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	ଯଦି (encsz > buf->encoded_sz) {
+		ଅକ୍ଷର *tmp = realloc(buf->encoded, encsz);
+		ଯଦି (!tmp)
+			ଯାଅ nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	ଯଦି (!res || !wsz || wsz == (size_t) -1)
+		ଯାଅ nothing;
 
-	if (width)
+	ଯଦି (width)
 		*width = wsz;
-	if (sz)
+	ଯଦି (sz)
 		*sz = strlen(res);
-	return res;
+	ଫେରନ୍ତୁ res;
 nothing:
-	if (width)
+	ଯଦି (width)
 		*width = 0;
-	if (sz)
+	ଯଦି (sz)
 		*sz = 0;
-	return NULL;
+	ଫେରନ୍ତୁ ଖାଲି;
 }
 
 
 #ifdef TEST_PROGRAM_BUFFER
 
-enum {
+ଗଣନା {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ଶୂନ୍ୟ)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	ସଂରଚନା ul_buffer buf = UL_INIT_BUFFER;
+	ଅକ୍ଷର *str;
 	size_t sz = 0;
 
 	ul_buffer_set_chunksize(&buf, 16);
@@ -331,7 +331,7 @@ int main(void)
 	ul_buffer_append_string(&buf, "bbb");
 	ul_buffer_save_pointer(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ଖାଲି);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
@@ -345,7 +345,7 @@ int main(void)
 	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
 	ul_buffer_save_pointer(&buf, PTR_AAA);
 	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ଖାଲି);
 	printf("data [%zu] '%s'\n", sz, str);
 	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
 
@@ -354,29 +354,29 @@ int main(void)
 	ul_buffer_refer_string(&buf, str);
 	ul_buffer_append_data(&buf, ",", 1);
 	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ଖାଲି);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ଖାଲି);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 	ul_buffer_append_char(&buf, 'x');
 	{
-		char c = 'y';
+		ଅକ୍ଷର c = 'y';
 		ul_buffer_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
+		ଅଚଳ ଅକ୍ଷର c = 'z';
 		ul_buffer_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
+	str = ul_buffer_get_data(&buf, &sz, ଖାଲି);
 	printf("data [%zu] '%s'\n", sz, str);
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	ଫେରନ୍ତୁ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BUFFER */

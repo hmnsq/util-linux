@@ -4,21 +4,21 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <ctype.h>
-#include <unistd.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <unistd.h>
 
 #ifdef HAVE_GETTTYNAM
 # include <ttyent.h>
 #endif
 
-#include "c.h"
-#include "ttyutils.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "ttyutils.h"
 
 #ifdef __linux__
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  ଯଦି defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -26,14 +26,14 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#elif defined(__GNU__)
+#ନଚେତଯଦି defined(__GNU__)
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "hurd"
 #  endif
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#ଅନ୍ୟଥା
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,179 +42,179 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_env_int(ଅଚଳ ଅକ୍ଷର *name)
 {
-	const char *cp = getenv(name);
+	ଅଚଳ ଅକ୍ଷର *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	ଯଦି (cp) {
+		ଅକ୍ଷର *end = ଖାଲି;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		ଯଦି (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			ଫେରନ୍ତୁ x;
 	}
 
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_terminal_dimension(ପୂର୍ଣ୍ଣସଂଖ୍ୟା *cols, ପୂର୍ଣ୍ଣସଂଖ୍ୟା *ଧାଡ଼ିଗୁଡ଼ିକ)
 {
-	int c = 0, l = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#ଯଦି defined(TIOCGWINSZ)
+	ସଂରଚନା winsize	w_win;
+	ଯଦି (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
-#elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+#ନଚେତଯଦି defined(TIOCGSIZE)
+	ସଂରଚନା ttysize	t_win;
+	ଯଦି (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
-		l = t_win.ts_lines;
+		l = t_win.ts_ଧାଡ଼ିଗୁଡ଼ିକ;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	ଯଦି (cols) {
+		ଯଦି (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	ଯଦି (ଧାଡ଼ିଗୁଡ଼ିକ) {
+		ଯଦି (l <= 0)
 			l = get_env_int("LINES");
-		*lines = l;
+		*ଧାଡ଼ିଗୁଡ଼ିକ = l;
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int get_terminal_width(int default_width)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_terminal_width(ପୂର୍ଣ୍ଣସଂଖ୍ୟା default_width)
 {
-	int width = 0;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା width = 0;
 
-	get_terminal_dimension(&width, NULL);
+	get_terminal_dimension(&width, ଖାଲି);
 
-	return width > 0 ? width : default_width;
+	ଫେରନ୍ତୁ width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_terminal_stdfd(ଶୂନ୍ୟ)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	ଯଦି (isatty(STDIN_FILENO))
+		ଫେରନ୍ତୁ STDIN_FILENO;
+	ଯଦି (isatty(STDOUT_FILENO))
+		ଫେରନ୍ତୁ STDOUT_FILENO;
+	ଯଦି (isatty(STDERR_FILENO))
+		ଫେରନ୍ତୁ STDERR_FILENO;
 
-	return -EINVAL;
+	ଫେରନ୍ତୁ -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_terminal_name(ଅଚଳ ଅକ୍ଷର **path,
+		      ଅଚଳ ଅକ୍ଷର **name,
+		      ଅଚଳ ଅକ୍ଷର **ସଂଖ୍ୟା)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	ଅଚଳ ଅକ୍ଷର *tty;
+	ଅଚଳ ଅକ୍ଷର *p;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା fd;
 
 
-	if (name)
-		*name = NULL;
-	if (path)
-		*path = NULL;
-	if (number)
-		*number = NULL;
+	ଯଦି (name)
+		*name = ଖାଲି;
+	ଯଦି (path)
+		*path = ଖାଲି;
+	ଯଦି (ସଂଖ୍ୟା)
+		*ସଂଖ୍ୟା = ଖାଲି;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	ଯଦି (fd < 0)
+		ଫେରନ୍ତୁ fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	ଯଦି (!tty)
+		ଫେରନ୍ତୁ -1;
 
-	if (path)
+	ଯଦି (path)
 		*path = tty;
-	if (name || number)
+	ଯଦି (name || ସଂଖ୍ୟା)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	ଯଦି (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
-				*number = p;
-				break;
+	ଯଦି (ସଂଖ୍ୟା) {
+		ପାଇଁ (p = tty; p && *p; p++) {
+			ଯଦି (isdigit(*p)) {
+				*ସଂଖ୍ୟା = p;
+				ଭାଙ୍ଗ;
 			}
 		}
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int get_terminal_type(const char **type)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_terminal_type(ଅଚଳ ଅକ୍ଷର **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	ଯଦି (*type)
+		ଫେରନ୍ତୁ -EINVAL;
+	ଫେରନ୍ତୁ 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+ଅକ୍ଷର *get_terminal_default_type(ଅଚଳ ଅକ୍ଷର *ttyname, ପୂର୍ଣ୍ଣସଂଖ୍ୟା is_serial)
 {
-	if (ttyname) {
+	ଯଦି (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		ସଂରଚନା ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		ଯଦି (ent && ent->ty_type)
+			ଫେରନ୍ତୁ strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#ଯଦି defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		ଯଦି (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			ଫେରନ୍ତୁ strdup(DEFAULT_TTYS0);
+		ଅନ୍ୟଥା ଯଦି (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			ଫେରନ୍ତୁ strdup(DEFAULT_TTY32);
+		ଅନ୍ୟଥା ଯଦି (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			ଫେରନ୍ତୁ strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	ଫେରନ୍ତୁ strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ଶୂନ୍ୟ)
 {
-	const char *path, *name, *num;
-	int c, l;
+	ଅଚଳ ଅକ୍ଷର *path, *name, *ଅଙ୍କ;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	ଯଦି (get_terminal_name(&path, &name, &ଅଙ୍କ) == 0) {
+		ଅକ୍ଷର *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
-		fprintf(stderr, "tty number:    %s\n", num);
+		fprintf(stderr, "tty number:    %s\n", ଅଙ୍କ);
 
 		fprintf(stderr, "tty term:      %s\n", getenv("TERM"));
 
 		term = get_terminal_default_type(name, 0);
 		fprintf(stderr, "tty dflt term: %s\n", term);
-		free(term);
+		ମୁକ୍ତ(term);
 	}
 	get_terminal_dimension(&c, &l);
 	fprintf(stderr,         "tty cols:      %d\n", c);
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	ଫେରନ୍ତୁ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */

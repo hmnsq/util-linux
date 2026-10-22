@@ -38,12 +38,12 @@
  *
  */
 
-#include <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
 
-#include "crc32.h"
+#ଅନ୍ତର୍ଭାଵ "crc32.h"
 
 
-static const uint32_t crc32_tab[] = {
+ସ୍ଥିର ଅଚଳ uint32_t crc32_tab[] = {
 	0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
 	0x706af48fL, 0xe963a535L, 0x9e6495a3L, 0x0edb8832L, 0x79dcb8a4L,
 	0xe0d5e91eL, 0x97d2d988L, 0x09b64c2bL, 0x7eb17cbdL, 0xe7b82d07L,
@@ -98,9 +98,9 @@ static const uint32_t crc32_tab[] = {
 	0x2d02ef8dL
 };
 
-static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ uint32_t crc32_add_char(uint32_t crc, unsigned ଅକ୍ଷର c)
 {
-	return crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
+	ଫେରନ୍ତୁ crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
 }
 
 /*
@@ -108,35 +108,35 @@ static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
  * and does __not__ xor at the end. Then individual users can do
  * whatever they need.
  */
-uint32_t ul_crc32(uint32_t seed, const unsigned char *buf, size_t len)
+uint32_t ul_crc32(uint32_t seed, ଅଚଳ unsigned ଅକ୍ଷର *buf, size_t len)
 {
 	uint32_t crc = seed;
-	const unsigned char *p = buf;
+	ଅଚଳ unsigned ଅକ୍ଷର *p = buf;
 
-	while (len) {
+	ଯେତେବେଳେ (len) {
 		crc = crc32_add_char(crc, *p++);
 		len--;
 	}
 
-	return crc;
+	ଫେରନ୍ତୁ crc;
 }
 
-uint32_t ul_crc32_exclude_offset(uint32_t seed, const unsigned char *buf, size_t len,
+uint32_t ul_crc32_exclude_offset(uint32_t seed, ଅଚଳ unsigned ଅକ୍ଷର *buf, size_t len,
 			      size_t exclude_off, size_t exclude_len, uint8_t exclude_fill)
 {
 	uint32_t crc = seed;
-	const unsigned char *p = buf;
+	ଅଚଳ unsigned ଅକ୍ଷର *p = buf;
 	size_t i;
 
-	for (i = 0; i < len; i++) {
-		unsigned char x = *p++;
+	ପାଇଁ (i = 0; i < len; i++) {
+		unsigned ଅକ୍ଷର x = *p++;
 
-		if (i >= exclude_off && i < exclude_off + exclude_len)
+		ଯଦି (i >= exclude_off && i < exclude_off + exclude_len)
 			x = exclude_fill;
 
 		crc = crc32_add_char(crc, x);
 	}
 
-	return crc;
+	ଫେରନ୍ତୁ crc;
 }
 

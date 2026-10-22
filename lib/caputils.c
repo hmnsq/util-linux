@@ -13,56 +13,56 @@
  * along with this program.  If not, see <https://gnu.org/licenses/>.
  */
 
-#include <sys/prctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <errno.h>
+#ଅନ୍ତର୍ଭାଵ <sys/prctl.h>
+#ଅନ୍ତର୍ଭାଵ <stdio.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <limits.h>
+#ଅନ୍ତର୍ଭାଵ <errno.h>
 
-#include "c.h"
-#include "caputils.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "nls.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "caputils.h"
+#ଅନ୍ତର୍ଭାଵ "pathnames.h"
+#ଅନ୍ତର୍ଭାଵ "procfs.h"
+#ଅନ୍ତର୍ଭାଵ "nls.h"
 
-static int test_cap(unsigned int cap)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା test_cap(unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	ଫେରନ୍ତୁ prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap_last_by_bsearch(ପୂର୍ଣ୍ଣସଂଖ୍ୟା *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap = INT_MAX;
+	unsigned ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap0 = 0, cap1 = INT_MAX;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	ଯେତେବେଳେ ((ପୂର୍ଣ୍ଣସଂଖ୍ୟା)cap0 < cap) {
+		ଯଦି (test_cap(cap))
 			cap0 = cap;
-		else
+		ଅନ୍ୟଥା
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap_last_by_procfs(ପୂର୍ଣ୍ଣସଂଖ୍ୟା *ret)
 {
 	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	ଯଦି (f && fd_is_procfs(fileno(f))) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
+		ଯଦି (fscanf(f, "%d", &cap) == 1 &&
 		    cap < INT_MAX && !test_cap(cap + 1)) {
 
 			*ret = cap;
@@ -70,36 +70,36 @@ static int cap_last_by_procfs(int *ret)
 		}
 	}
 
-	if (f)
+	ଯଦି (f)
 		fclose(f);
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 
-int cap_last_cap(void)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap_last_cap(ଶୂନ୍ୟ)
 {
-	static int cap = -1;
+	ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
+	ଯଦି (cap != -1)
+		ଫେରନ୍ତୁ cap;
+	ଯଦି (cap_last_by_procfs(&cap) < 0)
 		cap_last_by_bsearch(&cap);
 
-	return cap;
+	ଫେରନ୍ତୁ cap;
 }
 
-void cap_permitted_to_ambient(void)
+ଶୂନ୍ୟ cap_permitted_to_ambient(ଶୂନ୍ୟ)
 {
 	/* We use capabilities system calls to propagate the permitted
 	 * capabilities into the ambient set because we may have
 	 * already forked so be in async-signal-safe context. */
-	struct __user_cap_header_struct header = {
+	ସଂରଚନା __user_cap_header_struct header = {
 		.version = _LINUX_CAPABILITY_VERSION_3,
 		.pid = 0,
 	};
-	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
+	ସଂରଚନା __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
+	ଯଦି (capget(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
@@ -107,49 +107,49 @@ void cap_permitted_to_ambient(void)
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
+	ଯଦି (capset(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	ପାଇଁ (cap = 0; cap < (ଆକାର(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
-			continue;
+		ଯଦି (cap > (uint64_t) cap_last_cap())
+			ଜାରି;
 
-		if ((effective & (1ULL << cap))
+		ଯଦି ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
 			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
 #ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର *argv[])
 {
-	int rc = 0, cap;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = 0, cap;
 
-	if (argc < 2) {
+	ଯଦି (argc < 2) {
 		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		ଫେରନ୍ତୁ EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
+	ଯଦି (strcmp(argv[1], "--last-by-procfs") == 0) {
 		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
+		ଯଦି (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
+	} ଅନ୍ୟଥା ଯଦି (strcmp(argv[1], "--last-by-bsearch") == 0) {
 		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
+		ଯଦି (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
+	} ଅନ୍ୟଥା ଯଦି (strcmp(argv[1], "--last") == 0)
 		printf("last cap: %d\n", cap_last_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	ଫେରନ୍ତୁ rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 #endif

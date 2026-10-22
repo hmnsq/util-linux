@@ -12,27 +12,27 @@
  * Software Foundation; either version 2.1 of the License, or (at your option)
  * any later version.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <inttypes.h>
+#ଅନ୍ତର୍ଭାଵ <assert.h>
+#ଅନ୍ତର୍ଭାଵ <ctype.h>
+#ଅନ୍ତର୍ଭାଵ <stdlib.h>
+#ଅନ୍ତର୍ଭାଵ <string.h>
+#ଅନ୍ତର୍ଭାଵ <time.h>
+#ଅନ୍ତର୍ଭାଵ <sys/time.h>
+#ଅନ୍ତର୍ଭାଵ <inttypes.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
+#ଅନ୍ତର୍ଭାଵ "c.h"
+#ଅନ୍ତର୍ଭାଵ "nls.h"
+#ଅନ୍ତର୍ଭାଵ "strutils.h"
+#ଅନ୍ତର୍ଭାଵ "timeutils.h"
 
 #define WHITESPACE " \t\n\r"
 
 #define streq(a,b) (strcmp((a),(b)) == 0)
 
-static int parse_sec(const char *t, usec_t *usec)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_sec(ଅଚଳ ଅକ୍ଷର *t, usec_t *usec)
 {
-	static const struct {
-		const char *suffix;
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା {
+		ଅଚଳ ଅକ୍ଷର *suffix;
 		usec_t usec;
 	} table[] = {
 		{ "seconds",	USEC_PER_SEC },
@@ -65,124 +65,124 @@ static int parse_sec(const char *t, usec_t *usec)
 		{ "",		USEC_PER_SEC },	/* default is sec */
 	};
 
-	const char *p;
+	ଅଚଳ ଅକ୍ଷର *p;
 	usec_t r = 0;
-	int something = FALSE;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା something = FALSE;
 
-	assert(t);
-	assert(usec);
+	ପ୍ରତିଜ୍ଞା(t);
+	ପ୍ରତିଜ୍ଞା(usec);
 
 	p = t;
-	for (;;) {
+	ପାଇଁ (;;) {
 		long long l, z = 0;
-		char *e;
+		ଅକ୍ଷର *e;
 		unsigned i, n = 0;
 
 		p += strspn(p, WHITESPACE);
 
-		if (*p == 0) {
-			if (!something)
-				return -EINVAL;
+		ଯଦି (*p == 0) {
+			ଯଦି (!something)
+				ଫେରନ୍ତୁ -EINVAL;
 
-			break;
+			ଭାଙ୍ଗ;
 		}
 
 		errno = 0;
 		l = strtoll(p, &e, 10);
 
-		if (errno > 0)
-			return -errno;
+		ଯଦି (errno > 0)
+			ଫେରନ୍ତୁ -errno;
 
-		if (l < 0)
-			return -ERANGE;
+		ଯଦି (l < 0)
+			ଫେରନ୍ତୁ -ERANGE;
 
-		if (*e == '.') {
-			char *b = e + 1;
+		ଯଦି (*e == '.') {
+			ଅକ୍ଷର *b = e + 1;
 
 			errno = 0;
 			z = strtoll(b, &e, 10);
-			if (errno > 0)
-				return -errno;
+			ଯଦି (errno > 0)
+				ଫେରନ୍ତୁ -errno;
 
-			if (z < 0)
-				return -ERANGE;
+			ଯଦି (z < 0)
+				ଫେରନ୍ତୁ -ERANGE;
 
-			if (e == b)
-				return -EINVAL;
+			ଯଦି (e == b)
+				ଫେରନ୍ତୁ -EINVAL;
 
 			n = e - b;
 
-		} else if (e == p)
-			return -EINVAL;
+		} ଅନ୍ୟଥା ଯଦି (e == p)
+			ଫେରନ୍ତୁ -EINVAL;
 
 		e += strspn(e, WHITESPACE);
 
-		for (i = 0; i < ARRAY_SIZE(table); i++)
-			if (ul_startswith(e, table[i].suffix)) {
+		ପାଇଁ (i = 0; i < ARRAY_SIZE(table); i++)
+			ଯଦି (ul_startswith(e, table[i].suffix)) {
 				usec_t k = (usec_t) z * table[i].usec;
 
-				for (; n > 0; n--)
+				ପାଇଁ (; n > 0; n--)
 					k /= 10;
 
 				r += (usec_t) l *table[i].usec + k;
 				p = e + strlen(table[i].suffix);
 
 				something = TRUE;
-				break;
+				ଭାଙ୍ଗ;
 			}
 
-		if (i >= ARRAY_SIZE(table))
-			return -EINVAL;
+		ଯଦି (i >= ARRAY_SIZE(table))
+			ଫେରନ୍ତୁ -EINVAL;
 
 	}
 
 	*usec = r;
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static int parse_subseconds(const char *t, usec_t *usec)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_subseconds(ଅଚଳ ଅକ୍ଷର *t, usec_t *usec)
 {
 	usec_t ret = 0;
 	usec_t factor = USEC_PER_SEC / 10;
 
-	if (*t != '.' && *t != ',')
-		return -1;
+	ଯଦି (*t != '.' && *t != ',')
+		ଫେରନ୍ତୁ -1;
 
-	while (*(++t)) {
-		if (!isdigit(*t) || factor < 1)
-			return -1;
+	ଯେତେବେଳେ (*(++t)) {
+		ଯଦି (!isdigit(*t) || factor < 1)
+			ଫେରନ୍ତୁ -1;
 
 		ret += ((usec_t) *t - '0') * factor;
 		factor /= 10;
 	}
 
 	*usec = ret;
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-static const char *parse_epoch_seconds(const char *t, struct tm *tm)
+ସ୍ଥିର ଅଚଳ ଅକ୍ଷର *parse_epoch_seconds(ଅଚଳ ଅକ୍ଷର *t, ସଂରଚନା tm *tm)
 {
 	int64_t s;
 	time_t st;
-	int f, c;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା f, c;
 
 	f = sscanf(t, "%"SCNd64"%n", &s, &c);
-	if (f < 1)
-		return NULL;
+	ଯଦି (f < 1)
+		ଫେରନ୍ତୁ ଖାଲି;
 	st = s;
-	if ((int64_t) st < s)
-		return NULL;
-	if (!localtime_r(&st, tm))
-		return NULL;
-	return t + c;
+	ଯଦି ((int64_t) st < s)
+		ଫେରନ୍ତୁ ଖାଲି;
+	ଯଦି (!localtime_r(&st, tm))
+		ଫେରନ୍ତୁ ଖାଲି;
+	ଫେରନ୍ତୁ t + c;
 }
 
-static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା parse_timestamp_reference(time_t x, ଅଚଳ ଅକ୍ଷର *t, usec_t *usec)
 {
-	static const struct {
-		const char *name;
-		const int nr;
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା {
+		ଅଚଳ ଅକ୍ଷର *name;
+		ଅଚଳ ପୂର୍ଣ୍ଣସଂଖ୍ୟା nr;
 	} day_nr[] = {
 		{ "Sunday",	0 },
 		{ "Sun",	0 },
@@ -200,10 +200,10 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 		{ "Sat",	6 },
 	};
 
-	const char *k;
-	struct tm tm, copy;
+	ଅଚଳ ଅକ୍ଷର *k;
+	ସଂରଚନା tm tm, copy;
 	usec_t plus = 0, minus = 0, ret = 0;
-	int r, weekday = -1;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା r, weekday = -1;
 	unsigned i;
 
 	/*
@@ -233,179 +233,179 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	 *
 	 */
 
-	assert(t);
-	assert(usec);
+	ପ୍ରତିଜ୍ଞା(t);
+	ପ୍ରତିଜ୍ଞା(usec);
 
 	localtime_r(&x, &tm);
 	tm.tm_isdst = -1;
 
-	if (streq(t, "now"))
-		goto finish;
+	ଯଦି (streq(t, "now"))
+		ଯାଅ finish;
 
-	else if (streq(t, "today")) {
+	ଅନ୍ୟଥା ଯଦି (streq(t, "today")) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		ଯାଅ finish;
 
-	} else if (streq(t, "yesterday")) {
+	} ଅନ୍ୟଥା ଯଦି (streq(t, "yesterday")) {
 		tm.tm_mday--;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		ଯାଅ finish;
 
-	} else if (streq(t, "tomorrow")) {
+	} ଅନ୍ୟଥା ଯଦି (streq(t, "tomorrow")) {
 		tm.tm_mday++;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		ଯାଅ finish;
 
-	} else if (t[0] == '+') {
+	} ଅନ୍ୟଥା ଯଦି (t[0] == '+') {
 
 		r = parse_sec(t + 1, &plus);
-		if (r < 0)
-			return r;
+		ଯଦି (r < 0)
+			ଫେରନ୍ତୁ r;
 
-		goto finish;
-	} else if (t[0] == '-') {
+		ଯାଅ finish;
+	} ଅନ୍ୟଥା ଯଦି (t[0] == '-') {
 
 		r = parse_sec(t + 1, &minus);
-		if (r < 0)
-			return r;
+		ଯଦି (r < 0)
+			ଫେରନ୍ତୁ r;
 
-		goto finish;
-	} else if (t[0] == '@') {
+		ଯାଅ finish;
+	} ଅନ୍ୟଥା ଯଦି (t[0] == '@') {
 		k = parse_epoch_seconds(t + 1, &tm);
-		if (k && *k == 0)
-			goto finish;
-		else if (k && parse_subseconds(k, &ret) == 0)
-			goto finish;
+		ଯଦି (k && *k == 0)
+			ଯାଅ finish;
+		ଅନ୍ୟଥା ଯଦି (k && parse_subseconds(k, &ret) == 0)
+			ଯାଅ finish;
 
-		return -EINVAL;
-	} else if (ul_endswith(t, " ago")) {
-		char *z;
+		ଫେରନ୍ତୁ -EINVAL;
+	} ଅନ୍ୟଥା ଯଦି (ul_endswith(t, " ago")) {
+		ଅକ୍ଷର *z;
 
 		z = strndup(t, strlen(t) - 4);
-		if (!z)
-			return -ENOMEM;
+		ଯଦି (!z)
+			ଫେରନ୍ତୁ -ENOMEM;
 
 		r = parse_sec(z, &minus);
-		free(z);
-		if (r < 0)
-			return r;
+		ମୁକ୍ତ(z);
+		ଯଦି (r < 0)
+			ଫେରନ୍ତୁ r;
 
-		goto finish;
+		ଯାଅ finish;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(day_nr); i++) {
+	ପାଇଁ (i = 0; i < ARRAY_SIZE(day_nr); i++) {
 		size_t skip;
 
-		if (!startswith_no_case(t, day_nr[i].name))
-			continue;
+		ଯଦି (!startswith_no_case(t, day_nr[i].name))
+			ଜାରି;
 
 		skip = strlen(day_nr[i].name);
-		if (t[skip] != ' ')
-			continue;
+		ଯଦି (t[skip] != ' ')
+			ଜାରି;
 
 		weekday = day_nr[i].nr;
 		t += skip + 1;
-		break;
+		ଭାଙ୍ଗ;
 	}
 
 	copy = tm;
 	k = strptime(t, "%y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ଯଦି (k && *k == 0)
+		ଯାଅ finish;
+	ଅନ୍ୟଥା ଯଦି (k && parse_subseconds(k, &ret) == 0)
+		ଯାଅ finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ଯଦି (k && *k == 0)
+		ଯାଅ finish;
+	ଅନ୍ୟଥା ଯଦି (k && parse_subseconds(k, &ret) == 0)
+		ଯାଅ finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%dT%H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ଯଦି (k && *k == 0)
+		ଯାଅ finish;
+	ଅନ୍ୟଥା ଯଦି (k && parse_subseconds(k, &ret) == 0)
+		ଯାଅ finish;
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	ଯଦି (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		ଯାଅ finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	ଯଦି (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		ଯାଅ finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d", &tm);
-	if (k && *k == 0) {
+	ଯଦି (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		ଯାଅ finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d", &tm);
-	if (k && *k == 0) {
+	ଯଦି (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		ଯାଅ finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ଯଦି (k && *k == 0)
+		ଯାଅ finish;
+	ଅନ୍ୟଥା ଯଦି (k && parse_subseconds(k, &ret) == 0)
+		ଯାଅ finish;
 
 	tm = copy;
 	k = strptime(t, "%H:%M", &tm);
-	if (k && *k == 0) {
+	ଯଦି (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		ଯାଅ finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y%m%d%H%M%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ଯଦି (k && *k == 0)
+		ଯାଅ finish;
+	ଅନ୍ୟଥା ଯଦି (k && parse_subseconds(k, &ret) == 0)
+		ଯାଅ finish;
 
-	return -EINVAL;
+	ଫେରନ୍ତୁ -EINVAL;
 
  finish:
 	x = mktime(&tm);
-	if (x == (time_t)-1)
-		return -EINVAL;
+	ଯଦି (x == (time_t)-1)
+		ଫେରନ୍ତୁ -EINVAL;
 
-	if (weekday >= 0 && tm.tm_wday != weekday)
-		return -EINVAL;
+	ଯଦି (weekday >= 0 && tm.tm_wday != weekday)
+		ଫେରନ୍ତୁ -EINVAL;
 
 	ret += (usec_t) x * USEC_PER_SEC;
 
-	if (minus > ret)
-		return -ERANGE;
-	if ((ret + plus) < ret)
-		return -ERANGE;
+	ଯଦି (minus > ret)
+		ଫେରନ୍ତୁ -ERANGE;
+	ଯଦି ((ret + plus) < ret)
+		ଫେରନ୍ତୁ -ERANGE;
 
 	ret += plus;
 	ret -= minus;
 
 	*usec = ret;
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
 }
 
-int ul_parse_timestamp(const char *t, usec_t *usec)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ul_parse_timestamp(ଅଚଳ ଅକ୍ଷର *t, usec_t *usec)
 {
-	return parse_timestamp_reference(time(NULL), t, usec);
+	ଫେରନ୍ତୁ parse_timestamp_reference(time(ଖାଲି), t, usec);
 }
 
 /* Returns the difference in seconds between its argument and GMT. If if TP is
@@ -413,35 +413,35 @@ int ul_parse_timestamp(const char *t, usec_t *usec)
  * tzset is called so, for example, 'TZ="UTC" hwclock' will work as expected.
  * Derived from glibc/time/strftime_l.c
  */
-int get_gmtoff(const struct tm *tp)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା get_gmtoff(ଅଚଳ ସଂରଚନା tm *tp)
 {
-	if (tp->tm_isdst < 0)
-		return 0;
+	ଯଦି (tp->tm_isdst < 0)
+		ଫେରନ୍ତୁ 0;
 
-#if HAVE_TM_GMTOFF
-	return tp->tm_gmtoff;
-#else
-	struct tm tm;
-	struct tm gtm;
-	struct tm ltm = *tp;
+#ଯଦି HAVE_TM_GMTOFF
+	ଫେରନ୍ତୁ tp->tm_gmtoff;
+#ଅନ୍ୟଥା
+	ସଂରଚନା tm tm;
+	ସଂରଚନା tm gtm;
+	ସଂରଚନା tm ltm = *tp;
 	time_t lt;
 
 	tzset();
 	lt = mktime(&ltm);
 	/* Check if mktime returning -1 is an error or a valid time_t */
-	if (lt == (time_t) -1) {
-		if (! localtime_r(&lt, &tm)
+	ଯଦି (lt == (time_t) -1) {
+		ଯଦି (! localtime_r(&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
 			    | (ltm.tm_mday ^ tm.tm_mday)
 			    | (ltm.tm_mon ^ tm.tm_mon)
 			    | (ltm.tm_year ^ tm.tm_year)))
-			return 0;
+			ଫେରନ୍ତୁ 0;
 	}
 
-	if (! gmtime_r(&lt, &gtm))
-		return 0;
+	ଯଦି (! gmtime_r(&lt, &gtm))
+		ଫେରନ୍ତୁ 0;
 
 	/* Calculate the GMT offset, that is, the difference between the
 	 * TP argument (ltm) and GMT (gtm).
@@ -450,204 +450,204 @@ int get_gmtoff(const struct tm *tp)
 	 * Take care to avoid int overflow in leap day calculations, but it's OK
 	 * to assume that A and B are close to each other.
 	 */
-	int a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
-	int b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
-	int a100 = a4 / 25 - (a4 % 25 < 0);
-	int b100 = b4 / 25 - (b4 % 25 < 0);
-	int a400 = a100 >> 2;
-	int b400 = b100 >> 2;
-	int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା a100 = a4 / 25 - (a4 % 25 < 0);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା b100 = b4 / 25 - (b4 % 25 < 0);
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା a400 = a100 >> 2;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା b400 = b100 >> 2;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
 
-	int years = ltm.tm_year - gtm.tm_year;
-	int days = (365 * years + intervening_leap_days
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା years = ltm.tm_year - gtm.tm_year;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା days = (365 * years + intervening_leap_days
 		    + (ltm.tm_yday - gtm.tm_yday));
 
-	return (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
+	ଫେରନ୍ତୁ (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
 		+ (ltm.tm_min - gtm.tm_min)) + (ltm.tm_sec - gtm.tm_sec));
 #endif
 }
 
-static int format_iso_time(const struct tm *tm, uint32_t nsec, int flags, char *buf, size_t bufsz)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା format_iso_time(ଅଚଳ ସଂରଚନା tm *tm, uint32_t nsec, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅକ୍ଷର *buf, size_t bufsz)
 {
 	uint32_t usec = nsec / NSEC_PER_USEC;
-	char *p = buf;
-	int len;
+	ଅକ୍ଷର *p = buf;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା len;
 
-	if (flags & ISO_DATE) {
+	ଯଦି (flags & ISO_DATE) {
 		len = snprintf(p, bufsz, "%4ld-%.2d-%.2d",
 			       tm->tm_year + (long) 1900,
 			       tm->tm_mon + 1, tm->tm_mday);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if ((flags & ISO_DATE) && (flags & ISO_TIME)) {
-		if (bufsz < 1)
-			goto err;
+	ଯଦି ((flags & ISO_DATE) && (flags & ISO_TIME)) {
+		ଯଦି (bufsz < 1)
+			ଯାଅ err;
 		*p++ = (flags & ISO_T) ? 'T' : ' ';
 		bufsz--;
 	}
 
-	if (flags & ISO_TIME) {
+	ଯଦି (flags & ISO_TIME) {
 		len = snprintf(p, bufsz, "%02d:%02d:%02d", tm->tm_hour,
 			       tm->tm_min, tm->tm_sec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_DOTNSEC) {
+	ଯଦି (flags & ISO_DOTNSEC) {
 		len = snprintf(p, bufsz, ".%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMANSEC) {
+	} ଅନ୍ୟଥା ଯଦି (flags & ISO_COMMANSEC) {
 		len = snprintf(p, bufsz, ",%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 		bufsz -= len;
 		p += len;
-	} else if (flags & ISO_DOTUSEC) {
+	} ଅନ୍ୟଥା ଯଦି (flags & ISO_DOTUSEC) {
 		len = snprintf(p, bufsz, ".%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMAUSEC) {
+	} ଅନ୍ୟଥା ଯଦି (flags & ISO_COMMAUSEC) {
 		len = snprintf(p, bufsz, ",%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_TIMEZONE) {
-		int tmin  = get_gmtoff(tm) / 60;
-		int zhour = tmin / 60;
-		int zmin  = abs(tmin % 60);
+	ଯଦି (flags & ISO_TIMEZONE) {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା tmin  = get_gmtoff(tm) / 60;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା zhour = tmin / 60;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା zmin  = abs(tmin % 60);
 		len = snprintf(p, bufsz, "%+03d:%02d", zhour,zmin);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ଯଦି (len < 0 || (size_t) len > bufsz)
+			ଯାଅ err;
 	}
-	return 0;
+	ଫେରନ୍ତୁ 0;
  err:
 	warnx(_("format_iso_time: buffer overflow."));
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
 /* timespec to ISO 8601 */
-int strtimespec_iso(const struct timespec *ts, int flags, char *buf, size_t bufsz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା strtimespec_iso(ଅଚଳ ସଂରଚନା timespec *ts, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅକ୍ଷର *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	ସଂରଚନା tm tm;
+	ସଂରଚନା tm *rc;
 
-	if (flags & ISO_GMTIME)
+	ଯଦି (flags & ISO_GMTIME)
 		rc = gmtime_r(&ts->tv_sec, &tm);
-	else
+	ଅନ୍ୟଥା
 		rc = localtime_r(&ts->tv_sec, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
+	ଯଦି (rc)
+		ଫେରନ୍ତୁ format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)(ts->tv_sec));
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
 /* timeval to ISO 8601 */
-int strtimeval_iso(const struct timeval *tv, int flags, char *buf, size_t bufsz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା strtimeval_iso(ଅଚଳ ସଂରଚନା timeval *tv, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅକ୍ଷର *buf, size_t bufsz)
 {
-	struct timespec ts = {
+	ସଂରଚନା timespec ts = {
 		.tv_sec = tv->tv_sec,
 		.tv_nsec = tv->tv_usec * NSEC_PER_USEC,
 	};
 
-	return strtimespec_iso(&ts, flags, buf, bufsz);
+	ଫେରନ୍ତୁ strtimespec_iso(&ts, flags, buf, bufsz);
 }
 
 /* struct tm to ISO 8601 */
-int strtm_iso(const struct tm *tm, int flags, char *buf, size_t bufsz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା strtm_iso(ଅଚଳ ସଂରଚନା tm *tm, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅକ୍ଷର *buf, size_t bufsz)
 {
-	return format_iso_time(tm, 0, flags, buf, bufsz);
+	ଫେରନ୍ତୁ format_iso_time(tm, 0, flags, buf, bufsz);
 }
 
 /* time_t to ISO 8601 */
-int strtime_iso(const time_t *t, int flags, char *buf, size_t bufsz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା strtime_iso(ଅଚଳ time_t *t, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅକ୍ଷର *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	ସଂରଚନା tm tm;
+	ସଂରଚନା tm *rc;
 
-	if (flags & ISO_GMTIME)
+	ଯଦି (flags & ISO_GMTIME)
 		rc = gmtime_r(t, &tm);
-	else
+	ଅନ୍ୟଥା
 		rc = localtime_r(t, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, 0, flags, buf, bufsz);
+	ଯଦି (rc)
+		ଫେରନ୍ତୁ format_iso_time(&tm, 0, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)*t);
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
 /* relative time functions */
-static inline int time_is_thisyear(struct tm const *const tm,
-				   struct tm const *const tmnow)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ପୂର୍ଣ୍ଣସଂଖ୍ୟା time_is_thisyear(ସଂରଚନା tm ଅଚଳ *ଅଚଳ tm,
+				   ସଂରଚନା tm ଅଚଳ *ଅଚଳ tmnow)
 {
-	return tm->tm_year == tmnow->tm_year;
+	ଫେରନ୍ତୁ tm->tm_year == tmnow->tm_year;
 }
 
-static inline int time_is_today(struct tm const *const tm,
-				struct tm const *const tmnow)
+ସ୍ଥିର ଧାଡ଼ିଭିତରେ ପୂର୍ଣ୍ଣସଂଖ୍ୟା time_is_today(ସଂରଚନା tm ଅଚଳ *ଅଚଳ tm,
+				ସଂରଚନା tm ଅଚଳ *ଅଚଳ tmnow)
 {
-	return (tm->tm_yday == tmnow->tm_yday &&
+	ଫେରନ୍ତୁ (tm->tm_yday == tmnow->tm_yday &&
 		time_is_thisyear(tm, tmnow));
 }
 
-int strtime_short(const time_t *t, struct timeval *now, int flags, char *buf, size_t bufsz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା strtime_short(ଅଚଳ time_t *t, ସଂରଚନା timeval *now, ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags, ଅକ୍ଷର *buf, size_t bufsz)
 {
-	struct tm tm, tmnow;
-	int rc = 0;
+	ସଂରଚନା tm tm, tmnow;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = 0;
 
-	if (now->tv_sec == 0)
-		gettimeofday(now, NULL);
+	ଯଦି (now->tv_sec == 0)
+		gettimeofday(now, ଖାଲି);
 
 	localtime_r(t, &tm);
 	localtime_r(&now->tv_sec, &tmnow);
 
-	if (time_is_today(&tm, &tmnow)) {
+	ଯଦି (time_is_today(&tm, &tmnow)) {
 		rc = snprintf(buf, bufsz, "%02d:%02d", tm.tm_hour, tm.tm_min);
-		if (rc < 0 || (size_t) rc > bufsz)
-			return -1;
+		ଯଦି (rc < 0 || (size_t) rc > bufsz)
+			ଫେରନ୍ତୁ -1;
 		rc = 1;
 
-	} else if (time_is_thisyear(&tm, &tmnow)) {
-		if (flags & UL_SHORTTIME_THISYEAR_HHMM)
+	} ଅନ୍ୟଥା ଯଦି (time_is_thisyear(&tm, &tmnow)) {
+		ଯଦି (flags & UL_SHORTTIME_THISYEAR_HHMM)
 			rc = strftime(buf, bufsz, "%b%d/%H:%M", &tm);
-		else
+		ଅନ୍ୟଥା
 			rc = strftime(buf, bufsz, "%b%d", &tm);
-	} else
+	} ଅନ୍ୟଥା
 		rc = strftime(buf, bufsz, "%Y-%b%d", &tm);
 
-	return rc <= 0 ? -1 : 0;
+	ଫେରନ୍ତୁ rc <= 0 ? -1 : 0;
 }
 
-int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା strtimespec_relative(ଅଚଳ ସଂରଚନା timespec *ts, ଅକ୍ଷର *buf, size_t bufsz)
 {
 	time_t secs = ts->tv_sec;
 	size_t i, parts = 0;
-	int rc;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc;
 
-	if (bufsz)
+	ଯଦି (bufsz)
 		buf[0] = '\0';
 
-	static const struct {
-		const char * const suffix;
-		int width;
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା {
+		ଅଚଳ ଅକ୍ଷର * ଅଚଳ suffix;
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା width;
 		int64_t secs;
 	} table[] = {
 		{ "y", 4, NSEC_PER_YEAR   / NSEC_PER_SEC },
@@ -657,15 +657,15 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		{ "s", 2, NSEC_PER_SEC    / NSEC_PER_SEC },
 	};
 
-	for (i = 0; i < ARRAY_SIZE(table); i++) {
-		if (secs >= table[i].secs) {
+	ପାଇଁ (i = 0; i < ARRAY_SIZE(table); i++) {
+		ଯଦି (secs >= table[i].secs) {
 			rc = snprintf(buf, bufsz,
 				      "%*"PRId64"%s%s",
 				      parts ? table[i].width : 0,
 				      secs / table[i].secs, table[i].suffix,
 				      secs % table[i].secs ? " " : "");
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
+			ଯଦି (rc < 0 || (size_t) rc > bufsz)
+				ଯାଅ err;
 			parts++;
 			buf += rc;
 			bufsz -= rc;
@@ -673,52 +673,52 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		}
 	}
 
-	if (ts->tv_nsec) {
-		if (ts->tv_nsec % NSEC_PER_MSEC) {
+	ଯଦି (ts->tv_nsec) {
+		ଯଦି (ts->tv_nsec % NSEC_PER_MSEC) {
 			rc = snprintf(buf, bufsz, "%*ldns",
 				      parts ? 10 : 0, ts->tv_nsec);
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
-		} else {
+			ଯଦି (rc < 0 || (size_t) rc > bufsz)
+				ଯାଅ err;
+		} ଅନ୍ୟଥା {
 			rc = snprintf(buf, bufsz, "%*llums",
 				      parts ? 4 : 0, ts->tv_nsec / NSEC_PER_MSEC);
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
+			ଯଦି (rc < 0 || (size_t) rc > bufsz)
+				ଯାଅ err;
 		}
 	}
 
-	return 0;
+	ଫେରନ୍ତୁ 0;
  err:
 	warnx(_("format_reltime: buffer overflow."));
-	return -1;
+	ଫେରନ୍ତୁ -1;
 }
 
 #ifndef HAVE_TIMEGM
-time_t timegm(struct tm *tm)
+time_t timegm(ସଂରଚନା tm *tm)
 {
-	const char *zone = getenv("TZ");
+	ଅଚଳ ଅକ୍ଷର *zone = getenv("TZ");
 	time_t ret;
 
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
-	if (zone)
+	ଯଦି (zone)
 		setenv("TZ", zone, 1);
-	else
+	ଅନ୍ୟଥା
 		unsetenv("TZ");
 	tzset();
-	return ret;
+	ଫେରନ୍ତୁ ret;
 }
 #endif /* HAVE_TIMEGM */
 
 #ifdef TEST_PROGRAM_TIMEUTILS
 
-static int run_unittest_timestamp(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା run_unittest_timestamp(ଶୂନ୍ୟ)
 {
-	int rc = EXIT_SUCCESS;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
-	static const struct testcase {
-		const char * const input;
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା testcase {
+		ଅଚଳ ଅକ୍ଷର * ଅଚଳ ନିବେଶ;
 		usec_t expected;
 	} testcases[] = {
 		{ "2012-09-22 16:34:22"    , 1348331662000000 },
@@ -745,36 +745,36 @@ static int run_unittest_timestamp(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
+	ପାଇଁ (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+		ସଂରଚନା testcase t = testcases[i];
 		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
-		if (r) {
-			fprintf(stderr, "Could not parse '%s'\n", t.input);
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା r = parse_timestamp_reference(reference, t.ନିବେଶ, &result);
+		ଯଦି (r) {
+			fprintf(stderr, "Could not parse '%s'\n", t.ନିବେଶ);
 			rc = EXIT_FAILURE;
 		}
 
-		if (result != t.expected) {
+		ଯଦି (result != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
-				i, t.input, result, t.expected);
+				i, t.ନିବେଶ, result, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 
-static int run_unittest_format(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା run_unittest_format(ଶୂନ୍ୟ)
 {
-	int rc = EXIT_SUCCESS;
-	const struct timespec ts = {
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = EXIT_SUCCESS;
+	ଅଚଳ ସଂରଚନା timespec ts = {
 		.tv_sec = 1674180427,
 		.tv_nsec = 12345,
 	};
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		int flags;
-		const char * const expected;
+	ଅକ୍ଷର buf[FORMAT_TIMESTAMP_MAX];
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା testcase {
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା flags;
+		ଅଚଳ ଅକ୍ଷର * ଅଚଳ expected;
 	} testcases[] = {
 		{ ISO_DATE,               "2023-01-20"                       },
 		{ ISO_TIME,               "02:07:07"                         },
@@ -787,30 +787,30 @@ static int run_unittest_format(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
-		if (r) {
+	ପାଇଁ (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+		ସଂରଚନା testcase t = testcases[i];
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା r = strtimespec_iso(&ts, t.flags, buf, ଆକାର(buf));
+		ଯଦି (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		ଯଦି (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu %-20s != %-20s\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 
-static int run_unittest_format_relative(void)
+ସ୍ଥିର ପୂର୍ଣ୍ଣସଂଖ୍ୟା run_unittest_format_relative(ଶୂନ୍ୟ)
 {
-	int rc = EXIT_SUCCESS;
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		struct timespec ts;
-		const char * const expected;
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା rc = EXIT_SUCCESS;
+	ଅକ୍ଷର buf[FORMAT_TIMESTAMP_MAX];
+	ସ୍ଥିର ଅଚଳ ସଂରଚନା testcase {
+		ସଂରଚନା timespec ts;
+		ଅଚଳ ଅକ୍ଷର * ଅଚଳ expected;
 	} testcases[] = {
 		{{}, "" },
 		{{         1 },                  "1s" },
@@ -834,73 +834,73 @@ static int run_unittest_format_relative(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_relative(&t.ts, buf, sizeof(buf));
-		if (r) {
+	ପାଇଁ (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+		ସଂରଚନା testcase t = testcases[i];
+		ପୂର୍ଣ୍ଣସଂଖ୍ୟା r = strtimespec_relative(&t.ts, buf, ଆକାର(buf));
+		ଯଦି (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		ଯଦି (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu '%-20s' != '%-20s'\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	ଫେରନ୍ତୁ rc;
 }
 
-int main(int argc, char *argv[])
+ପୂର୍ଣ୍ଣସଂଖ୍ୟା ମୁଖ୍ୟ(ପୂର୍ଣ୍ଣସଂଖ୍ୟା argc, ଅକ୍ଷର *argv[])
 {
-	struct timespec ts = { 0 };
-	char buf[ISO_BUFSIZ];
-	int r;
+	ସଂରଚନା timespec ts = { 0 };
+	ଅକ୍ଷର buf[ISO_BUFSIZ];
+	ପୂର୍ଣ୍ଣସଂଖ୍ୟା r;
 
-	if (argc < 2) {
+	ଯଦି (argc < 2) {
 		fprintf(stderr, "usage: %s [<time> [<usec>]] | [--timestamp <str>] | [--unittest-timestamp]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if (strcmp(argv[1], "--unittest-timestamp") == 0)
-		return run_unittest_timestamp();
-	else if (strcmp(argv[1], "--unittest-format") == 0)
-		return run_unittest_format();
-	else if (strcmp(argv[1], "--unittest-format-relative") == 0)
-		return run_unittest_format_relative();
+	ଯଦି (strcmp(argv[1], "--unittest-timestamp") == 0)
+		ଫେରନ୍ତୁ run_unittest_timestamp();
+	ଅନ୍ୟଥା ଯଦି (strcmp(argv[1], "--unittest-format") == 0)
+		ଫେରନ୍ତୁ run_unittest_format();
+	ଅନ୍ୟଥା ଯଦି (strcmp(argv[1], "--unittest-format-relative") == 0)
+		ଫେରନ୍ତୁ run_unittest_format_relative();
 
-	if (strcmp(argv[1], "--timestamp") == 0) {
+	ଯଦି (strcmp(argv[1], "--timestamp") == 0) {
 		usec_t usec = 0;
 
 		r = ul_parse_timestamp(argv[2], &usec);
-		if (r)
+		ଯଦି (r)
 			errx(EXIT_FAILURE, "Can not parse '%s': %s", argv[2], strerror(-r));
 		ts.tv_sec = (time_t) (usec / USEC_PER_SEC);
 		ts.tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
-	} else {
+	} ଅନ୍ୟଥା {
 		ts.tv_sec = strtos64_or_err(argv[1], "failed to parse <time>");
-		if (argc == 3)
+		ଯଦି (argc == 3)
 			ts.tv_nsec = strtos64_or_err(argv[2], "failed to parse <usec>")
 				     * NSEC_PER_USEC;
 	}
 
-	strtimespec_iso(&ts, ISO_DATE, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_DATE, buf, ଆକାର(buf));
 	printf("Date: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIME, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_TIME, buf, ଆକାର(buf));
 	printf("Time: '%s'\n", buf);
 
 	strtimespec_iso(&ts, ISO_DATE | ISO_TIME | ISO_COMMAUSEC | ISO_T,
-		       buf, sizeof(buf));
+		       buf, ଆକାର(buf));
 	printf("Full: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, sizeof(buf));
+	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, ଆକାର(buf));
 	printf("Zone: '%s'\n", buf);
 
-	strtimespec_relative(&ts, buf, sizeof(buf));
+	strtimespec_relative(&ts, buf, ଆକାର(buf));
 	printf("Rel:  '%s'\n", buf);
 
-	return EXIT_SUCCESS;
+	ଫେରନ୍ତୁ EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_TIMEUTILS */
