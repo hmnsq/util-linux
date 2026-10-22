@@ -18,7 +18,7 @@
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  གལ་སྲིད defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -33,7 +33,7 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#དེ་མིན
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,163 +42,163 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+static ཧྲིལ get_env_int(const var_na *name)
 {
-	const char *cp = getenv(name);
+	const var_na *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	གལ་སྲིད (cp) {
+		var_na *end = NULL;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		གལ་སྲིད (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			ལོག x;
 	}
 
-	return -1;
+	ལོག -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+ཧྲིལ get_terminal_dimension(ཧྲིལ *cols, ཧྲིལ *lines)
 {
-	int c = 0, l = 0;
+	ཧྲིལ c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#གལ་སྲིད defined(TIOCGWINSZ)
+	sa_nracanaa winsize	w_win;
+	གལ་སྲིད (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
 #elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+	sa_nracanaa ttysize	t_win;
+	གལ་སྲིད (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
 		l = t_win.ts_lines;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	གལ་སྲིད (cols) {
+		གལ་སྲིད (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	གལ་སྲིད (lines) {
+		གལ་སྲིད (l <= 0)
 			l = get_env_int("LINES");
 		*lines = l;
 	}
-	return 0;
+	ལོག 0;
 }
 
-int get_terminal_width(int default_width)
+ཧྲིལ get_terminal_width(ཧྲིལ default_width)
 {
-	int width = 0;
+	ཧྲིལ width = 0;
 
 	get_terminal_dimension(&width, NULL);
 
-	return width > 0 ? width : default_width;
+	ལོག width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+ཧྲིལ get_terminal_stdfd(void)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	གལ་སྲིད (isatty(STDIN_FILENO))
+		ལོག STDIN_FILENO;
+	གལ་སྲིད (isatty(STDOUT_FILENO))
+		ལོག STDOUT_FILENO;
+	གལ་སྲིད (isatty(STDERR_FILENO))
+		ལོག STDERR_FILENO;
 
-	return -EINVAL;
+	ལོག -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+ཧྲིལ get_terminal_name(const var_na **path,
+		      const var_na **name,
+		      const var_na **number)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	const var_na *tty;
+	const var_na *p;
+	ཧྲིལ fd;
 
 
-	if (name)
+	གལ་སྲིད (name)
 		*name = NULL;
-	if (path)
+	གལ་སྲིད (path)
 		*path = NULL;
-	if (number)
+	གལ་སྲིད (number)
 		*number = NULL;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	གལ་སྲིད (fd < 0)
+		ལོག fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	གལ་སྲིད (!tty)
+		ལོག -1;
 
-	if (path)
+	གལ་སྲིད (path)
 		*path = tty;
-	if (name || number)
+	གལ་སྲིད (name || number)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	གལ་སྲིད (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
+	གལ་སྲིད (number) {
+		དོན་ལུ (p = tty; p && *p; p++) {
+			གལ་སྲིད (isdigit(*p)) {
 				*number = p;
-				break;
+				bha_nga;
 			}
 		}
 	}
-	return 0;
+	ལོག 0;
 }
 
-int get_terminal_type(const char **type)
+ཧྲིལ get_terminal_type(const var_na **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	གལ་སྲིད (*type)
+		ལོག -EINVAL;
+	ལོག 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+var_na *get_terminal_default_type(const var_na *ttyname, ཧྲིལ is_serial)
 {
-	if (ttyname) {
+	གལ་སྲིད (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		sa_nracanaa ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		གལ་སྲིད (ent && ent->ty_type)
+			ལོག strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#གལ་སྲིད defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		གལ་སྲིད (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			ལོག strdup(DEFAULT_TTYS0);
+		དེ་མིན གལ་སྲིད (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			ལོག strdup(DEFAULT_TTY32);
+		དེ་མིན གལ་སྲིད (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			ལོག strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	ལོག strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+ཧྲིལ main(void)
 {
-	const char *path, *name, *num;
-	int c, l;
+	const var_na *path, *name, *num;
+	ཧྲིལ c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	གལ་སྲིད (get_terminal_name(&path, &name, &num) == 0) {
+		var_na *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
@@ -215,6 +215,6 @@ int main(void)
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	ལོག EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */

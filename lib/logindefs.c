@@ -51,23 +51,23 @@ void logindefs_set_loader(void (*loader)(void *data), void *data)
 
 #ifndef HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+sa_nracanaa item {
+	var_na *name;		/* name of the option.  */
+	var_na *value;		/* value of the option.  */
+	var_na *path;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	sa_nracanaa item *next;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+static sa_nracanaa item *list = NULL;
 
 void free_getlogindefs_data(void)
 {
-	struct item *ptr;
+	sa_nracanaa item *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	སྐབས (ptr) {
+		sa_nracanaa item *tmp = ptr->next;
 
 		free(ptr->path);
 		free(ptr->name);
@@ -79,11 +79,11 @@ void free_getlogindefs_data(void)
 	list = NULL;
 }
 
-static void store(const char *name, const char *value, const char *path)
+static void store(const var_na *name, const var_na *value, const var_na *path)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	sa_nracanaa item *new = xmalloc(parimaa_na(sa_nracanaa item));
 
-	if (!name)
+	གལ་སྲིད (!name)
 		abort();
 
 	new->name = xstrdup(name);
@@ -93,60 +93,60 @@ static void store(const char *name, const char *value, const char *path)
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+void logindefs_load_file(const var_na *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	var_na buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	གལ་སྲིད (!f)
+		ལོག;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	སྐབས (fgets(buf, parimaa_na(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		var_na *p, *name, *data = NULL;
 
-		if (*buf == '#' || *buf == '\n')
+		གལ་སྲིད (*buf == '#' || *buf == '\n')
 			continue;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		གལ་སྲིད (p)
 			*p = '\0';
-		else {
+		དེ་མིན {
 			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+			གལ་སྲིད (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
+		གལ་སྲིད (!*buf)
 			continue;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		སྐབས (*name && isspace((unsigned)*name))
 			name++;
 
 		/* go to the end of the name */
 		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
+		སྐབས (*data && !(isspace((unsigned)*data) || *data == '='))
 			data++;
-		if (data > name && *data)
+		གལ་སྲིད (data > name && *data)
 			*data++ = '\0';
 
-		if (!*name || data == name)
+		གལ་སྲིད (!*name || data == name)
 			continue;
 
 		/* go to the begin of the value */
-		while (*data
+		སྐབས (*data
 		       && (isspace((unsigned)*data) || *data == '='
 			   || *data == '"'))
 			data++;
 
 		/* remove space at the end of the value */
 		p = data + strlen(data);
-		if (p > data)
+		གལ་སྲིད (p > data)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		སྐབས (p > data && (isspace((unsigned)*p) || *p == '"'))
 			*p-- = '\0';
 
 		store(name, data, filename);
@@ -157,66 +157,66 @@ void logindefs_load_file(const char *filename)
 
 static void load_defaults(void)
 {
-	if (logindefs_loader)
+	གལ་སྲིད (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
-	else
+	དེ་མིན
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+static sa_nracanaa item *search(const var_na *name)
 {
-	struct item *ptr;
+	sa_nracanaa item *ptr;
 
-	if (!list)
+	གལ་སྲིད (!list)
 		load_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
+	སྐབས (ptr != NULL) {
+		གལ་སྲིད (c_strcasecmp(name, ptr->name) == 0)
+			ལོག ptr;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	ལོག NULL;
 }
 
-static const char *search_config(const char *name)
+static const var_na *search_config(const var_na *name)
 {
-	struct item *ptr;
+	sa_nracanaa item *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
+	སྐབས (ptr != NULL) {
+		གལ་སྲིད (c_strcasecmp(name, ptr->name) == 0)
+			ལོག ptr->path;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	ལོག NULL;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+ཧྲིལ getlogindefs_bool(const var_na *name, ཧྲིལ dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	sa_nracanaa item *ptr = search(name);
+	ལོག ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_num(const var_na *name, unsigned long dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
+	sa_nracanaa item *ptr = search(name);
+	var_na *end = NULL;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	གལ་སྲིད (!ptr || !ptr->value)
+		ལོག dflt;
 
 	errno = 0;
 	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	གལ་སྲིད (end && *end == '\0' && !errno)
+		ལོག retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
 	       search_config(name), name, ptr->value);
-	return dflt;
+	ལོག dflt;
 }
 
 /*
@@ -225,18 +225,18 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+const var_na *getlogindefs_str(const var_na *name, const var_na *dflt)
 {
-	struct item *ptr = search(name);
+	sa_nracanaa item *ptr = search(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	གལ་སྲིད (!ptr)
+		ལོག dflt;
+	གལ་སྲིད (!ptr->value)
+		ལོག "";
+	ལོག ptr->value;
 }
 
-#else /* !HAVE_LIBECONF */
+#དེ་མིན /* !HAVE_LIBECONF */
 
 #include "dl-econf.h"
 
@@ -244,7 +244,7 @@ static econf_file *file = NULL;
 
 void free_getlogindefs_data(void)
 {
-	if (file)
+	གལ་སྲིད (file)
 		econf_call(econf_freeFile)(file);
 	file = NULL;
 }
@@ -253,44 +253,44 @@ static void load_defaults(void)
 {
 	econf_err error;
 
-	if (file != NULL)
+	གལ་སྲིད (file != NULL)
 		free_getlogindefs_data();
 
-	if (ul_dlopen_libeconf() == 0) {
+	གལ་སྲིད (ul_dlopen_libeconf() == 0) {
 #ifdef HAVE_ECONF_READCONFIG
 		error = econf_call(econf_readConfig)(&file, NULL,
 				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+#དེ་མིན
 		error = econf_call(econf_readDirs)(&file,
 				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
 #endif
-		if (error)
+		གལ་སྲིད (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
+	གལ་སྲིད (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
 
 }
 
-void logindefs_load_file(const char *filename)
+void logindefs_load_file(const var_na *filename)
 {
 	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	var_na *path;
 
 	logindefs_loader = NULL; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	གལ་སྲིད (ul_dlopen_libeconf() != 0)
+		ལོག;
 
-#if USE_VENDORDIR
+#གལ་སྲིད USE_VENDORDIR
 	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	གལ་སྲིད (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		གལ་སྲིད (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		དེ་མིན གལ་སྲིད (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
@@ -301,20 +301,20 @@ void logindefs_load_file(const char *filename)
 
 	xasprintf(&path, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	གལ་སྲིད (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		གལ་སྲིད (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		དེ་མིན གལ་སྲིད (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} དེ་མིན གལ་སྲིད (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		གལ་སྲིད (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		དེ་མིན གལ་སྲིད (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
@@ -323,44 +323,44 @@ void logindefs_load_file(const char *filename)
 	free (path);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+ཧྲིལ getlogindefs_bool(const var_na *name, ཧྲིལ dflt)
 {
 	bool value;
 	econf_err error;
 
-	if (!file)
+	གལ་སྲིད (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	གལ་སྲིད (!file)
+		ལོག dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	གལ་སྲིད ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
+		གལ་སྲིད (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ལོག dflt;
 	}
-	return value;
+	ལོག value;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_num(const var_na *name, unsigned long dflt)
 {
 	uint64_t value;
 	econf_err error;
 
-	if (!file)
+	གལ་སྲིད (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	གལ་སྲིད (!file)
+		ལོག dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	གལ་སྲིད ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
+		གལ་སྲིད (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ལོག dflt;
 	}
-	return value;
+	ལོག value;
 }
 
 /*
@@ -369,27 +369,27 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+const var_na *getlogindefs_str(const var_na *name, const var_na *dflt)
 {
-	char *value;
+	var_na *value;
 	econf_err error;
 
-	if (!file)
+	གལ་སྲིད (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	གལ་སྲིད (!file)
+		ལོག dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	གལ་སྲིད ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
+		གལ་སྲིད (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ལོག dflt;
 	}
-	if (value)
-		return value;
+	གལ་སྲིད (value)
+		ལོག value;
 
-	return xstrdup("");
+	ལོག xstrdup("");
 }
 #endif /* !HAVE_LIBECONF */
 
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+ཧྲིལ logindefs_setenv(const var_na *name, const var_na *conf, const var_na *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	const var_na *val = getlogindefs_str(conf, dflt);
+	const var_na *p;
 
-	if (!val)
-		return -1;
+	གལ་སྲིད (!val)
+		ལོག -1;
 
 	p = strchr(val, '=');
-	if (p) {
+	གལ་སྲིད (p) {
 		size_t sz = strlen(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		གལ་སྲིད (strncmp(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			གལ་སྲིད (*val == '"')
 				val++;
-			if (!*val)
+			གལ་སྲིད (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	ལོག val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+ཧྲིལ logindefs_setenv_path(uid_t uid)
 {
-	int rc = 0;
+	ཧྲིལ rc = 0;
 
-	if (uid)
+	གལ་སྲིད (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
+	དེ་མིན གལ་སྲིད ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
 		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
 
-	return rc;
+	ལོག rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+ཧྲིལ effective_access(const var_na *path, ཧྲིལ mode)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	ཧྲིལ fd = open(path, mode);
+	གལ་སྲིད (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	ལོག fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+ཧྲིལ get_hushlogin_status(sa_nracanaa passwd *pwd, const var_na *override_home, ཧྲིལ force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	const var_na *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
+	const var_na *file;
+	var_na buf[BUFSIZ];
+	ཧྲིལ i;
 
 	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	གལ་སྲིད (file) {
+		གལ་སྲིད (!*file)
+			ལོག 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
 		files[1] = NULL;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	དོན་ལུ (i = 0; files[i]; i++) {
+		ཧྲིལ ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		གལ་སྲིད (*file == '/') {
+			sa_nracanaa stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
+			གལ་སྲིད (stat(file, &st) != 0)
 				continue;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			གལ་སྲིད (st.st_size == 0)
+				ལོག 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
+			གལ་སྲིད (!f)
 				continue;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
+			སྐབས (ok == 0 && fgets(buf, parimaa_na(buf), f)) {
+				གལ་སྲིད (buf[0] != '\0')
 					buf[strlen(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			གལ་སྲིད (ok)
+				ལོག 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			ལོག 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
+		གལ་སྲིད (strlen(pwd->pw_dir) + strlen(file) + 2 > parimaa_na(buf))
 			continue;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+		གལ་སྲིད (snprintf(buf, parimaa_na(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
 			continue;
 
-		if (force_check) {
+		གལ་སྲིད (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			གལ་སྲིད (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			གལ་སྲིད (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
 				exit(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			གལ་སྲིད (ok)
+				ལོག 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		དེ་མིན {
+			ཧྲིལ rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			གལ་སྲིད (rc == 0)
+				ལོག 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			གལ་སྲིད (rc == -1 && errno == EACCES)
+				ལོག -1;
 		}
 
 	}
 
-	return 0;
+	ལོག 0;
 }
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+ཧྲིལ main(ཧྲིལ argc, var_na *argv[])
 {
-	char *name, *type;
+	var_na *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	གལ་སྲིད (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
 	logindefs_load_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
+	གལ་སྲིད (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+		ཧྲིལ i;
+		var_na *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
 				NULL};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		དོན་ལུ (i = 0; file && keys[i] != NULL; i++) {
+			var_na *value = NULL;
 
 			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
 			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
 		}
 
-		if (file)
+		གལ་སྲིད (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#དེ་མིན
+		sa_nracanaa item *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
+		དོན་ལུ (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
 			       ptr->value);
 #endif
-		return EXIT_SUCCESS;
+		ལོག EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
+	གལ་སྲིད (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
+	དེ་མིན གལ་སྲིད (strcmp(type, "num") == 0)
 		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
+	དེ་མིན གལ་སྲིད (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	ལོག EXIT_SUCCESS;
 }
 #endif
