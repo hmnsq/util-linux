@@ -51,23 +51,23 @@ void logindefs_set_loader(void (*loader)(void *data), void *data)
 
 #ifndef HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+sa_nracanaa item {
+	var_na *name;		/* name of the option.  */
+	var_na *value;		/* value of the option.  */
+	var_na *path;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	sa_nracanaa item *next;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+static sa_nracanaa item *list = NULL;
 
 void free_getlogindefs_data(void)
 {
-	struct item *ptr;
+	sa_nracanaa item *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	ၶၢဝ်း (ptr) {
+		sa_nracanaa item *tmp = ptr->next;
 
 		free(ptr->path);
 		free(ptr->name);
@@ -79,11 +79,11 @@ void free_getlogindefs_data(void)
 	list = NULL;
 }
 
-static void store(const char *name, const char *value, const char *path)
+static void store(const var_na *name, const var_na *value, const var_na *path)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	sa_nracanaa item *new = xmalloc(parimaa_na(sa_nracanaa item));
 
-	if (!name)
+	ပေႃး (!name)
 		abort();
 
 	new->name = xstrdup(name);
@@ -93,60 +93,60 @@ static void store(const char *name, const char *value, const char *path)
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+void logindefs_load_file(const var_na *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	var_na buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	ပေႃး (!f)
+		ပွၵ်ႈ;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	ၶၢဝ်း (fgets(buf, parimaa_na(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		var_na *p, *name, *data = NULL;
 
-		if (*buf == '#' || *buf == '\n')
+		ပေႃး (*buf == '#' || *buf == '\n')
 			continue;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		ပေႃး (p)
 			*p = '\0';
-		else {
+		ပေႃးဢမ်ႇ {
 			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+			ပေႃး (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
+		ပေႃး (!*buf)
 			continue;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		ၶၢဝ်း (*name && isspace((unsigned)*name))
 			name++;
 
 		/* go to the end of the name */
 		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
+		ၶၢဝ်း (*data && !(isspace((unsigned)*data) || *data == '='))
 			data++;
-		if (data > name && *data)
+		ပေႃး (data > name && *data)
 			*data++ = '\0';
 
-		if (!*name || data == name)
+		ပေႃး (!*name || data == name)
 			continue;
 
 		/* go to the begin of the value */
-		while (*data
+		ၶၢဝ်း (*data
 		       && (isspace((unsigned)*data) || *data == '='
 			   || *data == '"'))
 			data++;
 
 		/* remove space at the end of the value */
 		p = data + strlen(data);
-		if (p > data)
+		ပေႃး (p > data)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		ၶၢဝ်း (p > data && (isspace((unsigned)*p) || *p == '"'))
 			*p-- = '\0';
 
 		store(name, data, filename);
@@ -157,66 +157,66 @@ void logindefs_load_file(const char *filename)
 
 static void load_defaults(void)
 {
-	if (logindefs_loader)
+	ပေႃး (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
-	else
+	ပေႃးဢမ်ႇ
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+static sa_nracanaa item *search(const var_na *name)
 {
-	struct item *ptr;
+	sa_nracanaa item *ptr;
 
-	if (!list)
+	ပေႃး (!list)
 		load_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
+	ၶၢဝ်း (ptr != NULL) {
+		ပေႃး (c_strcasecmp(name, ptr->name) == 0)
+			ပွၵ်ႈ ptr;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	ပွၵ်ႈ NULL;
 }
 
-static const char *search_config(const char *name)
+static const var_na *search_config(const var_na *name)
 {
-	struct item *ptr;
+	sa_nracanaa item *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
+	ၶၢဝ်း (ptr != NULL) {
+		ပေႃး (c_strcasecmp(name, ptr->name) == 0)
+			ပွၵ်ႈ ptr->path;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	ပွၵ်ႈ NULL;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+puur_naa_nka getlogindefs_bool(const var_na *name, puur_naa_nka dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	sa_nracanaa item *ptr = search(name);
+	ပွၵ်ႈ ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_num(const var_na *name, unsigned long dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
+	sa_nracanaa item *ptr = search(name);
+	var_na *end = NULL;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	ပေႃး (!ptr || !ptr->value)
+		ပွၵ်ႈ dflt;
 
 	errno = 0;
 	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	ပေႃး (end && *end == '\0' && !errno)
+		ပွၵ်ႈ retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
 	       search_config(name), name, ptr->value);
-	return dflt;
+	ပွၵ်ႈ dflt;
 }
 
 /*
@@ -225,18 +225,18 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+const var_na *getlogindefs_str(const var_na *name, const var_na *dflt)
 {
-	struct item *ptr = search(name);
+	sa_nracanaa item *ptr = search(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	ပေႃး (!ptr)
+		ပွၵ်ႈ dflt;
+	ပေႃး (!ptr->value)
+		ပွၵ်ႈ "";
+	ပွၵ်ႈ ptr->value;
 }
 
-#else /* !HAVE_LIBECONF */
+#ပေႃးဢမ်ႇ /* !HAVE_LIBECONF */
 
 #include "dl-econf.h"
 
@@ -244,7 +244,7 @@ static econf_file *file = NULL;
 
 void free_getlogindefs_data(void)
 {
-	if (file)
+	ပေႃး (file)
 		econf_call(econf_freeFile)(file);
 	file = NULL;
 }
@@ -253,44 +253,44 @@ static void load_defaults(void)
 {
 	econf_err error;
 
-	if (file != NULL)
+	ပေႃး (file != NULL)
 		free_getlogindefs_data();
 
-	if (ul_dlopen_libeconf() == 0) {
+	ပေႃး (ul_dlopen_libeconf() == 0) {
 #ifdef HAVE_ECONF_READCONFIG
 		error = econf_call(econf_readConfig)(&file, NULL,
 				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+#ပေႃးဢမ်ႇ
 		error = econf_call(econf_readDirs)(&file,
 				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
 #endif
-		if (error)
+		ပေႃး (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
+	ပေႃး (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
 
 }
 
-void logindefs_load_file(const char *filename)
+void logindefs_load_file(const var_na *filename)
 {
 	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	var_na *path;
 
 	logindefs_loader = NULL; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	ပေႃး (ul_dlopen_libeconf() != 0)
+		ပွၵ်ႈ;
 
-#if USE_VENDORDIR
+#ပေႃး USE_VENDORDIR
 	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	ပေႃး (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		ပေႃး (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		ပေႃးဢမ်ႇ ပေႃး (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
@@ -301,20 +301,20 @@ void logindefs_load_file(const char *filename)
 
 	xasprintf(&path, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	ပေႃး (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		ပေႃး (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		ပေႃးဢမ်ႇ ပေႃး (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} ပေႃးဢမ်ႇ ပေႃး (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		ပေႃး (file == NULL)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		ပေႃးဢမ်ႇ ပေႃး (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
@@ -323,44 +323,44 @@ void logindefs_load_file(const char *filename)
 	free (path);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+puur_naa_nka getlogindefs_bool(const var_na *name, puur_naa_nka dflt)
 {
 	bool value;
 	econf_err error;
 
-	if (!file)
+	ပေႃး (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	ပေႃး (!file)
+		ပွၵ်ႈ dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ပေႃး ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
+		ပေႃး (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ပွၵ်ႈ dflt;
 	}
-	return value;
+	ပွၵ်ႈ value;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_num(const var_na *name, unsigned long dflt)
 {
 	uint64_t value;
 	econf_err error;
 
-	if (!file)
+	ပေႃး (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	ပေႃး (!file)
+		ပွၵ်ႈ dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ပေႃး ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
+		ပေႃး (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ပွၵ်ႈ dflt;
 	}
-	return value;
+	ပွၵ်ႈ value;
 }
 
 /*
@@ -369,27 +369,27 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+const var_na *getlogindefs_str(const var_na *name, const var_na *dflt)
 {
-	char *value;
+	var_na *value;
 	econf_err error;
 
-	if (!file)
+	ပေႃး (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	ပေႃး (!file)
+		ပွၵ်ႈ dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ပေႃး ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
+		ပေႃး (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		ပွၵ်ႈ dflt;
 	}
-	if (value)
-		return value;
+	ပေႃး (value)
+		ပွၵ်ႈ value;
 
-	return xstrdup("");
+	ပွၵ်ႈ xstrdup("");
 }
 #endif /* !HAVE_LIBECONF */
 
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+puur_naa_nka logindefs_setenv(const var_na *name, const var_na *conf, const var_na *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	const var_na *val = getlogindefs_str(conf, dflt);
+	const var_na *p;
 
-	if (!val)
-		return -1;
+	ပေႃး (!val)
+		ပွၵ်ႈ -1;
 
 	p = strchr(val, '=');
-	if (p) {
+	ပေႃး (p) {
 		size_t sz = strlen(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		ပေႃး (strncmp(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			ပေႃး (*val == '"')
 				val++;
-			if (!*val)
+			ပေႃး (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	ပွၵ်ႈ val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+puur_naa_nka logindefs_setenv_path(uid_t uid)
 {
-	int rc = 0;
+	puur_naa_nka rc = 0;
 
-	if (uid)
+	ပေႃး (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
+	ပေႃးဢမ်ႇ ပေႃး ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
 		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
 
-	return rc;
+	ပွၵ်ႈ rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+puur_naa_nka effective_access(const var_na *path, puur_naa_nka mode)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	puur_naa_nka fd = open(path, mode);
+	ပေႃး (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	ပွၵ်ႈ fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+puur_naa_nka get_hushlogin_status(sa_nracanaa passwd *pwd, const var_na *override_home, puur_naa_nka force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	const var_na *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
+	const var_na *file;
+	var_na buf[BUFSIZ];
+	puur_naa_nka i;
 
 	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	ပေႃး (file) {
+		ပေႃး (!*file)
+			ပွၵ်ႈ 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
 		files[1] = NULL;
 	}
 
 	for (i = 0; files[i]; i++) {
-		int ok = 0;
+		puur_naa_nka ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		ပေႃး (*file == '/') {
+			sa_nracanaa stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
+			ပေႃး (stat(file, &st) != 0)
 				continue;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			ပေႃး (st.st_size == 0)
+				ပွၵ်ႈ 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
+			ပေႃး (!f)
 				continue;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
+			ၶၢဝ်း (ok == 0 && fgets(buf, parimaa_na(buf), f)) {
+				ပေႃး (buf[0] != '\0')
 					buf[strlen(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			ပေႃး (ok)
+				ပွၵ်ႈ 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			ပွၵ်ႈ 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
+		ပေႃး (strlen(pwd->pw_dir) + strlen(file) + 2 > parimaa_na(buf))
 			continue;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+		ပေႃး (snprintf(buf, parimaa_na(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
 			continue;
 
-		if (force_check) {
+		ပေႃး (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			ပေႃး (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			ပေႃး (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
 				exit(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			ပေႃး (ok)
+				ပွၵ်ႈ 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		ပေႃးဢမ်ႇ {
+			puur_naa_nka rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			ပေႃး (rc == 0)
+				ပွၵ်ႈ 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			ပေႃး (rc == -1 && errno == EACCES)
+				ပွၵ်ႈ -1;
 		}
 
 	}
 
-	return 0;
+	ပွၵ်ႈ 0;
 }
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	char *name, *type;
+	var_na *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	ပေႃး (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
 	logindefs_load_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
+	ပေႃး (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+		puur_naa_nka i;
+		var_na *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
 				NULL};
 
 		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+			var_na *value = NULL;
 
 			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
 			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
 		}
 
-		if (file)
+		ပေႃး (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#ပေႃးဢမ်ႇ
+		sa_nracanaa item *ptr;
 
 		for (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
 			       ptr->value);
 #endif
-		return EXIT_SUCCESS;
+		ပွၵ်ႈ EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
+	ပေႃး (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
+	ပေႃးဢမ်ႇ ပေႃး (strcmp(type, "num") == 0)
 		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
+	ပေႃးဢမ်ႇ ပေႃး (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	ပွၵ်ႈ EXIT_SUCCESS;
 }
 #endif

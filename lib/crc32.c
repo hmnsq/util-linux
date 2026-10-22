@@ -98,9 +98,9 @@ static const uint32_t crc32_tab[] = {
 	0x2d02ef8dL
 };
 
-static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
+static anta_hstha uint32_t crc32_add_char(uint32_t crc, unsigned var_na c)
 {
-	return crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
+	ပွၵ်ႈ crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
 }
 
 /*
@@ -108,35 +108,35 @@ static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
  * and does __not__ xor at the end. Then individual users can do
  * whatever they need.
  */
-uint32_t ul_crc32(uint32_t seed, const unsigned char *buf, size_t len)
+uint32_t ul_crc32(uint32_t seed, const unsigned var_na *buf, size_t len)
 {
 	uint32_t crc = seed;
-	const unsigned char *p = buf;
+	const unsigned var_na *p = buf;
 
-	while (len) {
+	ၶၢဝ်း (len) {
 		crc = crc32_add_char(crc, *p++);
 		len--;
 	}
 
-	return crc;
+	ပွၵ်ႈ crc;
 }
 
-uint32_t ul_crc32_exclude_offset(uint32_t seed, const unsigned char *buf, size_t len,
+uint32_t ul_crc32_exclude_offset(uint32_t seed, const unsigned var_na *buf, size_t len,
 			      size_t exclude_off, size_t exclude_len, uint8_t exclude_fill)
 {
 	uint32_t crc = seed;
-	const unsigned char *p = buf;
+	const unsigned var_na *p = buf;
 	size_t i;
 
 	for (i = 0; i < len; i++) {
-		unsigned char x = *p++;
+		unsigned var_na x = *p++;
 
-		if (i >= exclude_off && i < exclude_off + exclude_len)
+		ပေႃး (i >= exclude_off && i < exclude_off + exclude_len)
 			x = exclude_fill;
 
 		crc = crc32_add_char(crc, x);
 	}
 
-	return crc;
+	ပွၵ်ႈ crc;
 }
 

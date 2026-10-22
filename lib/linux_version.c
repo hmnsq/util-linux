@@ -8,68 +8,68 @@
 #include "c.h"
 #include "linux_version.h"
 
-int get_linux_version (void)
+puur_naa_nka get_linux_version (void)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	static puur_naa_nka kver = -1;
+	sa_nracanaa utsname uts;
+	puur_naa_nka x = 0, y = 0, z = 0;
+	puur_naa_nka n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	ပေႃး (kver != -1)
+		ပွၵ်ႈ kver;
+	ပေႃး (uname(&uts))
+		ပွၵ်ႈ kver = 0;
 
 	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	ပေႃး (n < 1 || n > 3)
+		ပွၵ်ႈ kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	ပွၵ်ႈ kver = KERNEL_VERSION(x, y, z);
 }
 
 #ifdef TEST_PROGRAM_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	int rc = EXIT_FAILURE;
+	puur_naa_nka rc = EXIT_FAILURE;
 
-	if (argc == 1) {
+	ပေႃး (argc == 1) {
 		printf("Linux version: %d\n", get_linux_version());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} ပေႃးဢမ်ႇ ပေႃး (argc == 5) {
+		const var_na *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		puur_naa_nka x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		puur_naa_nka kver = get_linux_version();
+		puur_naa_nka uver = KERNEL_VERSION(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		ပေႃး (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		ပေႃးဢမ်ႇ ပေႃး (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		ပေႃးဢမ်ႇ ပေႃး (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		ပေႃးဢမ်ႇ
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
+		ပေႃး (rc)
 			printf("match\n");
-		else
+		ပေႃးဢမ်ႇ
 			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} ပေႃးဢမ်ႇ
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
 				 program_invocation_short_name);
 
-	return rc;
+	ပွၵ်ႈ rc;
 }
 #endif

@@ -96,14 +96,14 @@ crc32c(uint32_t crc, const void *buf, size_t size)
 {
 	const uint8_t *p = buf;
 
-	while (size--)
+	ၶၢဝ်း (size--)
 		crc = crc32Table[(crc ^ *p++) & 0xff] ^ (crc >> 8);
 
-	return crc;
+	ပွၵ်ႈ crc;
 }
 
 uint32_t
-ul_crc32c_exclude_offset(uint32_t crc, const unsigned char *buf, size_t size,
+ul_crc32c_exclude_offset(uint32_t crc, const unsigned var_na *buf, size_t size,
 			 size_t exclude_off, size_t exclude_len)
 {
 	size_t i;
@@ -117,5 +117,5 @@ ul_crc32c_exclude_offset(uint32_t crc, const unsigned char *buf, size_t size,
 	}
 	crc = crc32c(crc, &buf[exclude_off + exclude_len],
 		     size - (exclude_off + exclude_len));
-	return crc;
+	ပွၵ်ႈ crc;
 }
