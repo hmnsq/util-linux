@@ -9,224 +9,224 @@
  *
  * Copyright (C) 2017 Karel Zak <kzak@redhat.com>
  */
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
+#شامل <errno.h>
+#شامل <stdio.h>
 
-#include "mbsalign.h"
-#include "mbsedit.h"
+#شامل "mbsalign.h"
+#شامل "mbsedit.h"
 
-struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
+ساخت mbs_editor *mbs_new_edit(حرف *buf, size_t bufsz, size_t ncells)
 {
-	struct mbs_editor *edit = calloc(1, sizeof(*edit));
+	ساخت mbs_editor *edit = صفر_حافظہ_دو(1, حجم(*edit));
 
-	if (edit) {
+	اگر (edit) {
 		edit->buf = buf;
-		edit->max_bytes = bufsz;
+		edit->max_بائٹیں = bufsz;
 		edit->max_cells = ncells;
-		edit->cur_cells = mbs_safe_width(buf);
-		edit->cur_bytes = strlen(buf);
+		edit->cur_cells = mbs_محفوظ_چوڑائی(buf);
+		edit->cur_بائٹیں = لڑی_لمبائی(buf);
 	}
-	return edit;
+	واپس edit;
 }
 
-char *mbs_free_edit(struct mbs_editor *edit)
+حرف *mbs_free_edit(ساخت mbs_editor *edit)
 {
-	char *ret = edit ? edit->buf : NULL;
+	حرف *ret = edit ? edit->buf : تہی;
 
-	free(edit);
-	return ret;
+	آزاد(edit);
+	واپس ret;
 }
 
-static size_t mbs_next(const char *str, size_t *ncells)
+ساکن size_t mbs_اگلا(ثابت حرف *str, size_t *ncells)
 {
-#ifdef HAVE_WIDECHAR
+#اگر_تعریف_شدہ HAVE_WIDECHAR
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	اگر (!str || !*str)
+		واپس 0;
 
-	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
+	n = mbrtowc(&wc, str, MB_CUR_MAX, تہی);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	واپس n;
+#ورنہ
+	اگر (!str || !*str)
+		واپس 0;
 	*ncells = 1;
-	return 1;
-#endif
+	واپس 1;
+#اگر_ختم
 }
 
-static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
+ساکن size_t mbs_پچھلا(ثابت حرف *آغاز, ثابت حرف *انتہا, size_t *ncells)
 {
-#ifdef HAVE_WIDECHAR
+#اگر_تعریف_شدہ HAVE_WIDECHAR
 	wchar_t wc = 0;
-	const char *p, *prev;
+	ثابت حرف *p, *پچھلا;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	اگر (!آغاز || !انتہا || آغاز == انتہا || !*آغاز)
+		واپس 0;
 
-	prev = p = start;
-	while (p < end) {
-		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
-		prev = p;
+	پچھلا = p = آغاز;
+	جب (p < انتہا) {
+		n = mbrtowc(&wc, p, MB_CUR_MAX, تہی);
+		پچھلا = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		اگر (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		ورنہ
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	اگر (پچھلا == انتہا)
+		واپس 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	واپس n;
+#ورنہ
+	اگر (!آغاز || !انتہا || آغاز == انتہا || !*آغاز)
+		واپس 0;
 	*ncells = 1;
-	return 1;
-#endif
+	واپس 1;
+#اگر_ختم
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+صحیح mbs_edit_goto(ساخت mbs_editor *edit, صحیح where)
 {
-	switch (where) {
-	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+	انتخاب (where) {
+	حالت MBS_EDIT_بایاں:
+		اگر (edit->cursor == 0)
+			واپس 1;
+		ورنہ {
 			size_t n, cells;
-			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			n = mbs_پچھلا(edit->buf, edit->buf + edit->cursor, &cells);
+			اگر (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
-		break;
-	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		توڑو;
+	حالت MBS_EDIT_دایاں:
+		اگر (edit->cursor_cells >= edit->cur_cells)
+			واپس 1;
+		ورنہ {
 			size_t n, cells;
-			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			n = mbs_اگلا(edit->buf + edit->cursor, &cells);
+			اگر (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
 		}
-		break;
-	case MBS_EDIT_HOME:
+		توڑو;
+	حالت MBS_EDIT_HOME:
 		edit->cursor = 0;
 		edit->cursor_cells = 0;
-		break;
-	case MBS_EDIT_END:
-		edit->cursor = edit->cur_bytes;
+		توڑو;
+	حالت MBS_EDIT_انتہا:
+		edit->cursor = edit->cur_بائٹیں;
 		edit->cursor_cells = edit->cur_cells;
-		break;
-	default:
-		return -EINVAL;
+		توڑو;
+	طےشدہ:
+		واپس -EINVAL;
 	}
 
-	return 0;
+	واپس 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
-static size_t remove_next(char *str, size_t *ncells)
+ساکن size_t remove_اگلا(حرف *str, size_t *ncells)
 {
 	/* all in bytes! */
-	size_t bytes, move_bytes, n;
+	size_t بائٹیں, move_بائٹیں, n;
 
-	n          = mbs_next(str, ncells);
-	bytes      = strlen(str);
-	move_bytes = bytes - n;
+	n          = mbs_اگلا(str, ncells);
+	بائٹیں      = لڑی_لمبائی(str);
+	move_بائٹیں = بائٹیں - n;
 
-	memmove(str, str + n, move_bytes);
-	str[bytes - n] = '\0';
-	return n;
+	memmove(str, str + n, move_بائٹیں);
+	str[بائٹیں - n] = '\0';
+	واپس n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+ساکن size_t mbs_داخل_کرو(حرف *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
-	size_t n = 1, bytes;
-	char *in;
+	size_t n = 1, بائٹیں;
+	حرف *اندر;
 
-#ifdef HAVE_WIDECHAR
+#اگر_تعریف_شدہ HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
-	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	اندر = حافظہ_دو(MB_CUR_MAX);
+	اگر (!اندر)
+		واپس -1;
 
-	n = wctomb(in, wc);
-	if (n == (size_t) -1)
-		goto out;
+	n = wctomb(اندر, wc);
+	اگر (n == (size_t) -1)
+		جاؤ برآمد;
 	*ncells = wcwidth(wc);
-#else
+#ورنہ
 	*ncells = 1;
-	in = (char *) &c;
-#endif
-	bytes       = strlen(str);
+	اندر = (حرف *) &c;
+#اگر_ختم
+	بائٹیں       = لڑی_لمبائی(str);
 
-	memmove(str + n, str, bytes);
-	memcpy(str, in, n);
-	str[bytes + n] = '\0';
-#ifdef HAVE_WIDECHAR
-out:
-	free(in);
-#endif
-	return n;
+	memmove(str + n, str, بائٹیں);
+	حافظہ_نقل(str, اندر, n);
+	str[بائٹیں + n] = '\0';
+#اگر_تعریف_شدہ HAVE_WIDECHAR
+برآمد:
+	آزاد(اندر);
+#اگر_ختم
+	واپس n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+ساکن صحیح mbs_edit_remove(ساخت mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	اگر (edit->cur_cells == 0 || edit->cursor >= edit->cur_بائٹیں)
+		واپس 1;
 
-	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = remove_اگلا(edit->buf + edit->cursor, &ncells);
+	اگر (n == (size_t)-1)
+		واپس 1;
 
-	edit->cur_bytes -= n;
-	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	edit->cur_بائٹیں -= n;
+	edit->cur_cells = mbs_محفوظ_چوڑائی(edit->buf);
+	واپس 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+صحیح mbs_edit_delete(ساخت mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
-	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+	اگر (edit->cursor >= edit->cur_بائٹیں
+	    && mbs_edit_goto(edit, MBS_EDIT_بایاں) == 1)
+		واپس 1;
 
-	return mbs_edit_remove(edit);
+	واپس mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+صحیح mbs_edit_backspace(ساخت mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	اگر (mbs_edit_goto(edit, MBS_EDIT_بایاں) == 0)
+		واپس mbs_edit_remove(edit);
+	واپس 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+صحیح mbs_edit_داخل_کرو(ساخت mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	اگر (edit->cur_بائٹیں + MB_CUR_MAX > edit->max_بائٹیں)
+		واپس 1;
 
-	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = mbs_داخل_کرو(edit->buf + edit->cursor, c, &ncells);
+	اگر (n == (size_t)-1)
+		واپس 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
-	edit->cur_bytes += n;
-	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	edit->cur_بائٹیں += n;
+	edit->cur_cells = mbs_محفوظ_چوڑائی(edit->buf);
+	واپس 0;
 }

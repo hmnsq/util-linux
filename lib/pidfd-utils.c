@@ -4,47 +4,47 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
-#include <errno.h>
+#شامل <stdlib.h>
+#شامل <sys/stat.h>
+#شامل <sys/vfs.h>
+#شامل <sys/types.h>
+#شامل <errno.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "pidfd-utils.h"
-#include "statfs_magic.h"
+#شامل "c.h"
+#شامل "nls.h"
+#شامل "strutils.h"
+#شامل "pidfd-utils.h"
+#شامل "statfs_magic.h"
 
 /*
  * Returns 1, if the pidfd has the pidfs file system type, otherwise 0.
  */
-int pfd_is_pidfs(int pidfd)
+صحیح pfd_is_pidfs(صحیح pidfd)
 {
-	struct statfs stfs;
-	int rc;
+	ساخت statfs stfs;
+	صحیح rc;
 
 	rc = fstatfs(pidfd, &stfs);
-	if (rc < 0)
-		return 0;
+	اگر (rc < 0)
+		واپس 0;
 
-	return F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
+	واپس F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
 }
 
-#ifdef USE_PIDFD_INO_SUPPORT
-uint64_t pidfd_get_inode(int pidfd)
+#اگر_تعریف_شدہ USE_PIDFD_INO_SUPPORT
+uint64_t pidfd_get_inode(صحیح pidfd)
 {
-	struct statx stx;
-	int rc;
+	ساخت statx stx;
+	صحیح rc;
 
-	rc = statx(pidfd, "", AT_EMPTY_PATH, STATX_INO, &stx);
-	if (rc < 0) {
+	rc = statx(pidfd, "", AT_خالی_خانے_راستہ, STATX_INO, &stx);
+	اگر (rc < 0) {
 		close(pidfd);
 		err(EXIT_FAILURE, _("failed to statx() pidfd"));
 	}
-	return stx.stx_ino;
+	واپس stx.stx_ino;
 }
-#endif
+#اگر_ختم
 
 /*
  * ul_get_valid_pidfd_or_err() - Return a valid file descriptor for a PID
@@ -61,19 +61,19 @@ uint64_t pidfd_get_inode(int pidfd)
  *         and the processes is terminated.
  *
  */
-#ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
-#endif
+#اگر_تعریف_شدہ USE_PIDFD_INO_SUPPORT
+صحیح ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
+#ورنہ
+صحیح ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+#اگر_ختم
 {
-	int pfd;
+	صحیح pfd;
 
 	pfd = ul_get_valid_pidfd(pid, pidfd_ino);
-	if (pfd < 0)
+	اگر (pfd < 0)
 		err(EXIT_FAILURE, _("failed to obtain a valid file descriptor for PID %d"), pid);
 
-	return pfd;
+	واپس pfd;
 }
 
 /*
@@ -90,35 +90,35 @@ int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unu
  *         is set accordingly.
  *
  */
-#ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
-#endif
+#اگر_تعریف_شدہ USE_PIDFD_INO_SUPPORT
+صحیح ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
+#ورنہ
+صحیح ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+#اگر_ختم
 {
-	int pfd;
+	صحیح pfd;
 
 	pfd = pidfd_open(pid, 0);
-	if (pfd < 0)
-		return -errno;
+	اگر (pfd < 0)
+		واپس -errno;
 
 	/* the file descriptor has to have the pidfs file system type
 	 * otherwise the inode assigned to it will not be useful.
 	 */
-	if (!pfd_is_pidfs(pfd)) {
+	اگر (!pfd_is_pidfs(pfd)) {
 		close(pfd);
-		return -(errno = ENOTSUP);
+		واپس -(errno = ENOTSUP);
 	}
 
-#ifdef USE_PIDFD_INO_SUPPORT
+#اگر_تعریف_شدہ USE_PIDFD_INO_SUPPORT
 	uint64_t real_pidfd_ino;
-	if (pidfd_ino) {
+	اگر (pidfd_ino) {
 		real_pidfd_ino = pidfd_get_inode(pfd);
-		if (real_pidfd_ino != pidfd_ino) {
+		اگر (real_pidfd_ino != pidfd_ino) {
 			close(pfd);
-			return -(errno = ESRCH);
+			واپس -(errno = ESRCH);
 		}
 	}
-#endif
-	return pfd;
+#اگر_ختم
+	واپس pfd;
 }

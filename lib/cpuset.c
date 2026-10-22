@@ -15,128 +15,128 @@
  * Copyright (C) 2010 Karel Zak <kzak@redhat.com>
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sched.h>
-#include <errno.h>
-#include <string.h>
-#include <ctype.h>
-#ifdef HAVE_SYS_SYSCALL_H
-#include <sys/syscall.h>
-#endif
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <unistd.h>
+#شامل <sched.h>
+#شامل <errno.h>
+#شامل <string.h>
+#شامل <ctype.h>
+#اگر_تعریف_شدہ HAVE_SYS_SYSCALL_H
+#شامل <sys/syscall.h>
+#اگر_ختم
 
-#include "cpuset.h"
-#include "c.h"
+#شامل "cpuset.h"
+#شامل "c.h"
 
-static inline int val_to_char(int v)
+ساکن اندرونی صحیح val_مقصد_char(صحیح v)
 {
-	if (v >= 0 && v < 10)
-		return '0' + v;
-	if (v >= 10 && v < 16)
-		return ('a' - 10) + v;
-	return -1;
+	اگر (v >= 0 && v < 10)
+		واپس '0' + v;
+	اگر (v >= 10 && v < 16)
+		واپس ('a' - 10) + v;
+	واپس -1;
 }
 
-static inline int char_to_val(int c)
+ساکن اندرونی صحیح char_مقصد_val(صحیح c)
 {
-	int cl;
+	صحیح cl;
 
-	if (c >= '0' && c <= '9')
-		return c - '0';
+	اگر (c >= '0' && c <= '9')
+		واپس c - '0';
 	cl = tolower(c);
-	if (cl >= 'a' && cl <= 'f')
-		return cl + (10 - 'a');
-	return -1;
+	اگر (cl >= 'a' && cl <= 'f')
+		واپس cl + (10 - 'a');
+	واپس -1;
 }
 
-static const char *nexttoken(const char *q,  int sep)
+ساکن ثابت حرف *nexttoken(ثابت حرف *q,  صحیح sep)
 {
-	if (q)
+	اگر (q)
 		q = strchr(q, sep);
-	if (q)
+	اگر (q)
 		q++;
-	return q;
+	واپس q;
 }
 
 /*
  * Number of bits in a CPU bitmask on current system
  */
-int get_max_number_of_cpus(void)
+صحیح get_max_نمبر_کا_cpus(خالی)
 {
-#ifdef SYS_sched_getaffinity
-	int n, cpus = 2048;
+#اگر_تعریف_شدہ SYS_sched_getaffinity
+	صحیح n, cpus = 2048;
 	size_t setsize;
-	cpu_set_t *set = cpuset_alloc(cpus, &setsize, NULL);
+	cpu_set_t *سیٹ = cpuset_alloc(cpus, &setsize, تہی);
 
-	if (!set)
-		return -1;	/* error */
+	اگر (!سیٹ)
+		واپس -1;	/* error */
 
-	for (;;) {
-		CPU_ZERO_S(setsize, set);
+	برائے (;;) {
+		CPU_ZERO_S(setsize, سیٹ);
 
 		/* the library version does not return size of cpumask_t */
-		n = syscall(SYS_sched_getaffinity, 0, setsize, set);
+		n = syscall(SYS_sched_getaffinity, 0, setsize, سیٹ);
 
-		if (n < 0 && errno == EINVAL && cpus < 1024 * 1024) {
-			cpuset_free(set);
+		اگر (n < 0 && errno == EINVAL && cpus < 1024 * 1024) {
+			cpuset_free(سیٹ);
 			cpus *= 2;
-			set = cpuset_alloc(cpus, &setsize, NULL);
-			if (!set)
-				return -1;	/* error */
-			continue;
+			سیٹ = cpuset_alloc(cpus, &setsize, تہی);
+			اگر (!سیٹ)
+				واپس -1;	/* error */
+			جاری;
 		}
-		cpuset_free(set);
-		return n * 8;
+		cpuset_free(سیٹ);
+		واپس n * 8;
 	}
-#endif
-	return -1;
+#اگر_ختم
+	واپس -1;
 }
 
 /*
  * Allocates a new set for ncpus and returns size in bytes and size in bits
  */
-cpu_set_t *cpuset_alloc(int ncpus, size_t *setsize, size_t *nbits)
+cpu_set_t *cpuset_alloc(صحیح ncpus, size_t *setsize, size_t *nbits)
 {
-	cpu_set_t *set = NULL;
+	cpu_set_t *سیٹ = تہی;
 
-	if (ncpus)
-		set = CPU_ALLOC(ncpus);
-	if (!set)
-		return NULL;
-	if (setsize)
-		*setsize = CPU_ALLOC_SIZE(ncpus);
-	if (nbits)
-		*nbits = cpuset_nbits(CPU_ALLOC_SIZE(ncpus));
-	return set;
+	اگر (ncpus)
+		سیٹ = CPU_ALLOC(ncpus);
+	اگر (!سیٹ)
+		واپس تہی;
+	اگر (setsize)
+		*setsize = CPU_ALLOC_سائز(ncpus);
+	اگر (nbits)
+		*nbits = cpuset_nbits(CPU_ALLOC_سائز(ncpus));
+	واپس سیٹ;
 }
 
-void cpuset_free(cpu_set_t *set)
+خالی cpuset_free(cpu_set_t *سیٹ)
 {
-	CPU_FREE(set);
+	CPU_FREE(سیٹ);
 }
 
-#if !HAVE_DECL_CPU_ALLOC
+#اگر !HAVE_DECL_CPU_ALLOC
 /* Please, use CPU_COUNT_S() macro. This is fallback */
-int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
+صحیح __cpuset_count_s(size_t setsize, ثابت cpu_set_t *سیٹ)
 {
-	int s = 0;
-	const __cpu_mask *p = set->__bits;
-	const __cpu_mask *end = &set->__bits[setsize / sizeof (__cpu_mask)];
+	صحیح s = 0;
+	ثابت __cpu_mask *p = سیٹ->__bits;
+	ثابت __cpu_mask *انتہا = &سیٹ->__bits[setsize / حجم (__cpu_mask)];
 
-	while (p < end) {
+	جب (p < انتہا) {
 		__cpu_mask l = *p++;
 
-		if (l == 0)
-			continue;
-# if LONG_BIT > 32
+		اگر (l == 0)
+			جاری;
+# اگر LONG_ثنائی_ہندسہ > 32
 		l = (l & 0x5555555555555555ul) + ((l >> 1) & 0x5555555555555555ul);
 		l = (l & 0x3333333333333333ul) + ((l >> 2) & 0x3333333333333333ul);
 		l = (l & 0x0f0f0f0f0f0f0f0ful) + ((l >> 4) & 0x0f0f0f0f0f0f0f0ful);
 		l = (l & 0x00ff00ff00ff00fful) + ((l >> 8) & 0x00ff00ff00ff00fful);
 		l = (l & 0x0000ffff0000fffful) + ((l >> 16) & 0x0000ffff0000fffful);
 		l = (l & 0x00000000fffffffful) + ((l >> 32) & 0x00000000fffffffful);
-# else
+# ورنہ
 		l = (l & 0x55555555ul) + ((l >> 1) & 0x55555555ul);
 		l = (l & 0x33333333ul) + ((l >> 2) & 0x33333333ul);
 		l = (l & 0x0f0f0f0ful) + ((l >> 4) & 0x0f0f0f0ful);
@@ -145,9 +145,9 @@ int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
 # endif
 		s += l;
 	}
-	return s;
+	واپس s;
 }
-#endif
+#اگر_ختم
 
 /*
  * Finds the first CPU present after the specified index.
@@ -159,183 +159,183 @@ int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
  * Return: the index of the first CPU present in `set`, starting at `start`.
  * If no such CPU exists, returns the size of the set in *bits*.
  */
-static size_t find_next_cpu(size_t start, size_t setsize, cpu_set_t *set)
+ساکن size_t ڈھونڈو_اگلا_cpu(size_t آغاز, size_t setsize, cpu_set_t *سیٹ)
 {
 	size_t nbits = cpuset_nbits(setsize);
-	for (; start < nbits; start++)
-		if (CPU_ISSET_S(start, setsize, set))
-			return start;
-	return start;
+	برائے (; آغاز < nbits; آغاز++)
+		اگر (CPU_ISSET_S(آغاز, setsize, سیٹ))
+			واپس آغاز;
+	واپس آغاز;
 }
 
 /*
  * Returns human readable representation of the cpuset. The output format is
  * a list of CPUs with ranges (for example, "0,1,3-9:3").
  */
-char *cpulist_create(char *str, size_t len,
-			cpu_set_t *set, size_t setsize)
+حرف *cpulist_create(حرف *str, size_t len,
+			cpu_set_t *سیٹ, size_t setsize)
 {
-	char *ptr = str;
-	int entry_made = 0;
+	حرف *ptr = str;
+	صحیح اندراج_made = 0;
 	size_t max = cpuset_nbits(setsize);
 	size_t a = 0;  /* min for cpu range */
-	size_t next = 0;  /* where to start looking for next cpu */
+	size_t اگلا = 0;  /* where to start looking for next cpu */
 
-	while ((a = find_next_cpu(next, setsize, set)) < max) {
-		int rlen;
-		next = find_next_cpu(a + 1, setsize, set);
-		if (next == max) {
+	جب ((a = ڈھونڈو_اگلا_cpu(اگلا, setsize, سیٹ)) < max) {
+		صحیح rlen;
+		اگلا = ڈھونڈو_اگلا_cpu(a + 1, setsize, سیٹ);
+		اگر (اگلا == max) {
 			rlen = snprintf(ptr, len, "%zu,", a);
-		} else {
+		} ورنہ {
 			/* Extend range as long as we have the same stride. */
-			size_t b = next;
+			size_t b = اگلا;
 			size_t s = b - a;
-			while (((next = find_next_cpu(b + 1, setsize, set)) <
-				max) && next - b == s) {
-				b = next;
+			جب (((اگلا = ڈھونڈو_اگلا_cpu(b + 1, setsize, سیٹ)) <
+				max) && اگلا - b == s) {
+				b = اگلا;
 			}
-			if (b - a == s) {
+			اگر (b - a == s) {
 				/*
 				 * Only print one CPU.  Hope the next one can
 				 * be put in the next range.
 				 */
 				rlen = snprintf(ptr, len, "%zu,", a);
-				next = b;
-			} else if (s == 1) {
+				اگلا = b;
+			} ورنہ اگر (s == 1) {
 				rlen = snprintf(ptr, len, "%zu-%zu,", a, b);
-			} else {
+			} ورنہ {
 				rlen = snprintf(ptr, len, "%zu-%zu:%zu,",
 						a, b, s);
 			}
 		}
-		if (rlen < 0 || (size_t) rlen >= len)
-			return NULL;
+		اگر (rlen < 0 || (size_t) rlen >= len)
+			واپس تہی;
 		ptr += rlen;
 		len -= rlen;
-		entry_made = 1;
+		اندراج_made = 1;
 	}
-	ptr -= entry_made;
+	ptr -= اندراج_made;
 	*ptr = '\0';
 
-	return str;
+	واپس str;
 }
 
 /*
  * cpulist_flat_create - Convert cpumask to flat comma-separated list
  * Output: ONLY single CPUs, NO ranges (e.g. "0,1,2,3,4")
  */
-char *cpulist_flat_create(char *str, size_t len,
-			    cpu_set_t *set, size_t setsize)
+حرف *cpulist_flat_create(حرف *str, size_t len,
+			    cpu_set_t *سیٹ, size_t setsize)
 {
-	char *ptr = str;
-	int entry_made = 0;
+	حرف *ptr = str;
+	صحیح اندراج_made = 0;
 	size_t max = cpuset_nbits(setsize);
 	size_t cpu;
-	int rlen;
+	صحیح rlen;
 
-	for (cpu = 0; cpu < max; cpu++) {
-		if (!CPU_ISSET_S(cpu, setsize, set))
-			continue;
+	برائے (cpu = 0; cpu < max; cpu++) {
+		اگر (!CPU_ISSET_S(cpu, setsize, سیٹ))
+			جاری;
 
 		rlen = snprintf(ptr, len, "%zu,", cpu);
-		if (rlen < 0 || (size_t)rlen >= len)
-			return NULL;
+		اگر (rlen < 0 || (size_t)rlen >= len)
+			واپس تہی;
 
 		ptr += rlen;
 		len -= rlen;
-		entry_made = 1;
+		اندراج_made = 1;
 	}
-	ptr -= entry_made;
+	ptr -= اندراج_made;
 	*ptr = '\0';
 
-	return str;
+	واپس str;
 }
 
 
 /*
  * Returns string with CPU mask.
  */
-char *cpumask_create(char *str, size_t len,
-			cpu_set_t *set, size_t setsize)
+حرف *cpumask_create(حرف *str, size_t len,
+			cpu_set_t *سیٹ, size_t setsize)
 {
-	char *ptr = str;
-	char *ret = NULL;
-	int cpu;
+	حرف *ptr = str;
+	حرف *ret = تہی;
+	صحیح cpu;
 
-	for (cpu = cpuset_nbits(setsize) - 4; cpu >= 0; cpu -= 4) {
-		char val = 0;
+	برائے (cpu = cpuset_nbits(setsize) - 4; cpu >= 0; cpu -= 4) {
+		حرف val = 0;
 
-		if (len == (size_t) (ptr - str))
-			break;
+		اگر (len == (size_t) (ptr - str))
+			توڑو;
 
-		if (CPU_ISSET_S(cpu, setsize, set))
+		اگر (CPU_ISSET_S(cpu, setsize, سیٹ))
 			val |= 1;
-		if (CPU_ISSET_S(cpu + 1, setsize, set))
+		اگر (CPU_ISSET_S(cpu + 1, setsize, سیٹ))
 			val |= 2;
-		if (CPU_ISSET_S(cpu + 2, setsize, set))
+		اگر (CPU_ISSET_S(cpu + 2, setsize, سیٹ))
 			val |= 4;
-		if (CPU_ISSET_S(cpu + 3, setsize, set))
+		اگر (CPU_ISSET_S(cpu + 3, setsize, سیٹ))
 			val |= 8;
 
-		if (!ret && val)
+		اگر (!ret && val)
 			ret = ptr;
-		*ptr++ = val_to_char(val);
+		*ptr++ = val_مقصد_char(val);
 	}
 	*ptr = '\0';
-	return ret ? ret : ptr - 1;
+	واپس ret ? ret : ptr - 1;
 }
 
 /*
  * Parses string with CPUs mask.
  */
-int cpumask_parse(const char *str, cpu_set_t *set, size_t setsize)
+صحیح cpumask_parse(ثابت حرف *str, cpu_set_t *سیٹ, size_t setsize)
 {
-	int len = strlen(str);
-	const char *ptr = str + len - 1;
-	int cpu = 0;
+	صحیح len = لڑی_لمبائی(str);
+	ثابت حرف *ptr = str + len - 1;
+	صحیح cpu = 0;
 
 	/* skip 0x, it's all hex anyway */
-	if (len > 1 && !memcmp(str, "0x", 2L))
+	اگر (len > 1 && !memcmp(str, "0x", 2L))
 		str += 2;
 
-	CPU_ZERO_S(setsize, set);
+	CPU_ZERO_S(setsize, سیٹ);
 
-	while (ptr >= str) {
-		char val;
+	جب (ptr >= str) {
+		حرف val;
 
 		/* cpu masks in /sys uses comma as a separator */
-		if (*ptr == ',')
+		اگر (*ptr == ',')
 			ptr--;
 
-		val = char_to_val(*ptr);
-		if (val == (char) -1)
-			return -1;
-		if (val & 1)
-			CPU_SET_S(cpu, setsize, set);
-		if (val & 2)
-			CPU_SET_S(cpu + 1, setsize, set);
-		if (val & 4)
-			CPU_SET_S(cpu + 2, setsize, set);
-		if (val & 8)
-			CPU_SET_S(cpu + 3, setsize, set);
+		val = char_مقصد_val(*ptr);
+		اگر (val == (حرف) -1)
+			واپس -1;
+		اگر (val & 1)
+			CPU_سیٹ_S(cpu, setsize, سیٹ);
+		اگر (val & 2)
+			CPU_سیٹ_S(cpu + 1, setsize, سیٹ);
+		اگر (val & 4)
+			CPU_سیٹ_S(cpu + 2, setsize, سیٹ);
+		اگر (val & 8)
+			CPU_سیٹ_S(cpu + 3, setsize, سیٹ);
 		ptr--;
 		cpu += 4;
 	}
 
-	return 0;
+	واپس 0;
 }
 
-static int nextnumber(const char *str, char **end, unsigned int *result)
+ساکن صحیح nextnumber(ثابت حرف *str, حرف **انتہا, غیرعلامتی صحیح *نتیجہ)
 {
 	errno = 0;
-	if (str == NULL || *str == '\0' || !isdigit(*str))
-		return -EINVAL;
-	*result = (unsigned int) strtoul(str, end, 10);
-	if (errno)
-		return -errno;
-	if (str == *end)
-		return -EINVAL;
-	return 0;
+	اگر (str == تہی || *str == '\0' || !ہندسہ_ہے(*str))
+		واپس -EINVAL;
+	*نتیجہ = (غیرعلامتی صحیح) strtoul(str, انتہا, 10);
+	اگر (errno)
+		واپس -errno;
+	اگر (str == *انتہا)
+		واپس -EINVAL;
+	واپس 0;
 }
 
 /*
@@ -346,105 +346,105 @@ static int nextnumber(const char *str, char **end, unsigned int *result)
  * into the cpu_set. If fail is not set cpu numbers that do not fit are
  * ignored and 0 is returned instead.
  */
-int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
+صحیح cpulist_parse(ثابت حرف *str, cpu_set_t *سیٹ, size_t setsize, صحیح fail)
 {
-	const size_t max = cpuset_nbits(setsize);
-	const char *p, *q;
-	char *end = NULL;
+	ثابت size_t max = cpuset_nbits(setsize);
+	ثابت حرف *p, *q;
+	حرف *انتہا = تہی;
 
 	q = str;
-	CPU_ZERO_S(setsize, set);
+	CPU_ZERO_S(setsize, سیٹ);
 
-	while (p = q, q = nexttoken(q, ','), p) {
-		unsigned int a;	/* beginning of range */
-		unsigned int b;	/* end of range */
-		unsigned int s;	/* stride */
-		const char *c1, *c2;
+	جب (p = q, q = nexttoken(q, ','), p) {
+		غیرعلامتی صحیح a;	/* beginning of range */
+		غیرعلامتی صحیح b;	/* end of range */
+		غیرعلامتی صحیح s;	/* stride */
+		ثابت حرف *c1, *c2;
 
-		if (nextnumber(p, &end, &a) != 0 ||
-			(*end && *end != ',' && *end != '-'))
-			return 1;
+		اگر (nextnumber(p, &انتہا, &a) != 0 ||
+			(*انتہا && *انتہا != ',' && *انتہا != '-'))
+			واپس 1;
 		b = a;
 		s = 1;
-		p = end;
+		p = انتہا;
 
 		c1 = nexttoken(p, '-');
 		c2 = nexttoken(p, ',');
 
-		if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-			if (nextnumber(c1, &end, &b) != 0 ||
-				(*end && *end != ',' && *end != ':'))
-				return 1;
+		اگر (c1 != تہی && (c2 == تہی || c1 < c2)) {
+			اگر (nextnumber(c1, &انتہا, &b) != 0 ||
+				(*انتہا && *انتہا != ',' && *انتہا != ':'))
+				واپس 1;
 
-			c1 = nexttoken(end, ':');
+			c1 = nexttoken(انتہا, ':');
 
-			if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-				if (nextnumber(c1, &end, &s) != 0 ||
-					(*end && *end != ','))
-					return 1;
-				if (s == 0)
-					return 1;
+			اگر (c1 != تہی && (c2 == تہی || c1 < c2)) {
+				اگر (nextnumber(c1, &انتہا, &s) != 0 ||
+					(*انتہا && *انتہا != ','))
+					واپس 1;
+				اگر (s == 0)
+					واپس 1;
 			}
 		}
 
-		if (!(a <= b))
-			return 1;
-		while (a <= b) {
-			if (a >= max) {
-				if (fail)
-					return 2;
-				else
-					break;
+		اگر (!(a <= b))
+			واپس 1;
+		جب (a <= b) {
+			اگر (a >= max) {
+				اگر (fail)
+					واپس 2;
+				ورنہ
+					توڑو;
 			}
-			CPU_SET_S(a, setsize, set);
+			CPU_سیٹ_S(a, setsize, سیٹ);
 			a += s;
 		}
 	}
 
-	if (end && *end)
-		return 1;
-	return 0;
+	اگر (انتہا && *انتہا)
+		واپس 1;
+	واپس 0;
 }
 
-#ifdef TEST_PROGRAM_CPUSET
+#اگر_تعریف_شدہ TEST_پروگرام_CPUSET
 
-#include <getopt.h>
+#شامل <getopt.h>
 
-int main(int argc, char *argv[])
+صحیح مین(صحیح argc, حرف *argv[])
 {
-	cpu_set_t *set;
+	cpu_set_t *سیٹ;
 	size_t setsize, buflen, nbits;
-	char *buf, *mask = NULL, *range = NULL;
-	int ncpus = 2048, rc, c;
+	حرف *buf, *نقاب = تہی, *range = تہی;
+	صحیح ncpus = 2048, rc, c;
 
-	static const struct option longopts[] = {
-	    { "ncpus", 1, NULL, 'n' },
-	    { "mask",  1, NULL, 'm' },
-	    { "range", 1, NULL, 'r' },
-	    { NULL,    0, NULL, 0 }
+	ساکن ثابت ساخت option longopts[] = {
+	    { "ncpus", 1, تہی, 'n' },
+	    { "mask",  1, تہی, 'm' },
+	    { "range", 1, تہی, 'r' },
+	    { تہی,    0, تہی, 0 }
 	};
 
-	while ((c = getopt_long(argc, argv, "n:m:r:", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	جب ((c = getopt_long(argc, argv, "n:m:r:", longopts, تہی)) != -1) {
+		انتخاب(c) {
+		حالت 'n':
 			ncpus = atoi(optarg);
-			break;
-		case 'm':
-			mask = optarg;
-			break;
-		case 'r':
+			توڑو;
+		حالت 'm':
+			نقاب = optarg;
+			توڑو;
+		حالت 'r':
 			range = optarg;
-			break;
-		default:
-			goto usage_err;
+			توڑو;
+		طےشدہ:
+			جاؤ usage_err;
 		}
 	}
 
-	if (!mask && !range)
-		goto usage_err;
+	اگر (!نقاب && !range)
+		جاؤ usage_err;
 
-	set = cpuset_alloc(ncpus, &setsize, &nbits);
-	if (!set)
+	سیٹ = cpuset_alloc(ncpus, &setsize, &nbits);
+	اگر (!سیٹ)
 		err(EXIT_FAILURE, "failed to allocate cpu set");
 
 	/*
@@ -453,31 +453,31 @@ int main(int argc, char *argv[])
 	*/
 
 	buflen = 7 * nbits;
-	buf = malloc(buflen);
-	if (!buf)
+	buf = حافظہ_دو(buflen);
+	اگر (!buf)
 		err(EXIT_FAILURE, "failed to allocate cpu set buffer");
 
-	if (mask)
-		rc = cpumask_parse(mask, set, setsize);
-	else
-		rc = cpulist_parse(range, set, setsize, 0);
+	اگر (نقاب)
+		rc = cpumask_parse(نقاب, سیٹ, setsize);
+	ورنہ
+		rc = cpulist_parse(range, سیٹ, setsize, 0);
 
-	if (rc)
-		errx(EXIT_FAILURE, "failed to parse string: %s", mask ? : range);
+	اگر (rc)
+		errx(EXIT_FAILURE, "failed to parse string: %s", نقاب ? : range);
 
-	printf("%-15s = %15s ", mask ? : range,
-				cpumask_create(buf, buflen, set, setsize));
-	printf("[%s]\n", cpulist_create(buf, buflen, set, setsize));
+	لکھو("%-15s = %15s ", نقاب ? : range,
+				cpumask_create(buf, buflen, سیٹ, setsize));
+	لکھو("[%s]\n", cpulist_create(buf, buflen, سیٹ, setsize));
 
-	free(buf);
-	cpuset_free(set);
+	آزاد(buf);
+	cpuset_free(سیٹ);
 
-	return EXIT_SUCCESS;
+	واپس EXIT_SUCCESS;
 
 usage_err:
 	fprintf(stderr,
 		"usage: %s [--ncpus <num>] --mask <mask> | --range <list>\n",
-		program_invocation_short_name);
-	exit(EXIT_FAILURE);
+		پروگرام_invocation_short_name);
+	باہر_نکلو(EXIT_FAILURE);
 }
-#endif
+#اگر_ختم

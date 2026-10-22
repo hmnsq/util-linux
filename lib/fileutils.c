@@ -4,175 +4,175 @@
  * Copyright (C) 2012 Sami Kerola <kerolasa@iki.fi>
  * Copyright (C) 2012-2024 Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#ifdef HAVE_SYS_SYSCALL_H
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <sys/types.h>
+#شامل <sys/stat.h>
+#شامل <unistd.h>
+#شامل <sys/time.h>
+#شامل <sys/resource.h>
+#اگر_تعریف_شدہ HAVE_SYS_SYSCALL_H
 # include <sys/syscall.h>
-#endif
-#include <string.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <errno.h>
+#اگر_ختم
+#شامل <string.h>
+#شامل <sys/wait.h>
+#شامل <fcntl.h>
+#شامل <errno.h>
 
-#include "c.h"
-#include "all-io.h"
-#include "canonicalize.h"
-#include "fileutils.h"
-#include "pathnames.h"
-#include "strutils.h"
+#شامل "c.h"
+#شامل "all-io.h"
+#شامل "canonicalize.h"
+#شامل "fileutils.h"
+#شامل "pathnames.h"
+#شامل "strutils.h"
 
-int mkstemp_cloexec(char *template)
+صحیح mkstemp_cloexec(حرف *سانچہ)
 {
-#ifdef HAVE_MKOSTEMP
-	return mkostemp(template, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
-#else
-	int fd, old_flags, errno_save;
+#اگر_تعریف_شدہ HAVE_MKOSTEMP
+	واپس mkostemp(سانچہ, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
+#ورنہ
+	صحیح fd, old_flags, errno_save;
 
-	fd = mkstemp(template);
-	if (fd < 0)
-		return fd;
+	fd = mkstemp(سانچہ);
+	اگر (fd < 0)
+		واپس fd;
 
 	old_flags = fcntl(fd, F_GETFD, 0);
-	if (old_flags < 0)
-		goto unwind;
-	if (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
-		goto unwind;
+	اگر (old_flags < 0)
+		جاؤ unwind;
+	اگر (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
+		جاؤ unwind;
 
-	return fd;
+	واپس fd;
 
 unwind:
 	errno_save = errno;
-	unlink(template);
+	unlink(سانچہ);
 	close(fd);
 	errno = errno_save;
 
-	return -1;
-#endif
+	واپس -1;
+#اگر_ختم
 }
 
 /* Create open temporary file in safe way.  Please notice that the
  * file permissions are -rw------- by default. */
-int xmkstemp(char **tmpname, const char *dir, const char *prefix)
+صحیح xmkstemp(حرف **tmpname, ثابت حرف *dir, ثابت حرف *سابقہ)
 {
-	char *localtmp;
-	const char *tmpenv;
-	mode_t old_mode;
-	int fd, rc;
+	حرف *localtmp;
+	ثابت حرف *tmpenv;
+	mode_t old_منوال;
+	صحیح fd, rc;
 
 	/* Some use cases must be capable of being moved atomically
 	 * with rename(2), which is the reason why dir is here.  */
 	tmpenv = dir ? dir : getenv("TMPDIR");
-	if (!tmpenv)
+	اگر (!tmpenv)
 		tmpenv = _PATH_TMP;
 
-	rc = asprintf(&localtmp, "%s/%s.XXXXXX", tmpenv, prefix);
-	if (rc < 0)
-		return -1;
+	rc = asprintf(&localtmp, "%s/%s.XXXXXX", tmpenv, سابقہ);
+	اگر (rc < 0)
+		واپس -1;
 
-	old_mode = umask(077);
+	old_منوال = umask(077);
 	fd = mkstemp_cloexec(localtmp);
-	umask(old_mode);
-	if (fd == -1) {
-		free(localtmp);
-		localtmp = NULL;
+	umask(old_منوال);
+	اگر (fd == -1) {
+		آزاد(localtmp);
+		localtmp = تہی;
 	}
 	*tmpname = localtmp;
-	return fd;
+	واپس fd;
 }
 
-#ifdef F_DUPFD_CLOEXEC
-int dup_fd_cloexec(int oldfd, int lowfd)
-#else
-int dup_fd_cloexec(int oldfd, int lowfd  __attribute__((__unused__)))
-#endif
+#اگر_تعریف_شدہ F_DUPFD_CLOEXEC
+صحیح dup_fd_cloexec(صحیح oldfd, صحیح lowfd)
+#ورنہ
+صحیح dup_fd_cloexec(صحیح oldfd, صحیح lowfd  __attribute__((__unused__)))
+#اگر_ختم
 {
-	int fd, flags, errno_save;
+	صحیح fd, flags, errno_save;
 
-#ifdef F_DUPFD_CLOEXEC
+#اگر_تعریف_شدہ F_DUPFD_CLOEXEC
 	fd = fcntl(oldfd, F_DUPFD_CLOEXEC, lowfd);
-	if (fd >= 0)
-		return fd;
-#endif
+	اگر (fd >= 0)
+		واپس fd;
+#اگر_ختم
 
 	fd = dup(oldfd);
-	if (fd < 0)
-		return fd;
+	اگر (fd < 0)
+		واپس fd;
 
 	flags = fcntl(fd, F_GETFD);
-	if (flags < 0)
-		goto unwind;
-	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
-		goto unwind;
+	اگر (flags < 0)
+		جاؤ unwind;
+	اگر (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
+		جاؤ unwind;
 
-	return fd;
+	واپس fd;
 
 unwind:
 	errno_save = errno;
 	close(fd);
 	errno = errno_save;
 
-	return -1;
+	واپس -1;
 }
 
 /*
  * portable getdtablesize()
  */
-unsigned int get_fd_tabsize(void)
+غیرعلامتی صحیح get_fd_tabsize(خالی)
 {
-	int m;
+	صحیح m;
 
-#if defined(HAVE_GETDTABLESIZE)
+#اگر defined(HAVE_GETDTABLESIZE)
 	m = getdtablesize();
-#elif defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
-	struct rlimit rl;
+#وگرنہ_اگر defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
+	ساخت rlimit rl;
 
 	getrlimit(RLIMIT_NOFILE, &rl);
 	m = rl.rlim_cur;
-#elif defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
+#وگرنہ_اگر defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
 	m = sysconf(_SC_OPEN_MAX);
-#else
+#ورنہ
 	m = OPEN_MAX;
-#endif
-	return m;
+#اگر_ختم
+	واپس m;
 }
 
-void ul_close_all_fds(unsigned int first, unsigned int last)
+خالی ul_close_all_fds(غیرعلامتی صحیح پہلا, غیرعلامتی صحیح آخری)
 {
-	struct dirent *d;
+	ساخت dirent *d;
 	DIR *dir;
 
-	dir = opendir(_PATH_PROC_FDDIR);
-	if (dir) {
-		while ((d = xreaddir(dir))) {
-			char *end;
-			unsigned int fd;
-			int dfd;
+	dir = opendir(راستہ_PROC_FDDIR);
+	اگر (dir) {
+		جب ((d = xreaddir(dir))) {
+			حرف *انتہا;
+			غیرعلامتی صحیح fd;
+			صحیح dfd;
 
 			errno = 0;
-			fd = strtoul(d->d_name, &end, 10);
+			fd = strtoul(d->d_name, &انتہا, 10);
 
-			if (errno || end == d->d_name || !end || *end)
-				continue;
+			اگر (errno || انتہا == d->d_name || !انتہا || *انتہا)
+				جاری;
 			dfd = dirfd(dir);
-			if (dfd < 0)
-				continue;
-			if ((unsigned int)dfd == fd)
-				continue;
-			if (fd < first || last < fd)
-				continue;
+			اگر (dfd < 0)
+				جاری;
+			اگر ((غیرعلامتی صحیح)dfd == fd)
+				جاری;
+			اگر (fd < پہلا || آخری < fd)
+				جاری;
 			close(fd);
 		}
 		closedir(dir);
-	} else {
-		unsigned fd, tbsz = get_fd_tabsize();
+	} ورنہ {
+		غیرعلامتی fd, tbsz = get_fd_tabsize();
 
-		for (fd = 0; fd < tbsz; fd++) {
-			if (first <= fd && fd <= last)
+		برائے (fd = 0; fd < tbsz; fd++) {
+			اگر (پہلا <= fd && fd <= آخری)
 				close(fd);
 		}
 	}
@@ -181,175 +181,175 @@ void ul_close_all_fds(unsigned int first, unsigned int last)
 /*
  * Fork, drop permissions, and call oper() and return result.
  */
-char *ul_restricted_path_oper(const char *path,
-		  int (*oper)(const char *path, char **result, void *data),
-		  void *data)
+حرف *ul_restricted_راستہ_oper(ثابت حرف *راستہ,
+		  صحیح (*oper)(ثابت حرف *راستہ, حرف **نتیجہ, خالی *ڈیٹا),
+		  خالی *ڈیٹا)
 {
-	char *result = NULL;
-	int errsv = 0;
-	int pipes[2];
+	حرف *نتیجہ = تہی;
+	صحیح errsv = 0;
+	صحیح pipes[2];
 	ssize_t len;
 	pid_t pid;
 
-	if (!path || !*path)
-		return NULL;
+	اگر (!راستہ || !*راستہ)
+		واپس تہی;
 
-	if (pipe(pipes) != 0)
-		return NULL;
+	اگر (pipe(pipes) != 0)
+		واپس تہی;
 	/*
 	 * To accurately assume identity of getuid() we must use setuid()
 	 * but if we do that, we lose ability to reassume euid of 0, so
 	 * we fork to do the check to keep euid intact.
 	 */
 	pid = fork();
-	switch (pid) {
-	case -1:
+	انتخاب (pid) {
+	حالت -1:
 		close(pipes[0]);
 		close(pipes[1]);
-		return NULL;			/* fork error */
-	case 0:
+		واپس تہی;			/* fork error */
+	حالت 0:
 		close(pipes[0]);		/* close unused end */
 		pipes[0] = -1;
 		errno = 0;
 
-		if (drop_permissions() != 0)
-			result = NULL;	/* failed */
-		else
-			oper(path, &result, data);
+		اگر (drop_permissions() != 0)
+			نتیجہ = تہی;	/* failed */
+		ورنہ
+			oper(راستہ, &نتیجہ, ڈیٹا);
 
-		len = result ? (ssize_t) strlen(result) :
+		len = نتیجہ ? (ssize_t) لڑی_لمبائی(نتیجہ) :
 		          errno ? -errno : -EINVAL;
 
 		/* send length or errno */
-		ul_write_all(pipes[1], (char *) &len, sizeof(len));
-		if (result)
-			ul_write_all(pipes[1], result, len);
+		ul_write_all(pipes[1], (حرف *) &len, حجم(len));
+		اگر (نتیجہ)
+			ul_write_all(pipes[1], نتیجہ, len);
 		_exit(0);
-	default:
-		break;
+	طےشدہ:
+		توڑو;
 	}
 
 	close(pipes[1]);		/* close unused end */
 	pipes[1] = -1;
 
 	/* read size or -errno */
-	if (ul_read_all(pipes[0], (char *) &len, sizeof(len)) != sizeof(len))
-		goto done;
-	if (len < 0) {
+	اگر (ul_read_all(pipes[0], (حرف *) &len, حجم(len)) != حجم(len))
+		جاؤ مکمل;
+	اگر (len < 0) {
 		errsv = -len;
-		goto done;
+		جاؤ مکمل;
 	}
 
-	result = malloc(len + 1);
-	if (!result) {
+	نتیجہ = حافظہ_دو(len + 1);
+	اگر (!نتیجہ) {
 		errsv = ENOMEM;
-		goto done;
+		جاؤ مکمل;
 	}
 	/* read path */
-	if (ul_read_all(pipes[0], result, len) != len) {
+	اگر (ul_read_all(pipes[0], نتیجہ, len) != len) {
 		errsv = errno;
-		goto done;
+		جاؤ مکمل;
 	}
-	result[len] = '\0';
-done:
-	if (errsv) {
-		free(result);
-		result = NULL;
+	نتیجہ[len] = '\0';
+مکمل:
+	اگر (errsv) {
+		آزاد(نتیجہ);
+		نتیجہ = تہی;
 	}
 	close(pipes[0]);
 
 	/* We make a best effort to reap child */
-	ignore_result( waitpid(pid, NULL, 0) );
+	ignore_نتیجہ( waitpid(pid, تہی, 0) );
 
 	errno = errsv;
-	return result;
+	واپس نتیجہ;
 
 }
 
-int ul_mkdir_p(const char *path, mode_t mode)
+صحیح ul_mkdir_p(ثابت حرف *راستہ, mode_t منوال)
 {
-	char *p, *dir;
-	int rc = 0;
+	حرف *p, *dir;
+	صحیح rc = 0;
 
-	if (!path || !*path)
-		return -EINVAL;
+	اگر (!راستہ || !*راستہ)
+		واپس -EINVAL;
 
-	dir = p = strdup(path);
-	if (!dir)
-		return -ENOMEM;
+	dir = p = strdup(راستہ);
+	اگر (!dir)
+		واپس -ENOMEM;
 
-	if (*p == '/')
+	اگر (*p == '/')
 		p++;
 
-	while (p && *p) {
-		char *e = strchr(p, '/');
-		if (e)
+	جب (p && *p) {
+		حرف *e = strchr(p, '/');
+		اگر (e)
 			*e = '\0';
-		if (*p) {
-			rc = mkdir(dir, mode);
-			if (rc && errno != EEXIST)
-				break;
+		اگر (*p) {
+			rc = mkdir(dir, منوال);
+			اگر (rc && errno != EEXIST)
+				توڑو;
 			rc = 0;
 		}
-		if (!e)
-			break;
+		اگر (!e)
+			توڑو;
 		*e = '/';
 		p = e + 1;
 	}
 
-	free(dir);
-	return rc;
+	آزاد(dir);
+	واپس rc;
 }
 
 /* returns basename and keeps dirname in the @path, if @path is "/" (root)
  * then returns empty string */
-char *stripoff_last_component(char *path)
+حرف *stripoff_آخری_component(حرف *راستہ)
 {
-	char *p = path ? strrchr(path, '/') : NULL;
+	حرف *p = راستہ ? strrchr(راستہ, '/') : تہی;
 
-	if (!p)
-		return NULL;
+	اگر (!p)
+		واپس تہی;
 	*p = '\0';
-	return p + 1;
+	واپس p + 1;
 }
 
-static int copy_file_simple(int from, int to)
+ساکن صحیح copy_file_simple(صحیح from, صحیح to)
 {
 	ssize_t nr;
-	char buf[BUFSIZ];
+	حرف buf[BUFSIZ];
 
-	while ((nr = ul_read_all(from, buf, sizeof(buf))) > 0)
-		if (ul_write_all(to, buf, nr) == -1)
-			return UL_COPY_WRITE_ERROR;
-	if (nr < 0)
-		return UL_COPY_READ_ERROR;
-#ifdef HAVE_EXPLICIT_BZERO
-	explicit_bzero(buf, sizeof(buf));
-#endif
-	return 0;
+	جب ((nr = ul_read_all(from, buf, حجم(buf))) > 0)
+		اگر (ul_write_all(to, buf, nr) == -1)
+			واپس UL_COPY_WRITE_ERROR;
+	اگر (nr < 0)
+		واپس UL_COPY_READ_ERROR;
+#اگر_تعریف_شدہ HAVE_EXPLICIT_BZERO
+	explicit_bzero(buf, حجم(buf));
+#اگر_ختم
+	واپس 0;
 }
 
 /* Copies the contents of a file. Returns -1 on read error, -2 on write error. */
-int ul_copy_file(int from, int to)
+صحیح ul_copy_file(صحیح from, صحیح to)
 {
-#ifdef HAVE_SENDFILE
-	struct stat st;
+#اگر_تعریف_شدہ HAVE_SENDFILE
+	ساخت stat st;
 	ssize_t nw;
 
-	if (fstat(from, &st) == -1)
-		return UL_COPY_READ_ERROR;
-	if (!S_ISREG(st.st_mode))
-		return copy_file_simple(from, to);
-	if (ul_sendfile_all(to, from, NULL, st.st_size) < 0)
-		return copy_file_simple(from, to);
+	اگر (fstat(from, &st) == -1)
+		واپس UL_COPY_READ_ERROR;
+	اگر (!S_ISREG(st.st_mode))
+		واپس copy_file_simple(from, to);
+	اگر (ul_sendfile_all(to, from, تہی, st.st_size) < 0)
+		واپس copy_file_simple(from, to);
 	/* ensure we either get an EOF or an error */
-	while ((nw = ul_sendfile_all(to, from, NULL, 16*1024*1024)) != 0)
-		if (nw < 0)
-			return copy_file_simple(from, to);
-	return 0;
-#else
-	return copy_file_simple(from, to);
-#endif
+	جب ((nw = ul_sendfile_all(to, from, تہی, 16*1024*1024)) != 0)
+		اگر (nw < 0)
+			واپس copy_file_simple(from, to);
+	واپس 0;
+#ورنہ
+	واپس copy_file_simple(from, to);
+#اگر_ختم
 }
 
 /* Composes the /proc/self/fd/<fd> pathname for @fd. The @bufsz has to be at
@@ -359,45 +359,45 @@ int ul_copy_file(int from, int to)
  *
  * Returns @buf, or NULL on error.
  */
-char *ul_fd_mkpath(char *buf, size_t bufsz, int fd)
+حرف *ul_fd_mkpath(حرف *buf, size_t bufsz, صحیح fd)
 {
-	int len;
+	صحیح len;
 
-	if (fd < 0) {
+	اگر (fd < 0) {
 		errno = EBADF;
-		return NULL;
+		واپس تہی;
 	}
 
-	len = snprintf(buf, bufsz, _PATH_PROC_FDDIR "/%d", fd);
-	if (len < 0 || (size_t) len >= bufsz) {
+	len = snprintf(buf, bufsz, راستہ_PROC_FDDIR "/%d", fd);
+	اگر (len < 0 || (size_t) len >= bufsz) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		واپس تہی;
 	}
 
-	return buf;
+	واپس buf;
 }
 
 /* Returns the pathname the @fd refers to as used by the kernel, or NULL on
  * error. The result has to be deallocated by free().
  */
-char *ul_fd_get_path(int fd)
+حرف *ul_fd_get_راستہ(صحیح fd)
 {
 	ssize_t ssz;
-	char buf[PATH_MAX];
-	char fdpath[UL_FDPATH_BUFSIZ];
+	حرف buf[PATH_MAX];
+	حرف fdpath[UL_FDPATH_BUFSIZ];
 
-	if (!ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
-		return NULL;
+	اگر (!ul_fd_mkpath(fdpath, حجم(fdpath), fd))
+		واپس تہی;
 
-	ssz = readlink(fdpath, buf, sizeof(buf));
-	if (ssz < 0)
-		return NULL;
+	ssz = readlink(fdpath, buf, حجم(buf));
+	اگر (ssz < 0)
+		واپس تہی;
 
 	/* readlink() does not terminate the result and it does not report
 	 * truncation; a name we cannot read completely is unusable */
-	if ((size_t) ssz >= sizeof(buf)) {
+	اگر ((size_t) ssz >= حجم(buf)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		واپس تہی;
 	}
 
 	buf[ssz] = '\0';
@@ -410,26 +410,26 @@ char *ul_fd_get_path(int fd)
 	 * tell it apart we would have to stat() the name, and such a path
 	 * lookup may trigger an automount or block on an unreachable NFS
 	 * server. */
-	if (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
+	اگر (*buf != '/' || ul_endswith(buf, راستہ_DELETED_SUFFIX)) {
 		errno = ENOENT;
-		return NULL;
+		واپس تہی;
 	}
 
-	return strdup(buf);
+	واپس strdup(buf);
 }
 
-int ul_reopen(int fd, int flags)
+صحیح ul_reopen(صحیح fd, صحیح flags)
 {
-	char *path = ul_fd_get_path(fd);
-	int ret;
+	حرف *راستہ = ul_fd_get_راستہ(fd);
+	صحیح ret;
 
-	if (!path)
-		return -errno;
+	اگر (!راستہ)
+		واپس -errno;
 
-	ret = open(path, flags);
-	free(path);
+	ret = open(راستہ, flags);
+	آزاد(راستہ);
 
-	return ret;
+	واپس ret;
 }
 
 
@@ -437,34 +437,34 @@ int ul_reopen(int fd, int flags)
  * maintain functionality across different libc implementations. It was
  * inspired by the behavior and implementation of glibc.
  */
-char *ul_basename(char *path)
+حرف *ul_basename(حرف *راستہ)
 {
-	char *p;
+	حرف *p;
 
-	if (!path || !*path)
-		return (char *) ".";	/* ugly, static string */
+	اگر (!راستہ || !*راستہ)
+		واپس (حرف *) ".";	/* ugly, static string */
 
-	p = strrchr(path, '/');
-	if (!p)
-		return path;		/* no '/', return original */
+	p = strrchr(راستہ, '/');
+	اگر (!p)
+		واپس راستہ;		/* no '/', return original */
 
-	if (*(p + 1) != '\0')
-		return p + 1;		/* begin of the name */
+	اگر (*(p + 1) != '\0')
+		واپس p + 1;		/* begin of the name */
 
-	while (p > path && *(p - 1) == '/')
+	جب (p > راستہ && *(p - 1) == '/')
 		--p;			/* remove trailing '/' */
 
-	if (p > path) {
+	اگر (p > راستہ) {
 		*p-- = '\0';
-		while (p > path && *(p - 1) != '/')
+		جب (p > راستہ && *(p - 1) != '/')
 			--p;		/* move to the beginning of the name */
-	} else while (*(p + 1) != '\0')
+	} ورنہ جب (*(p + 1) != '\0')
 		++p;
 
-	return p;
+	واپس p;
 }
 
-#ifdef HAVE_OPENAT
+#اگر_تعریف_شدہ HAVE_OPENAT
 /*
  * fopen_at_no_link() - Open a file stream that is not a symbolic/hard link.
  *
@@ -483,12 +483,12 @@ char *ul_basename(char *path)
  * Return: On success, a valid pointer to a file stream is returned.
  *         On failure, NULL is returned and errno is set to indicate the issue.
  */
-FILE *fopen_at_no_link(int dir, const char *filename,
-                             int flags, mode_t perm, const char *mode)
+FILE *fopen_at_no_link(صحیح dir, ثابت حرف *filename,
+                             صحیح flags, mode_t perm, ثابت حرف *منوال)
 {
 	FILE *fp;
-	int fd;
-	struct stat st;
+	صحیح fd;
+	ساخت stat st;
 
 	/* We temporarily clear the O_TRUNC bit because we do not want
 	 * to accidentally truncate the target file if it is a hard link
@@ -497,58 +497,58 @@ FILE *fopen_at_no_link(int dir, const char *filename,
 	 * with fstat()...
 	 */
 	fd = openat(dir, filename, ((flags & ~O_TRUNC) | O_NOFOLLOW | O_CLOEXEC), perm);
-	if (fd < 0)
-		return NULL;
+	اگر (fd < 0)
+		واپس تہی;
 
-	if (fstat(fd, &st)) {
+	اگر (fstat(fd, &st)) {
 		close(fd);
-		return NULL;
+		واپس تہی;
 	}
 
-	if (st.st_nlink > 1) {
+	اگر (st.st_nlink > 1) {
 		close(fd);
 		errno = EMLINK;
-		return NULL;
+		واپس تہی;
 	}
 
-	if ((flags & O_TRUNC) && ftruncate(fd, 0)) {
+	اگر ((flags & O_TRUNC) && ftruncate(fd, 0)) {
 		close(fd);
-		return NULL;
+		واپس تہی;
 	}
 
-	fp = fdopen(fd, mode);
-	if (!fp)
+	fp = fdopen(fd, منوال);
+	اگر (!fp)
 		close(fd);
-	return fp;
+	واپس fp;
 }
-#endif /* HAVE_OPENAT */
+#اگر_ختم /* HAVE_OPENAT */
 
-#if defined(SYS_openat2)
-int ul_openat_resolve(int dirfd, const char *path, int flags,
-		      mode_t mode, unsigned long long resolve)
+#اگر defined(SYS_openat2)
+صحیح ul_openat_resolve(صحیح dirfd, ثابت حرف *راستہ, صحیح flags,
+		      mode_t منوال, غیرعلامتی طویل طویل resolve)
 {
-	struct open_how how = {
+	ساخت open_how how = {
 		.flags = (__u64) flags,
-		.mode = (__u64) mode,
+		.منوال = (__u64) منوال,
 		.resolve = resolve,
 	};
 
-	return syscall(SYS_openat2, dirfd, path, &how, sizeof(how));
+	واپس syscall(SYS_openat2, dirfd, راستہ, &how, حجم(how));
 }
-#else
-int ul_openat_resolve(
-		int dirfd __attribute__((__unused__)),
-		const char *path __attribute__((__unused__)),
-		int flags __attribute__((__unused__)),
-		mode_t mode __attribute__((__unused__)),
-		unsigned long long resolve __attribute__((__unused__)))
+#ورنہ
+صحیح ul_openat_resolve(
+		صحیح dirfd __attribute__((__unused__)),
+		ثابت حرف *راستہ __attribute__((__unused__)),
+		صحیح flags __attribute__((__unused__)),
+		mode_t منوال __attribute__((__unused__)),
+		غیرعلامتی طویل طویل resolve __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	واپس -1;
 }
-#endif
+#اگر_ختم
 
-#ifdef __linux__
+#اگر_تعریف_شدہ __linux__
 /*
  * Fallback for kernels without openat2() (Linux < 5.6).
  *
@@ -567,110 +567,110 @@ int ul_openat_resolve(
  * Returns a file descriptor, or -1 and sets errno to ELOOP when a symlink has
  * been detected, or to ENOSYS when the check is not possible.
  */
-static int open_no_symlinks_fallback(const char *path, int flags, mode_t mode)
+ساکن صحیح open_no_symlinks_fallback(ثابت حرف *راستہ, صحیح flags, mode_t منوال)
 {
-	char *abspath = NULL, *kpath = NULL;
-	struct stat st;
-	int fd = -1, errsv;
+	حرف *abspath = تہی, *kpath = تہی;
+	ساخت stat st;
+	صحیح fd = -1, errsv;
 
 	/* we cannot verify a file we have to create first */
-	if (!path || (flags & O_CREAT)) {
+	اگر (!راستہ || (flags & O_CREAT)) {
 		errno = ENOSYS;
-		return -1;
+		واپس -1;
 	}
 
-	if (ul_is_relative_path(path)) {
+	اگر (ul_is_relative_راستہ(راستہ)) {
 		/* the kernel reports an absolute pathname; note that
 		 * ul_absolute_path() only prepends the CWD as returned by
 		 * getcwd(), it resolves nothing */
-		abspath = ul_absolute_path(path);
-		if (!abspath)
-			return -1;
+		abspath = ul_absolute_راستہ(راستہ);
+		اگر (!abspath)
+			واپس -1;
 	}
 
-	if (flags & O_PATH)
-		fd = open(path, flags);
-	else
-		fd = open(path, O_PATH | O_CLOEXEC |
+	اگر (flags & O_راستہ)
+		fd = open(راستہ, flags);
+	ورنہ
+		fd = open(راستہ, O_راستہ | O_CLOEXEC |
 				(flags & (O_NOFOLLOW | O_DIRECTORY)));
-	if (fd < 0)
-		goto fail;
+	اگر (fd < 0)
+		جاؤ fail;
 
 	/* O_PATH|O_NOFOLLOW returns a FD to the symlink itself */
-	if (fstat(fd, &st) != 0)
-		goto fail;
-	if (S_ISLNK(st.st_mode)) {
+	اگر (fstat(fd, &st) != 0)
+		جاؤ fail;
+	اگر (S_ISLNK(st.st_mode)) {
 		errno = ELOOP;
-		goto fail;
+		جاؤ fail;
 	}
 
-	kpath = ul_fd_get_path(fd);
-	if (!kpath) {
+	kpath = ul_fd_get_راستہ(fd);
+	اگر (!kpath) {
 		errno = ENOSYS;		/* no /proc, no verification */
-		goto fail;
+		جاؤ fail;
 	}
 
 	/* streq_paths() ignores duplicate and trailing slashes, but "." and
 	 * ".." in the requested path are refused as a symlink */
-	if (streq_paths(abspath ? abspath : path, kpath) != 1) {
+	اگر (streq_paths(abspath ? abspath : راستہ, kpath) != 1) {
 		errno = ELOOP;
-		goto fail;
+		جاؤ fail;
 	}
 
-	if (!(flags & O_PATH)) {
-		char fdpath[UL_FDPATH_BUFSIZ];
-		int nfd = -1;
+	اگر (!(flags & O_راستہ)) {
+		حرف fdpath[UL_FDPATH_BUFSIZ];
+		صحیح nfd = -1;
 
 		/* apply the caller's flags; the /proc link refers to the
 		 * verified file, the path is not resolved for the second time */
-		if (ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
-			nfd = open(fdpath, flags, mode);
-		if (nfd < 0)
-			goto fail;
+		اگر (ul_fd_mkpath(fdpath, حجم(fdpath), fd))
+			nfd = open(fdpath, flags, منوال);
+		اگر (nfd < 0)
+			جاؤ fail;
 		close(fd);
 		fd = nfd;
 	}
 
-	free(abspath);
-	free(kpath);
-	return fd;
+	آزاد(abspath);
+	آزاد(kpath);
+	واپس fd;
 fail:
 	errsv = errno;
-	free(abspath);
-	free(kpath);
-	if (fd >= 0)
+	آزاد(abspath);
+	آزاد(kpath);
+	اگر (fd >= 0)
 		close(fd);
 	errno = errsv;
-	return -1;
+	واپس -1;
 }
-#else /* !__linux__ */
+#ورنہ /* !__linux__ */
 /* O_PATH and the /proc/self/fd/ names are Linux specific */
-static int open_no_symlinks_fallback(
-			const char *path __attribute__((__unused__)),
-			int flags __attribute__((__unused__)),
-			mode_t mode __attribute__((__unused__)))
+ساکن صحیح open_no_symlinks_fallback(
+			ثابت حرف *راستہ __attribute__((__unused__)),
+			صحیح flags __attribute__((__unused__)),
+			mode_t منوال __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	واپس -1;
 }
-#endif /* __linux__ */
+#اگر_ختم /* __linux__ */
 
 /* Opens @path with the guarantee that no component of the path is a symbolic
  * link, otherwise it fails with ELOOP.
  */
-int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
+صحیح ul_open_no_symlinks(ثابت حرف *راستہ, صحیح flags, mode_t منوال)
 {
-	int fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
+	صحیح fd = ul_openat_resolve(AT_FDCWD, راستہ, flags, منوال,
 				   RESOLVE_NO_SYMLINKS);
 
 	/* openat2() is Linux 5.6+ */
-	if (fd < 0 && errno == ENOSYS)
-		fd = open_no_symlinks_fallback(path, flags, mode);
+	اگر (fd < 0 && errno == ENOSYS)
+		fd = open_no_symlinks_fallback(راستہ, flags, منوال);
 
-	return fd;
+	واپس fd;
 }
 
-#ifdef HAVE_UL_SAFE_STATX
+#اگر_تعریف_شدہ HAVE_UL_محفوظ_STATX
 /* statx() that never asks the filesystem and never triggers an automount, so
  * it cannot block on a hung NFS server or FUSE daemon. AT_EMPTY_PATH is added
  * to @flags when @path is NULL or empty.
@@ -682,23 +682,23 @@ int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
  *
  * Returns 0 on success, otherwise negative errno (and errno is set too).
  */
-int ul_safe_statx(int dirfd, const char *path, int flags,
-		  unsigned int mask, struct statx *stx)
+صحیح ul_محفوظ_statx(صحیح dirfd, ثابت حرف *راستہ, صحیح flags,
+		  غیرعلامتی صحیح نقاب, ساخت statx *stx)
 {
-	assert(stx);
+	أكد(stx);
 
-	memset(stx, 0, sizeof(*stx));
+	memset(stx, 0, حجم(*stx));
 
 	flags |= AT_STATX_DONT_SYNC | AT_NO_AUTOMOUNT;
 
-#ifdef AT_EMPTY_PATH
-	if (!path || !*path)
-		flags |= AT_EMPTY_PATH;
-#endif
-	if (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
-		return -errno;
+#اگر_تعریف_شدہ AT_خالی_خانے_راستہ
+	اگر (!راستہ || !*راستہ)
+		flags |= AT_خالی_خانے_راستہ;
+#اگر_ختم
+	اگر (statx(dirfd, راستہ ? راستہ : "", flags, نقاب, stx) != 0)
+		واپس -errno;
 
-	return 0;
+	واپس 0;
 }
 
 /* Converts @stx to @st. statx(2) is not obliged to return everything the
@@ -706,9 +706,9 @@ int ul_safe_statx(int dirfd, const char *path, int flags,
  * attributes advertised by stx_mask and leave the rest zeroed. Callers that
  * care have to check stx_mask themselves.
  */
-void ul_statx_to_stat(const struct statx *stx, struct stat *st)
+خالی ul_statx_مقصد_stat(ثابت ساخت statx *stx, ساخت stat *st)
 {
-	memset(st, 0, sizeof(*st));
+	memset(st, 0, حجم(*st));
 
 	/* no bit in stx_mask, always returned by the kernel */
 	st->st_dev     = makedev(stx->stx_dev_major, stx->stx_dev_minor);
@@ -716,38 +716,38 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
 	st->st_blksize = stx->stx_blksize;
 
 	/* st_mode mixes two independently reported things */
-	if (stx->stx_mask & STATX_TYPE)
-		st->st_mode |= stx->stx_mode & S_IFMT;
-	if (stx->stx_mask & STATX_MODE)
-		st->st_mode |= stx->stx_mode & ~S_IFMT;
+	اگر (stx->stx_نقاب & STATX_TYPE)
+		st->st_mode |= stx->stx_منوال & S_IFMT;
+	اگر (stx->stx_نقاب & STATX_منوال)
+		st->st_mode |= stx->stx_منوال & ~S_IFMT;
 
-	if (stx->stx_mask & STATX_INO)
+	اگر (stx->stx_نقاب & STATX_INO)
 		st->st_ino = stx->stx_ino;
-	if (stx->stx_mask & STATX_NLINK)
+	اگر (stx->stx_نقاب & STATX_NLINK)
 		st->st_nlink = stx->stx_nlink;
-	if (stx->stx_mask & STATX_UID)
+	اگر (stx->stx_نقاب & STATX_UID)
 		st->st_uid = stx->stx_uid;
-	if (stx->stx_mask & STATX_GID)
+	اگر (stx->stx_نقاب & STATX_GID)
 		st->st_gid = stx->stx_gid;
-	if (stx->stx_mask & STATX_SIZE)
-		st->st_size = stx->stx_size;
-	if (stx->stx_mask & STATX_BLOCKS)
-		st->st_blocks = stx->stx_blocks;
+	اگر (stx->stx_نقاب & STATX_سائز)
+		st->st_size = stx->stx_سائز;
+	اگر (stx->stx_نقاب & STATX_بلاکیں)
+		st->st_blocks = stx->stx_بلاکیں;
 
-	if (stx->stx_mask & STATX_ATIME) {
+	اگر (stx->stx_نقاب & STATX_ATIME) {
 		st->st_atim.tv_sec  = stx->stx_atime.tv_sec;
 		st->st_atim.tv_nsec = stx->stx_atime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_MTIME) {
+	اگر (stx->stx_نقاب & STATX_MTIME) {
 		st->st_mtim.tv_sec  = stx->stx_mtime.tv_sec;
 		st->st_mtim.tv_nsec = stx->stx_mtime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_CTIME) {
+	اگر (stx->stx_نقاب & STATX_CTIME) {
 		st->st_ctim.tv_sec  = stx->stx_ctime.tv_sec;
 		st->st_ctim.tv_nsec = stx->stx_ctime.tv_nsec;
 	}
 }
-#endif
+#اگر_ختم
 
 /* This very simplified stat() alternative uses cached VFS data and does not
  * directly ask the filesystem for details. It requires a kernel that supports
@@ -766,143 +766,143 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
  * -EOPNOTSUPP means the kernel did not provide the essential attributes and
  * the caller should fall back to stat().
  */
-int ul_safe_stat(const char *target, struct stat *st,
-		 int nofollow __attribute__((__unused__)),
-		 unsigned int mask __attribute__((__unused__)),
-		 unsigned int *retmask)
+صحیح ul_محفوظ_stat(ثابت حرف *ہدف, ساخت stat *st,
+		 صحیح nofollow __attribute__((__unused__)),
+		 غیرعلامتی صحیح نقاب __attribute__((__unused__)),
+		 غیرعلامتی صحیح *retmask)
 {
-	assert(target);
-	assert(st);
+	أكد(ہدف);
+	أكد(st);
 
-	memset(st, 0, sizeof(struct stat));
-	if (retmask)
+	memset(st, 0, حجم(ساخت stat));
+	اگر (retmask)
 		*retmask = 0;
 
-#ifdef HAVE_UL_SAFE_STAT
+#اگر_تعریف_شدہ HAVE_UL_محفوظ_STAT
 	{
-		struct statx stx = { 0 };
-		int rc;
+		ساخت statx stx = { 0 };
+		صحیح rc;
 
-		mask |= UL_STATX_ESSENTIAL;
+		نقاب |= UL_STATX_ESSENTIAL;
 
-		rc = ul_safe_statx(AT_FDCWD, target,
-				nofollow ? AT_SYMLINK_NOFOLLOW : 0, mask, &stx);
-		if (rc)
-			return rc;
+		rc = ul_محفوظ_statx(AT_FDCWD, ہدف,
+				nofollow ? AT_SYMLINK_NOFOLLOW : 0, نقاب, &stx);
+		اگر (rc)
+			واپس rc;
 
-		ul_statx_to_stat(&stx, st);
+		ul_statx_مقصد_stat(&stx, st);
 
-		if (retmask)
-			*retmask = stx.stx_mask;
+		اگر (retmask)
+			*retmask = stx.stx_نقاب;
 
-		if ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
+		اگر ((stx.stx_نقاب & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
 			errno = EOPNOTSUPP;
-			return -EOPNOTSUPP;
+			واپس -EOPNOTSUPP;
 		}
 
-		return 0;
+		واپس 0;
 	}
-#else
+#ورنہ
 	errno = ENOSYS;
-	return -ENOSYS;
-#endif
+	واپس -ENOSYS;
+#اگر_ختم
 }
 
 
-#ifdef TEST_PROGRAM_FILEUTILS
-int main(int argc, char *argv[])
+#اگر_تعریف_شدہ TEST_پروگرام_FILEUTILS
+صحیح مین(صحیح argc, حرف *argv[])
 {
-	if (argc < 2)
+	اگر (argc < 2)
 		errx(EXIT_FAILURE, "Usage %s --{mkstemp,close-fds,copy-file,open-no-symlinks,safe-stat}",
 				argv[0]);
 
-	if (strcmp(argv[1], "--mkstemp") == 0) {
+	اگر (strcmp(argv[1], "--mkstemp") == 0) {
 		FILE *f;
-		char *tmpname = NULL;
+		حرف *tmpname = تہی;
 
-		f = xfmkstemp(&tmpname, NULL, "test");
+		f = xfmkstemp(&tmpname, تہی, "test");
 		unlink(tmpname);
-		free(tmpname);
+		آزاد(tmpname);
 		fclose(f);
 
-	} else if (strcmp(argv[1], "--close-fds") == 0) {
-		ignore_result( dup(STDIN_FILENO) );
-		ignore_result( dup(STDIN_FILENO) );
-		ignore_result( dup(STDIN_FILENO) );
+	} ورنہ اگر (strcmp(argv[1], "--close-fds") == 0) {
+		ignore_نتیجہ( dup(STDIN_FILENO) );
+		ignore_نتیجہ( dup(STDIN_FILENO) );
+		ignore_نتیجہ( dup(STDIN_FILENO) );
 
 # ifdef HAVE_CLOSE_RANGE
-		if (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
+		اگر (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
 # endif
 			ul_close_all_fds(STDERR_FILENO + 1, ~0U);
 
-	} else if (strcmp(argv[1], "--copy-file") == 0) {
-		int ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
-		if (ret == UL_COPY_READ_ERROR)
+	} ورنہ اگر (strcmp(argv[1], "--copy-file") == 0) {
+		صحیح ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
+		اگر (ret == UL_COPY_READ_ERROR)
 			err(EXIT_FAILURE, "read");
-		else if (ret == UL_COPY_WRITE_ERROR)
+		ورنہ اگر (ret == UL_COPY_WRITE_ERROR)
 			err(EXIT_FAILURE, "write");
 
-	} else if (strcmp(argv[1], "--open-no-symlinks") == 0) {
-#ifdef __linux__
-		int flags = O_PATH | O_CLOEXEC;
-#else
-		int flags = O_RDONLY | O_CLOEXEC;
-#endif
-		int fallback = 0;
-		char *name;
-		int fd, i;
+	} ورنہ اگر (strcmp(argv[1], "--open-no-symlinks") == 0) {
+#اگر_تعریف_شدہ __linux__
+		صحیح flags = O_راستہ | O_CLOEXEC;
+#ورنہ
+		صحیح flags = O_RDONLY | O_CLOEXEC;
+#اگر_ختم
+		صحیح fallback = 0;
+		حرف *name;
+		صحیح fd, i;
 
-		if (argc < 3)
+		اگر (argc < 3)
 			errx(EXIT_FAILURE, "no path specified");
 
-		for (i = 3; i < argc; i++) {
+		برائے (i = 3; i < argc; i++) {
 			/* the fallback is used on kernels without openat2()
 			 * only, "--fallback" makes it testable anywhere */
-			if (strcmp(argv[i], "--fallback") == 0)
+			اگر (strcmp(argv[i], "--fallback") == 0)
 				fallback = 1;
-			else if (strcmp(argv[i], "--rdonly") == 0)
+			ورنہ اگر (strcmp(argv[i], "--rdonly") == 0)
 				flags = O_RDONLY | O_CLOEXEC;
 		}
 
-		if (fallback)
+		اگر (fallback)
 			fd = open_no_symlinks_fallback(argv[2], flags, 0);
-		else
+		ورنہ
 			fd = ul_open_no_symlinks(argv[2], flags, 0);
-		if (fd < 0)
+		اگر (fd < 0)
 			err(EXIT_FAILURE, "%s", argv[2]);
 
-		name = ul_fd_get_path(fd);
-		printf("%s\n", name);
-		free(name);
+		name = ul_fd_get_راستہ(fd);
+		لکھو("%s\n", name);
+		آزاد(name);
 		close(fd);
 
-	} else if (strcmp(argv[1], "--safe-stat") == 0) {
-		unsigned int mask = 0, retmask = 0;
-		int nofollow = 0;
-		struct stat st, ref;
-		int rc, i;
+	} ورنہ اگر (strcmp(argv[1], "--safe-stat") == 0) {
+		غیرعلامتی صحیح نقاب = 0, retmask = 0;
+		صحیح nofollow = 0;
+		ساخت stat st, ref;
+		صحیح rc, i;
 
-		if (argc < 3)
+		اگر (argc < 3)
 			errx(EXIT_FAILURE, "no path specified");
 
-		for (i = 3; i < argc; i++) {
-			if (strcmp(argv[i], "--nofollow") == 0)
+		برائے (i = 3; i < argc; i++) {
+			اگر (strcmp(argv[i], "--nofollow") == 0)
 				nofollow = 1;
-			else if (strcmp(argv[i], "--basic") == 0)
-				mask |= UL_STATX_BASIC;
+			ورنہ اگر (strcmp(argv[i], "--basic") == 0)
+				نقاب |= UL_STATX_BASIC;
 		}
 
-		printf("%s:\n", argv[2]);
+		لکھو("%s:\n", argv[2]);
 
-		rc = ul_safe_stat(argv[2], &st, nofollow, mask, &retmask);
+		rc = ul_محفوظ_stat(argv[2], &st, nofollow, نقاب, &retmask);
 
 		/* the function returns -errno and it sets errno too */
-		printf("      rc: %d\n", rc);
-		printf("   errno: %d\n", rc ? errno : 0);
-		if (rc)
-			return EXIT_FAILURE;
+		لکھو("      rc: %d\n", rc);
+		لکھو("   errno: %d\n", rc ? errno : 0);
+		اگر (rc)
+			واپس EXIT_FAILURE;
 
-		printf("    type: %s\n", S_ISDIR(st.st_mode)  ? "dir" :
+		لکھو("    type: %s\n", S_ISDIR(st.st_mode)  ? "dir" :
 					 S_ISREG(st.st_mode)  ? "reg" :
 					 S_ISLNK(st.st_mode)  ? "lnk" :
 					 S_ISBLK(st.st_mode)  ? "blk" :
@@ -915,12 +915,12 @@ int main(int argc, char *argv[])
 		 * attributes advertised by @retmask are comparable, the rest
 		 * is zero in @st.
 		 */
-		if (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
+		اگر (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
 			err(EXIT_FAILURE, "%s", argv[2]);
 
-		printf("  st_dev: %s\n", st.st_dev == ref.st_dev ? "OK" : "FAILED");
-		printf(" st_rdev: %s\n", st.st_rdev == ref.st_rdev ? "OK" : "FAILED");
-#ifdef HAVE_UL_SAFE_STAT
+		لکھو("  st_dev: %s\n", st.st_dev == ref.st_dev ? "OK" : "FAILED");
+		لکھو(" st_rdev: %s\n", st.st_rdev == ref.st_rdev ? "OK" : "FAILED");
+#اگر_تعریف_شدہ HAVE_UL_محفوظ_STAT
 		{
 			/* Report all the attributes we asked for, so that
 			 * the output does not depend on how generous the
@@ -930,35 +930,35 @@ int main(int argc, char *argv[])
 			 * design, there is nothing to compare and it's not a
 			 * failure.
 			 */
-			unsigned int emask = mask | UL_STATX_ESSENTIAL;
+			غیرعلامتی صحیح emask = نقاب | UL_STATX_ESSENTIAL;
 
-# define RESULT(bit, x)	(!(retmask & (bit)) || (x) ? "OK" : "FAILED")
+# define نتیجہ_2(ثنائی_ہندسہ, x)	(!(retmask & (ثنائی_ہندسہ)) || (x) ? "OK" : "FAILED")
 
-			if (emask & STATX_TYPE)
-				printf("  S_IFMT: %s\n", RESULT(STATX_TYPE,
+			اگر (emask & STATX_TYPE)
+				لکھو("  S_IFMT: %s\n", نتیجہ_2(STATX_TYPE,
 					(st.st_mode & S_IFMT) == (ref.st_mode & S_IFMT)));
-			if (emask & STATX_MODE)
-				printf(" st_mode: %s\n", RESULT(STATX_MODE,
+			اگر (emask & STATX_منوال)
+				لکھو(" st_mode: %s\n", نتیجہ_2(STATX_منوال,
 					(st.st_mode & ~S_IFMT) == (ref.st_mode & ~S_IFMT)));
-			if (emask & STATX_INO)
-				printf("  st_ino: %s\n",
-					RESULT(STATX_INO, st.st_ino == ref.st_ino));
-			if (emask & STATX_NLINK)
-				printf("st_nlink: %s\n",
-					RESULT(STATX_NLINK, st.st_nlink == ref.st_nlink));
-			if (emask & STATX_UID)
-				printf("  st_uid: %s\n",
-					RESULT(STATX_UID, st.st_uid == ref.st_uid));
-			if (emask & STATX_GID)
-				printf("  st_gid: %s\n",
-					RESULT(STATX_GID, st.st_gid == ref.st_gid));
-			if (emask & STATX_SIZE)
-				printf(" st_size: %s\n",
-					RESULT(STATX_SIZE, st.st_size == ref.st_size));
-# undef RESULT
+			اگر (emask & STATX_INO)
+				لکھو("  st_ino: %s\n",
+					نتیجہ_2(STATX_INO, st.st_ino == ref.st_ino));
+			اگر (emask & STATX_NLINK)
+				لکھو("st_nlink: %s\n",
+					نتیجہ_2(STATX_NLINK, st.st_nlink == ref.st_nlink));
+			اگر (emask & STATX_UID)
+				لکھو("  st_uid: %s\n",
+					نتیجہ_2(STATX_UID, st.st_uid == ref.st_uid));
+			اگر (emask & STATX_GID)
+				لکھو("  st_gid: %s\n",
+					نتیجہ_2(STATX_GID, st.st_gid == ref.st_gid));
+			اگر (emask & STATX_سائز)
+				لکھو(" st_size: %s\n",
+					نتیجہ_2(STATX_سائز, st.st_size == ref.st_size));
+# undef نتیجہ_2
 		}
-#endif
+#اگر_ختم
 	}
-	return EXIT_SUCCESS;
+	واپس EXIT_SUCCESS;
 }
-#endif
+#اگر_ختم

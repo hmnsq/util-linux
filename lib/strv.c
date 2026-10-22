@@ -14,74 +14,74 @@
  *    Modified the original version from systemd project for util-linux.
  */
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <assert.h>
+#شامل <stdlib.h>
+#شامل <stdarg.h>
+#شامل <string.h>
+#شامل <errno.h>
+#شامل <stdbool.h>
+#شامل <assert.h>
 
-#include "strutils.h"
-#include "strv.h"
+#شامل "strutils.h"
+#شامل "strv.h"
 
-static void ul_strv_clear(char **l)
+ساکن خالی ul_strv_clear(حرف **l)
 {
-        char **k;
+        حرف **k;
 
-        if (!l)
-                return;
+        اگر (!l)
+                واپس;
 
-        for (k = l; *k; k++)
-                free(*k);
+        برائے (k = l; *k; k++)
+                آزاد(*k);
 
-        *l = NULL;
+        *l = تہی;
 }
 
-char **ul_strv_free(char **l)
+حرف **ul_strv_free(حرف **l)
 {
         ul_strv_clear(l);
-        free(l);
-        return NULL;
+        آزاد(l);
+        واپس تہی;
 }
 
-char **ul_strv_copy(char * const *l)
+حرف **ul_strv_copy(حرف * ثابت *l)
 {
-        char **r, **k;
+        حرف **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = حافظہ_دو(حجم(حرف *) * (ul_strv_لمبائی(l) + 1));
+        اگر (!r)
+                واپس تہی;
 
-        if (l)
-                for (; *l; k++, l++) {
+        اگر (l)
+                برائے (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        اگر (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                واپس تہی;
                         }
                 }
 
-        *k = NULL;
-        return r;
+        *k = تہی;
+        واپس r;
 }
 
-unsigned ul_strv_length(char * const *l) {
-        unsigned n = 0;
+غیرعلامتی ul_strv_لمبائی(حرف * ثابت *l) {
+        غیرعلامتی n = 0;
 
-        if (!l)
-                return 0;
+        اگر (!l)
+                واپس 0;
 
-        for (; *l; l++)
+        برائے (; *l; l++)
                 n++;
 
-        return n;
+        واپس n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+ساکن حرف **ul_strv_new_ap(ثابت حرف *x, va_list ap)
 {
-        const char *s;
-        char **a;
-        unsigned n = 0, i = 0;
+        ثابت حرف *s;
+        حرف **a;
+        غیرعلامتی n = 0, i = 0;
         va_list aq;
 
         /* As a special trick we ignore all listed strings that equal
@@ -89,13 +89,13 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        اگر (x) {
+                n = x == (ثابت حرف*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
-                                continue;
+                جب ((s = va_arg(aq, ثابت حرف*))) {
+                        اگر (s == (ثابت حرف*) -1)
+                                جاری;
 
                         n++;
                 }
@@ -103,153 +103,153 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = حافظہ_دو(حجم(حرف *) * (n + 1));
+        اگر (!a)
+                واپس تہی;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        اگر (x) {
+                اگر (x != (ثابت حرف*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
-                                goto fail;
+                        اگر (!a[i])
+                                جاؤ fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                جب ((s = va_arg(ap, ثابت حرف*))) {
 
-                        if (s == (const char*) -1)
-                                continue;
+                        اگر (s == (ثابت حرف*) -1)
+                                جاری;
 
                         a[i] = strdup(s);
-                        if (!a[i])
-                                goto fail;
+                        اگر (!a[i])
+                                جاؤ fail;
 
                         i++;
                 }
         }
 
-        a[i] = NULL;
+        a[i] = تہی;
 
-        return a;
+        واپس a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        واپس تہی;
 }
 
-char **ul_strv_new(const char *x, ...)
+حرف **ul_strv_new(ثابت حرف *x, ...)
 {
-        char **r;
+        حرف **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        واپس r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+صحیح ul_strv_extend_strv(حرف ***a, حرف **b)
 {
-        int r;
-        char **s;
+        صحیح r;
+        حرف **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                اگر (r < 0)
+                        واپس r;
         }
 
-        return 0;
+        واپس 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+صحیح ul_strv_extend_strv_concat(حرف ***a, حرف **b, ثابت حرف *suffix)
 {
-        int r;
-        char **s;
+        صحیح r;
+        حرف **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                حرف *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                اگر (!v)
+                        واپس -ENOMEM;
 
-                r = ul_strv_push(a, v);
-                if (r < 0) {
-                        free(v);
-                        return r;
+                r = ul_strv_ڈالو(a, v);
+                اگر (r < 0) {
+                        آزاد(v);
+                        واپس r;
                 }
         }
 
-        return 0;
+        واپس 0;
 }
 
 
-#define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+#تعریف_کرو FOREACH_لفظ(لفظ, لمبائی, s, separator, quoted, state)        \
+        برائے ((state) = (s), (لفظ) = ul_بانٹو(&(state), &(لمبائی), (separator), (quoted)); (لفظ); (لفظ) = ul_بانٹو(&(state), &(لمبائی), (separator), (quoted)))
 
-#define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
-        _FOREACH_WORD(word, length, s, separator, false, state)
+#تعریف_کرو FOREACH_لفظ_SEPARATOR(لفظ, لمبائی, s, separator, state)       \
+        FOREACH_لفظ(لفظ, لمبائی, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+حرف **ul_strv_بانٹو(ثابت حرف *s, ثابت حرف *separator)
 {
-        const char *word, *state;
+        ثابت حرف *لفظ, *state;
         size_t l;
-        unsigned n, i;
-        char **r;
+        غیرعلامتی n, i;
+        حرف **r;
 
-        assert(s);
+        أكد(s);
 
         n = 0;
-        FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
+        FOREACH_لفظ_SEPARATOR(لفظ, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = حافظہ_دو(حجم(حرف *) * (n + 1));
+        اگر (!r)
+                واپس تہی;
 
         i = 0;
-        FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
-                r[i] = strndup(word, l);
-                if (!r[i]) {
+        FOREACH_لفظ_SEPARATOR(لفظ, l, s, separator, state) {
+                r[i] = strndup(لفظ, l);
+                اگر (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        واپس تہی;
                 }
 
                 i++;
         }
 
-        r[i] = NULL;
-        return r;
+        r[i] = تہی;
+        واپس r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+حرف *ul_strv_join(حرف **l, ثابت حرف *separator)
 {
-        char *r, *e;
-        char **s;
+        حرف *r, *e;
+        حرف **s;
         size_t n, k;
 
-        if (!separator)
+        اگر (!separator)
                 separator = " ";
 
-        k = strlen(separator);
+        k = لڑی_لمبائی(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                اگر (n != 0)
                         n += k;
-                n += strlen(*s);
+                n += لڑی_لمبائی(*s);
         }
 
-        r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        r = حافظہ_دو(n + 1);
+        اگر (!r)
+                واپس تہی;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                اگر (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,167 +257,167 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        واپس r;
 }
 
-int ul_strv_push(char ***l, char *value)
+صحیح ul_strv_ڈالو(حرف ***l, حرف *قدر)
 {
-        char **c;
-        unsigned n, m;
+        حرف **c;
+        غیرعلامتی n, m;
 
-        if (!value)
-                return 0;
+        اگر (!قدر)
+                واپس 0;
 
-        n = ul_strv_length(*l);
+        n = ul_strv_لمبائی(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        اگر (m < n)
+                واپس -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, حجم(حرف *));
+        اگر (!c)
+                واپس -ENOMEM;
 
-        c[n] = value;
-        c[n+1] = NULL;
+        c[n] = قدر;
+        c[n+1] = تہی;
 
         *l = c;
-        return 0;
+        واپس 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+صحیح ul_strv_ڈالو_prepend(حرف ***l, حرف *قدر)
 {
-        char **c;
-        unsigned n, m, i;
+        حرف **c;
+        غیرعلامتی n, m, i;
 
-        if (!value)
-                return 0;
+        اگر (!قدر)
+                واپس 0;
 
-        n = ul_strv_length(*l);
+        n = ul_strv_لمبائی(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        اگر (m < n)
+                واپس -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = حافظہ_دو(حجم(حرف *) * m);
+        اگر (!c)
+                واپس -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        برائے (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
-        c[0] = value;
-        c[n+1] = NULL;
+        c[0] = قدر;
+        c[n+1] = تہی;
 
-        free(*l);
+        آزاد(*l);
         *l = c;
 
-        return 0;
+        واپس 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+صحیح ul_strv_consume(حرف ***l, حرف *قدر)
 {
-        int r;
+        صحیح r;
 
-        r = ul_strv_push(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_ڈالو(l, قدر);
+        اگر (r < 0)
+                آزاد(قدر);
 
-        return r;
+        واپس r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+صحیح ul_strv_consume_prepend(حرف ***l, حرف *قدر)
 {
-        int r;
+        صحیح r;
 
-        r = ul_strv_push_prepend(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_ڈالو_prepend(l, قدر);
+        اگر (r < 0)
+                آزاد(قدر);
 
-        return r;
+        واپس r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+صحیح ul_strv_extend(حرف ***l, ثابت حرف *قدر)
 {
-        char *v;
+        حرف *v;
 
-        if (!value)
-                return 0;
+        اگر (!قدر)
+                واپس 0;
 
-        v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        v = strdup(قدر);
+        اگر (!v)
+                واپس -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        واپس ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+حرف **ul_strv_remove(حرف **l, ثابت حرف *s)
 {
-        char **f, **t;
+        حرف **f, **t;
 
-        if (!l)
-                return NULL;
+        اگر (!l)
+                واپس تہی;
 
-        assert(s);
+        أكد(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
-                        free(*f);
-                else
+        برائے (f = t = l; *f; f++)
+                اگر (strcmp(*f, s) == 0)
+                        آزاد(*f);
+                ورنہ
                         *(t++) = *f;
 
-        *t = NULL;
-        return l;
+        *t = تہی;
+        واپس l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+صحیح ul_strv_extendf(حرف ***l, ثابت حرف *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        حرف *x;
+        صحیح r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        اگر (r < 0)
+                واپس -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        واپس ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+صحیح ul_strv_extendv(حرف ***l, ثابت حرف *format, va_list ap)
 {
-        char *x;
-        int r;
+        حرف *x;
+        صحیح r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        اگر (r < 0)
+                واپس -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        واپس ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+حرف **ul_strv_الٹ(حرف **l)
 {
-        unsigned n, i;
+        غیرعلامتی n, i;
 
-        n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        n = ul_strv_لمبائی(l);
+        اگر (n <= 1)
+                واپس l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        برائے (i = 0; i < n / 2; i++) {
+                حرف *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        واپس l;
 }

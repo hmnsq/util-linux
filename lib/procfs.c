@@ -4,62 +4,62 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2021]
  */
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
+#شامل <ctype.h>
+#شامل <unistd.h>
+#شامل <errno.h>
 
-#ifdef HAVE_SYS_VFS_H
+#اگر_تعریف_شدہ HAVE_SYS_VFS_H
 # include <sys/vfs.h>
-#endif
+#اگر_ختم
 
-#include "c.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "vfs.h"
-#include "debug.h"
-#include "strutils.h"
-#include "statfs_magic.h"
+#شامل "c.h"
+#شامل "pathnames.h"
+#شامل "procfs.h"
+#شامل "fileutils.h"
+#شامل "all-io.h"
+#شامل "vfs.h"
+#شامل "debug.h"
+#شامل "strutils.h"
+#شامل "statfs_magic.h"
 
-static void procfs_process_deinit_path(struct path_cxt *pc);
+ساکن خالی procfs_process_deinit_راستہ(ساخت راستہ_cxt *pc);
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulprocfs);
-UL_DEBUG_DEFINE_MASKNAMES(ulprocfs) = UL_DEBUG_EMPTY_MASKNAMES;
+ساکن UL_DEBUG_DEFINE_نقاب(ulprocfs);
+UL_DEBUG_DEFINE_MASKNAMES(ulprocfs) = UL_DEBUG_خالی_خانے_MASKNAMES;
 
-#define ULPROCFS_DEBUG_INIT	(1 << 1)
-#define ULPROCFS_DEBUG_CXT	(1 << 2)
+#تعریف_کرو ULPROCFS_DEBUG_INIT	(1 << 1)
+#تعریف_کرو ULPROCFS_DEBUG_CXT	(1 << 2)
 
-#define DBG(m, x)		__UL_DBG(ulprocfs, ULPROCFS_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulprocfs, ULPROCFS_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulprocfs, ULPROCFS_DEBUG_, m, x)
+#تعریف_کرو DBG(m, x)		__UL_DBG(ulprocfs, ULPROCFS_DEBUG_, m, x)
+#تعریف_کرو DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulprocfs, ULPROCFS_DEBUG_, m, h, x)
+#تعریف_کرو ON_DBG(m, x)		__UL_DBG_CALL(ulprocfs, ULPROCFS_DEBUG_, m, x)
 
-void ul_procfs_init_debug(void)
+خالی ul_procfs_init_debug(خالی)
 {
-	if (ulprocfs_debug_mask)
-		return;
+	اگر (ulprocfs_debug_نقاب)
+		واپس;
 	__UL_INIT_DEBUG_FROM_ENV(ulprocfs, ULPROCFS_DEBUG_, 0, ULPROCFS_DEBUG);
 }
 
-struct path_cxt *ul_new_procfs_path(pid_t pid, const char *prefix)
+ساخت راستہ_cxt *ul_new_procfs_راستہ(pid_t pid, ثابت حرف *سابقہ)
 {
-	struct path_cxt *pc = ul_new_path(NULL);
+	ساخت راستہ_cxt *pc = ul_new_راستہ(تہی);
 
-	if (!pc)
-		return NULL;
-	if (prefix)
-		ul_path_set_prefix(pc, prefix);
+	اگر (!pc)
+		واپس تہی;
+	اگر (سابقہ)
+		ul_راستہ_سیٹ_سابقہ(pc, سابقہ);
 
-	if (procfs_process_init_path(pc, pid) != 0) {
-		ul_unref_path(pc);
-		return NULL;
+	اگر (procfs_process_init_راستہ(pc, pid) != 0) {
+		ul_unref_راستہ(pc);
+		واپس تہی;
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
-	return pc;
+	واپس pc;
 }
 
 /*
@@ -69,148 +69,148 @@ struct path_cxt *ul_new_procfs_path(pid_t pid, const char *prefix)
  * The procfs_process_deinit_path() is automatically called by ul_unref_path().
  *
  */
-int procfs_process_init_path(struct path_cxt *pc, pid_t pid)
+صحیح procfs_process_init_راستہ(ساخت راستہ_cxt *pc, pid_t pid)
 {
-	struct procfs_process *prc;
-	int rc;
-	char buf[sizeof(_PATH_PROC) + sizeof(stringify_value(UINT32_MAX)) + 2];
+	ساخت procfs_process *prc;
+	صحیح rc;
+	حرف buf[حجم(راستہ_PROC) + حجم(stringify_قدر(UINT32_MAX)) + 2];
 
 	/* define path to pid stuff */
-	snprintf(buf, sizeof(buf), _PATH_PROC "/%zu", (size_t) pid);
-	rc = ul_path_set_dir(pc, buf);
-	if (rc)
-		return rc;
+	snprintf(buf, حجم(buf), راستہ_PROC "/%zu", (size_t) pid);
+	rc = ul_راستہ_سیٹ_dir(pc, buf);
+	اگر (rc)
+		واپس rc;
 
 	/* make sure path exists */
-	rc = ul_path_get_dirfd(pc);
-	if (rc < 0)
-		return rc;
+	rc = ul_راستہ_get_dirfd(pc);
+	اگر (rc < 0)
+		واپس rc;
 
 	/* initialize procfs specific stuff */
-	prc = ul_path_get_dialect(pc);
-	if (!prc) {
+	prc = ul_راستہ_get_dialect(pc);
+	اگر (!prc) {
 		DBG_OBJ(CXT, pc, ul_debug("alloc new procfs handler"));
-		prc = calloc(1, sizeof(struct procfs_process));
-		if (!prc)
-			return -ENOMEM;
+		prc = صفر_حافظہ_دو(1, حجم(ساخت procfs_process));
+		اگر (!prc)
+			واپس -ENOMEM;
 
-		ul_path_set_dialect(pc, prc, procfs_process_deinit_path);
+		ul_راستہ_سیٹ_dialect(pc, prc, procfs_process_deinit_راستہ);
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("init procfs stuff"));
 
 	prc->pid = pid;
-	return 0;
+	واپس 0;
 }
 
-static void procfs_process_deinit_path(struct path_cxt *pc)
+ساکن خالی procfs_process_deinit_راستہ(ساخت راستہ_cxt *pc)
 {
-	struct procfs_process *prc;
+	ساخت procfs_process *prc;
 
-	if (!pc)
-		return;
+	اگر (!pc)
+		واپس;
 
 	DBG_OBJ(CXT, pc, ul_debug("deinit"));
 
-	prc = ul_path_get_dialect(pc);
-	if (!prc)
-		return;
+	prc = ul_راستہ_get_dialect(pc);
+	اگر (!prc)
+		واپس;
 
-	free(prc);
-	ul_path_set_dialect(pc, NULL, NULL);
+	آزاد(prc);
+	ul_راستہ_سیٹ_dialect(pc, تہی, تہی);
 }
 
-static ssize_t read_procfs_file(const struct ul_vfs_ops *vfs, int fd,
-			       char *buf, size_t bufsz)
+ساکن ssize_t read_procfs_file(ثابت ساخت ul_vfs_ops *vfs, صحیح fd,
+			       حرف *buf, size_t bufsz)
 {
 	ssize_t sz = 0;
 	size_t i;
 
-	if (fd < 0)
-		return -EINVAL;
+	اگر (fd < 0)
+		واپس -EINVAL;
 
 	sz = ul_vfs_read_all(vfs, fd, buf, bufsz);
-	if (sz <= 0)
-		return sz;
+	اگر (sz <= 0)
+		واپس sz;
 
-	for (i = 0; i < (size_t) sz; i++) {
-		if (buf[i] == '\0')
+	برائے (i = 0; i < (size_t) sz; i++) {
+		اگر (buf[i] == '\0')
 			buf[i] = ' ';
 	}
 	buf[sz - 1] = '\0';
-	return sz;
+	واپس sz;
 }
 
-static ssize_t procfs_process_get_data_for(struct path_cxt *pc, char *buf, size_t bufsz,
-					    const char *fname)
+ساکن ssize_t procfs_process_get_ڈیٹا_for(ساخت راستہ_cxt *pc, حرف *buf, size_t bufsz,
+					    ثابت حرف *fname)
 {
-	int fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, fname);
+	صحیح fd = ul_راستہ_open(pc, O_RDONLY|O_CLOEXEC, fname);
 
-	if (fd >= 0) {
-		ssize_t sz = read_procfs_file(pc ? pc->vfs : NULL, fd, buf, bufsz);
-		ul_vfs_close(pc ? pc->vfs : NULL, fd);
-		return sz;
+	اگر (fd >= 0) {
+		ssize_t sz = read_procfs_file(pc ? pc->vfs : تہی, fd, buf, bufsz);
+		ul_vfs_close(pc ? pc->vfs : تہی, fd);
+		واپس sz;
 	}
-	return -errno;
+	واپس -errno;
 }
 
-ssize_t procfs_process_get_cmdline(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_cmdline(ساخت راستہ_cxt *pc, حرف *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "cmdline");
+	واپس procfs_process_get_ڈیٹا_for(pc, buf, bufsz, "cmdline");
 }
 
-ssize_t procfs_process_get_cmdname(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_cmdname(ساخت راستہ_cxt *pc, حرف *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "comm");
+	واپس procfs_process_get_ڈیٹا_for(pc, buf, bufsz, "comm");
 }
 
-ssize_t procfs_process_get_stat(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_stat(ساخت راستہ_cxt *pc, حرف *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "stat");
+	واپس procfs_process_get_ڈیٹا_for(pc, buf, bufsz, "stat");
 }
 
-ssize_t procfs_process_get_syscall(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_syscall(ساخت راستہ_cxt *pc, حرف *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "syscall");
+	واپس procfs_process_get_ڈیٹا_for(pc, buf, bufsz, "syscall");
 }
 
-int procfs_process_get_stat_nth(struct path_cxt *pc, int n, uint64_t *re)
+صحیح procfs_process_get_stat_nth(ساخت راستہ_cxt *pc, صحیح n, uint64_t *re)
 {
 	ssize_t rc;
-	char *key = NULL, *tok, *p;
-	char buf[BUFSIZ];
-	int i;
+	حرف *کلید = تہی, *tok, *p;
+	حرف buf[BUFSIZ];
+	صحیح i;
 
-	if (n == 2 || n == 3)		/* process name and status (strings) */
-		return -EINVAL;
+	اگر (n == 2 || n == 3)		/* process name and status (strings) */
+		واپس -EINVAL;
 
-	rc = procfs_process_get_data_for(pc, buf, sizeof(buf), "stat");
-	if (rc < 0)
-		return rc;
+	rc = procfs_process_get_ڈیٹا_for(pc, buf, حجم(buf), "stat");
+	اگر (rc < 0)
+		واپس rc;
 
-	for (i = 0, tok = strtok_r(buf, " ", &key); tok;
-	     tok = strtok_r(NULL, " ", &key)) {
+	برائے (i = 0, tok = strtok_r(buf, " ", &کلید); tok;
+	     tok = strtok_r(تہی, " ", &کلید)) {
 
 		i++;
-		if (i == n)
-			return ul_strtou64(tok, re, 10);
+		اگر (i == n)
+			واپس ul_strtou64(tok, re, 10);
 
 		/* skip rest of the process name */
-		if (i == 2 && (p = strrchr(key, ')')))
-			key = p + 2;
+		اگر (i == 2 && (p = strrchr(کلید, ')')))
+			کلید = p + 2;
 	}
 
-	return -EINVAL;
+	واپس -EINVAL;
 }
 
-int procfs_process_get_uid(struct path_cxt *pc, uid_t *uid)
+صحیح procfs_process_get_uid(ساخت راستہ_cxt *pc, uid_t *uid)
 {
-	struct stat sb;
-	int rc;
+	ساخت stat sb;
+	صحیح rc;
 
-	if ((rc = ul_path_stat(pc, &sb, 0, NULL)) == 0)
+	اگر ((rc = ul_راستہ_stat(pc, &sb, 0, تہی)) == 0)
 		*uid = sb.st_uid;
-	return rc;
+	واپس rc;
 }
 
 /*
@@ -230,57 +230,57 @@ int procfs_process_get_uid(struct path_cxt *pc, uid_t *uid)
  *	printf("task: %d", (int) tid);
  *
  */
-int procfs_process_next_tid(struct path_cxt *pc, DIR **sub, pid_t *tid)
+صحیح procfs_process_اگلا_tid(ساخت راستہ_cxt *pc, DIR **sub, pid_t *tid)
 {
-	struct dirent *d;
+	ساخت dirent *d;
 
-	if (!pc || !sub || !tid)
-		return -EINVAL;
+	اگر (!pc || !sub || !tid)
+		واپس -EINVAL;
 
-	if (!*sub) {
-		*sub = ul_path_opendir(pc, "task");
-		if (!*sub)
-			return -errno;
+	اگر (!*sub) {
+		*sub = ul_راستہ_opendir(pc, "task");
+		اگر (!*sub)
+			واپس -errno;
 	}
 
-	while ((d = xreaddir(*sub))) {
-		if (procfs_dirent_get_pid(d, tid) == 0)
-			return 0;
+	جب ((d = xreaddir(*sub))) {
+		اگر (procfs_dirent_get_pid(d, tid) == 0)
+			واپس 0;
 	}
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = تہی;
+	واپس 1;
 }
 
-int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
+صحیح procfs_process_اگلا_fd(ساخت راستہ_cxt *pc, DIR **sub, صحیح *fd)
 {
-	struct dirent *d;
+	ساخت dirent *d;
 
-	if (!pc || !sub || !fd)
-		return -EINVAL;
+	اگر (!pc || !sub || !fd)
+		واپس -EINVAL;
 
-	if (!*sub) {
-		*sub = ul_path_opendir(pc, "fd");
-		if (!*sub)
-			return -errno;
+	اگر (!*sub) {
+		*sub = ul_راستہ_opendir(pc, "fd");
+		اگر (!*sub)
+			واپس -errno;
 	}
 
-	while ((d = xreaddir(*sub))) {
-		uint64_t num;
-#ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
-			continue;
-#endif
-		if (ul_strtou64(d->d_name, &num, 10) < 0)
-			continue;
-		*fd = num;
-		return 0;
+	جب ((d = xreaddir(*sub))) {
+		uint64_t عدد;
+#اگر_تعریف_شدہ _DIRENT_HAVE_D_TYPE
+		اگر (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
+			جاری;
+#اگر_ختم
+		اگر (ul_strtou64(d->d_name, &عدد, 10) < 0)
+			جاری;
+		*fd = عدد;
+		واپس 0;
 	}
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = تہی;
+	واپس 1;
 }
 
 /*
@@ -288,362 +288,362 @@ int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
  */
 
 /* stupid, but good enough as a basic filter */
-int procfs_dirent_is_process(struct dirent *d)
+صحیح procfs_dirent_is_process(ساخت dirent *d)
 {
-#ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_DIR && d->d_type != DT_UNKNOWN)
-		return 0;
-#endif
-	if (!isdigit((unsigned char) *d->d_name))
-		return 0;
+#اگر_تعریف_شدہ _DIRENT_HAVE_D_TYPE
+	اگر (d->d_type != DT_DIR && d->d_type != DT_UNKNOWN)
+		واپس 0;
+#اگر_ختم
+	اگر (!ہندسہ_ہے((غیرعلامتی حرف) *d->d_name))
+		واپس 0;
 
-	return 1;
+	واپس 1;
 }
 
-int procfs_dirent_get_pid(struct dirent *d, pid_t *pid)
+صحیح procfs_dirent_get_pid(ساخت dirent *d, pid_t *pid)
 {
-	uint64_t num;
+	uint64_t عدد;
 
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	اگر (!procfs_dirent_is_process(d))
+		واپس -EINVAL;
 
-	if (ul_strtou64(d->d_name, &num, 10) < 0)
-		return -EINVAL;
+	اگر (ul_strtou64(d->d_name, &عدد, 10) < 0)
+		واپس -EINVAL;
 
-	*pid = (pid_t) num;
-	return 0;
+	*pid = (pid_t) عدد;
+	واپس 0;
 }
 
-int procfs_dirent_get_uid(DIR *procfs, struct dirent *d, uid_t *uid)
+صحیح procfs_dirent_get_uid(DIR *procfs, ساخت dirent *d, uid_t *uid)
 {
-	struct stat st;
+	ساخت stat st;
 
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	اگر (!procfs_dirent_is_process(d))
+		واپس -EINVAL;
 
-	if (fstatat(dirfd(procfs), d->d_name, &st, 0))
-		return -EINVAL;
+	اگر (fstatat(dirfd(procfs), d->d_name, &st, 0))
+		واپس -EINVAL;
 
 	*uid = st.st_uid;
-	return 0;
+	واپس 0;
 }
 
-int procfs_dirent_match_uid(DIR *procfs, struct dirent *d, uid_t uid)
+صحیح procfs_dirent_مطابقت_uid(DIR *procfs, ساخت dirent *d, uid_t uid)
 {
 	uid_t x;
 
-	if (procfs_dirent_get_uid(procfs, d, &x) == 0)
-		return x == uid;
+	اگر (procfs_dirent_get_uid(procfs, d, &x) == 0)
+		واپس x == uid;
 
-	return 0;
+	واپس 0;
 }
 
 /* "name" of process; may be truncated, see prctl(2) and PR_SET_NAME.
  * The minimal of the @buf has to be 32 bytes. */
-int procfs_dirent_get_name(DIR *procfs, struct dirent *d, char *buf, size_t bufsz)
+صحیح procfs_dirent_get_name(DIR *procfs, ساخت dirent *d, حرف *buf, size_t bufsz)
 {
 	FILE *f;
 	size_t sz;
-	char tmp[1024], *p, *end = NULL;
+	حرف tmp[1024], *p, *انتہا = تہی;
 
-	if (bufsz < 32)
-		return -EINVAL;
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	اگر (bufsz < 32)
+		واپس -EINVAL;
+	اگر (!procfs_dirent_is_process(d))
+		واپس -EINVAL;
 
-	snprintf(tmp, sizeof(tmp), "%s/stat", d->d_name);
+	snprintf(tmp, حجم(tmp), "%s/stat", d->d_name);
 	f = fopen_at(dirfd(procfs), tmp, O_CLOEXEC|O_RDONLY, "r");
-	if (!f)
-		return -errno;
+	اگر (!f)
+		واپس -errno;
 
-	p = fgets(tmp, sizeof(tmp), f);
+	p = fgets(tmp, حجم(tmp), f);
 	fclose(f);
-	if (!p)
-		return -errno;
+	اگر (!p)
+		واپس -errno;
 
 	/* skip PID */
-	while (*p && *p != '(')
+	جب (*p && *p != '(')
 		p++;
 
 	/* skip extra '(' */
-	while (*p && *p == '(')
+	جب (*p && *p == '(')
 		p++;
 
-	end = p;
-	while (*end && *end != ')')
-		end++;
+	انتہا = p;
+	جب (*انتہا && *انتہا != ')')
+		انتہا++;
 
-	sz = end - p;
-	if (sz >= bufsz)
+	sz = انتہا - p;
+	اگر (sz >= bufsz)
 		sz = bufsz - 1;
 
-	memcpy(buf, p, sz);
+	حافظہ_نقل(buf, p, sz);
 	buf[sz] = '\0';
 
-	return 0;
+	واپس 0;
 }
 
-int procfs_dirent_match_name(DIR *procfs, struct dirent *d, const char *name)
+صحیح procfs_dirent_مطابقت_name(DIR *procfs, ساخت dirent *d, ثابت حرف *name)
 {
-	char buf[33];
+	حرف buf[33];
 
-	if (procfs_dirent_get_name(procfs, d, buf, sizeof(buf)) == 0)
-		return strcmp(name, buf) == 0;
+	اگر (procfs_dirent_get_name(procfs, d, buf, حجم(buf)) == 0)
+		واپس strcmp(name, buf) == 0;
 
-	return 0;
+	واپس 0;
 }
 
-#ifdef HAVE_SYS_VFS_H
+#اگر_تعریف_شدہ HAVE_SYS_VFS_H
 /* checks if fd is file in a procfs;
  * returns 1 if true, 0 if false or couldn't determine */
-int fd_is_procfs(int fd)
+صحیح fd_is_procfs(صحیح fd)
 {
-	struct statfs st;
-	int ret;
+	ساخت statfs st;
+	صحیح ret;
 
-	do {
+	کرو {
 		errno = 0;
 		ret = fstatfs(fd, &st);
 
-		if (ret < 0) {
-			if (errno != EINTR && errno != EAGAIN)
-				return 0;
+		اگر (ret < 0) {
+			اگر (errno != EINTR && errno != EAGAIN)
+				واپس 0;
 			xusleep(250000);
 		}
-	} while (ret != 0);
+	} جب (ret != 0);
 
-	return F_TYPE_EQUAL(st.f_type, STATFS_PROC_MAGIC);
+	واپس F_TYPE_EQUAL(st.f_type, STATFS_PROC_MAGIC);
 }
-#else
-int fd_is_procfs(int fd __attribute__((__unused__)))
+#ورنہ
+صحیح fd_is_procfs(صحیح fd __attribute__((__unused__)))
 {
-	return 0;
+	واپس 0;
 }
-#endif
+#اگر_ختم
 
-static char *strdup_procfs_file(pid_t pid, const char *name)
+ساکن حرف *strdup_procfs_file(pid_t pid, ثابت حرف *name)
 {
-	char buf[BUFSIZ];
-	char *re = NULL;
-	int fd;
+	حرف buf[BUFSIZ];
+	حرف *re = تہی;
+	صحیح fd;
 
-	snprintf(buf, sizeof(buf), _PATH_PROC "/%d/%s", (int) pid, name);
+	snprintf(buf, حجم(buf), راستہ_PROC "/%d/%s", (صحیح) pid, name);
 	fd = open(buf, O_CLOEXEC|O_RDONLY);
-	if (fd < 0)
-		return NULL;
+	اگر (fd < 0)
+		واپس تہی;
 
-	if (read_procfs_file(NULL, fd, buf, sizeof(buf)) > 0)
+	اگر (read_procfs_file(تہی, fd, buf, حجم(buf)) > 0)
 		re = strdup(buf);
 	close(fd);
-	return re;
+	واپس re;
 }
 
-char *pid_get_cmdname(pid_t pid)
+حرف *pid_get_cmdname(pid_t pid)
 {
-	return strdup_procfs_file(pid, "comm");
+	واپس strdup_procfs_file(pid, "comm");
 }
 
-char *pid_get_cmdline(pid_t pid)
+حرف *pid_get_cmdline(pid_t pid)
 {
-	return strdup_procfs_file(pid, "cmdline");
+	واپس strdup_procfs_file(pid, "cmdline");
 }
 
-char *pid_get_personality(pid_t pid)
+حرف *pid_get_personality(pid_t pid)
 {
-	return strdup_procfs_file(pid, "personality");
+	واپس strdup_procfs_file(pid, "personality");
 }
 
-#ifdef TEST_PROGRAM_PROCFS
+#اگر_تعریف_شدہ TEST_پروگرام_PROCFS
 
-static int test_tasks(int argc, char *argv[], const char *prefix)
+ساکن صحیح test_tasks(صحیح argc, حرف *argv[], ثابت حرف *سابقہ)
 {
-	DIR *sub = NULL;
-	struct path_cxt *pc;
+	DIR *sub = تہی;
+	ساخت راستہ_cxt *pc;
 	pid_t tid = 0, pid;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
+	اگر (argc != 2)
+		واپس EXIT_FAILURE;
 
-	pid = strtol(argv[1], (char **) NULL, 10);
-	printf("PID=%d, TIDs:", pid);
+	pid = strtol(argv[1], (حرف **) تہی, 10);
+	لکھو("PID=%d, TIDs:", pid);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_راستہ(pid, سابقہ);
+	اگر (!pc)
 		err(EXIT_FAILURE, "alloc procfs handler failed");
 
-	while (procfs_process_next_tid(pc, &sub, &tid) == 0)
-		printf(" %d", tid);
+	جب (procfs_process_اگلا_tid(pc, &sub, &tid) == 0)
+		لکھو(" %d", tid);
 
-	printf("\n");
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	لکھو("\n");
+	ul_unref_راستہ(pc);
+	واپس EXIT_SUCCESS;
 }
 
-static int test_fds(int argc, char *argv[], const char *prefix)
+ساکن صحیح test_fds(صحیح argc, حرف *argv[], ثابت حرف *سابقہ)
 {
-	DIR *sub = NULL;
-	struct path_cxt *pc;
+	DIR *sub = تہی;
+	ساخت راستہ_cxt *pc;
 	pid_t pid;
-	int fd = -1;
+	صحیح fd = -1;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
+	اگر (argc != 2)
+		واپس EXIT_FAILURE;
 
-	pid = strtol(argv[1], (char **) NULL, 10);
-	printf("PID=%d, FDs:", pid);
+	pid = strtol(argv[1], (حرف **) تہی, 10);
+	لکھو("PID=%d, FDs:", pid);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_راستہ(pid, سابقہ);
+	اگر (!pc)
 		err(EXIT_FAILURE, "alloc procfs handler failed");
 
-	while (procfs_process_next_fd(pc, &sub, &fd) == 0)
-		printf(" %d", fd);
+	جب (procfs_process_اگلا_fd(pc, &sub, &fd) == 0)
+		لکھو(" %d", fd);
 
 	fputc('\n', stdout);
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ul_unref_راستہ(pc);
+	واپس EXIT_SUCCESS;
 }
 
-static int test_processes(int argc, char *argv[])
+ساکن صحیح test_processes(صحیح argc, حرف *argv[])
 {
 	DIR *dir;
-	struct dirent *d;
-	char *name = NULL;
+	ساخت dirent *d;
+	حرف *name = تہی;
 	uid_t uid = (uid_t) -1;
-	char buf[128];
+	حرف buf[128];
 
-	if (argc >= 3 && strcmp(argv[1], "--name") == 0)
+	اگر (argc >= 3 && strcmp(argv[1], "--name") == 0)
 		name = argv[2];
-	if (argc >= 3 && strcmp(argv[1], "--uid") == 0)
+	اگر (argc >= 3 && strcmp(argv[1], "--uid") == 0)
 		uid = (uid_t) atol(argv[2]);
 
-	dir = opendir(_PATH_PROC);
-	if (!dir)
+	dir = opendir(راستہ_PROC);
+	اگر (!dir)
 		err(EXIT_FAILURE, "cannot open proc");
 
-	while ((d = xreaddir(dir))) {
+	جب ((d = xreaddir(dir))) {
 		pid_t pid = 0;
 
-		if (procfs_dirent_get_pid(d, &pid) != 0)
-			continue;
-		if (name && !procfs_dirent_match_name(dir, d, name))
-			continue;
-		if (uid != (uid_t) -1 && !procfs_dirent_match_uid(dir, d, uid))
-			continue;
-		procfs_dirent_get_name(dir, d, buf, sizeof(buf));
-		printf(" %d [%s]", pid, buf);
+		اگر (procfs_dirent_get_pid(d, &pid) != 0)
+			جاری;
+		اگر (name && !procfs_dirent_مطابقت_name(dir, d, name))
+			جاری;
+		اگر (uid != (uid_t) -1 && !procfs_dirent_مطابقت_uid(dir, d, uid))
+			جاری;
+		procfs_dirent_get_name(dir, d, buf, حجم(buf));
+		لکھو(" %d [%s]", pid, buf);
 	}
 
 	fputc('\n', stdout);
 	closedir(dir);
-	return EXIT_SUCCESS;
+	واپس EXIT_SUCCESS;
 }
 
-static int test_one_process(int argc, char *argv[], const char *prefix)
+ساکن صحیح test_one_process(صحیح argc, حرف *argv[], ثابت حرف *سابقہ)
 {
 	pid_t pid;
-	struct path_cxt *pc;
-	char buf[BUFSIZ];
+	ساخت راستہ_cxt *pc;
+	حرف buf[BUFSIZ];
 	uid_t uid = (uid_t) -1;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
-	pid = strtol(argv[1], (char **) NULL, 10);
+	اگر (argc != 2)
+		واپس EXIT_FAILURE;
+	pid = strtol(argv[1], (حرف **) تہی, 10);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_راستہ(pid, سابقہ);
+	اگر (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	printf("%d\n", (int) pid);
+	لکھو("%d\n", (صحیح) pid);
 
 	procfs_process_get_uid(pc, &uid);
-	printf("   UID: %zu\n", (size_t) uid);
+	لکھو("   UID: %zu\n", (size_t) uid);
 
-	procfs_process_get_cmdline(pc, buf, sizeof(buf));
-	printf("   CMDLINE: '%s'\n", buf);
+	procfs_process_get_cmdline(pc, buf, حجم(buf));
+	لکھو("   CMDLINE: '%s'\n", buf);
 
-	procfs_process_get_cmdname(pc, buf, sizeof(buf));
-	printf("   COMM: '%s'\n", buf);
+	procfs_process_get_cmdname(pc, buf, حجم(buf));
+	لکھو("   COMM: '%s'\n", buf);
 
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ul_unref_راستہ(pc);
+	واپس EXIT_SUCCESS;
 }
 
-static int test_isprocfs(int argc, char *argv[])
+ساکن صحیح test_isprocfs(صحیح argc, حرف *argv[])
 {
-	const char *name = argc > 1 ? argv[1] : "/proc";
-	int fd = open(name, O_RDONLY | O_CLOEXEC);
-	int is = 0;
+	ثابت حرف *name = argc > 1 ? argv[1] : "/proc";
+	صحیح fd = open(name, O_RDONLY | O_CLOEXEC);
+	صحیح is = 0;
 
-	if (fd >= 0) {
+	اگر (fd >= 0) {
 		is = fd_is_procfs(fd);
 		close(fd);
-	} else
+	} ورنہ
 		err(EXIT_FAILURE, "cannot open %s", name);
 
-	printf("%s: %s procfs\n", name, is ? "is" : "is NOT");
-	return is ? EXIT_SUCCESS : EXIT_FAILURE;
+	لکھو("%s: %s procfs\n", name, is ? "is" : "is NOT");
+	واپس is ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static int test_process_stat_nth(int argc, char *argv[], const char *prefix)
+ساکن صحیح test_process_stat_nth(صحیح argc, حرف *argv[], ثابت حرف *سابقہ)
 {
 	pid_t pid;
-	struct path_cxt *pc;
-	uint64_t num = 0;
-	int n, ret;
+	ساخت راستہ_cxt *pc;
+	uint64_t عدد = 0;
+	صحیح n, ret;
 
-	if (argc != 3)
-		return EXIT_FAILURE;
-	pid = strtol(argv[1], (char **) NULL, 10);
-	n = strtol(argv[2], (char **) NULL, 10);
+	اگر (argc != 3)
+		واپس EXIT_FAILURE;
+	pid = strtol(argv[1], (حرف **) تہی, 10);
+	n = strtol(argv[2], (حرف **) تہی, 10);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_راستہ(pid, سابقہ);
+	اگر (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	ret = procfs_process_get_stat_nth(pc, n, &num);
-	if (ret)
+	ret = procfs_process_get_stat_nth(pc, n, &عدد);
+	اگر (ret)
 		errx(EXIT_FAILURE, "read %dth number failed: %s", n, strerror(-ret));
 
-	printf("%d: %dth %"PRIu64"\n", (int) pid, n, num);
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	لکھو("%d: %dth %"PRIu64"\n", (صحیح) pid, n, عدد);
+	ul_unref_راستہ(pc);
+	واپس EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+صحیح مین(صحیح argc, حرف *argv[])
 {
-	const char *prefix = NULL;
+	ثابت حرف *سابقہ = تہی;
 
-	if (argc > 2 && strcmp(argv[1], "--prefix") == 0) {
-		prefix = argv[2];
+	اگر (argc > 2 && strcmp(argv[1], "--prefix") == 0) {
+		سابقہ = argv[2];
 		argc -= 2;
 		argv += 2;
 	}
 
-	if (argc < 2) {
+	اگر (argc < 2) {
 		fprintf(stderr, "usage: %1$s [--prefix <prefix>] --tasks <pid>\n"
 				"       %1$s [--prefix <prefix>] --fds <pid>\n"
 				"       %1$s --is-procfs [<dir>]\n"
 				"       %1$s --processes [--name <name>] [--uid <uid>]\n"
 				"       %1$s [--prefix <prefix>] --one <pid>\n"
 				"       %1$s [--prefix <prefix>] --stat-nth <pid> <n>\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				پروگرام_invocation_short_name);
+		واپس EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--tasks") == 0)
-		return test_tasks(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--fds") == 0)
-		return test_fds(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--processes") == 0)
-		return test_processes(argc - 1, argv + 1);
-	if (strcmp(argv[1], "--is-procfs") == 0)
-		return test_isprocfs(argc - 1, argv + 1);
-	if (strcmp(argv[1], "--one") == 0)
-		return test_one_process(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--stat-nth") == 0)
-		return test_process_stat_nth(argc - 1, argv + 1, prefix);
+	اگر (strcmp(argv[1], "--tasks") == 0)
+		واپس test_tasks(argc - 1, argv + 1, سابقہ);
+	اگر (strcmp(argv[1], "--fds") == 0)
+		واپس test_fds(argc - 1, argv + 1, سابقہ);
+	اگر (strcmp(argv[1], "--processes") == 0)
+		واپس test_processes(argc - 1, argv + 1);
+	اگر (strcmp(argv[1], "--is-procfs") == 0)
+		واپس test_isprocfs(argc - 1, argv + 1);
+	اگر (strcmp(argv[1], "--one") == 0)
+		واپس test_one_process(argc - 1, argv + 1, سابقہ);
+	اگر (strcmp(argv[1], "--stat-nth") == 0)
+		واپس test_process_stat_nth(argc - 1, argv + 1, سابقہ);
 
-	return EXIT_FAILURE;
+	واپس EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_PROCUTILS */
+#اگر_ختم /* TEST_PROGRAM_PROCUTILS */

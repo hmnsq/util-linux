@@ -6,20 +6,20 @@
  *
  * Copyright (C) 2009-2013 Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#شامل <stdio.h>
+#شامل <string.h>
+#شامل <ctype.h>
+#شامل <unistd.h>
+#شامل <errno.h>
+#شامل <stdlib.h>
+#شامل <sys/types.h>
+#شامل <sys/stat.h>
 
-#include "canonicalize.h"
-#include "pathnames.h"
-#include "all-io.h"
-#include "strutils.h"
-#include "fileutils.h"
+#شامل "canonicalize.h"
+#شامل "pathnames.h"
+#شامل "all-io.h"
+#شامل "strutils.h"
+#شامل "fileutils.h"
 
 /*
  * Converts private "dm-N" names to "/dev/mapper/<name>"
@@ -30,57 +30,57 @@
  * The @prefix allows /sys to be mounted or stored outside the system root
  * (/prefix/sys/...).
  */
-char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
+حرف *ul_canonicalize_dm_name_prefixed(ثابت حرف *سابقہ, ثابت حرف *ptname)
 {
 	FILE	*f;
 	size_t	sz;
-	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
+	حرف	راستہ[256], name[حجم(راستہ) - حجم(راستہ_DEV_MAPPER)], *res = تہی;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	اگر (!ptname || !*ptname)
+		واپس تہی;
 
-	if (!prefix)
-		prefix = "";
+	اگر (!سابقہ)
+		سابقہ = "";
 
-	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	snprintf(راستہ, حجم(راستہ), "%s/sys/block/%s/dm/name", سابقہ, ptname);
+	اگر (!(f = fopen(راستہ, "r" UL_CLOEXECSTR)))
+		واپس تہی;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	اگر (fgets(name, حجم(name), f) && (sz = لڑی_لمبائی(name)) > 1) {
+		اگر (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
-		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
+		snprintf(راستہ, حجم(راستہ), راستہ_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
-			res = strdup(path);
+		اگر ((سابقہ && *سابقہ) || access(راستہ, F_OK) == 0)
+			res = strdup(راستہ);
 	}
 	fclose(f);
-	return res;
+	واپس res;
 }
 
-char *ul_canonicalize_dm_name(const char *ptname)
+حرف *ul_canonicalize_dm_name(ثابت حرف *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	واپس ul_canonicalize_dm_name_prefixed(تہی, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+ساکن صحیح is_dm_devname(حرف *canonical, حرف **name)
 {
-	struct stat sb;
-	char *p = strrchr(canonical, '/');
+	ساخت stat sb;
+	حرف *p = strrchr(canonical, '/');
 
-	*name = NULL;
+	*name = تہی;
 
-	if (!p
-	    || strncmp(p, "/dm-", 4) != 0
-	    || !isdigit(*(p + 4))
+	اگر (!p
+	    || لڑی_موازنہ(p, "/dm-", 4) != 0
+	    || !ہندسہ_ہے(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		واپس 0;
 
 	*name = p + 1;
-	return 1;
+	واپس 1;
 }
 
 /*
@@ -88,73 +88,73 @@ static int is_dm_devname(char *canonical, char **name)
  * relative path. If the path is no relative than returns NULL. The path does
  * not have to exist.
  */
-char *ul_absolute_path(const char *path)
+حرف *ul_absolute_راستہ(ثابت حرف *راستہ)
 {
-	char cwd[PATH_MAX], *res, *p;
+	حرف cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	اگر (!ul_is_relative_راستہ(راستہ)) {
 		errno = EINVAL;
-		return NULL;
+		واپس تہی;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	اگر (!getcwd(cwd, حجم(cwd)))
+		واپس تہی;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
-		path += 2;
-	else if (strcmp(path, ".") == 0)
-		path = NULL;
+	اگر (ul_startswith(راستہ, "./"))
+		راستہ += 2;
+	ورنہ اگر (strcmp(راستہ, ".") == 0)
+		راستہ = تہی;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	اگر (!راستہ || !*راستہ)
+		واپس strdup(cwd);
 
-	csz = strlen(cwd);
-	psz = strlen(path);
+	csz = لڑی_لمبائی(cwd);
+	psz = لڑی_لمبائی(راستہ);
 
-	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	p = res = حافظہ_دو(csz + 1 + psz + 1);
+	اگر (!res)
+		واپس تہی;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
-	memcpy(p, path, psz + 1);
+	حافظہ_نقل(p, راستہ, psz + 1);
 
-	return res;
+	واپس res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
-do_canonicalize(const char *path, char **result,
-		void *data __attribute__((__unused__)))
+ساکن صحیح __attribute__((nonnull(2)))
+do_canonicalize(ثابت حرف *راستہ, حرف **نتیجہ,
+		خالی *ڈیٹا __attribute__((__unused__)))
 {
-	char *canonical, *dmname;
+	حرف *canonical, *dmname;
 
-	*result = NULL;
+	*نتیجہ = تہی;
 
-	if (!path || !*path) {
+	اگر (!راستہ || !*راستہ) {
 		errno = EINVAL;
-		return -errno;
+		واپس -errno;
 	}
 
 	errno = 0;
-	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	canonical = realpath(راستہ, تہی);
+	اگر (!canonical)
+		واپس 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
-		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
-			free(canonical);
+	اگر (is_dm_devname(canonical, &dmname)) {
+		حرف *dm = ul_canonicalize_dm_name(dmname);
+		اگر (dm) {
+			آزاد(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
-		*result = canonical;
-	return 0;
+	اگر (canonical)
+		*نتیجہ = canonical;
+	واپس 0;
 }
 
 /*
@@ -162,45 +162,45 @@ do_canonicalize(const char *path, char **result,
  * unreachable path is not an error (!), and in this case, it just duplicates
  * @path.
  */
-char *ul_canonicalize_path(const char *path)
+حرف *ul_canonicalize_راستہ(ثابت حرف *راستہ)
 {
-	char *canonical = NULL;
+	حرف *canonical = تہی;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	اگر (do_canonicalize(راستہ, &canonical, تہی) == 1)
+		واپس strdup(راستہ);
 
-	return canonical;
+	واپس canonical;
 }
 
 /*
  * Drop permissions (e.g., suid) and canonicalize the path. If the path is
  * unreadable (for example, due to missing permissions), it returns NULL.
  */
-char *ul_canonicalize_path_restricted(const char *path)
+حرف *ul_canonicalize_راستہ_restricted(ثابت حرف *راستہ)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	واپس ul_restricted_راستہ_oper(راستہ, do_canonicalize, تہی);
 }
 
-#ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+#اگر_تعریف_شدہ TEST_پروگرام_CANONICALIZE
+صحیح مین(صحیح argc, حرف **argv)
 {
-	char *p;
+	حرف *p;
 
-	if (argc < 2) {
+	اگر (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
-		exit(EXIT_FAILURE);
+		باہر_نکلو(EXIT_FAILURE);
 	}
 
 	fprintf(stdout, "orig:            %s\n", argv[1]);
 
-	p = ul_canonicalize_path(argv[1]);
+	p = ul_canonicalize_راستہ(argv[1]);
 	fprintf(stdout, "real:            %s\n", p);
-	free(p);
+	آزاد(p);
 
-	p = ul_canonicalize_path_restricted(argv[1]);
+	p = ul_canonicalize_راستہ_restricted(argv[1]);
 	fprintf(stdout, "real-restricted: %s\n", p);
-	free(p);
+	آزاد(p);
 
-	exit(EXIT_SUCCESS);
+	باہر_نکلو(EXIT_SUCCESS);
 }
-#endif
+#اگر_ختم

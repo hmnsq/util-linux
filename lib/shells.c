@@ -1,81 +1,81 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include <sys/types.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <paths.h>
-#include <unistd.h>
-#include <sys/syslog.h>
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-#include "dl-econf.h"
-#endif
+#شامل <sys/types.h>
+#شامل <pwd.h>
+#شامل <stdlib.h>
+#شامل <paths.h>
+#شامل <unistd.h>
+#شامل <sys/syslog.h>
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+#شامل "dl-econf.h"
+#اگر_ختم
 
-#include "closestream.h"
-#include "shells.h"
+#شامل "closestream.h"
+#شامل "shells.h"
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-econf_file *open_etc_shells(void)
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+econf_file *open_etc_shells(خالی)
 {
 	econf_err error;
-	econf_file *key_file = NULL;
+	econf_file *کلید_file = تہی;
 
-	if (ul_dlopen_libeconf() != 0)
-		return NULL;
+	اگر (ul_dlopen_libeconf() != 0)
+		واپس تہی;
 
-	error = econf_call(econf_readDirs)(&key_file,
-			       _PATH_VENDORDIR,
+	error = econf_call(econf_readDirs)(&کلید_file,
+			       راستہ_VENDORDIR,
 			       "/etc",
 			       "shells",
-			       NULL,
+			       تہی,
 			       "", /* key only */
 			       "#" /* comment */);
-	if (error) {
+	اگر (error) {
 		syslog(LOG_ALERT,
 		       _("Cannot parse shells files: %s"),
 		       econf_call(econf_errString)(error));
-		return NULL;
+		واپس تہی;
 	}
 
-	return key_file;
+	واپس کلید_file;
 }
-#endif
+#اگر_ختم
 
 /*
  *  print_shells () -- /etc/shells is outputted to stdout.
  */
-extern void print_shells(FILE *out, const char *format)
+خارجی خالی print_shells(FILE *برآمد, ثابت حرف *format)
 {
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-	size_t size = 0;
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+	size_t سائز = 0;
 	econf_err error;
-	char **keys = NULL;
-	econf_file *key_file = open_etc_shells();
+	حرف **کلیدیں = تہی;
+	econf_file *کلید_file = open_etc_shells();
 
-	if (!key_file)
-	  return;
+	اگر (!کلید_file)
+	  واپس;
 
-	error = econf_call(econf_getKeys)(key_file, NULL, &size, &keys);
-	if (error) {
-		econf_call(econf_freeFile)(key_file);
+	error = econf_call(econf_get_کلیدیں)(کلید_file, تہی, &سائز, &کلیدیں);
+	اگر (error) {
+		econf_call(econf_freeFile)(کلید_file);
 		errx(EXIT_FAILURE,
 		  _("Cannot evaluate entries in shells files: %s"),
 		  econf_call(econf_errString)(error));
 	}
 
-	for (size_t i = 0; i < size; i++) {
-		fprintf(out, format, keys[i]);
+	برائے (size_t i = 0; i < سائز; i++) {
+		fprintf(برآمد, format, کلیدیں[i]);
 	}
-	econf_call(econf_freeArray)(keys);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	econf_call(econf_freeArray)(کلیدیں);
+	econf_call(econf_freeFile)(کلید_file);
+#ورنہ
+	حرف *s;
 
 	setusershell();
-	while ((s = getusershell()))
-		fprintf(out, format, s);
+	جب ((s = getusershell()))
+		fprintf(برآمد, format, s);
 	endusershell();
-#endif
+#اگر_ختم
 }
 
 
@@ -84,43 +84,43 @@ extern void print_shells(FILE *out, const char *format)
  *  or vendor defined files.
  *  Return 1 if found and return 0 if not found.
  */
-extern int is_known_shell(const char *shell_name)
+خارجی صحیح is_معلوم_shell(ثابت حرف *shell_name)
 {
-	int ret = 0;
+	صحیح ret = 0;
 
-	if (!shell_name)
-		return 0;
+	اگر (!shell_name)
+		واپس 0;
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-	char *val = NULL;
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+	حرف *val = تہی;
 	econf_err error;
-	econf_file *key_file = open_etc_shells();
+	econf_file *کلید_file = open_etc_shells();
 
-	if (!key_file)
-		return 0;
+	اگر (!کلید_file)
+		واپس 0;
 
-	error = econf_call(econf_getStringValue) (key_file, NULL, shell_name, &val);
-	if (error) {
-		if (error != ECONF_NOKEY)
+	error = econf_call(econf_get_String_قدر) (کلید_file, تہی, shell_name, &val);
+	اگر (error) {
+		اگر (error != ECONF_NOKEY)
 			syslog(LOG_ALERT,
 			       _("Cannot evaluate entries in shells files: %s"),
 			       econf_call(econf_errString)(error));
-	} else
+	} ورنہ
 		ret = 1;
 
-	free(val);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	آزاد(val);
+	econf_call(econf_freeFile)(کلید_file);
+#ورنہ
+	حرف *s;
 
 	setusershell();
-	while ((s = getusershell())) {
-		if (*s != '#' && strcmp(shell_name, s) == 0) {
+	جب ((s = getusershell())) {
+		اگر (*s != '#' && strcmp(shell_name, s) == 0) {
 			ret = 1;
-			break;
+			توڑو;
 		}
 	}
 	endusershell();
-#endif
-	return ret;
+#اگر_ختم
+	واپس ret;
 }

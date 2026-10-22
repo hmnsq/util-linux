@@ -31,63 +31,63 @@
  * Written by Karel Zak <kzak@redhat.com> [October 2021]
  */
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#شامل <inttypes.h>
+#شامل <stdio.h>
+#شامل <sys/types.h>
+#شامل <sys/stat.h>
+#شامل <unistd.h>
 
 /* Linux crypto */
-#ifdef HAVE_LINUX_IF_ALG_H
+#اگر_تعریف_شدہ HAVE_LINUX_IF_ALG_H
 # include <sys/socket.h>
 # include <linux/if_alg.h>
 # include <sys/param.h>
 # include <sys/sendfile.h>
-#endif
+#اگر_ختم
 
-#include "c.h"
-#include "all-io.h"
-#include "fileeq.h"
-#include "debug.h"
+#شامل "c.h"
+#شامل "all-io.h"
+#شامل "fileeq.h"
+#شامل "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulfileeq);
-UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
+ساکن UL_DEBUG_DEFINE_نقاب(ulfileeq);
+UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_خالی_خانے_MASKNAMES;
 
-#define ULFILEEQ_DEBUG_INIT	(1 << 1)
-#define ULFILEEQ_DEBUG_CRYPTO	(1 << 2)
-#define ULFILEEQ_DEBUG_DATA	(1 << 3)
-#define ULFILEEQ_DEBUG_EQ	(1 << 4)
+#تعریف_کرو ULFILEEQ_DEBUG_INIT	(1 << 1)
+#تعریف_کرو ULFILEEQ_DEBUG_CRYPTO	(1 << 2)
+#تعریف_کرو ULFILEEQ_DEBUG_ڈیٹا	(1 << 3)
+#تعریف_کرو ULFILEEQ_DEBUG_EQ	(1 << 4)
 
-#define DBG(m, x)		__UL_DBG(ulfileeq, ULFILEEQ_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
+#تعریف_کرو DBG(m, x)		__UL_DBG(ulfileeq, ULFILEEQ_DEBUG_, m, x)
+#تعریف_کرو DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
+#تعریف_کرو ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
 
-static void ul_fileeq_init_debug(void)
+ساکن خالی ul_fileeq_init_debug(خالی)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	اگر (ulfileeq_debug_نقاب)
+		واپس;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+شمار {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
-	UL_FILEEQ_CRC32
+	UL_FILEEQ_چکری_جانچ_32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
-	short digsiz;
+ساخت ul_fileeq_طریقہ {
+	ثابت حرف *name;	/* name used by applications */
+	ثابت حرف *kname;	/* name used by kernel crypto */
+	صحیح id;
+	مختصر digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+ساکن ثابت ساخت ul_fileeq_طریقہ ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
-#ifdef USE_FILEEQ_CRYPTOAPI
+#اگر_تعریف_شدہ USE_FILEEQ_CRYPTOAPI
 	[UL_FILEEQ_SHA1] = {
 		.id = UL_FILEEQ_SHA1, .name = "sha1",
 		.digsiz = 20, .kname = "sha1"
@@ -97,200 +97,200 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 		.digsiz = 32, .kname = "sha256"
 	},
 
-	[UL_FILEEQ_CRC32] = {
-		.id = UL_FILEEQ_CRC32, .name = "crc32",
+	[UL_FILEEQ_چکری_جانچ_32] = {
+		.id = UL_FILEEQ_چکری_جانچ_32, .name = "crc32",
 		.digsiz = 4, .kname = "crc32c"
 	}
-#endif
+#اگر_ختم
 };
 
-#ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+#اگر_تعریف_شدہ USE_FILEEQ_CRYPTOAPI
+ساکن خالی deinit_crypto_api(ساخت ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	اگر (!eq)
+		واپس;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	اگر (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	اگر (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+ساکن صحیح init_crypto_api(ساخت ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	ساخت sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
 
-	assert(eq->method);
-	assert(eq->method->kname);
-	assert(eq->fd_api == -1);
-	assert(eq->fd_cip == -1);
+	أكد(eq->طریقہ);
+	أكد(eq->طریقہ->kname);
+	أكد(eq->fd_api == -1);
+	أكد(eq->fd_cip == -1);
 
-	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
+	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->طریقہ->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
-	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
+	أكد(حجم(sa.salg_name) > لڑی_لمبائی(eq->طریقہ->kname) + 1);
+	حافظہ_نقل(&sa.salg_name, eq->طریقہ->kname, لڑی_لمبائی(eq->طریقہ->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
-		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
-		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
-		goto fail;
-	return 0;
+	اگر ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+		جاؤ fail;
+	اگر (bind(eq->fd_api, (ساخت sockaddr *) &sa, حجم(sa)) != 0)
+		جاؤ fail;
+	اگر ((eq->fd_cip = accept(eq->fd_api, تہی, 0)) < 0)
+		جاؤ fail;
+	واپس 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	واپس -1;
 }
-#endif
+#اگر_ختم
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+صحیح ul_fileeq_init(ساخت ul_fileeq *eq, ثابت حرف *طریقہ)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
-	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
+	DBG_OBJ(EQ, eq, ul_debug("init [%s]", طریقہ));
 
-	memset(eq, 0, sizeof(*eq));
+	memset(eq, 0, حجم(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	برائے (i = 0; i < ARRAY_سائز(ul_eq_methods); i++) {
+		ثابت ساخت ul_fileeq_طریقہ *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
-			eq->method = m;
-			break;
+		اگر (strcmp(m->name, طریقہ) == 0) {
+			eq->طریقہ = m;
+			توڑو;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
-#ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	اگر (!eq->طریقہ)
+		واپس -1;
+#اگر_تعریف_شدہ USE_FILEEQ_CRYPTOAPI
+	اگر (eq->طریقہ->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
-#endif
-	return 0;
+		واپس -1;
+#اگر_ختم
+	واپس 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+ساکن خالی reset_fileeq_bufs(ساخت ul_fileeq *eq)
 {
-	free(eq->buf_a);
-	free(eq->buf_b);
-	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
+	آزاد(eq->buf_a);
+	آزاد(eq->buf_b);
+	eq->buf_آخری = eq->buf_a = eq->buf_b = تہی;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+خالی ul_fileeq_deinit(ساخت ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	اگر (!eq)
+		واپس;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
-#ifdef USE_FILEEQ_CRYPTOAPI
+#اگر_تعریف_شدہ USE_FILEEQ_CRYPTOAPI
 	deinit_crypto_api(eq);
-#endif
+#اگر_ختم
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+خالی ul_fileeq_ڈیٹا_close_file(ساخت ul_fileeq_ڈیٹا *ڈیٹا)
 {
-	assert(data);
+	أكد(ڈیٹا);
 
-	if (data->fd >= 0) {
-		DBG_OBJ(DATA, data, ul_debug("close"));
-		close(data->fd);
+	اگر (ڈیٹا->fd >= 0) {
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("close"));
+		close(ڈیٹا->fd);
 	}
-	data->fd = -1;
+	ڈیٹا->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+خالی ul_fileeq_ڈیٹا_init(ساخت ul_fileeq_ڈیٹا *ڈیٹا)
 {
-	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
-	data->fd = -1;
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("init"));
+	memset(ڈیٹا, 0, حجم(*ڈیٹا));
+	ڈیٹا->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+خالی ul_fileeq_ڈیٹا_deinit(ساخت ul_fileeq_ڈیٹا *ڈیٹا)
 {
-	assert(data);
+	أكد(ڈیٹا);
 
-	DBG_OBJ(DATA, data, ul_debug("deinit"));
-	free(data->blocks);
-	data->blocks = NULL;
-	data->nblocks = 0;
-	data->maxblocks = 0;
-	data->is_eof = 0;
-	data->name = NULL;
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("deinit"));
+	آزاد(ڈیٹا->بلاکیں);
+	ڈیٹا->بلاکیں = تہی;
+	ڈیٹا->nblocks = 0;
+	ڈیٹا->maxblocks = 0;
+	ڈیٹا->is_eof = 0;
+	ڈیٹا->name = تہی;
 
-	ul_fileeq_data_close_file(data);
+	ul_fileeq_ڈیٹا_close_file(ڈیٹا);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+صحیح ul_fileeq_ڈیٹا_associated(ساخت ul_fileeq_ڈیٹا *ڈیٹا)
 {
-	return data->name != NULL;
+	واپس ڈیٹا->name != تہی;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+خالی ul_fileeq_ڈیٹا_سیٹ_file(ساخت ul_fileeq_ڈیٹا *ڈیٹا, ثابت حرف *name)
 {
-	assert(data);
-	assert(name);
+	أكد(ڈیٹا);
+	أكد(name);
 
-	DBG_OBJ(DATA, data, ul_debug("set file: %s", name));
-	ul_fileeq_data_init(data);
-	data->name = name;
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("set file: %s", name));
+	ul_fileeq_ڈیٹا_init(ڈیٹا);
+	ڈیٹا->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_سیٹ_سائز(ساخت ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
 	size_t digsiz;
 
-	assert(eq);
-	assert(st_size >= 0);
-	assert(readsiz);
+	أكد(eq);
+	أكد(st_size >= 0);
+	أكد(readsiz);
 
 	filesiz = (uint64_t) st_size;
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	اگر (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	انتخاب (eq->طریقہ->id) {
+	حالت UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
-	default:
-		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		توڑو;
+	طےشدہ:
+		digsiz = eq->طریقہ->digsiz;
+		اگر (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		اگر (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		ورنہ اگر (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		اگر (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			اگر (ceiling / maxdigs > SIZE_MAX)
+				واپس false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		توڑو;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,361 +301,361 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	واپس true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+ساکن غیرعلامتی حرف *get_بفر(ساخت ul_fileeq *eq)
 {
-	if (!eq->buf_a)
-		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
-		eq->buf_b = malloc(eq->readsiz);
+	اگر (!eq->buf_a)
+		eq->buf_a = حافظہ_دو(eq->readsiz);
+	اگر (!eq->buf_b)
+		eq->buf_b = حافظہ_دو(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	اگر (!eq->buf_a || !eq->buf_b)
+		واپس تہی;
 
-	if (eq->buf_last == eq->buf_b)
-		eq->buf_last = eq->buf_a;
-	else
-		eq->buf_last = eq->buf_b;
+	اگر (eq->buf_آخری == eq->buf_b)
+		eq->buf_آخری = eq->buf_a;
+	ورنہ
+		eq->buf_آخری = eq->buf_b;
 
-	return eq->buf_last;
+	واپس eq->buf_آخری;
 }
 
-#define get_cached_nblocks(_d) \
+#تعریف_کرو get_cached_nblocks(_d) \
 			((_d)->nblocks ? (_d)->nblocks - 1 : 0)
 
-#define get_cached_offset(_e, _d) \
+#تعریف_کرو get_cached_انحراف(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				حجم((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+ساکن صحیح get_fd(ساخت ul_fileeq *eq, ساخت ul_fileeq_ڈیٹا *ڈیٹا, off_t *off)
 {
-	off_t o = get_cached_offset(eq, data);
+	off_t o = get_cached_انحراف(eq, ڈیٹا);
 
-	assert(eq);
-	assert(data);
+	أكد(eq);
+	أكد(ڈیٹا);
 
 
-	if (data->fd < 0) {
-		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
-		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+	اگر (ڈیٹا->fd < 0) {
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("open: %s", ڈیٹا->name));
+		ڈیٹا->fd = open(ڈیٹا->name, O_RDONLY | O_CLOEXEC);
+		اگر (ڈیٹا->fd < 0)
+			واپس ڈیٹا->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
-		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
-#endif
-		if (o) {
-			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
-			lseek(data->fd, o, SEEK_SET);
+#اگر defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+		ignore_نتیجہ( posix_fadvise(ڈیٹا->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
+#اگر_ختم
+		اگر (o) {
+			DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("lseek off=%ju", (uintmax_t) o));
+			lseek(ڈیٹا->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	اگر (off)
 		*off = o;
 
-	return data->fd;
+	واپس ڈیٹا->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+ساکن خالی memcmp_reset(ساخت ul_fileeq *eq, ساخت ul_fileeq_ڈیٹا *ڈیٹا)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
-		data->nblocks = 1;
+	اگر (ڈیٹا->nblocks)
+		ڈیٹا->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
-		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
-	data->is_eof = 0;
+	اگر (ڈیٹا->fd >= 0)
+		lseek(ڈیٹا->fd, get_cached_انحراف(eq, ڈیٹا), SEEK_SET);
+	ڈیٹا->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+ساکن ssize_t read_بلاک(ساخت ul_fileeq *eq, ساخت ul_fileeq_ڈیٹا *ڈیٹا,
+				uint64_t n, غیرعلامتی حرف **بلاک)
 {
-	int fd;
+	صحیح fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	اگر (ڈیٹا->is_eof)
+		واپس 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	اگر (n >= eq->blocksmax)
+		واپس -EINVAL;
 
-	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	fd = get_fd(eq, ڈیٹا, &off);
+	اگر (fd < 0)
+		واپس fd;
 
-	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug(" read block off=%ju", (uintmax_t) off));
 
-	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	*بلاک = get_بفر(eq);
+	اگر (!*بلاک)
+		واپس -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
-		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+	rsz = ul_read_all(ڈیٹا->fd, (حرف *) *بلاک, eq->readsiz);
+	اگر (rsz < 0) {
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("  read failed"));
+		واپس rsz;
 	}
 	off += rsz;
-	data->nblocks++;
+	ڈیٹا->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
-		data->is_eof = 1;
-		ul_fileeq_data_close_file(data);
+	اگر (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+		ڈیٹا->is_eof = 1;
+		ul_fileeq_ڈیٹا_close_file(ڈیٹا);
 	}
 
-	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("  read sz=%zd", rsz));
+	واپس rsz;
 }
 
-#ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+#اگر_تعریف_شدہ USE_FILEEQ_CRYPTOAPI
+ساکن ssize_t get_digest(ساخت ul_fileeq *eq, ساخت ul_fileeq_ڈیٹا *ڈیٹا,
+				uint64_t n, غیرعلامتی حرف **بلاک)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	صحیح fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
-		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
-		assert(data->blocks);
-		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+	اگر (n < get_cached_nblocks(ڈیٹا)) {
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug(" digest cached"));
+		أكد(ڈیٹا->بلاکیں);
+		*بلاک = ڈیٹا->بلاکیں + (n * eq->طریقہ->digsiz);
+		واپس eq->طریقہ->digsiz;
 	}
 
-	if (data->is_eof) {
-		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+	اگر (ڈیٹا->is_eof) {
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug(" file EOF"));
+		واپس 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	اگر (n >= eq->blocksmax)
+		واپس -EINVAL;
 
 	/* read new block */
-	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	fd = get_fd(eq, ڈیٹا, &off);
+	اگر (fd < 0)
+		واپس fd;
 
-	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
-	sz = eq->method->digsiz;
+	sz = eq->طریقہ->digsiz;
 
-	if (!data->blocks) {
-		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
-		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+	اگر (!ڈیٹا->بلاکیں) {
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
+		ڈیٹا->بلاکیں = حافظہ_دو(eq->blocksmax * sz);
+		اگر (!ڈیٹا->بلاکیں)
+			واپس -ENOMEM;
 	}
 
-	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
-	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
+	rsz = sendfile(eq->fd_cip, ڈیٹا->fd, تہی, eq->readsiz);
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	اگر (rsz < 0)
+		واپس rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
-	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	*بلاک = ڈیٹا->بلاکیں + (n * eq->طریقہ->digsiz);
+	rsz = ul_read_all(eq->fd_cip, (حرف *) *بلاک, sz);
 
-	if (rsz > 0)
-		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
-		data->is_eof = 1;
-		ul_fileeq_data_close_file(data);
+	اگر (rsz > 0)
+		ڈیٹا->nblocks++;
+	اگر (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+		ڈیٹا->is_eof = 1;
+		ul_fileeq_ڈیٹا_close_file(ڈیٹا);
 	}
-	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug("  get %zdB digest", rsz));
+	واپس rsz;
 }
-#endif
+#اگر_ختم
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+ساکن ssize_t get_intro(ساخت ul_fileeq *eq, ساخت ul_fileeq_ڈیٹا *ڈیٹا,
+				غیرعلامتی حرف **بلاک)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	اگر (ڈیٹا->nblocks == 0) {
+		صحیح fd = get_fd(eq, ڈیٹا, تہی);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
-		data->nblocks = 1;
+		اگر (fd < 0)
+			واپس -1;
+		rsz = ul_read_all(fd, (حرف *) ڈیٹا->intro, حجم(ڈیٹا->intro));
+		DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, حجم(ڈیٹا->intro)));
+		اگر (rsz < 0)
+			واپس -1;
+		ڈیٹا->nblocks = 1;
 	}
 
-	DBG_OBJ(DATA, data, ul_debug(" return intro"));
-	*block = data->intro;
-	return sizeof(data->intro);
+	DBG_OBJ(ڈیٹا_2, ڈیٹا, ul_debug(" return intro"));
+	*بلاک = ڈیٹا->intro;
+	واپس حجم(ڈیٹا->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+ساکن ssize_t get_cmp_ڈیٹا(ساخت ul_fileeq *eq, ساخت ul_fileeq_ڈیٹا *ڈیٹا,
+				uint64_t blockno, غیرعلامتی حرف **بلاک)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	اگر (blockno == 0)
+		واپس get_intro(eq, ڈیٹا, بلاک);
 
 	blockno--;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
-	default:
-		break;
+	انتخاب (eq->طریقہ->id) {
+	حالت UL_FILEEQ_MEMCMP:
+		واپس read_بلاک(eq, ڈیٹا, blockno, بلاک);
+	طےشدہ:
+		توڑو;
 	}
-#ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
-#endif
+#اگر_تعریف_شدہ USE_FILEEQ_CRYPTOAPI
+	واپس get_digest(eq, ڈیٹا, blockno, بلاک);
+#ورنہ
+	واپس -1;
+#اگر_ختم
 }
 
-#define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
+#تعریف_کرو CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+صحیح ul_fileeq(ساخت ul_fileeq *eq,
+	      ساخت ul_fileeq_ڈیٹا *a, ساخت ul_fileeq_ڈیٹا *b)
 {
-	int cmp;
+	صحیح cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	اگر (eq->طریقہ->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
-	do {
-		unsigned char *da, *db;
+	کرو {
+		غیرعلامتی حرف *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
-		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
-			goto done;
-		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
-			goto done;
-		if (ca != cb || ca == 0) {
+		ca = get_cmp_ڈیٹا(eq, a, n, &da);
+		اگر (ca < 0)
+			جاؤ مکمل;
+		cb = get_cmp_ڈیٹا(eq, b, n, &db);
+		اگر (cb < 0)
+			جاؤ مکمل;
+		اگر (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			توڑو;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} جب (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
-			goto done; /* filesize changed? */
+	اگر (cmp == 0) {
+		اگر (!a->is_eof || !b->is_eof)
+			جاؤ مکمل; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		واپس 1;
 	}
-done:
+مکمل:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	واپس 0;
 }
 
-#ifdef TEST_PROGRAM_FILEEQ
+#اگر_تعریف_شدہ TEST_پروگرام_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+صحیح مین(صحیح argc, حرف *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
-		{ "method", required_argument, NULL, 'm' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	ساخت ul_fileeq eq;
+	ساخت ul_fileeq_ڈیٹا a, b, c;
+	ثابت حرف *طریقہ = "sha1";
+	ساکن ثابت ساخت option longopts[] = {
+		{ "method", required_argument, تہی, 'm' },
+		{ "help", no_argument, تہی, 'h' },
+		{ تہی, 0, تہی, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	صحیح ch, rc;
+	ثابت حرف *file_a = تہی, *file_b = تہی, *file_c = تہی;
+	ساخت stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'm':
-			method = optarg;
-			break;
-		case 'h':
-			printf("usage: %s [options] <file> <file>\n"
+	جب ((ch = getopt_long(argc, argv, "m:", longopts, تہی)) != -1) {
+		انتخاب (ch) {
+		حالت 'm':
+			طریقہ = optarg;
+			توڑو;
+		حالت 'h':
+			لکھو("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
-				program_invocation_short_name);
-			return EXIT_FAILURE;
+				پروگرام_invocation_short_name);
+			واپس EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	اگر (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	اگر (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	اگر (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	اگر (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	اگر (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	اگر (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	اگر (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	اگر (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
-	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
-		method = "memcmp";
-		rc = ul_fileeq_init(&eq, method);
+	rc = ul_fileeq_init(&eq, طریقہ);
+	اگر (rc != 0 && strcmp(طریقہ, "memcmp") != 0) {
+		طریقہ = "memcmp";
+		rc = ul_fileeq_init(&eq, طریقہ);
 	}
-	if (rc < 0)
+	اگر (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
-	ul_fileeq_data_set_file(&a, file_a);
-	ul_fileeq_data_set_file(&b, file_b);
+	ul_fileeq_ڈیٹا_سیٹ_file(&a, file_a);
+	ul_fileeq_ڈیٹا_سیٹ_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
-		ul_fileeq_data_set_file(&c, file_c);
+	اگر (file_c)
+		ul_fileeq_ڈیٹا_سیٹ_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	اگر (!ul_fileeq_سیٹ_سائز(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
-	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	لکھو("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+	اگر (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
-		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+		لکھو("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
 		rc = ul_fileeq(&eq, &b, &c);
-		printf("2nd vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+		لکھو("2nd vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 	}
 
-	ul_fileeq_data_deinit(&a);
-	ul_fileeq_data_deinit(&b);
+	ul_fileeq_ڈیٹا_deinit(&a);
+	ul_fileeq_ڈیٹا_deinit(&b);
 
-	if (file_c)
-		ul_fileeq_data_deinit(&c);
+	اگر (file_c)
+		ul_fileeq_ڈیٹا_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	واپس EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_FILEEQ */
+#اگر_ختم /* TEST_PROGRAM_FILEEQ */

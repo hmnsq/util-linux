@@ -6,13 +6,13 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <cctype.h>
+#شامل <stdio.h>
+#شامل <inttypes.h>
+#شامل <ctype.h>
+#شامل <cctype.h>
 
-#include "c.h"
-#include "jsonwrt.h"
+#شامل "c.h"
+#شامل "jsonwrt.h"
 
 /*
  * Requirements enumerated via testing (V8, Firefox, IE11):
@@ -26,14 +26,14 @@
  *	}
  * }
  */
-static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t size)
+ساکن خالی fputs_quoted_case_json(ثابت حرف *ڈیٹا, FILE *برآمد, صحیح dir, size_t سائز)
 {
-	const char *p;
+	ثابت حرف *p;
 
-	fputc('"', out);
-	for (p = data; p && *p && (!size || p < data + size); p++) {
+	fputc('"', برآمد);
+	برائے (p = ڈیٹا; p && *p && (!سائز || p < ڈیٹا + سائز); p++) {
 
-		const unsigned int c = (unsigned int) *p;
+		ثابت غیرعلامتی صحیح c = (غیرعلامتی صحیح) *p;
 
 		/* From http://www.json.org
 		 *
@@ -43,296 +43,296 @@ static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t 
 		 * Note that single-quotes and forward slashes, while they're
 		 * in the JSON spec, don't break double-quoted strings.
 		 */
-		if (c == '"' || c == '\\') {
-			fputc('\\', out);
-			fputc(c, out);
-			continue;
+		اگر (c == '"' || c == '\\') {
+			fputc('\\', برآمد);
+			fputc(c, برآمد);
+			جاری;
 		}
 
 		/* All non-control characters OK; do the case swap as required. */
-		if (c >= 0x20) {
+		اگر (c >= 0x20) {
 			/*
 			 * Don't use locale sensitive ctype.h functions for regular
 			 * ASCII chars, because for example with Turkish locale
 			 * (aka LANG=tr_TR.UTF-8) toupper('I') returns 'I'.
 			 */
-			if (c <= 127)
+			اگر (c <= 127)
 				fputc(dir ==  1 ? c_toupper(c) :
-				      dir == -1 ? c_tolower(c) : *p, out);
-			else
-				fputc(dir ==  1 ? toupper(c) :
-				      dir == -1 ? tolower(c) : *p, out);
-			continue;
+				      dir == -1 ? c_tolower(c) : *p, برآمد);
+			ورنہ
+				fputc(dir ==  1 ? بڑا_حرف(c) :
+				      dir == -1 ? tolower(c) : *p, برآمد);
+			جاری;
 		}
 
 		/* In addition, all chars under ' ' break Node's/V8/Chrome's, and
 		 * Firefox's JSON.parse function
 		 */
-		switch (c) {
+		انتخاب (c) {
 			/* Handle short-hand cases to reduce output size.  C
 			 * has most of the same stuff here, so if there's an
 			 * "Escape for C" function somewhere in the STL, we
 			 * should probably be using it.
 			 */
-			case '\b':
-				fputs("\\b", out);
-				break;
-			case '\t':
-				fputs("\\t", out);
-				break;
-			case '\n':
-				fputs("\\n", out);
-				break;
-			case '\f':
-				fputs("\\f", out);
-				break;
-			case '\r':
-				fputs("\\r", out);
-				break;
-			default:
+			حالت '\b':
+				fputs("\\b", برآمد);
+				توڑو;
+			حالت '\t':
+				fputs("\\t", برآمد);
+				توڑو;
+			حالت '\n':
+				fputs("\\n", برآمد);
+				توڑو;
+			حالت '\f':
+				fputs("\\f", برآمد);
+				توڑو;
+			حالت '\r':
+				fputs("\\r", برآمد);
+				توڑو;
+			طےشدہ:
 				/* Other assorted control characters */
-				fprintf(out, "\\u00%02x", c);
-				break;
+				fprintf(برآمد, "\\u00%02x", c);
+				توڑو;
 		}
 	}
-	fputc('"', out);
+	fputc('"', برآمد);
 }
 
-#define fputs_quoted_json(_d, _o)       fputs_quoted_case_json(_d, _o, 0, 0)
-#define fputs_quoted_json_upper(_d, _o) fputs_quoted_case_json(_d, _o, 1, 0)
-#define fputs_quoted_json_lower(_d, _o) fputs_quoted_case_json(_d, _o, -1, 0)
+#تعریف_کرو fputs_quoted_json(_d, _o)       fputs_quoted_case_json(_d, _o, 0, 0)
+#تعریف_کرو fputs_quoted_json_بالائی(_d, _o) fputs_quoted_case_json(_d, _o, 1, 0)
+#تعریف_کرو fputs_quoted_json_زیریں(_d, _o) fputs_quoted_case_json(_d, _o, -1, 0)
 
-void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json_format json_format)
+خالی ul_jsonwrt_init(ساخت ul_jsonwrt *fmt, FILE *برآمد, صحیح indent, شمار ul_json_format json_format)
 {
-	fmt->out = out;
+	fmt->برآمد = برآمد;
 	fmt->indent = indent;
 	fmt->json_format = json_format;
 	fmt->after_close = 0;
 }
 
-int ul_jsonwrt_is_ready(struct ul_jsonwrt *fmt)
+صحیح ul_jsonwrt_is_ready(ساخت ul_jsonwrt *fmt)
 {
-	return fmt->out == NULL ? 0 : 1;
+	واپس fmt->برآمد == تہی ? 0 : 1;
 }
 
-void ul_jsonwrt_indent(struct ul_jsonwrt *fmt)
+خالی ul_jsonwrt_indent(ساخت ul_jsonwrt *fmt)
 {
-	int i;
+	صحیح i;
 
-	for (i = 0; i < fmt->indent; i++)
-		fputs("   ", fmt->out);
+	برائے (i = 0; i < fmt->indent; i++)
+		fputs("   ", fmt->برآمد);
 }
 
-static void print_name(struct ul_jsonwrt *fmt, const char *name)
+ساکن خالی print_name(ساخت ul_jsonwrt *fmt, ثابت حرف *name)
 {
 	/* Values on the top level are not members of an array or object, so
 	 * they are never comma separated; ul_jsonwrt_close() has already
 	 * terminated the previous one by a newline. */
-	if (fmt->after_close && (fmt->indent > 0 || name)) {
-		if (fmt->json_format == UL_JSON_LINE
+	اگر (fmt->after_close && (fmt->indent > 0 || name)) {
+		اگر (fmt->json_format == UL_JSON_سطر
 		    || fmt->json_format == UL_JSON_COMPACT)
-			fputs(",", fmt->out);
-		else
-			fputs(name ? ",\n" : ",", fmt->out);
+			fputs(",", fmt->برآمد);
+		ورنہ
+			fputs(name ? ",\n" : ",", fmt->برآمد);
 	}
 
-	switch (fmt->json_format) {
-	case UL_JSON_LINE:
-	case UL_JSON_COMPACT:
-		break;
-	case UL_JSON_PRETTY:
-	default:
-		if (name || !fmt->after_close)
+	انتخاب (fmt->json_format) {
+	حالت UL_JSON_سطر:
+	حالت UL_JSON_COMPACT:
+		توڑو;
+	حالت UL_JSON_PRETTY:
+	طےشدہ:
+		اگر (name || !fmt->after_close)
 			ul_jsonwrt_indent(fmt);
-		break;
+		توڑو;
 	}
-	if (name)
-		fputs_quoted_json_lower(name, fmt->out);
+	اگر (name)
+		fputs_quoted_json_زیریں(name, fmt->برآمد);
 }
 
-void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
+خالی ul_jsonwrt_open(ساخت ul_jsonwrt *fmt, ثابت حرف *name, صحیح type)
 {
-	const char *s = "";
+	ثابت حرف *s = "";
 
 	print_name(fmt, name);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_LINE)
+	انتخاب (type) {
+	حالت UL_JSON_OBJECT:
+		اگر (fmt->json_format == UL_JSON_سطر)
 			s = "{";
-		else if (fmt->json_format == UL_JSON_COMPACT) {
+		ورنہ اگر (fmt->json_format == UL_JSON_COMPACT) {
 			/* At nesting depth 2, put the object opens on a new line
 			 * for readability; otherwise keep fully compact (no newline). */
-			if (fmt->indent == 2)
+			اگر (fmt->indent == 2)
 				s = name ? ":{" : "\n{";
-			else
+			ورنہ
 				s = "{";
-		} else
+		} ورنہ
 			s = name ? ": {\n" : "{\n";
 		fmt->indent++;
-		break;
-	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_LINE)
+		توڑو;
+	حالت UL_JSON_ARRAY:
+		اگر (fmt->json_format == UL_JSON_سطر)
 			s = "[";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		ورنہ اگر (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":[" : "[";
-		else
+		ورنہ
 			s = name ? ": [\n" : "[\n";
 		fmt->indent++;
-		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_LINE)
+		توڑو;
+	حالت UL_JSON_قدر:
+		اگر (fmt->json_format == UL_JSON_سطر)
 			s = name ? ":" : "";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		ورنہ اگر (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":" : "";
-		else
+		ورنہ
 			s = name ? ": " : " ";
-		break;
+		توڑو;
 	}
-	fputs(s, fmt->out);
+	fputs(s, fmt->برآمد);
 	fmt->after_close = 0;
 }
 
-void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
+خالی ul_jsonwrt_خالی_خانے(ساخت ul_jsonwrt *fmt, ثابت حرف *name, صحیح type)
 {
-	const char *s = "";
+	ثابت حرف *s = "";
 
 	print_name(fmt, name);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_PRETTY)
+	انتخاب (type) {
+	حالت UL_JSON_OBJECT:
+		اگر (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": {}" : "{}";
-		else
+		ورنہ
 			s = name ? ":{}" : "{}";
-		break;
-	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		توڑو;
+	حالت UL_JSON_ARRAY:
+		اگر (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": []" : "[]";
-		else
+		ورنہ
 			s = name ? ":[]" : "[]";
-		break;
-	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		توڑو;
+	حالت UL_JSON_قدر:
+		اگر (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": null" : "null";
-		else
+		ورنہ
 			s = name ? ":null" : "null";
-		break;
+		توڑو;
 	}
-	fputs(s, fmt->out);
+	fputs(s, fmt->برآمد);
 	fmt->after_close = 1;
 }
 
-void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
+خالی ul_jsonwrt_close(ساخت ul_jsonwrt *fmt, صحیح type)
 {
-	char endchr;
+	حرف endchr;
 
-	assert(fmt->indent > 0);
+	أكد(fmt->indent > 0);
 
-	switch (type) {
-	case UL_JSON_OBJECT:
+	انتخاب (type) {
+	حالت UL_JSON_OBJECT:
 		fmt->indent--;
 		endchr = '}';
-		break;
-	case UL_JSON_ARRAY:
+		توڑو;
+	حالت UL_JSON_ARRAY:
 		fmt->indent--;
 		endchr = ']';
-		break;
-	case UL_JSON_VALUE:
+		توڑو;
+	حالت UL_JSON_قدر:
 		fmt->after_close = 1;
-		return;
-	default:
+		واپس;
+	طےشدہ:
 		fmt->after_close = 1;
-		return;
+		واپس;
 	}
 
 	/* In COMPACT, when closing a direct child of root (indent==1),
 	 * insert a newline so the closing bracket starts on its own line. */
-	if (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
-		fputc('\n', fmt->out);
+	اگر (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
+		fputc('\n', fmt->برآمد);
 
-	switch (fmt->json_format) {
-	case UL_JSON_LINE:
-	case UL_JSON_COMPACT:
-		break;
-	case UL_JSON_PRETTY:
-	default:
-		fputs("\n", fmt->out);
+	انتخاب (fmt->json_format) {
+	حالت UL_JSON_سطر:
+	حالت UL_JSON_COMPACT:
+		توڑو;
+	حالت UL_JSON_PRETTY:
+	طےشدہ:
+		fputs("\n", fmt->برآمد);
 		ul_jsonwrt_indent(fmt);
-		break;
+		توڑو;
 	}
 
-	fputc(endchr, fmt->out);
+	fputc(endchr, fmt->برآمد);
 
 	/* Terminate the value on the top level. The writer may be re-initialized
 	 * between the values (for example libsmartcols does it for every
 	 * scols_table_print_range() call), so the terminator has to be printed
 	 * by the value itself rather than by the next one (see print_name()). */
-	if (fmt->indent == 0)
-		fputc('\n', fmt->out);
+	اگر (fmt->indent == 0)
+		fputc('\n', fmt->برآمد);
 
 	fmt->after_close = 1;
 }
 
 
-void ul_jsonwrt_flush(struct ul_jsonwrt *fmt)
+خالی ul_jsonwrt_flush(ساخت ul_jsonwrt *fmt)
 {
-	fflush(fmt->out);
+	fflush(fmt->برآمد);
 }
 
-void ul_jsonwrt_value_raw(struct ul_jsonwrt *fmt,
-			const char *name, const char *data)
+خالی ul_jsonwrt_قدر_raw(ساخت ul_jsonwrt *fmt,
+			ثابت حرف *name, ثابت حرف *ڈیٹا)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
-		fputs(data, fmt->out);
-	else
-		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_قدر_open(fmt, name);
+	اگر (ڈیٹا && *ڈیٹا)
+		fputs(ڈیٹا, fmt->برآمد);
+	ورنہ
+		fputs("null", fmt->برآمد);
+	ul_jsonwrt_قدر_close(fmt);
 }
 
-void ul_jsonwrt_value_s(struct ul_jsonwrt *fmt,
-			const char *name, const char *data)
+خالی ul_jsonwrt_قدر_s(ساخت ul_jsonwrt *fmt,
+			ثابت حرف *name, ثابت حرف *ڈیٹا)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
-		fputs_quoted_json(data, fmt->out);
-	else
-		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_قدر_open(fmt, name);
+	اگر (ڈیٹا && *ڈیٹا)
+		fputs_quoted_json(ڈیٹا, fmt->برآمد);
+	ورنہ
+		fputs("null", fmt->برآمد);
+	ul_jsonwrt_قدر_close(fmt);
 }
 
-void ul_jsonwrt_value_s_sized(struct ul_jsonwrt *fmt,
-			      const char *name, const char *data, size_t size)
+خالی ul_jsonwrt_قدر_s_sized(ساخت ul_jsonwrt *fmt,
+			      ثابت حرف *name, ثابت حرف *ڈیٹا, size_t سائز)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
-		fputs_quoted_case_json(data, fmt->out, 0, size);
-	else
-		fputs("null", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_قدر_open(fmt, name);
+	اگر (ڈیٹا && *ڈیٹا)
+		fputs_quoted_case_json(ڈیٹا, fmt->برآمد, 0, سائز);
+	ورنہ
+		fputs("null", fmt->برآمد);
+	ul_jsonwrt_قدر_close(fmt);
 }
 
-void ul_jsonwrt_value_u64(struct ul_jsonwrt *fmt,
-			const char *name, uint64_t data)
+خالی ul_jsonwrt_قدر_u64(ساخت ul_jsonwrt *fmt,
+			ثابت حرف *name, uint64_t ڈیٹا)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	fprintf(fmt->out, "%"PRIu64, data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_قدر_open(fmt, name);
+	fprintf(fmt->برآمد, "%"PRIu64, ڈیٹا);
+	ul_jsonwrt_قدر_close(fmt);
 }
 
-void ul_jsonwrt_value_double(struct ul_jsonwrt *fmt,
-			const char *name, long double data)
+خالی ul_jsonwrt_قدر_double(ساخت ul_jsonwrt *fmt,
+			ثابت حرف *name, طویل دوہرا ڈیٹا)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	fprintf(fmt->out, "%Lg", data);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_قدر_open(fmt, name);
+	fprintf(fmt->برآمد, "%Lg", ڈیٹا);
+	ul_jsonwrt_قدر_close(fmt);
 }
 
-void ul_jsonwrt_value_boolean(struct ul_jsonwrt *fmt,
-			const char *name, int data)
+خالی ul_jsonwrt_قدر_boolean(ساخت ul_jsonwrt *fmt,
+			ثابت حرف *name, صحیح ڈیٹا)
 {
-	ul_jsonwrt_value_open(fmt, name);
-	fputs(data ? "true" : "false", fmt->out);
-	ul_jsonwrt_value_close(fmt);
+	ul_jsonwrt_قدر_open(fmt, name);
+	fputs(ڈیٹا ? "true" : "false", fmt->برآمد);
+	ul_jsonwrt_قدر_close(fmt);
 }

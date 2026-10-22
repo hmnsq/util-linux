@@ -3,15 +3,15 @@
  * it what you wish.
  */
 
-#include "debug.h"
+#شامل "debug.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#شامل <stdarg.h>
+#شامل <stdlib.h>
+#شامل <stdio.h>
+#شامل <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+خالی ul_debug(ثابت حرف *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -20,67 +20,67 @@ void ul_debug(const char *mesg, ...)
 	fputc('\n', stderr);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
-		     const void *handle, unsigned mask)
+خالی ul_debug_سابقہ(ثابت حرف *lib, ثابت حرف *flag,
+		     ثابت خالی *handle, غیرعلامتی نقاب)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	اگر (handle && !(نقاب & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+غیرعلامتی ul_debug_parse_نقاب(ثابت ساخت ul_debug_maskname flagnames[],
+			     ثابت حرف *نقاب)
 {
-	unsigned res;
-	char *ptr;
+	غیرعلامتی res;
+	حرف *ptr;
 
 	/* let's check for a numeric mask first */
-	res = strtoul(mask, &ptr, 0);
+	res = strtoul(نقاب, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	اگر (ptr && *ptr && flagnames && flagnames[0].name) {
+		حرف *msbuf, *ms, *name;
 		res = 0;
 
-		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		ms = msbuf = strdup(نقاب);
+		اگر (!ms)
+			واپس res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		جب ((name = strtok_r(ms, ",", &ptr))) {
+			ثابت ساخت ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
-					res |= d->mask;
-					break;
+			برائے (d = flagnames; d && d->name; d++) {
+				اگر (strcmp(name, d->name) == 0) {
+					res |= d->نقاب;
+					توڑو;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			اگر (res == UL_DEBUG_ALL)
+				توڑو;
 		}
-		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+		آزاد(msbuf);
+	} ورنہ اگر (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	واپس res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+خالی ul_debug_print_masks(ثابت حرف *env,
+			  ثابت ساخت ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	ثابت ساخت ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	اگر (!flagnames)
+		واپس;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
-			continue;
+	برائے (d = flagnames; d && d->name; d++) {
+		اگر (!d->help)
+			جاری;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
-				d->name, d->mask, d->help);
+				d->name, d->نقاب, d->help);
 	}
 }

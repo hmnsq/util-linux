@@ -4,379 +4,379 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#شامل "buffer.h"
+#شامل "mbsalign.h"
+#شامل "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+خالی ul_بفر_reset_ڈیٹا(ساخت ul_بفر *buf)
 {
-	if (buf->begin)
+	اگر (buf->begin)
 		memset(buf->begin, 0, buf->sz);
-	buf->end = buf->begin;
+	buf->انتہا = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	اگر (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * حجم(حرف *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+ساکن اندرونی حرف *ul_بفر_free_ڈیٹا_common(ساخت ul_بفر *buf, bool steal)
 {
-	char *t = NULL;
+	حرف *t = تہی;
 
-	assert(buf);
+	أكد(buf);
 
-	if (steal)
+	اگر (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	ورنہ
+		آزاد(buf->begin);
+	buf->begin = تہی;
+	buf->انتہا = تہی;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	آزاد(buf->ptrs);
+	buf->ptrs = تہی;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	آزاد(buf->encoded);
+	buf->encoded = تہی;
 	buf->encoded_sz = 0;
 
-	return t;
+	واپس t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+خالی ul_بفر_free_ڈیٹا(ساخت ul_بفر *buf)
 {
-	ul_buffer_free_data_common(buf, false);
+	ul_بفر_free_ڈیٹا_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+حرف *ul_بفر_steal_string(ساخت ul_بفر *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
-		ul_buffer_free_data(buf);
-		return NULL;
+	اگر (ul_بفر_is_خالی_خانے(buf)) {
+		ul_بفر_free_ڈیٹا(buf);
+		واپس تہی;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	واپس ul_بفر_free_ڈیٹا_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+خالی ul_بفر_سیٹ_chunksize(ساخت ul_بفر *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+صحیح ul_بفر_is_خالی_خانے(ساخت ul_بفر *buf)
 {
-	return buf->begin == buf->end;
+	واپس buf->begin == buf->انتہا;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+صحیح ul_بفر_save_اشارہ_گر(ساخت ul_بفر *buf, غیرعلامتی مختصر ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	اگر (ptr_idx >= buf->nptrs) {
+		حرف **tmp = reallocarray(buf->ptrs, ptr_idx + 1, حجم(حرف *));
 
-		if (!tmp)
-			return -EINVAL;
+		اگر (!tmp)
+			واپس -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
-	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	buf->ptrs[ptr_idx] = buf->انتہا;
+	واپس 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+حرف *ul_بفر_get_اشارہ_گر(ساخت ul_بفر *buf, غیرعلامتی مختصر ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	اگر (ptr_idx < buf->nptrs)
+		واپس buf->ptrs[ptr_idx];
+	واپس تہی;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_بفر_get_اشارہ_گر_لمبائی(ساخت ul_بفر *buf, غیرعلامتی مختصر ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	حرف *ptr = ul_بفر_get_اشارہ_گر(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	اگر (ptr && ptr > buf->begin)
+		واپس ptr - buf->begin;
+	واپس 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_بفر_get_محفوظ_اشارہ_گر_چوڑائی(ساخت ul_بفر *buf, غیرعلامتی مختصر ptr_idx)
 {
-	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
+	size_t len = ul_بفر_get_اشارہ_گر_لمبائی(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	اگر (!len)
+		واپس 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	واپس mbs_محفوظ_nwidth(buf->begin, len, تہی);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+خالی ul_بفر_refer_string(ساخت ul_بفر *buf, حرف *str)
 {
-	if (buf->sz)
-		ul_buffer_free_data(buf);
+	اگر (buf->sz)
+		ul_بفر_free_ڈیٹا(buf);
 	buf->begin = str;
-	buf->sz = str ? strlen(str) : 0;
-	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
+	buf->sz = str ? لڑی_لمبائی(str) : 0;
+	buf->انتہا = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+صحیح ul_بفر_alloc_ڈیٹا(ساخت ul_بفر *buf, size_t sz)
 {
-	char *tmp;
+	حرف *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	أكد(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	اگر (sz <= buf->sz)
+		واپس 0;
 
-	if (buf->end && buf->begin)
-		len = buf->end - buf->begin;
+	اگر (buf->انتہا && buf->begin)
+		len = buf->انتہا - buf->begin;
 
-	if (buf->chunksize)
+	اگر (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	اگر (!tmp)
+		واپس -ENOMEM;
 
 	buf->begin = tmp;
-	buf->end = buf->begin + len;
+	buf->انتہا = buf->begin + len;
 	buf->sz = sz;
 
-	memset(buf->end, '\0', sz - len);
+	memset(buf->انتہا, '\0', sz - len);
 
-	return 0;
+	واپس 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+صحیح ul_بفر_append_ڈیٹا(ساخت ul_بفر *buf, ثابت حرف *ڈیٹا, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	اگر (!buf)
+		واپس -EINVAL;
+	اگر (!ڈیٹا)
+		واپس 0;
 
-	if (buf->begin && buf->end)
-		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	اگر (buf->begin && buf->انتہا)
+		maxsz = buf->sz - (buf->انتہا - buf->begin);
+	اگر (maxsz <= sz + 1) {
+		صحیح rc = ul_بفر_alloc_ڈیٹا(buf, buf->sz + sz + 1);
+		اگر (rc)
+			واپس rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	اگر (!buf->انتہا)
+		واپس -EINVAL;	/* make static analyzers happy */
 
-	buf->end = mempcpy(buf->end, data, sz);
-	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	buf->انتہا = mempcpy(buf->انتہا, ڈیٹا, sz);
+	*buf->انتہا = '\0';	/* make sure it's terminated */
+	واپس 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+صحیح ul_بفر_append_char(ساخت ul_بفر *buf, ثابت حرف c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	واپس ul_بفر_append_ڈیٹا(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+صحیح ul_بفر_append_string(ساخت ul_بفر *buf, ثابت حرف *str)
 {
-	if (!str)
-		return 0;
+	اگر (!str)
+		واپس 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	واپس ul_بفر_append_ڈیٹا(buf, str, لڑی_لمبائی(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+صحیح ul_بفر_append_ntimes(ساخت ul_بفر *buf, size_t n, ثابت حرف *str)
 {
 	size_t i;
-	size_t len = strlen(str);
+	size_t len = لڑی_لمبائی(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	برائے (i = 0; len && i < n; i++) {
+		صحیح rc = ul_بفر_append_ڈیٹا(buf, str, len);
+		اگر (rc)
+			واپس rc;
 	}
-	return 0;
+	واپس 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+صحیح ul_بفر_appendf(ساخت ul_بفر *buf, ثابت حرف *format, ...)
 {
 	va_list ap;
-	int res;
+	صحیح res;
 
 	va_start(ap, format);
-	res = ul_buffer_appendvf(buf, format, ap);
+	res = ul_بفر_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	واپس res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+صحیح ul_بفر_appendvf(ساخت ul_بفر *buf, ثابت حرف *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	حرف *val;
+	صحیح sz;
+	صحیح res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	اگر (sz < 0)
+		واپس -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
-	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	res = ul_بفر_append_ڈیٹا(buf, val, sz);
+	آزاد(val);
 
-	return res;
+	واپس res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+صحیح ul_بفر_سیٹ_ڈیٹا(ساخت ul_بفر *buf, ثابت حرف *ڈیٹا, size_t sz)
 {
-	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ul_بفر_reset_ڈیٹا(buf);
+	واپس ul_بفر_append_ڈیٹا(buf, ڈیٹا, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+حرف *ul_بفر_get_ڈیٹا(ساخت ul_بفر *buf, size_t *sz, size_t *چوڑائی)
 {
-	if (sz)
-		*sz = buf->end - buf->begin;
-	if (width)
-		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	اگر (sz)
+		*sz = buf->انتہا - buf->begin;
+	اگر (چوڑائی)
+		*چوڑائی = buf->begin && *buf->begin ? mbs_چوڑائی(buf->begin) : 0;
+	واپس buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+حرف *ul_بفر_get_string(ساخت ul_بفر *buf, size_t *sz, size_t *چوڑائی)
 {
-	char *ret;
+	حرف *ret;
 
-	ret = ul_buffer_get_data(buf, sz, width);
+	ret = ul_بفر_get_ڈیٹا(buf, sz, چوڑائی);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	اگر (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	واپس ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_بفر_get_bufsiz(ساخت ul_بفر *buf)
 {
-	return buf->sz;
+	واپس buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_بفر_get_datasiz(ساخت ul_بفر *buf)
 {
-	return buf->end - buf->begin;
+	واپس buf->انتہا - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+حرف *ul_بفر_get_محفوظ_ڈیٹا(ساخت ul_بفر *buf, size_t *sz, size_t *چوڑائی, ثابت حرف *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	حرف *ڈیٹا = ul_بفر_get_ڈیٹا(buf, تہی, تہی);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	حرف *res = تہی;
 
-	if (!data)
-		goto nothing;
+	اگر (!ڈیٹا)
+		جاؤ nothing;
 
-	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	encsz = mbs_محفوظ_encode_سائز(buf->sz) + 1;
+	اگر (encsz > buf->encoded_sz) {
+		حرف *tmp = realloc(buf->encoded, encsz);
+		اگر (!tmp)
+			جاؤ nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
-	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	res = mbs_محفوظ_encode_مقصد_بفر(ڈیٹا, &wsz, buf->encoded, buf->encoded_sz, safechars);
+	اگر (!res || !wsz || wsz == (size_t) -1)
+		جاؤ nothing;
 
-	if (width)
-		*width = wsz;
-	if (sz)
-		*sz = strlen(res);
-	return res;
+	اگر (چوڑائی)
+		*چوڑائی = wsz;
+	اگر (sz)
+		*sz = لڑی_لمبائی(res);
+	واپس res;
 nothing:
-	if (width)
-		*width = 0;
-	if (sz)
+	اگر (چوڑائی)
+		*چوڑائی = 0;
+	اگر (sz)
 		*sz = 0;
-	return NULL;
+	واپس تہی;
 }
 
 
-#ifdef TEST_PROGRAM_BUFFER
+#اگر_تعریف_شدہ TEST_پروگرام_بفر
 
-enum {
+شمار {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+صحیح مین(خالی)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	ساخت ul_بفر buf = UL_INIT_بفر;
+	حرف *str;
 	size_t sz = 0;
 
-	ul_buffer_set_chunksize(&buf, 16);
+	ul_بفر_سیٹ_chunksize(&buf, 16);
 
-	ul_buffer_append_string(&buf, "AAA");
-	ul_buffer_append_data(&buf, "=", 1);
-	ul_buffer_append_string(&buf, "aaa");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
+	ul_بفر_append_string(&buf, "AAA");
+	ul_بفر_append_ڈیٹا(&buf, "=", 1);
+	ul_بفر_append_string(&buf, "aaa");
+	ul_بفر_save_اشارہ_گر(&buf, PTR_AAA);
 
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "BBB");
-	ul_buffer_append_string(&buf, "=");
-	ul_buffer_append_string(&buf, "bbb");
-	ul_buffer_save_pointer(&buf, PTR_BBB);
+	ul_بفر_append_ڈیٹا(&buf, ",", 1);
+	ul_بفر_append_string(&buf, "BBB");
+	ul_بفر_append_string(&buf, "=");
+	ul_بفر_append_string(&buf, "bbb");
+	ul_بفر_save_اشارہ_گر(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_بفر_get_ڈیٹا(&buf, &sz, تہی);
+	لکھو("data [%zu] '%s'\n", sz, str);
 
-	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_pointer_length(&buf, PTR_AAA),
-			ul_buffer_get_pointer_length(&buf, PTR_BBB));
-	printf(" pointer data width: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_safe_pointer_width(&buf, PTR_AAA),
-			ul_buffer_get_safe_pointer_width(&buf, PTR_BBB));
+	لکھو(" pointer data len: AAA=%zu, BBB=%zu\n",
+			ul_بفر_get_اشارہ_گر_لمبائی(&buf, PTR_AAA),
+			ul_بفر_get_اشارہ_گر_لمبائی(&buf, PTR_BBB));
+	لکھو(" pointer data width: AAA=%zu, BBB=%zu\n",
+			ul_بفر_get_محفوظ_اشارہ_گر_چوڑائی(&buf, PTR_AAA),
+			ul_بفر_get_محفوظ_اشارہ_گر_چوڑائی(&buf, PTR_BBB));
 
-	ul_buffer_reset_data(&buf);
-	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
-	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
-	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
+	ul_بفر_reset_ڈیٹا(&buf);
+	ul_بفر_append_string(&buf, "This is really long string to test the buffer function.");
+	ul_بفر_save_اشارہ_گر(&buf, PTR_AAA);
+	ul_بفر_append_string(&buf, " YES!");
+	str = ul_بفر_get_ڈیٹا(&buf, &sz, تہی);
+	لکھو("data [%zu] '%s'\n", sz, str);
+	لکھو(" pointer data len: AAA=%zu\n", ul_بفر_get_اشارہ_گر_لمبائی(&buf, PTR_AAA));
 
-	ul_buffer_free_data(&buf);
+	ul_بفر_free_ڈیٹا(&buf);
 	str = strdup("foo");
-	ul_buffer_refer_string(&buf, str);
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_بفر_refer_string(&buf, str);
+	ul_بفر_append_ڈیٹا(&buf, ",", 1);
+	ul_بفر_append_string(&buf, "bar");
+	str = ul_بفر_get_ڈیٹا(&buf, &sz, تہی);
+	لکھو("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_بفر_free_ڈیٹا(&buf);
+	ul_بفر_appendf(&buf, "a%se%d", "bcd", 10);
+	str = ul_بفر_get_ڈیٹا(&buf, &sz, تہی);
+	لکھو("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_append_char(&buf, 'x');
+	ul_بفر_free_ڈیٹا(&buf);
+	ul_بفر_append_char(&buf, 'x');
 	{
-		char c = 'y';
-		ul_buffer_append_char(&buf, c);
+		حرف c = 'y';
+		ul_بفر_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
-		ul_buffer_append_char(&buf, c);
+		ثابت حرف c = 'z';
+		ul_بفر_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_بفر_get_ڈیٹا(&buf, &sz, تہی);
+	لکھو("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
+	ul_بفر_free_ڈیٹا(&buf);
 
-	return EXIT_SUCCESS;
+	واپس EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BUFFER */
+#اگر_ختم /* TEST_PROGRAM_BUFFER */

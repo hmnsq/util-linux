@@ -11,57 +11,57 @@
  * 3) A million repetitions of "a":  34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F
  */
 
-#define UL_SHA1HANDSOFF
+#تعریف_کرو UL_SHA1HANDSOFF
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
+#شامل <stdio.h>
+#شامل <string.h>
+#شامل <stdint.h>
 
-#include "sha1.h"
+#شامل "sha1.h"
 
-#define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
+#تعریف_کرو rol(قدر, بٹ) (((قدر) << (بٹ)) | ((قدر) >> (32 - (بٹ))))
 
 /* blk0() and blk() perform the initial expand. */
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-# define blk0(i) block->l[i]
-#else
-# define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
-    |(rol(block->l[i],8)&0x00FF00FF))
-#endif
+#اگر __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+# define blk0(i) بلاک->l[i]
+#ورنہ
+# define blk0(i) (بلاک->l[i] = (rol(بلاک->l[i],24)&0xFF00FF00) \
+    |(rol(بلاک->l[i],8)&0x00FF00FF))
+#اگر_ختم
 
-#define blk(i) (block->l[i&15] = rol(block->l[(i+13)&15]^block->l[(i+8)&15] \
-    ^block->l[(i+2)&15]^block->l[i&15],1))
+#تعریف_کرو blk(i) (بلاک->l[i&15] = rol(بلاک->l[(i+13)&15]^بلاک->l[(i+8)&15] \
+    ^بلاک->l[(i+2)&15]^بلاک->l[i&15],1))
 
 /* (R0+R1), R2, R3, R4 are the different operations used in SHA1 */
-#define R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
-#define R1(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(i)+0x5A827999+rol(v,5);w=rol(w,30);
-#define R2(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0x6ED9EBA1+rol(v,5);w=rol(w,30);
-#define R3(v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(i)+0x8F1BBCDC+rol(v,5);w=rol(w,30);
-#define R4(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0xCA62C1D6+rol(v,5);w=rol(w,30);
+#تعریف_کرو R0(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk0(i)+0x5A827999+rol(v,5);w=rol(w,30);
+#تعریف_کرو R1(v,w,x,y,z,i) z+=((w&(x^y))^y)+blk(i)+0x5A827999+rol(v,5);w=rol(w,30);
+#تعریف_کرو R2(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0x6ED9EBA1+rol(v,5);w=rol(w,30);
+#تعریف_کرو R3(v,w,x,y,z,i) z+=(((w|x)&y)|(w&x))+blk(i)+0x8F1BBCDC+rol(v,5);w=rol(w,30);
+#تعریف_کرو R4(v,w,x,y,z,i) z+=(w^x^y)+blk(i)+0xCA62C1D6+rol(v,5);w=rol(w,30);
 
 /* Hash a single 512-bit block. This is the core of the algorithm. */
 
-void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
+خالی ul_SHA1Transform(uint32_t state[5], ثابت غیرعلامتی حرف بفر[64])
 {
 	uint32_t a, b, c, d, e;
 
-	typedef union {
-		unsigned char c[64];
+	قسمتعریف اتحاد {
+		غیرعلامتی حرف c[64];
 		uint32_t l[16];
 	} CHAR64LONG16;
 
-#ifdef UL_SHA1HANDSOFF
-	CHAR64LONG16 block[1];	/* use array to appear as a pointer */
+#اگر_تعریف_شدہ UL_SHA1HANDSOFF
+	CHAR64LONG16 بلاک[1];	/* use array to appear as a pointer */
 
-	memcpy(block, buffer, 64);
-#else
+	حافظہ_نقل(بلاک, بفر, 64);
+#ورنہ
 	/* The following had better never be used because it causes the
 	 * pointer-to-const buffer to be cast into a pointer to non-const.
 	 * And the result is written through.  I threw a "const" in, hoping
 	 * this will cause a diagnostic.
 	 */
-	CHAR64LONG16 *block = (const CHAR64LONG16 *)buffer;
-#endif
+	CHAR64LONG16 *بلاک = (ثابت CHAR64LONG16 *)بفر;
+#اگر_ختم
 	/* Copy context->state[] to working vars */
 	a = state[0];
 	b = state[1];
@@ -156,23 +156,23 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	state[3] += d;
 	state[4] += e;
 	/* Wipe variables */
-#ifdef HAVE_EXPLICIT_BZERO
-	explicit_bzero(&a, sizeof(a));
-	explicit_bzero(&b, sizeof(b));
-	explicit_bzero(&c, sizeof(c));
-	explicit_bzero(&d, sizeof(d));
-	explicit_bzero(&e, sizeof(e));
-#else
+#اگر_تعریف_شدہ HAVE_EXPLICIT_BZERO
+	explicit_bzero(&a, حجم(a));
+	explicit_bzero(&b, حجم(b));
+	explicit_bzero(&c, حجم(c));
+	explicit_bzero(&d, حجم(d));
+	explicit_bzero(&e, حجم(e));
+#ورنہ
 	a = b = c = d = e = 0;
-#endif
-#ifdef UL_SHA1HANDSOFF
-	memset(block, '\0', sizeof(block));
-#endif
+#اگر_ختم
+#اگر_تعریف_شدہ UL_SHA1HANDSOFF
+	memset(بلاک, '\0', حجم(بلاک));
+#اگر_ختم
 }
 
 /* SHA1Init - Initialize new context */
 
-void ul_SHA1Init(UL_SHA1_CTX *context)
+خالی ul_SHA1Init(UL_SHA1_CTX *context)
 {
 	/* SHA1 initialization constants */
 	context->state[0] = 0x67452301;
@@ -180,88 +180,88 @@ void ul_SHA1Init(UL_SHA1_CTX *context)
 	context->state[2] = 0x98BADCFE;
 	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
-	context->count[0] = context->count[1] = 0;
+	context->گنتی[0] = context->گنتی[1] = 0;
 }
 
 /* Run your data through this. */
 
-void ul_SHA1Update(UL_SHA1_CTX *context, const unsigned char *data, uint32_t len)
+خالی ul_SHA1Update(UL_SHA1_CTX *context, ثابت غیرعلامتی حرف *ڈیٹا, uint32_t len)
 {
 	uint32_t i;
 
 	uint32_t j;
 
-	j = context->count[0];
-	if ((context->count[0] += len << 3) < j)
-		context->count[1]++;
-	context->count[1] += (len >> 29);
+	j = context->گنتی[0];
+	اگر ((context->گنتی[0] += len << 3) < j)
+		context->گنتی[1]++;
+	context->گنتی[1] += (len >> 29);
 	j = (j >> 3) & 63;
-	if ((j + len) > 63) {
-		memcpy(&context->buffer[j], data, (i = 64 - j));
-		ul_SHA1Transform(context->state, context->buffer);
-		for (; i + 63 < len; i += 64) {
-			ul_SHA1Transform(context->state, &data[i]);
+	اگر ((j + len) > 63) {
+		حافظہ_نقل(&context->بفر[j], ڈیٹا, (i = 64 - j));
+		ul_SHA1Transform(context->state, context->بفر);
+		برائے (; i + 63 < len; i += 64) {
+			ul_SHA1Transform(context->state, &ڈیٹا[i]);
 		}
 		j = 0;
-	} else
+	} ورنہ
 		i = 0;
-	memcpy(&context->buffer[j], &data[i], len - i);
+	حافظہ_نقل(&context->بفر[j], &ڈیٹا[i], len - i);
 }
 
 /* Add padding and return the message digest. */
 
-void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
+خالی ul_SHA1Final(غیرعلامتی حرف digest[20], UL_SHA1_CTX *context)
 {
-	unsigned i;
+	غیرعلامتی i;
 
-	unsigned char finalcount[8];
+	غیرعلامتی حرف finalcount[8];
 
-	unsigned char c;
+	غیرعلامتی حرف c;
 
-#if 0				/* untested "improvement" by DHR */
+#اگر 0				/* untested "improvement" by DHR */
 	/* Convert context->count to a sequence of bytes
 	 * in finalcount.  Second element first, but
 	 * big-endian order within element.
 	 * But we do it all backwards.
 	 */
-	unsigned char *fcp = &finalcount[8];
+	غیرعلامتی حرف *fcp = &finalcount[8];
 
-	for (i = 0; i < 2; i++) {
-		uint32_t t = context->count[i];
+	برائے (i = 0; i < 2; i++) {
+		uint32_t t = context->گنتی[i];
 
-		int j;
+		صحیح j;
 
-		for (j = 0; j < 4; t >>= 8, j++)
-			*--fcp = (unsigned char)t}
-#else
-	for (i = 0; i < 8; i++) {
-		finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
+		برائے (j = 0; j < 4; t >>= 8, j++)
+			*--fcp = (غیرعلامتی حرف)t}
+#ورنہ
+	برائے (i = 0; i < 8; i++) {
+		finalcount[i] = (غیرعلامتی حرف)((context->گنتی[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
 	}
-#endif
+#اگر_ختم
 	c = 0200;
 	ul_SHA1Update(context, &c, 1);
-	while ((context->count[0] & 504) != 448) {
+	جب ((context->گنتی[0] & 504) != 448) {
 		c = 0000;
 		ul_SHA1Update(context, &c, 1);
 	}
 	ul_SHA1Update(context, finalcount, 8);	/* Should cause a SHA1Transform() */
-	for (i = 0; i < 20; i++) {
-		digest[i] = (unsigned char)
+	برائے (i = 0; i < 20; i++) {
+		digest[i] = (غیرعلامتی حرف)
 		    ((context->state[i >> 2] >> ((3 - (i & 3)) * 8)) & 255);
 	}
 	/* Wipe variables */
-	memset(context, '\0', sizeof(*context));
-	memset(&finalcount, '\0', sizeof(finalcount));
+	memset(context, '\0', حجم(*context));
+	memset(&finalcount, '\0', حجم(finalcount));
 }
 
-void ul_SHA1(char *hash_out, const char *str, unsigned len)
+خالی ul_SHA1(حرف *hash_برآمد, ثابت حرف *str, غیرعلامتی len)
 {
 	UL_SHA1_CTX ctx;
-	unsigned int ii;
+	غیرعلامتی صحیح ii;
 
 	ul_SHA1Init(&ctx);
-	for (ii = 0; ii < len; ii += 1)
-		ul_SHA1Update(&ctx, (const unsigned char *)str + ii, 1);
-	ul_SHA1Final((unsigned char *)hash_out, &ctx);
-	hash_out[20] = '\0';
+	برائے (ii = 0; ii < len; ii += 1)
+		ul_SHA1Update(&ctx, (ثابت غیرعلامتی حرف *)str + ii, 1);
+	ul_SHA1Final((غیرعلامتی حرف *)hash_برآمد, &ctx);
+	hash_برآمد[20] = '\0';
 }
