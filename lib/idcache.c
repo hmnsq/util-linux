@@ -12,36 +12,36 @@
 #include "widechar.h"
 #include "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+struct identry *get_id(struct idcache *ic, unsigned long số_nguyên id)
 {
 	struct identry *ent;
 
-	if (!ic)
-		return NULL;
+	nếu (!ic)
+		trả_về NULL;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	cho (ent = ic->ent; ent; ent = ent->next) {
+		nếu (ent->id == id)
+			trả_về ent;
 	}
 
-	return NULL;
+	trả_về NULL;
 }
 
 struct idcache *new_idcache(void)
 {
-	return calloc(1, sizeof(struct idcache));
+	trả_về calloc(1, sizeof(struct idcache));
 }
 
 void free_idcache(struct idcache *ic)
 {
 	struct identry *ent;
 
-	if (!ic)
-		return;
+	nếu (!ic)
+		trả_về;
 
 	ent = ic->ent;
 
-	while (ent) {
+	trong_khi (ent) {
 		struct identry *next = ent->next;
 		free(ent->name);
 		free(ent);
@@ -51,73 +51,73 @@ void free_idcache(struct idcache *ic)
 	free(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+static void add_id(struct idcache *ic, char *name, unsigned long số_nguyên id)
 {
 	struct identry *ent, *x;
-	int w = 0;
+	số_nguyên w = 0;
 
-	if (!ic)
-		return;
+	nếu (!ic)
+		trả_về;
 
 	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	nếu (!ent)
+		trả_về;
 	ent->id = id;
 
-	if (name) {
+	nếu (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		nếu (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		không_thì
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	nếu (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
+		nếu (!ent->name) {
 			free(ent);
-			return;
+			trả_về;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
+	} không_thì {
+		nếu (asprintf(&ent->name, "%lu", id) < 0) {
 			free(ent);
-			return;
+			trả_về;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	cho (x = ic->ent; x && x->next; x = x->next);
 
-	if (x)
+	nếu (x)
 		x->next = ent;
-	else
+	không_thì
 		ic->ent = ent;
 
-	if (w <= 0)
+	nếu (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+void add_uid(struct idcache *cache, unsigned long số_nguyên id)
 {
 	struct identry *ent = get_id(cache, id);
 
-	if (!ent) {
+	nếu (!ent) {
 		struct passwd *pw = getpwuid((uid_t) id);
 		add_id(cache, pw ? pw->pw_name : NULL, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+void add_gid(struct idcache *cache, unsigned long số_nguyên id)
 {
 	struct identry *ent = get_id(cache, id);
 
-	if (!ent) {
+	nếu (!ent) {
 		struct group *gr = getgrgid((gid_t) id);
 		add_id(cache, gr ? gr->gr_name : NULL, id);
 	}

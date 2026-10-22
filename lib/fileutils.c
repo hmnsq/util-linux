@@ -26,24 +26,24 @@
 #include "pathnames.h"
 #include "strutils.h"
 
-int mkstemp_cloexec(char *template)
+số_nguyên mkstemp_cloexec(char *template)
 {
 #ifdef HAVE_MKOSTEMP
-	return mkostemp(template, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
-#else
-	int fd, old_flags, errno_save;
+	trả_về mkostemp(template, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
+#không_thì
+	số_nguyên fd, old_flags, errno_save;
 
 	fd = mkstemp(template);
-	if (fd < 0)
-		return fd;
+	nếu (fd < 0)
+		trả_về fd;
 
 	old_flags = fcntl(fd, F_GETFD, 0);
-	if (old_flags < 0)
+	nếu (old_flags < 0)
 		goto unwind;
-	if (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
+	nếu (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
 		goto unwind;
 
-	return fd;
+	trả_về fd;
 
 unwind:
 	errno_save = errno;
@@ -51,82 +51,82 @@ unwind:
 	close(fd);
 	errno = errno_save;
 
-	return -1;
+	trả_về -1;
 #endif
 }
 
 /* Create open temporary file in safe way.  Please notice that the
  * file permissions are -rw------- by default. */
-int xmkstemp(char **tmpname, const char *dir, const char *prefix)
+số_nguyên xmkstemp(char **tmpname, const char *dir, const char *prefix)
 {
 	char *localtmp;
 	const char *tmpenv;
 	mode_t old_mode;
-	int fd, rc;
+	số_nguyên fd, rc;
 
 	/* Some use cases must be capable of being moved atomically
 	 * with rename(2), which is the reason why dir is here.  */
 	tmpenv = dir ? dir : getenv("TMPDIR");
-	if (!tmpenv)
+	nếu (!tmpenv)
 		tmpenv = _PATH_TMP;
 
 	rc = asprintf(&localtmp, "%s/%s.XXXXXX", tmpenv, prefix);
-	if (rc < 0)
-		return -1;
+	nếu (rc < 0)
+		trả_về -1;
 
 	old_mode = umask(077);
 	fd = mkstemp_cloexec(localtmp);
 	umask(old_mode);
-	if (fd == -1) {
+	nếu (fd == -1) {
 		free(localtmp);
 		localtmp = NULL;
 	}
 	*tmpname = localtmp;
-	return fd;
+	trả_về fd;
 }
 
 #ifdef F_DUPFD_CLOEXEC
-int dup_fd_cloexec(int oldfd, int lowfd)
-#else
-int dup_fd_cloexec(int oldfd, int lowfd  __attribute__((__unused__)))
+số_nguyên dup_fd_cloexec(số_nguyên oldfd, số_nguyên lowfd)
+#không_thì
+số_nguyên dup_fd_cloexec(số_nguyên oldfd, số_nguyên lowfd  __attribute__((__unused__)))
 #endif
 {
-	int fd, flags, errno_save;
+	số_nguyên fd, flags, errno_save;
 
 #ifdef F_DUPFD_CLOEXEC
 	fd = fcntl(oldfd, F_DUPFD_CLOEXEC, lowfd);
-	if (fd >= 0)
-		return fd;
+	nếu (fd >= 0)
+		trả_về fd;
 #endif
 
 	fd = dup(oldfd);
-	if (fd < 0)
-		return fd;
+	nếu (fd < 0)
+		trả_về fd;
 
 	flags = fcntl(fd, F_GETFD);
-	if (flags < 0)
+	nếu (flags < 0)
 		goto unwind;
-	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
+	nếu (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
 		goto unwind;
 
-	return fd;
+	trả_về fd;
 
 unwind:
 	errno_save = errno;
 	close(fd);
 	errno = errno_save;
 
-	return -1;
+	trả_về -1;
 }
 
 /*
  * portable getdtablesize()
  */
-unsigned int get_fd_tabsize(void)
+unsigned số_nguyên get_fd_tabsize(void)
 {
-	int m;
+	số_nguyên m;
 
-#if defined(HAVE_GETDTABLESIZE)
+#nếu defined(HAVE_GETDTABLESIZE)
 	m = getdtablesize();
 #elif defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
 	struct rlimit rl;
@@ -135,44 +135,44 @@ unsigned int get_fd_tabsize(void)
 	m = rl.rlim_cur;
 #elif defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
 	m = sysconf(_SC_OPEN_MAX);
-#else
+#không_thì
 	m = OPEN_MAX;
 #endif
-	return m;
+	trả_về m;
 }
 
-void ul_close_all_fds(unsigned int first, unsigned int last)
+void ul_close_all_fds(unsigned số_nguyên first, unsigned số_nguyên last)
 {
 	struct dirent *d;
 	DIR *dir;
 
 	dir = opendir(_PATH_PROC_FDDIR);
-	if (dir) {
-		while ((d = xreaddir(dir))) {
+	nếu (dir) {
+		trong_khi ((d = xreaddir(dir))) {
 			char *end;
-			unsigned int fd;
-			int dfd;
+			unsigned số_nguyên fd;
+			số_nguyên dfd;
 
 			errno = 0;
 			fd = strtoul(d->d_name, &end, 10);
 
-			if (errno || end == d->d_name || !end || *end)
+			nếu (errno || end == d->d_name || !end || *end)
 				continue;
 			dfd = dirfd(dir);
-			if (dfd < 0)
+			nếu (dfd < 0)
 				continue;
-			if ((unsigned int)dfd == fd)
+			nếu ((unsigned số_nguyên)dfd == fd)
 				continue;
-			if (fd < first || last < fd)
+			nếu (fd < first || last < fd)
 				continue;
 			close(fd);
 		}
 		closedir(dir);
-	} else {
+	} không_thì {
 		unsigned fd, tbsz = get_fd_tabsize();
 
-		for (fd = 0; fd < tbsz; fd++) {
-			if (first <= fd && fd <= last)
+		cho (fd = 0; fd < tbsz; fd++) {
+			nếu (first <= fd && fd <= last)
 				close(fd);
 		}
 	}
@@ -182,20 +182,20 @@ void ul_close_all_fds(unsigned int first, unsigned int last)
  * Fork, drop permissions, and call oper() and return result.
  */
 char *ul_restricted_path_oper(const char *path,
-		  int (*oper)(const char *path, char **result, void *data),
+		  số_nguyên (*oper)(const char *path, char **result, void *data),
 		  void *data)
 {
 	char *result = NULL;
-	int errsv = 0;
-	int pipes[2];
+	số_nguyên errsv = 0;
+	số_nguyên pipes[2];
 	ssize_t len;
 	pid_t pid;
 
-	if (!path || !*path)
-		return NULL;
+	nếu (!path || !*path)
+		trả_về NULL;
 
-	if (pipe(pipes) != 0)
-		return NULL;
+	nếu (pipe(pipes) != 0)
+		trả_về NULL;
 	/*
 	 * To accurately assume identity of getuid() we must use setuid()
 	 * but if we do that, we lose ability to reassume euid of 0, so
@@ -206,15 +206,15 @@ char *ul_restricted_path_oper(const char *path,
 	case -1:
 		close(pipes[0]);
 		close(pipes[1]);
-		return NULL;			/* fork error */
+		trả_về NULL;			/* fork error */
 	case 0:
 		close(pipes[0]);		/* close unused end */
 		pipes[0] = -1;
 		errno = 0;
 
-		if (drop_permissions() != 0)
+		nếu (drop_permissions() != 0)
 			result = NULL;	/* failed */
-		else
+		không_thì
 			oper(path, &result, data);
 
 		len = result ? (ssize_t) strlen(result) :
@@ -222,7 +222,7 @@ char *ul_restricted_path_oper(const char *path,
 
 		/* send length or errno */
 		ul_write_all(pipes[1], (char *) &len, sizeof(len));
-		if (result)
+		nếu (result)
 			ul_write_all(pipes[1], result, len);
 		_exit(0);
 	default:
@@ -233,26 +233,26 @@ char *ul_restricted_path_oper(const char *path,
 	pipes[1] = -1;
 
 	/* read size or -errno */
-	if (ul_read_all(pipes[0], (char *) &len, sizeof(len)) != sizeof(len))
+	nếu (ul_read_all(pipes[0], (char *) &len, sizeof(len)) != sizeof(len))
 		goto done;
-	if (len < 0) {
+	nếu (len < 0) {
 		errsv = -len;
 		goto done;
 	}
 
 	result = malloc(len + 1);
-	if (!result) {
+	nếu (!result) {
 		errsv = ENOMEM;
 		goto done;
 	}
 	/* read path */
-	if (ul_read_all(pipes[0], result, len) != len) {
+	nếu (ul_read_all(pipes[0], result, len) != len) {
 		errsv = errno;
 		goto done;
 	}
 	result[len] = '\0';
 done:
-	if (errsv) {
+	nếu (errsv) {
 		free(result);
 		result = NULL;
 	}
@@ -262,43 +262,43 @@ done:
 	ignore_result( waitpid(pid, NULL, 0) );
 
 	errno = errsv;
-	return result;
+	trả_về result;
 
 }
 
-int ul_mkdir_p(const char *path, mode_t mode)
+số_nguyên ul_mkdir_p(const char *path, mode_t mode)
 {
 	char *p, *dir;
-	int rc = 0;
+	số_nguyên rc = 0;
 
-	if (!path || !*path)
-		return -EINVAL;
+	nếu (!path || !*path)
+		trả_về -EINVAL;
 
 	dir = p = strdup(path);
-	if (!dir)
-		return -ENOMEM;
+	nếu (!dir)
+		trả_về -ENOMEM;
 
-	if (*p == '/')
+	nếu (*p == '/')
 		p++;
 
-	while (p && *p) {
+	trong_khi (p && *p) {
 		char *e = strchr(p, '/');
-		if (e)
+		nếu (e)
 			*e = '\0';
-		if (*p) {
+		nếu (*p) {
 			rc = mkdir(dir, mode);
-			if (rc && errno != EEXIST)
+			nếu (rc && errno != EEXIST)
 				break;
 			rc = 0;
 		}
-		if (!e)
+		nếu (!e)
 			break;
 		*e = '/';
 		p = e + 1;
 	}
 
 	free(dir);
-	return rc;
+	trả_về rc;
 }
 
 /* returns basename and keeps dirname in the @path, if @path is "/" (root)
@@ -307,48 +307,48 @@ char *stripoff_last_component(char *path)
 {
 	char *p = path ? strrchr(path, '/') : NULL;
 
-	if (!p)
-		return NULL;
+	nếu (!p)
+		trả_về NULL;
 	*p = '\0';
-	return p + 1;
+	trả_về p + 1;
 }
 
-static int copy_file_simple(int from, int to)
+static số_nguyên copy_file_simple(số_nguyên from, số_nguyên to)
 {
 	ssize_t nr;
 	char buf[BUFSIZ];
 
-	while ((nr = ul_read_all(from, buf, sizeof(buf))) > 0)
-		if (ul_write_all(to, buf, nr) == -1)
-			return UL_COPY_WRITE_ERROR;
-	if (nr < 0)
-		return UL_COPY_READ_ERROR;
+	trong_khi ((nr = ul_read_all(from, buf, sizeof(buf))) > 0)
+		nếu (ul_write_all(to, buf, nr) == -1)
+			trả_về UL_COPY_WRITE_ERROR;
+	nếu (nr < 0)
+		trả_về UL_COPY_READ_ERROR;
 #ifdef HAVE_EXPLICIT_BZERO
 	explicit_bzero(buf, sizeof(buf));
 #endif
-	return 0;
+	trả_về 0;
 }
 
 /* Copies the contents of a file. Returns -1 on read error, -2 on write error. */
-int ul_copy_file(int from, int to)
+số_nguyên ul_copy_file(số_nguyên from, số_nguyên to)
 {
 #ifdef HAVE_SENDFILE
 	struct stat st;
 	ssize_t nw;
 
-	if (fstat(from, &st) == -1)
-		return UL_COPY_READ_ERROR;
-	if (!S_ISREG(st.st_mode))
-		return copy_file_simple(from, to);
-	if (ul_sendfile_all(to, from, NULL, st.st_size) < 0)
-		return copy_file_simple(from, to);
+	nếu (fstat(from, &st) == -1)
+		trả_về UL_COPY_READ_ERROR;
+	nếu (!S_ISREG(st.st_mode))
+		trả_về copy_file_simple(from, to);
+	nếu (ul_sendfile_all(to, from, NULL, st.st_size) < 0)
+		trả_về copy_file_simple(from, to);
 	/* ensure we either get an EOF or an error */
-	while ((nw = ul_sendfile_all(to, from, NULL, 16*1024*1024)) != 0)
-		if (nw < 0)
-			return copy_file_simple(from, to);
-	return 0;
-#else
-	return copy_file_simple(from, to);
+	trong_khi ((nw = ul_sendfile_all(to, from, NULL, 16*1024*1024)) != 0)
+		nếu (nw < 0)
+			trả_về copy_file_simple(from, to);
+	trả_về 0;
+#không_thì
+	trả_về copy_file_simple(from, to);
 #endif
 }
 
@@ -359,45 +359,45 @@ int ul_copy_file(int from, int to)
  *
  * Returns @buf, or NULL on error.
  */
-char *ul_fd_mkpath(char *buf, size_t bufsz, int fd)
+char *ul_fd_mkpath(char *buf, size_t bufsz, số_nguyên fd)
 {
-	int len;
+	số_nguyên len;
 
-	if (fd < 0) {
+	nếu (fd < 0) {
 		errno = EBADF;
-		return NULL;
+		trả_về NULL;
 	}
 
 	len = snprintf(buf, bufsz, _PATH_PROC_FDDIR "/%d", fd);
-	if (len < 0 || (size_t) len >= bufsz) {
+	nếu (len < 0 || (size_t) len >= bufsz) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		trả_về NULL;
 	}
 
-	return buf;
+	trả_về buf;
 }
 
 /* Returns the pathname the @fd refers to as used by the kernel, or NULL on
  * error. The result has to be deallocated by free().
  */
-char *ul_fd_get_path(int fd)
+char *ul_fd_get_path(số_nguyên fd)
 {
 	ssize_t ssz;
 	char buf[PATH_MAX];
 	char fdpath[UL_FDPATH_BUFSIZ];
 
-	if (!ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
-		return NULL;
+	nếu (!ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
+		trả_về NULL;
 
 	ssz = readlink(fdpath, buf, sizeof(buf));
-	if (ssz < 0)
-		return NULL;
+	nếu (ssz < 0)
+		trả_về NULL;
 
 	/* readlink() does not terminate the result and it does not report
 	 * truncation; a name we cannot read completely is unusable */
-	if ((size_t) ssz >= sizeof(buf)) {
+	nếu ((size_t) ssz >= sizeof(buf)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		trả_về NULL;
 	}
 
 	buf[ssz] = '\0';
@@ -410,26 +410,26 @@ char *ul_fd_get_path(int fd)
 	 * tell it apart we would have to stat() the name, and such a path
 	 * lookup may trigger an automount or block on an unreachable NFS
 	 * server. */
-	if (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
+	nếu (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
 		errno = ENOENT;
-		return NULL;
+		trả_về NULL;
 	}
 
-	return strdup(buf);
+	trả_về strdup(buf);
 }
 
-int ul_reopen(int fd, int flags)
+số_nguyên ul_reopen(số_nguyên fd, số_nguyên flags)
 {
 	char *path = ul_fd_get_path(fd);
-	int ret;
+	số_nguyên ret;
 
-	if (!path)
-		return -errno;
+	nếu (!path)
+		trả_về -errno;
 
 	ret = open(path, flags);
 	free(path);
 
-	return ret;
+	trả_về ret;
 }
 
 
@@ -441,27 +441,27 @@ char *ul_basename(char *path)
 {
 	char *p;
 
-	if (!path || !*path)
-		return (char *) ".";	/* ugly, static string */
+	nếu (!path || !*path)
+		trả_về (char *) ".";	/* ugly, static string */
 
 	p = strrchr(path, '/');
-	if (!p)
-		return path;		/* no '/', return original */
+	nếu (!p)
+		trả_về path;		/* no '/', return original */
 
-	if (*(p + 1) != '\0')
-		return p + 1;		/* begin of the name */
+	nếu (*(p + 1) != '\0')
+		trả_về p + 1;		/* begin of the name */
 
-	while (p > path && *(p - 1) == '/')
+	trong_khi (p > path && *(p - 1) == '/')
 		--p;			/* remove trailing '/' */
 
-	if (p > path) {
+	nếu (p > path) {
 		*p-- = '\0';
-		while (p > path && *(p - 1) != '/')
+		trong_khi (p > path && *(p - 1) != '/')
 			--p;		/* move to the beginning of the name */
-	} else while (*(p + 1) != '\0')
+	} không_thì trong_khi (*(p + 1) != '\0')
 		++p;
 
-	return p;
+	trả_về p;
 }
 
 #ifdef HAVE_OPENAT
@@ -483,11 +483,11 @@ char *ul_basename(char *path)
  * Return: On success, a valid pointer to a file stream is returned.
  *         On failure, NULL is returned and errno is set to indicate the issue.
  */
-FILE *fopen_at_no_link(int dir, const char *filename,
-                             int flags, mode_t perm, const char *mode)
+FILE *fopen_at_no_link(số_nguyên dir, const char *filename,
+                             số_nguyên flags, mode_t perm, const char *mode)
 {
 	FILE *fp;
-	int fd;
+	số_nguyên fd;
 	struct stat st;
 
 	/* We temporarily clear the O_TRUNC bit because we do not want
@@ -497,34 +497,34 @@ FILE *fopen_at_no_link(int dir, const char *filename,
 	 * with fstat()...
 	 */
 	fd = openat(dir, filename, ((flags & ~O_TRUNC) | O_NOFOLLOW | O_CLOEXEC), perm);
-	if (fd < 0)
-		return NULL;
+	nếu (fd < 0)
+		trả_về NULL;
 
-	if (fstat(fd, &st)) {
+	nếu (fstat(fd, &st)) {
 		close(fd);
-		return NULL;
+		trả_về NULL;
 	}
 
-	if (st.st_nlink > 1) {
+	nếu (st.st_nlink > 1) {
 		close(fd);
 		errno = EMLINK;
-		return NULL;
+		trả_về NULL;
 	}
 
-	if ((flags & O_TRUNC) && ftruncate(fd, 0)) {
+	nếu ((flags & O_TRUNC) && ftruncate(fd, 0)) {
 		close(fd);
-		return NULL;
+		trả_về NULL;
 	}
 
 	fp = fdopen(fd, mode);
-	if (!fp)
+	nếu (!fp)
 		close(fd);
-	return fp;
+	trả_về fp;
 }
 #endif /* HAVE_OPENAT */
 
-#if defined(SYS_openat2)
-int ul_openat_resolve(int dirfd, const char *path, int flags,
+#nếu defined(SYS_openat2)
+số_nguyên ul_openat_resolve(số_nguyên dirfd, const char *path, số_nguyên flags,
 		      mode_t mode, unsigned long long resolve)
 {
 	struct open_how how = {
@@ -533,18 +533,18 @@ int ul_openat_resolve(int dirfd, const char *path, int flags,
 		.resolve = resolve,
 	};
 
-	return syscall(SYS_openat2, dirfd, path, &how, sizeof(how));
+	trả_về syscall(SYS_openat2, dirfd, path, &how, sizeof(how));
 }
-#else
-int ul_openat_resolve(
-		int dirfd __attribute__((__unused__)),
+#không_thì
+số_nguyên ul_openat_resolve(
+		số_nguyên dirfd __attribute__((__unused__)),
 		const char *path __attribute__((__unused__)),
-		int flags __attribute__((__unused__)),
+		số_nguyên flags __attribute__((__unused__)),
 		mode_t mode __attribute__((__unused__)),
 		unsigned long long resolve __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	trả_về -1;
 }
 #endif
 
@@ -567,65 +567,65 @@ int ul_openat_resolve(
  * Returns a file descriptor, or -1 and sets errno to ELOOP when a symlink has
  * been detected, or to ENOSYS when the check is not possible.
  */
-static int open_no_symlinks_fallback(const char *path, int flags, mode_t mode)
+static số_nguyên open_no_symlinks_fallback(const char *path, số_nguyên flags, mode_t mode)
 {
 	char *abspath = NULL, *kpath = NULL;
 	struct stat st;
-	int fd = -1, errsv;
+	số_nguyên fd = -1, errsv;
 
 	/* we cannot verify a file we have to create first */
-	if (!path || (flags & O_CREAT)) {
+	nếu (!path || (flags & O_CREAT)) {
 		errno = ENOSYS;
-		return -1;
+		trả_về -1;
 	}
 
-	if (ul_is_relative_path(path)) {
+	nếu (ul_is_relative_path(path)) {
 		/* the kernel reports an absolute pathname; note that
 		 * ul_absolute_path() only prepends the CWD as returned by
 		 * getcwd(), it resolves nothing */
 		abspath = ul_absolute_path(path);
-		if (!abspath)
-			return -1;
+		nếu (!abspath)
+			trả_về -1;
 	}
 
-	if (flags & O_PATH)
+	nếu (flags & O_PATH)
 		fd = open(path, flags);
-	else
+	không_thì
 		fd = open(path, O_PATH | O_CLOEXEC |
 				(flags & (O_NOFOLLOW | O_DIRECTORY)));
-	if (fd < 0)
+	nếu (fd < 0)
 		goto fail;
 
 	/* O_PATH|O_NOFOLLOW returns a FD to the symlink itself */
-	if (fstat(fd, &st) != 0)
+	nếu (fstat(fd, &st) != 0)
 		goto fail;
-	if (S_ISLNK(st.st_mode)) {
+	nếu (S_ISLNK(st.st_mode)) {
 		errno = ELOOP;
 		goto fail;
 	}
 
 	kpath = ul_fd_get_path(fd);
-	if (!kpath) {
+	nếu (!kpath) {
 		errno = ENOSYS;		/* no /proc, no verification */
 		goto fail;
 	}
 
 	/* streq_paths() ignores duplicate and trailing slashes, but "." and
 	 * ".." in the requested path are refused as a symlink */
-	if (streq_paths(abspath ? abspath : path, kpath) != 1) {
+	nếu (streq_paths(abspath ? abspath : path, kpath) != 1) {
 		errno = ELOOP;
 		goto fail;
 	}
 
-	if (!(flags & O_PATH)) {
+	nếu (!(flags & O_PATH)) {
 		char fdpath[UL_FDPATH_BUFSIZ];
-		int nfd = -1;
+		số_nguyên nfd = -1;
 
 		/* apply the caller's flags; the /proc link refers to the
 		 * verified file, the path is not resolved for the second time */
-		if (ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
+		nếu (ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
 			nfd = open(fdpath, flags, mode);
-		if (nfd < 0)
+		nếu (nfd < 0)
 			goto fail;
 		close(fd);
 		fd = nfd;
@@ -633,41 +633,41 @@ static int open_no_symlinks_fallback(const char *path, int flags, mode_t mode)
 
 	free(abspath);
 	free(kpath);
-	return fd;
+	trả_về fd;
 fail:
 	errsv = errno;
 	free(abspath);
 	free(kpath);
-	if (fd >= 0)
+	nếu (fd >= 0)
 		close(fd);
 	errno = errsv;
-	return -1;
+	trả_về -1;
 }
-#else /* !__linux__ */
+#không_thì /* !__linux__ */
 /* O_PATH and the /proc/self/fd/ names are Linux specific */
-static int open_no_symlinks_fallback(
+static số_nguyên open_no_symlinks_fallback(
 			const char *path __attribute__((__unused__)),
-			int flags __attribute__((__unused__)),
+			số_nguyên flags __attribute__((__unused__)),
 			mode_t mode __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	trả_về -1;
 }
 #endif /* __linux__ */
 
 /* Opens @path with the guarantee that no component of the path is a symbolic
  * link, otherwise it fails with ELOOP.
  */
-int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
+số_nguyên ul_open_no_symlinks(const char *path, số_nguyên flags, mode_t mode)
 {
-	int fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
+	số_nguyên fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
 				   RESOLVE_NO_SYMLINKS);
 
 	/* openat2() is Linux 5.6+ */
-	if (fd < 0 && errno == ENOSYS)
+	nếu (fd < 0 && errno == ENOSYS)
 		fd = open_no_symlinks_fallback(path, flags, mode);
 
-	return fd;
+	trả_về fd;
 }
 
 #ifdef HAVE_UL_SAFE_STATX
@@ -682,8 +682,8 @@ int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
  *
  * Returns 0 on success, otherwise negative errno (and errno is set too).
  */
-int ul_safe_statx(int dirfd, const char *path, int flags,
-		  unsigned int mask, struct statx *stx)
+số_nguyên ul_safe_statx(số_nguyên dirfd, const char *path, số_nguyên flags,
+		  unsigned số_nguyên mask, struct statx *stx)
 {
 	assert(stx);
 
@@ -692,13 +692,13 @@ int ul_safe_statx(int dirfd, const char *path, int flags,
 	flags |= AT_STATX_DONT_SYNC | AT_NO_AUTOMOUNT;
 
 #ifdef AT_EMPTY_PATH
-	if (!path || !*path)
+	nếu (!path || !*path)
 		flags |= AT_EMPTY_PATH;
 #endif
-	if (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
-		return -errno;
+	nếu (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
+		trả_về -errno;
 
-	return 0;
+	trả_về 0;
 }
 
 /* Converts @stx to @st. statx(2) is not obliged to return everything the
@@ -716,33 +716,33 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
 	st->st_blksize = stx->stx_blksize;
 
 	/* st_mode mixes two independently reported things */
-	if (stx->stx_mask & STATX_TYPE)
+	nếu (stx->stx_mask & STATX_TYPE)
 		st->st_mode |= stx->stx_mode & S_IFMT;
-	if (stx->stx_mask & STATX_MODE)
+	nếu (stx->stx_mask & STATX_MODE)
 		st->st_mode |= stx->stx_mode & ~S_IFMT;
 
-	if (stx->stx_mask & STATX_INO)
+	nếu (stx->stx_mask & STATX_INO)
 		st->st_ino = stx->stx_ino;
-	if (stx->stx_mask & STATX_NLINK)
+	nếu (stx->stx_mask & STATX_NLINK)
 		st->st_nlink = stx->stx_nlink;
-	if (stx->stx_mask & STATX_UID)
+	nếu (stx->stx_mask & STATX_UID)
 		st->st_uid = stx->stx_uid;
-	if (stx->stx_mask & STATX_GID)
+	nếu (stx->stx_mask & STATX_GID)
 		st->st_gid = stx->stx_gid;
-	if (stx->stx_mask & STATX_SIZE)
+	nếu (stx->stx_mask & STATX_SIZE)
 		st->st_size = stx->stx_size;
-	if (stx->stx_mask & STATX_BLOCKS)
+	nếu (stx->stx_mask & STATX_BLOCKS)
 		st->st_blocks = stx->stx_blocks;
 
-	if (stx->stx_mask & STATX_ATIME) {
+	nếu (stx->stx_mask & STATX_ATIME) {
 		st->st_atim.tv_sec  = stx->stx_atime.tv_sec;
 		st->st_atim.tv_nsec = stx->stx_atime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_MTIME) {
+	nếu (stx->stx_mask & STATX_MTIME) {
 		st->st_mtim.tv_sec  = stx->stx_mtime.tv_sec;
 		st->st_mtim.tv_nsec = stx->stx_mtime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_CTIME) {
+	nếu (stx->stx_mask & STATX_CTIME) {
 		st->st_ctim.tv_sec  = stx->stx_ctime.tv_sec;
 		st->st_ctim.tv_nsec = stx->stx_ctime.tv_nsec;
 	}
@@ -766,57 +766,57 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
  * -EOPNOTSUPP means the kernel did not provide the essential attributes and
  * the caller should fall back to stat().
  */
-int ul_safe_stat(const char *target, struct stat *st,
-		 int nofollow __attribute__((__unused__)),
-		 unsigned int mask __attribute__((__unused__)),
-		 unsigned int *retmask)
+số_nguyên ul_safe_stat(const char *target, struct stat *st,
+		 số_nguyên nofollow __attribute__((__unused__)),
+		 unsigned số_nguyên mask __attribute__((__unused__)),
+		 unsigned số_nguyên *retmask)
 {
 	assert(target);
 	assert(st);
 
 	memset(st, 0, sizeof(struct stat));
-	if (retmask)
+	nếu (retmask)
 		*retmask = 0;
 
 #ifdef HAVE_UL_SAFE_STAT
 	{
 		struct statx stx = { 0 };
-		int rc;
+		số_nguyên rc;
 
 		mask |= UL_STATX_ESSENTIAL;
 
 		rc = ul_safe_statx(AT_FDCWD, target,
 				nofollow ? AT_SYMLINK_NOFOLLOW : 0, mask, &stx);
-		if (rc)
-			return rc;
+		nếu (rc)
+			trả_về rc;
 
 		ul_statx_to_stat(&stx, st);
 
-		if (retmask)
+		nếu (retmask)
 			*retmask = stx.stx_mask;
 
-		if ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
+		nếu ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
 			errno = EOPNOTSUPP;
-			return -EOPNOTSUPP;
+			trả_về -EOPNOTSUPP;
 		}
 
-		return 0;
+		trả_về 0;
 	}
-#else
+#không_thì
 	errno = ENOSYS;
-	return -ENOSYS;
+	trả_về -ENOSYS;
 #endif
 }
 
 
 #ifdef TEST_PROGRAM_FILEUTILS
-int main(int argc, char *argv[])
+số_nguyên main(số_nguyên argc, char *argv[])
 {
-	if (argc < 2)
+	nếu (argc < 2)
 		errx(EXIT_FAILURE, "Usage %s --{mkstemp,close-fds,copy-file,open-no-symlinks,safe-stat}",
 				argv[0]);
 
-	if (strcmp(argv[1], "--mkstemp") == 0) {
+	nếu (strcmp(argv[1], "--mkstemp") == 0) {
 		FILE *f;
 		char *tmpname = NULL;
 
@@ -825,50 +825,50 @@ int main(int argc, char *argv[])
 		free(tmpname);
 		fclose(f);
 
-	} else if (strcmp(argv[1], "--close-fds") == 0) {
+	} không_thì nếu (strcmp(argv[1], "--close-fds") == 0) {
 		ignore_result( dup(STDIN_FILENO) );
 		ignore_result( dup(STDIN_FILENO) );
 		ignore_result( dup(STDIN_FILENO) );
 
 # ifdef HAVE_CLOSE_RANGE
-		if (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
+		nếu (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
 # endif
 			ul_close_all_fds(STDERR_FILENO + 1, ~0U);
 
-	} else if (strcmp(argv[1], "--copy-file") == 0) {
-		int ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
-		if (ret == UL_COPY_READ_ERROR)
+	} không_thì nếu (strcmp(argv[1], "--copy-file") == 0) {
+		số_nguyên ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
+		nếu (ret == UL_COPY_READ_ERROR)
 			err(EXIT_FAILURE, "read");
-		else if (ret == UL_COPY_WRITE_ERROR)
+		không_thì nếu (ret == UL_COPY_WRITE_ERROR)
 			err(EXIT_FAILURE, "write");
 
-	} else if (strcmp(argv[1], "--open-no-symlinks") == 0) {
+	} không_thì nếu (strcmp(argv[1], "--open-no-symlinks") == 0) {
 #ifdef __linux__
-		int flags = O_PATH | O_CLOEXEC;
-#else
-		int flags = O_RDONLY | O_CLOEXEC;
+		số_nguyên flags = O_PATH | O_CLOEXEC;
+#không_thì
+		số_nguyên flags = O_RDONLY | O_CLOEXEC;
 #endif
-		int fallback = 0;
+		số_nguyên fallback = 0;
 		char *name;
-		int fd, i;
+		số_nguyên fd, i;
 
-		if (argc < 3)
+		nếu (argc < 3)
 			errx(EXIT_FAILURE, "no path specified");
 
-		for (i = 3; i < argc; i++) {
+		cho (i = 3; i < argc; i++) {
 			/* the fallback is used on kernels without openat2()
 			 * only, "--fallback" makes it testable anywhere */
-			if (strcmp(argv[i], "--fallback") == 0)
+			nếu (strcmp(argv[i], "--fallback") == 0)
 				fallback = 1;
-			else if (strcmp(argv[i], "--rdonly") == 0)
+			không_thì nếu (strcmp(argv[i], "--rdonly") == 0)
 				flags = O_RDONLY | O_CLOEXEC;
 		}
 
-		if (fallback)
+		nếu (fallback)
 			fd = open_no_symlinks_fallback(argv[2], flags, 0);
-		else
+		không_thì
 			fd = ul_open_no_symlinks(argv[2], flags, 0);
-		if (fd < 0)
+		nếu (fd < 0)
 			err(EXIT_FAILURE, "%s", argv[2]);
 
 		name = ul_fd_get_path(fd);
@@ -876,19 +876,19 @@ int main(int argc, char *argv[])
 		free(name);
 		close(fd);
 
-	} else if (strcmp(argv[1], "--safe-stat") == 0) {
-		unsigned int mask = 0, retmask = 0;
-		int nofollow = 0;
+	} không_thì nếu (strcmp(argv[1], "--safe-stat") == 0) {
+		unsigned số_nguyên mask = 0, retmask = 0;
+		số_nguyên nofollow = 0;
 		struct stat st, ref;
-		int rc, i;
+		số_nguyên rc, i;
 
-		if (argc < 3)
+		nếu (argc < 3)
 			errx(EXIT_FAILURE, "no path specified");
 
-		for (i = 3; i < argc; i++) {
-			if (strcmp(argv[i], "--nofollow") == 0)
+		cho (i = 3; i < argc; i++) {
+			nếu (strcmp(argv[i], "--nofollow") == 0)
 				nofollow = 1;
-			else if (strcmp(argv[i], "--basic") == 0)
+			không_thì nếu (strcmp(argv[i], "--basic") == 0)
 				mask |= UL_STATX_BASIC;
 		}
 
@@ -899,8 +899,8 @@ int main(int argc, char *argv[])
 		/* the function returns -errno and it sets errno too */
 		printf("      rc: %d\n", rc);
 		printf("   errno: %d\n", rc ? errno : 0);
-		if (rc)
-			return EXIT_FAILURE;
+		nếu (rc)
+			trả_về EXIT_FAILURE;
 
 		printf("    type: %s\n", S_ISDIR(st.st_mode)  ? "dir" :
 					 S_ISREG(st.st_mode)  ? "reg" :
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
 		 * attributes advertised by @retmask are comparable, the rest
 		 * is zero in @st.
 		 */
-		if (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
+		nếu (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
 			err(EXIT_FAILURE, "%s", argv[2]);
 
 		printf("  st_dev: %s\n", st.st_dev == ref.st_dev ? "OK" : "FAILED");
@@ -930,35 +930,35 @@ int main(int argc, char *argv[])
 			 * design, there is nothing to compare and it's not a
 			 * failure.
 			 */
-			unsigned int emask = mask | UL_STATX_ESSENTIAL;
+			unsigned số_nguyên emask = mask | UL_STATX_ESSENTIAL;
 
 # define RESULT(bit, x)	(!(retmask & (bit)) || (x) ? "OK" : "FAILED")
 
-			if (emask & STATX_TYPE)
+			nếu (emask & STATX_TYPE)
 				printf("  S_IFMT: %s\n", RESULT(STATX_TYPE,
 					(st.st_mode & S_IFMT) == (ref.st_mode & S_IFMT)));
-			if (emask & STATX_MODE)
+			nếu (emask & STATX_MODE)
 				printf(" st_mode: %s\n", RESULT(STATX_MODE,
 					(st.st_mode & ~S_IFMT) == (ref.st_mode & ~S_IFMT)));
-			if (emask & STATX_INO)
+			nếu (emask & STATX_INO)
 				printf("  st_ino: %s\n",
 					RESULT(STATX_INO, st.st_ino == ref.st_ino));
-			if (emask & STATX_NLINK)
+			nếu (emask & STATX_NLINK)
 				printf("st_nlink: %s\n",
 					RESULT(STATX_NLINK, st.st_nlink == ref.st_nlink));
-			if (emask & STATX_UID)
+			nếu (emask & STATX_UID)
 				printf("  st_uid: %s\n",
 					RESULT(STATX_UID, st.st_uid == ref.st_uid));
-			if (emask & STATX_GID)
+			nếu (emask & STATX_GID)
 				printf("  st_gid: %s\n",
 					RESULT(STATX_GID, st.st_gid == ref.st_gid));
-			if (emask & STATX_SIZE)
+			nếu (emask & STATX_SIZE)
 				printf(" st_size: %s\n",
 					RESULT(STATX_SIZE, st.st_size == ref.st_size));
 # undef RESULT
 		}
 #endif
 	}
-	return EXIT_SUCCESS;
+	trả_về EXIT_SUCCESS;
 }
 #endif

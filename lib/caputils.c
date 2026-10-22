@@ -25,44 +25,44 @@
 #include "procfs.h"
 #include "nls.h"
 
-static int test_cap(unsigned int cap)
+static số_nguyên test_cap(unsigned số_nguyên cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	trả_về prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+static số_nguyên cap_last_by_bsearch(số_nguyên *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	số_nguyên cap = INT_MAX;
+	unsigned số_nguyên cap0 = 0, cap1 = INT_MAX;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	trong_khi ((số_nguyên)cap0 < cap) {
+		nếu (test_cap(cap))
 			cap0 = cap;
-		else
+		không_thì
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	trả_về 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+static số_nguyên cap_last_by_procfs(số_nguyên *ret)
 {
 	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	số_nguyên rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	nếu (f && fd_is_procfs(fileno(f))) {
+		số_nguyên cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
+		nếu (fscanf(f, "%d", &cap) == 1 &&
 		    cap < INT_MAX && !test_cap(cap + 1)) {
 
 			*ret = cap;
@@ -70,21 +70,21 @@ static int cap_last_by_procfs(int *ret)
 		}
 	}
 
-	if (f)
+	nếu (f)
 		fclose(f);
-	return rc;
+	trả_về rc;
 }
 
-int cap_last_cap(void)
+số_nguyên cap_last_cap(void)
 {
-	static int cap = -1;
+	static số_nguyên cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
+	nếu (cap != -1)
+		trả_về cap;
+	nếu (cap_last_by_procfs(&cap) < 0)
 		cap_last_by_bsearch(&cap);
 
-	return cap;
+	trả_về cap;
 }
 
 void cap_permitted_to_ambient(void)
@@ -99,7 +99,7 @@ void cap_permitted_to_ambient(void)
 	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
+	nếu (capget(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
@@ -107,49 +107,49 @@ void cap_permitted_to_ambient(void)
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
+	nếu (capset(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	cho (cap = 0; cap < (sizeof(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
+		nếu (cap > (uint64_t) cap_last_cap())
 			continue;
 
-		if ((effective & (1ULL << cap))
+		nếu ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
 			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
 #ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+số_nguyên main(số_nguyên argc, char *argv[])
 {
-	int rc = 0, cap;
+	số_nguyên rc = 0, cap;
 
-	if (argc < 2) {
+	nếu (argc < 2) {
 		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		trả_về EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
+	nếu (strcmp(argv[1], "--last-by-procfs") == 0) {
 		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
+		nếu (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
+	} không_thì nếu (strcmp(argv[1], "--last-by-bsearch") == 0) {
 		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
+		nếu (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
+	} không_thì nếu (strcmp(argv[1], "--last") == 0)
 		printf("last cap: %d\n", cap_last_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	trả_về rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 #endif

@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		trả_về "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		trả_về ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		trả_về "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		trả_về "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		trả_về "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		trả_về "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		trả_về "AM";
 	case PM_STR:
-		return "PM";
+		trả_về "PM";
 	case DAY_1:
-		return "Sunday";
+		trả_về "Sunday";
 	case DAY_2:
-		return "Monday";
+		trả_về "Monday";
 	case DAY_3:
-		return "Tuesday";
+		trả_về "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		trả_về "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		trả_về "Thursday";
 	case DAY_6:
-		return "Friday";
+		trả_về "Friday";
 	case DAY_7:
-		return "Saturday";
+		trả_về "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		trả_về "Sun";
 	case ABDAY_2:
-		return "Mon";
+		trả_về "Mon";
 	case ABDAY_3:
-		return "Tue";
+		trả_về "Tue";
 	case ABDAY_4:
-		return "Wed";
+		trả_về "Wed";
 	case ABDAY_5:
-		return "Thu";
+		trả_về "Thu";
 	case ABDAY_6:
-		return "Fri";
+		trả_về "Fri";
 	case ABDAY_7:
-		return "Sat";
+		trả_về "Sat";
 	case MON_1:
-		return "January";
+		trả_về "January";
 	case MON_2:
-		return "February";
+		trả_về "February";
 	case MON_3:
-		return "March";
+		trả_về "March";
 	case MON_4:
-		return "April";
+		trả_về "April";
 	case MON_5:
-		return "May";
+		trả_về "May";
 	case MON_6:
-		return "June";
+		trả_về "June";
 	case MON_7:
-		return "July";
+		trả_về "July";
 	case MON_8:
-		return "August";
+		trả_về "August";
 	case MON_9:
-		return "September";
+		trả_về "September";
 	case MON_10:
-		return "October";
+		trả_về "October";
 	case MON_11:
-		return "November";
+		trả_về "November";
 	case MON_12:
-		return "December";
+		trả_về "December";
 	case ABMON_1:
-		return "Jan";
+		trả_về "Jan";
 	case ABMON_2:
-		return "Feb";
+		trả_về "Feb";
 	case ABMON_3:
-		return "Mar";
+		trả_về "Mar";
 	case ABMON_4:
-		return "Apr";
+		trả_về "Apr";
 	case ABMON_5:
-		return "May";
+		trả_về "May";
 	case ABMON_6:
-		return "Jun";
+		trả_về "Jun";
 	case ABMON_7:
-		return "Jul";
+		trả_về "Jul";
 	case ABMON_8:
-		return "Aug";
+		trả_về "Aug";
 	case ABMON_9:
-		return "Sep";
+		trả_về "Sep";
 	case ABMON_10:
-		return "Oct";
+		trả_về "Oct";
 	case ABMON_11:
-		return "Nov";
+		trả_về "Nov";
 	case ABMON_12:
-		return "Dec";
+		trả_về "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		trả_về "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		trả_về "-";
 	case YESEXPR:
-		return "^[yY]";
+		trả_về "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		trả_về "^[nN]";
 	default:
-		return "";
+		trả_về "";
 	}
 }
 

@@ -28,10 +28,10 @@ static void ul_strv_clear(char **l)
 {
         char **k;
 
-        if (!l)
-                return;
+        nếu (!l)
+                trả_về;
 
-        for (k = l; *k; k++)
+        cho (k = l; *k; k++)
                 free(*k);
 
         *l = NULL;
@@ -41,7 +41,7 @@ char **ul_strv_free(char **l)
 {
         ul_strv_clear(l);
         free(l);
-        return NULL;
+        trả_về NULL;
 }
 
 char **ul_strv_copy(char * const *l)
@@ -49,32 +49,32 @@ char **ul_strv_copy(char * const *l)
         char **r, **k;
 
         k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        nếu (!r)
+                trả_về NULL;
 
-        if (l)
-                for (; *l; k++, l++) {
+        nếu (l)
+                cho (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        nếu (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                trả_về NULL;
                         }
                 }
 
         *k = NULL;
-        return r;
+        trả_về r;
 }
 
 unsigned ul_strv_length(char * const *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        nếu (!l)
+                trả_về 0;
 
-        for (; *l; l++)
+        cho (; *l; l++)
                 n++;
 
-        return n;
+        trả_về n;
 }
 
 static char **ul_strv_new_ap(const char *x, va_list ap)
@@ -89,12 +89,12 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
+        nếu (x) {
                 n = x == (const char*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
+                trong_khi ((s = va_arg(aq, const char*))) {
+                        nếu (s == (const char*) -1)
                                 continue;
 
                         n++;
@@ -104,24 +104,24 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
         }
 
         a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        nếu (!a)
+                trả_về NULL;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        nếu (x) {
+                nếu (x != (const char*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
+                        nếu (!a[i])
                                 goto fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                trong_khi ((s = va_arg(ap, const char*))) {
 
-                        if (s == (const char*) -1)
+                        nếu (s == (const char*) -1)
                                 continue;
 
                         a[i] = strdup(s);
-                        if (!a[i])
+                        nếu (!a[i])
                                 goto fail;
 
                         i++;
@@ -130,11 +130,11 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
 
         a[i] = NULL;
 
-        return a;
+        trả_về a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        trả_về NULL;
 }
 
 char **ul_strv_new(const char *x, ...)
@@ -146,48 +146,48 @@ char **ul_strv_new(const char *x, ...)
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        trả_về r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+số_nguyên ul_strv_extend_strv(char ***a, char **b)
 {
-        int r;
+        số_nguyên r;
         char **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                nếu (r < 0)
+                        trả_về r;
         }
 
-        return 0;
+        trả_về 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+số_nguyên ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
 {
-        int r;
+        số_nguyên r;
         char **s;
 
         UL_STRV_FOREACH(s, b) {
                 char *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                nếu (!v)
+                        trả_về -ENOMEM;
 
                 r = ul_strv_push(a, v);
-                if (r < 0) {
+                nếu (r < 0) {
                         free(v);
-                        return r;
+                        trả_về r;
                 }
         }
 
-        return 0;
+        trả_về 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        cho ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
@@ -207,22 +207,22 @@ char **ul_strv_split(const char *s, const char *separator)
                 n++;
 
         r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        nếu (!r)
+                trả_về NULL;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                nếu (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        trả_về NULL;
                 }
 
                 i++;
         }
 
         r[i] = NULL;
-        return r;
+        trả_về r;
 }
 
 char *ul_strv_join(char **l, const char *separator)
@@ -231,25 +231,25 @@ char *ul_strv_join(char **l, const char *separator)
         char **s;
         size_t n, k;
 
-        if (!separator)
+        nếu (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                nếu (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        nếu (!r)
+                trả_về NULL;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                nếu (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,55 +257,55 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        trả_về r;
 }
 
-int ul_strv_push(char ***l, char *value)
+số_nguyên ul_strv_push(char ***l, char *value)
 {
         char **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        nếu (!value)
+                trả_về 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        nếu (m < n)
+                trả_về -ENOMEM;
 
         c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        nếu (!c)
+                trả_về -ENOMEM;
 
         c[n] = value;
         c[n+1] = NULL;
 
         *l = c;
-        return 0;
+        trả_về 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+số_nguyên ul_strv_push_prepend(char ***l, char *value)
 {
         char **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        nếu (!value)
+                trả_về 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        nếu (m < n)
+                trả_về -ENOMEM;
 
         c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        nếu (!c)
+                trả_về -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        cho (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
         c[0] = value;
@@ -314,93 +314,93 @@ int ul_strv_push_prepend(char ***l, char *value)
         free(*l);
         *l = c;
 
-        return 0;
+        trả_về 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+số_nguyên ul_strv_consume(char ***l, char *value)
 {
-        int r;
+        số_nguyên r;
 
         r = ul_strv_push(l, value);
-        if (r < 0)
+        nếu (r < 0)
                 free(value);
 
-        return r;
+        trả_về r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+số_nguyên ul_strv_consume_prepend(char ***l, char *value)
 {
-        int r;
+        số_nguyên r;
 
         r = ul_strv_push_prepend(l, value);
-        if (r < 0)
+        nếu (r < 0)
                 free(value);
 
-        return r;
+        trả_về r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+số_nguyên ul_strv_extend(char ***l, const char *value)
 {
         char *v;
 
-        if (!value)
-                return 0;
+        nếu (!value)
+                trả_về 0;
 
         v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        nếu (!v)
+                trả_về -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        trả_về ul_strv_consume(l, v);
 }
 
 char **ul_strv_remove(char **l, const char *s)
 {
         char **f, **t;
 
-        if (!l)
-                return NULL;
+        nếu (!l)
+                trả_về NULL;
 
         assert(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
+        cho (f = t = l; *f; f++)
+                nếu (strcmp(*f, s) == 0)
                         free(*f);
-                else
+                không_thì
                         *(t++) = *f;
 
         *t = NULL;
-        return l;
+        trả_về l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+số_nguyên ul_strv_extendf(char ***l, const char *format, ...)
 {
         va_list ap;
         char *x;
-        int r;
+        số_nguyên r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        nếu (r < 0)
+                trả_về -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        trả_về ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+số_nguyên ul_strv_extendv(char ***l, const char *format, va_list ap)
 {
         char *x;
-        int r;
+        số_nguyên r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        nếu (r < 0)
+                trả_về -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        trả_về ul_strv_consume(l, x);
 }
 
 char **ul_strv_reverse(char **l)
@@ -408,10 +408,10 @@ char **ul_strv_reverse(char **l)
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        nếu (n <= 1)
+                trả_về l;
 
-        for (i = 0; i < n / 2; i++) {
+        cho (i = 0; i < n / 2; i++) {
                 char *t;
 
                 t = l[i];
@@ -419,5 +419,5 @@ char **ul_strv_reverse(char **l)
                 l[n-1-i] = t;
         }
 
-        return l;
+        trả_về l;
 }

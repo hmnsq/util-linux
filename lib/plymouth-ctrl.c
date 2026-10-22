@@ -40,40 +40,40 @@
 #include "nls.h"
 #include "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+static số_nguyên can_read(số_nguyên fd, const long timeout)
 {
 	struct pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	số_nguyên ret;
 
 	do {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} trong_khi ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	trả_về (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+static số_nguyên open_un_socket_and_connect(void)
 {
 	/* The abstract UNIX socket of plymouth */
 	struct sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	const số_nguyên one = 1;
+	số_nguyên fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	nếu (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
 		goto err;
 	}
 
 	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	nếu (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
@@ -83,22 +83,22 @@ static int open_un_socket_and_connect(void)
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
 	ret = connect(fd, (struct sockaddr *) &su,
 		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	nếu (ret < 0) {
+		nếu (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
 		goto err;
 	}
 err:
-	return fd;
+	trả_về fd;
 }
 
-int plymouth_command(int cmd, ...)
+số_nguyên plymouth_command(số_nguyên cmd, ...)
 {
 	uint8_t answer[2], command[2];
 	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	số_nguyên fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -110,14 +110,14 @@ int plymouth_command(int cmd, ...)
 	switch (cmd) {
 	case MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		nếu (fdsock >= 0) {
 			command[0] = cmd;
 			ul_write_all(fdsock, command, sizeof(command));
 		}
 		break;
 	case MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		nếu (fdsock >= 0) {
 			command[0] = cmd;
 			ul_write_all(fdsock, command, sizeof(command));
 		}
@@ -129,14 +129,14 @@ int plymouth_command(int cmd, ...)
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
+	nếu (fdsock >= 0) {
+		nếu (can_read(fdsock, 1000))
 			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
 		close(fdsock);
 	}
 	sigaction(SIGPIPE, &op, NULL);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	trả_về ret;
 }
 

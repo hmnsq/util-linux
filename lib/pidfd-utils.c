@@ -19,30 +19,30 @@
 /*
  * Returns 1, if the pidfd has the pidfs file system type, otherwise 0.
  */
-int pfd_is_pidfs(int pidfd)
+số_nguyên pfd_is_pidfs(số_nguyên pidfd)
 {
 	struct statfs stfs;
-	int rc;
+	số_nguyên rc;
 
 	rc = fstatfs(pidfd, &stfs);
-	if (rc < 0)
-		return 0;
+	nếu (rc < 0)
+		trả_về 0;
 
-	return F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
+	trả_về F_TYPE_EQUAL(stfs.f_type, STATFS_PIDFS_MAGIC);
 }
 
 #ifdef USE_PIDFD_INO_SUPPORT
-uint64_t pidfd_get_inode(int pidfd)
+uint64_t pidfd_get_inode(số_nguyên pidfd)
 {
 	struct statx stx;
-	int rc;
+	số_nguyên rc;
 
 	rc = statx(pidfd, "", AT_EMPTY_PATH, STATX_INO, &stx);
-	if (rc < 0) {
+	nếu (rc < 0) {
 		close(pidfd);
 		err(EXIT_FAILURE, _("failed to statx() pidfd"));
 	}
-	return stx.stx_ino;
+	trả_về stx.stx_ino;
 }
 #endif
 
@@ -62,18 +62,18 @@ uint64_t pidfd_get_inode(int pidfd)
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+số_nguyên ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino)
+#không_thì
+số_nguyên ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	số_nguyên pfd;
 
 	pfd = ul_get_valid_pidfd(pid, pidfd_ino);
-	if (pfd < 0)
+	nếu (pfd < 0)
 		err(EXIT_FAILURE, _("failed to obtain a valid file descriptor for PID %d"), pid);
 
-	return pfd;
+	trả_về pfd;
 }
 
 /*
@@ -91,34 +91,34 @@ int ul_get_valid_pidfd_or_err(pid_t pid, uint64_t pidfd_ino __attribute__((__unu
  *
  */
 #ifdef USE_PIDFD_INO_SUPPORT
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
-#else
-int ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
+số_nguyên ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino)
+#không_thì
+số_nguyên ul_get_valid_pidfd(pid_t pid, uint64_t pidfd_ino __attribute__((__unused__)))
 #endif
 {
-	int pfd;
+	số_nguyên pfd;
 
 	pfd = pidfd_open(pid, 0);
-	if (pfd < 0)
-		return -errno;
+	nếu (pfd < 0)
+		trả_về -errno;
 
 	/* the file descriptor has to have the pidfs file system type
 	 * otherwise the inode assigned to it will not be useful.
 	 */
-	if (!pfd_is_pidfs(pfd)) {
+	nếu (!pfd_is_pidfs(pfd)) {
 		close(pfd);
-		return -(errno = ENOTSUP);
+		trả_về -(errno = ENOTSUP);
 	}
 
 #ifdef USE_PIDFD_INO_SUPPORT
 	uint64_t real_pidfd_ino;
-	if (pidfd_ino) {
+	nếu (pidfd_ino) {
 		real_pidfd_ino = pidfd_get_inode(pfd);
-		if (real_pidfd_ino != pidfd_ino) {
+		nếu (real_pidfd_ino != pidfd_ino) {
 			close(pfd);
-			return -(errno = ESRCH);
+			trả_về -(errno = ESRCH);
 		}
 	}
 #endif
-	return pfd;
+	trả_về pfd;
 }

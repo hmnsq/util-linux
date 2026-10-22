@@ -21,7 +21,7 @@
 
 static const struct ul_signal_name {
 	const char *name;
-	int val;
+	số_nguyên val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+static số_nguyên rtsig_to_signum(const char *sig)
 {
-	int num, maxi = 0;
+	số_nguyên num, maxi = 0;
 	char *ep = NULL;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	nếu (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	không_thì nếu (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	nếu (!isdigit(*sig))
+		trả_về -1;
 	errno = 0;
 	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
+	nếu (!ep || sig == ep || errno || num < 0)
+		trả_về -1;
 	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	nếu (num < SIGRTMIN || SIGRTMAX < num)
+		trả_về -1;
+	trả_về num;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+số_nguyên signame_to_signum(const char *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	nếu (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	nếu (!c_strncasecmp(sig, "rt", 2))
+		trả_về rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	cho (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		nếu (!c_strcasecmp(ul_signames[n].name, sig))
+			trả_về ul_signames[n].val;
 	}
-	return -1;
+	trả_về -1;
 }
 
-const char *signum_to_signame(int signum)
+const char *signum_to_signame(số_nguyên signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	cho (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		nếu (ul_signames[n].val == signum) {
+			trả_về ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	trả_về NULL;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+số_nguyên get_signame_by_idx(size_t idx, const char **signame, số_nguyên *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	nếu (idx >= ARRAY_SIZE(ul_signames))
+		trả_về -1;
 
-	if (signame)
+	nếu (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	nếu (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	trả_về 0;
 
 }
 

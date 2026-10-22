@@ -36,51 +36,51 @@ char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
 	size_t	sz;
 	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	nếu (!ptname || !*ptname)
+		trả_về NULL;
 
-	if (!prefix)
+	nếu (!prefix)
 		prefix = "";
 
 	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	nếu (!(f = fopen(path, "r" UL_CLOEXECSTR)))
+		trả_về NULL;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	nếu (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
+		nếu (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
 		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
+		nếu ((prefix && *prefix) || access(path, F_OK) == 0)
 			res = strdup(path);
 	}
 	fclose(f);
-	return res;
+	trả_về res;
 }
 
 char *ul_canonicalize_dm_name(const char *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	trả_về ul_canonicalize_dm_name_prefixed(NULL, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+static số_nguyên is_dm_devname(char *canonical, char **name)
 {
 	struct stat sb;
 	char *p = strrchr(canonical, '/');
 
 	*name = NULL;
 
-	if (!p
+	nếu (!p
 	    || strncmp(p, "/dm-", 4) != 0
 	    || !isdigit(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		trả_về 0;
 
 	*name = p + 1;
-	return 1;
+	trả_về 1;
 }
 
 /*
@@ -93,40 +93,40 @@ char *ul_absolute_path(const char *path)
 	char cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	nếu (!ul_is_relative_path(path)) {
 		errno = EINVAL;
-		return NULL;
+		trả_về NULL;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	nếu (!getcwd(cwd, sizeof(cwd)))
+		trả_về NULL;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
+	nếu (ul_startswith(path, "./"))
 		path += 2;
-	else if (strcmp(path, ".") == 0)
+	không_thì nếu (strcmp(path, ".") == 0)
 		path = NULL;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	nếu (!path || !*path)
+		trả_về strdup(cwd);
 
 	csz = strlen(cwd);
 	psz = strlen(path);
 
 	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	nếu (!res)
+		trả_về NULL;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
 	memcpy(p, path, psz + 1);
 
-	return res;
+	trả_về res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
+static số_nguyên __attribute__((nonnull(2)))
 do_canonicalize(const char *path, char **result,
 		void *data __attribute__((__unused__)))
 {
@@ -134,27 +134,27 @@ do_canonicalize(const char *path, char **result,
 
 	*result = NULL;
 
-	if (!path || !*path) {
+	nếu (!path || !*path) {
 		errno = EINVAL;
-		return -errno;
+		trả_về -errno;
 	}
 
 	errno = 0;
 	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	nếu (!canonical)
+		trả_về 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
+	nếu (is_dm_devname(canonical, &dmname)) {
 		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
+		nếu (dm) {
 			free(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
+	nếu (canonical)
 		*result = canonical;
-	return 0;
+	trả_về 0;
 }
 
 /*
@@ -166,10 +166,10 @@ char *ul_canonicalize_path(const char *path)
 {
 	char *canonical = NULL;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	nếu (do_canonicalize(path, &canonical, NULL) == 1)
+		trả_về strdup(path);
 
-	return canonical;
+	trả_về canonical;
 }
 
 /*
@@ -178,15 +178,15 @@ char *ul_canonicalize_path(const char *path)
  */
 char *ul_canonicalize_path_restricted(const char *path)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	trả_về ul_restricted_path_oper(path, do_canonicalize, NULL);
 }
 
 #ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+số_nguyên main(số_nguyên argc, char **argv)
 {
 	char *p;
 
-	if (argc < 2) {
+	nếu (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
