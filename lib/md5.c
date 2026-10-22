@@ -14,28 +14,28 @@
  * needed on buffers full of bytes, and then call MD5Final, which
  * will fill a supplied 16-byte array with the digest.
  */
-#include <string.h>		/* for memcpy() */
+#ضمن <string.h>		/* for memcpy() */
 
-#include "md5.h"
+#ضمن "md5.h"
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#إذا __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 # define byteReverse(buf, len)	/* Nothing */
-#else
-static void byteReverse(unsigned char *buf, unsigned longs);
+#وإلا
+ساكن فراغ byteReverse(unsigned حرف *buf, unsigned longs);
 
 #ifndef ASM_MD5
 /*
  * Note: this code is harmless on little-endian machines.
  */
-static void byteReverse(unsigned char *buf, unsigned longs)
+ساكن فراغ byteReverse(unsigned حرف *buf, unsigned longs)
 {
     uint32_t t;
-    do {
+    افعل {
 	t = (uint32_t) ((unsigned) buf[3] << 8 | buf[2]) << 16 |
 	    ((unsigned) buf[1] << 8 | buf[0]);
 	*(uint32_t *) buf = t;
 	buf += 4;
-    } while (--longs);
+    } طالما (--longs);
 }
 #endif /* !ASM_MD5 */
 #endif /* __ORDER_LITTLE_ENDIAN__ */
@@ -44,7 +44,7 @@ static void byteReverse(unsigned char *buf, unsigned longs)
  * Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
  * initialization constants.
  */
-void ul_MD5Init(struct UL_MD5Context *ctx)
+فراغ ul_MD5Init(بنية UL_MD5Context *ctx)
 {
     ctx->buf[0] = 0x67452301;
     ctx->buf[1] = 0xefcdab89;
@@ -59,14 +59,14 @@ void ul_MD5Init(struct UL_MD5Context *ctx)
  * Update context to reflect the concatenation of another buffer full
  * of bytes.
  */
-void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned len)
+فراغ ul_MD5Update(بنية UL_MD5Context *ctx, unsigned حرف ثابت *buf, unsigned len)
 {
     uint32_t t;
 
     /* Update bitcount */
 
     t = ctx->bits[0];
-    if ((ctx->bits[0] = t + ((uint32_t) len << 3)) < t)
+    إذا ((ctx->bits[0] = t + ((uint32_t) len << 3)) < t)
 	ctx->bits[1]++;		/* Carry from low to high */
     ctx->bits[1] += len >> 29;
 
@@ -74,13 +74,13 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
 
     /* Handle any leading odd-sized chunks */
 
-    if (t) {
-	unsigned char *p = (unsigned char *) ctx->in + t;
+    إذا (t) {
+	unsigned حرف *p = (unsigned حرف *) ctx->in + t;
 
 	t = 64 - t;
-	if (len < t) {
+	إذا (len < t) {
 	    memcpy(p, buf, len);
-	    return;
+	    أرجع;
 	}
 	memcpy(p, buf, t);
 	byteReverse(ctx->in, 16);
@@ -90,7 +90,7 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
     }
     /* Process data in 64-byte chunks */
 
-    while (len >= 64) {
+    طالما (len >= 64) {
 	memcpy(ctx->in, buf, 64);
 	byteReverse(ctx->in, 16);
 	ul_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
@@ -107,34 +107,34 @@ void ul_MD5Update(struct UL_MD5Context *ctx, unsigned char const *buf, unsigned 
  * Final wrapup - pad to 64-byte boundary with the bit pattern
  * 1 0* (64-bit count of bits processed, MSB-first)
  */
-void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
+فراغ ul_MD5Final(unsigned حرف digest[UL_MD5LENGTH], بنية UL_MD5Context *ctx)
 {
-    unsigned count;
-    unsigned char *p;
+    unsigned كدي;
+    unsigned حرف *p;
 
     /* Compute number of bytes mod 64 */
-    count = (ctx->bits[0] >> 3) & 0x3F;
+    كدي = (ctx->bits[0] >> 3) & 0x3F;
 
     /* Set the first char of padding to 0x80.  This is safe since there is
        always at least one byte free */
-    p = ctx->in + count;
+    p = ctx->in + كدي;
     *p++ = 0x80;
 
     /* Bytes of padding needed to make 64 bytes */
-    count = 64 - 1 - count;
+    كدي = 64 - 1 - كدي;
 
     /* Pad out to 56 mod 64 */
-    if (count < 8) {
+    إذا (كدي < 8) {
 	/* Two lots of padding:  Pad the first block to 64 bytes */
-	memset(p, 0, count);
+	memset(p, 0, كدي);
 	byteReverse(ctx->in, 16);
 	ul_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
 
 	/* Now fill the next block with 56 bytes */
 	memset(ctx->in, 0, 56);
-    } else {
+    } وإلا {
 	/* Pad block to 56 bytes */
-	memset(p, 0, count - 8);
+	memset(p, 0, كدي - 8);
     }
     byteReverse(ctx->in, 14);
 
@@ -142,13 +142,13 @@ void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
      * Use memcpy to avoid aliasing problems.  On most systems,
      * this will be optimized away to the same code.
      */
-    memcpy(&ctx->in[14 * sizeof(uint32_t)], &ctx->bits[0], 4);
-    memcpy(&ctx->in[15 * sizeof(uint32_t)], &ctx->bits[1], 4);
+    memcpy(&ctx->in[14 * حجم(uint32_t)], &ctx->bits[0], 4);
+    memcpy(&ctx->in[15 * حجم(uint32_t)], &ctx->bits[1], 4);
 
     ul_MD5Transform(ctx->buf, (uint32_t *) ctx->in);
-    byteReverse((unsigned char *) ctx->buf, 4);
+    byteReverse((unsigned حرف *) ctx->buf, 4);
     memcpy(digest, ctx->buf, UL_MD5LENGTH);
-    memset(ctx, 0, sizeof(*ctx));	/* In case it's sensitive */
+    memset(ctx, 0, حجم(*ctx));	/* In case it's sensitive */
 }
 
 #ifndef ASM_MD5
@@ -170,9 +170,9 @@ void ul_MD5Final(unsigned char digest[UL_MD5LENGTH], struct UL_MD5Context *ctx)
  * reflect the addition of 16 longwords of new data.  MD5Update blocks
  * the data and converts bytes into longwords for this routine.
  */
-void ul_MD5Transform(uint32_t buf[4], uint32_t const in[16])
+فراغ ul_MD5Transform(uint32_t buf[4], uint32_t ثابت in[16])
 {
-    register uint32_t a, b, c, d;
+    سجل uint32_t a, b, c, d;
 
     a = buf[0];
     b = buf[1];
