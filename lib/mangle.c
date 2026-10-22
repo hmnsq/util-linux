@@ -6,67 +6,67 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <ctype.h>
 
-#include "mangle.h"
-#include "c.h"
+#అన్తర్భావ "mangle.h"
+#అన్తర్భావ "c.h"
 
-#define isoctal(a)		(((a) & ~7) == '0')
+#నిర్వచించు isoctal(a)		(((a) & ~7) == '0')
 
-#define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
+#నిర్వచించు from_hex(c)		(అంకెనా(c) ? c - '0' : tolower(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+స్థిర అంతఃవరుస పూర్ణాంకం is_unwanted_char(గుర్తులేని అక్షరం c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	తిరిగి c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+అక్షరం *mangle(స్థిరరాశి అక్షరం *s)
 {
-	char *ss, *sp;
+	అక్షరం *ss, *sp;
 
-	if (!s)
-		return NULL;
+	ఒకవేళ (!s)
+		తిరిగి ఖాళీ;
 
-	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	ss = sp = జ్ఞాపకం_ఇవ్వు(4 * అక్షరశ్రేణి_పొడవు(s) + 1);
+	ఒకవేళ (!sp)
+		తిరిగి ఖాళీ;
+	అయితే(1) {
+		ఒకవేళ (!*s) {
 			*sp = '\0';
-			break;
+			ఆపు;
 		}
-		if (is_unwanted_char(*s)) {
+		ఒకవేళ (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} లేకపోతే
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	తిరిగి ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+శూన్య unmangle_గమ్యం_బఫరు(స్థిరరాశి అక్షరం *s, అక్షరం *buf, size_t len)
 {
 	size_t sz = 0;
 
-	if (!s)
-		return;
+	ఒకవేళ (!s)
+		తిరిగి;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	అయితే(*s && sz < len - 1) {
+		ఒకవేళ (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} లేకపోతే {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,128 +74,128 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+size_t unhexmangle_గమ్యం_బఫరు(స్థిరరాశి అక్షరం *s, అక్షరం *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	స్థిరరాశి అక్షరం *buf0 = buf;
 
-	if (!s)
-		return 0;
+	ఒకవేళ (!s)
+		తిరిగి 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+	అయితే(*s && sz < len - 1) {
+		ఒకవేళ (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
 		    isxdigit(s[2]) && isxdigit(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} లేకపోతే {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	తిరిగి buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+size_t unescape_గమ్యం_బఫరు(స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం *wanted, అక్షరం *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	స్థిరరాశి అక్షరం *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	అయితే (*s && sz < len - 1) {
+		ఒకవేళ (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} లేకపోతే {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	తిరిగి buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+స్థిర అంతఃవరుస స్థిరరాశి అక్షరం *skip_nonspaces(స్థిరరాశి అక్షరం *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	అయితే (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	తిరిగి s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+అక్షరం *unmangle(స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం **చివర)
 {
-	char *buf;
-	const char *e;
+	అక్షరం *buf;
+	స్థిరరాశి అక్షరం *e;
 	size_t sz;
 
-	if (!s)
-		return NULL;
+	ఒకవేళ (!s)
+		తిరిగి ఖాళీ;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
-		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	ఒకవేళ (చివర)
+		*చివర = e;
+	ఒకవేళ (e == s)
+		తిరిగి ఖాళీ;	/* empty string */
 
-	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	buf = జ్ఞాపకం_ఇవ్వు(sz);
+	ఒకవేళ (!buf)
+		తిరిగి ఖాళీ;
 
-	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	unmangle_గమ్యం_బఫరు(s, buf, sz);
+	తిరిగి buf;
 }
 
-#ifdef TEST_PROGRAM_MANGLE
-#include <errno.h>
-int main(int argc, char *argv[])
+#నిర్వచితమైతే TEST_కార్యక్రమం_MANGLE
+#అన్తర్భావ <errno.h>
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
+	అక్షరం *p = ఖాళీ;
+	ఒకవేళ (argc < 3) {
 		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
-						program_invocation_short_name);
-		return EXIT_FAILURE;
+						కార్యక్రమం_invocation_short_name);
+		తిరిగి EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	ఒకవేళ (!strcmp(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
-		printf("mangled: '%s'\n", p);
-		free(p);
+		రాయి("mangled: '%s'\n", p);
+		విడుదల(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	లేకపోతే ఒకవేళ (!strcmp(argv[1], "--unmangle")) {
+		అక్షరం *x = unmangle(argv[2], ఖాళీ);
 
-		if (x) {
-			printf("unmangled: '%s'\n", x);
-			free(x);
+		ఒకవేళ (x) {
+			రాయి("unmangled: '%s'\n", x);
+			విడుదల(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
-			unmangle_to_buffer(x, x, strlen(x) + 1);
+		ఒకవేళ (x) {
+			unmangle_గమ్యం_బఫరు(x, x, అక్షరశ్రేణి_పొడవు(x) + 1);
 
-			printf("self-unmangled: '%s'\n", x);
-			free(x);
+			రాయి("self-unmangled: '%s'\n", x);
+			విడుదల(x);
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
-			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
+	లేకపోతే ఒకవేళ (!strcmp(argv[1], "--unescape")) {
+		అక్షరం *x = strdup(argv[2]);
+		ఒకవేళ (x) {
+			unescape_గమ్యం_బఫరు(x, ",\"", x, అక్షరశ్రేణి_పొడవు(x) + 1);
 
-			printf("self-unescaped: '%s'\n", x);
-			free(x);
+			రాయి("self-unescaped: '%s'\n", x);
+			విడుదల(x);
 		}
 	}
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_MANGLE */
+#అయితే_ముగింపు /* TEST_PROGRAM_MANGLE */

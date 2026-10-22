@@ -4,122 +4,122 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
+#అన్తర్భావ <pwd.h>
+#అన్తర్భావ <grp.h>
+#అన్తర్భావ <sys/types.h>
 
-#include "c.h"
-#include "widechar.h"
-#include "idcache.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "widechar.h"
+#అన్తర్భావ "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+నిర్మాణం identry *get_id(నిర్మాణం idcache *ic, గుర్తులేని దీర్ఘ పూర్ణాంకం id)
 {
-	struct identry *ent;
+	నిర్మాణం identry *ent;
 
-	if (!ic)
-		return NULL;
+	ఒకవేళ (!ic)
+		తిరిగి ఖాళీ;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	కొరకు (ent = ic->ent; ent; ent = ent->తదుపరి) {
+		ఒకవేళ (ent->id == id)
+			తిరిగి ent;
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-struct idcache *new_idcache(void)
+నిర్మాణం idcache *new_idcache(శూన్య)
 {
-	return calloc(1, sizeof(struct idcache));
+	తిరిగి సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(నిర్మాణం idcache));
 }
 
-void free_idcache(struct idcache *ic)
+శూన్య free_idcache(నిర్మాణం idcache *ic)
 {
-	struct identry *ent;
+	నిర్మాణం identry *ent;
 
-	if (!ic)
-		return;
+	ఒకవేళ (!ic)
+		తిరిగి;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
-		free(ent->name);
-		free(ent);
-		ent = next;
+	అయితే (ent) {
+		నిర్మాణం identry *తదుపరి = ent->తదుపరి;
+		విడుదల(ent->name);
+		విడుదల(ent);
+		ent = తదుపరి;
 	}
 
-	free(ic);
+	విడుదల(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+స్థిర శూన్య కూడు_id(నిర్మాణం idcache *ic, అక్షరం *name, గుర్తులేని దీర్ఘ పూర్ణాంకం id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	నిర్మాణం identry *ent, *x;
+	పూర్ణాంకం w = 0;
 
-	if (!ic)
-		return;
+	ఒకవేళ (!ic)
+		తిరిగి;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(నిర్మాణం identry));
+	ఒకవేళ (!ent)
+		తిరిగి;
 	ent->id = id;
 
-	if (name) {
-#ifdef HAVE_WIDECHAR
+	ఒకవేళ (name) {
+#నిర్వచితమైతే HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		ఒకవేళ (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
-#endif
-			w = strlen(name);
+		లేకపోతే
+#అయితే_ముగింపు
+			w = అక్షరశ్రేణి_పొడవు(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	ఒకవేళ (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
-			free(ent);
-			return;
+		ఒకవేళ (!ent->name) {
+			విడుదల(ent);
+			తిరిగి;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
-			free(ent);
-			return;
+	} లేకపోతే {
+		ఒకవేళ (asprintf(&ent->name, "%lu", id) < 0) {
+			విడుదల(ent);
+			తిరిగి;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	కొరకు (x = ic->ent; x && x->తదుపరి; x = x->తదుపరి);
 
-	if (x)
-		x->next = ent;
-	else
+	ఒకవేళ (x)
+		x->తదుపరి = ent;
+	లేకపోతే
 		ic->ent = ent;
 
-	if (w <= 0)
-		w = ent->name ? strlen(ent->name) : 0;
-	ic->width = ic->width < w ? w : ic->width;
+	ఒకవేళ (w <= 0)
+		w = ent->name ? అక్షరశ్రేణి_పొడవు(ent->name) : 0;
+	ic->వెడల్పు = ic->వెడల్పు < w ? w : ic->వెడల్పు;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+శూన్య కూడు_uid(నిర్మాణం idcache *cache, గుర్తులేని దీర్ఘ పూర్ణాంకం id)
 {
-	struct identry *ent = get_id(cache, id);
+	నిర్మాణం identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
-		add_id(cache, pw ? pw->pw_name : NULL, id);
+	ఒకవేళ (!ent) {
+		నిర్మాణం passwd *pw = getpwuid((uid_t) id);
+		కూడు_id(cache, pw ? pw->pw_name : ఖాళీ, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+శూన్య కూడు_gid(నిర్మాణం idcache *cache, గుర్తులేని దీర్ఘ పూర్ణాంకం id)
 {
-	struct identry *ent = get_id(cache, id);
+	నిర్మాణం identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
-		add_id(cache, gr ? gr->gr_name : NULL, id);
+	ఒకవేళ (!ent) {
+		నిర్మాణం group *gr = getgrgid((gid_t) id);
+		కూడు_id(cache, gr ? gr->gr_name : ఖాళీ, id);
 	}
 }
 

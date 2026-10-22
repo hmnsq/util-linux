@@ -5,10 +5,10 @@
  * GNU Lesser General Public License.
  */
 
-#include <string.h>
+#అన్తర్భావ <string.h>
 
-#include "match.h"
-#include "cctype.h"
+#అన్తర్భావ "match.h"
+#అన్తర్భావ "cctype.h"
 
 /*
  * match_fstype:
@@ -20,35 +20,35 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+పూర్ణాంకం సరిపోలిక_fstype(స్థిరరాశి అక్షరం *type, స్థిరరాశి అక్షరం *నమూనా)
 {
-	int no = 0;		/* negated types list */
-	int len;
-	const char *p;
+	పూర్ణాంకం no = 0;		/* negated types list */
+	పూర్ణాంకం len;
+	స్థిరరాశి అక్షరం *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	ఒకవేళ (!నమూనా && !type)
+		తిరిగి 1;
+	ఒకవేళ (!నమూనా)
+		తిరిగి 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	ఒకవేళ (!అక్షరశ్రేణి_పోలిక(నమూనా, "no", 2)) {
 		no = 1;
-		pattern += 2;
+		నమూనా += 2;
 	}
 
 	/* Does type occur in types, separated by commas? */
-	len = strlen(type);
-	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	len = అక్షరశ్రేణి_పొడవు(type);
+	p = నమూనా;
+	అయితే(1) {
+		ఒకవేళ (!అక్షరశ్రేణి_పోలిక(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			తిరిగి 0;
+		ఒకవేళ (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			తిరిగి !no;
 		p = strchr(p,',');
-		if (!p)
-			break;
+		ఒకవేళ (!p)
+			ఆపు;
 		p++;
 	}
-	return no;
+	తిరిగి no;
 }

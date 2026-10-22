@@ -13,93 +13,93 @@
  * along with this program.  If not, see <https://gnu.org/licenses/>.
  */
 
-#include <sys/prctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <errno.h>
+#అన్తర్భావ <sys/prctl.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <errno.h>
 
-#include "c.h"
-#include "caputils.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "nls.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "caputils.h"
+#అన్తర్భావ "pathnames.h"
+#అన్తర్భావ "procfs.h"
+#అన్తర్భావ "nls.h"
 
-static int test_cap(unsigned int cap)
+స్థిర పూర్ణాంకం test_cap(గుర్తులేని పూర్ణాంకం cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	తిరిగి prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+స్థిర పూర్ణాంకం cap_చివరి_by_bsearch(పూర్ణాంకం *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	పూర్ణాంకం cap = గరిష్ఠ_పూర్ణాంకం;
+	గుర్తులేని పూర్ణాంకం cap0 = 0, cap1 = గరిష్ఠ_పూర్ణాంకం;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	అయితే ((పూర్ణాంకం)cap0 < cap) {
+		ఒకవేళ (test_cap(cap))
 			cap0 = cap;
-		else
+		లేకపోతే
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	తిరిగి 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+స్థిర పూర్ణాంకం cap_చివరి_by_procfs(పూర్ణాంకం *ret)
 {
-	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	FILE *f = fopen(మార్గం_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
+	పూర్ణాంకం rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	ఒకవేళ (f && fd_is_procfs(fileno(f))) {
+		పూర్ణాంకం cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
-		    cap < INT_MAX && !test_cap(cap + 1)) {
+		ఒకవేళ (fscanf(f, "%d", &cap) == 1 &&
+		    cap < గరిష్ఠ_పూర్ణాంకం && !test_cap(cap + 1)) {
 
 			*ret = cap;
 			rc = 0;
 		}
 	}
 
-	if (f)
+	ఒకవేళ (f)
 		fclose(f);
-	return rc;
+	తిరిగి rc;
 }
 
-int cap_last_cap(void)
+పూర్ణాంకం cap_చివరి_cap(శూన్య)
 {
-	static int cap = -1;
+	స్థిర పూర్ణాంకం cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
-		cap_last_by_bsearch(&cap);
+	ఒకవేళ (cap != -1)
+		తిరిగి cap;
+	ఒకవేళ (cap_చివరి_by_procfs(&cap) < 0)
+		cap_చివరి_by_bsearch(&cap);
 
-	return cap;
+	తిరిగి cap;
 }
 
-void cap_permitted_to_ambient(void)
+శూన్య cap_permitted_గమ్యం_ambient(శూన్య)
 {
 	/* We use capabilities system calls to propagate the permitted
 	 * capabilities into the ambient set because we may have
 	 * already forked so be in async-signal-safe context. */
-	struct __user_cap_header_struct header = {
-		.version = _LINUX_CAPABILITY_VERSION_3,
+	నిర్మాణం __user_cap_header_struct శీర్షిక = {
+		.సంస్కరణ = LINUX_CAPABILITY_సంస్కరణ_3,
 		.pid = 0,
 	};
-	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
+	నిర్మాణం __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
+	ఒకవేళ (capget(&శీర్షిక, payload) < 0)
 		err(EXIT_FAILURE, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
@@ -107,49 +107,49 @@ void cap_permitted_to_ambient(void)
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
+	ఒకవేళ (capset(&శీర్షిక, payload) < 0)
 		err(EXIT_FAILURE, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	కొరకు (cap = 0; cap < (పరిమాణం(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
-			continue;
+		ఒకవేళ (cap > (uint64_t) cap_చివరి_cap())
+			కొనసాగు;
 
-		if ((effective & (1ULL << cap))
+		ఒకవేళ ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
 			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
-#ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+#నిర్వచితమైతే TEST_కార్యక్రమం_CAPUTILS
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	int rc = 0, cap;
+	పూర్ణాంకం rc = 0, cap;
 
-	if (argc < 2) {
+	ఒకవేళ (argc < 2) {
 		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				కార్యక్రమం_invocation_short_name);
+		తిరిగి EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
-		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
-			printf("last cap: %d\n", cap);
+	ఒకవేళ (strcmp(argv[1], "--last-by-procfs") == 0) {
+		rc = cap_చివరి_by_procfs(&cap);
+		ఒకవేళ (rc == 0)
+			రాయి("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
-		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
-			printf("last cap: %d\n", cap);
+	} లేకపోతే ఒకవేళ (strcmp(argv[1], "--last-by-bsearch") == 0) {
+		rc = cap_చివరి_by_bsearch(&cap);
+		ఒకవేళ (rc == 0)
+			రాయి("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
-		printf("last cap: %d\n", cap_last_cap());
+	} లేకపోతే ఒకవేళ (strcmp(argv[1], "--last") == 0)
+		రాయి("last cap: %d\n", cap_చివరి_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	తిరిగి rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-#endif
+#అయితే_ముగింపు

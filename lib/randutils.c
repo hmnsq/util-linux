@@ -7,85 +7,85 @@
  * the terms of the Modified BSD License. The complete text of the license is
  * available in the Documentation/licenses/COPYING.BSD-3-Clause file.
  */
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
-#ifdef HAVE_SYS_SYSCALL_H
-#include <sys/syscall.h>
-#endif
-#include "c.h"
-#include "timeutils.h"
-#include "randutils.h"
-#include "nls.h"
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/time.h>
+#నిర్వచితమైతే HAVE_SYS_SYSCALL_H
+#అన్తర్భావ <sys/syscall.h>
+#అయితే_ముగింపు
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "timeutils.h"
+#అన్తర్భావ "randutils.h"
+#అన్తర్భావ "nls.h"
 
 
-#ifdef HAVE_GETRANDOM
+#నిర్వచితమైతే HAVE_GETRANDOM
 # include <sys/random.h>
-#elif defined (__linux__)
-# if !defined(SYS_getrandom) && defined(__NR_getrandom)
+#లేదావేళ defined (__linux__)
+# ఒకవేళ !defined(SYS_getrandom) && defined(__NR_getrandom)
    /* usable kernel-headers, but old glibc-headers */
 #  define SYS_getrandom __NR_getrandom
 # endif
-#endif
+#అయితే_ముగింపు
 
-#if !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
+#ఒకవేళ !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
 /* libc without function, but we have syscall */
-#define GRND_NONBLOCK 0x01
-#define GRND_RANDOM 0x02
-static int getrandom(void *buf, size_t buflen, unsigned int flags)
+#నిర్వచించు GRND_NONBLOCK 0x01
+#నిర్వచించు GRND_RANDOM 0x02
+స్థిర పూర్ణాంకం getrandom(శూన్య *buf, size_t buflen, గుర్తులేని పూర్ణాంకం flags)
 {
-	return (syscall(SYS_getrandom, buf, buflen, flags));
+	తిరిగి (syscall(SYS_getrandom, buf, buflen, flags));
 }
 # define HAVE_GETRANDOM
-#endif
+#అయితే_ముగింపు
 
-#ifdef HAVE_SRANDOM
-#define srand(x)	srandom(x)
-#define rand()		random()
-#endif
+#నిర్వచితమైతే HAVE_SRANDOM
+#నిర్వచించు srand(x)	srandom(x)
+#నిర్వచించు rand()		random()
+#అయితే_ముగింపు
 
-#if defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
-#define DO_JRAND_MIX
-THREAD_LOCAL unsigned short ul_jrand_seed[3];
-#endif
+#ఒకవేళ defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
+#నిర్వచించు DO_JRAND_MIX
+THREAD_LOCAL గుర్తులేని పొట్టి ul_jrand_విత్తనం[3];
+#అయితే_ముగింపు
 
-static void crank_random(void)
+స్థిర శూన్య crank_random(శూన్య)
 {
-	int i;
-	struct timeval tv;
-	unsigned int n_pid, n_uid;
+	పూర్ణాంకం i;
+	నిర్మాణం timeval tv;
+	గుర్తులేని పూర్ణాంకం n_pid, n_uid;
 
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, ఖాళీ);
 	n_pid = getpid();
 	n_uid = getuid();
 	srand((n_pid << 16) ^ n_uid ^ tv.tv_sec ^ tv.tv_usec);
 
-#ifdef DO_JRAND_MIX
-	ul_jrand_seed[0] = getpid() ^ (tv.tv_sec & 0xFFFF);
-	ul_jrand_seed[1] = getppid() ^ (tv.tv_usec & 0xFFFF);
-	ul_jrand_seed[2] = (tv.tv_sec ^ tv.tv_usec) >> 16;
-#endif
+#నిర్వచితమైతే DO_JRAND_MIX
+	ul_jrand_విత్తనం[0] = getpid() ^ (tv.tv_sec & 0xFFFF);
+	ul_jrand_విత్తనం[1] = getppid() ^ (tv.tv_usec & 0xFFFF);
+	ul_jrand_విత్తనం[2] = (tv.tv_sec ^ tv.tv_usec) >> 16;
+#అయితే_ముగింపు
 	/* Crank the random number generator a few times */
-	gettimeofday(&tv, NULL);
-	for (i = (tv.tv_sec ^ tv.tv_usec) & 0x1F; i > 0; i--)
+	gettimeofday(&tv, ఖాళీ);
+	కొరకు (i = (tv.tv_sec ^ tv.tv_usec) & 0x1F; i > 0; i--)
 		rand();
 }
 
-static int random_get_fd(ul_random_src_t *src)
+స్థిర పూర్ణాంకం random_get_fd(ul_random_src_t *src)
 {
-	int fd;
+	పూర్ణాంకం fd;
 
 	*src = UL_RAND_URANDOM;
 	fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
-	if (fd == -1) {
+	ఒకవేళ (fd == -1) {
 		*src = UL_RAND_RANDOM;
 		fd = open("/dev/random", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	}
 	crank_random();
-	return fd;
+	తిరిగి fd;
 }
 
 /*
@@ -93,63 +93,63 @@ static int random_get_fd(ul_random_src_t *src)
  * Use /dev/urandom if possible, and if not,
  * use glibc pseudo-random functions.
  */
-#define UL_RAND_READ_ATTEMPTS	8
-#define UL_RAND_READ_DELAY	125000	/* microseconds */
+#నిర్వచించు UL_RAND_READ_ATTEMPTS	8
+#నిర్వచించు UL_RAND_READ_DELAY	125000	/* microseconds */
 
 /*
  * Write @nbytes random bytes into @buf.
  *
  * Returns source of random bytes (0 for weak quality).
  */
-ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
+ul_random_src_t ul_random_get_బైట్లు(శూన్య *buf, size_t nbytes)
 {
-	unsigned char *cp = (unsigned char *)buf;
+	గుర్తులేని అక్షరం *cp = (గుర్తులేని అక్షరం *)buf;
 	size_t i, n = nbytes;
 	ul_random_src_t src;
-	int lose_counter = 0;
+	పూర్ణాంకం lose_counter = 0;
 
-#ifdef HAVE_GETRANDOM
-	while (n > 0) {
-		int x;
+#నిర్వచితమైతే HAVE_GETRANDOM
+	అయితే (n > 0) {
+		పూర్ణాంకం x;
 
 		errno = 0;
 		x = getrandom(cp, n, GRND_NONBLOCK);
-		if (x > 0) {			/* success */
+		ఒకవేళ (x > 0) {			/* success */
 		       n -= x;
 		       cp += x;
 		       lose_counter = 0;
 		       errno = 0;
-		} else if (errno == ENOSYS) {	/* kernel without getrandom() */
-			break;
+		} లేకపోతే ఒకవేళ (errno == ENOSYS) {	/* kernel without getrandom() */
+			ఆపు;
 
-		} else if (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
+		} లేకపోతే ఒకవేళ (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
 			xusleep(UL_RAND_READ_DELAY);	/* no entropy, wait and try again */
 			lose_counter++;
-		} else
-			break;
+		} లేకపోతే
+			ఆపు;
 	}
-	if (n == 0)
-		return UL_RAND_GETRANDOM;
+	ఒకవేళ (n == 0)
+		తిరిగి UL_RAND_GETRANDOM;
 
-	if (errno == ENOSYS)
+	ఒకవేళ (errno == ENOSYS)
 	/*
 	 * We've been built against headers that support getrandom, but the
 	 * running kernel does not.  Fallback to reading from /dev/{u,}random
 	 * as before
 	 */
-#endif
+#అయితే_ముగింపు
 	{
-		int fd = random_get_fd(&src);
+		పూర్ణాంకం fd = random_get_fd(&src);
 
 		lose_counter = 0;
-		if (fd >= 0) {
-			while (n > 0) {
-				ssize_t x = read(fd, cp, n);
-				if (x <= 0) {
-					if (lose_counter++ > UL_RAND_READ_ATTEMPTS)
-						break;
+		ఒకవేళ (fd >= 0) {
+			అయితే (n > 0) {
+				ssize_t x = పఠ(fd, cp, n);
+				ఒకవేళ (x <= 0) {
+					ఒకవేళ (lose_counter++ > UL_RAND_READ_ATTEMPTS)
+						ఆపు;
 					xusleep(UL_RAND_READ_DELAY);
-					continue;
+					కొనసాగు;
 				}
 				n -= x;
 				cp += x;
@@ -158,90 +158,90 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 
 			close(fd);
 		}
-		if (n == 0)
-			return src;
+		ఒకవేళ (n == 0)
+			తిరిగి src;
 	}
 	/*
 	 * We do this all the time, but this is the only source of
 	 * randomness if /dev/random/urandom is out to lunch.
 	 */
 	crank_random();
-	for (cp = buf, i = 0; i < nbytes; i++)
+	కొరకు (cp = buf, i = 0; i < nbytes; i++)
 		*cp++ ^= (rand() >> 7) & 0xFF;
 
-#ifdef DO_JRAND_MIX
+#నిర్వచితమైతే DO_JRAND_MIX
 	{
-		unsigned short tmp_seed[3];
+		గుర్తులేని పొట్టి tmp_విత్తనం[3];
 
-		memcpy(tmp_seed, ul_jrand_seed, sizeof(tmp_seed));
-		ul_jrand_seed[2] = ul_jrand_seed[2] ^ syscall(__NR_gettid);
-		for (cp = buf, i = 0; i < nbytes; i++)
-			*cp++ ^= (jrand48(tmp_seed) >> 7) & 0xFF;
-		memcpy(ul_jrand_seed, tmp_seed,
-		       sizeof(ul_jrand_seed)-sizeof(unsigned short));
+		జ్ఞాపకం_నకలు(tmp_విత్తనం, ul_jrand_విత్తనం, పరిమాణం(tmp_విత్తనం));
+		ul_jrand_విత్తనం[2] = ul_jrand_విత్తనం[2] ^ syscall(__NR_gettid);
+		కొరకు (cp = buf, i = 0; i < nbytes; i++)
+			*cp++ ^= (jrand48(tmp_విత్తనం) >> 7) & 0xFF;
+		జ్ఞాపకం_నకలు(ul_jrand_విత్తనం, tmp_విత్తనం,
+		       పరిమాణం(ul_jrand_విత్తనం)-పరిమాణం(గుర్తులేని పొట్టి));
 	}
-#endif
+#అయితే_ముగింపు
 
-	return UL_RAND_WEAK;
+	తిరిగి UL_RAND_WEAK;
 }
 
 
 /*
  * Tell source of randomness.
  */
-const char *ul_random_tell_source(ul_random_src_t src)
+స్థిరరాశి అక్షరం *ul_random_tell_ఆధారం(ul_random_src_t src)
 {
-	const char *s;
+	స్థిరరాశి అక్షరం *s;
 
-	switch (src) {
-	case UL_RAND_GETRANDOM:
+	ఎంపిక (src) {
+	స్థితి UL_RAND_GETRANDOM:
 		s = _("getrandom() function");
-		break;
-	case UL_RAND_RANDOM:
+		ఆపు;
+	స్థితి UL_RAND_RANDOM:
 		s = "/dev/random";
-		break;
-	case UL_RAND_URANDOM:
+		ఆపు;
+	స్థితి UL_RAND_URANDOM:
 		s = "/dev/urandom";
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		s = _("libc pseudo-random functions");
-		break;
+		ఆపు;
 	}
 
-	return s;
+	తిరిగి s;
 }
 
-#ifdef TEST_PROGRAM_RANDUTILS
-#include <inttypes.h>
+#నిర్వచితమైతే TEST_కార్యక్రమం_RANDUTILS
+#అన్తర్భావ <inttypes.h>
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
 	size_t i, n;
 	int64_t *vp, v;
-	char *buf;
+	అక్షరం *buf;
 	size_t bufsz;
 
 	n = argc == 1 ? 16 : atoi(argv[1]);
 
-	printf("Multiple random calls:\n");
-	for (i = 0; i < n; i++) {
-		ul_random_get_bytes(&v, sizeof(v));
-		printf("#%02zu: %25"PRId64"\n", i, v);
+	రాయి("Multiple random calls:\n");
+	కొరకు (i = 0; i < n; i++) {
+		ul_random_get_బైట్లు(&v, పరిమాణం(v));
+		రాయి("#%02zu: %25"PRId64"\n", i, v);
 	}
 
 
-	printf("One random call:\n");
-	bufsz = n * sizeof(*vp);
-	buf = malloc(bufsz);
-	if (!buf)
+	రాయి("One random call:\n");
+	bufsz = n * పరిమాణం(*vp);
+	buf = జ్ఞాపకం_ఇవ్వు(bufsz);
+	ఒకవేళ (!buf)
 		err(EXIT_FAILURE, "failed to allocate buffer");
 
-	ul_random_get_bytes(buf, bufsz);
-	for (i = 0; i < n; i++) {
-		vp = (int64_t *) (buf + (i * sizeof(*vp)));
-		printf("#%02zu: %25"PRId64"\n", i, *vp);
+	ul_random_get_బైట్లు(buf, bufsz);
+	కొరకు (i = 0; i < n; i++) {
+		vp = (int64_t *) (buf + (i * పరిమాణం(*vp)));
+		రాయి("#%02zu: %25"PRId64"\n", i, *vp);
 	}
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_RANDUTILS */
+#అయితే_ముగింపు /* TEST_PROGRAM_RANDUTILS */

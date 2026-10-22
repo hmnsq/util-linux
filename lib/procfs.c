@@ -4,62 +4,62 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2021]
  */
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <errno.h>
 
-#ifdef HAVE_SYS_VFS_H
+#నిర్వచితమైతే HAVE_SYS_VFS_H
 # include <sys/vfs.h>
-#endif
+#అయితే_ముగింపు
 
-#include "c.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "vfs.h"
-#include "debug.h"
-#include "strutils.h"
-#include "statfs_magic.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "pathnames.h"
+#అన్తర్భావ "procfs.h"
+#అన్తర్భావ "fileutils.h"
+#అన్తర్భావ "all-io.h"
+#అన్తర్భావ "vfs.h"
+#అన్తర్భావ "debug.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "statfs_magic.h"
 
-static void procfs_process_deinit_path(struct path_cxt *pc);
+స్థిర శూన్య procfs_process_deinit_మార్గం(నిర్మాణం మార్గం_cxt *pc);
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulprocfs);
-UL_DEBUG_DEFINE_MASKNAMES(ulprocfs) = UL_DEBUG_EMPTY_MASKNAMES;
+స్థిర UL_DEBUG_DEFINE_ముసుగు(ulprocfs);
+UL_DEBUG_DEFINE_MASKNAMES(ulprocfs) = UL_DEBUG_ఖాళీలు_MASKNAMES;
 
-#define ULPROCFS_DEBUG_INIT	(1 << 1)
-#define ULPROCFS_DEBUG_CXT	(1 << 2)
+#నిర్వచించు ULPROCFS_DEBUG_INIT	(1 << 1)
+#నిర్వచించు ULPROCFS_DEBUG_CXT	(1 << 2)
 
-#define DBG(m, x)		__UL_DBG(ulprocfs, ULPROCFS_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulprocfs, ULPROCFS_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulprocfs, ULPROCFS_DEBUG_, m, x)
+#నిర్వచించు DBG(m, x)		__UL_DBG(ulprocfs, ULPROCFS_DEBUG_, m, x)
+#నిర్వచించు DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulprocfs, ULPROCFS_DEBUG_, m, h, x)
+#నిర్వచించు ON_DBG(m, x)		__UL_DBG_CALL(ulprocfs, ULPROCFS_DEBUG_, m, x)
 
-void ul_procfs_init_debug(void)
+శూన్య ul_procfs_init_debug(శూన్య)
 {
-	if (ulprocfs_debug_mask)
-		return;
+	ఒకవేళ (ulprocfs_debug_ముసుగు)
+		తిరిగి;
 	__UL_INIT_DEBUG_FROM_ENV(ulprocfs, ULPROCFS_DEBUG_, 0, ULPROCFS_DEBUG);
 }
 
-struct path_cxt *ul_new_procfs_path(pid_t pid, const char *prefix)
+నిర్మాణం మార్గం_cxt *ul_new_procfs_మార్గం(pid_t pid, స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	struct path_cxt *pc = ul_new_path(NULL);
+	నిర్మాణం మార్గం_cxt *pc = ul_new_మార్గం(ఖాళీ);
 
-	if (!pc)
-		return NULL;
-	if (prefix)
-		ul_path_set_prefix(pc, prefix);
+	ఒకవేళ (!pc)
+		తిరిగి ఖాళీ;
+	ఒకవేళ (ఉపసర్గ)
+		ul_మార్గం_సమితి_ఉపసర్గ(pc, ఉపసర్గ);
 
-	if (procfs_process_init_path(pc, pid) != 0) {
-		ul_unref_path(pc);
-		return NULL;
+	ఒకవేళ (procfs_process_init_మార్గం(pc, pid) != 0) {
+		ul_unref_మార్గం(pc);
+		తిరిగి ఖాళీ;
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
-	return pc;
+	తిరిగి pc;
 }
 
 /*
@@ -69,148 +69,148 @@ struct path_cxt *ul_new_procfs_path(pid_t pid, const char *prefix)
  * The procfs_process_deinit_path() is automatically called by ul_unref_path().
  *
  */
-int procfs_process_init_path(struct path_cxt *pc, pid_t pid)
+పూర్ణాంకం procfs_process_init_మార్గం(నిర్మాణం మార్గం_cxt *pc, pid_t pid)
 {
-	struct procfs_process *prc;
-	int rc;
-	char buf[sizeof(_PATH_PROC) + sizeof(stringify_value(UINT32_MAX)) + 2];
+	నిర్మాణం procfs_process *prc;
+	పూర్ణాంకం rc;
+	అక్షరం buf[పరిమాణం(మార్గం_PROC) + పరిమాణం(stringify_విలువ(UINT32_MAX)) + 2];
 
 	/* define path to pid stuff */
-	snprintf(buf, sizeof(buf), _PATH_PROC "/%zu", (size_t) pid);
-	rc = ul_path_set_dir(pc, buf);
-	if (rc)
-		return rc;
+	snprintf(buf, పరిమాణం(buf), మార్గం_PROC "/%zu", (size_t) pid);
+	rc = ul_మార్గం_సమితి_dir(pc, buf);
+	ఒకవేళ (rc)
+		తిరిగి rc;
 
 	/* make sure path exists */
-	rc = ul_path_get_dirfd(pc);
-	if (rc < 0)
-		return rc;
+	rc = ul_మార్గం_get_dirfd(pc);
+	ఒకవేళ (rc < 0)
+		తిరిగి rc;
 
 	/* initialize procfs specific stuff */
-	prc = ul_path_get_dialect(pc);
-	if (!prc) {
+	prc = ul_మార్గం_get_dialect(pc);
+	ఒకవేళ (!prc) {
 		DBG_OBJ(CXT, pc, ul_debug("alloc new procfs handler"));
-		prc = calloc(1, sizeof(struct procfs_process));
-		if (!prc)
-			return -ENOMEM;
+		prc = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(నిర్మాణం procfs_process));
+		ఒకవేళ (!prc)
+			తిరిగి -ENOMEM;
 
-		ul_path_set_dialect(pc, prc, procfs_process_deinit_path);
+		ul_మార్గం_సమితి_dialect(pc, prc, procfs_process_deinit_మార్గం);
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("init procfs stuff"));
 
 	prc->pid = pid;
-	return 0;
+	తిరిగి 0;
 }
 
-static void procfs_process_deinit_path(struct path_cxt *pc)
+స్థిర శూన్య procfs_process_deinit_మార్గం(నిర్మాణం మార్గం_cxt *pc)
 {
-	struct procfs_process *prc;
+	నిర్మాణం procfs_process *prc;
 
-	if (!pc)
-		return;
+	ఒకవేళ (!pc)
+		తిరిగి;
 
 	DBG_OBJ(CXT, pc, ul_debug("deinit"));
 
-	prc = ul_path_get_dialect(pc);
-	if (!prc)
-		return;
+	prc = ul_మార్గం_get_dialect(pc);
+	ఒకవేళ (!prc)
+		తిరిగి;
 
-	free(prc);
-	ul_path_set_dialect(pc, NULL, NULL);
+	విడుదల(prc);
+	ul_మార్గం_సమితి_dialect(pc, ఖాళీ, ఖాళీ);
 }
 
-static ssize_t read_procfs_file(const struct ul_vfs_ops *vfs, int fd,
-			       char *buf, size_t bufsz)
+స్థిర ssize_t read_procfs_file(స్థిరరాశి నిర్మాణం ul_vfs_ops *vfs, పూర్ణాంకం fd,
+			       అక్షరం *buf, size_t bufsz)
 {
 	ssize_t sz = 0;
 	size_t i;
 
-	if (fd < 0)
-		return -EINVAL;
+	ఒకవేళ (fd < 0)
+		తిరిగి -EINVAL;
 
 	sz = ul_vfs_read_all(vfs, fd, buf, bufsz);
-	if (sz <= 0)
-		return sz;
+	ఒకవేళ (sz <= 0)
+		తిరిగి sz;
 
-	for (i = 0; i < (size_t) sz; i++) {
-		if (buf[i] == '\0')
+	కొరకు (i = 0; i < (size_t) sz; i++) {
+		ఒకవేళ (buf[i] == '\0')
 			buf[i] = ' ';
 	}
 	buf[sz - 1] = '\0';
-	return sz;
+	తిరిగి sz;
 }
 
-static ssize_t procfs_process_get_data_for(struct path_cxt *pc, char *buf, size_t bufsz,
-					    const char *fname)
+స్థిర ssize_t procfs_process_get_దత్తాంశం_for(నిర్మాణం మార్గం_cxt *pc, అక్షరం *buf, size_t bufsz,
+					    స్థిరరాశి అక్షరం *fname)
 {
-	int fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, fname);
+	పూర్ణాంకం fd = ul_మార్గం_open(pc, O_RDONLY|O_CLOEXEC, fname);
 
-	if (fd >= 0) {
-		ssize_t sz = read_procfs_file(pc ? pc->vfs : NULL, fd, buf, bufsz);
-		ul_vfs_close(pc ? pc->vfs : NULL, fd);
-		return sz;
+	ఒకవేళ (fd >= 0) {
+		ssize_t sz = read_procfs_file(pc ? pc->vfs : ఖాళీ, fd, buf, bufsz);
+		ul_vfs_close(pc ? pc->vfs : ఖాళీ, fd);
+		తిరిగి sz;
 	}
-	return -errno;
+	తిరిగి -errno;
 }
 
-ssize_t procfs_process_get_cmdline(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_cmdline(నిర్మాణం మార్గం_cxt *pc, అక్షరం *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "cmdline");
+	తిరిగి procfs_process_get_దత్తాంశం_for(pc, buf, bufsz, "cmdline");
 }
 
-ssize_t procfs_process_get_cmdname(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_cmdname(నిర్మాణం మార్గం_cxt *pc, అక్షరం *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "comm");
+	తిరిగి procfs_process_get_దత్తాంశం_for(pc, buf, bufsz, "comm");
 }
 
-ssize_t procfs_process_get_stat(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_stat(నిర్మాణం మార్గం_cxt *pc, అక్షరం *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "stat");
+	తిరిగి procfs_process_get_దత్తాంశం_for(pc, buf, bufsz, "stat");
 }
 
-ssize_t procfs_process_get_syscall(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_syscall(నిర్మాణం మార్గం_cxt *pc, అక్షరం *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "syscall");
+	తిరిగి procfs_process_get_దత్తాంశం_for(pc, buf, bufsz, "syscall");
 }
 
-int procfs_process_get_stat_nth(struct path_cxt *pc, int n, uint64_t *re)
+పూర్ణాంకం procfs_process_get_stat_nth(నిర్మాణం మార్గం_cxt *pc, పూర్ణాంకం n, uint64_t *re)
 {
 	ssize_t rc;
-	char *key = NULL, *tok, *p;
-	char buf[BUFSIZ];
-	int i;
+	అక్షరం *కీలకం = ఖాళీ, *tok, *p;
+	అక్షరం buf[BUFSIZ];
+	పూర్ణాంకం i;
 
-	if (n == 2 || n == 3)		/* process name and status (strings) */
-		return -EINVAL;
+	ఒకవేళ (n == 2 || n == 3)		/* process name and status (strings) */
+		తిరిగి -EINVAL;
 
-	rc = procfs_process_get_data_for(pc, buf, sizeof(buf), "stat");
-	if (rc < 0)
-		return rc;
+	rc = procfs_process_get_దత్తాంశం_for(pc, buf, పరిమాణం(buf), "stat");
+	ఒకవేళ (rc < 0)
+		తిరిగి rc;
 
-	for (i = 0, tok = strtok_r(buf, " ", &key); tok;
-	     tok = strtok_r(NULL, " ", &key)) {
+	కొరకు (i = 0, tok = strtok_r(buf, " ", &కీలకం); tok;
+	     tok = strtok_r(ఖాళీ, " ", &కీలకం)) {
 
 		i++;
-		if (i == n)
-			return ul_strtou64(tok, re, 10);
+		ఒకవేళ (i == n)
+			తిరిగి ul_strtou64(tok, re, 10);
 
 		/* skip rest of the process name */
-		if (i == 2 && (p = strrchr(key, ')')))
-			key = p + 2;
+		ఒకవేళ (i == 2 && (p = strrchr(కీలకం, ')')))
+			కీలకం = p + 2;
 	}
 
-	return -EINVAL;
+	తిరిగి -EINVAL;
 }
 
-int procfs_process_get_uid(struct path_cxt *pc, uid_t *uid)
+పూర్ణాంకం procfs_process_get_uid(నిర్మాణం మార్గం_cxt *pc, uid_t *uid)
 {
-	struct stat sb;
-	int rc;
+	నిర్మాణం stat sb;
+	పూర్ణాంకం rc;
 
-	if ((rc = ul_path_stat(pc, &sb, 0, NULL)) == 0)
+	ఒకవేళ ((rc = ul_మార్గం_stat(pc, &sb, 0, ఖాళీ)) == 0)
 		*uid = sb.st_uid;
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -230,57 +230,57 @@ int procfs_process_get_uid(struct path_cxt *pc, uid_t *uid)
  *	printf("task: %d", (int) tid);
  *
  */
-int procfs_process_next_tid(struct path_cxt *pc, DIR **sub, pid_t *tid)
+పూర్ణాంకం procfs_process_తదుపరి_tid(నిర్మాణం మార్గం_cxt *pc, DIR **sub, pid_t *tid)
 {
-	struct dirent *d;
+	నిర్మాణం dirent *d;
 
-	if (!pc || !sub || !tid)
-		return -EINVAL;
+	ఒకవేళ (!pc || !sub || !tid)
+		తిరిగి -EINVAL;
 
-	if (!*sub) {
-		*sub = ul_path_opendir(pc, "task");
-		if (!*sub)
-			return -errno;
+	ఒకవేళ (!*sub) {
+		*sub = ul_మార్గం_opendir(pc, "task");
+		ఒకవేళ (!*sub)
+			తిరిగి -errno;
 	}
 
-	while ((d = xreaddir(*sub))) {
-		if (procfs_dirent_get_pid(d, tid) == 0)
-			return 0;
+	అయితే ((d = xreaddir(*sub))) {
+		ఒకవేళ (procfs_dirent_get_pid(d, tid) == 0)
+			తిరిగి 0;
 	}
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = ఖాళీ;
+	తిరిగి 1;
 }
 
-int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
+పూర్ణాంకం procfs_process_తదుపరి_fd(నిర్మాణం మార్గం_cxt *pc, DIR **sub, పూర్ణాంకం *fd)
 {
-	struct dirent *d;
+	నిర్మాణం dirent *d;
 
-	if (!pc || !sub || !fd)
-		return -EINVAL;
+	ఒకవేళ (!pc || !sub || !fd)
+		తిరిగి -EINVAL;
 
-	if (!*sub) {
-		*sub = ul_path_opendir(pc, "fd");
-		if (!*sub)
-			return -errno;
+	ఒకవేళ (!*sub) {
+		*sub = ul_మార్గం_opendir(pc, "fd");
+		ఒకవేళ (!*sub)
+			తిరిగి -errno;
 	}
 
-	while ((d = xreaddir(*sub))) {
-		uint64_t num;
-#ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
-			continue;
-#endif
-		if (ul_strtou64(d->d_name, &num, 10) < 0)
-			continue;
-		*fd = num;
-		return 0;
+	అయితే ((d = xreaddir(*sub))) {
+		uint64_t అంకె;
+#నిర్వచితమైతే _DIRENT_HAVE_D_TYPE
+		ఒకవేళ (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
+			కొనసాగు;
+#అయితే_ముగింపు
+		ఒకవేళ (ul_strtou64(d->d_name, &అంకె, 10) < 0)
+			కొనసాగు;
+		*fd = అంకె;
+		తిరిగి 0;
 	}
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = ఖాళీ;
+	తిరిగి 1;
 }
 
 /*
@@ -288,362 +288,362 @@ int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
  */
 
 /* stupid, but good enough as a basic filter */
-int procfs_dirent_is_process(struct dirent *d)
+పూర్ణాంకం procfs_dirent_is_process(నిర్మాణం dirent *d)
 {
-#ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_DIR && d->d_type != DT_UNKNOWN)
-		return 0;
-#endif
-	if (!isdigit((unsigned char) *d->d_name))
-		return 0;
+#నిర్వచితమైతే _DIRENT_HAVE_D_TYPE
+	ఒకవేళ (d->d_type != DT_DIR && d->d_type != DT_UNKNOWN)
+		తిరిగి 0;
+#అయితే_ముగింపు
+	ఒకవేళ (!అంకెనా((గుర్తులేని అక్షరం) *d->d_name))
+		తిరిగి 0;
 
-	return 1;
+	తిరిగి 1;
 }
 
-int procfs_dirent_get_pid(struct dirent *d, pid_t *pid)
+పూర్ణాంకం procfs_dirent_get_pid(నిర్మాణం dirent *d, pid_t *pid)
 {
-	uint64_t num;
+	uint64_t అంకె;
 
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	ఒకవేళ (!procfs_dirent_is_process(d))
+		తిరిగి -EINVAL;
 
-	if (ul_strtou64(d->d_name, &num, 10) < 0)
-		return -EINVAL;
+	ఒకవేళ (ul_strtou64(d->d_name, &అంకె, 10) < 0)
+		తిరిగి -EINVAL;
 
-	*pid = (pid_t) num;
-	return 0;
+	*pid = (pid_t) అంకె;
+	తిరిగి 0;
 }
 
-int procfs_dirent_get_uid(DIR *procfs, struct dirent *d, uid_t *uid)
+పూర్ణాంకం procfs_dirent_get_uid(DIR *procfs, నిర్మాణం dirent *d, uid_t *uid)
 {
-	struct stat st;
+	నిర్మాణం stat st;
 
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	ఒకవేళ (!procfs_dirent_is_process(d))
+		తిరిగి -EINVAL;
 
-	if (fstatat(dirfd(procfs), d->d_name, &st, 0))
-		return -EINVAL;
+	ఒకవేళ (fstatat(dirfd(procfs), d->d_name, &st, 0))
+		తిరిగి -EINVAL;
 
 	*uid = st.st_uid;
-	return 0;
+	తిరిగి 0;
 }
 
-int procfs_dirent_match_uid(DIR *procfs, struct dirent *d, uid_t uid)
+పూర్ణాంకం procfs_dirent_సరిపోలిక_uid(DIR *procfs, నిర్మాణం dirent *d, uid_t uid)
 {
 	uid_t x;
 
-	if (procfs_dirent_get_uid(procfs, d, &x) == 0)
-		return x == uid;
+	ఒకవేళ (procfs_dirent_get_uid(procfs, d, &x) == 0)
+		తిరిగి x == uid;
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* "name" of process; may be truncated, see prctl(2) and PR_SET_NAME.
  * The minimal of the @buf has to be 32 bytes. */
-int procfs_dirent_get_name(DIR *procfs, struct dirent *d, char *buf, size_t bufsz)
+పూర్ణాంకం procfs_dirent_get_name(DIR *procfs, నిర్మాణం dirent *d, అక్షరం *buf, size_t bufsz)
 {
 	FILE *f;
 	size_t sz;
-	char tmp[1024], *p, *end = NULL;
+	అక్షరం tmp[1024], *p, *చివర = ఖాళీ;
 
-	if (bufsz < 32)
-		return -EINVAL;
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	ఒకవేళ (bufsz < 32)
+		తిరిగి -EINVAL;
+	ఒకవేళ (!procfs_dirent_is_process(d))
+		తిరిగి -EINVAL;
 
-	snprintf(tmp, sizeof(tmp), "%s/stat", d->d_name);
+	snprintf(tmp, పరిమాణం(tmp), "%s/stat", d->d_name);
 	f = fopen_at(dirfd(procfs), tmp, O_CLOEXEC|O_RDONLY, "r");
-	if (!f)
-		return -errno;
+	ఒకవేళ (!f)
+		తిరిగి -errno;
 
-	p = fgets(tmp, sizeof(tmp), f);
+	p = fgets(tmp, పరిమాణం(tmp), f);
 	fclose(f);
-	if (!p)
-		return -errno;
+	ఒకవేళ (!p)
+		తిరిగి -errno;
 
 	/* skip PID */
-	while (*p && *p != '(')
+	అయితే (*p && *p != '(')
 		p++;
 
 	/* skip extra '(' */
-	while (*p && *p == '(')
+	అయితే (*p && *p == '(')
 		p++;
 
-	end = p;
-	while (*end && *end != ')')
-		end++;
+	చివర = p;
+	అయితే (*చివర && *చివర != ')')
+		చివర++;
 
-	sz = end - p;
-	if (sz >= bufsz)
+	sz = చివర - p;
+	ఒకవేళ (sz >= bufsz)
 		sz = bufsz - 1;
 
-	memcpy(buf, p, sz);
+	జ్ఞాపకం_నకలు(buf, p, sz);
 	buf[sz] = '\0';
 
-	return 0;
+	తిరిగి 0;
 }
 
-int procfs_dirent_match_name(DIR *procfs, struct dirent *d, const char *name)
+పూర్ణాంకం procfs_dirent_సరిపోలిక_name(DIR *procfs, నిర్మాణం dirent *d, స్థిరరాశి అక్షరం *name)
 {
-	char buf[33];
+	అక్షరం buf[33];
 
-	if (procfs_dirent_get_name(procfs, d, buf, sizeof(buf)) == 0)
-		return strcmp(name, buf) == 0;
+	ఒకవేళ (procfs_dirent_get_name(procfs, d, buf, పరిమాణం(buf)) == 0)
+		తిరిగి strcmp(name, buf) == 0;
 
-	return 0;
+	తిరిగి 0;
 }
 
-#ifdef HAVE_SYS_VFS_H
+#నిర్వచితమైతే HAVE_SYS_VFS_H
 /* checks if fd is file in a procfs;
  * returns 1 if true, 0 if false or couldn't determine */
-int fd_is_procfs(int fd)
+పూర్ణాంకం fd_is_procfs(పూర్ణాంకం fd)
 {
-	struct statfs st;
-	int ret;
+	నిర్మాణం statfs st;
+	పూర్ణాంకం ret;
 
-	do {
+	చేయి {
 		errno = 0;
 		ret = fstatfs(fd, &st);
 
-		if (ret < 0) {
-			if (errno != EINTR && errno != EAGAIN)
-				return 0;
+		ఒకవేళ (ret < 0) {
+			ఒకవేళ (errno != EINTR && errno != EAGAIN)
+				తిరిగి 0;
 			xusleep(250000);
 		}
-	} while (ret != 0);
+	} అయితే (ret != 0);
 
-	return F_TYPE_EQUAL(st.f_type, STATFS_PROC_MAGIC);
+	తిరిగి F_TYPE_EQUAL(st.f_type, STATFS_PROC_MAGIC);
 }
-#else
-int fd_is_procfs(int fd __attribute__((__unused__)))
+#లేకపోతే
+పూర్ణాంకం fd_is_procfs(పూర్ణాంకం fd __attribute__((__unused__)))
 {
-	return 0;
+	తిరిగి 0;
 }
-#endif
+#అయితే_ముగింపు
 
-static char *strdup_procfs_file(pid_t pid, const char *name)
+స్థిర అక్షరం *strdup_procfs_file(pid_t pid, స్థిరరాశి అక్షరం *name)
 {
-	char buf[BUFSIZ];
-	char *re = NULL;
-	int fd;
+	అక్షరం buf[BUFSIZ];
+	అక్షరం *re = ఖాళీ;
+	పూర్ణాంకం fd;
 
-	snprintf(buf, sizeof(buf), _PATH_PROC "/%d/%s", (int) pid, name);
+	snprintf(buf, పరిమాణం(buf), మార్గం_PROC "/%d/%s", (పూర్ణాంకం) pid, name);
 	fd = open(buf, O_CLOEXEC|O_RDONLY);
-	if (fd < 0)
-		return NULL;
+	ఒకవేళ (fd < 0)
+		తిరిగి ఖాళీ;
 
-	if (read_procfs_file(NULL, fd, buf, sizeof(buf)) > 0)
+	ఒకవేళ (read_procfs_file(ఖాళీ, fd, buf, పరిమాణం(buf)) > 0)
 		re = strdup(buf);
 	close(fd);
-	return re;
+	తిరిగి re;
 }
 
-char *pid_get_cmdname(pid_t pid)
+అక్షరం *pid_get_cmdname(pid_t pid)
 {
-	return strdup_procfs_file(pid, "comm");
+	తిరిగి strdup_procfs_file(pid, "comm");
 }
 
-char *pid_get_cmdline(pid_t pid)
+అక్షరం *pid_get_cmdline(pid_t pid)
 {
-	return strdup_procfs_file(pid, "cmdline");
+	తిరిగి strdup_procfs_file(pid, "cmdline");
 }
 
-char *pid_get_personality(pid_t pid)
+అక్షరం *pid_get_personality(pid_t pid)
 {
-	return strdup_procfs_file(pid, "personality");
+	తిరిగి strdup_procfs_file(pid, "personality");
 }
 
-#ifdef TEST_PROGRAM_PROCFS
+#నిర్వచితమైతే TEST_కార్యక్రమం_PROCFS
 
-static int test_tasks(int argc, char *argv[], const char *prefix)
+స్థిర పూర్ణాంకం test_tasks(పూర్ణాంకం argc, అక్షరం *argv[], స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	DIR *sub = NULL;
-	struct path_cxt *pc;
+	DIR *sub = ఖాళీ;
+	నిర్మాణం మార్గం_cxt *pc;
 	pid_t tid = 0, pid;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc != 2)
+		తిరిగి EXIT_FAILURE;
 
-	pid = strtol(argv[1], (char **) NULL, 10);
-	printf("PID=%d, TIDs:", pid);
+	pid = strtol(argv[1], (అక్షరం **) ఖాళీ, 10);
+	రాయి("PID=%d, TIDs:", pid);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_మార్గం(pid, ఉపసర్గ);
+	ఒకవేళ (!pc)
 		err(EXIT_FAILURE, "alloc procfs handler failed");
 
-	while (procfs_process_next_tid(pc, &sub, &tid) == 0)
-		printf(" %d", tid);
+	అయితే (procfs_process_తదుపరి_tid(pc, &sub, &tid) == 0)
+		రాయి(" %d", tid);
 
-	printf("\n");
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	రాయి("\n");
+	ul_unref_మార్గం(pc);
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_fds(int argc, char *argv[], const char *prefix)
+స్థిర పూర్ణాంకం test_fds(పూర్ణాంకం argc, అక్షరం *argv[], స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
-	DIR *sub = NULL;
-	struct path_cxt *pc;
+	DIR *sub = ఖాళీ;
+	నిర్మాణం మార్గం_cxt *pc;
 	pid_t pid;
-	int fd = -1;
+	పూర్ణాంకం fd = -1;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc != 2)
+		తిరిగి EXIT_FAILURE;
 
-	pid = strtol(argv[1], (char **) NULL, 10);
-	printf("PID=%d, FDs:", pid);
+	pid = strtol(argv[1], (అక్షరం **) ఖాళీ, 10);
+	రాయి("PID=%d, FDs:", pid);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_మార్గం(pid, ఉపసర్గ);
+	ఒకవేళ (!pc)
 		err(EXIT_FAILURE, "alloc procfs handler failed");
 
-	while (procfs_process_next_fd(pc, &sub, &fd) == 0)
-		printf(" %d", fd);
+	అయితే (procfs_process_తదుపరి_fd(pc, &sub, &fd) == 0)
+		రాయి(" %d", fd);
 
 	fputc('\n', stdout);
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ul_unref_మార్గం(pc);
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_processes(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_processes(పూర్ణాంకం argc, అక్షరం *argv[])
 {
 	DIR *dir;
-	struct dirent *d;
-	char *name = NULL;
+	నిర్మాణం dirent *d;
+	అక్షరం *name = ఖాళీ;
 	uid_t uid = (uid_t) -1;
-	char buf[128];
+	అక్షరం buf[128];
 
-	if (argc >= 3 && strcmp(argv[1], "--name") == 0)
+	ఒకవేళ (argc >= 3 && strcmp(argv[1], "--name") == 0)
 		name = argv[2];
-	if (argc >= 3 && strcmp(argv[1], "--uid") == 0)
+	ఒకవేళ (argc >= 3 && strcmp(argv[1], "--uid") == 0)
 		uid = (uid_t) atol(argv[2]);
 
-	dir = opendir(_PATH_PROC);
-	if (!dir)
+	dir = opendir(మార్గం_PROC);
+	ఒకవేళ (!dir)
 		err(EXIT_FAILURE, "cannot open proc");
 
-	while ((d = xreaddir(dir))) {
+	అయితే ((d = xreaddir(dir))) {
 		pid_t pid = 0;
 
-		if (procfs_dirent_get_pid(d, &pid) != 0)
-			continue;
-		if (name && !procfs_dirent_match_name(dir, d, name))
-			continue;
-		if (uid != (uid_t) -1 && !procfs_dirent_match_uid(dir, d, uid))
-			continue;
-		procfs_dirent_get_name(dir, d, buf, sizeof(buf));
-		printf(" %d [%s]", pid, buf);
+		ఒకవేళ (procfs_dirent_get_pid(d, &pid) != 0)
+			కొనసాగు;
+		ఒకవేళ (name && !procfs_dirent_సరిపోలిక_name(dir, d, name))
+			కొనసాగు;
+		ఒకవేళ (uid != (uid_t) -1 && !procfs_dirent_సరిపోలిక_uid(dir, d, uid))
+			కొనసాగు;
+		procfs_dirent_get_name(dir, d, buf, పరిమాణం(buf));
+		రాయి(" %d [%s]", pid, buf);
 	}
 
 	fputc('\n', stdout);
 	closedir(dir);
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_one_process(int argc, char *argv[], const char *prefix)
+స్థిర పూర్ణాంకం test_one_process(పూర్ణాంకం argc, అక్షరం *argv[], స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
 	pid_t pid;
-	struct path_cxt *pc;
-	char buf[BUFSIZ];
+	నిర్మాణం మార్గం_cxt *pc;
+	అక్షరం buf[BUFSIZ];
 	uid_t uid = (uid_t) -1;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
-	pid = strtol(argv[1], (char **) NULL, 10);
+	ఒకవేళ (argc != 2)
+		తిరిగి EXIT_FAILURE;
+	pid = strtol(argv[1], (అక్షరం **) ఖాళీ, 10);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_మార్గం(pid, ఉపసర్గ);
+	ఒకవేళ (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	printf("%d\n", (int) pid);
+	రాయి("%d\n", (పూర్ణాంకం) pid);
 
 	procfs_process_get_uid(pc, &uid);
-	printf("   UID: %zu\n", (size_t) uid);
+	రాయి("   UID: %zu\n", (size_t) uid);
 
-	procfs_process_get_cmdline(pc, buf, sizeof(buf));
-	printf("   CMDLINE: '%s'\n", buf);
+	procfs_process_get_cmdline(pc, buf, పరిమాణం(buf));
+	రాయి("   CMDLINE: '%s'\n", buf);
 
-	procfs_process_get_cmdname(pc, buf, sizeof(buf));
-	printf("   COMM: '%s'\n", buf);
+	procfs_process_get_cmdname(pc, buf, పరిమాణం(buf));
+	రాయి("   COMM: '%s'\n", buf);
 
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ul_unref_మార్గం(pc);
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_isprocfs(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_isprocfs(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	const char *name = argc > 1 ? argv[1] : "/proc";
-	int fd = open(name, O_RDONLY | O_CLOEXEC);
-	int is = 0;
+	స్థిరరాశి అక్షరం *name = argc > 1 ? argv[1] : "/proc";
+	పూర్ణాంకం fd = open(name, O_RDONLY | O_CLOEXEC);
+	పూర్ణాంకం is = 0;
 
-	if (fd >= 0) {
+	ఒకవేళ (fd >= 0) {
 		is = fd_is_procfs(fd);
 		close(fd);
-	} else
+	} లేకపోతే
 		err(EXIT_FAILURE, "cannot open %s", name);
 
-	printf("%s: %s procfs\n", name, is ? "is" : "is NOT");
-	return is ? EXIT_SUCCESS : EXIT_FAILURE;
+	రాయి("%s: %s procfs\n", name, is ? "is" : "is NOT");
+	తిరిగి is ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static int test_process_stat_nth(int argc, char *argv[], const char *prefix)
+స్థిర పూర్ణాంకం test_process_stat_nth(పూర్ణాంకం argc, అక్షరం *argv[], స్థిరరాశి అక్షరం *ఉపసర్గ)
 {
 	pid_t pid;
-	struct path_cxt *pc;
-	uint64_t num = 0;
-	int n, ret;
+	నిర్మాణం మార్గం_cxt *pc;
+	uint64_t అంకె = 0;
+	పూర్ణాంకం n, ret;
 
-	if (argc != 3)
-		return EXIT_FAILURE;
-	pid = strtol(argv[1], (char **) NULL, 10);
-	n = strtol(argv[2], (char **) NULL, 10);
+	ఒకవేళ (argc != 3)
+		తిరిగి EXIT_FAILURE;
+	pid = strtol(argv[1], (అక్షరం **) ఖాళీ, 10);
+	n = strtol(argv[2], (అక్షరం **) ఖాళీ, 10);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_మార్గం(pid, ఉపసర్గ);
+	ఒకవేళ (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	ret = procfs_process_get_stat_nth(pc, n, &num);
-	if (ret)
+	ret = procfs_process_get_stat_nth(pc, n, &అంకె);
+	ఒకవేళ (ret)
 		errx(EXIT_FAILURE, "read %dth number failed: %s", n, strerror(-ret));
 
-	printf("%d: %dth %"PRIu64"\n", (int) pid, n, num);
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	రాయి("%d: %dth %"PRIu64"\n", (పూర్ణాంకం) pid, n, అంకె);
+	ul_unref_మార్గం(pc);
+	తిరిగి EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	const char *prefix = NULL;
+	స్థిరరాశి అక్షరం *ఉపసర్గ = ఖాళీ;
 
-	if (argc > 2 && strcmp(argv[1], "--prefix") == 0) {
-		prefix = argv[2];
+	ఒకవేళ (argc > 2 && strcmp(argv[1], "--prefix") == 0) {
+		ఉపసర్గ = argv[2];
 		argc -= 2;
 		argv += 2;
 	}
 
-	if (argc < 2) {
+	ఒకవేళ (argc < 2) {
 		fprintf(stderr, "usage: %1$s [--prefix <prefix>] --tasks <pid>\n"
 				"       %1$s [--prefix <prefix>] --fds <pid>\n"
 				"       %1$s --is-procfs [<dir>]\n"
 				"       %1$s --processes [--name <name>] [--uid <uid>]\n"
 				"       %1$s [--prefix <prefix>] --one <pid>\n"
 				"       %1$s [--prefix <prefix>] --stat-nth <pid> <n>\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				కార్యక్రమం_invocation_short_name);
+		తిరిగి EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--tasks") == 0)
-		return test_tasks(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--fds") == 0)
-		return test_fds(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--processes") == 0)
-		return test_processes(argc - 1, argv + 1);
-	if (strcmp(argv[1], "--is-procfs") == 0)
-		return test_isprocfs(argc - 1, argv + 1);
-	if (strcmp(argv[1], "--one") == 0)
-		return test_one_process(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--stat-nth") == 0)
-		return test_process_stat_nth(argc - 1, argv + 1, prefix);
+	ఒకవేళ (strcmp(argv[1], "--tasks") == 0)
+		తిరిగి test_tasks(argc - 1, argv + 1, ఉపసర్గ);
+	ఒకవేళ (strcmp(argv[1], "--fds") == 0)
+		తిరిగి test_fds(argc - 1, argv + 1, ఉపసర్గ);
+	ఒకవేళ (strcmp(argv[1], "--processes") == 0)
+		తిరిగి test_processes(argc - 1, argv + 1);
+	ఒకవేళ (strcmp(argv[1], "--is-procfs") == 0)
+		తిరిగి test_isprocfs(argc - 1, argv + 1);
+	ఒకవేళ (strcmp(argv[1], "--one") == 0)
+		తిరిగి test_one_process(argc - 1, argv + 1, ఉపసర్గ);
+	ఒకవేళ (strcmp(argv[1], "--stat-nth") == 0)
+		తిరిగి test_process_stat_nth(argc - 1, argv + 1, ఉపసర్గ);
 
-	return EXIT_FAILURE;
+	తిరిగి EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_PROCUTILS */
+#అయితే_ముగింపు /* TEST_PROGRAM_PROCUTILS */

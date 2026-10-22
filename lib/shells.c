@@ -1,81 +1,81 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include <sys/types.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <paths.h>
-#include <unistd.h>
-#include <sys/syslog.h>
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-#include "dl-econf.h"
-#endif
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <pwd.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <paths.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <sys/syslog.h>
+#ఒకవేళ defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+#అన్తర్భావ "dl-econf.h"
+#అయితే_ముగింపు
 
-#include "closestream.h"
-#include "shells.h"
+#అన్తర్భావ "closestream.h"
+#అన్తర్భావ "shells.h"
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-econf_file *open_etc_shells(void)
+#ఒకవేళ defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+econf_file *open_etc_shells(శూన్య)
 {
 	econf_err error;
-	econf_file *key_file = NULL;
+	econf_file *కీలకం_file = ఖాళీ;
 
-	if (ul_dlopen_libeconf() != 0)
-		return NULL;
+	ఒకవేళ (ul_dlopen_libeconf() != 0)
+		తిరిగి ఖాళీ;
 
-	error = econf_call(econf_readDirs)(&key_file,
-			       _PATH_VENDORDIR,
+	error = econf_call(econf_readDirs)(&కీలకం_file,
+			       మార్గం_VENDORDIR,
 			       "/etc",
 			       "shells",
-			       NULL,
+			       ఖాళీ,
 			       "", /* key only */
 			       "#" /* comment */);
-	if (error) {
+	ఒకవేళ (error) {
 		syslog(LOG_ALERT,
 		       _("Cannot parse shells files: %s"),
 		       econf_call(econf_errString)(error));
-		return NULL;
+		తిరిగి ఖాళీ;
 	}
 
-	return key_file;
+	తిరిగి కీలకం_file;
 }
-#endif
+#అయితే_ముగింపు
 
 /*
  *  print_shells () -- /etc/shells is outputted to stdout.
  */
-extern void print_shells(FILE *out, const char *format)
+బాహ్య శూన్య print_shells(FILE *బహిర్గతం, స్థిరరాశి అక్షరం *format)
 {
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-	size_t size = 0;
+#ఒకవేళ defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+	size_t కొలత = 0;
 	econf_err error;
-	char **keys = NULL;
-	econf_file *key_file = open_etc_shells();
+	అక్షరం **కీలకాలు = ఖాళీ;
+	econf_file *కీలకం_file = open_etc_shells();
 
-	if (!key_file)
-	  return;
+	ఒకవేళ (!కీలకం_file)
+	  తిరిగి;
 
-	error = econf_call(econf_getKeys)(key_file, NULL, &size, &keys);
-	if (error) {
-		econf_call(econf_freeFile)(key_file);
+	error = econf_call(econf_get_కీలకాలు)(కీలకం_file, ఖాళీ, &కొలత, &కీలకాలు);
+	ఒకవేళ (error) {
+		econf_call(econf_freeFile)(కీలకం_file);
 		errx(EXIT_FAILURE,
 		  _("Cannot evaluate entries in shells files: %s"),
 		  econf_call(econf_errString)(error));
 	}
 
-	for (size_t i = 0; i < size; i++) {
-		fprintf(out, format, keys[i]);
+	కొరకు (size_t i = 0; i < కొలత; i++) {
+		fprintf(బహిర్గతం, format, కీలకాలు[i]);
 	}
-	econf_call(econf_freeArray)(keys);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	econf_call(econf_freeArray)(కీలకాలు);
+	econf_call(econf_freeFile)(కీలకం_file);
+#లేకపోతే
+	అక్షరం *s;
 
 	setusershell();
-	while ((s = getusershell()))
-		fprintf(out, format, s);
+	అయితే ((s = getusershell()))
+		fprintf(బహిర్గతం, format, s);
 	endusershell();
-#endif
+#అయితే_ముగింపు
 }
 
 
@@ -84,43 +84,43 @@ extern void print_shells(FILE *out, const char *format)
  *  or vendor defined files.
  *  Return 1 if found and return 0 if not found.
  */
-extern int is_known_shell(const char *shell_name)
+బాహ్య పూర్ణాంకం is_తెలిసిన_shell(స్థిరరాశి అక్షరం *shell_name)
 {
-	int ret = 0;
+	పూర్ణాంకం ret = 0;
 
-	if (!shell_name)
-		return 0;
+	ఒకవేళ (!shell_name)
+		తిరిగి 0;
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-	char *val = NULL;
+#ఒకవేళ defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+	అక్షరం *val = ఖాళీ;
 	econf_err error;
-	econf_file *key_file = open_etc_shells();
+	econf_file *కీలకం_file = open_etc_shells();
 
-	if (!key_file)
-		return 0;
+	ఒకవేళ (!కీలకం_file)
+		తిరిగి 0;
 
-	error = econf_call(econf_getStringValue) (key_file, NULL, shell_name, &val);
-	if (error) {
-		if (error != ECONF_NOKEY)
+	error = econf_call(econf_get_String_విలువ) (కీలకం_file, ఖాళీ, shell_name, &val);
+	ఒకవేళ (error) {
+		ఒకవేళ (error != ECONF_NOKEY)
 			syslog(LOG_ALERT,
 			       _("Cannot evaluate entries in shells files: %s"),
 			       econf_call(econf_errString)(error));
-	} else
+	} లేకపోతే
 		ret = 1;
 
-	free(val);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	విడుదల(val);
+	econf_call(econf_freeFile)(కీలకం_file);
+#లేకపోతే
+	అక్షరం *s;
 
 	setusershell();
-	while ((s = getusershell())) {
-		if (*s != '#' && strcmp(shell_name, s) == 0) {
+	అయితే ((s = getusershell())) {
+		ఒకవేళ (*s != '#' && strcmp(shell_name, s) == 0) {
 			ret = 1;
-			break;
+			ఆపు;
 		}
 	}
 	endusershell();
-#endif
-	return ret;
+#అయితే_ముగింపు
+	తిరిగి ret;
 }

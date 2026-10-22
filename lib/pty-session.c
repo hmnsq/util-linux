@@ -10,194 +10,194 @@
  *
  * Written by Karel Zak <kzak@redhat.com> in Jul 2019
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <pty.h>
-#include <poll.h>
-#include <sys/signalfd.h>
-#include <paths.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <inttypes.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <pty.h>
+#అన్తర్భావ <poll.h>
+#అన్తర్భావ <sys/signalfd.h>
+#అన్తర్భావ <paths.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/wait.h>
+#అన్తర్భావ <inttypes.h>
 
-#include "c.h"
-#include "all-io.h"
-#include "ttyutils.h"
-#include "pty-session.h"
-#include "monotonic.h"
-#include "debug.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "all-io.h"
+#అన్తర్భావ "ttyutils.h"
+#అన్తర్భావ "pty-session.h"
+#అన్తర్భావ "monotonic.h"
+#అన్తర్భావ "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulpty);
-UL_DEBUG_DEFINE_MASKNAMES(ulpty) = UL_DEBUG_EMPTY_MASKNAMES;
+స్థిర UL_DEBUG_DEFINE_ముసుగు(ulpty);
+UL_DEBUG_DEFINE_MASKNAMES(ulpty) = UL_DEBUG_ఖాళీలు_MASKNAMES;
 
-#define ULPTY_DEBUG_INIT	(1 << 1)
-#define ULPTY_DEBUG_SETUP	(1 << 2)
-#define ULPTY_DEBUG_SIG		(1 << 3)
-#define ULPTY_DEBUG_IO		(1 << 4)
-#define ULPTY_DEBUG_DONE	(1 << 5)
+#నిర్వచించు ULPTY_DEBUG_INIT	(1 << 1)
+#నిర్వచించు ULPTY_DEBUG_అమరిక	(1 << 2)
+#నిర్వచించు ULPTY_DEBUG_SIG		(1 << 3)
+#నిర్వచించు ULPTY_DEBUG_IO		(1 << 4)
+#నిర్వచించు ULPTY_DEBUG_పూర్తి	(1 << 5)
 
-#define DBG(m, x)		__UL_DBG(ulpty, ULPTY_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulpty, ULPTY_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulpty, ULPTY_DEBUG_, m, x)
+#నిర్వచించు DBG(m, x)		__UL_DBG(ulpty, ULPTY_DEBUG_, m, x)
+#నిర్వచించు DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulpty, ULPTY_DEBUG_, m, h, x)
+#నిర్వచించు ON_DBG(m, x)		__UL_DBG_CALL(ulpty, ULPTY_DEBUG_, m, x)
 
-void ul_pty_init_debug(int mask)
+శూన్య ul_pty_init_debug(పూర్ణాంకం ముసుగు)
 {
-	if (ulpty_debug_mask)
-		return;
-	__UL_INIT_DEBUG_FROM_ENV(ulpty, ULPTY_DEBUG_, mask, ULPTY_DEBUG);
+	ఒకవేళ (ulpty_debug_ముసుగు)
+		తిరిగి;
+	__UL_INIT_DEBUG_FROM_ENV(ulpty, ULPTY_DEBUG_, ముసుగు, ULPTY_DEBUG);
 }
 
-struct ul_pty *ul_new_pty(int is_stdin_tty)
+నిర్మాణం ul_pty *ul_new_pty(పూర్ణాంకం is_stdin_tty)
 {
-	struct ul_pty *pty = calloc(1, sizeof(*pty));
+	నిర్మాణం ul_pty *pty = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(*pty));
 
-	if (!pty)
-		return NULL;
+	ఒకవేళ (!pty)
+		తిరిగి ఖాళీ;
 
-	DBG_OBJ(SETUP, pty, ul_debug("alloc handler"));
+	DBG_OBJ(అమరిక, pty, ul_debug("alloc handler"));
 	pty->isterm = is_stdin_tty;
 	pty->master = -1;
 	pty->slave = -1;
 	pty->sigfd = -1;
-	pty->child = (pid_t) -1;
+	pty->బిడ్డ = (pid_t) -1;
 
-	return pty;
+	తిరిగి pty;
 }
 
-void ul_free_pty(struct ul_pty *pty)
+శూన్య ul_free_pty(నిర్మాణం ul_pty *pty)
 {
-	struct ul_pty_child_buffer *hd;
+	నిర్మాణం ul_pty_బిడ్డ_బఫరు *hd;
 
-	while ((hd = pty->child_buffer_head)) {
-		pty->child_buffer_head = hd->next;
-		free(hd);
+	అయితే ((hd = pty->బిడ్డ_బఫరు_తల)) {
+		pty->బిడ్డ_బఫరు_తల = hd->తదుపరి;
+		విడుదల(hd);
 	}
 
-	while ((hd = pty->free_buffers)) {
-		pty->free_buffers = hd->next;
-		free(hd);
+	అయితే ((hd = pty->free_buffers)) {
+		pty->free_buffers = hd->తదుపరి;
+		విడుదల(hd);
 	}
-	free(pty);
+	విడుదల(pty);
 }
 
-void ul_pty_slave_echo(struct ul_pty *pty, int enable)
+శూన్య ul_pty_slave_echo(నిర్మాణం ul_pty *pty, పూర్ణాంకం enable)
 {
-	assert(pty);
+	ప్రతిజ్ఞా(pty);
 	pty->slave_echo = enable ? 1 : 0;
 }
 
-int ul_pty_get_delivered_signal(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_get_delivered_signal(నిర్మాణం ul_pty *pty)
 {
-	assert(pty);
-	return pty->delivered_signal;
+	ప్రతిజ్ఞా(pty);
+	తిరిగి pty->delivered_signal;
 }
 
-struct ul_pty_callbacks *ul_pty_get_callbacks(struct ul_pty *pty)
+నిర్మాణం ul_pty_callbacks *ul_pty_get_callbacks(నిర్మాణం ul_pty *pty)
 {
-	assert(pty);
-	return &pty->callbacks;
+	ప్రతిజ్ఞా(pty);
+	తిరిగి &pty->callbacks;
 }
 
-void ul_pty_set_callback_data(struct ul_pty *pty, void *data)
+శూన్య ul_pty_సమితి_callback_దత్తాంశం(నిర్మాణం ul_pty *pty, శూన్య *దత్తాంశం)
 {
-	assert(pty);
-	pty->callback_data = data;
+	ప్రతిజ్ఞా(pty);
+	pty->callback_దత్తాంశం = దత్తాంశం;
 }
 
-void ul_pty_set_child(struct ul_pty *pty, pid_t child)
+శూన్య ul_pty_సమితి_బిడ్డ(నిర్మాణం ul_pty *pty, pid_t బిడ్డ)
 {
-	assert(pty);
-	pty->child = child;
+	ప్రతిజ్ఞా(pty);
+	pty->బిడ్డ = బిడ్డ;
 }
 
-int ul_pty_get_childfd(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_get_childfd(నిర్మాణం ul_pty *pty)
 {
-	assert(pty);
-	return pty->master;
+	ప్రతిజ్ఞా(pty);
+	తిరిగి pty->master;
 }
 
-pid_t ul_pty_get_child(struct ul_pty *pty)
+pid_t ul_pty_get_బిడ్డ(నిర్మాణం ul_pty *pty)
 {
-	assert(pty);
-	return pty->child;
+	ప్రతిజ్ఞా(pty);
+	తిరిగి pty->బిడ్డ;
 }
 
 /* it's active when signals are redirected to sigfd */
-int ul_pty_is_running(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_is_running(నిర్మాణం ul_pty *pty)
 {
-	assert(pty);
-	return pty->sigfd >= 0;
+	ప్రతిజ్ఞా(pty);
+	తిరిగి pty->sigfd >= 0;
 }
 
-void ul_pty_set_mainloop_time(struct ul_pty *pty, struct timeval *tv)
+శూన్య ul_pty_సమితి_mainloop_సమయం(నిర్మాణం ul_pty *pty, నిర్మాణం timeval *tv)
 {
-	assert(pty);
-	if (!tv) {
+	ప్రతిజ్ఞా(pty);
+	ఒకవేళ (!tv) {
 		DBG_OBJ(IO, pty, ul_debug("mainloop time: clear"));
-		timerclear(&pty->next_callback_time);
-	} else {
-		pty->next_callback_time.tv_sec = tv->tv_sec;
-		pty->next_callback_time.tv_usec = tv->tv_usec;
+		timerclear(&pty->తదుపరి_callback_సమయం);
+	} లేకపోతే {
+		pty->తదుపరి_callback_సమయం.tv_sec = tv->tv_sec;
+		pty->తదుపరి_callback_సమయం.tv_usec = tv->tv_usec;
 		DBG_OBJ(IO, pty, ul_debug("mainloop time: %"PRId64".%06"PRId64,
 				(int64_t) tv->tv_sec, (int64_t) tv->tv_usec));
 	}
 }
 
-static void pty_signals_cleanup(struct ul_pty *pty)
+స్థిర శూన్య pty_సంకేతాలు_cleanup(నిర్మాణం ul_pty *pty)
 {
-	if (pty->sigfd != -1)
+	ఒకవేళ (pty->sigfd != -1)
 		close(pty->sigfd);
 	pty->sigfd = -1;
 
 	/* restore original setting */
-	sigprocmask(SIG_SETMASK, &pty->orgsig, NULL);
+	sigprocmask(SIG_SETMASK, &pty->orgsig, ఖాళీ);
 }
 
 /* call me before fork() */
-int ul_pty_setup(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_అమరిక(నిర్మాణం ul_pty *pty)
 {
-	struct termios attrs;
-	int rc = 0;
+	నిర్మాణం termios attrs;
+	పూర్ణాంకం rc = 0;
 
-	assert(pty->sigfd == -1);
+	ప్రతిజ్ఞా(pty->sigfd == -1);
 
 	/* save the current signals setting (to make ul_pty_cleanup() usable,
 	 * otherwise see ul_pty_signals_setup() */
-	sigprocmask(0, NULL, &pty->orgsig);
+	sigprocmask(0, ఖాళీ, &pty->orgsig);
 
-	if (pty->isterm) {
-		DBG_OBJ(SETUP, pty, ul_debug("create for terminal"));
+	ఒకవేళ (pty->isterm) {
+		DBG_OBJ(అమరిక, pty, ul_debug("create for terminal"));
 
 		/* original setting of the current terminal */
-		if (tcgetattr(STDIN_FILENO, &pty->stdin_attrs) != 0) {
+		ఒకవేళ (tcgetattr(STDIN_FILENO, &pty->stdin_attrs) != 0) {
 			rc = -errno;
-			goto done;
+			వెళ్ళు పూర్తి;
 		}
 
 		attrs = pty->stdin_attrs;
-		if (pty->slave_echo)
+		ఒకవేళ (pty->slave_echo)
 			attrs.c_lflag |= ECHO;
-		else
+		లేకపోతే
 			attrs.c_lflag &= ~ECHO;
 
-		ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&pty->win);
+		ioctl(STDIN_FILENO, TIOCGWINSZ, (అక్షరం *)&pty->win);
 		/* create master+slave */
-		rc = openpty(&pty->master, &pty->slave, NULL, &attrs, &pty->win);
-		if (rc)
-			goto done;
+		rc = openpty(&pty->master, &pty->slave, ఖాళీ, &attrs, &pty->win);
+		ఒకవేళ (rc)
+			వెళ్ళు పూర్తి;
 
-	} else {
-		DBG_OBJ(SETUP, pty, ul_debug("create for non-terminal"));
+	} లేకపోతే {
+		DBG_OBJ(అమరిక, pty, ul_debug("create for non-terminal"));
 
-		rc = openpty(&pty->master, &pty->slave, NULL, NULL, NULL);
-		if (rc)
-			goto done;
+		rc = openpty(&pty->master, &pty->slave, ఖాళీ, ఖాళీ, ఖాళీ);
+		ఒకవేళ (rc)
+			వెళ్ళు పూర్తి;
 
 		tcgetattr(pty->slave, &attrs);
 
-		if (pty->slave_echo)
+		ఒకవేళ (pty->slave_echo)
 			attrs.c_lflag |= ECHO;
-		else
+		లేకపోతే
 			attrs.c_lflag &= ~ECHO;
 
 		tcsetattr(pty->slave, TCSANOW, &attrs);
@@ -205,47 +205,47 @@ int ul_pty_setup(struct ul_pty *pty)
 
 	fcntl(pty->master, F_SETFL, O_NONBLOCK);
 
-done:
-	if (rc)
+పూర్తి:
+	ఒకవేళ (rc)
 		ul_pty_cleanup(pty);
 
-	DBG_OBJ(SETUP, pty, ul_debug("pty setup done [master=%d, slave=%d, rc=%d]",
+	DBG_OBJ(అమరిక, pty, ul_debug("pty setup done [master=%d, slave=%d, rc=%d]",
 				pty->master, pty->slave, rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /* call me after ul_pty_signals_setup() and before fork() */
-int ul_pty_terminal_setup(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_terminal_అమరిక(నిర్మాణం ul_pty *pty)
 {
-	struct termios attrs;
+	నిర్మాణం termios attrs;
 
-	if (!pty->isterm)
-		return 0;
+	ఒకవేళ (!pty->isterm)
+		తిరిగి 0;
 
 	attrs = pty->stdin_attrs;
 	cfmakeraw(&attrs);
-	if (tcsetattr(STDIN_FILENO, TCSANOW, &attrs))
-		return -errno;
+	ఒకవేళ (tcsetattr(STDIN_FILENO, TCSANOW, &attrs))
+		తిరిగి -errno;
 
-	DBG_OBJ(SETUP, pty, ul_debug("terminal raw mode setup done"));
-	return 0;
+	DBG_OBJ(అమరిక, pty, ul_debug("terminal raw mode setup done"));
+	తిరిగి 0;
 }
 
 /* call me before fork() */
-int ul_pty_signals_setup(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_సంకేతాలు_అమరిక(నిర్మాణం ul_pty *pty)
 {
 	sigset_t ourset;
-	int rc = 0;
+	పూర్ణాంకం rc = 0;
 
-	assert(pty->sigfd == -1);
+	ప్రతిజ్ఞా(pty->sigfd == -1);
 
 	/* save the current signals setting */
-	sigprocmask(0, NULL, &pty->orgsig);
+	sigprocmask(0, ఖాళీ, &pty->orgsig);
 
 	sigfillset(&ourset);
-	if (sigprocmask(SIG_BLOCK, &ourset, NULL)) {
+	ఒకవేళ (sigprocmask(SIG_BLOCK, &ourset, ఖాళీ)) {
 		rc = -errno;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	sigemptyset(&ourset);
@@ -257,47 +257,47 @@ int ul_pty_signals_setup(struct ul_pty *pty)
 	sigaddset(&ourset, SIGINT);
 	sigaddset(&ourset, SIGQUIT);
 
-	if (pty->callbacks.flush_logs)
+	ఒకవేళ (pty->callbacks.flush_logs)
 		sigaddset(&ourset, SIGUSR1);
 
-	if ((pty->sigfd = signalfd(-1, &ourset, SFD_CLOEXEC)) < 0)
+	ఒకవేళ ((pty->sigfd = signalfd(-1, &ourset, SFD_CLOEXEC)) < 0)
 		rc = -errno;
-done:
-	if (rc)
+పూర్తి:
+	ఒకవేళ (rc)
 		ul_pty_cleanup(pty);
 
-	DBG_OBJ(SETUP, pty, ul_debug("pty signals setup done [rc=%d]", rc));
-	return rc;
+	DBG_OBJ(అమరిక, pty, ul_debug("pty signals setup done [rc=%d]", rc));
+	తిరిగి rc;
 }
 
 /* cleanup in parent process */
-void ul_pty_cleanup(struct ul_pty *pty)
+శూన్య ul_pty_cleanup(నిర్మాణం ul_pty *pty)
 {
-	struct termios rtt;
+	నిర్మాణం termios rtt;
 
-	pty_signals_cleanup(pty);
+	pty_సంకేతాలు_cleanup(pty);
 
-	if (pty->master == -1 || !pty->isterm)
-		return;
+	ఒకవేళ (pty->master == -1 || !pty->isterm)
+		తిరిగి;
 
-	DBG_OBJ(DONE, pty, ul_debug("cleanup"));
+	DBG_OBJ(పూర్తి_2, pty, ul_debug("cleanup"));
 	rtt = pty->stdin_attrs;
 	tcsetattr(STDIN_FILENO, TCSADRAIN, &rtt);
 }
 
-int ul_pty_chownmod_slave(struct ul_pty *pty, uid_t uid, gid_t gid, mode_t mode)
+పూర్ణాంకం ul_pty_chownmod_slave(నిర్మాణం ul_pty *pty, uid_t uid, gid_t gid, mode_t బహుళకం)
 {
-	if (fchown(pty->slave, uid, gid))
-		return -errno;
-	if (fchmod(pty->slave, mode))
-		return -errno;
-	return 0;
+	ఒకవేళ (fchown(pty->slave, uid, gid))
+		తిరిగి -errno;
+	ఒకవేళ (fchmod(pty->slave, బహుళకం))
+		తిరిగి -errno;
+	తిరిగి 0;
 }
 
 /* call me in child process */
-void ul_pty_init_slave(struct ul_pty *pty)
+శూన్య ul_pty_init_slave(నిర్మాణం ul_pty *pty)
 {
-	DBG_OBJ(SETUP, pty, ul_debug("initialize slave"));
+	DBG_OBJ(అమరిక, pty, ul_debug("initialize slave"));
 
 	setsid();
 
@@ -310,54 +310,54 @@ void ul_pty_init_slave(struct ul_pty *pty)
 
 	close(pty->slave);
 
-	if (pty->sigfd >= 0)
+	ఒకవేళ (pty->sigfd >= 0)
 		close(pty->sigfd);
 
 	pty->slave = -1;
 	pty->master = -1;
 	pty->sigfd = -1;
 
-	sigprocmask(SIG_SETMASK, &pty->orgsig, NULL);
+	sigprocmask(SIG_SETMASK, &pty->orgsig, ఖాళీ);
 
-	DBG_OBJ(SETUP, pty, ul_debug("... initialize slave done"));
+	DBG_OBJ(అమరిక, pty, ul_debug("... initialize slave done"));
 }
 
-static int write_output(char *obuf, ssize_t bytes)
+స్థిర పూర్ణాంకం write_output(అక్షరం *obuf, ssize_t బైట్లు)
 {
 	DBG(IO, ul_debug(" writing output"));
 
-	if (ul_write_all(STDOUT_FILENO, obuf, bytes)) {
+	ఒకవేళ (ul_write_all(STDOUT_FILENO, obuf, బైట్లు)) {
 		DBG(IO, ul_debug("  writing output *failed*"));
-		return -errno;
+		తిరిగి -errno;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int final)
+స్థిర పూర్ణాంకం కాలపట్టిక_బిడ్డ_write(నిర్మాణం ul_pty *pty, అక్షరం *buf, size_t bufsz, పూర్ణాంకం final)
 {
-	struct ul_pty_child_buffer *stash;
+	నిర్మాణం ul_pty_బిడ్డ_బఫరు *stash;
 
-	if (pty->free_buffers) {
+	ఒకవేళ (pty->free_buffers) {
 		stash = pty->free_buffers;
-		pty->free_buffers = stash->next;
-		memset(stash, 0, sizeof(*stash));
-	} else
-		stash = calloc(1, sizeof(*stash));
-	if (!stash)
-		return -1;
+		pty->free_buffers = stash->తదుపరి;
+		memset(stash, 0, పరిమాణం(*stash));
+	} లేకపోతే
+		stash = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(*stash));
+	ఒకవేళ (!stash)
+		తిరిగి -1;
 
-	assert(bufsz <= sizeof(stash->buf));
+	ప్రతిజ్ఞా(bufsz <= పరిమాణం(stash->buf));
 
-	memcpy(stash->buf, buf, bufsz);
-	stash->size = bufsz;
-	stash->final_input = final ? 1 : 0;
+	జ్ఞాపకం_నకలు(stash->buf, buf, bufsz);
+	stash->కొలత = bufsz;
+	stash->final_ఆదానం = final ? 1 : 0;
 
-	if (pty->child_buffer_head)
-		pty->child_buffer_tail = pty->child_buffer_tail->next = stash;
-	else
-		pty->child_buffer_head = pty->child_buffer_tail = stash;
-	return 0;
+	ఒకవేళ (pty->బిడ్డ_బఫరు_తల)
+		pty->బిడ్డ_బఫరు_తోక = pty->బిడ్డ_బఫరు_తోక->తదుపరి = stash;
+	లేకపోతే
+		pty->బిడ్డ_బఫరు_తల = pty->బిడ్డ_బఫరు_తోక = stash;
+	తిరిగి 0;
 }
 
 /*
@@ -376,346 +376,346 @@ static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int
  * maintains master+slave tty stuff within the session. Use pipe to write to
  * pty and assume non-interactive (tee-like) behavior is NOT well supported.
  */
-static void drain_child_buffers(struct ul_pty *pty)
+స్థిర శూన్య drain_బిడ్డ_buffers(నిర్మాణం ul_pty *pty)
 {
-	unsigned int tries = 0;
-	struct pollfd fd = { .fd = pty->slave, .events = POLLIN };
+	గుర్తులేని పూర్ణాంకం tries = 0;
+	నిర్మాణం pollfd fd = { .fd = pty->slave, .events = POLLIN };
 
 	DBG_OBJ(IO, pty, ul_debug(" waiting for empty slave"));
-	while (poll(&fd, 1, 10) == 1 && tries < 8) {
+	అయితే (poll(&fd, 1, 10) == 1 && tries < 8) {
 		DBG_OBJ(IO, pty, ul_debug("   slave is not empty"));
 		xusleep(250000);
 		tries++;
 	}
-	if (tries < 8)
+	ఒకవేళ (tries < 8)
 		DBG_OBJ(IO, pty, ul_debug("   slave is empty now"));
 
 	DBG_OBJ(IO, pty, ul_debug(" sending EOF to master"));
 }
 
-static int flush_child_buffers(struct ul_pty *pty, int *anything)
+స్థిర పూర్ణాంకం flush_బిడ్డ_buffers(నిర్మాణం ul_pty *pty, పూర్ణాంకం *anything)
 {
-	int rc = 0, any = 0;
+	పూర్ణాంకం rc = 0, any = 0;
 
-	while (pty->child_buffer_head) {
-		struct ul_pty_child_buffer *hd = pty->child_buffer_head;
+	అయితే (pty->బిడ్డ_బఫరు_తల) {
+		నిర్మాణం ul_pty_బిడ్డ_బఫరు *hd = pty->బిడ్డ_బఫరు_తల;
 		ssize_t ret;
 
-		if (hd->final_input)
-			drain_child_buffers(pty);
+		ఒకవేళ (hd->final_ఆదానం)
+			drain_బిడ్డ_buffers(pty);
 
-		DBG_OBJ(IO, hd, ul_debug(" stdin --> master trying %zu bytes", hd->size - hd->cursor));
+		DBG_OBJ(IO, hd, ul_debug(" stdin --> master trying %zu bytes", hd->కొలత - hd->cursor));
 
-		ret = write(pty->master, hd->buf + hd->cursor, hd->size - hd->cursor);
-		if (ret == -1) {
+		ret = లిఖ(pty->master, hd->buf + hd->cursor, hd->కొలత - hd->cursor);
+		ఒకవేళ (ret == -1) {
 			DBG_OBJ(IO, hd, ul_debug("   EAGAIN"));
-			if (!(errno == EINTR || errno == EAGAIN))
+			ఒకవేళ (!(errno == EINTR || errno == EAGAIN))
 				rc = -errno;
-			goto out;
+			వెళ్ళు బహిర్గతం;
 		}
 		DBG_OBJ(IO, hd, ul_debug("   wrote %zd", ret));
 		any = 1;
 		hd->cursor += ret;
 
-		if (hd->cursor == hd->size) {
-			pty->child_buffer_head = hd->next;
-			if (!hd->next)
-				pty->child_buffer_tail = NULL;
+		ఒకవేళ (hd->cursor == hd->కొలత) {
+			pty->బిడ్డ_బఫరు_తల = hd->తదుపరి;
+			ఒకవేళ (!hd->తదుపరి)
+				pty->బిడ్డ_బఫరు_తోక = ఖాళీ;
 
-			hd->next = pty->free_buffers;
+			hd->తదుపరి = pty->free_buffers;
 			pty->free_buffers = hd;
 		}
 	}
-out:
+బహిర్గతం:
 	/* without sync write_output() will write both input &
 	 * shell output that looks like double echoing */
-	if (any)
+	ఒకవేళ (any)
 		fdatasync(pty->master);
 
-	if (anything)
+	ఒకవేళ (anything)
 		*anything = any;
-	return rc;
+	తిరిగి rc;
 }
 
-void ul_pty_write_eof_to_child(struct ul_pty *pty)
+శూన్య ul_pty_write_eof_గమ్యం_బిడ్డ(నిర్మాణం ul_pty *pty)
 {
-	char c = DEF_EOF;
-	schedule_child_write(pty, &c, sizeof(char), 1);
+	అక్షరం c = DEF_EOF;
+	కాలపట్టిక_బిడ్డ_write(pty, &c, పరిమాణం(అక్షరం), 1);
 }
 
-static int mainloop_callback(struct ul_pty *pty)
+స్థిర పూర్ణాంకం mainloop_callback(నిర్మాణం ul_pty *pty)
 {
-	int rc;
+	పూర్ణాంకం rc;
 
-	if (!pty->callbacks.mainloop)
-		return 0;
+	ఒకవేళ (!pty->callbacks.mainloop)
+		తిరిగి 0;
 
 	DBG_OBJ(IO, pty, ul_debug("calling mainloop callback"));
-	rc = pty->callbacks.mainloop(pty->callback_data);
+	rc = pty->callbacks.mainloop(pty->callback_దత్తాంశం);
 
 	DBG_OBJ(IO, pty, ul_debug(" callback done [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
-static int handle_io(struct ul_pty *pty, int fd, int *eof)
+స్థిర పూర్ణాంకం handle_io(నిర్మాణం ul_pty *pty, పూర్ణాంకం fd, పూర్ణాంకం *eof)
 {
-	char buf[BUFSIZ];
-	ssize_t bytes;
-	int rc = 0;
-	sigset_t set;
+	అక్షరం buf[BUFSIZ];
+	ssize_t బైట్లు;
+	పూర్ణాంకం rc = 0;
+	sigset_t సమితి;
 
 	DBG_OBJ(IO, pty, ul_debug(" handle I/O on fd=%d", fd));
 	*eof = 0;
 
-	sigemptyset(&set);
-	sigaddset(&set, SIGTTIN);
-	sigprocmask(SIG_UNBLOCK, &set, NULL);
+	sigemptyset(&సమితి);
+	sigaddset(&సమితి, SIGTTIN);
+	sigprocmask(SIG_UNBLOCK, &సమితి, ఖాళీ);
 	/* read from active FD */
-	bytes = read(fd, buf, sizeof(buf));
-	sigprocmask(SIG_BLOCK, &set, NULL);
-	if (bytes == -1) {
-		if (errno == EAGAIN || errno == EINTR)
-			return 0;
-		return -errno;
+	బైట్లు = పఠ(fd, buf, పరిమాణం(buf));
+	sigprocmask(SIG_BLOCK, &సమితి, ఖాళీ);
+	ఒకవేళ (బైట్లు == -1) {
+		ఒకవేళ (errno == EAGAIN || errno == EINTR)
+			తిరిగి 0;
+		తిరిగి -errno;
 	}
 
-	if (bytes == 0) {
+	ఒకవేళ (బైట్లు == 0) {
 		*eof = 1;
-		return 0;
+		తిరిగి 0;
 	}
 
 	/* from stdin (user) to command */
-	if (fd == STDIN_FILENO) {
-		DBG_OBJ(IO, pty, ul_debug(" stdin --> master %zd bytes queued", bytes));
+	ఒకవేళ (fd == STDIN_FILENO) {
+		DBG_OBJ(IO, pty, ul_debug(" stdin --> master %zd bytes queued", బైట్లు));
 
-		if (schedule_child_write(pty, buf, bytes, 0))
-			return -errno;
+		ఒకవేళ (కాలపట్టిక_బిడ్డ_write(pty, buf, బైట్లు, 0))
+			తిరిగి -errno;
 
 	/* from command (master) to stdout */
-	} else if (fd == pty->master) {
-		DBG_OBJ(IO, pty, ul_debug(" master --> stdout %zd bytes", bytes));
-		write_output(buf, bytes);
+	} లేకపోతే ఒకవేళ (fd == pty->master) {
+		DBG_OBJ(IO, pty, ul_debug(" master --> stdout %zd bytes", బైట్లు));
+		write_output(buf, బైట్లు);
 	}
 
-	if (pty->callbacks.log_stream_activity)
-		rc = pty->callbacks.log_stream_activity(
-					pty->callback_data, fd, buf, bytes);
+	ఒకవేళ (pty->callbacks.log_ప్రవాహం_activity)
+		rc = pty->callbacks.log_ప్రవాహం_activity(
+					pty->callback_దత్తాంశం, fd, buf, బైట్లు);
 
-	return rc;
+	తిరిగి rc;
 }
 
-void ul_pty_wait_for_child(struct ul_pty *pty)
+శూన్య ul_pty_wait_for_బిడ్డ(నిర్మాణం ul_pty *pty)
 {
-	int status;
+	పూర్ణాంకం స్థితి_2;
 	pid_t pid;
-	int options = 0;
+	పూర్ణాంకం options = 0;
 
-	if (pty->child == (pid_t) -1)
-		return;
+	ఒకవేళ (pty->బిడ్డ == (pid_t) -1)
+		తిరిగి;
 
-	DBG(SIG, ul_debug("waiting for child [child=%d]", (int) pty->child));
+	DBG(SIG, ul_debug("waiting for child [child=%d]", (పూర్ణాంకం) pty->బిడ్డ));
 
-	if (ul_pty_is_running(pty)) {
+	ఒకవేళ (ul_pty_is_running(pty)) {
 		/* wait for specific child */
 		options = WNOHANG;
-		for (;;) {
-			pid = waitpid(pty->child, &status, options);
-			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (int) pid));
-			if (pid != (pid_t) - 1) {
-				if (pty->callbacks.child_die)
-					pty->callbacks.child_die(
-							pty->callback_data,
-							pty->child, status);
-				ul_pty_set_child(pty, (pid_t) -1);
-			} else
-				break;
+		కొరకు (;;) {
+			pid = waitpid(pty->బిడ్డ, &స్థితి_2, options);
+			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (పూర్ణాంకం) pid));
+			ఒకవేళ (pid != (pid_t) - 1) {
+				ఒకవేళ (pty->callbacks.బిడ్డ_die)
+					pty->callbacks.బిడ్డ_die(
+							pty->callback_దత్తాంశం,
+							pty->బిడ్డ, స్థితి_2);
+				ul_pty_సమితి_బిడ్డ(pty, (pid_t) -1);
+			} లేకపోతే
+				ఆపు;
 		}
-	} else {
+	} లేకపోతే {
 		/* final wait */
-		while ((pid = waitpid(-1, &status, options)) > 0) {
-			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (int) pid));
-			if (pid == pty->child) {
-				if (pty->callbacks.child_die)
-					pty->callbacks.child_die(
-							pty->callback_data,
-							pty->child, status);
-				ul_pty_set_child(pty, (pid_t) -1);
+		అయితే ((pid = waitpid(-1, &స్థితి_2, options)) > 0) {
+			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (పూర్ణాంకం) pid));
+			ఒకవేళ (pid == pty->బిడ్డ) {
+				ఒకవేళ (pty->callbacks.బిడ్డ_die)
+					pty->callbacks.బిడ్డ_die(
+							pty->callback_దత్తాంశం,
+							pty->బిడ్డ, స్థితి_2);
+				ul_pty_సమితి_బిడ్డ(pty, (pid_t) -1);
 			}
 		}
 	}
 }
 
-static int handle_signal(struct ul_pty *pty, int fd)
+స్థిర పూర్ణాంకం handle_signal(నిర్మాణం ul_pty *pty, పూర్ణాంకం fd)
 {
-	struct signalfd_siginfo info;
-	ssize_t bytes;
-	int rc = 0;
+	నిర్మాణం signalfd_siginfo info;
+	ssize_t బైట్లు;
+	పూర్ణాంకం rc = 0;
 
 	DBG_OBJ(SIG, pty, ul_debug(" handle signal on fd=%d", fd));
 
-	bytes = read(fd, &info, sizeof(info));
-	if (bytes != sizeof(info)) {
-		if (bytes < 0 && (errno == EAGAIN || errno == EINTR))
-			return 0;
-		return -errno;
+	బైట్లు = పఠ(fd, &info, పరిమాణం(info));
+	ఒకవేళ (బైట్లు != పరిమాణం(info)) {
+		ఒకవేళ (బైట్లు < 0 && (errno == EAGAIN || errno == EINTR))
+			తిరిగి 0;
+		తిరిగి -errno;
 	}
 
-	switch (info.ssi_signo) {
-	case SIGCHLD:
+	ఎంపిక (info.ssi_signo) {
+	స్థితి SIGCHLD:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGCHLD"));
 
-		if (info.ssi_code == CLD_EXITED
+		ఒకవేళ (info.ssi_code == CLD_EXITED
 		    || info.ssi_code == CLD_KILLED
 		    || info.ssi_code == CLD_DUMPED) {
 
-			if (pty->callbacks.child_wait)
-				pty->callbacks.child_wait(pty->callback_data,
-							  pty->child);
-			else
-				ul_pty_wait_for_child(pty);
+			ఒకవేళ (pty->callbacks.బిడ్డ_wait)
+				pty->callbacks.బిడ్డ_wait(pty->callback_దత్తాంశం,
+							  pty->బిడ్డ);
+			లేకపోతే
+				ul_pty_wait_for_బిడ్డ(pty);
 
-		} else if (info.ssi_status == SIGSTOP && pty->child > 0) {
-			pty->callbacks.child_sigstop(pty->callback_data,
-						     pty->child);
+		} లేకపోతే ఒకవేళ (info.ssi_status == SIGSTOP && pty->బిడ్డ > 0) {
+			pty->callbacks.బిడ్డ_sigstop(pty->callback_దత్తాంశం,
+						     pty->బిడ్డ);
 		}
 
-		if (pty->child <= 0) {
+		ఒకవేళ (pty->బిడ్డ <= 0) {
 			DBG_OBJ(SIG, pty, ul_debug(" no child, setting leaving timeout"));
 			pty->poll_timeout = 10;
-			timerclear(&pty->next_callback_time);
+			timerclear(&pty->తదుపరి_callback_సమయం);
 		}
-		return 0;
-	case SIGWINCH:
+		తిరిగి 0;
+	స్థితి SIGWINCH:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGWINCH"));
-		if (pty->isterm) {
-			ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&pty->win);
-			ioctl(pty->slave, TIOCSWINSZ, (char *)&pty->win);
+		ఒకవేళ (pty->isterm) {
+			ioctl(STDIN_FILENO, TIOCGWINSZ, (అక్షరం *)&pty->win);
+			ioctl(pty->slave, TIOCSWINSZ, (అక్షరం *)&pty->win);
 
-			if (pty->callbacks.log_signal)
-				rc = pty->callbacks.log_signal(pty->callback_data,
-							&info, (void *) &pty->win);
+			ఒకవేళ (pty->callbacks.log_signal)
+				rc = pty->callbacks.log_signal(pty->callback_దత్తాంశం,
+							&info, (శూన్య *) &pty->win);
 		}
-		break;
-	case SIGALRM:
+		ఆపు;
+	స్థితి SIGALRM:
 		FALLTHROUGH;
-	case SIGHUP:
+	స్థితి SIGHUP:
 		FALLTHROUGH;
-	case SIGTERM:
+	స్థితి SIGTERM:
 		FALLTHROUGH;
-	case SIGINT:
+	స్థితి SIGINT:
 		FALLTHROUGH;
-	case SIGQUIT:
+	స్థితి SIGQUIT:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIG{ALRM,HUP,TERM,INT,QUIT}"));
 		pty->delivered_signal = info.ssi_signo;
 		/* Child termination is going to generate SIGCHLD (see above) */
-		if (pty->child > 0)
-			kill(pty->child, SIGTERM);
+		ఒకవేళ (pty->బిడ్డ > 0)
+			kill(pty->బిడ్డ, SIGTERM);
 
-		if (pty->callbacks.log_signal)
-			rc = pty->callbacks.log_signal(pty->callback_data,
-					&info, (void *) &pty->win);
-		break;
-	case SIGUSR1:
+		ఒకవేళ (pty->callbacks.log_signal)
+			rc = pty->callbacks.log_signal(pty->callback_దత్తాంశం,
+					&info, (శూన్య *) &pty->win);
+		ఆపు;
+	స్థితి SIGUSR1:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGUSR1"));
-		if (pty->callbacks.flush_logs)
-			rc = pty->callbacks.flush_logs(pty->callback_data);
-		break;
-	default:
+		ఒకవేళ (pty->callbacks.flush_logs)
+			rc = pty->callbacks.flush_logs(pty->callback_దత్తాంశం);
+		ఆపు;
+	అప్రమేయ:
 		abort();
 	}
 
-	return rc;
+	తిరిగి rc;
 }
 
 /* loop in parent */
-int ul_pty_proxy_master(struct ul_pty *pty)
+పూర్ణాంకం ul_pty_proxy_master(నిర్మాణం ul_pty *pty)
 {
-	int rc = 0, ret, eof = 0;
-	enum {
+	పూర్ణాంకం rc = 0, ret, eof = 0;
+	గణన {
 		POLLFD_SIGNAL = 0,
 		POLLFD_MASTER,
 		POLLFD_STDIN
 
 	};
-	struct pollfd pfd[] = {
+	నిర్మాణం pollfd pfd[] = {
 		[POLLFD_SIGNAL] = { .fd = -1,		.events = POLLIN | POLLERR | POLLHUP },
 		[POLLFD_MASTER] = { .fd = pty->master,  .events = POLLIN | POLLERR | POLLHUP },
 		[POLLFD_STDIN]	= { .fd = STDIN_FILENO, .events = POLLIN | POLLERR | POLLHUP }
 	};
 
 	/* We use signalfd, and standard signals by handlers are completely blocked */
-	assert(pty->sigfd >= 0);
+	ప్రతిజ్ఞా(pty->sigfd >= 0);
 
 	pfd[POLLFD_SIGNAL].fd = pty->sigfd;
 	pty->poll_timeout = -1;
 
-	while (!pty->delivered_signal) {
+	అయితే (!pty->delivered_signal) {
 		size_t i;
-		int errsv, timeout;
+		పూర్ణాంకం errsv, timeout;
 
 		DBG_OBJ(IO, pty, ul_debug("--poll() loop--"));
 
 		/* note, callback usually updates @next_callback_time */
-		if (timerisset(&pty->next_callback_time)) {
-			struct timeval now = { 0 };
+		ఒకవేళ (timerisset(&pty->తదుపరి_callback_సమయం)) {
+			నిర్మాణం timeval now = { 0 };
 
 			DBG_OBJ(IO, pty, ul_debug(" callback requested"));
 			gettime_monotonic(&now);
-			if (timercmp(&now, &pty->next_callback_time, >)) {
+			ఒకవేళ (timercmp(&now, &pty->తదుపరి_callback_సమయం, >)) {
 				rc = mainloop_callback(pty);
-				if (rc)
-					break;
+				ఒకవేళ (rc)
+					ఆపు;
 			}
 		}
 
 		/* set timeout */
-		if (timerisset(&pty->next_callback_time)) {
-			struct timeval now = { 0 }, rest = { 0 };
+		ఒకవేళ (timerisset(&pty->తదుపరి_callback_సమయం)) {
+			నిర్మాణం timeval now = { 0 }, rest = { 0 };
 
 			gettime_monotonic(&now);
-			timersub(&pty->next_callback_time, &now, &rest);
-			timeout = (rest.tv_sec * MSEC_PER_SEC) +  (rest.tv_usec / USEC_PER_MSEC);
-		} else
+			timersub(&pty->తదుపరి_callback_సమయం, &now, &rest);
+			timeout = (rest.tv_sec * MSEC_చొప్పున_SEC) +  (rest.tv_usec / USEC_చొప్పున_MSEC);
+		} లేకపోతే
 			timeout = pty->poll_timeout;
 
 		/* use POLLOUT (aka "writing is now possible") if data queued */
-		if (pty->child_buffer_head)
+		ఒకవేళ (pty->బిడ్డ_బఫరు_తల)
 			pfd[POLLFD_MASTER].events |= POLLOUT;
-		else
+		లేకపోతే
 			pfd[POLLFD_MASTER].events &= ~POLLOUT;
 
 		/* wait for input, signal or timeout */
 		DBG_OBJ(IO, pty, ul_debug("calling poll() [timeout=%dms]", timeout));
-		ret = poll(pfd, ARRAY_SIZE(pfd), timeout);
+		ret = poll(pfd, ARRAY_కొలత(pfd), timeout);
 
 		errsv = errno;
 		DBG_OBJ(IO, pty, ul_debug("poll() rc=%d", ret));
 
 		/* error */
-		if (ret < 0) {
-			if (errsv == EAGAIN)
-				continue;
+		ఒకవేళ (ret < 0) {
+			ఒకవేళ (errsv == EAGAIN)
+				కొనసాగు;
 			rc = -errno;
-			break;
+			ఆపు;
 		}
 
 		/* timeout */
-		if (ret == 0) {
-			if (timerisset(&pty->next_callback_time)) {
+		ఒకవేళ (ret == 0) {
+			ఒకవేళ (timerisset(&pty->తదుపరి_callback_సమయం)) {
 				rc = mainloop_callback(pty);
-				if (rc == 0)
-					continue;
-			} else {
+				ఒకవేళ (rc == 0)
+					కొనసాగు;
+			} లేకపోతే {
 				rc = 0;
 			}
 
 			DBG_OBJ(IO, pty, ul_debug("leaving poll() loop [timeout=%d, rc=%d]", timeout, rc));
-			break;
+			ఆపు;
 		}
 		/* event */
-		for (i = 0; i < ARRAY_SIZE(pfd); i++) {
-			if (pfd[i].revents == 0)
-				continue;
+		కొరకు (i = 0; i < ARRAY_కొలత(pfd); i++) {
+			ఒకవేళ (pfd[i].revents == 0)
+				కొనసాగు;
 
 			DBG_OBJ(IO, pty, ul_debug(" active pfd[%s].fd=%d %s %s %s %s %s",
 						i == POLLFD_STDIN  ? "stdin" :
@@ -728,26 +728,26 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 						pfd[i].revents & POLLERR ? "POLLERR" : "",
 						pfd[i].revents & POLLNVAL ? "POLLNVAL" : ""));
 
-			if (i == POLLFD_SIGNAL)
+			ఒకవేళ (i == POLLFD_SIGNAL)
 				rc = handle_signal(pty, pfd[i].fd);
-			else {
-				if (pfd[i].revents & POLLIN)
-					rc = handle_io(pty, pfd[i].fd, &eof); /* data */
-				if (pfd[i].revents & POLLOUT) /* i == POLLFD_MASTER */
-					rc = flush_child_buffers(pty, NULL);
+			లేకపోతే {
+				ఒకవేళ (pfd[i].revents & POLLIN)
+					rc = handle_io(pty, pfd[i].fd, &eof); /*దత్తాంశం*/
+				ఒకవేళ (pfd[i].revents & POLLOUT) /* i == POLLFD_MASTER */
+					rc = flush_బిడ్డ_buffers(pty, ఖాళీ);
 			}
 
-			if (rc) {
-				int anything = 1;
+			ఒకవేళ (rc) {
+				పూర్ణాంకం anything = 1;
 
-				ul_pty_write_eof_to_child(pty);
-				for (anything = 1; anything;)
-					flush_child_buffers(pty, &anything);
-				break;
+				ul_pty_write_eof_గమ్యం_బిడ్డ(pty);
+				కొరకు (anything = 1; anything;)
+					flush_బిడ్డ_buffers(pty, &anything);
+				ఆపు;
 			}
 
-			if (i == POLLFD_SIGNAL)
-				continue;
+			ఒకవేళ (i == POLLFD_SIGNAL)
+				కొనసాగు;
 
 			/* EOF maybe detected in two ways; they are as follows:
 			 *	A) poll() return POLLHUP event after close()
@@ -755,103 +755,103 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 			 *
 			 * POLLNVAL means that fd is closed.
 			 */
-			if ((pfd[i].revents & POLLHUP) || (pfd[i].revents & POLLNVAL) || eof) {
+			ఒకవేళ ((pfd[i].revents & POLLHUP) || (pfd[i].revents & POLLNVAL) || eof) {
 				DBG_OBJ(IO, pty, ul_debug(" ignore FD"));
-				if (i == POLLFD_STDIN) {
+				ఒకవేళ (i == POLLFD_STDIN) {
 					pfd[i].fd = -1;
-					ul_pty_write_eof_to_child(pty);
-				} else /* i == POLLFD_MASTER */
+					ul_pty_write_eof_గమ్యం_బిడ్డ(pty);
+				} లేకపోతే /* i == POLLFD_MASTER */
 					pfd[i].revents &= ~POLLIN;
 			}
 		}
-		if (rc)
-			break;
+		ఒకవేళ (rc)
+			ఆపు;
 	}
 
-	if (rc && pty->child && pty->child != (pid_t) -1 && !pty->delivered_signal) {
-		kill(pty->child, SIGTERM);
+	ఒకవేళ (rc && pty->బిడ్డ && pty->బిడ్డ != (pid_t) -1 && !pty->delivered_signal) {
+		kill(pty->బిడ్డ, SIGTERM);
 		sleep(2);
-		kill(pty->child, SIGKILL);
+		kill(pty->బిడ్డ, SIGKILL);
 	}
 
-	pty_signals_cleanup(pty);
+	pty_సంకేతాలు_cleanup(pty);
 
 	DBG(IO, ul_debug("poll() done [signal=%d, rc=%d]", pty->delivered_signal, rc));
-	return rc;
+	తిరిగి rc;
 }
 
-#ifdef TEST_PROGRAM_PTY
+#నిర్వచితమైతే TEST_కార్యక్రమం_PTY
 /*
  * $ make test_pty
  * $ ./test_pty
  *
  * ... and see for example tty(1) or "ps afu"
  */
-static void child_sigstop(void *data __attribute__((__unused__)), pid_t child)
+స్థిర శూన్య బిడ్డ_sigstop(శూన్య *దత్తాంశం __attribute__((__unused__)), pid_t బిడ్డ)
 {
 	kill(getpid(), SIGSTOP);
-	kill(child, SIGCONT);
+	kill(బిడ్డ, SIGCONT);
 }
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	struct ul_pty_callbacks *cb;
-	const char *shell, *command = NULL, *shname = NULL;
-	int caught_signal = 0;
-	pid_t child;
-	struct ul_pty *pty;
+	నిర్మాణం ul_pty_callbacks *cb;
+	స్థిరరాశి అక్షరం *shell, *command = ఖాళీ, *shname = ఖాళీ;
+	పూర్ణాంకం caught_signal = 0;
+	pid_t బిడ్డ;
+	నిర్మాణం ul_pty *pty;
 
 	shell = getenv("SHELL");
-	if (shell == NULL)
+	ఒకవేళ (shell == ఖాళీ)
 		shell = _PATH_BSHELL;
-	if (argc == 2)
+	ఒకవేళ (argc == 2)
 		command = argv[1];
 
 	ul_pty_init_debug(0);
 
 	pty = ul_new_pty(isatty(STDIN_FILENO));
-	if (!pty)
+	ఒకవేళ (!pty)
 		err(EXIT_FAILURE, "failed to allocate PTY handler");
 
 	cb = ul_pty_get_callbacks(pty);
-	cb->child_sigstop = child_sigstop;
+	cb->బిడ్డ_sigstop = బిడ్డ_sigstop;
 
-	if (ul_pty_setup(pty))
+	ఒకవేళ (ul_pty_అమరిక(pty))
 		err(EXIT_FAILURE, "failed to create pseudo-terminal");
-	if (ul_pty_signals_setup(pty))
+	ఒకవేళ (ul_pty_సంకేతాలు_అమరిక(pty))
 		err(EXIT_FAILURE, "failed to initialize signals handler");
-	if (ul_pty_terminal_setup(pty))
+	ఒకవేళ (ul_pty_terminal_అమరిక(pty))
 		err(EXIT_FAILURE, "failed to setup terminal");
 
 	fflush(stdout);			/* ??? */
 
-	switch ((int) (child = fork())) {
-	case -1: /* error */
+	ఎంపిక ((పూర్ణాంకం) (బిడ్డ = fork())) {
+	స్థితి -1: /* error */
 		ul_pty_cleanup(pty);
 		err(EXIT_FAILURE, "cannot create child process");
-		break;
+		ఆపు;
 
-	case 0: /* child */
+	స్థితి 0: /*బిడ్డ*/
 		ul_pty_init_slave(pty);
 
-		signal(SIGTERM, SIG_DFL); /* because /etc/csh.login */
+		సంకేతం(SIGTERM, SIG_DFL); /* because /etc/csh.login */
 
 		shname = strrchr(shell, '/');
 		shname = shname ? shname + 1 : shell;
 
-		if (command)
-			execl(shell, shname, "-c", command, (char *)NULL);
-		else
-			execl(shell, shname, "-i", (char *)NULL);
+		ఒకవేళ (command)
+			execl(shell, shname, "-c", command, (అక్షరం *)ఖాళీ);
+		లేకపోతే
+			execl(shell, shname, "-i", (అక్షరం *)ఖాళీ);
 		err(EXIT_FAILURE, "failed to execute %s", shell);
-		break;
+		ఆపు;
 
-	default:
-		break;
+	అప్రమేయ:
+		ఆపు;
 	}
 
-	/* parent */
-	ul_pty_set_child(pty, child);
+	/*మాతృ*/
+	ul_pty_సమితి_బిడ్డ(pty, బిడ్డ);
 
 	/* this is the main loop */
 	ul_pty_proxy_master(pty);
@@ -859,21 +859,21 @@ int main(int argc, char *argv[])
 	/* all done; cleanup and kill */
 	caught_signal = ul_pty_get_delivered_signal(pty);
 
-	if (!caught_signal && ul_pty_get_child(pty) != (pid_t)-1)
-		ul_pty_wait_for_child(pty);	/* final wait */
+	ఒకవేళ (!caught_signal && ul_pty_get_బిడ్డ(pty) != (pid_t)-1)
+		ul_pty_wait_for_బిడ్డ(pty);	/* final wait */
 
-	if (caught_signal && ul_pty_get_child(pty) != (pid_t)-1) {
+	ఒకవేళ (caught_signal && ul_pty_get_బిడ్డ(pty) != (pid_t)-1) {
 		fprintf(stderr, "\nSession terminated, killing shell...");
-		kill(child, SIGTERM);
+		kill(బిడ్డ, SIGTERM);
 		sleep(2);
-		kill(child, SIGKILL);
+		kill(బిడ్డ, SIGKILL);
 		fprintf(stderr, " ...killed.\n");
 	}
 
 	ul_pty_cleanup(pty);
 	ul_free_pty(pty);
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-#endif /* TEST_PROGRAM */
+#అయితే_ముగింపు /* TEST_PROGRAM */
 

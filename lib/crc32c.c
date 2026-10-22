@@ -10,10 +10,10 @@
  *  code or tables extracted from it, as desired without restriction.
  */
 
-#include <assert.h>
-#include "crc32c.h"
+#అన్తర్భావ <assert.h>
+#అన్తర్భావ "crc32c.h"
 
-static const uint32_t crc32Table[256] = {
+స్థిర స్థిరరాశి uint32_t చక్రీయ_తనిఖీ_32_పట్టిక[256] = {
 	0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
 	0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
 	0x8AD958CFL, 0x78B2DBCCL, 0x6BE22838L, 0x9989AB3BL,
@@ -92,30 +92,30 @@ static const uint32_t crc32Table[256] = {
  *
  */
 uint32_t
-crc32c(uint32_t crc, const void *buf, size_t size)
+crc32c(uint32_t చక్రీయ_తనిఖీ, స్థిరరాశి శూన్య *buf, size_t కొలత)
 {
-	const uint8_t *p = buf;
+	స్థిరరాశి uint8_t *p = buf;
 
-	while (size--)
-		crc = crc32Table[(crc ^ *p++) & 0xff] ^ (crc >> 8);
+	అయితే (కొలత--)
+		చక్రీయ_తనిఖీ = చక్రీయ_తనిఖీ_32_పట్టిక[(చక్రీయ_తనిఖీ ^ *p++) & 0xff] ^ (చక్రీయ_తనిఖీ >> 8);
 
-	return crc;
+	తిరిగి చక్రీయ_తనిఖీ;
 }
 
 uint32_t
-ul_crc32c_exclude_offset(uint32_t crc, const unsigned char *buf, size_t size,
+ul_crc32c_exclude_స్థానభ్రంశం(uint32_t చక్రీయ_తనిఖీ, స్థిరరాశి గుర్తులేని అక్షరం *buf, size_t కొలత,
 			 size_t exclude_off, size_t exclude_len)
 {
 	size_t i;
 
-	assert((exclude_off + exclude_len) <= size);
+	ప్రతిజ్ఞా((exclude_off + exclude_len) <= కొలత);
 
-	crc = crc32c(crc, buf, exclude_off);
-	for (i = 0; i < exclude_len; i++) {
+	చక్రీయ_తనిఖీ = crc32c(చక్రీయ_తనిఖీ, buf, exclude_off);
+	కొరకు (i = 0; i < exclude_len; i++) {
 		uint8_t zero = 0;
-		crc = crc32c(crc, &zero, 1);
+		చక్రీయ_తనిఖీ = crc32c(చక్రీయ_తనిఖీ, &zero, 1);
 	}
-	crc = crc32c(crc, &buf[exclude_off + exclude_len],
-		     size - (exclude_off + exclude_len));
-	return crc;
+	చక్రీయ_తనిఖీ = crc32c(చక్రీయ_తనిఖీ, &buf[exclude_off + exclude_len],
+		     కొలత - (exclude_off + exclude_len));
+	తిరిగి చక్రీయ_తనిఖీ;
 }

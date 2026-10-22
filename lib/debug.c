@@ -3,15 +3,15 @@
  * it what you wish.
  */
 
-#include "debug.h"
+#అన్తర్భావ "debug.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#అన్తర్భావ <stdarg.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+శూన్య ul_debug(స్థిరరాశి అక్షరం *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -20,67 +20,67 @@ void ul_debug(const char *mesg, ...)
 	fputc('\n', stderr);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
-		     const void *handle, unsigned mask)
+శూన్య ul_debug_ఉపసర్గ(స్థిరరాశి అక్షరం *lib, స్థిరరాశి అక్షరం *flag,
+		     స్థిరరాశి శూన్య *handle, గుర్తులేని ముసుగు)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	ఒకవేళ (handle && !(ముసుగు & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+గుర్తులేని ul_debug_parse_ముసుగు(స్థిరరాశి నిర్మాణం ul_debug_maskname flagnames[],
+			     స్థిరరాశి అక్షరం *ముసుగు)
 {
-	unsigned res;
-	char *ptr;
+	గుర్తులేని res;
+	అక్షరం *ptr;
 
 	/* let's check for a numeric mask first */
-	res = strtoul(mask, &ptr, 0);
+	res = strtoul(ముసుగు, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	ఒకవేళ (ptr && *ptr && flagnames && flagnames[0].name) {
+		అక్షరం *msbuf, *ms, *name;
 		res = 0;
 
-		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		ms = msbuf = strdup(ముసుగు);
+		ఒకవేళ (!ms)
+			తిరిగి res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		అయితే ((name = strtok_r(ms, ",", &ptr))) {
+			స్థిరరాశి నిర్మాణం ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
-					res |= d->mask;
-					break;
+			కొరకు (d = flagnames; d && d->name; d++) {
+				ఒకవేళ (strcmp(name, d->name) == 0) {
+					res |= d->ముసుగు;
+					ఆపు;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			ఒకవేళ (res == UL_DEBUG_ALL)
+				ఆపు;
 		}
-		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+		విడుదల(msbuf);
+	} లేకపోతే ఒకవేళ (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	తిరిగి res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+శూన్య ul_debug_print_masks(స్థిరరాశి అక్షరం *env,
+			  స్థిరరాశి నిర్మాణం ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	స్థిరరాశి నిర్మాణం ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	ఒకవేళ (!flagnames)
+		తిరిగి;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
-			continue;
+	కొరకు (d = flagnames; d && d->name; d++) {
+		ఒకవేళ (!d->help)
+			కొనసాగు;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
-				d->name, d->mask, d->help);
+				d->name, d->ముసుగు, d->help);
 	}
 }

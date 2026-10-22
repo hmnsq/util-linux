@@ -4,172 +4,172 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "color-names.h"
 
-#include <ctype.h>
+#అన్తర్భావ <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+నిర్మాణం ul_color_name {
+	స్థిరరాశి అక్షరం *name;
+	స్థిరరాశి అక్షరం *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+స్థిర పూర్ణాంకం cmp_color_name(స్థిరరాశి శూన్య *a0, స్థిరరాశి శూన్య *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	స్థిరరాశి నిర్మాణం ul_color_name
+		*a = (స్థిరరాశి నిర్మాణం ul_color_name *) a0,
+		*b = (స్థిరరాశి నిర్మాణం ul_color_name *) b0;
+	తిరిగి strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+స్థిరరాశి అక్షరం *color_sequence_from_colorname(స్థిరరాశి అక్షరం *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	స్థిర స్థిరరాశి నిర్మాణం ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
 		{ "bold",       UL_COLOR_BOLD		 },
 		{ "brown",	UL_COLOR_BROWN           },
 		{ "cyan",	UL_COLOR_CYAN            },
-		{ "darkgray",	UL_COLOR_DARK_GRAY       },
-		{ "gray",	UL_COLOR_GRAY            },
+		{ "darkgray",	UL_COLOR_DARK_బూడిద       },
+		{ "gray",	UL_COLOR_బూడిద            },
 		{ "green",	UL_COLOR_GREEN           },
 		{ "halfbright", UL_COLOR_HALFBRIGHT	 },
 		{ "lightblue",	UL_COLOR_BOLD_BLUE       },
 		{ "lightcyan",	UL_COLOR_BOLD_CYAN       },
-		{ "lightgray",	UL_COLOR_GRAY            },
+		{ "lightgray",	UL_COLOR_బూడిద            },
 		{ "lightgreen", UL_COLOR_BOLD_GREEN      },
 		{ "lightmagenta", UL_COLOR_BOLD_MAGENTA  },
 		{ "lightred",	UL_COLOR_BOLD_RED        },
 		{ "magenta",	UL_COLOR_MAGENTA         },
 		{ "red",	UL_COLOR_RED             },
 		{ "reset",      UL_COLOR_RESET,          },
-		{ "reverse",    UL_COLOR_REVERSE         },
+		{ "reverse",    UL_COLOR_తిరగేయి         },
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	నిర్మాణం ul_color_name కీలకం = { .name = str };
+	స్థిరరాశి నిర్మాణం ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	ఒకవేళ (!str)
+		తిరిగి ఖాళీ;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&కీలకం, basic_schemes, ARRAY_కొలత(basic_schemes),
+				పరిమాణం(నిర్మాణం ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	తిరిగి res ? res->seq : ఖాళీ;
 }
 
 
-int color_is_sequence(const char *color)
+పూర్ణాంకం color_is_sequence(స్థిరరాశి అక్షరం *color)
 {
-	if (color && *color == 0x1B) {
-		size_t len = strlen(color);
+	ఒకవేళ (color && *color == 0x1B) {
+		size_t len = అక్షరశ్రేణి_పొడవు(color);
 
-		if (len >= 4 &&
+		ఒకవేళ (len >= 4 &&
 		    *(color + 1) == '[' &&
-		    isdigit(*(color + 2)) &&
+		    అంకెనా(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		తిరిగి 1;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+స్థిర పూర్ణాంకం __color_canonicalize(స్థిరరాశి అక్షరం *str, అక్షరం **seq)
 {
-	char *in, *out;
-	int len;
+	అక్షరం *లోపల, *బహిర్గతం;
+	పూర్ణాంకం len;
 
-	if (!str)
-		return -EINVAL;
+	ఒకవేళ (!str)
+		తిరిగి -EINVAL;
 
-	*seq = NULL;
+	*seq = ఖాళీ;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	ఒకవేళ (*str != '\\' && !strchr(str, ';') && అక్షరమా(*str)) {
+		స్థిరరాశి అక్షరం *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		ఒకవేళ (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			తిరిగి *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		తిరిగి 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	ఒకవేళ ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		తిరిగి -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
-			*out++ = *in;
-			continue;
+	కొరకు (లోపల = *seq, బహిర్గతం = *seq; లోపల && *లోపల; లోపల++) {
+		ఒకవేళ (*లోపల != '\\') {
+			*బహిర్గతం++ = *లోపల;
+			కొనసాగు;
 		}
-		switch(*(in + 1)) {
-		case 'a':
-			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
-			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
-			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
-			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
-			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
-			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
-			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
-			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
-			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
-			*out++ = ' ';	/* Space */
-			break;
-		case '#':
-			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
-			*out++ = '?';	/* Question mark */
-			break;
-		default:
-			*out++ = *in;
-			*out++ = *(in + 1);
-			break;
+		ఎంపిక(*(లోపల + 1)) {
+		స్థితి 'a':
+			*బహిర్గతం++ = '\a';	/* Bell */
+			ఆపు;
+		స్థితి 'b':
+			*బహిర్గతం++ = '\b';	/* Backspace */
+			ఆపు;
+		స్థితి 'e':
+			*బహిర్గతం++ = '\033';	/* Escape */
+			ఆపు;
+		స్థితి 'f':
+			*బహిర్గతం++ = '\f';	/* Form Feed */
+			ఆపు;
+		స్థితి 'n':
+			*బహిర్గతం++ = '\n';	/* Newline */
+			ఆపు;
+		స్థితి 'r':
+			*బహిర్గతం++ = '\r';	/* Carriage Return */
+			ఆపు;
+		స్థితి 't':
+			*బహిర్గతం++ = '\t';	/* Tab */
+			ఆపు;
+		స్థితి 'v':
+			*బహిర్గతం++ = '\v';	/* Vertical Tab */
+			ఆపు;
+		స్థితి '\\':
+			*బహిర్గతం++ = '\\';	/* Backslash */
+			ఆపు;
+		స్థితి '_':
+			*బహిర్గతం++ = ' ';	/* Space */
+			ఆపు;
+		స్థితి '#':
+			*బహిర్గతం++ = '#';	/* Hash mark */
+			ఆపు;
+		స్థితి '?':
+			*బహిర్గతం++ = '?';	/* Question mark */
+			ఆపు;
+		అప్రమేయ:
+			*బహిర్గతం++ = *లోపల;
+			*బహిర్గతం++ = *(లోపల + 1);
+			ఆపు;
 		}
-		in++;
+		లోపల++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
-		*out = '\0';
+	ఒకవేళ (బహిర్గతం) {
+		ప్రతిజ్ఞా ((బహిర్గతం - *seq) <= len);
+		*బహిర్గతం = '\0';
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
-char *color_get_sequence(const char *color)
+అక్షరం *color_get_sequence(స్థిరరాశి అక్షరం *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	అక్షరం *seq = ఖాళీ;
+	పూర్ణాంకం rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	తిరిగి rc ? ఖాళీ : seq;
 }

@@ -5,64 +5,64 @@
  * Authors: 2012 Ondrej Oprala <ooprala@redhat.com>
  *          2012-2025 Karel Zak <kzak@redhat.com>
  */
-#include <assert.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <ctype.h>
+#అన్తర్భావ <assert.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <dirent.h>
+#అన్తర్భావ <ctype.h>
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
-# if defined(HAVE_NCURSESW_NCURSES_H)
+#ఒకవేళ defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+# ఒకవేళ defined(HAVE_NCURSESW_NCURSES_H)
 #  include <ncursesw/ncurses.h>
 # elif defined(HAVE_NCURSES_NCURSES_H)
 #  include <ncurses/ncurses.h>
 # elif defined(HAVE_NCURSES_H)
 #  include <ncurses.h>
 # endif
-# if defined(HAVE_NCURSESW_TERM_H)
+# ఒకవేళ defined(HAVE_NCURSESW_పదం_H)
 #  include <ncursesw/term.h>
-# elif defined(HAVE_NCURSES_TERM_H)
+# elif defined(HAVE_NCURSES_పదం_H)
 #  include <ncurses/term.h>
-# elif defined(HAVE_TERM_H)
+# elif defined(HAVE_పదం_H)
 #  include <term.h>
 # endif
-#endif
+#అయితే_ముగింపు
 
-#include "c.h"
-#include "cctype.h"
-#include "colors.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "strutils.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "cctype.h"
+#అన్తర్భావ "colors.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "pathnames.h"
+#అన్తర్భావ "strutils.h"
 
-#include "debug.h"
+#అన్తర్భావ "debug.h"
 
 /*
  * Default behavior, may be overridden by terminal-colors.d/{enable,disable}.
  */
-#ifdef USE_COLORS_BY_DEFAULT
+#నిర్వచితమైతే USE_COLORS_BY_DEFAULT
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_AUTO	/* check isatty() */
-#else
+#లేకపోతే
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_NEVER	/* no colors by default */
-#endif
+#అయితే_ముగింపు
 
 /*
  * terminal-colors.d debug stuff
  */
-static UL_DEBUG_DEFINE_MASK(termcolors);
-UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
+స్థిర UL_DEBUG_DEFINE_ముసుగు(termcolors);
+UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_ఖాళీలు_MASKNAMES;
 
-#define TERMCOLORS_DEBUG_INIT	(1 << 1)
-#define TERMCOLORS_DEBUG_CONF	(1 << 2)
-#define TERMCOLORS_DEBUG_SCHEME	(1 << 3)
+#నిర్వచించు TERMCOLORS_DEBUG_INIT	(1 << 1)
+#నిర్వచించు TERMCOLORS_DEBUG_CONF	(1 << 2)
+#నిర్వచించు TERMCOLORS_DEBUG_SCHEME	(1 << 3)
 
-#define DBG(m, x)       __UL_DBG(termcolors, TERMCOLORS_DEBUG_, m, x)
-#define ON_DBG(m, x)    __UL_DBG_CALL(termcolors, TERMCOLORS_DEBUG_, m, x)
+#నిర్వచించు DBG(m, x)       __UL_DBG(termcolors, TERMCOLORS_DEBUG_, m, x)
+#నిర్వచించు ON_DBG(m, x)    __UL_DBG_CALL(termcolors, TERMCOLORS_DEBUG_, m, x)
 
 /*
  * terminal-colors.d file types
  */
-enum {
+గణన {
 	UL_COLORFILE_DISABLE,		/* .disable */
 	UL_COLORFILE_ENABLE,		/* .enable */
 	UL_COLORFILE_SCHEME,		/* .scheme */
@@ -70,9 +70,9 @@ enum {
 	__UL_COLORFILE_COUNT
 };
 
-struct ul_color_scheme {
-	char *name;
-	char *seq;
+నిర్మాణం ul_color_scheme {
+	అక్షరం *name;
+	అక్షరం *seq;
 };
 
 /*
@@ -89,88 +89,88 @@ struct ul_color_scheme {
  *
  * the match with higher score wins. The score is per type.
  */
-struct ul_color_ctl {
-	const char	*utilname;	/* util name */
-	const char	*termname;	/* terminal name ($TERM) */
+నిర్మాణం ul_color_ctl {
+	స్థిరరాశి అక్షరం	*utilname;	/* util name */
+	స్థిరరాశి అక్షరం	*termname;	/* terminal name ($TERM) */
 
-	char		*sfile;	/* path to scheme */
+	అక్షరం		*sfile;	/* path to scheme */
 
-	struct ul_color_scheme	*schemes;	/* array with color schemes */
+	నిర్మాణం ul_color_scheme	*schemes;	/* array with color schemes */
 	size_t			nschemes;	/* number of the items */
 	size_t			schemes_sz;	/* number of the allocated items */
 
-	int		mode;		/* UL_COLORMODE_* */
-	unsigned int	has_colors : 1,	/* based on mode and scores[] */
+	పూర్ణాంకం		బహుళకం;		/* UL_COLORMODE_* */
+	గుర్తులేని పూర్ణాంకం	has_colors : 1,	/* based on mode and scores[] */
 			disabled   : 1, /* disable colors */
 			cs_configured : 1, /* color schemes read */
 			configured : 1; /* terminal-colors.d parsed */
 
-	int		scores[__UL_COLORFILE_COUNT];	/* the best match */
+	పూర్ణాంకం		scores[__UL_COLORFILE_COUNT];	/* the best match */
 };
 
 /*
  * Control struct, globally shared.
  */
-static struct ul_color_ctl ul_colors;
+స్థిర నిర్మాణం ul_color_ctl ul_colors;
 
-static void colors_free_schemes(struct ul_color_ctl *cc);
-static int colors_read_schemes(struct ul_color_ctl *cc);
+స్థిర శూన్య colors_free_schemes(నిర్మాణం ul_color_ctl *cc);
+స్థిర పూర్ణాంకం colors_read_schemes(నిర్మాణం ul_color_ctl *cc);
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_scheme_name(const void *a0, const void *b0)
+స్థిర పూర్ణాంకం cmp_scheme_name(స్థిరరాశి శూన్య *a0, స్థిరరాశి శూన్య *b0)
 {
-	const struct ul_color_scheme *a = (const struct ul_color_scheme *) a0,
-				     *b = (const struct ul_color_scheme *) b0;
-	return strcmp(a->name, b->name);
+	స్థిరరాశి నిర్మాణం ul_color_scheme *a = (స్థిరరాశి నిర్మాణం ul_color_scheme *) a0,
+				     *b = (స్థిరరాశి నిర్మాణం ul_color_scheme *) b0;
+	తిరిగి strcmp(a->name, b->name);
 }
 
 /*
  * Resets control struct (note that we don't allocate the struct)
  */
-static void colors_reset(struct ul_color_ctl *cc)
+స్థిర శూన్య colors_reset(నిర్మాణం ul_color_ctl *cc)
 {
-	if (!cc)
-		return;
+	ఒకవేళ (!cc)
+		తిరిగి;
 
 	colors_free_schemes(cc);
 
-	free(cc->sfile);
+	విడుదల(cc->sfile);
 
-	cc->sfile = NULL;
-	cc->utilname = NULL;
-	cc->termname = NULL;
-	cc->mode = UL_COLORMODE_UNDEF;
+	cc->sfile = ఖాళీ;
+	cc->utilname = ఖాళీ;
+	cc->termname = ఖాళీ;
+	cc->బహుళకం = UL_COLORMODE_UNDEF;
 
-	memset(cc->scores, 0, sizeof(cc->scores));
+	memset(cc->scores, 0, పరిమాణం(cc->scores));
 }
 
-static void colors_debug(struct ul_color_ctl *cc)
+స్థిర శూన్య colors_debug(నిర్మాణం ul_color_ctl *cc)
 {
 	size_t i;
 
-	if (!cc)
-		return;
+	ఒకవేళ (!cc)
+		తిరిగి;
 
-	printf("Colors:\n");
-	printf("\tutilname = '%s'\n", cc->utilname);
-	printf("\ttermname = '%s'\n", cc->termname);
-	printf("\tscheme file = '%s'\n", cc->sfile);
-	printf("\tmode = %s\n",
-			cc->mode == UL_COLORMODE_UNDEF ? "undefined" :
-			cc->mode == UL_COLORMODE_AUTO ?  "auto" :
-			cc->mode == UL_COLORMODE_NEVER ? "never" :
-			cc->mode == UL_COLORMODE_ALWAYS ? "always" : "???");
-	printf("\thas_colors = %d\n", cc->has_colors);
-	printf("\tdisabled = %d\n", cc->disabled);
-	printf("\tconfigured = %d\n", cc->configured);
-	printf("\tcs configured = %d\n", cc->cs_configured);
+	రాయి("Colors:\n");
+	రాయి("\tutilname = '%s'\n", cc->utilname);
+	రాయి("\ttermname = '%s'\n", cc->termname);
+	రాయి("\tscheme file = '%s'\n", cc->sfile);
+	రాయి("\tmode = %s\n",
+			cc->బహుళకం == UL_COLORMODE_UNDEF ? "undefined" :
+			cc->బహుళకం == UL_COLORMODE_AUTO ?  "auto" :
+			cc->బహుళకం == UL_COLORMODE_NEVER ? "never" :
+			cc->బహుళకం == UL_COLORMODE_ALWAYS ? "always" : "???");
+	రాయి("\thas_colors = %d\n", cc->has_colors);
+	రాయి("\tdisabled = %d\n", cc->disabled);
+	రాయి("\tconfigured = %d\n", cc->configured);
+	రాయి("\tcs configured = %d\n", cc->cs_configured);
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < ARRAY_SIZE(cc->scores); i++)
-		printf("\tscore %s = %d\n",
+	కొరకు (i = 0; i < ARRAY_కొలత(cc->scores); i++)
+		రాయి("\tscore %s = %d\n",
 				i == UL_COLORFILE_DISABLE ? "disable" :
 				i == UL_COLORFILE_ENABLE ? "enable" :
 				i == UL_COLORFILE_SCHEME ? "scheme" : "???",
@@ -178,9 +178,9 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < cc->nschemes; i++) {
-		printf("\tscheme #%02zu ", i);
-		color_scheme_enable(cc->schemes[i].name, NULL);
+	కొరకు (i = 0; i < cc->nschemes; i++) {
+		రాయి("\tscheme #%02zu ", i);
+		color_scheme_enable(cc->schemes[i].name, ఖాళీ);
 		fputs(cc->schemes[i].name, stdout);
 		color_disable();
 		fputc('\n', stdout);
@@ -191,50 +191,50 @@ static void colors_debug(struct ul_color_ctl *cc)
 /*
  * Parses [[<utilname>][@<termname>].]<type>
  */
-static int filename_to_tokens(const char *str,
-			      const char **name, size_t *namesz,
-			      const char **term, size_t *termsz,
-			      int  *filetype)
+స్థిర పూర్ణాంకం filename_గమ్యం_టోకెన్లు(స్థిరరాశి అక్షరం *str,
+			      స్థిరరాశి అక్షరం **name, size_t *namesz,
+			      స్థిరరాశి అక్షరం **పదం, size_t *termsz,
+			      పూర్ణాంకం  *filetype)
 {
-	const char *type_start, *term_start, *p;
+	స్థిరరాశి అక్షరం *type_ప్రారంభం, *పదం_ప్రారంభం, *p;
 
-	if (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
-		return -EINVAL;
+	ఒకవేళ (!str || !*str || *str == '.' || అక్షరశ్రేణి_పొడవు(str) > PATH_MAX)
+		తిరిగి -EINVAL;
 
 	/* parse .type */
 	p = strrchr(str, '.');
-	type_start = p ? p + 1 : str;
+	type_ప్రారంభం = p ? p + 1 : str;
 
-	if (strcmp(type_start, "disable") == 0)
+	ఒకవేళ (strcmp(type_ప్రారంభం, "disable") == 0)
 		*filetype = UL_COLORFILE_DISABLE;
-	else if (strcmp(type_start, "enable") == 0)
+	లేకపోతే ఒకవేళ (strcmp(type_ప్రారంభం, "enable") == 0)
 		*filetype = UL_COLORFILE_ENABLE;
-	else if (strcmp(type_start, "scheme") == 0)
+	లేకపోతే ఒకవేళ (strcmp(type_ప్రారంభం, "scheme") == 0)
 		*filetype = UL_COLORFILE_SCHEME;
-	else {
-		DBG(CONF, ul_debug("unknown type '%s'", type_start));
-		return 1;				/* unknown type */
+	లేకపోతే {
+		DBG(CONF, ul_debug("unknown type '%s'", type_ప్రారంభం));
+		తిరిగి 1;				/* unknown type */
 	}
 
-	if (type_start == str)
-		return 0;				/* "type" only */
+	ఒకవేళ (type_ప్రారంభం == str)
+		తిరిగి 0;				/* "type" only */
 
 	/* parse @termname */
 	p = strchr(str, '@');
-	term_start = p ? p + 1 : NULL;
-	if (term_start) {
-		*term = term_start;
-		*termsz = type_start - term_start - 1;
-		if (term_start - 1 == str)
-			return 0;			/* "@termname.type" */
+	పదం_ప్రారంభం = p ? p + 1 : ఖాళీ;
+	ఒకవేళ (పదం_ప్రారంభం) {
+		*పదం = పదం_ప్రారంభం;
+		*termsz = type_ప్రారంభం - పదం_ప్రారంభం - 1;
+		ఒకవేళ (పదం_ప్రారంభం - 1 == str)
+			తిరిగి 0;			/* "@termname.type" */
 	}
 
 	/* parse utilname */
-	p = term_start ? term_start : type_start;
+	p = పదం_ప్రారంభం ? పదం_ప్రారంభం : type_ప్రారంభం;
 	*name = str;
 	*namesz = p - str - 1;
 
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -242,68 +242,68 @@ static int filename_to_tokens(const char *str,
  * The result is stored to cc->scores. The path to the best "scheme"
  * file is stored to cc->scheme.
  */
-static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
+స్థిర పూర్ణాంకం colors_readdir(నిర్మాణం ul_color_ctl *cc, స్థిరరాశి అక్షరం *dirname)
 {
 	DIR *dir;
-	int rc = -ENOENT;
-	struct dirent *d;
-	char sfile[PATH_MAX] = { '\0' };
+	పూర్ణాంకం rc = -ENOENT;
+	నిర్మాణం dirent *d;
+	అక్షరం sfile[PATH_MAX] = { '\0' };
 	size_t namesz, termsz;
 
-	if (!dirname || !cc || !cc->utilname || !*cc->utilname)
-		return -EINVAL;
+	ఒకవేళ (!dirname || !cc || !cc->utilname || !*cc->utilname)
+		తిరిగి -EINVAL;
 
 	DBG(CONF, ul_debug("reading dir: '%s'", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return -errno;
+	ఒకవేళ (!dir)
+		తిరిగి -errno;
 
-	namesz = strlen(cc->utilname);
-	termsz = cc->termname ? strlen(cc->termname) : 0;
+	namesz = అక్షరశ్రేణి_పొడవు(cc->utilname);
+	termsz = cc->termname ? అక్షరశ్రేణి_పొడవు(cc->termname) : 0;
 
-	while ((d = readdir(dir))) {
-		int type, score = 1;
-		const char *tk_name = NULL, *tk_term = NULL;
+	అయితే ((d = readdir(dir))) {
+		పూర్ణాంకం type, score = 1;
+		స్థిరరాశి అక్షరం *tk_name = ఖాళీ, *tk_పదం = ఖాళీ;
 		size_t tk_namesz = 0, tk_termsz = 0;
 
-		if (*d->d_name == '.')
-			continue;
-#ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
+		ఒకవేళ (*d->d_name == '.')
+			కొనసాగు;
+#నిర్వచితమైతే _DIRENT_HAVE_D_TYPE
+		ఒకవేళ (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
 		    d->d_type != DT_REG)
-			continue;
-#endif
-		if (filename_to_tokens(d->d_name,
+			కొనసాగు;
+#అయితే_ముగింపు
+		ఒకవేళ (filename_గమ్యం_టోకెన్లు(d->d_name,
 				       &tk_name, &tk_namesz,
-				       &tk_term, &tk_termsz, &type) != 0)
-			continue;
+				       &tk_పదం, &tk_termsz, &type) != 0)
+			కొనసాగు;
 
 		/* count theoretical score before we check names to avoid
 		 * unnecessary strcmp() */
-		if (tk_name)
+		ఒకవేళ (tk_name)
 			score += 20;
-		if (tk_term)
+		ఒకవేళ (tk_పదం)
 			score += 10;
 
 		DBG(CONF, ul_debug("item '%s': score=%d "
 			"[cur: %d, name(%zu): %s, term(%zu): %s]",
 			d->d_name, score, cc->scores[type],
 			tk_namesz, tk_name,
-			tk_termsz, tk_term));
+			tk_termsz, tk_పదం));
 
 
-		if (score < cc->scores[type])
-			continue;
+		ఒకవేళ (score < cc->scores[type])
+			కొనసాగు;
 
 		/* filter out by names */
-		if (tk_namesz && (tk_namesz != namesz ||
-				 strncmp(tk_name, cc->utilname, namesz) != 0))
-			continue;
+		ఒకవేళ (tk_namesz && (tk_namesz != namesz ||
+				 అక్షరశ్రేణి_పోలిక(tk_name, cc->utilname, namesz) != 0))
+			కొనసాగు;
 
-		if (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
-				  strncmp(tk_term, cc->termname, termsz) != 0))
-			continue;
+		ఒకవేళ (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
+				  అక్షరశ్రేణి_పోలిక(tk_పదం, cc->termname, termsz) != 0))
+			కొనసాగు;
 
 		DBG(CONF, ul_debug("setting '%s' from %d -to-> %d",
 					type == UL_COLORFILE_SCHEME ? "scheme" :
@@ -312,22 +312,22 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 					cc->scores[type], score));
 		cc->scores[type] = score;
 		rc = 0;
-		if (type == UL_COLORFILE_SCHEME)
-			strncpy(sfile, d->d_name, sizeof(sfile));
+		ఒకవేళ (type == UL_COLORFILE_SCHEME)
+			strncpy(sfile, d->d_name, పరిమాణం(sfile));
 	}
 
-	if (*sfile) {
-		sfile[sizeof(sfile) - 1] = '\0';
-		if (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
+	ఒకవేళ (*sfile) {
+		sfile[పరిమాణం(sfile) - 1] = '\0';
+		ఒకవేళ (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
 			rc = -ENOMEM;
 	}
 
 	closedir(dir);
-	return rc;
+	తిరిగి rc;
 }
 
 /* atexit() wrapper */
-static void colors_deinit(void)
+స్థిర శూన్య colors_deinit(శూన్య)
 {
 	colors_reset(&ul_colors);
 }
@@ -335,51 +335,51 @@ static void colors_deinit(void)
 /*
  * Returns path to $XDG_CONFIG_HOME/terminal-colors.d
  */
-static char *colors_get_homedir(char *buf, size_t bufsz)
+స్థిర అక్షరం *colors_get_homedir(అక్షరం *buf, size_t bufsz)
 {
-	char *p = getenv("XDG_CONFIG_HOME");
+	అక్షరం *p = getenv("XDG_CONFIG_HOME");
 
-	if (p) {
-		snprintf(buf, bufsz, "%s/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+	ఒకవేళ (p) {
+		snprintf(buf, bufsz, "%s/" మార్గం_TERMCOLORS_DIRNAME, p);
+		తిరిగి buf;
 	}
 
 	p = getenv("HOME");
-	if (p) {
-		snprintf(buf, bufsz, "%s/.config/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+	ఒకవేళ (p) {
+		snprintf(buf, bufsz, "%s/.config/" మార్గం_TERMCOLORS_DIRNAME, p);
+		తిరిగి buf;
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /*
  * Adds one color sequence to array with color scheme.
  */
-static int colors_add_scheme(struct ul_color_ctl *cc,
-			     const char *name,
-			     const char *seq0)
+స్థిర పూర్ణాంకం colors_కూడు_scheme(నిర్మాణం ul_color_ctl *cc,
+			     స్థిరరాశి అక్షరం *name,
+			     స్థిరరాశి అక్షరం *seq0)
 {
-	struct ul_color_scheme *cs = NULL;
-	char *seq = NULL;
-	int rc;
+	నిర్మాణం ul_color_scheme *cs = ఖాళీ;
+	అక్షరం *seq = ఖాళీ;
+	పూర్ణాంకం rc;
 
-	if (!cc || !name || !*name || !seq0 || !*seq0)
-		return -EINVAL;
+	ఒకవేళ (!cc || !name || !*name || !seq0 || !*seq0)
+		తిరిగి -EINVAL;
 
 	DBG(SCHEME, ul_debug("add '%s'", name));
 
 	seq = color_get_sequence(seq0);
-	if (!seq)
-		return -EINVAL;
+	ఒకవేళ (!seq)
+		తిరిగి -EINVAL;
 	rc = -ENOMEM;
 
 	/* enlarge the array */
-	if (cc->nschemes == cc->schemes_sz) {
-		void *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
-					 sizeof(struct ul_color_scheme));
-		if (!tmp)
-			goto err;
+	ఒకవేళ (cc->nschemes == cc->schemes_sz) {
+		శూన్య *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
+					 పరిమాణం(నిర్మాణం ul_color_scheme));
+		ఒకవేళ (!tmp)
+			వెళ్ళు err;
 		cc->schemes = tmp;
 		cc->schemes_sz = cc->nschemes + 10;
 	}
@@ -388,37 +388,37 @@ static int colors_add_scheme(struct ul_color_ctl *cc,
 	cs = &cc->schemes[cc->nschemes];
 	cs->seq = seq;
 	cs->name = strdup(name);
-	if (!cs->name)
-		goto err;
+	ఒకవేళ (!cs->name)
+		వెళ్ళు err;
 
 	cc->nschemes++;
-	return 0;
+	తిరిగి 0;
 err:
-	if (cs) {
-		free(cs->seq);
-		free(cs->name);
-		cs->seq = cs->name = NULL;
-	} else
-		free(seq);
-	return rc;
+	ఒకవేళ (cs) {
+		విడుదల(cs->seq);
+		విడుదల(cs->name);
+		cs->seq = cs->name = ఖాళీ;
+	} లేకపోతే
+		విడుదల(seq);
+	తిరిగి rc;
 }
 
 /*
  * Deallocates all regards to color schemes
  */
-static void colors_free_schemes(struct ul_color_ctl *cc)
+స్థిర శూన్య colors_free_schemes(నిర్మాణం ul_color_ctl *cc)
 {
 	size_t i;
 
 	DBG(SCHEME, ul_debug("free scheme"));
 
-	for (i = 0; i < cc->nschemes; i++) {
-		free(cc->schemes[i].name);
-		free(cc->schemes[i].seq);
+	కొరకు (i = 0; i < cc->nschemes; i++) {
+		విడుదల(cc->schemes[i].name);
+		విడుదల(cc->schemes[i].seq);
 	}
 
-	free(cc->schemes);
-	cc->schemes = NULL;
+	విడుదల(cc->schemes);
+	cc->schemes = ఖాళీ;
 	cc->nschemes = 0;
 	cc->schemes_sz = 0;
 }
@@ -426,152 +426,152 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
 /*
  * The scheme configuration has to be sorted for bsearch
  */
-static void colors_sort_schemes(struct ul_color_ctl *cc)
+స్థిర శూన్య colors_క్రమీకరించు_schemes(నిర్మాణం ul_color_ctl *cc)
 {
-	if (!cc->nschemes)
-		return;
+	ఒకవేళ (!cc->nschemes)
+		తిరిగి;
 
 	DBG(SCHEME, ul_debug("sort scheme"));
 
 	qsort(cc->schemes, cc->nschemes,
-	      sizeof(struct ul_color_scheme), cmp_scheme_name);
+	      పరిమాణం(నిర్మాణం ul_color_scheme), cmp_scheme_name);
 }
 
 /*
  * Returns just one color scheme
  */
-static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
-						 const char *name)
+స్థిర నిర్మాణం ul_color_scheme *colors_get_scheme(నిర్మాణం ul_color_ctl *cc,
+						 స్థిరరాశి అక్షరం *name)
 {
-	struct ul_color_scheme key = { .name = (char *) name}, *res;
+	నిర్మాణం ul_color_scheme కీలకం = { .name = (అక్షరం *) name}, *res;
 
-	if (!cc || !name || !*name)
-		return NULL;
+	ఒకవేళ (!cc || !name || !*name)
+		తిరిగి ఖాళీ;
 
-	if (!cc->cs_configured) {
-		int rc = colors_read_schemes(cc);
-		if (rc)
-			return NULL;
+	ఒకవేళ (!cc->cs_configured) {
+		పూర్ణాంకం rc = colors_read_schemes(cc);
+		ఒకవేళ (rc)
+			తిరిగి ఖాళీ;
 	}
-	if (!cc->nschemes)
-		return NULL;
+	ఒకవేళ (!cc->nschemes)
+		తిరిగి ఖాళీ;
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
-	res = bsearch(&key, cc->schemes, cc->nschemes,
-				sizeof(struct ul_color_scheme),
+	res = bsearch(&కీలకం, cc->schemes, cc->nschemes,
+				పరిమాణం(నిర్మాణం ul_color_scheme),
 				cmp_scheme_name);
 
-	return res && res->seq ? res  : NULL;
+	తిరిగి res && res->seq ? res  : ఖాళీ;
 }
 
 /*
  * Parses filenames in terminal-colors.d
  */
-static int colors_read_configuration(struct ul_color_ctl *cc)
+స్థిర పూర్ణాంకం colors_read_configuration(నిర్మాణం ul_color_ctl *cc)
 {
-	int rc = -ENOENT;
-	char *dirname, buf[PATH_MAX];
+	పూర్ణాంకం rc = -ENOENT;
+	అక్షరం *dirname, buf[PATH_MAX];
 
 	cc->termname = getenv("TERM");
 
-	dirname = colors_get_homedir(buf, sizeof(buf));
-	if (dirname)
+	dirname = colors_get_homedir(buf, పరిమాణం(buf));
+	ఒకవేళ (dirname)
 		rc = colors_readdir(cc, dirname);		/* ~/.config */
-	if (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
-		rc = colors_readdir(cc, _PATH_TERMCOLORS_DIR);	/* /etc */
+	ఒకవేళ (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
+		rc = colors_readdir(cc, మార్గం_TERMCOLORS_DIR);	/* /etc */
 
 	cc->configured = 1;
-	return rc;
+	తిరిగి rc;
 }
 
 /*
  * Reads terminal-colors.d/ scheme file into array schemes
  */
-static int colors_read_schemes(struct ul_color_ctl *cc)
+స్థిర పూర్ణాంకం colors_read_schemes(నిర్మాణం ul_color_ctl *cc)
 {
-	int rc = 0;
-	FILE *f = NULL;
-	char buf[BUFSIZ],
+	పూర్ణాంకం rc = 0;
+	FILE *f = ఖాళీ;
+	అక్షరం buf[BUFSIZ],
 	     cn[129], seq[129];
 
-	if (!cc->configured)
+	ఒకవేళ (!cc->configured)
 		rc = colors_read_configuration(cc);
 
 	cc->cs_configured = 1;
 
-	if (rc || !cc->sfile)
-		goto done;
+	ఒకవేళ (rc || !cc->sfile)
+		వెళ్ళు పూర్తి;
 
 	DBG(SCHEME, ul_debug("reading file '%s'", cc->sfile));
 
 	f = fopen(cc->sfile, "r" UL_CLOEXECSTR);
-	if (!f) {
+	ఒకవేళ (!f) {
 		rc = -errno;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
-	while (fgets(buf, sizeof(buf), f)) {
-		char *p = strchr(buf, '\n');
+	అయితే (fgets(buf, పరిమాణం(buf), f)) {
+		అక్షరం *p = strchr(buf, '\n');
 
-		if (!p) {
-			if (feof(f))
+		ఒకవేళ (!p) {
+			ఒకవేళ (feof(f))
 				p = strchr(buf, '\0');
-			else {
+			లేకపోతే {
 				rc = -errno;
-				goto done;
+				వెళ్ళు పూర్తి;
 			}
 		}
 		*p = '\0';
-		p = (char *) skip_blank(buf);
-		if (*p == '\0' || *p == '#')
-			continue;
+		p = (అక్షరం *) skip_blank(buf);
+		ఒకవేళ (*p == '\0' || *p == '#')
+			కొనసాగు;
 
-		rc = sscanf(p, "%128[^ ] %128[^\n ]", cn, seq);
-		if (rc == 2 && *cn && *seq) {
-			rc = colors_add_scheme(cc, cn, seq);	/* set rc=0 on success */
-			if (rc)
-				goto done;
+		rc = అక్షరశ్రేణి_చదువు(p, "%128[^ ] %128[^\n ]", cn, seq);
+		ఒకవేళ (rc == 2 && *cn && *seq) {
+			rc = colors_కూడు_scheme(cc, cn, seq);	/* set rc=0 on success */
+			ఒకవేళ (rc)
+				వెళ్ళు పూర్తి;
 		}
 	}
 	rc = 0;
 
-done:
-	if (f)
+పూర్తి:
+	ఒకవేళ (f)
 		fclose(f);
-	colors_sort_schemes(cc);
+	colors_క్రమీకరించు_schemes(cc);
 
-	return rc;
+	తిరిగి rc;
 }
 
 
-static void termcolors_init_debug(void)
+స్థిర శూన్య termcolors_init_debug(శూన్య)
 {
 	__UL_INIT_DEBUG_FROM_ENV(termcolors, TERMCOLORS_DEBUG_, 0, TERMINAL_COLORS_DEBUG);
 }
 
-static int colors_terminal_is_ready(void)
+స్థిర పూర్ణాంకం colors_terminal_is_ready(శూన్య)
 {
-	int ncolors = -1;
+	పూర్ణాంకం ncolors = -1;
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+#ఒకవేళ defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 	{
-		int ret;
+		పూర్ణాంకం ret;
 
 		/* setupterm() allocates memory, del_curterm() deallocates it */
-		if (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
+		ఒకవేళ (setupterm(ఖాళీ, STDOUT_FILENO, &ret) == 0 && ret == 1) {
 			ncolors = tigetnum("colors");
-			del_curterm(cur_term);
+			del_curterm(cur_పదం);
 		}
 	}
-#endif
-	if (1 < ncolors) {
+#అయితే_ముగింపు
+	ఒకవేళ (1 < ncolors) {
 		DBG(CONF, ul_debug("terminal is ready (supports %d colors)", ncolors));
-		return 1;
+		తిరిగి 1;
 	}
 
 	DBG(CONF, ul_debug("terminal is NOT ready (no colors)"));
-	return 0;
+	తిరిగి 0;
 }
 
 /**
@@ -584,61 +584,61 @@ static int colors_terminal_is_ready(void)
  *
  * Returns: >0 on success.
  */
-int colors_init(int mode, const char *name)
+పూర్ణాంకం colors_init(పూర్ణాంకం బహుళకం, స్థిరరాశి అక్షరం *name)
 {
-	int ready = -1;
-	struct ul_color_ctl *cc = &ul_colors;
+	పూర్ణాంకం ready = -1;
+	నిర్మాణం ul_color_ctl *cc = &ul_colors;
 
 	cc->utilname = name;
 
 	termcolors_init_debug();
 
-	if (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
-		cc->mode = UL_COLORMODE_NEVER;
-	else
-		cc->mode = mode;
+	ఒకవేళ (బహుళకం != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
+		cc->బహుళకం = UL_COLORMODE_NEVER;
+	లేకపోతే
+		cc->బహుళకం = బహుళకం;
 
-	if (cc->mode == UL_COLORMODE_UNDEF
-	    && getenv("NO_COLOR") == NULL
+	ఒకవేళ (cc->బహుళకం == UL_COLORMODE_UNDEF
+	    && getenv("NO_COLOR") == ఖాళీ
 	    && (ready = colors_terminal_is_ready())) {
 
-		int rc = colors_read_configuration(cc);
-		if (rc)
-			cc->mode = UL_COLORMODE_DEFAULT;
-		else {
+		పూర్ణాంకం rc = colors_read_configuration(cc);
+		ఒకవేళ (rc)
+			cc->బహుళకం = UL_COLORMODE_DEFAULT;
+		లేకపోతే {
 
 			/* evaluate scores */
-			if (cc->scores[UL_COLORFILE_DISABLE] >
+			ఒకవేళ (cc->scores[UL_COLORFILE_DISABLE] >
 			    cc->scores[UL_COLORFILE_ENABLE])
-				cc->mode = UL_COLORMODE_NEVER;
-			else
-				cc->mode = UL_COLORMODE_DEFAULT;
+				cc->బహుళకం = UL_COLORMODE_NEVER;
+			లేకపోతే
+				cc->బహుళకం = UL_COLORMODE_DEFAULT;
 
 			atexit(colors_deinit);
 		}
 	}
 
-	switch (cc->mode) {
-	case UL_COLORMODE_AUTO:
+	ఎంపిక (cc->బహుళకం) {
+	స్థితి UL_COLORMODE_AUTO:
 		cc->has_colors = ready == -1 ? colors_terminal_is_ready() : ready;
-		break;
-	case UL_COLORMODE_ALWAYS:
+		ఆపు;
+	స్థితి UL_COLORMODE_ALWAYS:
 		cc->has_colors = 1;
-		break;
-	case UL_COLORMODE_NEVER:
-	default:
+		ఆపు;
+	స్థితి UL_COLORMODE_NEVER:
+	అప్రమేయ:
 		cc->has_colors = 0;
 	}
 
 	ON_DBG(CONF, colors_debug(cc));
 
-	return cc->has_colors;
+	తిరిగి cc->has_colors;
 }
 
 /*
  * Temporary disable colors (this setting is independent on terminal-colors.d/)
  */
-void colors_off(void)
+శూన్య colors_off(శూన్య)
 {
 	ul_colors.disabled = 1;
 }
@@ -646,7 +646,7 @@ void colors_off(void)
 /*
  * Enable colors
  */
-void colors_on(void)
+శూన్య colors_on(శూన్య)
 {
 	ul_colors.disabled = 0;
 }
@@ -654,51 +654,51 @@ void colors_on(void)
 /*
  * Is terminal-colors.d/ configured to use colors?
  */
-int colors_wanted(void)
+పూర్ణాంకం colors_wanted(శూన్య)
 {
-	return ul_colors.has_colors;
+	తిరిగి ul_colors.has_colors;
 }
 
 /*
  * Returns mode
  */
-int colors_mode(void)
+పూర్ణాంకం colors_బహుళకం(శూన్య)
 {
-	return ul_colors.mode;
+	తిరిగి ul_colors.బహుళకం;
 }
 
 /*
  * Enable @seq color
  */
-void color_fenable(const char *seq, FILE *f)
+శూన్య color_fenable(స్థిరరాశి అక్షరం *seq, FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors && seq)
+	ఒకవేళ (!ul_colors.disabled && ul_colors.has_colors && seq)
 		fputs(seq, f);
 }
 
 /*
  * Returns escape sequence by logical @name, if undefined then returns @dflt.
  */
-const char *color_scheme_get_sequence(const char *name, const char *dflt)
+స్థిరరాశి అక్షరం *color_scheme_get_sequence(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *dflt)
 {
-	struct ul_color_scheme *cs;
+	నిర్మాణం ul_color_scheme *cs;
 
-	if (ul_colors.disabled || !ul_colors.has_colors)
-		return NULL;
+	ఒకవేళ (ul_colors.disabled || !ul_colors.has_colors)
+		తిరిగి ఖాళీ;
 
 	cs = colors_get_scheme(&ul_colors, name);
-	return cs && cs->seq ? cs->seq : dflt;
+	తిరిగి cs && cs->seq ? cs->seq : dflt;
 }
 
 /*
  * Enable color by logical @name, if undefined enable @dflt.
  */
-void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
+శూన్య color_scheme_fenable(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *dflt, FILE *f)
 {
-	const char *seq = color_scheme_get_sequence(name, dflt);
+	స్థిరరాశి అక్షరం *seq = color_scheme_get_sequence(name, dflt);
 
-	if (!seq)
-		return;
+	ఒకవేళ (!seq)
+		తిరిగి;
 	color_fenable(seq, f);
 }
 
@@ -706,122 +706,122 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
 /*
  * Disable previously enabled color
  */
-void color_fdisable(FILE *f)
+శూన్య color_fdisable(FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
+	ఒకవేళ (!ul_colors.disabled && ul_colors.has_colors)
 		fputs(UL_COLOR_RESET, f);
 }
 
 /*
  * Get reset sequence
  */
-const char *color_get_disable_sequence(void)
+స్థిరరాశి అక్షరం *color_get_disable_sequence(శూన్య)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
-		return UL_COLOR_RESET;
-	else
-		return "";
+	ఒకవేళ (!ul_colors.disabled && ul_colors.has_colors)
+		తిరిగి UL_COLOR_RESET;
+	లేకపోతే
+		తిరిగి "";
 }
 
 /*
  * Parses @str to return UL_COLORMODE_*
  */
-int colormode_from_string(const char *str)
+పూర్ణాంకం colormode_from_string(స్థిరరాశి అక్షరం *str)
 {
 	size_t i;
-	static const char *const modes[] = {
+	స్థిర స్థిరరాశి అక్షరం *స్థిరరాశి modes[] = {
 		[UL_COLORMODE_AUTO]   = "auto",
 		[UL_COLORMODE_NEVER]  = "never",
 		[UL_COLORMODE_ALWAYS] = "always",
 		[UL_COLORMODE_UNDEF] = ""
 	};
 
-	if (!str || !*str)
-		return -EINVAL;
+	ఒకవేళ (!str || !*str)
+		తిరిగి -EINVAL;
 
-	assert(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
+	ప్రతిజ్ఞా(ARRAY_కొలత(modes) == __UL_NCOLORMODES);
 
-	for (i = 0; i < ARRAY_SIZE(modes); i++) {
-		if (c_strcasecmp(str, modes[i]) == 0)
-			return i;
+	కొరకు (i = 0; i < ARRAY_కొలత(modes); i++) {
+		ఒకవేళ (c_strcasecmp(str, modes[i]) == 0)
+			తిరిగి i;
 	}
 
-	return -EINVAL;
+	తిరిగి -EINVAL;
 }
 
 /*
  * Parses @str and exit(EXIT_FAILURE) on error
  */
-int colormode_or_err(const char *str)
+పూర్ణాంకం colormode_or_err(స్థిరరాశి అక్షరం *str)
 {
-	const char *p = str && *str == '=' ? str + 1 : str;
-	int colormode;
+	స్థిరరాశి అక్షరం *p = str && *str == '=' ? str + 1 : str;
+	పూర్ణాంకం colormode;
 
 	colormode = colormode_from_string(p);
-	if (colormode < 0)
+	ఒకవేళ (colormode < 0)
 		errx(EXIT_FAILURE, _("unsupported color mode: %s"), p);
 
-	return colormode;
+	తిరిగి colormode;
 }
 
-#ifdef TEST_PROGRAM_COLORS
+#నిర్వచితమైతే TEST_కార్యక్రమం_COLORS
 # include <getopt.h>
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	static const struct option longopts[] = {
-		{ "mode",	required_argument, NULL, 'm' },
-		{ "color",	required_argument, NULL, 'c' },
-		{ "color-scheme", required_argument, NULL, 'C' },
-		{ "name",	required_argument, NULL, 'n' },
-		{ NULL, 0, NULL, 0 }
+	స్థిర స్థిరరాశి నిర్మాణం option longopts[] = {
+		{ "mode",	required_argument, ఖాళీ, 'm' },
+		{ "color",	required_argument, ఖాళీ, 'c' },
+		{ "color-scheme", required_argument, ఖాళీ, 'C' },
+		{ "name",	required_argument, ఖాళీ, 'n' },
+		{ ఖాళీ, 0, ఖాళీ, 0 }
 	};
-	int c, mode = UL_COLORMODE_UNDEF;	/* default */
-	const char *color = "red", *name = NULL, *color_scheme = NULL;
-	char *seq = NULL;
+	పూర్ణాంకం c, బహుళకం = UL_COLORMODE_UNDEF;	/* default */
+	స్థిరరాశి అక్షరం *color = "red", *name = ఖాళీ, *color_scheme = ఖాళీ;
+	అక్షరం *seq = ఖాళీ;
 
-	while ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
-		switch (c) {
-		case 'c':
+	అయితే ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, ఖాళీ)) != -1) {
+		ఎంపిక (c) {
+		స్థితి 'c':
 			color = optarg;
-			break;
-		case 'C':
+			ఆపు;
+		స్థితి 'C':
 			color_scheme = optarg;
-			break;
-		case 'm':
-			mode = colormode_or_err(optarg);
-			break;
-		case 'n':
+			ఆపు;
+		స్థితి 'm':
+			బహుళకం = colormode_or_err(optarg);
+			ఆపు;
+		స్థితి 'n':
 			name = optarg;
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			fprintf(stderr, "usage: %s [options]\n"
 			" -m, --mode <auto|never|always>  default is undefined\n"
 			" -c, --color <red|blue|...>      color for the test message\n"
 			" -C, --color-scheme <name>       color for the test message\n"
 			" -n, --name <utilname>           util name\n",
-			program_invocation_short_name);
-			return EXIT_FAILURE;
+			కార్యక్రమం_invocation_short_name);
+			తిరిగి EXIT_FAILURE;
 		}
 	}
 
-	colors_init(mode, name ? name : program_invocation_short_name);
+	colors_init(బహుళకం, name ? name : కార్యక్రమం_invocation_short_name);
 
-	if (color_is_sequence(color))
+	ఒకవేళ (color_is_sequence(color))
 		seq = strdup(color);
-	else
+	లేకపోతే
 		seq = color_get_sequence(color);
 
-	if (color_scheme)
+	ఒకవేళ (color_scheme)
 		color_scheme_enable(color_scheme, seq);
-	else
+	లేకపోతే
 		color_enable(seq);
-	printf("Hello World!");
+	రాయి("Hello World!");
 	color_disable();
 	fputc('\n', stdout);
 
-	free(seq);
+	విడుదల(seq);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_COLORS */
+#అయితే_ముగింపు /* TEST_PROGRAM_COLORS */
 

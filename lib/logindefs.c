@@ -19,204 +19,204 @@
  *    products derived from this software without their specific prior
  *   written permission.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <pwd.h>
+#అన్తర్భావ <assert.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/syslog.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <pwd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "closestream.h"
-#include "logindefs.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "xalloc.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "cctype.h"
+#అన్తర్భావ "closestream.h"
+#అన్తర్భావ "logindefs.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "pathnames.h"
+#అన్తర్భావ "xalloc.h"
 
 
-static void (*logindefs_loader)(void *) = NULL;
-static void *logindefs_loader_data = NULL;
+స్థిర శూన్య (*logindefs_loader)(శూన్య *) = ఖాళీ;
+స్థిర శూన్య *logindefs_loader_దత్తాంశం = ఖాళీ;
 
-void logindefs_set_loader(void (*loader)(void *data), void *data)
+శూన్య logindefs_సమితి_loader(శూన్య (*loader)(శూన్య *దత్తాంశం), శూన్య *దత్తాంశం)
 {
 	logindefs_loader = loader;
-	logindefs_loader_data = data;
+	logindefs_loader_దత్తాంశం = దత్తాంశం;
 }
 
-#ifndef HAVE_LIBECONF
+#నిర్వచితం_కాకపోతే HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+నిర్మాణం అంశం {
+	అక్షరం *name;		/* name of the option.  */
+	అక్షరం *విలువ;		/* value of the option.  */
+	అక్షరం *మార్గం;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	నిర్మాణం అంశం *తదుపరి;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+స్థిర నిర్మాణం అంశం *list = ఖాళీ;
 
-void free_getlogindefs_data(void)
+శూన్య free_getlogindefs_దత్తాంశం(శూన్య)
 {
-	struct item *ptr;
+	నిర్మాణం అంశం *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	అయితే (ptr) {
+		నిర్మాణం అంశం *tmp = ptr->తదుపరి;
 
-		free(ptr->path);
-		free(ptr->name);
-		free(ptr->value);
-		free(ptr);
+		విడుదల(ptr->మార్గం);
+		విడుదల(ptr->name);
+		విడుదల(ptr->విలువ);
+		విడుదల(ptr);
 		ptr = tmp;
 	}
 
-	list = NULL;
+	list = ఖాళీ;
 }
 
-static void store(const char *name, const char *value, const char *path)
+స్థిర శూన్య store(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *విలువ, స్థిరరాశి అక్షరం *మార్గం)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	నిర్మాణం అంశం *new = xmalloc(పరిమాణం(నిర్మాణం అంశం));
 
-	if (!name)
+	ఒకవేళ (!name)
 		abort();
 
 	new->name = xstrdup(name);
-	new->value = value && *value ? xstrdup(value) : NULL;
-	new->path = xstrdup(path);
-	new->next = list;
+	new->విలువ = విలువ && *విలువ ? xstrdup(విలువ) : ఖాళీ;
+	new->మార్గం = xstrdup(మార్గం);
+	new->తదుపరి = list;
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+శూన్య logindefs_ఎక్కించు_file(స్థిరరాశి అక్షరం *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	అక్షరం buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	ఒకవేళ (!f)
+		తిరిగి;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	అయితే (fgets(buf, పరిమాణం(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		అక్షరం *p, *name, *దత్తాంశం = ఖాళీ;
 
-		if (*buf == '#' || *buf == '\n')
-			continue;	/* only comment or empty line */
+		ఒకవేళ (*buf == '#' || *buf == '\n')
+			కొనసాగు;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		ఒకవేళ (p)
 			*p = '\0';
-		else {
-			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+		లేకపోతే {
+			size_t n = అక్షరశ్రేణి_పొడవు(buf);
+			ఒకవేళ (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
-			continue;	/* empty line */
+		ఒకవేళ (!*buf)
+			కొనసాగు;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		అయితే (*name && ఖాళీనా((గుర్తులేని)*name))
 			name++;
 
 		/* go to the end of the name */
-		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
-			data++;
-		if (data > name && *data)
-			*data++ = '\0';
+		దత్తాంశం = name;
+		అయితే (*దత్తాంశం && !(ఖాళీనా((గుర్తులేని)*దత్తాంశం) || *దత్తాంశం == '='))
+			దత్తాంశం++;
+		ఒకవేళ (దత్తాంశం > name && *దత్తాంశం)
+			*దత్తాంశం++ = '\0';
 
-		if (!*name || data == name)
-			continue;
+		ఒకవేళ (!*name || దత్తాంశం == name)
+			కొనసాగు;
 
 		/* go to the begin of the value */
-		while (*data
-		       && (isspace((unsigned)*data) || *data == '='
-			   || *data == '"'))
-			data++;
+		అయితే (*దత్తాంశం
+		       && (ఖాళీనా((గుర్తులేని)*దత్తాంశం) || *దత్తాంశం == '='
+			   || *దత్తాంశం == '"'))
+			దత్తాంశం++;
 
 		/* remove space at the end of the value */
-		p = data + strlen(data);
-		if (p > data)
+		p = దత్తాంశం + అక్షరశ్రేణి_పొడవు(దత్తాంశం);
+		ఒకవేళ (p > దత్తాంశం)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		అయితే (p > దత్తాంశం && (ఖాళీనా((గుర్తులేని)*p) || *p == '"'))
 			*p-- = '\0';
 
-		store(name, data, filename);
+		store(name, దత్తాంశం, filename);
 	}
 
 	fclose(f);
 }
 
-static void load_defaults(void)
+స్థిర శూన్య ఎక్కించు_defaults(శూన్య)
 {
-	if (logindefs_loader)
-		logindefs_loader(logindefs_loader_data);
-	else
-		logindefs_load_file(_PATH_LOGINDEFS);
+	ఒకవేళ (logindefs_loader)
+		logindefs_loader(logindefs_loader_దత్తాంశం);
+	లేకపోతే
+		logindefs_ఎక్కించు_file(మార్గం_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+స్థిర నిర్మాణం అంశం *శోధన(స్థిరరాశి అక్షరం *name)
 {
-	struct item *ptr;
+	నిర్మాణం అంశం *ptr;
 
-	if (!list)
-		load_defaults();
+	ఒకవేళ (!list)
+		ఎక్కించు_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
-		ptr = ptr->next;
+	అయితే (ptr != ఖాళీ) {
+		ఒకవేళ (c_strcasecmp(name, ptr->name) == 0)
+			తిరిగి ptr;
+		ptr = ptr->తదుపరి;
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-static const char *search_config(const char *name)
+స్థిర స్థిరరాశి అక్షరం *శోధన_config(స్థిరరాశి అక్షరం *name)
 {
-	struct item *ptr;
+	నిర్మాణం అంశం *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
-		ptr = ptr->next;
+	అయితే (ptr != ఖాళీ) {
+		ఒకవేళ (c_strcasecmp(name, ptr->name) == 0)
+			తిరిగి ptr->మార్గం;
+		ptr = ptr->తదుపరి;
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+పూర్ణాంకం getlogindefs_bool(స్థిరరాశి అక్షరం *name, పూర్ణాంకం dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	నిర్మాణం అంశం *ptr = శోధన(name);
+	తిరిగి ptr && ptr->విలువ ? (c_strcasecmp(ptr->విలువ, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+గుర్తులేని దీర్ఘ getlogindefs_అంకె(స్థిరరాశి అక్షరం *name, గుర్తులేని దీర్ఘ dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
-	unsigned long retval;
+	నిర్మాణం అంశం *ptr = శోధన(name);
+	అక్షరం *చివర = ఖాళీ;
+	గుర్తులేని దీర్ఘ retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	ఒకవేళ (!ptr || !ptr->విలువ)
+		తిరిగి dflt;
 
 	errno = 0;
-	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	retval = strtoul(ptr->విలువ, &చివర, 0);
+	ఒకవేళ (చివర && *చివర == '\0' && !errno)
+		తిరిగి retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
-	       search_config(name), name, ptr->value);
-	return dflt;
+	       శోధన_config(name), name, ptr->విలువ);
+	తిరిగి dflt;
 }
 
 /*
@@ -225,142 +225,142 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+స్థిరరాశి అక్షరం *getlogindefs_str(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *dflt)
 {
-	struct item *ptr = search(name);
+	నిర్మాణం అంశం *ptr = శోధన(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	ఒకవేళ (!ptr)
+		తిరిగి dflt;
+	ఒకవేళ (!ptr->విలువ)
+		తిరిగి "";
+	తిరిగి ptr->విలువ;
 }
 
-#else /* !HAVE_LIBECONF */
+#లేకపోతే /* !HAVE_LIBECONF */
 
-#include "dl-econf.h"
+#అన్తర్భావ "dl-econf.h"
 
-static econf_file *file = NULL;
+స్థిర econf_file *file = ఖాళీ;
 
-void free_getlogindefs_data(void)
+శూన్య free_getlogindefs_దత్తాంశం(శూన్య)
 {
-	if (file)
+	ఒకవేళ (file)
 		econf_call(econf_freeFile)(file);
-	file = NULL;
+	file = ఖాళీ;
 }
 
-static void load_defaults(void)
+స్థిర శూన్య ఎక్కించు_defaults(శూన్య)
 {
 	econf_err error;
 
-	if (file != NULL)
-		free_getlogindefs_data();
+	ఒకవేళ (file != ఖాళీ)
+		free_getlogindefs_దత్తాంశం();
 
-	if (ul_dlopen_libeconf() == 0) {
-#ifdef HAVE_ECONF_READCONFIG
-		error = econf_call(econf_readConfig)(&file, NULL,
-				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+	ఒకవేళ (ul_dlopen_libeconf() == 0) {
+#నిర్వచితమైతే HAVE_ECONF_READCONFIG
+		error = econf_call(econf_readConfig)(&file, ఖాళీ,
+				UL_VENDORDIR_మార్గం, "login", "defs", "= \t", "#");
+#లేకపోతే
 		error = econf_call(econf_readDirs)(&file,
-				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
-#endif
-		if (error)
+				UL_VENDORDIR_మార్గం, "/etc", "login", "defs", "= \t", "#");
+#అయితే_ముగింపు
+		ఒకవేళ (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
-		logindefs_loader(logindefs_loader_data);
+	ఒకవేళ (logindefs_loader)
+		logindefs_loader(logindefs_loader_దత్తాంశం);
 
 }
 
-void logindefs_load_file(const char *filename)
+శూన్య logindefs_ఎక్కించు_file(స్థిరరాశి అక్షరం *filename)
 {
-	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	econf_file *file_l = ఖాళీ, *file_m = ఖాళీ;
+	అక్షరం *మార్గం;
 
-	logindefs_loader = NULL; /* No recursion */
+	logindefs_loader = ఖాళీ; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	ఒకవేళ (ul_dlopen_libeconf() != 0)
+		తిరిగి;
 
-#if USE_VENDORDIR
-	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
+#ఒకవేళ USE_VENDORDIR
+	xasprintf(&మార్గం, మార్గం_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	ఒకవేళ (!econf_call(econf_readFile)(&file_l, మార్గం, "= \t", "#")) {
+		ఒకవేళ (file == ఖాళీ)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		లేకపోతే ఒకవేళ (!econf_call(econf_విలీనం_Files)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
-#endif
+	విడుదల (మార్గం);
+#అయితే_ముగింపు
 
-	xasprintf(&path, "/etc/%s", filename);
+	xasprintf(&మార్గం, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	ఒకవేళ (!econf_call(econf_readFile)(&file_l, మార్గం, "= \t", "#")) {
+		ఒకవేళ (file == ఖాళీ)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		లేకపోతే ఒకవేళ (!econf_call(econf_విలీనం_Files)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} లేకపోతే ఒకవేళ (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		ఒకవేళ (file == ఖాళీ)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		లేకపోతే ఒకవేళ (!econf_call(econf_విలీనం_Files)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	విడుదల (మార్గం);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+పూర్ణాంకం getlogindefs_bool(స్థిరరాశి అక్షరం *name, పూర్ణాంకం dflt)
 {
-	bool value;
+	bool విలువ;
 	econf_err error;
 
-	if (!file)
-		load_defaults();
+	ఒకవేళ (!file)
+		ఎక్కించు_defaults();
 
-	if (!file)
-		return dflt;
+	ఒకవేళ (!file)
+		తిరిగి dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ఒకవేళ ((error = econf_call(econf_get_Bool_విలువ)(file, ఖాళీ, name, &విలువ))) {
+		ఒకవేళ (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		తిరిగి dflt;
 	}
-	return value;
+	తిరిగి విలువ;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+గుర్తులేని దీర్ఘ getlogindefs_అంకె(స్థిరరాశి అక్షరం *name, గుర్తులేని దీర్ఘ dflt)
 {
-	uint64_t value;
+	uint64_t విలువ;
 	econf_err error;
 
-	if (!file)
-		load_defaults();
+	ఒకవేళ (!file)
+		ఎక్కించు_defaults();
 
-	if (!file)
-		return dflt;
+	ఒకవేళ (!file)
+		తిరిగి dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ఒకవేళ ((error = econf_call(econf_get_UInt64_విలువ)(file, ఖాళీ, name, &విలువ))) {
+		ఒకవేళ (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		తిరిగి dflt;
 	}
-	return value;
+	తిరిగి విలువ;
 }
 
 /*
@@ -369,29 +369,29 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+స్థిరరాశి అక్షరం *getlogindefs_str(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *dflt)
 {
-	char *value;
+	అక్షరం *విలువ;
 	econf_err error;
 
-	if (!file)
-		load_defaults();
+	ఒకవేళ (!file)
+		ఎక్కించు_defaults();
 
-	if (!file)
-		return dflt;
+	ఒకవేళ (!file)
+		తిరిగి dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	ఒకవేళ ((error = econf_call(econf_get_String_విలువ)(file, ఖాళీ, name, &విలువ))) {
+		ఒకవేళ (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		తిరిగి dflt;
 	}
-	if (value)
-		return value;
+	ఒకవేళ (విలువ)
+		తిరిగి విలువ;
 
-	return xstrdup("");
+	తిరిగి xstrdup("");
 }
-#endif /* !HAVE_LIBECONF */
+#అయితే_ముగింపు /* !HAVE_LIBECONF */
 
 /*
  * For compatibility with shadow-utils we have to support additional
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+పూర్ణాంకం logindefs_setenv(స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *conf, స్థిరరాశి అక్షరం *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	స్థిరరాశి అక్షరం *val = getlogindefs_str(conf, dflt);
+	స్థిరరాశి అక్షరం *p;
 
-	if (!val)
-		return -1;
+	ఒకవేళ (!val)
+		తిరిగి -1;
 
 	p = strchr(val, '=');
-	if (p) {
-		size_t sz = strlen(name);
+	ఒకవేళ (p) {
+		size_t sz = అక్షరశ్రేణి_పొడవు(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			ఒకవేళ (*val == '"')
 				val++;
-			if (!*val)
+			ఒకవేళ (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	తిరిగి val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+పూర్ణాంకం logindefs_setenv_మార్గం(uid_t uid)
 {
-	int rc = 0;
+	పూర్ణాంకం rc = 0;
 
-	if (uid)
+	ఒకవేళ (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
-		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
+	లేకపోతే ఒకవేళ ((rc = logindefs_setenv("PATH", "ENV_SUPATH", ఖాళీ)) != 0)
+		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", మార్గం_DEFPATH_మూలం);
 
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+పూర్ణాంకం effective_access(స్థిరరాశి అక్షరం *మార్గం, పూర్ణాంకం బహుళకం)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	పూర్ణాంకం fd = open(మార్గం, బహుళకం);
+	ఒకవేళ (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	తిరిగి fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+పూర్ణాంకం get_hushlogin_స్థితి(నిర్మాణం passwd *pwd, స్థిరరాశి అక్షరం *override_home, పూర్ణాంకం force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	స్థిరరాశి అక్షరం *files[] = { మార్గం_HUSHLOGINS, మార్గం_HUSHLOGIN, ఖాళీ };
+	స్థిరరాశి అక్షరం *file;
+	అక్షరం buf[BUFSIZ];
+	పూర్ణాంకం i;
 
-	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	file = getlogindefs_str("HUSHLOGIN_FILE", ఖాళీ);
+	ఒకవేళ (file) {
+		ఒకవేళ (!*file)
+			తిరిగి 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
-		files[1] = NULL;
+		files[1] = ఖాళీ;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	కొరకు (i = 0; files[i]; i++) {
+		పూర్ణాంకం ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		ఒకవేళ (*file == '/') {
+			నిర్మాణం stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
-				continue;	/* file does not exist */
+			ఒకవేళ (stat(file, &st) != 0)
+				కొనసాగు;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			ఒకవేళ (st.st_size == 0)
+				తిరిగి 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
-				continue;	/* ignore errors... */
+			ఒకవేళ (!f)
+				కొనసాగు;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
-					buf[strlen(buf) - 1] = '\0';
+			అయితే (ok == 0 && fgets(buf, పరిమాణం(buf), f)) {
+				ఒకవేళ (buf[0] != '\0')
+					buf[అక్షరశ్రేణి_పొడవు(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			ఒకవేళ (ok)
+				తిరిగి 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			తిరిగి 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
-			continue;
+		ఒకవేళ (అక్షరశ్రేణి_పొడవు(pwd->pw_dir) + అక్షరశ్రేణి_పొడవు(file) + 2 > పరిమాణం(buf))
+			కొనసాగు;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
-			continue;
+		ఒకవేళ (snprintf(buf, పరిమాణం(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+			కొనసాగు;
 
-		if (force_check) {
+		ఒకవేళ (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			ఒకవేళ (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			ఒకవేళ (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
-				exit(EXIT_FAILURE);
+				నిష్క్రమించు(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			ఒకవేళ (ok)
+				తిరిగి 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		లేకపోతే {
+			పూర్ణాంకం rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			ఒకవేళ (rc == 0)
+				తిరిగి 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			ఒకవేళ (rc == -1 && errno == EACCES)
+				తిరిగి -1;
 		}
 
 	}
 
-	return 0;
+	తిరిగి 0;
 }
-#ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+#నిర్వచితమైతే TEST_కార్యక్రమం
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	char *name, *type;
+	అక్షరం *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	ఒకవేళ (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
-	logindefs_load_file(argv[1]);
+	logindefs_ఎక్కించు_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
-#ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+	ఒకవేళ (argc != 4) {	/* list all */
+#నిర్వచితమైతే HAVE_LIBECONF
+		పూర్ణాంకం i;
+		అక్షరం *కీలకాలు[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
-				NULL};
+				ఖాళీ};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		కొరకు (i = 0; file && కీలకాలు[i] != ఖాళీ; i++) {
+			అక్షరం *విలువ = ఖాళీ;
 
-			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
-			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
+			econf_call(econf_get_String_విలువ)(file, ఖాళీ, కీలకాలు[i], &విలువ);
+			రాయి ("%s: $%s: '%s'\n", argv[1], కీలకాలు[i], విలువ);
 		}
 
-		if (file)
+		ఒకవేళ (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#లేకపోతే
+		నిర్మాణం అంశం *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
-			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
-			       ptr->value);
-#endif
-		return EXIT_SUCCESS;
+		కొరకు (ptr = list; ptr; ptr = ptr->తదుపరి)
+			రాయి("%s: $%s: '%s'\n", ptr->మార్గం, ptr->name,
+			       ptr->విలువ);
+#అయితే_ముగింపు
+		తిరిగి EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
-		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
-		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
-		printf("$%s: '%s'\n", name,
+	ఒకవేళ (strcmp(type, "str") == 0)
+		రాయి("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
+	లేకపోతే ఒకవేళ (strcmp(type, "num") == 0)
+		రాయి("$%s: '%lu'\n", name, getlogindefs_అంకె(name, 0));
+	లేకపోతే ఒకవేళ (strcmp(type, "bool") == 0)
+		రాయి("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif
+#అయితే_ముగింపు

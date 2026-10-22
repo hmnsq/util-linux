@@ -12,177 +12,177 @@
  * Software Foundation; either version 2.1 of the License, or (at your option)
  * any later version.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <inttypes.h>
+#అన్తర్భావ <assert.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <time.h>
+#అన్తర్భావ <sys/time.h>
+#అన్తర్భావ <inttypes.h>
 
-#include "c.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "timeutils.h"
 
-#define WHITESPACE " \t\n\r"
+#నిర్వచించు WHITESPACE " \t\n\r"
 
-#define streq(a,b) (strcmp((a),(b)) == 0)
+#నిర్వచించు streq(a,b) (strcmp((a),(b)) == 0)
 
-static int parse_sec(const char *t, usec_t *usec)
+స్థిర పూర్ణాంకం parse_sec(స్థిరరాశి అక్షరం *t, usec_t *usec)
 {
-	static const struct {
-		const char *suffix;
+	స్థిర స్థిరరాశి నిర్మాణం {
+		స్థిరరాశి అక్షరం *suffix;
 		usec_t usec;
-	} table[] = {
-		{ "seconds",	USEC_PER_SEC },
-		{ "second",	USEC_PER_SEC },
-		{ "sec",	USEC_PER_SEC },
-		{ "s",		USEC_PER_SEC },
-		{ "minutes",	USEC_PER_MINUTE },
-		{ "minute",	USEC_PER_MINUTE },
-		{ "min",	USEC_PER_MINUTE },
-		{ "months",	USEC_PER_MONTH },
-		{ "month",	USEC_PER_MONTH },
-		{ "msec",	USEC_PER_MSEC },
-		{ "ms",		USEC_PER_MSEC },
-		{ "m",		USEC_PER_MINUTE },
-		{ "hours",	USEC_PER_HOUR },
-		{ "hour",	USEC_PER_HOUR },
-		{ "hr",		USEC_PER_HOUR },
-		{ "h",		USEC_PER_HOUR },
-		{ "days",	USEC_PER_DAY },
-		{ "day",	USEC_PER_DAY },
-		{ "d",		USEC_PER_DAY },
-		{ "weeks",	USEC_PER_WEEK },
-		{ "week",	USEC_PER_WEEK },
-		{ "w",		USEC_PER_WEEK },
-		{ "years",	USEC_PER_YEAR },
-		{ "year",	USEC_PER_YEAR },
-		{ "y",		USEC_PER_YEAR },
+	} పట్టిక[] = {
+		{ "seconds",	USEC_చొప్పున_SEC },
+		{ "second",	USEC_చొప్పున_SEC },
+		{ "sec",	USEC_చొప్పున_SEC },
+		{ "s",		USEC_చొప్పున_SEC },
+		{ "minutes",	USEC_చొప్పున_MINUTE },
+		{ "minute",	USEC_చొప్పున_MINUTE },
+		{ "min",	USEC_చొప్పున_MINUTE },
+		{ "months",	USEC_చొప్పున_MONTH },
+		{ "month",	USEC_చొప్పున_MONTH },
+		{ "msec",	USEC_చొప్పున_MSEC },
+		{ "ms",		USEC_చొప్పున_MSEC },
+		{ "m",		USEC_చొప్పున_MINUTE },
+		{ "hours",	USEC_చొప్పున_HOUR },
+		{ "hour",	USEC_చొప్పున_HOUR },
+		{ "hr",		USEC_చొప్పున_HOUR },
+		{ "h",		USEC_చొప్పున_HOUR },
+		{ "days",	USEC_చొప్పున_DAY },
+		{ "day",	USEC_చొప్పున_DAY },
+		{ "d",		USEC_చొప్పున_DAY },
+		{ "weeks",	USEC_చొప్పున_WEEK },
+		{ "week",	USEC_చొప్పున_WEEK },
+		{ "w",		USEC_చొప్పున_WEEK },
+		{ "years",	USEC_చొప్పున_YEAR },
+		{ "year",	USEC_చొప్పున_YEAR },
+		{ "y",		USEC_చొప్పున_YEAR },
 		{ "usec",	1ULL },
 		{ "us",		1ULL },
-		{ "",		USEC_PER_SEC },	/* default is sec */
+		{ "",		USEC_చొప్పున_SEC },	/* default is sec */
 	};
 
-	const char *p;
+	స్థిరరాశి అక్షరం *p;
 	usec_t r = 0;
-	int something = FALSE;
+	పూర్ణాంకం something = FALSE;
 
-	assert(t);
-	assert(usec);
+	ప్రతిజ్ఞా(t);
+	ప్రతిజ్ఞా(usec);
 
 	p = t;
-	for (;;) {
-		long long l, z = 0;
-		char *e;
-		unsigned i, n = 0;
+	కొరకు (;;) {
+		దీర్ఘ దీర్ఘ l, z = 0;
+		అక్షరం *e;
+		గుర్తులేని i, n = 0;
 
 		p += strspn(p, WHITESPACE);
 
-		if (*p == 0) {
-			if (!something)
-				return -EINVAL;
+		ఒకవేళ (*p == 0) {
+			ఒకవేళ (!something)
+				తిరిగి -EINVAL;
 
-			break;
+			ఆపు;
 		}
 
 		errno = 0;
 		l = strtoll(p, &e, 10);
 
-		if (errno > 0)
-			return -errno;
+		ఒకవేళ (errno > 0)
+			తిరిగి -errno;
 
-		if (l < 0)
-			return -ERANGE;
+		ఒకవేళ (l < 0)
+			తిరిగి -ERANGE;
 
-		if (*e == '.') {
-			char *b = e + 1;
+		ఒకవేళ (*e == '.') {
+			అక్షరం *b = e + 1;
 
 			errno = 0;
 			z = strtoll(b, &e, 10);
-			if (errno > 0)
-				return -errno;
+			ఒకవేళ (errno > 0)
+				తిరిగి -errno;
 
-			if (z < 0)
-				return -ERANGE;
+			ఒకవేళ (z < 0)
+				తిరిగి -ERANGE;
 
-			if (e == b)
-				return -EINVAL;
+			ఒకవేళ (e == b)
+				తిరిగి -EINVAL;
 
 			n = e - b;
 
-		} else if (e == p)
-			return -EINVAL;
+		} లేకపోతే ఒకవేళ (e == p)
+			తిరిగి -EINVAL;
 
 		e += strspn(e, WHITESPACE);
 
-		for (i = 0; i < ARRAY_SIZE(table); i++)
-			if (ul_startswith(e, table[i].suffix)) {
-				usec_t k = (usec_t) z * table[i].usec;
+		కొరకు (i = 0; i < ARRAY_కొలత(పట్టిక); i++)
+			ఒకవేళ (ul_startswith(e, పట్టిక[i].suffix)) {
+				usec_t k = (usec_t) z * పట్టిక[i].usec;
 
-				for (; n > 0; n--)
+				కొరకు (; n > 0; n--)
 					k /= 10;
 
-				r += (usec_t) l *table[i].usec + k;
-				p = e + strlen(table[i].suffix);
+				r += (usec_t) l *పట్టిక[i].usec + k;
+				p = e + అక్షరశ్రేణి_పొడవు(పట్టిక[i].suffix);
 
 				something = TRUE;
-				break;
+				ఆపు;
 			}
 
-		if (i >= ARRAY_SIZE(table))
-			return -EINVAL;
+		ఒకవేళ (i >= ARRAY_కొలత(పట్టిక))
+			తిరిగి -EINVAL;
 
 	}
 
 	*usec = r;
 
-	return 0;
+	తిరిగి 0;
 }
 
-static int parse_subseconds(const char *t, usec_t *usec)
+స్థిర పూర్ణాంకం parse_subseconds(స్థిరరాశి అక్షరం *t, usec_t *usec)
 {
 	usec_t ret = 0;
-	usec_t factor = USEC_PER_SEC / 10;
+	usec_t గుణకం = USEC_చొప్పున_SEC / 10;
 
-	if (*t != '.' && *t != ',')
-		return -1;
+	ఒకవేళ (*t != '.' && *t != ',')
+		తిరిగి -1;
 
-	while (*(++t)) {
-		if (!isdigit(*t) || factor < 1)
-			return -1;
+	అయితే (*(++t)) {
+		ఒకవేళ (!అంకెనా(*t) || గుణకం < 1)
+			తిరిగి -1;
 
-		ret += ((usec_t) *t - '0') * factor;
-		factor /= 10;
+		ret += ((usec_t) *t - '0') * గుణకం;
+		గుణకం /= 10;
 	}
 
 	*usec = ret;
-	return 0;
+	తిరిగి 0;
 }
 
-static const char *parse_epoch_seconds(const char *t, struct tm *tm)
+స్థిర స్థిరరాశి అక్షరం *parse_epoch_seconds(స్థిరరాశి అక్షరం *t, నిర్మాణం tm *tm)
 {
 	int64_t s;
 	time_t st;
-	int f, c;
+	పూర్ణాంకం f, c;
 
-	f = sscanf(t, "%"SCNd64"%n", &s, &c);
-	if (f < 1)
-		return NULL;
+	f = అక్షరశ్రేణి_చదువు(t, "%"SCNd64"%n", &s, &c);
+	ఒకవేళ (f < 1)
+		తిరిగి ఖాళీ;
 	st = s;
-	if ((int64_t) st < s)
-		return NULL;
-	if (!localtime_r(&st, tm))
-		return NULL;
-	return t + c;
+	ఒకవేళ ((int64_t) st < s)
+		తిరిగి ఖాళీ;
+	ఒకవేళ (!localtime_r(&st, tm))
+		తిరిగి ఖాళీ;
+	తిరిగి t + c;
 }
 
-static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
+స్థిర పూర్ణాంకం parse_timestamp_reference(time_t x, స్థిరరాశి అక్షరం *t, usec_t *usec)
 {
-	static const struct {
-		const char *name;
-		const int nr;
+	స్థిర స్థిరరాశి నిర్మాణం {
+		స్థిరరాశి అక్షరం *name;
+		స్థిరరాశి పూర్ణాంకం nr;
 	} day_nr[] = {
 		{ "Sunday",	0 },
 		{ "Sun",	0 },
@@ -200,11 +200,11 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 		{ "Sat",	6 },
 	};
 
-	const char *k;
-	struct tm tm, copy;
+	స్థిరరాశి అక్షరం *k;
+	నిర్మాణం tm tm, copy;
 	usec_t plus = 0, minus = 0, ret = 0;
-	int r, weekday = -1;
-	unsigned i;
+	పూర్ణాంకం r, weekday = -1;
+	గుర్తులేని i;
 
 	/*
 	 * Allowed syntaxes:
@@ -233,179 +233,179 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	 *
 	 */
 
-	assert(t);
-	assert(usec);
+	ప్రతిజ్ఞా(t);
+	ప్రతిజ్ఞా(usec);
 
 	localtime_r(&x, &tm);
 	tm.tm_isdst = -1;
 
-	if (streq(t, "now"))
-		goto finish;
+	ఒకవేళ (streq(t, "now"))
+		వెళ్ళు ముగింపు;
 
-	else if (streq(t, "today")) {
+	లేకపోతే ఒకవేళ (streq(t, "today")) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 
-	} else if (streq(t, "yesterday")) {
+	} లేకపోతే ఒకవేళ (streq(t, "yesterday")) {
 		tm.tm_mday--;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 
-	} else if (streq(t, "tomorrow")) {
+	} లేకపోతే ఒకవేళ (streq(t, "tomorrow")) {
 		tm.tm_mday++;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 
-	} else if (t[0] == '+') {
+	} లేకపోతే ఒకవేళ (t[0] == '+') {
 
 		r = parse_sec(t + 1, &plus);
-		if (r < 0)
-			return r;
+		ఒకవేళ (r < 0)
+			తిరిగి r;
 
-		goto finish;
-	} else if (t[0] == '-') {
+		వెళ్ళు ముగింపు;
+	} లేకపోతే ఒకవేళ (t[0] == '-') {
 
 		r = parse_sec(t + 1, &minus);
-		if (r < 0)
-			return r;
+		ఒకవేళ (r < 0)
+			తిరిగి r;
 
-		goto finish;
-	} else if (t[0] == '@') {
+		వెళ్ళు ముగింపు;
+	} లేకపోతే ఒకవేళ (t[0] == '@') {
 		k = parse_epoch_seconds(t + 1, &tm);
-		if (k && *k == 0)
-			goto finish;
-		else if (k && parse_subseconds(k, &ret) == 0)
-			goto finish;
+		ఒకవేళ (k && *k == 0)
+			వెళ్ళు ముగింపు;
+		లేకపోతే ఒకవేళ (k && parse_subseconds(k, &ret) == 0)
+			వెళ్ళు ముగింపు;
 
-		return -EINVAL;
-	} else if (ul_endswith(t, " ago")) {
-		char *z;
+		తిరిగి -EINVAL;
+	} లేకపోతే ఒకవేళ (ul_endswith(t, " ago")) {
+		అక్షరం *z;
 
-		z = strndup(t, strlen(t) - 4);
-		if (!z)
-			return -ENOMEM;
+		z = strndup(t, అక్షరశ్రేణి_పొడవు(t) - 4);
+		ఒకవేళ (!z)
+			తిరిగి -ENOMEM;
 
 		r = parse_sec(z, &minus);
-		free(z);
-		if (r < 0)
-			return r;
+		విడుదల(z);
+		ఒకవేళ (r < 0)
+			తిరిగి r;
 
-		goto finish;
+		వెళ్ళు ముగింపు;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(day_nr); i++) {
+	కొరకు (i = 0; i < ARRAY_కొలత(day_nr); i++) {
 		size_t skip;
 
-		if (!startswith_no_case(t, day_nr[i].name))
-			continue;
+		ఒకవేళ (!startswith_no_case(t, day_nr[i].name))
+			కొనసాగు;
 
-		skip = strlen(day_nr[i].name);
-		if (t[skip] != ' ')
-			continue;
+		skip = అక్షరశ్రేణి_పొడవు(day_nr[i].name);
+		ఒకవేళ (t[skip] != ' ')
+			కొనసాగు;
 
 		weekday = day_nr[i].nr;
 		t += skip + 1;
-		break;
+		ఆపు;
 	}
 
 	copy = tm;
 	k = strptime(t, "%y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ఒకవేళ (k && *k == 0)
+		వెళ్ళు ముగింపు;
+	లేకపోతే ఒకవేళ (k && parse_subseconds(k, &ret) == 0)
+		వెళ్ళు ముగింపు;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ఒకవేళ (k && *k == 0)
+		వెళ్ళు ముగింపు;
+	లేకపోతే ఒకవేళ (k && parse_subseconds(k, &ret) == 0)
+		వెళ్ళు ముగింపు;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%dT%H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ఒకవేళ (k && *k == 0)
+		వెళ్ళు ముగింపు;
+	లేకపోతే ఒకవేళ (k && parse_subseconds(k, &ret) == 0)
+		వెళ్ళు ముగింపు;
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	ఒకవేళ (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	ఒకవేళ (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 	}
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d", &tm);
-	if (k && *k == 0) {
+	ఒకవేళ (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d", &tm);
-	if (k && *k == 0) {
+	ఒకవేళ (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 	}
 
 	tm = copy;
 	k = strptime(t, "%H:%M:%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ఒకవేళ (k && *k == 0)
+		వెళ్ళు ముగింపు;
+	లేకపోతే ఒకవేళ (k && parse_subseconds(k, &ret) == 0)
+		వెళ్ళు ముగింపు;
 
 	tm = copy;
 	k = strptime(t, "%H:%M", &tm);
-	if (k && *k == 0) {
+	ఒకవేళ (k && *k == 0) {
 		tm.tm_sec = 0;
-		goto finish;
+		వెళ్ళు ముగింపు;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y%m%d%H%M%S", &tm);
-	if (k && *k == 0)
-		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
-		goto finish;
+	ఒకవేళ (k && *k == 0)
+		వెళ్ళు ముగింపు;
+	లేకపోతే ఒకవేళ (k && parse_subseconds(k, &ret) == 0)
+		వెళ్ళు ముగింపు;
 
-	return -EINVAL;
+	తిరిగి -EINVAL;
 
- finish:
+ ముగింపు:
 	x = mktime(&tm);
-	if (x == (time_t)-1)
-		return -EINVAL;
+	ఒకవేళ (x == (time_t)-1)
+		తిరిగి -EINVAL;
 
-	if (weekday >= 0 && tm.tm_wday != weekday)
-		return -EINVAL;
+	ఒకవేళ (weekday >= 0 && tm.tm_wday != weekday)
+		తిరిగి -EINVAL;
 
-	ret += (usec_t) x * USEC_PER_SEC;
+	ret += (usec_t) x * USEC_చొప్పున_SEC;
 
-	if (minus > ret)
-		return -ERANGE;
-	if ((ret + plus) < ret)
-		return -ERANGE;
+	ఒకవేళ (minus > ret)
+		తిరిగి -ERANGE;
+	ఒకవేళ ((ret + plus) < ret)
+		తిరిగి -ERANGE;
 
 	ret += plus;
 	ret -= minus;
 
 	*usec = ret;
 
-	return 0;
+	తిరిగి 0;
 }
 
-int ul_parse_timestamp(const char *t, usec_t *usec)
+పూర్ణాంకం ul_parse_timestamp(స్థిరరాశి అక్షరం *t, usec_t *usec)
 {
-	return parse_timestamp_reference(time(NULL), t, usec);
+	తిరిగి parse_timestamp_reference(time(ఖాళీ), t, usec);
 }
 
 /* Returns the difference in seconds between its argument and GMT. If if TP is
@@ -413,35 +413,35 @@ int ul_parse_timestamp(const char *t, usec_t *usec)
  * tzset is called so, for example, 'TZ="UTC" hwclock' will work as expected.
  * Derived from glibc/time/strftime_l.c
  */
-int get_gmtoff(const struct tm *tp)
+పూర్ణాంకం get_gmtoff(స్థిరరాశి నిర్మాణం tm *tp)
 {
-	if (tp->tm_isdst < 0)
-		return 0;
+	ఒకవేళ (tp->tm_isdst < 0)
+		తిరిగి 0;
 
-#if HAVE_TM_GMTOFF
-	return tp->tm_gmtoff;
-#else
-	struct tm tm;
-	struct tm gtm;
-	struct tm ltm = *tp;
+#ఒకవేళ HAVE_TM_GMTOFF
+	తిరిగి tp->tm_gmtoff;
+#లేకపోతే
+	నిర్మాణం tm tm;
+	నిర్మాణం tm gtm;
+	నిర్మాణం tm ltm = *tp;
 	time_t lt;
 
 	tzset();
 	lt = mktime(&ltm);
 	/* Check if mktime returning -1 is an error or a valid time_t */
-	if (lt == (time_t) -1) {
-		if (! localtime_r(&lt, &tm)
+	ఒకవేళ (lt == (time_t) -1) {
+		ఒకవేళ (! localtime_r(&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
 			    | (ltm.tm_mday ^ tm.tm_mday)
 			    | (ltm.tm_mon ^ tm.tm_mon)
 			    | (ltm.tm_year ^ tm.tm_year)))
-			return 0;
+			తిరిగి 0;
 	}
 
-	if (! gmtime_r(&lt, &gtm))
-		return 0;
+	ఒకవేళ (! gmtime_r(&lt, &gtm))
+		తిరిగి 0;
 
 	/* Calculate the GMT offset, that is, the difference between the
 	 * TP argument (ltm) and GMT (gtm).
@@ -450,275 +450,275 @@ int get_gmtoff(const struct tm *tp)
 	 * Take care to avoid int overflow in leap day calculations, but it's OK
 	 * to assume that A and B are close to each other.
 	 */
-	int a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
-	int b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
-	int a100 = a4 / 25 - (a4 % 25 < 0);
-	int b100 = b4 / 25 - (b4 % 25 < 0);
-	int a400 = a100 >> 2;
-	int b400 = b100 >> 2;
-	int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+	పూర్ణాంకం a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
+	పూర్ణాంకం b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
+	పూర్ణాంకం a100 = a4 / 25 - (a4 % 25 < 0);
+	పూర్ణాంకం b100 = b4 / 25 - (b4 % 25 < 0);
+	పూర్ణాంకం a400 = a100 >> 2;
+	పూర్ణాంకం b400 = b100 >> 2;
+	పూర్ణాంకం intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
 
-	int years = ltm.tm_year - gtm.tm_year;
-	int days = (365 * years + intervening_leap_days
+	పూర్ణాంకం years = ltm.tm_year - gtm.tm_year;
+	పూర్ణాంకం days = (365 * years + intervening_leap_days
 		    + (ltm.tm_yday - gtm.tm_yday));
 
-	return (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
+	తిరిగి (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
 		+ (ltm.tm_min - gtm.tm_min)) + (ltm.tm_sec - gtm.tm_sec));
-#endif
+#అయితే_ముగింపు
 }
 
-static int format_iso_time(const struct tm *tm, uint32_t nsec, int flags, char *buf, size_t bufsz)
+స్థిర పూర్ణాంకం format_iso_సమయం(స్థిరరాశి నిర్మాణం tm *tm, uint32_t nsec, పూర్ణాంకం flags, అక్షరం *buf, size_t bufsz)
 {
-	uint32_t usec = nsec / NSEC_PER_USEC;
-	char *p = buf;
-	int len;
+	uint32_t usec = nsec / NSEC_చొప్పున_USEC;
+	అక్షరం *p = buf;
+	పూర్ణాంకం len;
 
-	if (flags & ISO_DATE) {
+	ఒకవేళ (flags & ISO_DATE) {
 		len = snprintf(p, bufsz, "%4ld-%.2d-%.2d",
-			       tm->tm_year + (long) 1900,
+			       tm->tm_year + (దీర్ఘ) 1900,
 			       tm->tm_mon + 1, tm->tm_mday);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if ((flags & ISO_DATE) && (flags & ISO_TIME)) {
-		if (bufsz < 1)
-			goto err;
+	ఒకవేళ ((flags & ISO_DATE) && (flags & ISO_సమయం)) {
+		ఒకవేళ (bufsz < 1)
+			వెళ్ళు err;
 		*p++ = (flags & ISO_T) ? 'T' : ' ';
 		bufsz--;
 	}
 
-	if (flags & ISO_TIME) {
+	ఒకవేళ (flags & ISO_సమయం) {
 		len = snprintf(p, bufsz, "%02d:%02d:%02d", tm->tm_hour,
 			       tm->tm_min, tm->tm_sec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_DOTNSEC) {
+	ఒకవేళ (flags & ISO_DOTNSEC) {
 		len = snprintf(p, bufsz, ".%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMANSEC) {
+	} లేకపోతే ఒకవేళ (flags & ISO_COMMANSEC) {
 		len = snprintf(p, bufsz, ",%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 		bufsz -= len;
 		p += len;
-	} else if (flags & ISO_DOTUSEC) {
+	} లేకపోతే ఒకవేళ (flags & ISO_DOTUSEC) {
 		len = snprintf(p, bufsz, ".%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMAUSEC) {
+	} లేకపోతే ఒకవేళ (flags & ISO_COMMAUSEC) {
 		len = snprintf(p, bufsz, ",%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_TIMEZONE) {
-		int tmin  = get_gmtoff(tm) / 60;
-		int zhour = tmin / 60;
-		int zmin  = abs(tmin % 60);
+	ఒకవేళ (flags & ISO_TIMEZONE) {
+		పూర్ణాంకం tmin  = get_gmtoff(tm) / 60;
+		పూర్ణాంకం zhour = tmin / 60;
+		పూర్ణాంకం zmin  = నిరపేక్ష(tmin % 60);
 		len = snprintf(p, bufsz, "%+03d:%02d", zhour,zmin);
-		if (len < 0 || (size_t) len > bufsz)
-			goto err;
+		ఒకవేళ (len < 0 || (size_t) len > bufsz)
+			వెళ్ళు err;
 	}
-	return 0;
+	తిరిగి 0;
  err:
 	warnx(_("format_iso_time: buffer overflow."));
-	return -1;
+	తిరిగి -1;
 }
 
 /* timespec to ISO 8601 */
-int strtimespec_iso(const struct timespec *ts, int flags, char *buf, size_t bufsz)
+పూర్ణాంకం strtimespec_iso(స్థిరరాశి నిర్మాణం timespec *ts, పూర్ణాంకం flags, అక్షరం *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	నిర్మాణం tm tm;
+	నిర్మాణం tm *rc;
 
-	if (flags & ISO_GMTIME)
+	ఒకవేళ (flags & ISO_GMTIME)
 		rc = gmtime_r(&ts->tv_sec, &tm);
-	else
+	లేకపోతే
 		rc = localtime_r(&ts->tv_sec, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
+	ఒకవేళ (rc)
+		తిరిగి format_iso_సమయం(&tm, ts->tv_nsec, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)(ts->tv_sec));
-	return -1;
+	తిరిగి -1;
 }
 
 /* timeval to ISO 8601 */
-int strtimeval_iso(const struct timeval *tv, int flags, char *buf, size_t bufsz)
+పూర్ణాంకం strtimeval_iso(స్థిరరాశి నిర్మాణం timeval *tv, పూర్ణాంకం flags, అక్షరం *buf, size_t bufsz)
 {
-	struct timespec ts = {
+	నిర్మాణం timespec ts = {
 		.tv_sec = tv->tv_sec,
-		.tv_nsec = tv->tv_usec * NSEC_PER_USEC,
+		.tv_nsec = tv->tv_usec * NSEC_చొప్పున_USEC,
 	};
 
-	return strtimespec_iso(&ts, flags, buf, bufsz);
+	తిరిగి strtimespec_iso(&ts, flags, buf, bufsz);
 }
 
 /* struct tm to ISO 8601 */
-int strtm_iso(const struct tm *tm, int flags, char *buf, size_t bufsz)
+పూర్ణాంకం strtm_iso(స్థిరరాశి నిర్మాణం tm *tm, పూర్ణాంకం flags, అక్షరం *buf, size_t bufsz)
 {
-	return format_iso_time(tm, 0, flags, buf, bufsz);
+	తిరిగి format_iso_సమయం(tm, 0, flags, buf, bufsz);
 }
 
 /* time_t to ISO 8601 */
-int strtime_iso(const time_t *t, int flags, char *buf, size_t bufsz)
+పూర్ణాంకం strtime_iso(స్థిరరాశి time_t *t, పూర్ణాంకం flags, అక్షరం *buf, size_t bufsz)
 {
-	struct tm tm;
-	struct tm *rc;
+	నిర్మాణం tm tm;
+	నిర్మాణం tm *rc;
 
-	if (flags & ISO_GMTIME)
+	ఒకవేళ (flags & ISO_GMTIME)
 		rc = gmtime_r(t, &tm);
-	else
+	లేకపోతే
 		rc = localtime_r(t, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, 0, flags, buf, bufsz);
+	ఒకవేళ (rc)
+		తిరిగి format_iso_సమయం(&tm, 0, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)*t);
-	return -1;
+	తిరిగి -1;
 }
 
 /* relative time functions */
-static inline int time_is_thisyear(struct tm const *const tm,
-				   struct tm const *const tmnow)
+స్థిర అంతఃవరుస పూర్ణాంకం సమయం_is_thisyear(నిర్మాణం tm స్థిరరాశి *స్థిరరాశి tm,
+				   నిర్మాణం tm స్థిరరాశి *స్థిరరాశి tmnow)
 {
-	return tm->tm_year == tmnow->tm_year;
+	తిరిగి tm->tm_year == tmnow->tm_year;
 }
 
-static inline int time_is_today(struct tm const *const tm,
-				struct tm const *const tmnow)
+స్థిర అంతఃవరుస పూర్ణాంకం సమయం_is_today(నిర్మాణం tm స్థిరరాశి *స్థిరరాశి tm,
+				నిర్మాణం tm స్థిరరాశి *స్థిరరాశి tmnow)
 {
-	return (tm->tm_yday == tmnow->tm_yday &&
-		time_is_thisyear(tm, tmnow));
+	తిరిగి (tm->tm_yday == tmnow->tm_yday &&
+		సమయం_is_thisyear(tm, tmnow));
 }
 
-int strtime_short(const time_t *t, struct timeval *now, int flags, char *buf, size_t bufsz)
+పూర్ణాంకం strtime_short(స్థిరరాశి time_t *t, నిర్మాణం timeval *now, పూర్ణాంకం flags, అక్షరం *buf, size_t bufsz)
 {
-	struct tm tm, tmnow;
-	int rc = 0;
+	నిర్మాణం tm tm, tmnow;
+	పూర్ణాంకం rc = 0;
 
-	if (now->tv_sec == 0)
-		gettimeofday(now, NULL);
+	ఒకవేళ (now->tv_sec == 0)
+		gettimeofday(now, ఖాళీ);
 
 	localtime_r(t, &tm);
 	localtime_r(&now->tv_sec, &tmnow);
 
-	if (time_is_today(&tm, &tmnow)) {
+	ఒకవేళ (సమయం_is_today(&tm, &tmnow)) {
 		rc = snprintf(buf, bufsz, "%02d:%02d", tm.tm_hour, tm.tm_min);
-		if (rc < 0 || (size_t) rc > bufsz)
-			return -1;
+		ఒకవేళ (rc < 0 || (size_t) rc > bufsz)
+			తిరిగి -1;
 		rc = 1;
 
-	} else if (time_is_thisyear(&tm, &tmnow)) {
-		if (flags & UL_SHORTTIME_THISYEAR_HHMM)
+	} లేకపోతే ఒకవేళ (సమయం_is_thisyear(&tm, &tmnow)) {
+		ఒకవేళ (flags & UL_SHORTTIME_THISYEAR_HHMM)
 			rc = strftime(buf, bufsz, "%b%d/%H:%M", &tm);
-		else
+		లేకపోతే
 			rc = strftime(buf, bufsz, "%b%d", &tm);
-	} else
+	} లేకపోతే
 		rc = strftime(buf, bufsz, "%Y-%b%d", &tm);
 
-	return rc <= 0 ? -1 : 0;
+	తిరిగి rc <= 0 ? -1 : 0;
 }
 
-int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
+పూర్ణాంకం strtimespec_relative(స్థిరరాశి నిర్మాణం timespec *ts, అక్షరం *buf, size_t bufsz)
 {
 	time_t secs = ts->tv_sec;
 	size_t i, parts = 0;
-	int rc;
+	పూర్ణాంకం rc;
 
-	if (bufsz)
+	ఒకవేళ (bufsz)
 		buf[0] = '\0';
 
-	static const struct {
-		const char * const suffix;
-		int width;
+	స్థిర స్థిరరాశి నిర్మాణం {
+		స్థిరరాశి అక్షరం * స్థిరరాశి suffix;
+		పూర్ణాంకం వెడల్పు;
 		int64_t secs;
-	} table[] = {
-		{ "y", 4, NSEC_PER_YEAR   / NSEC_PER_SEC },
-		{ "d", 3, NSEC_PER_DAY    / NSEC_PER_SEC },
-		{ "h", 2, NSEC_PER_HOUR   / NSEC_PER_SEC },
-		{ "m", 2, NSEC_PER_MINUTE / NSEC_PER_SEC },
-		{ "s", 2, NSEC_PER_SEC    / NSEC_PER_SEC },
+	} పట్టిక[] = {
+		{ "y", 4, NSEC_చొప్పున_YEAR   / NSEC_చొప్పున_SEC },
+		{ "d", 3, NSEC_చొప్పున_DAY    / NSEC_చొప్పున_SEC },
+		{ "h", 2, NSEC_చొప్పున_HOUR   / NSEC_చొప్పున_SEC },
+		{ "m", 2, NSEC_చొప్పున_MINUTE / NSEC_చొప్పున_SEC },
+		{ "s", 2, NSEC_చొప్పున_SEC    / NSEC_చొప్పున_SEC },
 	};
 
-	for (i = 0; i < ARRAY_SIZE(table); i++) {
-		if (secs >= table[i].secs) {
+	కొరకు (i = 0; i < ARRAY_కొలత(పట్టిక); i++) {
+		ఒకవేళ (secs >= పట్టిక[i].secs) {
 			rc = snprintf(buf, bufsz,
 				      "%*"PRId64"%s%s",
-				      parts ? table[i].width : 0,
-				      secs / table[i].secs, table[i].suffix,
-				      secs % table[i].secs ? " " : "");
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
+				      parts ? పట్టిక[i].వెడల్పు : 0,
+				      secs / పట్టిక[i].secs, పట్టిక[i].suffix,
+				      secs % పట్టిక[i].secs ? " " : "");
+			ఒకవేళ (rc < 0 || (size_t) rc > bufsz)
+				వెళ్ళు err;
 			parts++;
 			buf += rc;
 			bufsz -= rc;
-			secs %= table[i].secs;
+			secs %= పట్టిక[i].secs;
 		}
 	}
 
-	if (ts->tv_nsec) {
-		if (ts->tv_nsec % NSEC_PER_MSEC) {
+	ఒకవేళ (ts->tv_nsec) {
+		ఒకవేళ (ts->tv_nsec % NSEC_చొప్పున_MSEC) {
 			rc = snprintf(buf, bufsz, "%*ldns",
 				      parts ? 10 : 0, ts->tv_nsec);
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
-		} else {
+			ఒకవేళ (rc < 0 || (size_t) rc > bufsz)
+				వెళ్ళు err;
+		} లేకపోతే {
 			rc = snprintf(buf, bufsz, "%*llums",
-				      parts ? 4 : 0, ts->tv_nsec / NSEC_PER_MSEC);
-			if (rc < 0 || (size_t) rc > bufsz)
-				goto err;
+				      parts ? 4 : 0, ts->tv_nsec / NSEC_చొప్పున_MSEC);
+			ఒకవేళ (rc < 0 || (size_t) rc > bufsz)
+				వెళ్ళు err;
 		}
 	}
 
-	return 0;
+	తిరిగి 0;
  err:
 	warnx(_("format_reltime: buffer overflow."));
-	return -1;
+	తిరిగి -1;
 }
 
-#ifndef HAVE_TIMEGM
-time_t timegm(struct tm *tm)
+#నిర్వచితం_కాకపోతే HAVE_TIMEGM
+time_t timegm(నిర్మాణం tm *tm)
 {
-	const char *zone = getenv("TZ");
+	స్థిరరాశి అక్షరం *zone = getenv("TZ");
 	time_t ret;
 
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
-	if (zone)
+	ఒకవేళ (zone)
 		setenv("TZ", zone, 1);
-	else
+	లేకపోతే
 		unsetenv("TZ");
 	tzset();
-	return ret;
+	తిరిగి ret;
 }
-#endif /* HAVE_TIMEGM */
+#అయితే_ముగింపు /* HAVE_TIMEGM */
 
-#ifdef TEST_PROGRAM_TIMEUTILS
+#నిర్వచితమైతే TEST_కార్యక్రమం_TIMEUTILS
 
-static int run_unittest_timestamp(void)
+స్థిర పూర్ణాంకం నిరంతరం_unittest_timestamp(శూన్య)
 {
-	int rc = EXIT_SUCCESS;
+	పూర్ణాంకం rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
-	static const struct testcase {
-		const char * const input;
+	స్థిర స్థిరరాశి నిర్మాణం testcase {
+		స్థిరరాశి అక్షరం * స్థిరరాశి ఆదానం;
 		usec_t expected;
 	} testcases[] = {
 		{ "2012-09-22 16:34:22"    , 1348331662000000 },
@@ -745,72 +745,72 @@ static int run_unittest_timestamp(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
-		if (r) {
-			fprintf(stderr, "Could not parse '%s'\n", t.input);
+	కొరకు (size_t i = 0; i < ARRAY_కొలత(testcases); i++) {
+		నిర్మాణం testcase t = testcases[i];
+		usec_t ఫలితం;
+		పూర్ణాంకం r = parse_timestamp_reference(reference, t.ఆదానం, &ఫలితం);
+		ఒకవేళ (r) {
+			fprintf(stderr, "Could not parse '%s'\n", t.ఆదానం);
 			rc = EXIT_FAILURE;
 		}
 
-		if (result != t.expected) {
+		ఒకవేళ (ఫలితం != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
-				i, t.input, result, t.expected);
+				i, t.ఆదానం, ఫలితం, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	తిరిగి rc;
 }
 
-static int run_unittest_format(void)
+స్థిర పూర్ణాంకం నిరంతరం_unittest_format(శూన్య)
 {
-	int rc = EXIT_SUCCESS;
-	const struct timespec ts = {
+	పూర్ణాంకం rc = EXIT_SUCCESS;
+	స్థిరరాశి నిర్మాణం timespec ts = {
 		.tv_sec = 1674180427,
 		.tv_nsec = 12345,
 	};
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		int flags;
-		const char * const expected;
+	అక్షరం buf[FORMAT_TIMESTAMP_MAX];
+	స్థిర స్థిరరాశి నిర్మాణం testcase {
+		పూర్ణాంకం flags;
+		స్థిరరాశి అక్షరం * స్థిరరాశి expected;
 	} testcases[] = {
 		{ ISO_DATE,               "2023-01-20"                       },
-		{ ISO_TIME,               "02:07:07"                         },
+		{ ISO_సమయం,               "02:07:07"                         },
 		{ ISO_TIMEZONE,           "+00:00"                           },
 		{ ISO_TIMESTAMP_T,        "2023-01-20T02:07:07+00:00"        },
 		{ ISO_TIMESTAMP_COMMA_G,  "2023-01-20 02:07:07,000012+00:00" },
-		{ ISO_TIME | ISO_DOTNSEC, "02:07:07.000012345" },
+		{ ISO_సమయం | ISO_DOTNSEC, "02:07:07.000012345" },
 	};
 
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
-		if (r) {
+	కొరకు (size_t i = 0; i < ARRAY_కొలత(testcases); i++) {
+		నిర్మాణం testcase t = testcases[i];
+		పూర్ణాంకం r = strtimespec_iso(&ts, t.flags, buf, పరిమాణం(buf));
+		ఒకవేళ (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		ఒకవేళ (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu %-20s != %-20s\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	తిరిగి rc;
 }
 
-static int run_unittest_format_relative(void)
+స్థిర పూర్ణాంకం నిరంతరం_unittest_format_relative(శూన్య)
 {
-	int rc = EXIT_SUCCESS;
-	char buf[FORMAT_TIMESTAMP_MAX];
-	static const struct testcase {
-		struct timespec ts;
-		const char * const expected;
+	పూర్ణాంకం rc = EXIT_SUCCESS;
+	అక్షరం buf[FORMAT_TIMESTAMP_MAX];
+	స్థిర స్థిరరాశి నిర్మాణం testcase {
+		నిర్మాణం timespec ts;
+		స్థిరరాశి అక్షరం * స్థిరరాశి expected;
 	} testcases[] = {
 		{{}, "" },
 		{{         1 },                  "1s" },
@@ -834,73 +834,73 @@ static int run_unittest_format_relative(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
-		struct testcase t = testcases[i];
-		int r = strtimespec_relative(&t.ts, buf, sizeof(buf));
-		if (r) {
+	కొరకు (size_t i = 0; i < ARRAY_కొలత(testcases); i++) {
+		నిర్మాణం testcase t = testcases[i];
+		పూర్ణాంకం r = strtimespec_relative(&t.ts, buf, పరిమాణం(buf));
+		ఒకవేళ (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		ఒకవేళ (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu '%-20s' != '%-20s'\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	తిరిగి rc;
 }
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	struct timespec ts = { 0 };
-	char buf[ISO_BUFSIZ];
-	int r;
+	నిర్మాణం timespec ts = { 0 };
+	అక్షరం buf[ISO_BUFSIZ];
+	పూర్ణాంకం r;
 
-	if (argc < 2) {
+	ఒకవేళ (argc < 2) {
 		fprintf(stderr, "usage: %s [<time> [<usec>]] | [--timestamp <str>] | [--unittest-timestamp]\n", argv[0]);
-		exit(EXIT_FAILURE);
+		నిష్క్రమించు(EXIT_FAILURE);
 	}
 
-	if (strcmp(argv[1], "--unittest-timestamp") == 0)
-		return run_unittest_timestamp();
-	else if (strcmp(argv[1], "--unittest-format") == 0)
-		return run_unittest_format();
-	else if (strcmp(argv[1], "--unittest-format-relative") == 0)
-		return run_unittest_format_relative();
+	ఒకవేళ (strcmp(argv[1], "--unittest-timestamp") == 0)
+		తిరిగి నిరంతరం_unittest_timestamp();
+	లేకపోతే ఒకవేళ (strcmp(argv[1], "--unittest-format") == 0)
+		తిరిగి నిరంతరం_unittest_format();
+	లేకపోతే ఒకవేళ (strcmp(argv[1], "--unittest-format-relative") == 0)
+		తిరిగి నిరంతరం_unittest_format_relative();
 
-	if (strcmp(argv[1], "--timestamp") == 0) {
+	ఒకవేళ (strcmp(argv[1], "--timestamp") == 0) {
 		usec_t usec = 0;
 
 		r = ul_parse_timestamp(argv[2], &usec);
-		if (r)
+		ఒకవేళ (r)
 			errx(EXIT_FAILURE, "Can not parse '%s': %s", argv[2], strerror(-r));
-		ts.tv_sec = (time_t) (usec / USEC_PER_SEC);
-		ts.tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
-	} else {
+		ts.tv_sec = (time_t) (usec / USEC_చొప్పున_SEC);
+		ts.tv_nsec = (usec % USEC_చొప్పున_SEC) * NSEC_చొప్పున_USEC;
+	} లేకపోతే {
 		ts.tv_sec = strtos64_or_err(argv[1], "failed to parse <time>");
-		if (argc == 3)
+		ఒకవేళ (argc == 3)
 			ts.tv_nsec = strtos64_or_err(argv[2], "failed to parse <usec>")
-				     * NSEC_PER_USEC;
+				     * NSEC_చొప్పున_USEC;
 	}
 
-	strtimespec_iso(&ts, ISO_DATE, buf, sizeof(buf));
-	printf("Date: '%s'\n", buf);
+	strtimespec_iso(&ts, ISO_DATE, buf, పరిమాణం(buf));
+	రాయి("Date: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIME, buf, sizeof(buf));
-	printf("Time: '%s'\n", buf);
+	strtimespec_iso(&ts, ISO_సమయం, buf, పరిమాణం(buf));
+	రాయి("Time: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_DATE | ISO_TIME | ISO_COMMAUSEC | ISO_T,
-		       buf, sizeof(buf));
-	printf("Full: '%s'\n", buf);
+	strtimespec_iso(&ts, ISO_DATE | ISO_సమయం | ISO_COMMAUSEC | ISO_T,
+		       buf, పరిమాణం(buf));
+	రాయి("Full: '%s'\n", buf);
 
-	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, sizeof(buf));
-	printf("Zone: '%s'\n", buf);
+	strtimespec_iso(&ts, ISO_TIMESTAMP_DOT, buf, పరిమాణం(buf));
+	రాయి("Zone: '%s'\n", buf);
 
-	strtimespec_relative(&ts, buf, sizeof(buf));
-	printf("Rel:  '%s'\n", buf);
+	strtimespec_relative(&ts, buf, పరిమాణం(buf));
+	రాయి("Rel:  '%s'\n", buf);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-#endif /* TEST_PROGRAM_TIMEUTILS */
+#అయితే_ముగింపు /* TEST_PROGRAM_TIMEUTILS */

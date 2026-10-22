@@ -2,61 +2,61 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#అన్తర్భావ <dlfcn.h>
 
-#include "c.h"
-#include "dl-cryptsetup.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "dl-cryptsetup.h"
 
-#if defined(HAVE_CRYPTSETUP) && defined(USE_DLOPEN_CRYPTSETUP)
+#ఒకవేళ defined(HAVE_CRYPTSETUP) && defined(USE_DLOPEN_CRYPTSETUP)
 
 UL_ELF_NOTE_DLOPEN("cryptsetup",
 		    "Support for dm-verity devices",
-		    UL_ELF_NOTE_DLOPEN_PRIORITY_SUGGESTED,
+		    UL_ELF_NOTE_DLOPEN_ప్రాధాన్యత_SUGGESTED,
 		    "libcryptsetup.so.12");
 
-struct ul_cryptsetup_opers ul_cryptsetup;
+నిర్మాణం ul_cryptsetup_opers ul_cryptsetup;
 
-static const struct ul_dlsym ul_cryptsetup_symbols[] =
+స్థిర స్థిరరాశి నిర్మాణం ul_dlsym ul_cryptsetup_symbols[] =
 {
-	UL_DLSYM( ul_cryptsetup_opers, crypt_set_debug_level ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_set_log_callback ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_init_data_device ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_load ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_get_volume_key_size ),
-#ifdef HAVE_CRYPT_ACTIVATE_BY_SIGNED_KEY
-	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_signed_key ),
-#endif
-	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_volume_key ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_సమితి_debug_level ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_సమితి_log_callback ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_init_దత్తాంశం_device ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_ఎక్కించు ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_get_volume_కీలకం_కొలత ),
+#నిర్వచితమైతే HAVE_CRYPT_ACTIVATE_BY_SIGNED_కీలకం
+	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_signed_కీలకం ),
+#అయితే_ముగింపు
+	UL_DLSYM( ul_cryptsetup_opers, crypt_activate_by_volume_కీలకం ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_free ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_init_by_name ),
 	UL_DLSYM( ul_cryptsetup_opers, crypt_get_verity_info ),
-	UL_DLSYM( ul_cryptsetup_opers, crypt_volume_key_get ),
+	UL_DLSYM( ul_cryptsetup_opers, crypt_volume_కీలకం_get ),
 
 	UL_DLSYM( ul_cryptsetup_opers, crypt_deactivate_by_name ),
 };
 
-int ul_dlopen_libcryptsetup(void)
+పూర్ణాంకం ul_dlopen_libcryptsetup(శూన్య)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	స్థిర పూర్ణాంకం స్థితి_2 = 0;
+	స్థిర శూన్య *dl = ఖాళీ;
+	పూర్ణాంకం flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ఒకవేళ (స్థితి_2)
+		తిరిగి స్థితి_2 > 0 ? 0 : -ENOSYS;
 
-#ifdef RTLD_NODELETE
+#నిర్వచితమైతే RTLD_NODELETE
 	flags |= RTLD_NODELETE;
-#endif
-#ifdef RTLD_DEEPBIND
+#అయితే_ముగింపు
+#నిర్వచితమైతే RTLD_DEEPBIND
 	flags |= RTLD_DEEPBIND;
-#endif
-	status = ul_dlopen_symbols("libcryptsetup.so.12", flags,
+#అయితే_ముగింపు
+	స్థితి_2 = ul_dlopen_symbols("libcryptsetup.so.12", flags,
 				   ul_cryptsetup_symbols,
-				   ARRAY_SIZE(ul_cryptsetup_symbols),
+				   ARRAY_కొలత(ul_cryptsetup_symbols),
 				   &ul_cryptsetup, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	తిరిగి స్థితి_2 > 0 ? 0 : -ENOSYS;
 }
 
-#endif /* HAVE_CRYPTSETUP && USE_DLOPEN_CRYPTSETUP */
+#అయితే_ముగింపు /* HAVE_CRYPTSETUP && USE_DLOPEN_CRYPTSETUP */

@@ -2,10 +2,10 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
-#include <errno.h>
+#అన్తర్భావ <dlfcn.h>
+#అన్తర్భావ <errno.h>
 
-#include "dl-utils.h"
+#అన్తర్భావ "dl-utils.h"
 
 /*
  * Open @libname with dlopen() and resolve all symbols listed in @syms
@@ -13,38 +13,38 @@
  * stored in *@dl_handle and 0 is returned.  On failure *@dl_handle is
  * set to NULL and a negative errno value is returned (usually -ENOTSUP).
  */
-int ul_dlopen_symbols(const char *libname, int flags,
-		      const struct ul_dlsym *syms, size_t nsyms,
-		      void *opers, void **dl_handle)
+పూర్ణాంకం ul_dlopen_symbols(స్థిరరాశి అక్షరం *libname, పూర్ణాంకం flags,
+		      స్థిరరాశి నిర్మాణం ul_dlsym *syms, size_t nsyms,
+		      శూన్య *opers, శూన్య **dl_handle)
 {
 	size_t i;
 
 	errno = 0;
 
 	*dl_handle = dlopen(libname, flags);
-	if (!*dl_handle)
-		goto failed;
+	ఒకవేళ (!*dl_handle)
+		వెళ్ళు failed;
 
 	dlerror();
 
-	for (i = 0; i < nsyms; i++) {
-		const struct ul_dlsym *def = &syms[i];
-		void **sym;
+	కొరకు (i = 0; i < nsyms; i++) {
+		స్థిరరాశి నిర్మాణం ul_dlsym *def = &syms[i];
+		శూన్య **sym;
 
-		sym = (void **) ((char *) opers + def->offset);
+		sym = (శూన్య **) ((అక్షరం *) opers + def->స్థానభ్రంశం);
 		*sym = dlsym(*dl_handle, def->name);
 
-		if (dlerror())
-			goto failed;
+		ఒకవేళ (dlerror())
+			వెళ్ళు failed;
 	}
 
-	return 0;
+	తిరిగి 0;
 failed:
-	if (*dl_handle) {
+	ఒకవేళ (*dl_handle) {
 		dlclose(*dl_handle);
-		*dl_handle = NULL;
+		*dl_handle = ఖాళీ;
 	}
-	if (!errno)
+	ఒకవేళ (!errno)
 		errno = ENOTSUP;
-	return -errno;
+	తిరిగి -errno;
 }

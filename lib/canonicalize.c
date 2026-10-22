@@ -6,20 +6,20 @@
  *
  * Copyright (C) 2009-2013 Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/stat.h>
 
-#include "canonicalize.h"
-#include "pathnames.h"
-#include "all-io.h"
-#include "strutils.h"
-#include "fileutils.h"
+#అన్తర్భావ "canonicalize.h"
+#అన్తర్భావ "pathnames.h"
+#అన్తర్భావ "all-io.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "fileutils.h"
 
 /*
  * Converts private "dm-N" names to "/dev/mapper/<name>"
@@ -30,57 +30,57 @@
  * The @prefix allows /sys to be mounted or stored outside the system root
  * (/prefix/sys/...).
  */
-char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
+అక్షరం *ul_canonicalize_dm_name_prefixed(స్థిరరాశి అక్షరం *ఉపసర్గ, స్థిరరాశి అక్షరం *ptname)
 {
 	FILE	*f;
 	size_t	sz;
-	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
+	అక్షరం	మార్గం[256], name[పరిమాణం(మార్గం) - పరిమాణం(మార్గం_DEV_MAPPER)], *res = ఖాళీ;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	ఒకవేళ (!ptname || !*ptname)
+		తిరిగి ఖాళీ;
 
-	if (!prefix)
-		prefix = "";
+	ఒకవేళ (!ఉపసర్గ)
+		ఉపసర్గ = "";
 
-	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	snprintf(మార్గం, పరిమాణం(మార్గం), "%s/sys/block/%s/dm/name", ఉపసర్గ, ptname);
+	ఒకవేళ (!(f = fopen(మార్గం, "r" UL_CLOEXECSTR)))
+		తిరిగి ఖాళీ;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	ఒకవేళ (fgets(name, పరిమాణం(name), f) && (sz = అక్షరశ్రేణి_పొడవు(name)) > 1) {
+		ఒకవేళ (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
-		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
+		snprintf(మార్గం, పరిమాణం(మార్గం), మార్గం_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
-			res = strdup(path);
+		ఒకవేళ ((ఉపసర్గ && *ఉపసర్గ) || access(మార్గం, F_OK) == 0)
+			res = strdup(మార్గం);
 	}
 	fclose(f);
-	return res;
+	తిరిగి res;
 }
 
-char *ul_canonicalize_dm_name(const char *ptname)
+అక్షరం *ul_canonicalize_dm_name(స్థిరరాశి అక్షరం *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	తిరిగి ul_canonicalize_dm_name_prefixed(ఖాళీ, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+స్థిర పూర్ణాంకం is_dm_devname(అక్షరం *canonical, అక్షరం **name)
 {
-	struct stat sb;
-	char *p = strrchr(canonical, '/');
+	నిర్మాణం stat sb;
+	అక్షరం *p = strrchr(canonical, '/');
 
-	*name = NULL;
+	*name = ఖాళీ;
 
-	if (!p
-	    || strncmp(p, "/dm-", 4) != 0
-	    || !isdigit(*(p + 4))
+	ఒకవేళ (!p
+	    || అక్షరశ్రేణి_పోలిక(p, "/dm-", 4) != 0
+	    || !అంకెనా(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		తిరిగి 0;
 
 	*name = p + 1;
-	return 1;
+	తిరిగి 1;
 }
 
 /*
@@ -88,73 +88,73 @@ static int is_dm_devname(char *canonical, char **name)
  * relative path. If the path is no relative than returns NULL. The path does
  * not have to exist.
  */
-char *ul_absolute_path(const char *path)
+అక్షరం *ul_absolute_మార్గం(స్థిరరాశి అక్షరం *మార్గం)
 {
-	char cwd[PATH_MAX], *res, *p;
+	అక్షరం cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	ఒకవేళ (!ul_is_relative_మార్గం(మార్గం)) {
 		errno = EINVAL;
-		return NULL;
+		తిరిగి ఖాళీ;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	ఒకవేళ (!getcwd(cwd, పరిమాణం(cwd)))
+		తిరిగి ఖాళీ;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
-		path += 2;
-	else if (strcmp(path, ".") == 0)
-		path = NULL;
+	ఒకవేళ (ul_startswith(మార్గం, "./"))
+		మార్గం += 2;
+	లేకపోతే ఒకవేళ (strcmp(మార్గం, ".") == 0)
+		మార్గం = ఖాళీ;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	ఒకవేళ (!మార్గం || !*మార్గం)
+		తిరిగి strdup(cwd);
 
-	csz = strlen(cwd);
-	psz = strlen(path);
+	csz = అక్షరశ్రేణి_పొడవు(cwd);
+	psz = అక్షరశ్రేణి_పొడవు(మార్గం);
 
-	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	p = res = జ్ఞాపకం_ఇవ్వు(csz + 1 + psz + 1);
+	ఒకవేళ (!res)
+		తిరిగి ఖాళీ;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
-	memcpy(p, path, psz + 1);
+	జ్ఞాపకం_నకలు(p, మార్గం, psz + 1);
 
-	return res;
+	తిరిగి res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
-do_canonicalize(const char *path, char **result,
-		void *data __attribute__((__unused__)))
+స్థిర పూర్ణాంకం __attribute__((nonnull(2)))
+do_canonicalize(స్థిరరాశి అక్షరం *మార్గం, అక్షరం **ఫలితం,
+		శూన్య *దత్తాంశం __attribute__((__unused__)))
 {
-	char *canonical, *dmname;
+	అక్షరం *canonical, *dmname;
 
-	*result = NULL;
+	*ఫలితం = ఖాళీ;
 
-	if (!path || !*path) {
+	ఒకవేళ (!మార్గం || !*మార్గం) {
 		errno = EINVAL;
-		return -errno;
+		తిరిగి -errno;
 	}
 
 	errno = 0;
-	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	canonical = realpath(మార్గం, ఖాళీ);
+	ఒకవేళ (!canonical)
+		తిరిగి 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
-		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
-			free(canonical);
+	ఒకవేళ (is_dm_devname(canonical, &dmname)) {
+		అక్షరం *dm = ul_canonicalize_dm_name(dmname);
+		ఒకవేళ (dm) {
+			విడుదల(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
-		*result = canonical;
-	return 0;
+	ఒకవేళ (canonical)
+		*ఫలితం = canonical;
+	తిరిగి 0;
 }
 
 /*
@@ -162,45 +162,45 @@ do_canonicalize(const char *path, char **result,
  * unreachable path is not an error (!), and in this case, it just duplicates
  * @path.
  */
-char *ul_canonicalize_path(const char *path)
+అక్షరం *ul_canonicalize_మార్గం(స్థిరరాశి అక్షరం *మార్గం)
 {
-	char *canonical = NULL;
+	అక్షరం *canonical = ఖాళీ;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	ఒకవేళ (do_canonicalize(మార్గం, &canonical, ఖాళీ) == 1)
+		తిరిగి strdup(మార్గం);
 
-	return canonical;
+	తిరిగి canonical;
 }
 
 /*
  * Drop permissions (e.g., suid) and canonicalize the path. If the path is
  * unreadable (for example, due to missing permissions), it returns NULL.
  */
-char *ul_canonicalize_path_restricted(const char *path)
+అక్షరం *ul_canonicalize_మార్గం_restricted(స్థిరరాశి అక్షరం *మార్గం)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	తిరిగి ul_restricted_మార్గం_oper(మార్గం, do_canonicalize, ఖాళీ);
 }
 
-#ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+#నిర్వచితమైతే TEST_కార్యక్రమం_CANONICALIZE
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	char *p;
+	అక్షరం *p;
 
-	if (argc < 2) {
+	ఒకవేళ (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
-		exit(EXIT_FAILURE);
+		నిష్క్రమించు(EXIT_FAILURE);
 	}
 
 	fprintf(stdout, "orig:            %s\n", argv[1]);
 
-	p = ul_canonicalize_path(argv[1]);
+	p = ul_canonicalize_మార్గం(argv[1]);
 	fprintf(stdout, "real:            %s\n", p);
-	free(p);
+	విడుదల(p);
 
-	p = ul_canonicalize_path_restricted(argv[1]);
+	p = ul_canonicalize_మార్గం_restricted(argv[1]);
 	fprintf(stdout, "real-restricted: %s\n", p);
-	free(p);
+	విడుదల(p);
 
-	exit(EXIT_SUCCESS);
+	నిష్క్రమించు(EXIT_SUCCESS);
 }
-#endif
+#అయితే_ముగింపు

@@ -4,135 +4,135 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdint.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/file.h>
+#అన్తర్భావ <sys/ioctl.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <stdint.h>
 
-#ifdef HAVE_LINUX_FD_H
-#include <linux/fd.h>
-#endif
+#నిర్వచితమైతే HAVE_LINUX_FD_H
+#అన్తర్భావ <linux/fd.h>
+#అయితే_ముగింపు
 
-#ifdef HAVE_LINUX_BLKZONED_H
-#include <linux/blkzoned.h>
-#endif
+#నిర్వచితమైతే HAVE_LINUX_BLKZONED_H
+#అన్తర్భావ <linux/blkzoned.h>
+#అయితే_ముగింపు
 
-#ifdef HAVE_SYS_DISKLABEL_H
-#include <sys/disklabel.h>
-#endif
+#నిర్వచితమైతే HAVE_SYS_DISKLABEL_H
+#అన్తర్భావ <sys/disklabel.h>
+#అయితే_ముగింపు
 
-#ifdef HAVE_SYS_DISK_H
+#నిర్వచితమైతే HAVE_SYS_DISK_H
 # include <sys/disk.h>
-#endif
+#అయితే_ముగింపు
 
-#ifndef EBADFD
+#నిర్వచితం_కాకపోతే EBADFD
 # define EBADFD 77		/* File descriptor in bad state */
-#endif
+#అయితే_ముగింపు
 
-#include "all-io.h"
-#include "blkdev.h"
-#include "c.h"
-#include "cctype.h"
-#include "linux_version.h"
-#include "fileutils.h"
-#include "nls.h"
+#అన్తర్భావ "all-io.h"
+#అన్తర్భావ "blkdev.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "cctype.h"
+#అన్తర్భావ "linux_version.h"
+#అన్తర్భావ "fileutils.h"
+#అన్తర్భావ "nls.h"
 
-static long blkdev_valid_offset(int fd, off_t offset)
+స్థిర దీర్ఘ blkdev_valid_స్థానభ్రంశం(పూర్ణాంకం fd, off_t స్థానభ్రంశం)
 {
-	char ch;
+	అక్షరం ch;
 
-	if (lseek (fd, offset, 0) < 0)
-		return 0;
-	if (ul_read_all (fd, &ch, 1) < 1)
-		return 0;
-	return 1;
+	ఒకవేళ (lseek (fd, స్థానభ్రంశం, 0) < 0)
+		తిరిగి 0;
+	ఒకవేళ (ul_read_all (fd, &ch, 1) < 1)
+		తిరిగి 0;
+	తిరిగి 1;
 }
 
-int is_blkdev(int fd)
+పూర్ణాంకం is_blkdev(పూర్ణాంకం fd)
 {
-	struct stat st;
-	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+	నిర్మాణం stat st;
+	తిరిగి (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
 }
 
-off_t blkdev_find_size (int fd)
+off_t blkdev_కనుగొను_కొలత (పూర్ణాంకం fd)
 {
-	off_t high, low = 0;
+	off_t high, దిగువ = 0;
 
-	for (high = 1024; blkdev_valid_offset(fd, high); ) {
-		if (high == SINT_MAX(off_t)) {
+	కొరకు (high = 1024; blkdev_valid_స్థానభ్రంశం(fd, high); ) {
+		ఒకవేళ (high == SINT_MAX(off_t)) {
 			errno = EFBIG;
-			return -1;
+			తిరిగి -1;
 		}
 
-		low = high;
+		దిగువ = high;
 
-		if (high >= SINT_MAX(off_t)/2)
+		ఒకవేళ (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
-		else
+		లేకపోతే
 			high *= 2;
 	}
 
-	while (low < high - 1) {
-		off_t mid = (low + high) / 2;
+	అయితే (దిగువ < high - 1) {
+		off_t mid = (దిగువ + high) / 2;
 
-		if (blkdev_valid_offset (fd, mid))
-			low = mid;
-		else
+		ఒకవేళ (blkdev_valid_స్థానభ్రంశం (fd, mid))
+			దిగువ = mid;
+		లేకపోతే
 			high = mid;
 	}
-	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	blkdev_valid_స్థానభ్రంశం (fd, 0);
+	తిరిగి (దిగువ + 1);
 }
 
 /* get size in bytes */
-int blkdev_get_size(int fd, uint64_t *bytes)
+పూర్ణాంకం blkdev_get_కొలత(పూర్ణాంకం fd, uint64_t *బైట్లు)
 {
-#ifdef DKIOCGETBLOCKCOUNT
+#నిర్వచితమైతే DKIOCGETBLOCKCOUNT
 	/* Apple Darwin */
-	if (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
-		*bytes <<= 9;
-		return 0;
+	ఒకవేళ (ioctl(fd, DKIOCGETBLOCKCOUNT, బైట్లు) >= 0) {
+		*బైట్లు <<= 9;
+		తిరిగి 0;
 	}
-#endif
+#అయితే_ముగింపు
 
-#ifdef BLKGETSIZE64
-	if (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
-		return 0;
-#endif
+#నిర్వచితమైతే BLKGETSIZE64
+	ఒకవేళ (ioctl(fd, BLKGETSIZE64, బైట్లు) >= 0)
+		తిరిగి 0;
+#అయితే_ముగింపు
 
-#ifdef BLKGETSIZE
+#నిర్వచితమైతే BLKGETSIZE
 	{
-		unsigned long size;
+		గుర్తులేని దీర్ఘ కొలత;
 
-		if (ioctl(fd, BLKGETSIZE, &size) >= 0) {
-			*bytes = ((uint64_t) size) << 9;
-			return 0;
+		ఒకవేళ (ioctl(fd, BLKGETSIZE, &కొలత) >= 0) {
+			*బైట్లు = ((uint64_t) కొలత) << 9;
+			తిరిగి 0;
 		}
 	}
 
-#endif /* BLKGETSIZE */
+#అయితే_ముగింపు /* BLKGETSIZE */
 
-#ifdef DIOCGMEDIASIZE
+#నిర్వచితమైతే DIOCGMEDIASIZE
 	/* FreeBSD */
-	if (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
-		return 0;
-#endif
+	ఒకవేళ (ioctl(fd, DIOCGMEDIASIZE, బైట్లు) >= 0)
+		తిరిగి 0;
+#అయితే_ముగింపు
 
-#ifdef FDGETPRM
+#నిర్వచితమైతే FDGETPRM
 	{
-		struct floppy_struct this_floppy;
+		నిర్మాణం floppy_struct this_floppy;
 
-		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
-			*bytes = ((uint64_t) this_floppy.size) << 9;
-			return 0;
+		ఒకవేళ (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+			*బైట్లు = ((uint64_t) this_floppy.కొలత) << 9;
+			తిరిగి 0;
 		}
 	}
-#endif /* FDGETPRM */
+#అయితే_ముగింపు /* FDGETPRM */
 
-#if defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
+#ఒకవేళ defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
 	{
 		/*
 		 * This code works for FreeBSD 4.11 i386, except for the full device
@@ -143,63 +143,63 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 		 * Note that FreeBSD >= 4.0 has disk devices as unbuffered (raw,
 		 * character) devices, so we need to check for S_ISCHR, too.
 		 */
-		int part = -1;
-		struct disklabel lab;
-		struct partition *pp;
-		struct stat st;
+		పూర్ణాంకం part = -1;
+		నిర్మాణం disklabel lab;
+		నిర్మాణం విభజన *pp;
+		నిర్మాణం stat st;
 
-		if ((fstat(fd, &st) >= 0) &&
+		ఒకవేళ ((fstat(fd, &st) >= 0) &&
 		    (S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode)))
 			part = st.st_rdev & 7;
 
-		if (part >= 0 && (ioctl(fd, DIOCGDINFO, (char *)&lab) >= 0)) {
+		ఒకవేళ (part >= 0 && (ioctl(fd, DIOCGDINFO, (అక్షరం *)&lab) >= 0)) {
 			pp = &lab.d_partitions[part];
-			if (pp->p_size) {
-				 *bytes = ((uint64_t) pp->p_size) << 9;
-				 return 0;
+			ఒకవేళ (pp->p_కొలత) {
+				 *బైట్లు = ((uint64_t) pp->p_కొలత) << 9;
+				 తిరిగి 0;
 			}
 		}
 	}
-#endif /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
+#అయితే_ముగింపు /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
 
 	{
-		struct stat st;
+		నిర్మాణం stat st;
 
-		if (fstat(fd, &st) != 0)
-			return -1;
-		if (S_ISREG(st.st_mode)) {
-			*bytes = (uint64_t) st.st_size;
-			return 0;
+		ఒకవేళ (fstat(fd, &st) != 0)
+			తిరిగి -1;
+		ఒకవేళ (S_ISREG(st.st_mode)) {
+			*బైట్లు = (uint64_t) st.st_size;
+			తిరిగి 0;
 		}
-		if (!S_ISBLK(st.st_mode)) {
+		ఒకవేళ (!S_ISBLK(st.st_mode)) {
 			errno = ENOTBLK;
-			return -1;
+			తిరిగి -1;
 		}
 	}
 
 	{
-		off_t size = blkdev_find_size(fd);
+		off_t కొలత = blkdev_కనుగొను_కొలత(fd);
 
-		if (size < 0)
-			return -1;
+		ఒకవేళ (కొలత < 0)
+			తిరిగి -1;
 
-		*bytes = (uint64_t) size;
+		*బైట్లు = (uint64_t) కొలత;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* get 512-byte sector count */
-int blkdev_get_sectors(int fd, uint64_t *sectors)
+పూర్ణాంకం blkdev_get_sectors(పూర్ణాంకం fd, uint64_t *sectors)
 {
-	uint64_t bytes;
+	uint64_t బైట్లు;
 
-	if (blkdev_get_size(fd, &bytes) == 0) {
-		*sectors = (bytes >> 9);
-		return 0;
+	ఒకవేళ (blkdev_get_కొలత(fd, &బైట్లు) == 0) {
+		*sectors = (బైట్లు >> 9);
+		తిరిగి 0;
 	}
 
-	return -1;
+	తిరిగి -1;
 }
 
 /*
@@ -208,20 +208,20 @@ int blkdev_get_sectors(int fd, uint64_t *sectors)
  * This is the smallest unit the storage device can
  * address. It is typically 512 bytes.
  */
-#ifdef BLKSSZGET
-int blkdev_get_sector_size(int fd, int *sector_size)
+#నిర్వచితమైతే BLKSSZGET
+పూర్ణాంకం blkdev_get_sector_కొలత(పూర్ణాంకం fd, పూర్ణాంకం *sector_కొలత)
 {
-	if (ioctl(fd, BLKSSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ఒకవేళ (ioctl(fd, BLKSSZGET, sector_కొలత) >= 0)
+		తిరిగి 0;
+	తిరిగి -1;
 }
-#else
-int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
+#లేకపోతే
+పూర్ణాంకం blkdev_get_sector_కొలత(పూర్ణాంకం fd __attribute__((__unused__)), పూర్ణాంకం *sector_కొలత)
 {
-	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	*sector_కొలత = DEFAULT_SECTOR_కొలత;
+	తిరిగి 0;
 }
-#endif
+#అయితే_ముగింపు
 
 /*
  * Get physical block device size. The BLKPBSZGET is supported since Linux
@@ -237,74 +237,74 @@ int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
  *		physec = DEFAULT_SECTOR_SIZE;
  * }
  */
-#ifdef BLKPBSZGET
-int blkdev_get_physector_size(int fd, int *sector_size)
+#నిర్వచితమైతే BLKPBSZGET
+పూర్ణాంకం blkdev_get_physector_కొలత(పూర్ణాంకం fd, పూర్ణాంకం *sector_కొలత)
 {
-	if (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	ఒకవేళ (ioctl(fd, BLKPBSZGET, sector_కొలత) >= 0)
+		తిరిగి 0;
+	తిరిగి -1;
 }
-#else
-int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_size)
+#లేకపోతే
+పూర్ణాంకం blkdev_get_physector_కొలత(పూర్ణాంకం fd __attribute__((__unused__)), పూర్ణాంకం *sector_కొలత)
 {
-	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	*sector_కొలత = DEFAULT_SECTOR_కొలత;
+	తిరిగి 0;
 }
-#endif
+#అయితే_ముగింపు
 
 /*
  * Return the alignment status of a device
  */
-#ifdef BLKALIGNOFF
-int blkdev_is_misaligned(int fd)
+#నిర్వచితమైతే BLKALIGNOFF
+పూర్ణాంకం blkdev_is_misaligned(పూర్ణాంకం fd)
 {
-	int aligned;
+	పూర్ణాంకం aligned;
 
-	if (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
-		return 0; /* probably kernel < 2.6.32 */
+	ఒకవేళ (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
+		తిరిగి 0; /* probably kernel < 2.6.32 */
 	/*
 	 * Note that kernel returns -1 as alignment offset if no compatible
 	 * sizes and alignments exist for stacked devices
 	 */
-	return aligned != 0 ? 1 : 0;
+	తిరిగి aligned != 0 ? 1 : 0;
 }
-#else
-int blkdev_is_misaligned(int fd __attribute__((__unused__)))
+#లేకపోతే
+పూర్ణాంకం blkdev_is_misaligned(పూర్ణాంకం fd __attribute__((__unused__)))
 {
-	return 0;
+	తిరిగి 0;
 }
-#endif
+#అయితే_ముగింపు
 
-int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+పూర్ణాంకం open_blkdev_or_file(స్థిరరాశి నిర్మాణం stat *st, స్థిరరాశి అక్షరం *name, స్థిరరాశి పూర్ణాంకం oflag)
 {
-	int fd;
+	పూర్ణాంకం fd;
 
-	if (S_ISBLK(st->st_mode)) {
+	ఒకవేళ (S_ISBLK(st->st_mode)) {
 		fd = open(name, oflag | O_EXCL | O_CLOEXEC);
-	} else
+	} లేకపోతే
 		fd = open(name, oflag);
-	if (-1 < fd && !is_same_inode(fd, st)) {
+	ఒకవేళ (-1 < fd && !is_same_inode(fd, st)) {
 		close(fd);
 		errno = EBADFD;
-		return -1;
+		తిరిగి -1;
 	}
-	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+	ఒకవేళ (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
 		warnx(_("warning: %s is misaligned"), name);
-	return fd;
+	తిరిగి fd;
 }
 
-#ifdef CDROM_GET_CAPABILITY
-int blkdev_is_cdrom(int fd)
+#నిర్వచితమైతే CDROM_GET_CAPABILITY
+పూర్ణాంకం blkdev_is_cdrom(పూర్ణాంకం fd)
 {
-	int ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
-	return ret < 0 ? 0 : ret;
+	పూర్ణాంకం ret = ioctl(fd, CDROM_GET_CAPABILITY, ఖాళీ);
+	తిరిగి ret < 0 ? 0 : ret;
 }
-#else
-int blkdev_is_cdrom(int fd __attribute__((__unused__)))
+#లేకపోతే
+పూర్ణాంకం blkdev_is_cdrom(పూర్ణాంకం fd __attribute__((__unused__)))
 {
-	return 0;
+	తిరిగి 0;
 }
-#endif
+#అయితే_ముగింపు
 
 /*
  * Get kernel's interpretation of the device's geometry.
@@ -314,177 +314,177 @@ int blkdev_is_cdrom(int fd __attribute__((__unused__)))
  *
  * Note that this is deprecated in favor of LBA addressing.
  */
-#ifdef HDIO_GETGEO
-int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+#నిర్వచితమైతే HDIO_GETGEO
+పూర్ణాంకం blkdev_get_geometry(పూర్ణాంకం fd, గుర్తులేని పూర్ణాంకం *h, గుర్తులేని పూర్ణాంకం *s)
 {
-	struct hd_geometry geometry;
+	నిర్మాణం hd_geometry geometry;
 
-	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+	ఒకవేళ (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
 		*h = geometry.heads;
 		*s = geometry.sectors;
-		return 0;
+		తిరిగి 0;
 	}
-#else
-int blkdev_get_geometry(int fd __attribute__((__unused__)),
-		unsigned int *h, unsigned int *s)
+#లేకపోతే
+పూర్ణాంకం blkdev_get_geometry(పూర్ణాంకం fd __attribute__((__unused__)),
+		గుర్తులేని పూర్ణాంకం *h, గుర్తులేని పూర్ణాంకం *s)
 {
 	*h = 0;
 	*s = 0;
-#endif
-	return -1;
+#అయితే_ముగింపు
+	తిరిగి -1;
 }
 
 /*
  * Convert scsi type to human readable string.
  */
-const char *blkdev_scsi_type_to_name(int type)
+స్థిరరాశి అక్షరం *blkdev_scsi_type_గమ్యం_name(పూర్ణాంకం type)
 {
-	switch (type) {
-	case SCSI_TYPE_DISK:
-		return "disk";
-	case SCSI_TYPE_TAPE:
-		return "tape";
-	case SCSI_TYPE_PRINTER:
-		return "printer";
-	case SCSI_TYPE_PROCESSOR:
-		return "processor";
-	case SCSI_TYPE_WORM:
-		return "worm";
-	case SCSI_TYPE_ROM:
-		return "rom";
-	case SCSI_TYPE_SCANNER:
-		return "scanner";
-	case SCSI_TYPE_MOD:
-		return "mo-disk";
-	case SCSI_TYPE_MEDIUM_CHANGER:
-		return "changer";
-	case SCSI_TYPE_COMM:
-		return "comm";
-	case SCSI_TYPE_RAID:
-		return "raid";
-	case SCSI_TYPE_ENCLOSURE:
-		return "enclosure";
-	case SCSI_TYPE_RBC:
-		return "rbc";
-	case SCSI_TYPE_OSD:
-		return "osd";
-	case SCSI_TYPE_NO_LUN:
-		return "no-lun";
-	default:
-		break;
+	ఎంపిక (type) {
+	స్థితి SCSI_TYPE_DISK:
+		తిరిగి "disk";
+	స్థితి SCSI_TYPE_పట్టీ:
+		తిరిగి "tape";
+	స్థితి SCSI_TYPE_PRINTER:
+		తిరిగి "printer";
+	స్థితి SCSI_TYPE_PROCESSOR:
+		తిరిగి "processor";
+	స్థితి SCSI_TYPE_WORM:
+		తిరిగి "worm";
+	స్థితి SCSI_TYPE_ROM:
+		తిరిగి "rom";
+	స్థితి SCSI_TYPE_SCANNER:
+		తిరిగి "scanner";
+	స్థితి SCSI_TYPE_MOD:
+		తిరిగి "mo-disk";
+	స్థితి SCSI_TYPE_MEDIUM_CHANGER:
+		తిరిగి "changer";
+	స్థితి SCSI_TYPE_COMM:
+		తిరిగి "comm";
+	స్థితి SCSI_TYPE_RAID:
+		తిరిగి "raid";
+	స్థితి SCSI_TYPE_ENCLOSURE:
+		తిరిగి "enclosure";
+	స్థితి SCSI_TYPE_RBC:
+		తిరిగి "rbc";
+	స్థితి SCSI_TYPE_OSD:
+		తిరిగి "osd";
+	స్థితి SCSI_TYPE_NO_LUN:
+		తిరిగి "no-lun";
+	అప్రమేయ:
+		ఆపు;
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /* return 0 on success */
-int blkdev_lock(int fd, const char *devname, const char *lockmode)
+పూర్ణాంకం blkdev_తాళం(పూర్ణాంకం fd, స్థిరరాశి అక్షరం *devname, స్థిరరాశి అక్షరం *lockmode)
 {
-	int oper, rc, msg = 0;
+	పూర్ణాంకం oper, rc, సందేశం = 0;
 
-	if (!lockmode)
+	ఒకవేళ (!lockmode)
 		lockmode = getenv("LOCK_BLOCK_DEVICE");
-	if (!lockmode)
-		return 0;
+	ఒకవేళ (!lockmode)
+		తిరిగి 0;
 
-	if (c_strcasecmp(lockmode, "yes") == 0 ||
+	ఒకవేళ (c_strcasecmp(lockmode, "yes") == 0 ||
 	    strcmp(lockmode, "1") == 0)
 		oper = LOCK_EX;
 
-	else if (c_strcasecmp(lockmode, "nonblock") == 0)
+	లేకపోతే ఒకవేళ (c_strcasecmp(lockmode, "nonblock") == 0)
 		oper = LOCK_EX | LOCK_NB;
 
-	else if (c_strcasecmp(lockmode, "no") == 0 ||
+	లేకపోతే ఒకవేళ (c_strcasecmp(lockmode, "no") == 0 ||
 		 strcmp(lockmode, "0") == 0)
-		return 0;
-	else {
+		తిరిగి 0;
+	లేకపోతే {
 		warnx(_("unsupported lock mode: %s"), lockmode);
-		return -EINVAL;
+		తిరిగి -EINVAL;
 	}
 
-	if (!(oper & LOCK_NB)) {
+	ఒకవేళ (!(oper & LOCK_NB)) {
 		/* Try non-block first to provide message */
 		rc = flock(fd, oper | LOCK_NB);
-		if (rc == 0)
-			return 0;
-		if (rc != 0 && errno == EWOULDBLOCK) {
+		ఒకవేళ (rc == 0)
+			తిరిగి 0;
+		ఒకవేళ (rc != 0 && errno == EWOULDBLOCK) {
 			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
-					program_invocation_short_name, devname);
-			msg = 1;
+					కార్యక్రమం_invocation_short_name, devname);
+			సందేశం = 1;
 		}
 	}
 	rc = flock(fd, oper);
-	if (rc != 0) {
-		switch (errno) {
-		case EWOULDBLOCK: /* LOCK_NB */
+	ఒకవేళ (rc != 0) {
+		ఎంపిక (errno) {
+		స్థితి EWOULDBLOCK: /* LOCK_NB */
 			warnx(_("%s: device already locked"), devname);
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
+	} లేకపోతే ఒకవేళ (సందేశం)
 		fprintf(stderr, _("OK\n"));
-	return rc;
+	తిరిగి rc;
 }
 
-#ifdef HAVE_LINUX_BLKZONED_H
-struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t nzones)
+#నిర్వచితమైతే HAVE_LINUX_BLKZONED_H
+నిర్మాణం blk_zone_report *blkdev_get_zonereport(పూర్ణాంకం fd, uint64_t sector, uint32_t nzones)
 {
-	struct blk_zone_report *rep;
-	size_t rep_size;
-	int ret;
+	నిర్మాణం blk_zone_report *rep;
+	size_t rep_కొలత;
+	పూర్ణాంకం ret;
 
-	rep_size = sizeof(struct blk_zone_report) + sizeof(struct blk_zone) * nzones;
-	rep = calloc(1, rep_size);
-	if (!rep)
-		return NULL;
+	rep_కొలత = పరిమాణం(నిర్మాణం blk_zone_report) + పరిమాణం(నిర్మాణం blk_zone) * nzones;
+	rep = సున్నా_జ్ఞాపకం_ఇవ్వు(1, rep_కొలత);
+	ఒకవేళ (!rep)
+		తిరిగి ఖాళీ;
 
 	rep->sector = sector;
 	rep->nr_zones = nzones;
 
 	ret = ioctl(fd, BLKREPORTZONE, rep);
-	if (ret || rep->nr_zones != nzones) {
-		free(rep);
-		return NULL;
+	ఒకవేళ (ret || rep->nr_zones != nzones) {
+		విడుదల(rep);
+		తిరిగి ఖాళీ;
 	}
 
-	return rep;
+	తిరిగి rep;
 }
-#endif
+#అయితే_ముగింపు
 
 
-#ifdef TEST_PROGRAM_BLKDEV
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
+#నిర్వచితమైతే TEST_కార్యక్రమం_BLKDEV
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <fcntl.h>
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	uint64_t bytes, sectors;
-	int sector_size, phy_sector_size;
-	int fd;
+	uint64_t బైట్లు, sectors;
+	పూర్ణాంకం sector_కొలత, phy_sector_కొలత;
+	పూర్ణాంకం fd;
 
-	if (argc != 2) {
+	ఒకవేళ (argc != 2) {
 		fprintf(stderr, "usage: %s device\n", argv[0]);
-		exit(EXIT_FAILURE);
+		నిష్క్రమించు(EXIT_FAILURE);
 	}
 
-	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+	ఒకవేళ ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
 		err(EXIT_FAILURE, "open %s failed", argv[1]);
 
-	if (blkdev_get_size(fd, &bytes) < 0)
+	ఒకవేళ (blkdev_get_కొలత(fd, &బైట్లు) < 0)
 		err(EXIT_FAILURE, "blkdev_get_size() failed");
-	if (blkdev_get_sectors(fd, &sectors) < 0)
+	ఒకవేళ (blkdev_get_sectors(fd, &sectors) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sectors() failed");
-	if (blkdev_get_sector_size(fd, &sector_size) < 0)
+	ఒకవేళ (blkdev_get_sector_కొలత(fd, &sector_కొలత) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sector_size() failed");
-	if (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
+	ఒకవేళ (blkdev_get_physector_కొలత(fd, &phy_sector_కొలత) < 0)
 		err(EXIT_FAILURE, "blkdev_get_physector_size() failed");
 
-	printf("          bytes: %" PRIu64 "\n", bytes);
-	printf("        sectors: %" PRIu64 "\n", sectors);
-	printf("    sector size: %d\n", sector_size);
-	printf("phy-sector size: %d\n", phy_sector_size);
+	రాయి("          bytes: %" PRIu64 "\n", బైట్లు);
+	రాయి("        sectors: %" PRIu64 "\n", sectors);
+	రాయి("    sector size: %d\n", sector_కొలత);
+	రాయి("phy-sector size: %d\n", phy_sector_కొలత);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BLKDEV */
+#అయితే_ముగింపు /* TEST_PROGRAM_BLKDEV */

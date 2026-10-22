@@ -8,39 +8,39 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#అన్తర్భావ <ctype.h>		/* for isdigit() */
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "cctype.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+స్థిర స్థిరరాశి నిర్మాణం ul_signal_name {
+	స్థిరరాశి అక్షరం *name;
+	పూర్ణాంకం val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
 	{ "INT",	SIGINT },	/* 2 */
 	{ "QUIT",	SIGQUIT },	/* 3 */
 	{ "ILL",	SIGILL },	/* 4 */
-#ifdef SIGTRAP
+#నిర్వచితమైతే SIGTRAP
 	{ "TRAP",	SIGTRAP },	/* 5 */
-#endif
+#అయితే_ముగింపు
 	{ "ABRT",	SIGABRT },	/* 6 */
-#ifdef SIGIOT
+#నిర్వచితమైతే SIGIOT
 	{ "IOT",	SIGIOT },	/* 6, same as SIGABRT */
-#endif
-#ifdef SIGEMT
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGEMT
 	{ "EMT",	SIGEMT },	/* 7 (mips,alpha,sparc*) */
-#endif
-#ifdef SIGBUS
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGBUS
 	{ "BUS",	SIGBUS },	/* 7 (arm,i386,m68k,ppc), 10 (mips,alpha,sparc*) */
-#endif
+#అయితే_ముగింపు
 	{ "FPE",	SIGFPE },	/* 8 */
 	{ "KILL",	SIGKILL },	/* 9 */
 	{ "USR1",	SIGUSR1 },	/* 10 (arm,i386,m68k,ppc), 30 (alpha,sparc*), 16 (mips) */
@@ -49,126 +49,126 @@ static const struct ul_signal_name {
 	{ "PIPE",	SIGPIPE },	/* 13 */
 	{ "ALRM",	SIGALRM },	/* 14 */
 	{ "TERM",	SIGTERM },	/* 15 */
-#ifdef SIGSTKFLT
+#నిర్వచితమైతే SIGSTKFLT
 	{ "STKFLT",	SIGSTKFLT },	/* 16 (arm,i386,m68k,ppc) */
-#endif
+#అయితే_ముగింపు
 	{ "CHLD",	SIGCHLD },	/* 17 (arm,i386,m68k,ppc), 20 (alpha,sparc*), 18 (mips) */
-#ifdef SIGCLD
+#నిర్వచితమైతే SIGCLD
 	{ "CLD",	SIGCLD },	/* same as SIGCHLD (mips) */
-#endif
+#అయితే_ముగింపు
 	{ "CONT",	SIGCONT },	/* 18 (arm,i386,m68k,ppc), 19 (alpha,sparc*), 25 (mips) */
 	{ "STOP",	SIGSTOP },	/* 19 (arm,i386,m68k,ppc), 17 (alpha,sparc*), 23 (mips) */
 	{ "TSTP",	SIGTSTP },	/* 20 (arm,i386,m68k,ppc), 18 (alpha,sparc*), 24 (mips) */
 	{ "TTIN",	SIGTTIN },	/* 21 (arm,i386,m68k,ppc,alpha,sparc*), 26 (mips) */
 	{ "TTOU",	SIGTTOU },	/* 22 (arm,i386,m68k,ppc,alpha,sparc*), 27 (mips) */
-#ifdef SIGURG
+#నిర్వచితమైతే SIGURG
 	{ "URG",	SIGURG },	/* 23 (arm,i386,m68k,ppc), 16 (alpha,sparc*), 21 (mips) */
-#endif
-#ifdef SIGXCPU
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGXCPU
 	{ "XCPU",	SIGXCPU },	/* 24 (arm,i386,m68k,ppc,alpha,sparc*), 30 (mips) */
-#endif
-#ifdef SIGXFSZ
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGXFSZ
 	{ "XFSZ",	SIGXFSZ },	/* 25 (arm,i386,m68k,ppc,alpha,sparc*), 31 (mips) */
-#endif
-#ifdef SIGVTALRM
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGVTALRM
 	{ "VTALRM",	SIGVTALRM },	/* 26 (arm,i386,m68k,ppc,alpha,sparc*), 28 (mips) */
-#endif
-#ifdef SIGPROF
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGPROF
 	{ "PROF",	SIGPROF },	/* 27 (arm,i386,m68k,ppc,alpha,sparc*), 29 (mips) */
-#endif
-#ifdef SIGWINCH
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGWINCH
 	{ "WINCH",	SIGWINCH },	/* 28 (arm,i386,m68k,ppc,alpha,sparc*), 20 (mips) */
-#endif
-#ifdef SIGIO
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGIO
 	{ "IO",		SIGIO },	/* 29 (arm,i386,m68k,ppc), 23 (alpha,sparc*), 22 (mips) */
-#endif
-#ifdef SIGPOLL
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGPOLL
 	{ "POLL",	SIGPOLL },	/* same as SIGIO */
-#endif
-#ifdef SIGINFO
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGINFO
 	{ "INFO",	SIGINFO },	/* 29 (alpha) */
-#endif
-#ifdef SIGLOST
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGLOST
 	{ "LOST",	SIGLOST },	/* 29 (arm,i386,m68k,ppc,sparc*) */
-#endif
-#ifdef SIGPWR
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGPWR
 	{ "PWR",	SIGPWR },	/* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
-#endif
-#ifdef SIGUNUSED
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGUNUSED
 	{ "UNUSED",	SIGUNUSED },	/* 31 (arm,i386,m68k,ppc) */
-#endif
-#ifdef SIGSYS
+#అయితే_ముగింపు
+#నిర్వచితమైతే SIGSYS
 	{ "SYS",	SIGSYS },	/* 31 (mips,alpha,sparc*) */
-#endif
+#అయితే_ముగింపు
 };
 
-#ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+#నిర్వచితమైతే SIGRTMIN
+స్థిర పూర్ణాంకం rtsig_గమ్యం_signum(స్థిరరాశి అక్షరం *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	పూర్ణాంకం అంకె, maxi = 0;
+	అక్షరం *ep = ఖాళీ;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	ఒకవేళ (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	లేకపోతే ఒకవేళ (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	ఒకవేళ (!అంకెనా(*sig))
+		తిరిగి -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	అంకె = strtol(sig, &ep, 10);
+	ఒకవేళ (!ep || sig == ep || errno || అంకె < 0)
+		తిరిగి -1;
+	అంకె = maxi ? SIGRTMAX - అంకె : SIGRTMIN + అంకె;
+	ఒకవేళ (అంకె < SIGRTMIN || SIGRTMAX < అంకె)
+		తిరిగి -1;
+	తిరిగి అంకె;
 }
-#endif
+#అయితే_ముగింపు
 
-int signame_to_signum(const char *sig)
+పూర్ణాంకం signame_గమ్యం_signum(స్థిరరాశి అక్షరం *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	ఒకవేళ (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
-#ifdef SIGRTMIN
+#నిర్వచితమైతే SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
-#endif
+	ఒకవేళ (!c_strncasecmp(sig, "rt", 2))
+		తిరిగి rtsig_గమ్యం_signum(sig + 2);
+#అయితే_ముగింపు
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	కొరకు (n = 0; n < ARRAY_కొలత(ul_signames); n++) {
+		ఒకవేళ (!c_strcasecmp(ul_signames[n].name, sig))
+			తిరిగి ul_signames[n].val;
 	}
-	return -1;
+	తిరిగి -1;
 }
 
-const char *signum_to_signame(int signum)
+స్థిరరాశి అక్షరం *signum_గమ్యం_signame(పూర్ణాంకం signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	కొరకు (n = 0; n < ARRAY_కొలత(ul_signames); n++) {
+		ఒకవేళ (ul_signames[n].val == signum) {
+			తిరిగి ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+పూర్ణాంకం get_signame_by_idx(size_t idx, స్థిరరాశి అక్షరం **signame, పూర్ణాంకం *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	ఒకవేళ (idx >= ARRAY_కొలత(ul_signames))
+		తిరిగి -1;
 
-	if (signame)
+	ఒకవేళ (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	ఒకవేళ (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	తిరిగి 0;
 
 }
 

@@ -1,55 +1,55 @@
 /*
  * configs_file.c instantiates functions defined and described in configs_file.h
  */
-#include <errno.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
-#include <dirent.h>
-#endif
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <sys/syslog.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <stdarg.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <stdio.h>
+#ఒకవేళ defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#అన్తర్భావ <dirent.h>
+#అయితే_ముగింపు
 
-#include "c.h"
-#include "configs.h"
-#include "strutils.h"
-#include "list.h"
-#include "fileutils.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "configs.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "list.h"
+#అన్తర్భావ "fileutils.h"
 
-struct file_element {
-	struct list_head file_list;
-	char *filename;
+నిర్మాణం file_element {
+	నిర్మాణం list_తల file_list;
+	అక్షరం *filename;
 };
 
-static __attribute__ ((__format__ (__printf__, 2, 0)))
-	char *config_mk_path(int types, const char *fmt, ...)
+స్థిర __attribute__ ((__format__ (__printf__, 2, 0)))
+	అక్షరం *config_mk_మార్గం(పూర్ణాంకం types, స్థిరరాశి అక్షరం *fmt, ...)
 {
 	va_list ap;
-	char *path = NULL;
-	int rc;
+	అక్షరం *మార్గం = ఖాళీ;
+	పూర్ణాంకం rc;
 
 	errno = 0;
 
 	va_start(ap, fmt);
-	rc = vasprintf(&path, fmt, ap);
+	rc = vasprintf(&మార్గం, fmt, ap);
 	va_end(ap);
 
-	if (rc > 0 && types) {
-		struct stat st;
+	ఒకవేళ (rc > 0 && types) {
+		నిర్మాణం stat st;
 
-		if (stat(path, &st) != 0 ||
+		ఒకవేళ (stat(మార్గం, &st) != 0 ||
 		    !((st.st_mode & S_IFMT) & types))
-			goto fail;
+			వెళ్ళు fail;
 
 	}
 
-	return path;
+	తిరిగి మార్గం;
 fail:
-	free(path);
-	return NULL;
+	విడుదల(మార్గం);
+	తిరిగి ఖాళీ;
 }
 
 /* Checking for main configuration file
@@ -57,317 +57,317 @@ fail:
  * Returning absolute path or NULL if not found The return value has to be
  * freed by the caller.
  */
-static char *main_configs(const char *root,
-			  const char *project,
-			  const char *confname,
-			  const char *suffix)
+స్థిర అక్షరం *main_configs(స్థిరరాశి అక్షరం *మూలం,
+			  స్థిరరాశి అక్షరం *project,
+			  స్థిరరాశి అక్షరం *confname,
+			  స్థిరరాశి అక్షరం *suffix)
 {
-	char *path = NULL;
+	అక్షరం *మార్గం = ఖాళీ;
 
-	if (suffix)
-		path = config_mk_path(S_IFREG, "%s/%s/%s.%s",
-				root, project, confname, suffix);
-	if (!path)
-		path = config_mk_path(S_IFREG, "%s/%s/%s",
-				root, project, confname);
-	return path;
+	ఒకవేళ (suffix)
+		మార్గం = config_mk_మార్గం(S_IFREG, "%s/%s/%s.%s",
+				మూలం, project, confname, suffix);
+	ఒకవేళ (!మార్గం)
+		మార్గం = config_mk_మార్గం(S_IFREG, "%s/%s/%s",
+				మూలం, project, confname);
+	తిరిగి మార్గం;
 }
 
-static int configs_refer_filename(struct list_head *list, char *filename, int head)
+స్థిర పూర్ణాంకం configs_refer_filename(నిర్మాణం list_తల *list, అక్షరం *filename, పూర్ణాంకం తల)
 {
-	struct file_element *e;
+	నిర్మాణం file_element *e;
 
-	e = calloc(1, sizeof(*e));
-	if (e == NULL)
-		return -ENOMEM;
+	e = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(*e));
+	ఒకవేళ (e == ఖాళీ)
+		తిరిగి -ENOMEM;
 
-	INIT_LIST_HEAD(&e->file_list);
+	INIT_LIST_తల(&e->file_list);
 	e->filename = filename;
-	if (head)
-		list_add(&e->file_list, list);
-	else
-		list_add_tail(&e->file_list, list);
-	return 0;
+	ఒకవేళ (తల)
+		list_కూడు(&e->file_list, list);
+	లేకపోతే
+		list_కూడు_తోక(&e->file_list, list);
+	తిరిగి 0;
 }
 
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#ఒకవేళ defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 
-static int filter(const struct dirent *d)
+స్థిర పూర్ణాంకం filter(స్థిరరాశి నిర్మాణం dirent *d)
 {
-#ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_UNKNOWN && d->d_type != DT_REG &&
+#నిర్వచితమైతే _DIRENT_HAVE_D_TYPE
+	ఒకవేళ (d->d_type != DT_UNKNOWN && d->d_type != DT_REG &&
 	    d->d_type != DT_LNK)
-		return 0;
-#endif
-	if (is_dotdir_dirent(d))
-		return 0;
+		తిరిగి 0;
+#అయితే_ముగింపు
+	ఒకవేళ (is_dotdir_dirent(d))
+		తిరిగి 0;
 
-	return 1;
+	తిరిగి 1;
 }
 
-static int read_dir(struct list_head *file_list,
-		    const char *project,
-		    const char *root,
-		    const char *confname,
-		    const char *suffix)
+స్థిర పూర్ణాంకం read_dir(నిర్మాణం list_తల *file_list,
+		    స్థిరరాశి అక్షరం *project,
+		    స్థిరరాశి అక్షరం *మూలం,
+		    స్థిరరాశి అక్షరం *confname,
+		    స్థిరరాశి అక్షరం *suffix)
 {
-	char *dirname = NULL;
-	char *filename = NULL;
-	int dd = -1, nfiles = 0, i;
-	int ret = 0;
-	struct dirent **namelist = NULL;
+	అక్షరం *dirname = ఖాళీ;
+	అక్షరం *filename = ఖాళీ;
+	పూర్ణాంకం dd = -1, nfiles = 0, i;
+	పూర్ణాంకం ret = 0;
+	నిర్మాణం dirent **namelist = ఖాళీ;
 
-	if (suffix)
-		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.%s.d",
-				root, project, confname, suffix);
-	if (!dirname)
-		dirname = config_mk_path(S_IFDIR, "%s/%s/%s.d",
-				root, project, confname);
-	if (!dirname)
-		return errno == ENOMEM ? -ENOMEM : 0;
+	ఒకవేళ (suffix)
+		dirname = config_mk_మార్గం(S_IFDIR, "%s/%s/%s.%s.d",
+				మూలం, project, confname, suffix);
+	ఒకవేళ (!dirname)
+		dirname = config_mk_మార్గం(S_IFDIR, "%s/%s/%s.d",
+				మూలం, project, confname);
+	ఒకవేళ (!dirname)
+		తిరిగి errno == ENOMEM ? -ENOMEM : 0;
 
 	dd = open(dirname, O_RDONLY|O_CLOEXEC|O_DIRECTORY);
-	if (dd < 0)
-		goto finish;
+	ఒకవేళ (dd < 0)
+		వెళ్ళు ముగింపు;
 
 	nfiles = scandirat(dd, ".", &namelist, filter, alphasort);
-	if (nfiles <= 0)
-		goto finish;
+	ఒకవేళ (nfiles <= 0)
+		వెళ్ళు ముగింపు;
 
-	for (i = 0; i < nfiles; i++) {
-		struct dirent *d = namelist[i];
+	కొరకు (i = 0; i < nfiles; i++) {
+		నిర్మాణం dirent *d = namelist[i];
 
-		if (suffix) {
-			const char *p = ul_endswith(d->d_name, suffix);
+		ఒకవేళ (suffix) {
+			స్థిరరాశి అక్షరం *p = ul_endswith(d->d_name, suffix);
 
-			if (!p || p == d->d_name || *(p - 1) != '.')
-				continue;
+			ఒకవేళ (!p || p == d->d_name || *(p - 1) != '.')
+				కొనసాగు;
 		}
 
-		if (asprintf(&filename, "%s/%s", dirname, d->d_name) < 0) {
+		ఒకవేళ (asprintf(&filename, "%s/%s", dirname, d->d_name) < 0) {
 			ret = -ENOMEM;
-			break;
+			ఆపు;
 		}
 
 		ret = configs_refer_filename(file_list, filename, 0);
-		if (ret < 0) {
-			free(filename);
-			break;
+		ఒకవేళ (ret < 0) {
+			విడుదల(filename);
+			ఆపు;
 		}
 	}
 
-finish:
-	for (i = 0; i < nfiles; i++)
-		free(namelist[i]);
-	free(namelist);
-	free(dirname);
-	if (dd >= 0)
+ముగింపు:
+	కొరకు (i = 0; i < nfiles; i++)
+		విడుదల(namelist[i]);
+	విడుదల(namelist);
+	విడుదల(dirname);
+	ఒకవేళ (dd >= 0)
 		close(dd);
-	return ret;
+	తిరిగి ret;
 }
 
-#endif /* HAVE_SCANDIRAT */
+#అయితే_ముగింపు /* HAVE_SCANDIRAT */
 
-static int config_cmp(struct list_head *a, struct list_head *b,
-		      void *data __attribute__((__unused__)))
+స్థిర పూర్ణాంకం config_cmp(నిర్మాణం list_తల *a, నిర్మాణం list_తల *b,
+		      శూన్య *దత్తాంశం __attribute__((__unused__)))
 {
-	struct file_element *ea = list_entry(a, struct file_element, file_list);
-	struct file_element *eb = list_entry(b, struct file_element, file_list);
-	char *na = ul_basename(ea->filename);
-	char *nb = ul_basename(eb->filename);
+	నిర్మాణం file_element *ea = list_నమోదు(a, నిర్మాణం file_element, file_list);
+	నిర్మాణం file_element *eb = list_నమోదు(b, నిర్మాణం file_element, file_list);
+	అక్షరం *na = ul_basename(ea->filename);
+	అక్షరం *nb = ul_basename(eb->filename);
 
-	return strcoll(na, nb);
+	తిరిగి strcoll(na, nb);
 }
 
-static void free_list_entry(struct file_element *element)
+స్థిర శూన్య free_list_నమోదు(నిర్మాణం file_element *element)
 {
-	free(element->filename);
-	free(element);
+	విడుదల(element->filename);
+	విడుదల(element);
 }
 
-static int config_merge_list(struct list_head *main_list,
-			      struct list_head *new_list)
+స్థిర పూర్ణాంకం config_విలీనం_list(నిర్మాణం list_తల *main_list,
+			      నిర్మాణం list_తల *new_list)
 {
-	struct list_head *n, *m, *next;
+	నిర్మాణం list_తల *n, *m, *తదుపరి;
 
-	list_for_each_safe(n, next, new_list) {
-		struct file_element *ne = list_entry(n, struct file_element, file_list);
-		char *nn = ul_basename(ne->filename);
-		int duplicate = 0;
+	list_for_each_సురక్షిత(n, తదుపరి, new_list) {
+		నిర్మాణం file_element *ne = list_నమోదు(n, నిర్మాణం file_element, file_list);
+		అక్షరం *nn = ul_basename(ne->filename);
+		పూర్ణాంకం duplicate = 0;
 
 		list_for_each(m, main_list) {
-			struct file_element *me = list_entry(m, struct file_element, file_list);
-			char *mn = ul_basename(me->filename);
+			నిర్మాణం file_element *me = list_నమోదు(m, నిర్మాణం file_element, file_list);
+			అక్షరం *mn = ul_basename(me->filename);
 
-			if (strcoll(mn, nn) == 0) {
+			ఒకవేళ (strcoll(mn, nn) == 0) {
 				duplicate = 1;
-				break;
+				ఆపు;
 			}
 		}
 
-		if (!duplicate) {
+		ఒకవేళ (!duplicate) {
 			list_del_init(n);
-			list_add_tail(n, main_list);
+			list_కూడు_తోక(n, main_list);
 		}
 	}
 
-	list_sort(main_list, config_cmp, NULL);
-	return 0;
+	list_క్రమీకరించు(main_list, config_cmp, ఖాళీ);
+	తిరిగి 0;
 }
 
-int ul_configs_file_list(struct list_head *file_list,
-			 const char *project,
-			 const char *etcdir,
-			 const char *rundir,
-			 const char *usrdir,
-			 const char *confname,
-			 const char *suffix)
+పూర్ణాంకం ul_configs_file_list(నిర్మాణం list_తల *file_list,
+			 స్థిరరాశి అక్షరం *project,
+			 స్థిరరాశి అక్షరం *etcdir,
+			 స్థిరరాశి అక్షరం *rundir,
+			 స్థిరరాశి అక్షరం *usrdir,
+			 స్థిరరాశి అక్షరం *confname,
+			 స్థిరరాశి అక్షరం *suffix)
 {
-	char *main_file = NULL;
-	struct list_head etc_list;
-	struct list_head run_list;
-	struct list_head usr_list;
-	int ret;
+	అక్షరం *main_file = ఖాళీ;
+	నిర్మాణం list_తల etc_list;
+	నిర్మాణం list_తల నిరంతరం_list;
+	నిర్మాణం list_తల usr_list;
+	పూర్ణాంకం ret;
 
-	INIT_LIST_HEAD(file_list);
+	INIT_LIST_తల(file_list);
 
-	if (!confname)
-		return -ENOTEMPTY;
+	ఒకవేళ (!confname)
+		తిరిగి -ENOTEMPTY;
 
 	/* Default is /etc */
-	if (!etcdir)
-		etcdir = _PATH_SYSCONFDIR;
-	if (!rundir)
+	ఒకవేళ (!etcdir)
+		etcdir = మార్గం_SYSCONFDIR;
+	ఒకవేళ (!rundir)
 		rundir = "";
-	if (!usrdir)
+	ఒకవేళ (!usrdir)
 		usrdir = "";
 
-	if (!project)
+	ఒకవేళ (!project)
 		project = "";
 
 	/* Find "main" config file (but don't add to list yet) */
 	/* Search order: /etc /run /usr */
 	main_file = main_configs(etcdir, project, confname, suffix);
-	if (main_file == NULL)
+	ఒకవేళ (main_file == ఖాళీ)
 		main_file = main_configs(rundir, project, confname, suffix);
-	if (main_file == NULL)
+	ఒకవేళ (main_file == ఖాళీ)
 		main_file = main_configs(usrdir, project, confname, suffix);
 
-	INIT_LIST_HEAD(&etc_list);
-	INIT_LIST_HEAD(&run_list);
-	INIT_LIST_HEAD(&usr_list);
+	INIT_LIST_తల(&etc_list);
+	INIT_LIST_తల(&నిరంతరం_list);
+	INIT_LIST_తల(&usr_list);
 
-#if defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
+#ఒకవేళ defined(HAVE_SCANDIRAT) && defined(HAVE_OPENAT)
 	ret = read_dir(&etc_list, project, etcdir, confname, suffix);
-	if (ret == -ENOMEM)
-		goto finish;
+	ఒకవేళ (ret == -ENOMEM)
+		వెళ్ళు ముగింపు;
 
-	ret = read_dir(&run_list, project, rundir, confname, suffix);
-	if (ret == -ENOMEM)
-		goto finish;
+	ret = read_dir(&నిరంతరం_list, project, rundir, confname, suffix);
+	ఒకవేళ (ret == -ENOMEM)
+		వెళ్ళు ముగింపు;
 
 	ret = read_dir(&usr_list, project, usrdir, confname, suffix);
-	if (ret == -ENOMEM)
-		goto finish;
-#endif
+	ఒకవేళ (ret == -ENOMEM)
+		వెళ్ళు ముగింపు;
+#అయితే_ముగింపు
 
 	/* Merge drop-in directories in priority order (high to low) */
-	if ((ret = config_merge_list(file_list, &etc_list)) < 0 ||
-	    (ret = config_merge_list(file_list, &run_list)) < 0 ||
-	    (ret = config_merge_list(file_list, &usr_list)) < 0)
-		goto finish;
+	ఒకవేళ ((ret = config_విలీనం_list(file_list, &etc_list)) < 0 ||
+	    (ret = config_విలీనం_list(file_list, &నిరంతరం_list)) < 0 ||
+	    (ret = config_విలీనం_list(file_list, &usr_list)) < 0)
+		వెళ్ళు ముగింపు;
 
 	/* Add main config file at the beginning; the list is in parsing
 	 * order, so the main file is parsed first and the drop-ins which
 	 * follow it overwrite its settings. */
-	if (main_file != NULL) {
+	ఒకవేళ (main_file != ఖాళీ) {
 		ret = configs_refer_filename(file_list, main_file, 1);
-		if (ret < 0) {
-			free(main_file);
-			goto finish;
+		ఒకవేళ (ret < 0) {
+			విడుదల(main_file);
+			వెళ్ళు ముగింపు;
 		}
 	}
 
-finish:
+ముగింపు:
 	ul_configs_free_list(&etc_list);
-	ul_configs_free_list(&run_list);
+	ul_configs_free_list(&నిరంతరం_list);
 	ul_configs_free_list(&usr_list);
 
-	return ret < 0 ? ret : (int) list_count_entries(file_list);
+	తిరిగి ret < 0 ? ret : (పూర్ణాంకం) list_లెక్క_entries(file_list);
 }
 
-void ul_configs_free_list(struct list_head *file_list)
+శూన్య ul_configs_free_list(నిర్మాణం list_తల *file_list)
 {
-	list_free(file_list, struct file_element,  file_list, free_list_entry);
+	list_free(file_list, నిర్మాణం file_element,  file_list, free_list_నమోదు);
 }
 
-int ul_configs_next_filename(struct list_head *file_list,
-			     struct list_head **current_entry,
-			     char **name)
+పూర్ణాంకం ul_configs_తదుపరి_filename(నిర్మాణం list_తల *file_list,
+			     నిర్మాణం list_తల **current_నమోదు,
+			     అక్షరం **name)
 {
-	struct file_element *element = NULL;
+	నిర్మాణం file_element *element = ఖాళీ;
 
-	if (list_empty(file_list) || *current_entry == file_list)
-		return 1;
+	ఒకవేళ (list_ఖాళీలు(file_list) || *current_నమోదు == file_list)
+		తిరిగి 1;
 
-	if (*current_entry == NULL)
-		*current_entry = file_list->next;
+	ఒకవేళ (*current_నమోదు == ఖాళీ)
+		*current_నమోదు = file_list->తదుపరి;
 
-	element = list_entry(*current_entry, struct file_element, file_list);
+	element = list_నమోదు(*current_నమోదు, నిర్మాణం file_element, file_list);
 	*name = element->filename;
-	*current_entry = (*current_entry)->next;
+	*current_నమోదు = (*current_నమోదు)->తదుపరి;
 
-	return 0;
+	తిరిగి 0;
 }
 
-#ifdef TEST_PROGRAM_CONFIGS
+#నిర్వచితమైతే TEST_కార్యక్రమం_CONFIGS
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	struct list_head file_list;
-	struct list_head *current = NULL;
-	char *name = NULL;
-	const char *etc_path = NULL;
-	const char *run_path = NULL;
-	const char *usr_path = NULL;
-	const char *project = NULL;
-	const char *config_name = NULL;
-	const char *config_suffix = NULL;
-	static const struct option longopts[] = {
-		{ "etc", required_argument, NULL, 'e' },
-		{ "run", required_argument, NULL, 'r' },
-		{ "usr", required_argument, NULL, 'u' },
-		{ "project", required_argument, NULL, 'p' },
-		{ "name", required_argument, NULL, 'n' },
-		{ "suffix", required_argument, NULL, 's' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	నిర్మాణం list_తల file_list;
+	నిర్మాణం list_తల *current = ఖాళీ;
+	అక్షరం *name = ఖాళీ;
+	స్థిరరాశి అక్షరం *etc_మార్గం = ఖాళీ;
+	స్థిరరాశి అక్షరం *నిరంతరం_మార్గం = ఖాళీ;
+	స్థిరరాశి అక్షరం *usr_మార్గం = ఖాళీ;
+	స్థిరరాశి అక్షరం *project = ఖాళీ;
+	స్థిరరాశి అక్షరం *config_name = ఖాళీ;
+	స్థిరరాశి అక్షరం *config_suffix = ఖాళీ;
+	స్థిర స్థిరరాశి నిర్మాణం option longopts[] = {
+		{ "etc", required_argument, ఖాళీ, 'e' },
+		{ "run", required_argument, ఖాళీ, 'r' },
+		{ "usr", required_argument, ఖాళీ, 'u' },
+		{ "project", required_argument, ఖాళీ, 'p' },
+		{ "name", required_argument, ఖాళీ, 'n' },
+		{ "suffix", required_argument, ఖాళీ, 's' },
+		{ "help", no_argument, ఖాళీ, 'h' },
+		{ ఖాళీ, 0, ఖాళీ, 0 }
 	};
-	int ch, count;
+	పూర్ణాంకం ch, లెక్క;
 
-	while ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'e':
-			etc_path = optarg;
-			break;
-		case 'r':
-			run_path = optarg;
-			break;
-		case 'u':
-			usr_path = optarg;
-			break;
-		case 'p':
+	అయితే ((ch = getopt_long(argc, argv, "e:r:u:p:n:s:h", longopts, ఖాళీ)) != -1) {
+		ఎంపిక (ch) {
+		స్థితి 'e':
+			etc_మార్గం = optarg;
+			ఆపు;
+		స్థితి 'r':
+			నిరంతరం_మార్గం = optarg;
+			ఆపు;
+		స్థితి 'u':
+			usr_మార్గం = optarg;
+			ఆపు;
+		స్థితి 'p':
 			project = optarg;
-			break;
-		case 'n':
+			ఆపు;
+		స్థితి 'n':
 			config_name = optarg;
-			break;
-		case 's':
+			ఆపు;
+		స్థితి 's':
 			config_suffix = optarg;
-			break;
-		case 'h':
-			printf("usage: %s [options]\n"
+			ఆపు;
+		స్థితి 'h':
+			రాయి("usage: %s [options]\n"
 				" -e, --etc <path>      path to /etc directory\n"
 				" -r, --run <path>      path to /run directory\n"
 				" -u, --usr <path>      path to /usr directory\n"
@@ -375,30 +375,30 @@ int main(int argc, char *argv[])
 				" -n, --name <name>     config file base name\n"
 				" -s, --suffix <suffix> config file suffix\n"
 				" -h, --help            display this help\n",
-				program_invocation_short_name);
-			return EXIT_SUCCESS;
-		default:
-			return EXIT_FAILURE;
+				కార్యక్రమం_invocation_short_name);
+			తిరిగి EXIT_SUCCESS;
+		అప్రమేయ:
+			తిరిగి EXIT_FAILURE;
 		}
 	}
 
-	if (!config_name) {
+	ఒకవేళ (!config_name) {
 		fprintf(stderr, "config name is required (use --name)\n");
-		return EXIT_FAILURE;
+		తిరిగి EXIT_FAILURE;
 	}
 
-	count = ul_configs_file_list(&file_list, project, etc_path, run_path, usr_path,
+	లెక్క = ul_configs_file_list(&file_list, project, etc_మార్గం, నిరంతరం_మార్గం, usr_మార్గం,
 				     config_name, config_suffix);
-	if (count < 0) {
-		fprintf(stderr, "failed to get config file list: %d\n", count);
-		return EXIT_FAILURE;
+	ఒకవేళ (లెక్క < 0) {
+		fprintf(stderr, "failed to get config file list: %d\n", లెక్క);
+		తిరిగి EXIT_FAILURE;
 	}
 
-	printf("Found %d configuration file(s):\n", count);
-	while (ul_configs_next_filename(&file_list, &current, &name) == 0)
-		printf("  %s\n", name);
+	రాయి("Found %d configuration file(s):\n", లెక్క);
+	అయితే (ul_configs_తదుపరి_filename(&file_list, &current, &name) == 0)
+		రాయి("  %s\n", name);
 
 	ul_configs_free_list(&file_list);
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_CONFIGS */
+#అయితే_ముగింపు /* TEST_PROGRAM_CONFIGS */

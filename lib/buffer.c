@@ -4,379 +4,379 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#అన్తర్భావ "buffer.h"
+#అన్తర్భావ "mbsalign.h"
+#అన్తర్భావ "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+శూన్య ul_బఫరు_reset_దత్తాంశం(నిర్మాణం ul_బఫరు *buf)
 {
-	if (buf->begin)
+	ఒకవేళ (buf->begin)
 		memset(buf->begin, 0, buf->sz);
-	buf->end = buf->begin;
+	buf->చివర = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	ఒకవేళ (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * పరిమాణం(అక్షరం *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+స్థిర అంతఃవరుస అక్షరం *ul_బఫరు_free_దత్తాంశం_common(నిర్మాణం ul_బఫరు *buf, bool steal)
 {
-	char *t = NULL;
+	అక్షరం *t = ఖాళీ;
 
-	assert(buf);
+	ప్రతిజ్ఞా(buf);
 
-	if (steal)
+	ఒకవేళ (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	లేకపోతే
+		విడుదల(buf->begin);
+	buf->begin = ఖాళీ;
+	buf->చివర = ఖాళీ;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	విడుదల(buf->ptrs);
+	buf->ptrs = ఖాళీ;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	విడుదల(buf->encoded);
+	buf->encoded = ఖాళీ;
 	buf->encoded_sz = 0;
 
-	return t;
+	తిరిగి t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+శూన్య ul_బఫరు_free_దత్తాంశం(నిర్మాణం ul_బఫరు *buf)
 {
-	ul_buffer_free_data_common(buf, false);
+	ul_బఫరు_free_దత్తాంశం_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+అక్షరం *ul_బఫరు_steal_string(నిర్మాణం ul_బఫరు *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
-		ul_buffer_free_data(buf);
-		return NULL;
+	ఒకవేళ (ul_బఫరు_is_ఖాళీలు(buf)) {
+		ul_బఫరు_free_దత్తాంశం(buf);
+		తిరిగి ఖాళీ;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	తిరిగి ul_బఫరు_free_దత్తాంశం_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+శూన్య ul_బఫరు_సమితి_chunksize(నిర్మాణం ul_బఫరు *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+పూర్ణాంకం ul_బఫరు_is_ఖాళీలు(నిర్మాణం ul_బఫరు *buf)
 {
-	return buf->begin == buf->end;
+	తిరిగి buf->begin == buf->చివర;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+పూర్ణాంకం ul_బఫరు_save_సూచిక(నిర్మాణం ul_బఫరు *buf, గుర్తులేని పొట్టి ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	ఒకవేళ (ptr_idx >= buf->nptrs) {
+		అక్షరం **tmp = reallocarray(buf->ptrs, ptr_idx + 1, పరిమాణం(అక్షరం *));
 
-		if (!tmp)
-			return -EINVAL;
+		ఒకవేళ (!tmp)
+			తిరిగి -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
-	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	buf->ptrs[ptr_idx] = buf->చివర;
+	తిరిగి 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+అక్షరం *ul_బఫరు_get_సూచిక(నిర్మాణం ul_బఫరు *buf, గుర్తులేని పొట్టి ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	ఒకవేళ (ptr_idx < buf->nptrs)
+		తిరిగి buf->ptrs[ptr_idx];
+	తిరిగి ఖాళీ;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_బఫరు_get_సూచిక_నిడివి(నిర్మాణం ul_బఫరు *buf, గుర్తులేని పొట్టి ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	అక్షరం *ptr = ul_బఫరు_get_సూచిక(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	ఒకవేళ (ptr && ptr > buf->begin)
+		తిరిగి ptr - buf->begin;
+	తిరిగి 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_బఫరు_get_సురక్షిత_సూచిక_వెడల్పు(నిర్మాణం ul_బఫరు *buf, గుర్తులేని పొట్టి ptr_idx)
 {
-	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
+	size_t len = ul_బఫరు_get_సూచిక_నిడివి(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	ఒకవేళ (!len)
+		తిరిగి 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	తిరిగి mbs_సురక్షిత_nwidth(buf->begin, len, ఖాళీ);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+శూన్య ul_బఫరు_refer_string(నిర్మాణం ul_బఫరు *buf, అక్షరం *str)
 {
-	if (buf->sz)
-		ul_buffer_free_data(buf);
+	ఒకవేళ (buf->sz)
+		ul_బఫరు_free_దత్తాంశం(buf);
 	buf->begin = str;
-	buf->sz = str ? strlen(str) : 0;
-	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
+	buf->sz = str ? అక్షరశ్రేణి_పొడవు(str) : 0;
+	buf->చివర = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+పూర్ణాంకం ul_బఫరు_alloc_దత్తాంశం(నిర్మాణం ul_బఫరు *buf, size_t sz)
 {
-	char *tmp;
+	అక్షరం *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	ప్రతిజ్ఞా(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	ఒకవేళ (sz <= buf->sz)
+		తిరిగి 0;
 
-	if (buf->end && buf->begin)
-		len = buf->end - buf->begin;
+	ఒకవేళ (buf->చివర && buf->begin)
+		len = buf->చివర - buf->begin;
 
-	if (buf->chunksize)
+	ఒకవేళ (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	ఒకవేళ (!tmp)
+		తిరిగి -ENOMEM;
 
 	buf->begin = tmp;
-	buf->end = buf->begin + len;
+	buf->చివర = buf->begin + len;
 	buf->sz = sz;
 
-	memset(buf->end, '\0', sz - len);
+	memset(buf->చివర, '\0', sz - len);
 
-	return 0;
+	తిరిగి 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+పూర్ణాంకం ul_బఫరు_append_దత్తాంశం(నిర్మాణం ul_బఫరు *buf, స్థిరరాశి అక్షరం *దత్తాంశం, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	ఒకవేళ (!buf)
+		తిరిగి -EINVAL;
+	ఒకవేళ (!దత్తాంశం)
+		తిరిగి 0;
 
-	if (buf->begin && buf->end)
-		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	ఒకవేళ (buf->begin && buf->చివర)
+		maxsz = buf->sz - (buf->చివర - buf->begin);
+	ఒకవేళ (maxsz <= sz + 1) {
+		పూర్ణాంకం rc = ul_బఫరు_alloc_దత్తాంశం(buf, buf->sz + sz + 1);
+		ఒకవేళ (rc)
+			తిరిగి rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	ఒకవేళ (!buf->చివర)
+		తిరిగి -EINVAL;	/* make static analyzers happy */
 
-	buf->end = mempcpy(buf->end, data, sz);
-	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	buf->చివర = mempcpy(buf->చివర, దత్తాంశం, sz);
+	*buf->చివర = '\0';	/* make sure it's terminated */
+	తిరిగి 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+పూర్ణాంకం ul_బఫరు_append_char(నిర్మాణం ul_బఫరు *buf, స్థిరరాశి అక్షరం c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	తిరిగి ul_బఫరు_append_దత్తాంశం(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+పూర్ణాంకం ul_బఫరు_append_string(నిర్మాణం ul_బఫరు *buf, స్థిరరాశి అక్షరం *str)
 {
-	if (!str)
-		return 0;
+	ఒకవేళ (!str)
+		తిరిగి 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	తిరిగి ul_బఫరు_append_దత్తాంశం(buf, str, అక్షరశ్రేణి_పొడవు(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+పూర్ణాంకం ul_బఫరు_append_ntimes(నిర్మాణం ul_బఫరు *buf, size_t n, స్థిరరాశి అక్షరం *str)
 {
 	size_t i;
-	size_t len = strlen(str);
+	size_t len = అక్షరశ్రేణి_పొడవు(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	కొరకు (i = 0; len && i < n; i++) {
+		పూర్ణాంకం rc = ul_బఫరు_append_దత్తాంశం(buf, str, len);
+		ఒకవేళ (rc)
+			తిరిగి rc;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+పూర్ణాంకం ul_బఫరు_appendf(నిర్మాణం ul_బఫరు *buf, స్థిరరాశి అక్షరం *format, ...)
 {
 	va_list ap;
-	int res;
+	పూర్ణాంకం res;
 
 	va_start(ap, format);
-	res = ul_buffer_appendvf(buf, format, ap);
+	res = ul_బఫరు_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	తిరిగి res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+పూర్ణాంకం ul_బఫరు_appendvf(నిర్మాణం ul_బఫరు *buf, స్థిరరాశి అక్షరం *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	అక్షరం *val;
+	పూర్ణాంకం sz;
+	పూర్ణాంకం res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ఒకవేళ (sz < 0)
+		తిరిగి -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
-	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	res = ul_బఫరు_append_దత్తాంశం(buf, val, sz);
+	విడుదల(val);
 
-	return res;
+	తిరిగి res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+పూర్ణాంకం ul_బఫరు_సమితి_దత్తాంశం(నిర్మాణం ul_బఫరు *buf, స్థిరరాశి అక్షరం *దత్తాంశం, size_t sz)
 {
-	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ul_బఫరు_reset_దత్తాంశం(buf);
+	తిరిగి ul_బఫరు_append_దత్తాంశం(buf, దత్తాంశం, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+అక్షరం *ul_బఫరు_get_దత్తాంశం(నిర్మాణం ul_బఫరు *buf, size_t *sz, size_t *వెడల్పు)
 {
-	if (sz)
-		*sz = buf->end - buf->begin;
-	if (width)
-		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	ఒకవేళ (sz)
+		*sz = buf->చివర - buf->begin;
+	ఒకవేళ (వెడల్పు)
+		*వెడల్పు = buf->begin && *buf->begin ? mbs_వెడల్పు(buf->begin) : 0;
+	తిరిగి buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+అక్షరం *ul_బఫరు_get_string(నిర్మాణం ul_బఫరు *buf, size_t *sz, size_t *వెడల్పు)
 {
-	char *ret;
+	అక్షరం *ret;
 
-	ret = ul_buffer_get_data(buf, sz, width);
+	ret = ul_బఫరు_get_దత్తాంశం(buf, sz, వెడల్పు);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	ఒకవేళ (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	తిరిగి ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_బఫరు_get_bufsiz(నిర్మాణం ul_బఫరు *buf)
 {
-	return buf->sz;
+	తిరిగి buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_బఫరు_get_datasiz(నిర్మాణం ul_బఫరు *buf)
 {
-	return buf->end - buf->begin;
+	తిరిగి buf->చివర - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+అక్షరం *ul_బఫరు_get_సురక్షిత_దత్తాంశం(నిర్మాణం ul_బఫరు *buf, size_t *sz, size_t *వెడల్పు, స్థిరరాశి అక్షరం *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	అక్షరం *దత్తాంశం = ul_బఫరు_get_దత్తాంశం(buf, ఖాళీ, ఖాళీ);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	అక్షరం *res = ఖాళీ;
 
-	if (!data)
-		goto nothing;
+	ఒకవేళ (!దత్తాంశం)
+		వెళ్ళు nothing;
 
-	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	encsz = mbs_సురక్షిత_encode_కొలత(buf->sz) + 1;
+	ఒకవేళ (encsz > buf->encoded_sz) {
+		అక్షరం *tmp = realloc(buf->encoded, encsz);
+		ఒకవేళ (!tmp)
+			వెళ్ళు nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
-	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	res = mbs_సురక్షిత_encode_గమ్యం_బఫరు(దత్తాంశం, &wsz, buf->encoded, buf->encoded_sz, safechars);
+	ఒకవేళ (!res || !wsz || wsz == (size_t) -1)
+		వెళ్ళు nothing;
 
-	if (width)
-		*width = wsz;
-	if (sz)
-		*sz = strlen(res);
-	return res;
+	ఒకవేళ (వెడల్పు)
+		*వెడల్పు = wsz;
+	ఒకవేళ (sz)
+		*sz = అక్షరశ్రేణి_పొడవు(res);
+	తిరిగి res;
 nothing:
-	if (width)
-		*width = 0;
-	if (sz)
+	ఒకవేళ (వెడల్పు)
+		*వెడల్పు = 0;
+	ఒకవేళ (sz)
 		*sz = 0;
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 
-#ifdef TEST_PROGRAM_BUFFER
+#నిర్వచితమైతే TEST_కార్యక్రమం_బఫరు
 
-enum {
+గణన {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+పూర్ణాంకం ప్రధాన(శూన్య)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	నిర్మాణం ul_బఫరు buf = UL_INIT_బఫరు;
+	అక్షరం *str;
 	size_t sz = 0;
 
-	ul_buffer_set_chunksize(&buf, 16);
+	ul_బఫరు_సమితి_chunksize(&buf, 16);
 
-	ul_buffer_append_string(&buf, "AAA");
-	ul_buffer_append_data(&buf, "=", 1);
-	ul_buffer_append_string(&buf, "aaa");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
+	ul_బఫరు_append_string(&buf, "AAA");
+	ul_బఫరు_append_దత్తాంశం(&buf, "=", 1);
+	ul_బఫరు_append_string(&buf, "aaa");
+	ul_బఫరు_save_సూచిక(&buf, PTR_AAA);
 
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "BBB");
-	ul_buffer_append_string(&buf, "=");
-	ul_buffer_append_string(&buf, "bbb");
-	ul_buffer_save_pointer(&buf, PTR_BBB);
+	ul_బఫరు_append_దత్తాంశం(&buf, ",", 1);
+	ul_బఫరు_append_string(&buf, "BBB");
+	ul_బఫరు_append_string(&buf, "=");
+	ul_బఫరు_append_string(&buf, "bbb");
+	ul_బఫరు_save_సూచిక(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_బఫరు_get_దత్తాంశం(&buf, &sz, ఖాళీ);
+	రాయి("data [%zu] '%s'\n", sz, str);
 
-	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_pointer_length(&buf, PTR_AAA),
-			ul_buffer_get_pointer_length(&buf, PTR_BBB));
-	printf(" pointer data width: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_safe_pointer_width(&buf, PTR_AAA),
-			ul_buffer_get_safe_pointer_width(&buf, PTR_BBB));
+	రాయి(" pointer data len: AAA=%zu, BBB=%zu\n",
+			ul_బఫరు_get_సూచిక_నిడివి(&buf, PTR_AAA),
+			ul_బఫరు_get_సూచిక_నిడివి(&buf, PTR_BBB));
+	రాయి(" pointer data width: AAA=%zu, BBB=%zu\n",
+			ul_బఫరు_get_సురక్షిత_సూచిక_వెడల్పు(&buf, PTR_AAA),
+			ul_బఫరు_get_సురక్షిత_సూచిక_వెడల్పు(&buf, PTR_BBB));
 
-	ul_buffer_reset_data(&buf);
-	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
-	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
-	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
+	ul_బఫరు_reset_దత్తాంశం(&buf);
+	ul_బఫరు_append_string(&buf, "This is really long string to test the buffer function.");
+	ul_బఫరు_save_సూచిక(&buf, PTR_AAA);
+	ul_బఫరు_append_string(&buf, " YES!");
+	str = ul_బఫరు_get_దత్తాంశం(&buf, &sz, ఖాళీ);
+	రాయి("data [%zu] '%s'\n", sz, str);
+	రాయి(" pointer data len: AAA=%zu\n", ul_బఫరు_get_సూచిక_నిడివి(&buf, PTR_AAA));
 
-	ul_buffer_free_data(&buf);
+	ul_బఫరు_free_దత్తాంశం(&buf);
 	str = strdup("foo");
-	ul_buffer_refer_string(&buf, str);
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_బఫరు_refer_string(&buf, str);
+	ul_బఫరు_append_దత్తాంశం(&buf, ",", 1);
+	ul_బఫరు_append_string(&buf, "bar");
+	str = ul_బఫరు_get_దత్తాంశం(&buf, &sz, ఖాళీ);
+	రాయి("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_బఫరు_free_దత్తాంశం(&buf);
+	ul_బఫరు_appendf(&buf, "a%se%d", "bcd", 10);
+	str = ul_బఫరు_get_దత్తాంశం(&buf, &sz, ఖాళీ);
+	రాయి("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_append_char(&buf, 'x');
+	ul_బఫరు_free_దత్తాంశం(&buf);
+	ul_బఫరు_append_char(&buf, 'x');
 	{
-		char c = 'y';
-		ul_buffer_append_char(&buf, c);
+		అక్షరం c = 'y';
+		ul_బఫరు_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
-		ul_buffer_append_char(&buf, c);
+		స్థిరరాశి అక్షరం c = 'z';
+		ul_బఫరు_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_బఫరు_get_దత్తాంశం(&buf, &sz, ఖాళీ);
+	రాయి("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
+	ul_బఫరు_free_దత్తాంశం(&buf);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BUFFER */
+#అయితే_ముగింపు /* TEST_PROGRAM_BUFFER */

@@ -10,242 +10,242 @@
  * by Davidlohr Bueso <dave@xxxxxxx> - March 2012.
  */
 
-#include <unistd.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <signal.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <stdbool.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/wait.h>
+#అన్తర్భావ <signal.h>
 
-#include "c.h"
-#include "xalloc.h"
-#include "nls.h"
-#include "strutils.h"
-#include "ttyutils.h"
-#include "pager.h"
-#include "env.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "xalloc.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "ttyutils.h"
+#అన్తర్భావ "pager.h"
+#అన్తర్భావ "env.h"
 
-static const char *pager_argv[] = { "sh", "-c", NULL, NULL };
+స్థిర స్థిరరాశి అక్షరం *pager_argv[] = { "sh", "-c", ఖాళీ, ఖాళీ };
 
-struct child_process {
-	const char **argv;
+నిర్మాణం బిడ్డ_process {
+	స్థిరరాశి అక్షరం **argv;
 	pid_t pid;
-	int in;
+	పూర్ణాంకం లోపల;
 
-	int header_lines;
-	int header_width;
+	పూర్ణాంకం శీర్షిక_పంక్తులు;
+	పూర్ణాంకం శీర్షిక_వెడల్పు;
 
-	int org_err;
-	int org_out;
-	struct sigaction orig_sigchld;
-	struct sigaction orig_sigint;
-	struct sigaction orig_sighup;
-	struct sigaction orig_sigterm;
-	struct sigaction orig_sigquit;
-	struct sigaction orig_sigpipe;
+	పూర్ణాంకం org_err;
+	పూర్ణాంకం org_బహిర్గతం;
+	నిర్మాణం sigaction orig_sigchld;
+	నిర్మాణం sigaction orig_sigint;
+	నిర్మాణం sigaction orig_sighup;
+	నిర్మాణం sigaction orig_sigterm;
+	నిర్మాణం sigaction orig_sigquit;
+	నిర్మాణం sigaction orig_sigpipe;
 };
-static struct child_process pager_process;
+స్థిర నిర్మాణం బిడ్డ_process pager_process;
 
-static volatile sig_atomic_t pager_caught_signal;
-static volatile sig_atomic_t pager_caught_sigpipe;
+స్థిర అస్థిర sig_atomic_t pager_caught_signal;
+స్థిర అస్థిర sig_atomic_t pager_caught_sigpipe;
 
-static inline void close_pair(int fd[2])
+స్థిర అంతఃవరుస శూన్య close_pair(పూర్ణాంకం fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
 }
 
-static void pager_preexec(void)
+స్థిర శూన్య pager_preexec(శూన్య)
 {
-	const char *less_env = getenv("LESS");
-	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
-	int header_width = pager_process.header_width;
-	char *less_val = NULL;
+	స్థిరరాశి అక్షరం *less_env = getenv("LESS");
+	స్థిరరాశి అక్షరం *పునాది = less_env ? less_env : "FRSX";
+	పూర్ణాంకం శీర్షిక_పంక్తులు = pager_process.శీర్షిక_పంక్తులు;
+	పూర్ణాంకం శీర్షిక_వెడల్పు = pager_process.శీర్షిక_వెడల్పు;
+	అక్షరం *less_val = ఖాళీ;
 
-	if (header_lines > 0 && header_width > 0)
-		less_val = ul_strfconcat(base, " --header %d,%d",
-					 header_lines, header_width);
-	else if (header_width > 0)
-		less_val = ul_strfconcat(base, " --header 0,%d",
-					 header_width);
-	else if (header_lines > 0)
-		less_val = ul_strfconcat(base, " --header %d",
-					 header_lines);
+	ఒకవేళ (శీర్షిక_పంక్తులు > 0 && శీర్షిక_వెడల్పు > 0)
+		less_val = ul_strfconcat(పునాది, " --header %d,%d",
+					 శీర్షిక_పంక్తులు, శీర్షిక_వెడల్పు);
+	లేకపోతే ఒకవేళ (శీర్షిక_వెడల్పు > 0)
+		less_val = ul_strfconcat(పునాది, " --header 0,%d",
+					 శీర్షిక_వెడల్పు);
+	లేకపోతే ఒకవేళ (శీర్షిక_పంక్తులు > 0)
+		less_val = ul_strfconcat(పునాది, " --header %d",
+					 శీర్షిక_పంక్తులు);
 
-	if (less_val) {
-		if (setenv("LESS", less_val, 1) != 0)
+	ఒకవేళ (less_val) {
+		ఒకవేళ (setenv("LESS", less_val, 1) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
-		free(less_val);
-	} else if (less_env == NULL) {
-		if (setenv("LESS", "FRSX", 0) != 0)
+		విడుదల(less_val);
+	} లేకపోతే ఒకవేళ (less_env == ఖాళీ) {
+		ఒకవేళ (setenv("LESS", "FRSX", 0) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 	}
 
-	if (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
+	ఒకవేళ (getenv("LV") == ఖాళీ && setenv("LV", "-c", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LV");
 }
 
-static int start_command(struct child_process *cmd)
+స్థిర పూర్ణాంకం ప్రారంభం_command(నిర్మాణం బిడ్డ_process *cmd)
 {
-	int fdin[2];
+	పూర్ణాంకం fdin[2];
 
-	if (pipe(fdin) < 0)
-		return -1;
-	cmd->in = fdin[1];
+	ఒకవేళ (pipe(fdin) < 0)
+		తిరిగి -1;
+	cmd->లోపల = fdin[1];
 
-	fflush(NULL);
+	fflush(ఖాళీ);
 	cmd->pid = fork();
-	if (!cmd->pid) {
+	ఒకవేళ (!cmd->pid) {
 		dup2(fdin[0], STDIN_FILENO);
 		close_pair(fdin);
 
 		pager_preexec();
-		execvp(cmd->argv[0], (char *const*) cmd->argv);
+		execvp(cmd->argv[0], (అక్షరం *స్థిరరాశి*) cmd->argv);
 		errexec(cmd->argv[0]);
 	}
 
-	if (cmd->pid < 0) {
+	ఒకవేళ (cmd->pid < 0) {
 		cmd->pid = 0;
 		close_pair(fdin);
-		return -1;
+		తిరిగి -1;
 	}
 
 	close(fdin[0]);
-	return 0;
+	తిరిగి 0;
 }
 
-static int wait_for_pager(void)
+స్థిర పూర్ణాంకం wait_for_pager(శూన్య)
 {
-	pid_t waiting;
-	int ret, status;
+	pid_t నిరీక్షణ;
+	పూర్ణాంకం ret, స్థితి_2;
 
-	do {
-		waiting = waitpid(pager_process.pid, &status, 0);
-	} while (waiting == -1 && errno == EINTR);
+	చేయి {
+		నిరీక్షణ = waitpid(pager_process.pid, &స్థితి_2, 0);
+	} అయితే (నిరీక్షణ == -1 && errno == EINTR);
 
-	if (waiting == -1)
+	ఒకవేళ (నిరీక్షణ == -1)
 		ret = -1;
-	else if (waiting == pager_process.pid && WIFEXITED(status))
-		ret = WEXITSTATUS(status);
-	else
+	లేకపోతే ఒకవేళ (నిరీక్షణ == pager_process.pid && WIFEXITED(స్థితి_2))
+		ret = WEXITSTATUS(స్థితి_2);
+	లేకపోతే
 		ret = 1;
 
 	pager_process.pid = 0;
 
-	return ret;
+	తిరిగి ret;
 }
 
-static void catch_signal(int signo)
+స్థిర శూన్య catch_signal(పూర్ణాంకం signo)
 {
 	pager_caught_signal = signo;
 }
 
-static void catch_sigpipe(int signo)
+స్థిర శూన్య catch_sigpipe(పూర్ణాంకం signo)
 {
 	pager_caught_sigpipe = signo;
 }
 
-static void wait_for_pager_signal(int signo __attribute__ ((__unused__)))
+స్థిర శూన్య wait_for_pager_signal(పూర్ణాంకం signo __attribute__ ((__unused__)))
 {
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* async-signal safe: wait for all children, including pager */
-	while (wait(NULL) != -1 || errno == EINTR)
+	అయితే (wait(ఖాళీ) != -1 || errno == EINTR)
 		;
 
 	_exit(EXIT_FAILURE);
 }
 
-static int has_command(const char *cmd)
+స్థిర పూర్ణాంకం has_command(స్థిరరాశి అక్షరం *cmd)
 {
-	const char *path;
-	char *b, *c, *p, *s;
-	int rc = 0;
+	స్థిరరాశి అక్షరం *మార్గం;
+	అక్షరం *b, *c, *p, *s;
+	పూర్ణాంకం rc = 0;
 
-	if (!cmd)
-		goto done;
+	ఒకవేళ (!cmd)
+		వెళ్ళు పూర్తి;
 
 	c = xstrdup(cmd);
-	if (!c)
-		goto done;
+	ఒకవేళ (!c)
+		వెళ్ళు పూర్తి;
 	b = strtok(c, " ");	/* cmd may contain options */
-	if (!b)
-		goto cleanup;
+	ఒకవేళ (!b)
+		వెళ్ళు cleanup;
 
-	if (strchr(b, '/')) {
+	ఒకవేళ (strchr(b, '/')) {
 		rc = access(b, X_OK) == 0;
-		goto cleanup;
+		వెళ్ళు cleanup;
 	}
 
-	path = getenv("PATH");
-	if (!path)
-		goto cleanup;
-	p = xstrdup(path);
-	if (!p)
-		goto cleanup;
+	మార్గం = getenv("PATH");
+	ఒకవేళ (!మార్గం)
+		వెళ్ళు cleanup;
+	p = xstrdup(మార్గం);
+	ఒకవేళ (!p)
+		వెళ్ళు cleanup;
 
-	for (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
-		int fd = open(s, O_RDONLY|O_CLOEXEC);
-		if (fd < 0)
-			continue;
+	కొరకు (s = strtok(p, ":"); s; s = strtok(ఖాళీ, ":")) {
+		పూర్ణాంకం fd = open(s, O_RDONLY|O_CLOEXEC);
+		ఒకవేళ (fd < 0)
+			కొనసాగు;
 		rc = faccessat(fd, b, X_OK, 0) == 0;
 		close(fd);
-		if (rc)
-			break;
+		ఒకవేళ (rc)
+			ఆపు;
 	}
-	free(p);
+	విడుదల(p);
 cleanup:
-	free(c);
-done:
+	విడుదల(c);
+పూర్తి:
 	/*fprintf(stderr, "has PAGER '%s': rc=%d\n", cmd, rc);*/
-	return rc;
+	తిరిగి rc;
 }
 
-static void __setup_pager(void)
+స్థిర శూన్య __setup_pager(శూన్య)
 {
-	const char *pager = getenv("PAGER");
-	struct sigaction sa;
+	స్థిరరాశి అక్షరం *pager = getenv("PAGER");
+	నిర్మాణం sigaction sa;
 
-	if (!isatty(STDOUT_FILENO))
-		return;
+	ఒకవేళ (!isatty(STDOUT_FILENO))
+		తిరిగి;
 
-	if (!pager)
+	ఒకవేళ (!pager)
 		pager = "less";
-	else if (!*pager || !strcmp(pager, "cat"))
-		return;
+	లేకపోతే ఒకవేళ (!*pager || !strcmp(pager, "cat"))
+		తిరిగి;
 
-	if (!has_command(pager))
-		return;
+	ఒకవేళ (!has_command(pager))
+		తిరిగి;
 
 	/* spawn the pager */
 	pager_argv[2] = pager;
 	pager_process.argv = pager_argv;
-	pager_process.in = -1;
+	pager_process.లోపల = -1;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, పరిమాణం(sa));
 	sa.sa_handler = SIG_DFL;
 
 	/* this makes sure that waitpid works as expected */
 	sigaction(SIGCHLD, &sa, &pager_process.orig_sigchld);
 
-	if (start_command(&pager_process)) {
-		sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-		return;
+	ఒకవేళ (ప్రారంభం_command(&pager_process)) {
+		sigaction(SIGCHLD, &pager_process.orig_sigchld, ఖాళీ);
+		తిరిగి;
 	}
 
 	/* original process continues, but writes to the pipe */
-	dup2(pager_process.in, STDOUT_FILENO);
-	setvbuf(stdout, NULL, _IOLBF, 0);
-	if (isatty(STDERR_FILENO)) {
-		dup2(pager_process.in, STDERR_FILENO);
-		setvbuf(stderr, NULL, _IOLBF, 0);
+	dup2(pager_process.లోపల, STDOUT_FILENO);
+	setvbuf(stdout, ఖాళీ, _IOLBF, 0);
+	ఒకవేళ (isatty(STDERR_FILENO)) {
+		dup2(pager_process.లోపల, STDERR_FILENO);
+		setvbuf(stderr, ఖాళీ, _IOLBF, 0);
 	}
-	close(pager_process.in);
+	close(pager_process.లోపల);
 
 	sa.sa_handler = wait_for_pager_signal;
 
@@ -263,9 +263,9 @@ static void __setup_pager(void)
 
 /* Setup pager and redirect output, the pager may be closed by pager_close().
  */
-void pager_open(void)
+శూన్య pager_open(శూన్య)
 {
-	pager_open_header(0, 0);
+	pager_open_శీర్షిక(0, 0);
 }
 
 /* Setup pager with "less --header" support to freeze header lines and
@@ -276,49 +276,49 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+శూన్య pager_open_శీర్షిక(పూర్ణాంకం శీర్షిక_పంక్తులు, పూర్ణాంకం మొదటి_నిలువు_వెడల్పు)
 {
-	if (pager_process.pid)
-		return;		/* already running */
+	ఒకవేళ (pager_process.pid)
+		తిరిగి;		/* already running */
 
-	pager_process.header_lines = header_lines;
-	pager_process.header_width = first_col_width;
+	pager_process.శీర్షిక_పంక్తులు = శీర్షిక_పంక్తులు;
+	pager_process.శీర్షిక_వెడల్పు = మొదటి_నిలువు_వెడల్పు;
 
-	pager_process.org_out = dup(STDOUT_FILENO);
+	pager_process.org_బహిర్గతం = dup(STDOUT_FILENO);
 	pager_process.org_err = dup(STDERR_FILENO);
 
-	if (pager_process.org_out != -1 && pager_process.org_err != -1)
+	ఒకవేళ (pager_process.org_బహిర్గతం != -1 && pager_process.org_err != -1)
 		__setup_pager();
 
-	if (!pager_process.pid) {
-		if (pager_process.org_out != -1)
-			close(pager_process.org_out);
-		if (pager_process.org_err != -1)
+	ఒకవేళ (!pager_process.pid) {
+		ఒకవేళ (pager_process.org_బహిర్గతం != -1)
+			close(pager_process.org_బహిర్గతం);
+		ఒకవేళ (pager_process.org_err != -1)
 			close(pager_process.org_err);
-		memset(&pager_process, 0, sizeof(pager_process));
+		memset(&pager_process, 0, పరిమాణం(pager_process));
 	}
 }
 
 /* Close pager and restore original std{out,err}.
  */
-void pager_close(void)
+శూన్య pager_close(శూన్య)
 {
-	struct sigaction sa;
-	int ret, safe_errno;
+	నిర్మాణం sigaction sa;
+	పూర్ణాంకం ret, సురక్షిత_errno;
 
-	if (pager_process.pid == 0)
-		return;
+	ఒకవేళ (pager_process.pid == 0)
+		తిరిగి;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, పరిమాణం(sa));
 	sa.sa_handler = catch_signal;
 
 	/* set flag instead of calling wait_for_pager again */
-	sigaction(SIGINT,  &sa, NULL);
-	sigaction(SIGHUP,  &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGINT,  &sa, ఖాళీ);
+	sigaction(SIGHUP,  &sa, ఖాళీ);
+	sigaction(SIGTERM, &sa, ఖాళీ);
+	sigaction(SIGQUIT, &sa, ఖాళీ);
 
-	fflush(NULL);
+	fflush(ఖాళీ);
 
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
@@ -326,32 +326,32 @@ void pager_close(void)
 
 	/* restore original output */
 	clearerr(stdout);
-	dup2(pager_process.org_out, STDOUT_FILENO);
+	dup2(pager_process.org_బహిర్గతం, STDOUT_FILENO);
 	clearerr(stderr);
 	dup2(pager_process.org_err, STDERR_FILENO);
 
-	close(pager_process.org_out);
+	close(pager_process.org_బహిర్గతం);
 	close(pager_process.org_err);
 
 	ret = wait_for_pager();
 
 	/* restore original signal settings */
-	safe_errno = errno;
-	sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-	sigaction(SIGINT,  &pager_process.orig_sigint, NULL);
-	sigaction(SIGHUP,  &pager_process.orig_sighup, NULL);
-	sigaction(SIGTERM, &pager_process.orig_sigterm, NULL);
-	sigaction(SIGQUIT, &pager_process.orig_sigquit, NULL);
-	sigaction(SIGPIPE, &pager_process.orig_sigpipe, NULL);
-	errno = safe_errno;
+	సురక్షిత_errno = errno;
+	sigaction(SIGCHLD, &pager_process.orig_sigchld, ఖాళీ);
+	sigaction(SIGINT,  &pager_process.orig_sigint, ఖాళీ);
+	sigaction(SIGHUP,  &pager_process.orig_sighup, ఖాళీ);
+	sigaction(SIGTERM, &pager_process.orig_sigterm, ఖాళీ);
+	sigaction(SIGQUIT, &pager_process.orig_sigquit, ఖాళీ);
+	sigaction(SIGPIPE, &pager_process.orig_sigpipe, ఖాళీ);
+	errno = సురక్షిత_errno;
 
-	if (ret == -1)
+	ఒకవేళ (ret == -1)
 		err(EXIT_FAILURE, _("waitpid failed"));
 
-	if (pager_caught_signal || (pager_caught_sigpipe && ret))
-		exit(EXIT_FAILURE);
+	ఒకవేళ (pager_caught_signal || (pager_caught_sigpipe && ret))
+		నిష్క్రమించు(EXIT_FAILURE);
 
-	memset(&pager_process, 0, sizeof(pager_process));
+	memset(&pager_process, 0, పరిమాణం(pager_process));
 	pager_caught_signal = 0;
 	pager_caught_sigpipe = 0;
 }
@@ -367,42 +367,42 @@ void pager_close(void)
  * a pager. The variable is also suppressed in privileged (SUID/SGID)
  * contexts via safe_getenv().
  */
-bool pager_is_enabled(enum ul_pagermode mode)
+bool pager_is_enabled(గణన ul_pagermode బహుళకం)
 {
-	switch (mode) {
-	case UL_PAGER_ALWAYS:
-		return true;
-	case UL_PAGER_NEVER:
-		return false;
-	case UL_PAGER_AUTO: {
-		const char *s;
+	ఎంపిక (బహుళకం) {
+	స్థితి UL_PAGER_ALWAYS:
+		తిరిగి true;
+	స్థితి UL_PAGER_NEVER:
+		తిరిగి false;
+	స్థితి UL_PAGER_AUTO: {
+		స్థిరరాశి అక్షరం *s;
 		bool val;
 
-		if (!isatty(STDOUT_FILENO))
-			return false;
-		s = safe_getenv("PAGER_ENABLE");
-		if (!s || ul_strtobool(s, &val) != 0)
-			return false;
-		return val;
+		ఒకవేళ (!isatty(STDOUT_FILENO))
+			తిరిగి false;
+		s = సురక్షిత_getenv("PAGER_ENABLE");
+		ఒకవేళ (!s || ul_strtobool(s, &val) != 0)
+			తిరిగి false;
+		తిరిగి val;
 	}
-	default:
-		return false;
+	అప్రమేయ:
+		తిరిగి false;
 	}
 }
 
-#ifdef TEST_PROGRAM_PAGER
+#నిర్వచితమైతే TEST_కార్యక్రమం_PAGER
 
-#define MAX 255
+#నిర్వచించు MAX 255
 
-int main(int argc __attribute__ ((__unused__)),
-	 char *argv[] __attribute__ ((__unused__)))
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc __attribute__ ((__unused__)),
+	 అక్షరం *argv[] __attribute__ ((__unused__)))
 {
-	int i;
+	పూర్ణాంకం i;
 
 	pager_open();
-	for (i = 0; i < MAX; i++)
-		printf("%d\n", i);
+	కొరకు (i = 0; i < MAX; i++)
+		రాయి("%d\n", i);
 	pager_close();
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_PAGER */
+#అయితే_ముగింపు /* TEST_PROGRAM_PAGER */

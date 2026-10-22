@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+పూర్ణాంకం ul_parse_pid_str(అక్షరం *pidstr, pid_t *pid_అంకె, uint64_t *pfd_ino, పూర్ణాంకం flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	పూర్ణాంకం rc;
+	అక్షరం *చివర = ఖాళీ;
+	int64_t అంకె = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	ఒకవేళ (!pidstr || !*pidstr || !pid_అంకె)
+		తిరిగి -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	అంకె = strtoimax(pidstr, &చివర, 10);
+	ఒకవేళ (అంకె == 0 && చివర == pidstr)
+		తిరిగి -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	ఒకవేళ (errno == ERANGE || అంకె < SINT_MIN(pid_t) || అంకె > SINT_MAX(pid_t))
+		తిరిగి -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	ఒకవేళ (అంకె == 0 && !(flags & UL_PID_ZERO))
+		తిరిగి -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	ఒకవేళ (అంకె < 0 && !(flags & UL_PID_NEGATIVE))
+		తిరిగి -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_అంకె = (pid_t) అంకె;
 
-	if (*end == ':' && pfd_ino && num > 0) {
-		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+	ఒకవేళ (*చివర == ':' && pfd_ino && అంకె > 0) {
+		rc = ul_strtou64(++చివర, pfd_ino, 10);
+		ఒకవేళ (rc < 0)
+			తిరిగి rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
-		*end = '\0';
+		ఒకవేళ (*pfd_ino == 0)
+			తిరిగి -(errno = ERANGE);
+		*చివర = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	ఒకవేళ (చివర && *చివర != '\0')
+		తిరిగి -(errno = EINVAL);
+	తిరిగి 0;
 }
 
 /*
@@ -82,70 +82,70 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+శూన్య ul_parse_pid_str_or_err(అక్షరం *pidstr, pid_t *pid_అంకె, uint64_t *pfd_ino, పూర్ణాంకం flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	ఒకవేళ (ul_parse_pid_str(pidstr, pid_అంకె, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
 
 
-#ifdef TEST_PROGRAM_PARSEPID
+#నిర్వచితమైతే TEST_కార్యక్రమం_PARSEPID
 
-#include <getopt.h>
+#అన్తర్భావ <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+స్థిర శూన్య __attribute__((__noreturn__)) usage(శూన్య)
 {
-	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
+	fprintf(stdout, " %s [options] <pidstr>\n\n", కార్యక్రమం_invocation_short_name);
 	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
 	fputs(" -n, --negative     allow negative number as value for <pidstr>\n", stdout);
 
-	exit(EXIT_SUCCESS);
+	నిష్క్రమించు(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం **argv)
 {
-	int c, flags = 0, rc = 0;
+	పూర్ణాంకం c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_అంకె = 0;
+	అక్షరం *str = ఖాళీ;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	స్థిర స్థిరరాశి నిర్మాణం option longopts[] = {
+		{ "zero",	0, ఖాళీ, 'z' },
+		{ "negative",	0, ఖాళీ, 'n' },
+		{ "help",       0, ఖాళీ, 'h' },
+		{ ఖాళీ, 0, ఖాళీ, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	అయితే((c = getopt_long(argc, argv, "nhz", longopts, ఖాళీ)) != -1) {
+		ఎంపిక(c) {
+		స్థితి 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			ఆపు;
+		స్థితి 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			ఆపు;
+		స్థితి 'h':
 			usage();
-			break;
-		default:
+			ఆపు;
+		అప్రమేయ:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	ఒకవేళ (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	rc = ul_parse_pid_str(str, &pid_అంకె, &pidfd_ino, flags);
+	ఒకవేళ (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
-		printf("inode: %"PRIu64"\n", pidfd_ino);
+	రాయి("PID: %d\n", pid_అంకె);
+	ఒకవేళ (pidfd_ino)
+		రాయి("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-#endif /* TEST_PROGRAM_PARSE_PID */
+#అయితే_ముగింపు /* TEST_PROGRAM_PARSE_PID */

@@ -1,28 +1,28 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include <paths.h>
+#అన్తర్భావ <paths.h>
 
-#include "c.h"
-#include "default_shell.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "default_shell.h"
 
-const char *ul_default_shell(int flags, const struct passwd *pw)
+స్థిరరాశి అక్షరం *ul_default_shell(పూర్ణాంకం flags, స్థిరరాశి నిర్మాణం passwd *pw)
 {
-	const char *shell = NULL;
+	స్థిరరాశి అక్షరం *shell = ఖాళీ;
 
-	if (!(flags & UL_SHELL_NOENV)) {
+	ఒకవేళ (!(flags & UL_SHELL_NOENV)) {
 		shell = getenv("SHELL");
-		if (shell && *shell)
-			return shell;
+		ఒకవేళ (shell && *shell)
+			తిరిగి shell;
 	}
-	if (!(flags & UL_SHELL_NOPWD)) {
-		if (!pw)
+	ఒకవేళ (!(flags & UL_SHELL_NOPWD)) {
+		ఒకవేళ (!pw)
 			pw = getpwuid(getuid());
-		if (pw)
+		ఒకవేళ (pw)
 			shell = pw->pw_shell;
-		if (shell && *shell)
-			return shell;
+		ఒకవేళ (shell && *shell)
+			తిరిగి shell;
 	}
 
-	return _PATH_BSHELL;
+	తిరిగి _PATH_BSHELL;
 }

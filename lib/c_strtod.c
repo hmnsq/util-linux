@@ -6,104 +6,104 @@
  *
  * Copyright (C) 2021 Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
+#అన్తర్భావ "c.h"
 
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
+#అన్తర్భావ <locale.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
 
-#include "c_strtod.h"
+#అన్తర్భావ "c_strtod.h"
 
-#ifdef __APPLE__
+#నిర్వచితమైతే __APPLE__
 # include <xlocale.h>
-#endif
+#అయితే_ముగింపు
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#ఒకవేళ defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
-#endif
+#అయితే_ముగింపు
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#ఒకవేళ defined(USE_CLOCALE)
+స్థిర అస్థిర locale_t c_locale;
 
-static locale_t get_c_locale(void)
+స్థిర locale_t get_c_locale(శూన్య)
 {
-	if (!c_locale)
-		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	ఒకవేళ (!c_locale)
+		c_locale = newlocale(LC_ALL_ముసుగు, "C", (locale_t) 0);
+	తిరిగి c_locale;
 }
-#endif
+#అయితే_ముగింపు
 
 
-double c_strtod(char const *str, char **end)
+ద్విగుణ c_strtod(అక్షరం స్థిరరాశి *str, అక్షరం **చివర)
 {
-	double res;
-	int errsv;
+	ద్విగుణ res;
+	పూర్ణాంకం errsv;
 
-#if defined(USE_CLOCALE)
+#ఒకవేళ defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#ఒకవేళ defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
-#elif defined(HAVE_USELOCALE)
+	ఒకవేళ (cl)
+		తిరిగి strtod_l(str, చివర, cl);
+#లేదావేళ defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	ఒకవేళ (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		ఒకవేళ (!org_cl)
+			తిరిగి 0;
 
-		res = strtod(str, end);
+		res = strtod(str, చివర);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		తిరిగి res;
 	}
-#endif /* HAVE_USELOCALE */
-#endif /* USE_CLOCALE */
+#అయితే_ముగింపు /* HAVE_USELOCALE */
+#అయితే_ముగింపు /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	అక్షరం *org_locale = setlocale(LC_NUMERIC, ఖాళీ);
 
-	if (org_locale) {
+	ఒకవేళ (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		ఒకవేళ (!org_locale)
+			తిరిగి 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
-	res = strtod(str, end);
+	res = strtod(str, చివర);
 	errsv = errno;
 
-	if (org_locale) {
+	ఒకవేళ (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
-		free(org_locale);
+		విడుదల(org_locale);
 	}
 	errno = errsv;
-	return res;
+	తిరిగి res;
 }
 
-#ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+#నిర్వచితమైతే TEST_కార్యక్రమం
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	double res;
-	char *end;
+	ద్విగుణ res;
+	అక్షరం *చివర;
 
-	if (argc < 2) {
+	ఒకవేళ (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				కార్యక్రమం_invocation_short_name);
+		తిరిగి EXIT_FAILURE;
 	}
 
-	res = c_strtod(argv[1], &end);
-	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
+	res = c_strtod(argv[1], &చివర);
+	రాయి("Result: %g, errno: %d, endptr: '%s'\n", res, errno, చివర);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	తిరిగి errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-#endif
+#అయితే_ముగింపు

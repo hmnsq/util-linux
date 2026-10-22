@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <inttypes.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <strings.h>
+#అన్తర్భావ <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "cctype.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "strutils.h"
+#అన్తర్భావ "timeutils.h"
+#అన్తర్భావ "bitops.h"
+#అన్తర్భావ "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+స్థిర పూర్ణాంకం STRTOXX_EXIT_సంకేతం = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+శూన్య strutils_సమితి_exitcode(పూర్ణాంకం ex)
 {
-	STRTOXX_EXIT_CODE = ex;
+	STRTOXX_EXIT_సంకేతం = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+స్థిర పూర్ణాంకం do_scale_by_power (uintmax_t *x, పూర్ణాంకం పునాది, పూర్ణాంకం power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
-		*x *= base;
+	అయితే (power--) {
+		ఒకవేళ (UINTMAX_MAX / పునాది < *x)
+			తిరిగి -ERANGE;
+		*x *= పునాది;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+పూర్ణాంకం ul_parse_కొలత(స్థిరరాశి అక్షరం *str, uintmax_t *res, పూర్ణాంకం *power)
 {
-	const char *p;
-	char *end;
+	స్థిరరాశి అక్షరం *p;
+	అక్షరం *చివర;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	పూర్ణాంకం పునాది = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	స్థిర స్థిరరాశి అక్షరం *suf  = "KMGTPEZY";
+	స్థిర స్థిరరాశి అక్షరం *suf2 = "kmgtpezy";
+	స్థిరరాశి అక్షరం *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	ఒకవేళ (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		వెళ్ళు err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	అయితే (ఖాళీనా((గుర్తులేని అక్షరం) *p))
 		p++;
-	if (*p == '-') {
+	ఒకవేళ (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		వెళ్ళు err;
 	}
 
-	errno = 0, end = NULL;
-	x = strtoumax(str, &end, 0);
+	errno = 0, చివర = ఖాళీ;
+	x = strtoumax(str, &చివర, 0);
 
-	if (end == str ||
+	ఒకవేళ (చివర == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		వెళ్ళు err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
-	p = end;
+	ఒకవేళ (!చివర || !*చివర)
+		వెళ్ళు పూర్తి;			/* without suffix */
+	p = చివర;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
-		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
-		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
-		size_t dpsz = dp ? strlen(dp) : 0;
+	ఒకవేళ (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+		పునాది = 1024;			/* XiB, 2^N */
+	లేకపోతే ఒకవేళ ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+		పునాది = 1000;			/* XB, 10^N */
+	లేకపోతే ఒకవేళ (*(p + 1)) {
+		నిర్మాణం lconv స్థిరరాశి *l = localeconv();
+		స్థిరరాశి అక్షరం *dp = l ? l->decimal_బిందువు : ఖాళీ;
+		size_t dpsz = dp ? అక్షరశ్రేణి_పొడవు(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		ఒకవేళ (frac == 0 && *p && dp && అక్షరశ్రేణి_పోలిక(dp, p, dpsz) == 0) {
+			స్థిరరాశి అక్షరం *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			కొరకు (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
-				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+			ఒకవేళ (అంకెనా(*fstr)) {
+				errno = 0, చివర = ఖాళీ;
+				frac = strtoumax(fstr, &చివర, 0);
+				ఒకవేళ (చివర == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					వెళ్ళు err;
 				}
-			} else
-				end = (char *) p;
+			} లేకపోతే
+				చివర = (అక్షరం *) p;
 
-			if (!end || !*end) {
+			ఒకవేళ (!చివర || !*చివర) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				వెళ్ళు err;	/* without suffix, but with fractions */
 			}
-			p = end;
-			goto check_suffix;
+			p = చివర;
+			వెళ్ళు check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		వెళ్ళు err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	ఒకవేళ (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	లేకపోతే {
 		sp = strchr(suf2, *p);
-		if (sp)
+		ఒకవేళ (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		లేకపోతే {
 			rc = -EINVAL;
-			goto err;
+			వెళ్ళు err;
 		}
 	}
 
-	if (power)
+	ఒకవేళ (power)
 		*power = pwr;
 
-	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	rc = do_scale_by_power(&x, పునాది, pwr);
+	ఒకవేళ (rc)
+		వెళ్ళు err;
 
-	if (frac && pwr) {
-		int i;
-		uintmax_t frac_base = 1, frac_val = 0;
+	ఒకవేళ (frac && pwr) {
+		పూర్ణాంకం i;
+		uintmax_t frac_పునాది = 1, frac_val = 0;
 
 		/* mega, giga, ... */
-		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		rc = do_scale_by_power(&frac_పునాది, పునాది, pwr);
+		ఒకవేళ (rc)
+			వెళ్ళు err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
-			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
+		చేయి {
+			frac_val = ((frac % 10) * frac_పునాది + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} అయితే (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		కొరకు (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		ఒకవేళ (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			వెళ్ళు err;
 		}
 		x += frac_val;
 	}
-done:
+పూర్తి:
 	*res = x;
 err:
-	if (rc < 0)
+	ఒకవేళ (rc < 0)
 		errno = -rc;
-	return rc;
+	తిరిగి rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+పూర్ణాంకం strtosize(స్థిరరాశి అక్షరం *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	తిరిగి ul_parse_కొలత(str, res, ఖాళీ);
 }
 
-int isdigit_strend(const char *str, const char **end)
+పూర్ణాంకం isdigit_strend(స్థిరరాశి అక్షరం *str, స్థిరరాశి అక్షరం **చివర)
 {
-	const char *p;
+	స్థిరరాశి అక్షరం *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	కొరకు (p = str; p && *p && అంకెనా((గుర్తులేని అక్షరం) *p); p++);
 
-	if (end)
-		*end = p;
-	return p && p > str && !*p;
+	ఒకవేళ (చివర)
+		*చివర = p;
+	తిరిగి p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+పూర్ణాంకం isxdigit_strend(స్థిరరాశి అక్షరం *str, స్థిరరాశి అక్షరం **చివర)
 {
-	const char *p;
+	స్థిరరాశి అక్షరం *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	కొరకు (p = str; p && *p && isxdigit((గుర్తులేని అక్షరం) *p); p++);
 
-	if (end)
-		*end = p;
+	ఒకవేళ (చివర)
+		*చివర = p;
 
-	return p && p > str && !*p;
+	తిరిగి p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+పూర్ణాంకం ul_strtobool(స్థిరరాశి అక్షరం *str, bool *ఫలితం)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	స్థిర స్థిరరాశి అక్షరం *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	స్థిర స్థిరరాశి అక్షరం *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	ఒకవేళ (!str || !ఫలితం)
+		తిరిగి -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
-			*result = true;
-			return 0;
+	కొరకు (i = 0; i < ARRAY_కొలత(bool_true); i++) {
+		ఒకవేళ (c_strcasecmp(str, bool_true[i]) == 0) {
+			*ఫలితం = true;
+			తిరిగి 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
-			*result = false;
-			return 0;
+	కొరకు (i = 0; i < ARRAY_కొలత(bool_false); i++) {
+		ఒకవేళ (c_strcasecmp(str, bool_false[i]) == 0) {
+			*ఫలితం = false;
+			తిరిగి 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	తిరిగి -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+పూర్ణాంకం ul_parse_switch(స్థిరరాశి అక్షరం *arg, ...)
 {
-	const char *a, *b;
+	స్థిరరాశి అక్షరం *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	చేయి {
+		a = va_arg(ap, అక్షరం *);
+		ఒకవేళ (!a)
+			ఆపు;
+		b = va_arg(ap, అక్షరం *);
+		ఒకవేళ (!b)
+			ఆపు;
 
-		if (strcmp(arg, a) == 0) {
+		ఒకవేళ (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			తిరిగి 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		ఒకవేళ (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			తిరిగి 0;
 		}
-	} while (1);
+	} అయితే (1);
 	va_end(ap);
 
-	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
+	errx(STRTOXX_EXIT_సంకేతం, _("unsupported argument: %s"), arg);
 }
 
-#ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+#నిర్వచితం_కాకపోతే HAVE_MEMPCPY
+శూన్య *mempcpy(శూన్య *పరిమిత dest, స్థిరరాశి శూన్య *పరిమిత src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	తిరిగి ((అక్షరం *)జ్ఞాపకం_నకలు(dest, src, n)) + n;
 }
-#endif
+#అయితే_ముగింపు
 
-#ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+#నిర్వచితం_కాకపోతే HAVE_STRNLEN
+size_t strnlen(స్థిరరాశి అక్షరం *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	కొరకు (i = 0; i < maxlen; i++) {
+		ఒకవేళ (s[i] == '\0')
+			తిరిగి i;
 	}
-	return maxlen;
+	తిరిగి maxlen;
 }
-#endif
+#అయితే_ముగింపు
 
-#ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+#నిర్వచితం_కాకపోతే HAVE_STRNCHR
+అక్షరం *strnchr(స్థిరరాశి అక్షరం *s, size_t maxlen, పూర్ణాంకం c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	కొరకు (; maxlen-- && *s != '\0'; ++s)
+		ఒకవేళ (*s == (అక్షరం)c)
+			తిరిగి (అక్షరం *)s;
+	తిరిగి ఖాళీ;
 }
-#endif
+#అయితే_ముగింపు
 
-#ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+#నిర్వచితం_కాకపోతే HAVE_STRNDUP
+అక్షరం *strndup(స్థిరరాశి అక్షరం *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	అక్షరం *new = జ్ఞాపకం_ఇవ్వు((len + 1) * పరిమాణం(అక్షరం));
+	ఒకవేళ (!new)
+		తిరిగి ఖాళీ;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	తిరిగి (అక్షరం *) జ్ఞాపకం_నకలు(new, s, len);
 }
-#endif
+#అయితే_ముగింపు
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+పూర్ణాంకం ul_strtos64(స్థిరరాశి అక్షరం *str, int64_t *అంకె, పూర్ణాంకం పునాది)
 {
-	char *end = NULL;
+	అక్షరం *చివర = ఖాళీ;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ఒకవేళ (str == ఖాళీ || *str == '\0')
+		తిరిగి -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*అంకె = (int64_t) strtoimax(str, &చివర, పునాది);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ఒకవేళ (errno != 0)
+		తిరిగి -errno;
+	ఒకవేళ (str == చివర || (చివర && *చివర))
+		తిరిగి -(errno = EINVAL);
+	తిరిగి 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+పూర్ణాంకం ul_strtou64(స్థిరరాశి అక్షరం *str, uint64_t *అంకె, పూర్ణాంకం పునాది)
 {
-	char *end = NULL;
+	అక్షరం *చివర = ఖాళీ;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ఒకవేళ (str == ఖాళీ || *str == '\0')
+		తిరిగి -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
-	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	tmp = (int64_t) strtoimax(str, &చివర, పునాది);
+	ఒకవేళ (tmp < 0)
 		errno = ERANGE;
-	else {
+	లేకపోతే {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*అంకె = strtoumax(str, &చివర, పునాది);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ఒకవేళ (errno != 0)
+		తిరిగి -errno;
+	ఒకవేళ (str == చివర || (చివర && *చివర))
+		తిరిగి -(errno = EINVAL);
+	తిరిగి 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+పూర్ణాంకం ul_strtos32(స్థిరరాశి అక్షరం *str, int32_t *అంకె, పూర్ణాంకం పునాది)
 {
 	int64_t tmp;
-	int rc;
+	పూర్ణాంకం rc;
 
-	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	rc = ul_strtos64(str, &tmp, పునాది);
+	ఒకవేళ (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	ఒకవేళ (rc == 0)
+		*అంకె = (int32_t) tmp;
+	తిరిగి rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+పూర్ణాంకం ul_strtou32(స్థిరరాశి అక్షరం *str, uint32_t *అంకె, పూర్ణాంకం పునాది)
 {
 	uint64_t tmp;
-	int rc;
+	పూర్ణాంకం rc;
 
-	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	rc = ul_strtou64(str, &tmp, పునాది);
+	ఒకవేళ (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	ఒకవేళ (rc == 0)
+		*అంకె = (uint32_t) tmp;
+	తిరిగి rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+పూర్ణాంకం ul_strtou16(స్థిరరాశి అక్షరం *str, uint16_t *అంకె, పూర్ణాంకం పునాది)
 {
 	uint64_t tmp;
-	int rc;
+	పూర్ణాంకం rc;
 
-	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	rc = ul_strtou64(str, &tmp, పునాది);
+	ఒకవేళ (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	ఒకవేళ (rc == 0)
+		*అంకె = (uint16_t) tmp;
+	తిరిగి rc;
 }
 
 /*
@@ -432,236 +432,236 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(స్థిరరాశి అక్షరం *str, పూర్ణాంకం పునాది, స్థిరరాశి అక్షరం *errmesg,
+			     int64_t దిగువ, int64_t పైకి)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t అంకె = 0;
+	పూర్ణాంకం rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &అంకె, పునాది);
+	ఒకవేళ (rc == 0 && ((దిగువ && అంకె < దిగువ) || (పైకి && అంకె > పైకి)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
-			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
-		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ఒకవేళ (rc) {
+		ఒకవేళ (errno == ERANGE)
+			err(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
+		errx(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	తిరిగి అంకె;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(స్థిరరాశి అక్షరం *str, పూర్ణాంకం పునాది, స్థిరరాశి అక్షరం *errmesg, uint64_t పైకి)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t అంకె = 0;
+	పూర్ణాంకం rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &అంకె, పునాది);
+	ఒకవేళ (rc == 0 && (పైకి && అంకె > పైకి))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
-			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
-		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ఒకవేళ (rc) {
+		ఒకవేళ (errno == ERANGE)
+			err(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
+		errx(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	తిరిగి అంకె;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+ద్విగుణ strtod_or_err(స్థిరరాశి అక్షరం *str, స్థిరరాశి అక్షరం *errmesg)
 {
-	double num;
-	char *end = NULL;
+	ద్విగుణ అంకె;
+	అక్షరం *చివర = ఖాళీ;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	ఒకవేళ (str == ఖాళీ || *str == '\0')
+		వెళ్ళు err;
+	అంకె = strtod(str, &చివర);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	ఒకవేళ (errno || str == చివర || (చివర && *చివర))
+		వెళ్ళు err;
 
-	return num;
+	తిరిగి అంకె;
 err:
-	if (errno == ERANGE)
-		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ఒకవేళ (errno == ERANGE)
+		err(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 
-	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	errx(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+పూర్ణాంకం ul_strtold(స్థిరరాశి అక్షరం *str, దీర్ఘ ద్విగుణ *అంకె)
 {
-	char *end = NULL;
+	అక్షరం *చివర = ఖాళీ;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	ఒకవేళ (str == ఖాళీ || *str == '\0')
+		తిరిగి -(errno = EINVAL);
+	*అంకె = strtold(str, &చివర);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ఒకవేళ (errno != 0)
+		తిరిగి -errno;
+	ఒకవేళ (str == చివర || (చివర && *చివర))
+		తిరిగి -(errno = EINVAL);
+	తిరిగి 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+దీర్ఘ ద్విగుణ strtold_or_err(స్థిరరాశి అక్షరం *str, స్థిరరాశి అక్షరం *errmesg)
 {
-	long double num = 0;
+	దీర్ఘ ద్విగుణ అంకె = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
-		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ఒకవేళ (ul_strtold(str, &అంకె) == 0)
+		తిరిగి అంకె;
+	ఒకవేళ (errno == ERANGE)
+		err(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 
-	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	errx(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(స్థిరరాశి అక్షరం *str, స్థిరరాశి అక్షరం *errmesg)
 {
-	uintmax_t num;
+	uintmax_t అంకె;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	ఒకవేళ (strtosize(str, &అంకె) == 0)
+		తిరిగి అంకె;
 
-	if (errno)
-		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	ఒకవేళ (errno)
+		err(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 
-	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
+	errx(STRTOXX_EXIT_సంకేతం, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+శూన్య strtotimeval_or_err(స్థిరరాశి అక్షరం *str, నిర్మాణం timeval *tv, స్థిరరాశి అక్షరం *errmesg)
 {
-	long double user_input;
+	దీర్ఘ ద్విగుణ user_ఆదానం;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_ఆదానం = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_ఆదానం;
+	tv->tv_usec = (suseconds_t)((user_ఆదానం - tv->tv_sec) * USEC_చొప్పున_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+శూన్య strtotimespec_or_err(స్థిరరాశి అక్షరం *str, నిర్మాణం timespec *ts, స్థిరరాశి అక్షరం *errmesg)
 {
-	long double user_input;
+	దీర్ఘ ద్విగుణ user_ఆదానం;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_ఆదానం = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_ఆదానం;
+	ts->tv_nsec = (దీర్ఘ)((user_ఆదానం - ts->tv_sec) * NSEC_చొప్పున_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(స్థిరరాశి అక్షరం *str, స్థిరరాశి అక్షరం *errmesg)
 {
-	int64_t user_input;
+	int64_t user_ఆదానం;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_ఆదానం = strtos64_or_err(str, errmesg);
+	తిరిగి (time_t) user_ఆదానం;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(స్థిరరాశి అక్షరం *బహుళకం)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	ఒకవేళ (బహుళకం && strcmp(బహుళకం, "never") == 0)
+		తిరిగి false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	ఒకవేళ (బహుళకం && strcmp(బహుళకం, "always") == 0)
+		తిరిగి true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	ఒకవేళ (!బహుళకం || strcmp(బహుళకం, "auto") == 0)
+		తిరిగి isatty(STDOUT_FILENO) ? true : false;
 
-	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
+	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), బహుళకం);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(స్థిరరాశి అక్షరం *బహుళకం)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	ఒకవేళ (బహుళకం && strcmp(బహుళకం, "never") == 0)
+		తిరిగి false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	ఒకవేళ (బహుళకం && strcmp(బహుళకం, "always") == 0)
+		తిరిగి true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	ఒకవేళ (!బహుళకం || strcmp(బహుళకం, "auto") == 0)
+		తిరిగి isatty(STDOUT_FILENO) ? true : false;
 
-	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
+	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), బహుళకం);
 }
 
 /*
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+అక్షరం *xstrmode(mode_t బహుళకం, అక్షరం *str)
 {
-	unsigned short i = 0;
+	గుర్తులేని పొట్టి i = 0;
 
-	if (S_ISDIR(mode))
+	ఒకవేళ (S_ISDIR(బహుళకం))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	లేకపోతే ఒకవేళ (S_ISLNK(బహుళకం))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	లేకపోతే ఒకవేళ (S_ISCHR(బహుళకం))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	లేకపోతే ఒకవేళ (S_ISBLK(బహుళకం))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	లేకపోతే ఒకవేళ (S_ISSOCK(బహుళకం))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	లేకపోతే ఒకవేళ (S_ISFIFO(బహుళకం))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	లేకపోతే ఒకవేళ (S_ISREG(బహుళకం))
 		str[i++] = '-';
 
-	str[i++] = mode & S_IRUSR ? 'r' : '-';
-	str[i++] = mode & S_IWUSR ? 'w' : '-';
-	str[i++] = (mode & S_ISUID
-		? (mode & S_IXUSR ? 's' : 'S')
-		: (mode & S_IXUSR ? 'x' : '-'));
-	str[i++] = mode & S_IRGRP ? 'r' : '-';
-	str[i++] = mode & S_IWGRP ? 'w' : '-';
-	str[i++] = (mode & S_ISGID
-		? (mode & S_IXGRP ? 's' : 'S')
-		: (mode & S_IXGRP ? 'x' : '-'));
-	str[i++] = mode & S_IROTH ? 'r' : '-';
-	str[i++] = mode & S_IWOTH ? 'w' : '-';
-	str[i++] = (mode & S_ISVTX
-		? (mode & S_IXOTH ? 't' : 'T')
-		: (mode & S_IXOTH ? 'x' : '-'));
+	str[i++] = బహుళకం & S_IRUSR ? 'r' : '-';
+	str[i++] = బహుళకం & S_IWUSR ? 'w' : '-';
+	str[i++] = (బహుళకం & S_ISUID
+		? (బహుళకం & S_IXUSR ? 's' : 'S')
+		: (బహుళకం & S_IXUSR ? 'x' : '-'));
+	str[i++] = బహుళకం & S_IRGRP ? 'r' : '-';
+	str[i++] = బహుళకం & S_IWGRP ? 'w' : '-';
+	str[i++] = (బహుళకం & S_ISGID
+		? (బహుళకం & S_IXGRP ? 's' : 'S')
+		: (బహుళకం & S_IXGRP ? 'x' : '-'));
+	str[i++] = బహుళకం & S_IROTH ? 'r' : '-';
+	str[i++] = బహుళకం & S_IWOTH ? 'w' : '-';
+	str[i++] = (బహుళకం & S_ISVTX
+		? (బహుళకం & S_IXOTH ? 't' : 'T')
+		: (బహుళకం & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	తిరిగి str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+స్థిర పూర్ణాంకం get_exp(uint64_t n)
 {
-	int shft;
+	పూర్ణాంకం shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	కొరకు (shft = 10; shft <= 60; shft += 10) {
+		ఒకవేళ (n < (1ULL << shft))
+			ఆపు;
 	}
-	return shft - 10;
+	తిరిగి shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+అక్షరం *కొలత_గమ్యం_human_string(పూర్ణాంకం options, uint64_t బైట్లు)
 {
-	char buf[32];
-	int dec, exp;
+	అక్షరం buf[32];
+	పూర్ణాంకం dec, ఘాతాంకం;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	స్థిరరాశి అక్షరం *letters = "BKMGTPE";
+	అక్షరం suffix[పరిమాణం(" KiB")], *psuf = suffix;
+	అక్షరం c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	ఒకవేళ (options & కొలత_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
-	exp  = get_exp(bytes);
-	c    = *(letters + (exp ? exp / 10 : 0));
-	dec  = exp ? bytes / (1ULL << exp) : bytes;
-	frac = exp ? bytes % (1ULL << exp) : 0;
+	ఘాతాంకం  = get_exp(బైట్లు);
+	c    = *(letters + (ఘాతాంకం ? ఘాతాంకం / 10 : 0));
+	dec  = ఘాతాంకం ? బైట్లు / (1ULL << ఘాతాంకం) : బైట్లు;
+	frac = ఘాతాంకం ? బైట్లు % (1ULL << ఘాతాంకం) : 0;
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	ఒకవేళ ((options & కొలత_SUFFIX_3_LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -672,50 +672,50 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 *                 exp, suffix[0], dec, frac);
 	 */
 
-	/* round */
-	if (frac) {
+	/*విడత*/
+	ఒకవేళ (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
-			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
-			frac = (frac * 1000) / (1ULL << (exp)) ;
+		ఒకవేళ (frac >= UINT64_MAX / 1000)
+			frac = ((frac / 1024) * 1000) / (1ULL << (ఘాతాంకం - 10)) ;
+		లేకపోతే
+			frac = (frac * 1000) / (1ULL << (ఘాతాంకం)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		ఒకవేళ (options & కొలత_DECIMAL_2_DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} లేకపోతే {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		ఒకవేళ (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	ఒకవేళ (frac) {
+		నిర్మాణం lconv స్థిరరాశి *l = localeconv();
+		అక్షరం *dp = l ? l->decimal_బిందువు : ఖాళీ;
+		పూర్ణాంకం len;
 
-		if (!dp || !*dp)
+		ఒకవేళ (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, పరిమాణం(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		ఒకవేళ (len > 0 && (size_t) len < పరిమాణం(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			ఒకవేళ (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, పరిమాణం(buf) - len);
+		} లేకపోతే
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} లేకపోతే
+		snprintf(buf, పరిమాణం(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	తిరిగి strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+పూర్ణాంకం string_గమ్యం_idarray(స్థిరరాశి అక్షరం *list, పూర్ణాంకం ary[], size_t arysz,
+			పూర్ణాంకం (name2id)(స్థిరరాశి అక్షరం *, size_t))
 {
-	const char *begin = NULL, *p;
+	స్థిరరాశి అక్షరం *begin = ఖాళీ, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	ఒకవేళ (!list || !*list || !ary || !arysz || !name2id)
+		తిరిగి -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	కొరకు (p = list; p && *p; p++) {
+		స్థిరరాశి అక్షరం *చివర = ఖాళీ;
+		పూర్ణాంకం id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		ఒకవేళ (n >= arysz)
+			తిరిగి -2;
+		ఒకవేళ (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
-			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
-			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		ఒకవేళ (*p == ',')
+			చివర = p;		/* terminate the name */
+		ఒకవేళ (*(p + 1) == '\0')
+			చివర = p + 1;		/* end of string */
+		ఒకవేళ (!begin || !చివర)
+			కొనసాగు;
+		ఒకవేళ (చివర <= begin)
+			తిరిగి -1;
 
-		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		id = name2id(begin, చివర - begin);
+		ఒకవేళ (id == -1)
+			తిరిగి -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ఖాళీ;
+		ఒకవేళ (చివర && !*చివర)
+			ఆపు;
 	}
-	return n;
+	తిరిగి n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+పూర్ణాంకం string_కూడు_గమ్యం_idarray(స్థిరరాశి అక్షరం *list, పూర్ణాంకం ary[], size_t arysz,
+			size_t *ary_pos, పూర్ణాంకం (name2id)(స్థిరరాశి అక్షరం *, size_t))
 {
-	const char *list_add;
-	int r;
+	స్థిరరాశి అక్షరం *list_కూడు;
+	పూర్ణాంకం r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	ఒకవేళ (!list || !*list || !ary_pos || *ary_pos > arysz)
+		తిరిగి -1;
 
-	if (list[0] == '+')
-		list_add = &list[1];
-	else {
-		list_add = list;
+	ఒకవేళ (list[0] == '+')
+		list_కూడు = &list[1];
+	లేకపోతే {
+		list_కూడు = list;
 		*ary_pos = 0;
 	}
 
-	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	r = string_గమ్యం_idarray(list_కూడు, &ary[*ary_pos], arysz - *ary_pos, name2id);
+	ఒకవేళ (r > 0)
 		*ary_pos += r;
-	return r;
+	తిరిగి r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+పూర్ణాంకం string_గమ్యం_bitarray(స్థిరరాశి అక్షరం *list,
+		     అక్షరం *ary,
+		     పూర్ణాంకం (*name2bit)(స్థిరరాశి అక్షరం *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	స్థిరరాశి అక్షరం *begin = ఖాళీ, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	ఒకవేళ (!list || !name2bit || !ary)
+		తిరిగి -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	కొరకు (p = list; p && *p; p++) {
+		స్థిరరాశి అక్షరం *చివర = ఖాళీ;
+		పూర్ణాంకం బిట్టు, సమితి_క్రింది = 0, సమితి_higher = 0;
 
-		if (!begin)
+		ఒకవేళ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
-			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
-			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
-				end--;
-				set_lower = 1;
-			} else if (*begin == '+') {
+		ఒకవేళ (*p == ',')
+			చివర = p;		/* terminate the name */
+		ఒకవేళ (*(p + 1) == '\0')
+			చివర = p + 1;		/* end of string */
+		ఒకవేళ (!begin || !చివర)
+			కొనసాగు;
+		ఒకవేళ (చివర <= begin)
+			తిరిగి -1;
+		ఒకవేళ (allow_range) {
+			ఒకవేళ (*(చివర - 1) == '+') {
+				చివర--;
+				సమితి_క్రింది = 1;
+			} లేకపోతే ఒకవేళ (*begin == '+') {
 				begin++;
-				set_higher = 1;
+				సమితి_higher = 1;
 			}
 		}
 
-		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
-		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
-				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
-				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		బిట్టు = name2bit(begin, చివర - begin);
+		ఒకవేళ (బిట్టు < 0)
+			తిరిగి బిట్టు;
+		setbit(ary, బిట్టు);
+		ఒకవేళ (సమితి_క్రింది)
+			అయితే (--బిట్టు >= 0)
+				setbit(ary, బిట్టు);
+		లేకపోతే ఒకవేళ (సమితి_higher)
+			అయితే (++బిట్టు < (పూర్ణాంకం) allow_range)
+				setbit(ary, బిట్టు);
+		begin = ఖాళీ;
+		ఒకవేళ (చివర && !*చివర)
+			ఆపు;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
-		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+పూర్ణాంకం string_గమ్యం_bitmask(స్థిరరాశి అక్షరం *list,
+		     గుర్తులేని దీర్ఘ *ముసుగు,
+		     దీర్ఘ (*name2flag)(స్థిరరాశి అక్షరం *, size_t))
 {
-	const char *begin = NULL, *p;
+	స్థిరరాశి అక్షరం *begin = ఖాళీ, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	ఒకవేళ (!list || !name2flag || !ముసుగు)
+		తిరిగి -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		long flag;
+	కొరకు (p = list; p && *p; p++) {
+		స్థిరరాశి అక్షరం *చివర = ఖాళీ;
+		దీర్ఘ flag;
 
-		if (!begin)
+		ఒకవేళ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
-			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
-			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		ఒకవేళ (*p == ',')
+			చివర = p;		/* terminate the name */
+		ఒకవేళ (*(p + 1) == '\0')
+			చివర = p + 1;		/* end of string */
+		ఒకవేళ (!begin || !చివర)
+			కొనసాగు;
+		ఒకవేళ (చివర <= begin)
+			తిరిగి -1;
 
-		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
-		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		flag = name2flag(begin, చివర - begin);
+		ఒకవేళ (flag < 0)
+			తిరిగి flag;	/* error */
+		*ముసుగు |= flag;
+		begin = ఖాళీ;
+		ఒకవేళ (చివర && !*చివర)
+			ఆపు;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+పూర్ణాంకం ul_parse_range(స్థిరరాశి అక్షరం *str, పూర్ణాంకం *క్రింది, పూర్ణాంకం *పై, పూర్ణాంకం def)
 {
-	char *end = NULL;
+	అక్షరం *చివర = ఖాళీ;
 
-	if (!str)
-		return 0;
+	ఒకవేళ (!str)
+		తిరిగి 0;
 
-	*upper = *lower = def;
+	*పై = *క్రింది = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	ఒకవేళ (*str == ':') {				/* <:N> */
 		str++;
-		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
-		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		*పై = strtol(str, &చివర, 10);
+		ఒకవేళ (errno || !చివర || *చివర || చివర == str)
+			తిరిగి -1;
+	} లేకపోతే {
+		*పై = *క్రింది = strtol(str, &చివర, 10);
+		ఒకవేళ (errno || !చివర || చివర == str)
+			తిరిగి -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
-			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
-			str = end + 1;
-			end = NULL;
+		ఒకవేళ (*చివర == ':' && !*(చివర + 1))		/* <M:> */
+			*పై = def;
+		లేకపోతే ఒకవేళ (*చివర == '-' || *చివర == ':') {	/* <M:N> <M-N> */
+			str = చివర + 1;
+			చివర = ఖాళీ;
 			errno = 0;
-			*upper = strtol(str, &end, 10);
+			*పై = strtol(str, &చివర, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			ఒకవేళ (errno || !చివర || *చివర || చివర == str)
+				తిరిగి -1;
 		}
 	}
-	return 0;
+	తిరిగి 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+స్థిరరాశి అక్షరం *ul_మార్గం_తదుపరి_segment(స్థిరరాశి అక్షరం *str, size_t *sz)
 {
-	const char *start, *p;
+	స్థిరరాశి అక్షరం *ప్రారంభం, *p;
 
-	start = str;
+	ప్రారంభం = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
-		start++;
+	అయితే (ప్రారంభం && *ప్రారంభం == '/' && *(ప్రారంభం + 1) == '/')
+		ప్రారంభం++;
 
-	if (!start || !*start)
-		return NULL;
+	ఒకవేళ (!ప్రారంభం || !*ప్రారంభం)
+		తిరిగి ఖాళీ;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	కొరకు (*sz = 1, p = ప్రారంభం + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	తిరిగి ప్రారంభం;
 }
 
-int streq_paths(const char *a, const char *b)
+పూర్ణాంకం streq_paths(స్థిరరాశి అక్షరం *a, స్థిరరాశి అక్షరం *b)
 {
-	while (a && b) {
+	అయితే (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		స్థిరరాశి అక్షరం *a_seg = ul_మార్గం_తదుపరి_segment(a, &a_sz);
+		స్థిరరాశి అక్షరం *b_seg = ul_మార్గం_తదుపరి_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		ఒకవేళ (a_sz + b_sz == 0)
+			తిరిగి 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		ఒకవేళ (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			తిరిగి 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		ఒకవేళ (!a_seg || !b_seg)
+			ఆపు;
+		ఒకవేళ (a_sz != b_sz || అక్షరశ్రేణి_పోలిక(a_seg, b_seg, a_sz) != 0)
+			ఆపు;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+పూర్ణాంకం ul_మార్గం_is_within(స్థిరరాశి అక్షరం *మార్గం, స్థిరరాశి అక్షరం *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	ఒకవేళ (!మార్గం || !dir || !*మార్గం || !*dir)
+		తిరిగి 0;
 
-	while (path && dir) {
+	అయితే (మార్గం && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		స్థిరరాశి అక్షరం *p_seg = ul_మార్గం_తదుపరి_segment(మార్గం, &p_sz);
+		స్థిరరాశి అక్షరం *d_seg = ul_మార్గం_తదుపరి_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		ఒకవేళ (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			తిరిగి 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		ఒకవేళ (!p_seg || !d_seg)
+			ఆపు;
+		ఒకవేళ (p_sz != d_sz || అక్షరశ్రేణి_పోలిక(p_seg, d_seg, p_sz) != 0)
+			ఆపు;
 
-		path = p_seg + p_sz;
+		మార్గం = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+అక్షరం *ul_strnconcat(స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	అక్షరం *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	ఒకవేళ (!s && !suffix)
+		తిరిగి strdup("");
+	ఒకవేళ (!s)
+		తిరిగి strndup(suffix, b);
+	ఒకవేళ (!suffix)
+		తిరిగి strdup(s);
 
-	assert(s);
-	assert(suffix);
+	ప్రతిజ్ఞా(s);
+	ప్రతిజ్ఞా(suffix);
 
-	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	a = అక్షరశ్రేణి_పొడవు(s);
+	ఒకవేళ (b > ((size_t) -1) - a)
+		తిరిగి ఖాళీ;
 
-	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	r = జ్ఞాపకం_ఇవ్వు(a + b + 1);
+	ఒకవేళ (!r)
+		తిరిగి ఖాళీ;
 
-	memcpy(r, s, a);
-	memcpy(r + a, suffix, b);
+	జ్ఞాపకం_నకలు(r, s, a);
+	జ్ఞాపకం_నకలు(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	తిరిగి r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+అక్షరం *ul_strconcat(స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	తిరిగి ul_strnconcat(s, suffix, suffix ? అక్షరశ్రేణి_పొడవు(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+అక్షరం *ul_strfconcat(స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	అక్షరం *val, *res;
+	పూర్ణాంకం sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	ఒకవేళ (sz < 0)
+		తిరిగి ఖాళీ;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	విడుదల(val);
+	తిరిగి res;
 }
 
-int ul_strappend(char **a, const char *b)
+పూర్ణాంకం ul_strappend(అక్షరం **a, స్థిరరాశి అక్షరం *b)
 {
 	size_t al, bl;
-	char *tmp;
+	అక్షరం *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	ఒకవేళ (!a)
+		తిరిగి -EINVAL;
+	ఒకవేళ (!b || !*b)
+		తిరిగి 0;
+	ఒకవేళ (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		తిరిగి !*a ? -ENOMEM : 0;
 	}
 
-	al = strlen(*a);
-	bl = strlen(b);
+	al = అక్షరశ్రేణి_పొడవు(*a);
+	bl = అక్షరశ్రేణి_పొడవు(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	ఒకవేళ (!tmp)
+		తిరిగి -ENOMEM;
 	*a = tmp;
-	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	జ్ఞాపకం_నకలు((*a) + al, b, bl + 1);
+	తిరిగి 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+పూర్ణాంకం strfappend(అక్షరం **a, స్థిరరాశి అక్షరం *format, ...)
 {
 	va_list ap;
-	int res;
+	పూర్ణాంకం res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	తిరిగి res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+బాహ్య పూర్ణాంకం ul_strvfappend(అక్షరం **a, స్థిరరాశి అక్షరం *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	అక్షరం *val;
+	పూర్ణాంకం sz;
+	పూర్ణాంకం res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ఒకవేళ (sz < 0)
+		తిరిగి -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	విడుదల(val);
+	తిరిగి res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+స్థిర size_t strcspn_escaped(స్థిరరాశి అక్షరం *s, స్థిరరాశి అక్షరం *reject)
 {
-	int escaped = 0;
-	int n;
+	పూర్ణాంకం escaped = 0;
+	పూర్ణాంకం n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	కొరకు (n=0; s[n]; n++) {
+		ఒకవేళ (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		లేకపోతే ఒకవేళ (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		లేకపోతే ఒకవేళ (strchr(reject, s[n]))
+			ఆపు;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	తిరిగి n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+అక్షరం *ul_strchr_escaped(స్థిరరాశి అక్షరం *s, పూర్ణాంకం c)
 {
-	char *p;
-	int esc = 0;
+	అక్షరం *p;
+	పూర్ణాంకం esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	కొరకు (p = (అక్షరం *) s; p && *p; p++) {
+		ఒకవేళ (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			కొనసాగు;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		ఒకవేళ (*p == c && (!esc || c == '\\'))
+			తిరిగి p;
 		esc = 0;
 	}
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+స్థిరరాశి అక్షరం *ul_విభజించు(స్థిరరాశి అక్షరం **state, size_t *l, స్థిరరాశి అక్షరం *separator, పూర్ణాంకం quoted)
 {
-	const char *current;
+	స్థిరరాశి అక్షరం *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	ఒకవేళ (!*current) {
+		ప్రతిజ్ఞా(**state == '\0');
+		తిరిగి ఖాళీ;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	ఒకవేళ (!*current) {
 		*state = current;
-		return NULL;
+		తిరిగి ఖాళీ;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	ఒకవేళ (quoted && strchr("\'\"", *current)) {
+		అక్షరం quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		ఒకవేళ (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			తిరిగి ఖాళీ;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} లేకపోతే ఒకవేళ (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		ఒకవేళ (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			తిరిగి ఖాళీ;
 		}
 		*state = current + *l;
-	} else {
+	} లేకపోతే {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	తిరిగి current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+పూర్ణాంకం skip_fline(FILE *fp)
 {
-	int ch;
+	పూర్ణాంకం ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	చేయి {
+		ఒకవేళ ((ch = fgetc(fp)) == EOF)
+			తిరిగి 1;
+		ఒకవేళ (ch == '\n')
+			తిరిగి 0;
+	} అయితే (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+పూర్ణాంకం ul_stralnumcmp(స్థిరరాశి అక్షరం *p1, స్థిరరాశి అక్షరం *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	స్థిరరాశి గుర్తులేని అక్షరం *s1 = (స్థిరరాశి గుర్తులేని అక్షరం *) p1;
+	స్థిరరాశి గుర్తులేని అక్షరం *s2 = (స్థిరరాశి గుర్తులేని అక్షరం *) p2;
+	గుర్తులేని అక్షరం c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	చేయి {
+		చేయి {
+			c1 = (గుర్తులేని అక్షరం) *s1++;
+		} అయితే (c1 != '\0' && !అక్షరమా_అంకెనా((గుర్తులేని పూర్ణాంకం) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		చేయి {
+			c2 = (గుర్తులేని అక్షరం) *s2++;
+		} అయితే (c2 != '\0' && !అక్షరమా_అంకెనా((గుర్తులేని పూర్ణాంకం) c2));
 
-		if (c1 != '\0')
+		ఒకవేళ (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		ఒకవేళ (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		ఒకవేళ (c1 == '\0')
+			తిరిగి c1 - c2;
+	} అయితే (c1 == c2);
 
-	return c1 - c2;
+	తిరిగి c1 - c2;
 }
 
 /*
@@ -1277,359 +1277,359 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+పూర్ణాంకం ul_optstr_తదుపరి(అక్షరం **optstr, అక్షరం **name, size_t *namesz,
+		   అక్షరం **విలువ, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	పూర్ణాంకం open_quote = 0;
+	అక్షరం *ప్రారంభం = ఖాళీ, *stop = ఖాళీ, *p, *sep = ఖాళీ;
+	అక్షరం *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	ప్రతిజ్ఞా(optstr);
+	ప్రతిజ్ఞా(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	ఒకవేళ (name)
+		*name = ఖాళీ;
+	ఒకవేళ (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	ఒకవేళ (విలువ)
+		*విలువ = ఖాళీ;
+	ఒకవేళ (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	అయితే (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
-			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+	కొరకు (p = optstr0; p && *p; p++) {
+		ఒకవేళ (!ప్రారంభం && *p == '=')
+			తిరిగి -EINVAL;
+		ఒకవేళ (!ప్రారంభం)
+			ప్రారంభం = p;		/* beginning of the option item */
+		ఒకవేళ (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		ఒకవేళ (open_quote)
+			కొనసాగు;		/* still in quoted block */
+		ఒకవేళ (!sep && p > ప్రారంభం && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		ఒకవేళ (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		లేకపోతే ఒకవేళ (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		ఒకవేళ (!ప్రారంభం || !stop)
+			కొనసాగు;
+		ఒకవేళ (stop <= ప్రారంభం)
+			తిరిగి -EINVAL;
 
-		if (name)
-			*name = start;
-		if (namesz)
-			*namesz = sep ? sep - start : stop - start;
+		ఒకవేళ (name)
+			*name = ప్రారంభం;
+		ఒకవేళ (namesz)
+			*namesz = sep ? sep - ప్రారంభం : stop - ప్రారంభం;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		ఒకవేళ (sep) {
+			ఒకవేళ (విలువ)
+				*విలువ = sep + 1;
+			ఒకవేళ (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		తిరిగి 0;
 	}
 
-	return 1;				/* end of optstr */
+	తిరిగి 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+పూర్ణాంకం ul_optstr_is_valid(స్థిరరాశి అక్షరం *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	పూర్ణాంకం rc;
+	అక్షరం *p = (అక్షరం *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	అయితే ((rc = ul_optstr_తదుపరి(&p, ఖాళీ, ఖాళీ, ఖాళీ, ఖాళీ)) == 0);
+	తిరిగి rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+అక్షరం *ul_optstr_get_విలువ(స్థిరరాశి అక్షరం *optstr, స్థిరరాశి అక్షరం *కీలకం)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	అక్షరం *name = ఖాళీ, *విలువ = ఖాళీ;
+	అక్షరం *p = (అక్షరం *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	ఒకవేళ (!optstr || !కీలకం || !*కీలకం)
+		తిరిగి ఖాళీ;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = అక్షరశ్రేణి_పొడవు(కీలకం);
+	అయితే (ul_optstr_తదుపరి(&p, &name, &namesz, &విలువ, &valsz) == 0) {
+		ఒకవేళ (namesz != sz || !valsz)
+			కొనసాగు;
+		ఒకవేళ (అక్షరశ్రేణి_పోలిక(name, కీలకం, namesz) == 0)
+			తిరిగి strndup(విలువ, valsz);
 	}
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(అక్షరం *str)
 {
 	size_t len;
-	char q;
+	అక్షరం q;
 
-	if (!str || !*str)
-		return 0;
+	ఒకవేళ (!str || !*str)
+		తిరిగి 0;
 
-	len = strlen(str);
+	len = అక్షరశ్రేణి_పొడవు(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	ఒకవేళ ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		తిరిగి len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	తిరిగి len - 2;
 }
 
-#ifdef TEST_PROGRAM_STRUTILS
+#నిర్వచితమైతే TEST_కార్యక్రమం_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+నిర్మాణం testS {
+	అక్షరం *name;
+	అక్షరం *విలువ;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_strdup_గమ్యం_member(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	struct testS *xx;
+	నిర్మాణం testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 3)
+		తిరిగి EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(*xx));
+	ఒకవేళ (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
-	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_గమ్యం_struct_member(xx, name, argv[1]);
+	strdup_గమ్యం_struct_member(xx, విలువ, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	ఒకవేళ (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->విలువ, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	రాయి("1: '%s', 2: '%s'\n", xx->name, xx->విలువ);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	విడుదల(xx->name);
+	విడుదల(xx->విలువ);
+	విడుదల(xx);
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_strutils_sizes(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	uintmax_t కొలత = 0;
+	అక్షరం *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 2)
+		తిరిగి EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	ఒకవేళ (strtosize(argv[1], &కొలత))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
-	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
-	hum2 = size_to_human_string(SIZE_SUFFIX_3LETTER |
-				    SIZE_SUFFIX_SPACE, size);
-	hum3 = size_to_human_string(SIZE_SUFFIX_3LETTER |
-				    SIZE_SUFFIX_SPACE |
-				    SIZE_DECIMAL_2DIGITS, size);
+	hum1 = కొలత_గమ్యం_human_string(కొలత_SUFFIX_1_LETTER, కొలత);
+	hum2 = కొలత_గమ్యం_human_string(కొలత_SUFFIX_3_LETTER |
+				    కొలత_SUFFIX_SPACE, కొలత);
+	hum3 = కొలత_గమ్యం_human_string(కొలత_SUFFIX_3_LETTER |
+				    కొలత_SUFFIX_SPACE |
+				    కొలత_DECIMAL_2_DIGITS, కొలత);
 
-	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	రాయి("%25s : %20ju : %8s : %12s : %13s\n", argv[1], కొలత, hum1, hum2, hum3);
+	విడుదల(hum1);
+	విడుదల(hum2);
+	విడుదల(hum3);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_strutils_cmp_paths(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	పూర్ణాంకం rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 3)
+		తిరిగి EXIT_FAILURE;
 
-	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	రాయి("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_strutils_మార్గం_is_within(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	int rc;
+	పూర్ణాంకం rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 3)
+		తిరిగి EXIT_FAILURE;
 
-	rc = ul_path_is_within(argv[1], argv[2]);
+	rc = ul_మార్గం_is_within(argv[1], argv[2]);
 
-	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	రాయి("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_strutils_normalize(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	unsigned char *src, *dst, *org;
+	గుర్తులేని అక్షరం *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 2)
+		తిరిగి EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
-	dst = malloc(len + 1);
+	org = (గుర్తులేని అక్షరం *) strdup(argv[1]);
+	src = (గుర్తులేని అక్షరం *) strdup((అక్షరం *) org);
+	len = అక్షరశ్రేణి_పొడవు((అక్షరం *) src);
+	dst = జ్ఞాపకం_ఇవ్వు(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	ఒకవేళ (!org || !src || !dst)
+		వెళ్ళు పూర్తి;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
-	printf("1: '%s' --> '%s' [sz=%zu]\n", src, dst, sz);
+	రాయి("1: '%s' --> '%s' [sz=%zu]\n", src, dst, sz);
 
 	/* one buffer */
 	sz = normalize_whitespace(src);
-	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
+	రాయి("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
-done:
-	free(src);
-	free(dst);
-	free(org);
+పూర్తి:
+	విడుదల(src);
+	విడుదల(dst);
+	విడుదల(org);
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+స్థిర పూర్ణాంకం test_strutils_cstrcasecmp(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	char *a, *b;
+	అక్షరం *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ఒకవేళ (argc < 3)
+		తిరిగి EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	ఒకవేళ (!a || !b)
+		తిరిగి EXIT_FAILURE;
 
-	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
-	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
-	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
+	రాయి("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
+	రాయి("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
+	రాయి("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, అక్షరశ్రేణి_పొడవు(a)));
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	ఒకవేళ (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		తిరిగి test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
-		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+		రాయి("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						ఖాళీ));
+		తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		ఒకవేళ (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
-		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		రాయి("'%s'-->%s\n", argv[2], val ? "true" : "false");
+		తిరిగి EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} లేకపోతే ఒకవేళ (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		తిరిగి test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} లేకపోతే ఒకవేళ (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		తిరిగి test_strutils_మార్గం_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} లేకపోతే ఒకవేళ (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		తిరిగి test_strdup_గమ్యం_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
-		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
+	} లేకపోతే ఒకవేళ  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+		రాయి("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		తిరిగి EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} లేకపోతే ఒకవేళ (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		తిరిగి test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		తిరిగి test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
-		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
-		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
-		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
-		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
-		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
-		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+		రాయి("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
+		తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		రాయి("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
+		తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		రాయి("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
+		తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		రాయి("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
+		తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		రాయి("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
+		తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		రాయి("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
+		తిరిగి EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
-		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+		రాయి("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
+		తిరిగి EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} లేకపోతే ఒకవేళ (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		అక్షరం *buf = "abc\0Y\0\0xyz\0X";
+		అక్షరం *చివర = buf + 12;
+		అక్షరం *p = buf;
 
-		do {
-			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		చేయి {
+			రాయి("str: '%s'\n", p);
+		} అయితే ((p = ul_తదుపరి_string(p, చివర)));
 
-		return EXIT_SUCCESS;
+		తిరిగి EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		అక్షరం *name = ఖాళీ, *val = ఖాళీ;
+		అక్షరం *p = argv[2];
+		పూర్ణాంకం rc;
 
-		if (!ul_optstr_is_valid(p))
+		ఒకవేళ (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		అయితే ((rc = ul_optstr_తదుపరి(&p, &name, &namesz, &val, &valsz)) == 0) {
+			రాయి("'%.*s' : '%.*s'\n", (పూర్ణాంకం) namesz, name,
+						   (పూర్ణాంకం) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		ఒకవేళ (rc == 1)
+			తిరిగి EXIT_SUCCESS;
+	} లేకపోతే ఒకవేళ (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		అక్షరం *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		ఒకవేళ (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
-		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		రాయి("%s-->%s\n", argv[2], unquoted);
+		విడుదల(unquoted);
+		తిరిగి EXIT_SUCCESS;
 
-	} else {
+	} లేకపోతే {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1643,9 +1643,9 @@ int main(int argc, char *argv[])
 				"       %1$s --optstr <str>\n"
 				"       %1$s --unquote <str>\n",
 				argv[0]);
-		exit(EXIT_FAILURE);
+		నిష్క్రమించు(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	తిరిగి EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_STRUTILS */
+#అయితే_ముగింపు /* TEST_PROGRAM_STRUTILS */

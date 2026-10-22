@@ -20,76 +20,76 @@
  *  - old LOOP_{SET,GET}_STATUS (32bit) ioctls are unsupported
  *  - extendible
  */
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <inttypes.h>
-#include <dirent.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdint.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <ctype.h>
+#అన్తర్భావ <fcntl.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <sys/ioctl.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <sys/mman.h>
+#అన్తర్భావ <inttypes.h>
+#అన్తర్భావ <dirent.h>
 
-#include "linux_version.h"
-#include "c.h"
-#include "timeutils.h"
-#include "sysfs.h"
-#include "pathnames.h"
-#include "loopdev.h"
-#include "canonicalize.h"
-#include "blkdev.h"
-#include "debug.h"
-#include "fileutils.h"
+#అన్తర్భావ "linux_version.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "timeutils.h"
+#అన్తర్భావ "sysfs.h"
+#అన్తర్భావ "pathnames.h"
+#అన్తర్భావ "loopdev.h"
+#అన్తర్భావ "canonicalize.h"
+#అన్తర్భావ "blkdev.h"
+#అన్తర్భావ "debug.h"
+#అన్తర్భావ "fileutils.h"
 
-#define LOOPDEV_MAX_TRIES	10
+#నిర్వచించు LOOPDEV_MAX_TRIES	10
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(loopdev);
-UL_DEBUG_DEFINE_MASKNAMES(loopdev) = UL_DEBUG_EMPTY_MASKNAMES;
+స్థిర UL_DEBUG_DEFINE_ముసుగు(loopdev);
+UL_DEBUG_DEFINE_MASKNAMES(loopdev) = UL_DEBUG_ఖాళీలు_MASKNAMES;
 
-#define LOOPDEV_DEBUG_INIT	(1 << 1)
-#define LOOPDEV_DEBUG_CXT	(1 << 2)
-#define LOOPDEV_DEBUG_ITER	(1 << 3)
-#define LOOPDEV_DEBUG_SETUP	(1 << 4)
+#నిర్వచించు LOOPDEV_DEBUG_INIT	(1 << 1)
+#నిర్వచించు LOOPDEV_DEBUG_CXT	(1 << 2)
+#నిర్వచించు LOOPDEV_DEBUG_ITER	(1 << 3)
+#నిర్వచించు LOOPDEV_DEBUG_అమరిక	(1 << 4)
 
-#define DBG(m, x)		__UL_DBG(loopdev, LOOPDEV_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(loopdev, LOOPDEV_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(loopdev, LOOPDEV_DEBUG_, m, x)
+#నిర్వచించు DBG(m, x)		__UL_DBG(loopdev, LOOPDEV_DEBUG_, m, x)
+#నిర్వచించు DBG_OBJ(m, h, x)	__UL_DBG_OBJ(loopdev, LOOPDEV_DEBUG_, m, h, x)
+#నిర్వచించు ON_DBG(m, x)		__UL_DBG_CALL(loopdev, LOOPDEV_DEBUG_, m, x)
 
-static void loopdev_init_debug(void)
+స్థిర శూన్య loopdev_init_debug(శూన్య)
 {
-	if (loopdev_debug_mask)
-		return;
+	ఒకవేళ (loopdev_debug_ముసుగు)
+		తిరిగి;
 	__UL_INIT_DEBUG_FROM_ENV(loopdev, LOOPDEV_DEBUG_, 0, LOOPDEV_DEBUG);
 }
 
 /*
  * see loopcxt_init()
  */
-#define loopcxt_ioctl_enabled(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOIOCTL))
-#define loopcxt_sysfs_available(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOSYSFS)) \
+#నిర్వచించు loopcxt_ioctl_enabled(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOIOCTL))
+#నిర్వచించు loopcxt_sysfs_అందుబాటు(_lc)	(!((_lc)->flags & LOOPDEV_FL_NOSYSFS)) \
 					 && !loopcxt_ioctl_enabled(_lc)
 
 /*
  * Calls @x and repeat on EAGAIN
  */
-#define repeat_on_eagain(x) __extension__ ({			\
-		int _c = 0, _e;					\
-		do {						\
+#నిర్వచించు repeat_on_eagain(x) __extension__ ({			\
+		పూర్ణాంకం _c = 0, _e;					\
+		చేయి {						\
 			errno = 0;				\
 			_e = x;					\
-			if (_e == 0 || errno != EAGAIN)		\
-				break;				\
-			if (_c >= LOOPDEV_MAX_TRIES)		\
-				break;				\
+			ఒకవేళ (_e == 0 || errno != EAGAIN)		\
+				ఆపు;				\
+			ఒకవేళ (_c >= LOOPDEV_MAX_TRIES)		\
+				ఆపు;				\
 			xusleep(250000);			\
 			_c++;					\
-		} while (1);					\
+		} అయితే (1);					\
 		_e == 0 ? 0 : errno ? -errno : -1;		\
 	})
 
@@ -105,75 +105,75 @@ static void loopdev_init_debug(void)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
+పూర్ణాంకం loopcxt_సమితి_device(నిర్మాణం loopdev_cxt *lc, స్థిరరాశి అక్షరం *device)
 {
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
-	if (lc->fd >= 0) {
+	ఒకవేళ (lc->fd >= 0) {
 		close(lc->fd);
 		DBG_OBJ(CXT, lc, ul_debug("closing old open fd"));
 	}
 	lc->fd = -1;
-	lc->is_lost = 0;
+	lc->is_కోల్పోయిన = 0;
 	lc->devno = 0;
-	lc->mode = O_RDONLY;
+	lc->బహుళకం = O_RDONLY;
 	lc->blocksize = 0;
 	lc->has_info = 0;
 	lc->info_failed = 0;
 	*lc->device = '\0';
-	memset(&lc->config, 0, sizeof(lc->config));
+	memset(&lc->config, 0, పరిమాణం(lc->config));
 
 	/* set new */
-	if (device) {
-		if (*device != '/') {
-			const char *dir = _PATH_DEV;
+	ఒకవేళ (device) {
+		ఒకవేళ (*device != '/') {
+			స్థిరరాశి అక్షరం *dir = _PATH_DEV;
 
 			/* compose device name for /dev/loop<n> or /dev/loop/<n> */
-			if (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
-				if (strlen(device) < 5)
-					return -1;
+			ఒకవేళ (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
+				ఒకవేళ (అక్షరశ్రేణి_పొడవు(device) < 5)
+					తిరిగి -1;
 				device += 4;
-				dir = _PATH_DEV_LOOP "/";	/* _PATH_DEV uses trailing slash */
+				dir = మార్గం_DEV_LOOP "/";	/* _PATH_DEV uses trailing slash */
 			}
-			snprintf(lc->device, sizeof(lc->device), "%s%s",
+			snprintf(lc->device, పరిమాణం(lc->device), "%s%s",
 				dir, device);
-		} else
-			xstrncpy(lc->device, device, sizeof(lc->device));
+		} లేకపోతే
+			xstrncpy(lc->device, device, పరిమాణం(lc->device));
 
 		DBG_OBJ(CXT, lc, ul_debug("%s name assigned", device));
 	}
 
-	ul_unref_path(lc->sysfs);
-	lc->sysfs = NULL;
-	return 0;
+	ul_unref_మార్గం(lc->sysfs);
+	lc->sysfs = ఖాళీ;
+	తిరిగి 0;
 }
 
-int loopcxt_has_device(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_has_device(నిర్మాణం loopdev_cxt *lc)
 {
-	return lc && *lc->device;
+	తిరిగి lc && *lc->device;
 }
 
-dev_t loopcxt_get_devno(struct loopdev_cxt *lc)
+dev_t loopcxt_get_devno(నిర్మాణం loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (!lc->devno)
-		lc->devno = sysfs_devname_to_devno(lc->device);
-	return lc->devno;
+	ఒకవేళ (!lc || !loopcxt_has_device(lc))
+		తిరిగి 0;
+	ఒకవేళ (!lc->devno)
+		lc->devno = sysfs_devname_గమ్యం_devno(lc->device);
+	తిరిగి lc->devno;
 }
 
-int loopcxt_is_lost(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_is_కోల్పోయిన(నిర్మాణం loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (lc->is_lost)
-		return 1;
+	ఒకవేళ (!lc || !loopcxt_has_device(lc))
+		తిరిగి 0;
+	ఒకవేళ (lc->is_కోల్పోయిన)
+		తిరిగి 1;
 
-	lc->is_lost = access(lc->device, F_OK) != 0
+	lc->is_కోల్పోయిన = access(lc->device, F_OK) != 0
 			&& loopcxt_get_devno(lc) != 0;
 
-	return lc->is_lost;
+	తిరిగి lc->is_కోల్పోయిన;
 }
 
 /*
@@ -190,33 +190,33 @@ int loopcxt_is_lost(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_init(struct loopdev_cxt *lc, int flags)
+పూర్ణాంకం loopcxt_init(నిర్మాణం loopdev_cxt *lc, పూర్ణాంకం flags)
 {
-	int rc;
-	struct stat st;
-	struct loopdev_cxt dummy = UL_LOOPDEVCXT_EMPTY;
+	పూర్ణాంకం rc;
+	నిర్మాణం stat st;
+	నిర్మాణం loopdev_cxt dummy = UL_LOOPDEVCXT_ఖాళీలు;
 
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
 	loopdev_init_debug();
 	DBG_OBJ(CXT, lc, ul_debug("initialize context"));
 
-	memcpy(lc, &dummy, sizeof(dummy));
+	జ్ఞాపకం_నకలు(lc, &dummy, పరిమాణం(dummy));
 	lc->flags = flags;
 
-	rc = loopcxt_set_device(lc, NULL);
-	if (rc)
-		return rc;
+	rc = loopcxt_సమితి_device(lc, ఖాళీ);
+	ఒకవేళ (rc)
+		తిరిగి rc;
 
-	if (stat(_PATH_SYS_BLOCK, &st) || !S_ISDIR(st.st_mode)) {
+	ఒకవేళ (stat(మార్గం_SYS_ఖండం, &st) || !S_ISDIR(st.st_mode)) {
 		lc->flags |= LOOPDEV_FL_NOSYSFS;
 		lc->flags &= ~LOOPDEV_FL_NOIOCTL;
 		DBG_OBJ(CXT, lc, ul_debug("init: disable /sys usage"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
-	    get_linux_version() >= KERNEL_VERSION(2,6,37)) {
+	ఒకవేళ (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
+	    get_linux_సంస్కరణ() >= KERNEL_సంస్కరణ(2,6,37)) {
 		/*
 		 * Use only sysfs for basic information about loop devices
 		 */
@@ -224,12 +224,12 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
 		DBG_OBJ(CXT, lc, ul_debug("init: ignore ioctls"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(_PATH_DEV_LOOPCTL, &st)) {
+	ఒకవేళ (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(మార్గం_DEV_LOOPCTL, &st)) {
 		lc->flags |= LOOPDEV_FL_CONTROL;
 		DBG_OBJ(CXT, lc, ul_debug("init: loop-control detected "));
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -237,19 +237,19 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
  *
  * Deinitialize loop context
  */
-void loopcxt_deinit(struct loopdev_cxt *lc)
+శూన్య loopcxt_deinit(నిర్మాణం loopdev_cxt *lc)
 {
-	int errsv = errno;
+	పూర్ణాంకం errsv = errno;
 
-	if (!lc)
-		return;
+	ఒకవేళ (!lc)
+		తిరిగి;
 
 	DBG_OBJ(CXT, lc, ul_debug("de-initialize"));
 
-	free(lc->filename);
-	lc->filename = NULL;
+	విడుదల(lc->filename);
+	lc->filename = ఖాళీ;
 
-	ignore_result( loopcxt_set_device(lc, NULL) );
+	ignore_ఫలితం( loopcxt_సమితి_device(lc, ఖాళీ) );
 	loopcxt_deinit_iterator(lc);
 
 	errno = errsv;
@@ -260,11 +260,11 @@ void loopcxt_deinit(struct loopdev_cxt *lc)
  *
  * Returns newly allocated device path.
  */
-char *loopcxt_strdup_device(struct loopdev_cxt *lc)
+అక్షరం *loopcxt_strdup_device(నిర్మాణం loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device)
-		return NULL;
-	return strdup(lc->device);
+	ఒకవేళ (!lc || !*lc->device)
+		తిరిగి ఖాళీ;
+	తిరిగి strdup(lc->device);
 }
 
 /*
@@ -272,9 +272,9 @@ char *loopcxt_strdup_device(struct loopdev_cxt *lc)
  *
  * Returns pointer device name in the @lc struct.
  */
-const char *loopcxt_get_device(struct loopdev_cxt *lc)
+స్థిరరాశి అక్షరం *loopcxt_get_device(నిర్మాణం loopdev_cxt *lc)
 {
-	return lc && *lc->device ? lc->device : NULL;
+	తిరిగి lc && *lc->device ? lc->device : ఖాళీ;
 }
 
 /*
@@ -282,67 +282,67 @@ const char *loopcxt_get_device(struct loopdev_cxt *lc)
  *
  * Returns pointer to the sysfs context (see lib/sysfs.c)
  */
-static struct path_cxt *loopcxt_get_sysfs(struct loopdev_cxt *lc)
+స్థిర నిర్మాణం మార్గం_cxt *loopcxt_get_sysfs(నిర్మాణం loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
-		return NULL;
+	ఒకవేళ (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
+		తిరిగి ఖాళీ;
 
-	if (!lc->sysfs) {
+	ఒకవేళ (!lc->sysfs) {
 		dev_t devno = loopcxt_get_devno(lc);
-		if (!devno) {
+		ఒకవేళ (!devno) {
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: failed devname to devno"));
-			return NULL;
+			తిరిగి ఖాళీ;
 		}
 
-		lc->sysfs = ul_new_sysfs_path(devno, NULL, NULL);
-		if (!lc->sysfs)
+		lc->sysfs = ul_new_sysfs_మార్గం(devno, ఖాళీ, ఖాళీ);
+		ఒకవేళ (!lc->sysfs)
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: init failed"));
 	}
 
-	return lc->sysfs;
+	తిరిగి lc->sysfs;
 }
 
-static int __loopcxt_get_fd(struct loopdev_cxt *lc, mode_t mode)
+స్థిర పూర్ణాంకం __loopcxt_get_fd(నిర్మాణం loopdev_cxt *lc, mode_t బహుళకం)
 {
-	int old = -1;
+	పూర్ణాంకం old = -1;
 
-	if (!lc || !*lc->device)
-		return -EINVAL;
+	ఒకవేళ (!lc || !*lc->device)
+		తిరిగి -EINVAL;
 
 	/* It's okay to return a FD with read-write permissions if someone
 	 * asked for read-only, but you shouldn't do the opposite.
 	 *
 	 * (O_RDONLY is a widely usable default.)
 	 */
-	if (lc->fd >= 0 && mode == O_RDWR && lc->mode == O_RDONLY) {
+	ఒకవేళ (lc->fd >= 0 && బహుళకం == O_RDWR && lc->బహుళకం == O_RDONLY) {
 		DBG_OBJ(CXT, lc, ul_debug("closing already open device (mode mismatch)"));
 		old = lc->fd;
 		lc->fd = -1;
 	}
 
-	if (lc->fd < 0) {
-		lc->mode = mode;
-		lc->fd = open(lc->device, lc->mode | O_CLOEXEC);
+	ఒకవేళ (lc->fd < 0) {
+		lc->బహుళకం = బహుళకం;
+		lc->fd = open(lc->device, lc->బహుళకం | O_CLOEXEC);
 		DBG_OBJ(CXT, lc, ul_debug("open %s [%s]: %m", lc->device,
-				mode == O_RDONLY ? "ro" :
-				mode == O_RDWR ? "rw" : "??"));
+				బహుళకం == O_RDONLY ? "ro" :
+				బహుళకం == O_RDWR ? "rw" : "??"));
 
-		if (lc->fd < 0 && old >= 0) {
+		ఒకవేళ (lc->fd < 0 && old >= 0) {
 			/* restore original on error */
 			lc->fd = old;
 			old = -1;
 		}
 	}
 
-	if (old >= 0)
+	ఒకవేళ (old >= 0)
 		close(old);
-	return lc->fd;
+	తిరిగి lc->fd;
 }
 
 /* default is read-only file descriptor, it's enough for all ioctls */
-int loopcxt_get_fd(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_get_fd(నిర్మాణం loopdev_cxt *lc)
 {
-	return __loopcxt_get_fd(lc, O_RDONLY);
+	తిరిగి __loopcxt_get_fd(lc, O_RDONLY);
 }
 
 /*
@@ -353,13 +353,13 @@ int loopcxt_get_fd(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
+పూర్ణాంకం loopcxt_init_iterator(నిర్మాణం loopdev_cxt *lc, పూర్ణాంకం flags)
 {
-	struct loopdev_iter *iter;
-	struct stat st;
+	నిర్మాణం loopdev_iter *iter;
+	నిర్మాణం stat st;
 
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
 
 	iter = &lc->iter;
@@ -367,22 +367,22 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
 
 	/* always zeroize
 	 */
-	memset(iter, 0, sizeof(*iter));
+	memset(iter, 0, పరిమాణం(*iter));
 	iter->ncur = -1;
 	iter->flags = flags;
 	iter->default_check = 1;
 
-	if (!lc->extra_check) {
+	ఒకవేళ (!lc->extra_check) {
 		/*
 		 * Check for /dev/loop/<N> subdirectory
 		 */
-		if (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
-		    stat(_PATH_DEV_LOOP, &st) == 0 && S_ISDIR(st.st_mode))
+		ఒకవేళ (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
+		    stat(మార్గం_DEV_LOOP, &st) == 0 && S_ISDIR(st.st_mode))
 			lc->flags |= LOOPDEV_FL_DEVSUBDIR;
 
 		lc->extra_check = 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -390,24 +390,24 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_deinit_iterator(నిర్మాణం loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter;
+	నిర్మాణం loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
 	iter = &lc->iter;
 	DBG_OBJ(ITER, iter, ul_debug("de-initialize"));
 
-	free(iter->minors);
-	if (iter->proc)
+	విడుదల(iter->minors);
+	ఒకవేళ (iter->proc)
 		fclose(iter->proc);
-	if (iter->sysblock)
+	ఒకవేళ (iter->sysblock)
 		closedir(iter->sysblock);
 
-	memset(iter, 0, sizeof(*iter));
-	return 0;
+	memset(iter, 0, పరిమాణం(*iter));
+	తిరిగి 0;
 }
 
 /*
@@ -417,36 +417,36 @@ int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
  * Returns: <0 on error, 0 on success, 1 device does not match with
  *         LOOPITER_FL_{USED,FREE} flags.
  */
-static int loopiter_set_device(struct loopdev_cxt *lc, const char *device)
+స్థిర పూర్ణాంకం loopiter_సమితి_device(నిర్మాణం loopdev_cxt *lc, స్థిరరాశి అక్షరం *device)
 {
-	int rc = loopcxt_set_device(lc, device);
-	int used;
+	పూర్ణాంకం rc = loopcxt_సమితి_device(lc, device);
+	పూర్ణాంకం వాడిన;
 
-	if (rc)
-		return rc;
+	ఒకవేళ (rc)
+		తిరిగి rc;
 
-	if (!(lc->iter.flags & LOOPITER_FL_USED) &&
+	ఒకవేళ (!(lc->iter.flags & LOOPITER_FL_వాడిన) &&
 	    !(lc->iter.flags & LOOPITER_FL_FREE))
-		return 0;	/* caller does not care about device status */
+		తిరిగి 0;	/* caller does not care about device status */
 
-	used = loopcxt_get_offset(lc, NULL) == 0;
+	వాడిన = loopcxt_get_స్థానభ్రంశం(lc, ఖాళీ) == 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_USED) && used)
-		return 0;
+	ఒకవేళ ((lc->iter.flags & LOOPITER_FL_వాడిన) && వాడిన)
+		తిరిగి 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_FREE) && !used)
-		return 0;
+	ఒకవేళ ((lc->iter.flags & LOOPITER_FL_FREE) && !వాడిన)
+		తిరిగి 0;
 
 	DBG_OBJ(ITER, &lc->iter, ul_debug("failed to use %s device", lc->device));
 
-	ignore_result( loopcxt_set_device(lc, NULL) );
-	return 1;
+	ignore_ఫలితం( loopcxt_సమితి_device(lc, ఖాళీ) );
+	తిరిగి 1;
 }
 
-static int cmpnum(const void *p1, const void *p2)
+స్థిర పూర్ణాంకం cmpnum(స్థిరరాశి శూన్య *p1, స్థిరరాశి శూన్య *p2)
 {
-	return (((* (const int *) p1) > (* (const int *) p2)) -
-			((* (const int *) p1) < (* (const int *) p2)));
+	తిరిగి (((* (స్థిరరాశి పూర్ణాంకం *) p1) > (* (స్థిరరాశి పూర్ణాంకం *) p2)) -
+			((* (స్థిరరాశి పూర్ణాంకం *) p1) < (* (స్థిరరాశి పూర్ణాంకం *) p2)));
 }
 
 /*
@@ -454,70 +454,70 @@ static int cmpnum(const void *p1, const void *p2)
  * We needn't full loop device names -- loop numbers (loop<N>)
  * are enough.
  */
-static int loop_scandir(const char *dirname, int **ary, int hasprefix)
+స్థిర పూర్ణాంకం loop_scandir(స్థిరరాశి అక్షరం *dirname, పూర్ణాంకం **ary, పూర్ణాంకం hasprefix)
 {
 	DIR *dir;
-	struct dirent *d;
-	unsigned int n, count = 0, arylen = 0;
+	నిర్మాణం dirent *d;
+	గుర్తులేని పూర్ణాంకం n, లెక్క = 0, arylen = 0;
 
-	if (!dirname || !ary)
-		return 0;
+	ఒకవేళ (!dirname || !ary)
+		తిరిగి 0;
 
 	DBG(ITER, ul_debug("scan dir: %s", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return 0;
-	free(*ary);
-	*ary = NULL;
+	ఒకవేళ (!dir)
+		తిరిగి 0;
+	విడుదల(*ary);
+	*ary = ఖాళీ;
 
-	while((d = readdir(dir))) {
-#ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
+	అయితే((d = readdir(dir))) {
+#నిర్వచితమైతే _DIRENT_HAVE_D_TYPE
+		ఒకవేళ (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
 		    d->d_type != DT_LNK)
-			continue;
-#endif
-		if (is_dotdir_dirent(d))
-			continue;
+			కొనసాగు;
+#అయితే_ముగింపు
+		ఒకవేళ (is_dotdir_dirent(d))
+			కొనసాగు;
 
-		if (hasprefix) {
+		ఒకవేళ (hasprefix) {
 			/* /dev/loop<N> */
-			if (sscanf(d->d_name, "loop%u", &n) != 1)
-				continue;
-		} else {
+			ఒకవేళ (అక్షరశ్రేణి_చదువు(d->d_name, "loop%u", &n) != 1)
+				కొనసాగు;
+		} లేకపోతే {
 			/* /dev/loop/<N> */
-			char *end = NULL;
+			అక్షరం *చివర = ఖాళీ;
 
 			errno = 0;
-			n = strtol(d->d_name, &end, 10);
-			if (d->d_name == end || (end && *end) || errno)
-				continue;
+			n = strtol(d->d_name, &చివర, 10);
+			ఒకవేళ (d->d_name == చివర || (చివర && *చివర) || errno)
+				కొనసాగు;
 		}
-		if (n < LOOPDEV_DEFAULT_NNODES)
-			continue;			/* ignore loop<0..7> */
+		ఒకవేళ (n < LOOPDEV_DEFAULT_NNODES)
+			కొనసాగు;			/* ignore loop<0..7> */
 
-		if (count + 1 > arylen) {
-			int *tmp;
+		ఒకవేళ (లెక్క + 1 > arylen) {
+			పూర్ణాంకం *tmp;
 
 			arylen += 1;
 
-			tmp = reallocarray(*ary, arylen, sizeof(int));
-			if (!tmp) {
-				free(*ary);
-				*ary = NULL;
+			tmp = reallocarray(*ary, arylen, పరిమాణం(పూర్ణాంకం));
+			ఒకవేళ (!tmp) {
+				విడుదల(*ary);
+				*ary = ఖాళీ;
 				closedir(dir);
-				return -1;
+				తిరిగి -1;
 			}
 			*ary = tmp;
 		}
-		if (*ary)
-			(*ary)[count++] = n;
+		ఒకవేళ (*ary)
+			(*ary)[లెక్క++] = n;
 	}
-	if (count && *ary)
-		qsort(*ary, count, sizeof(int), cmpnum);
+	ఒకవేళ (లెక్క && *ary)
+		qsort(*ary, లెక్క, పరిమాణం(పూర్ణాంకం), cmpnum);
 
 	closedir(dir);
-	return count;
+	తిరిగి లెక్క;
 }
 
 /*
@@ -525,34 +525,34 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
  *
  * Loop devices smaller than 512 bytes are invisible for this function.
  */
-static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
+స్థిర పూర్ణాంకం loopcxt_తదుపరి_from_proc(నిర్మాణం loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter = &lc->iter;
-	char buf[BUFSIZ];
+	నిర్మాణం loopdev_iter *iter = &lc->iter;
+	అక్షరం buf[BUFSIZ];
 
 	DBG_OBJ(ITER, iter, ul_debug("scan /proc/partitions"));
 
-	if (!iter->proc)
-		iter->proc = fopen(_PATH_PROC_PARTITIONS, "r" UL_CLOEXECSTR);
-	if (!iter->proc)
-		return 1;
+	ఒకవేళ (!iter->proc)
+		iter->proc = fopen(మార్గం_PROC_PARTITIONS, "r" UL_CLOEXECSTR);
+	ఒకవేళ (!iter->proc)
+		తిరిగి 1;
 
-	while (fgets(buf, sizeof(buf), iter->proc)) {
-		unsigned int m;
-		char name[128 + 1];
+	అయితే (fgets(buf, పరిమాణం(buf), iter->proc)) {
+		గుర్తులేని పూర్ణాంకం m;
+		అక్షరం name[128 + 1];
 
 
-		if (sscanf(buf, " %u %*s %*s %128[^\n ]",
+		ఒకవేళ (అక్షరశ్రేణి_చదువు(buf, " %u %*s %*s %128[^\n ]",
 			   &m, name) != 2 || m != LOOPDEV_MAJOR)
-			continue;
+			కొనసాగు;
 
 		DBG_OBJ(ITER, iter, ul_debug("checking %s", name));
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		ఒకవేళ (loopiter_సమితి_device(lc, name) == 0)
+			తిరిగి 0;
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
 /*
@@ -561,40 +561,40 @@ static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
  *
  * This is preferred method.
  */
-static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
+స్థిర పూర్ణాంకం loopcxt_తదుపరి_from_sysfs(నిర్మాణం loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter = &lc->iter;
-	struct dirent *d;
-	int fd;
+	నిర్మాణం loopdev_iter *iter = &lc->iter;
+	నిర్మాణం dirent *d;
+	పూర్ణాంకం fd;
 
 	DBG_OBJ(ITER, iter, ul_debug("scanning /sys/block"));
 
-	if (!iter->sysblock)
-		iter->sysblock = opendir(_PATH_SYS_BLOCK);
+	ఒకవేళ (!iter->sysblock)
+		iter->sysblock = opendir(మార్గం_SYS_ఖండం);
 
-	if (!iter->sysblock)
-		return 1;
+	ఒకవేళ (!iter->sysblock)
+		తిరిగి 1;
 
 	fd = dirfd(iter->sysblock);
 
-	while ((d = readdir(iter->sysblock))) {
-		char name[NAME_MAX + 18 + 1];
-		struct stat st;
+	అయితే ((d = readdir(iter->sysblock))) {
+		అక్షరం name[NAME_MAX + 18 + 1];
+		నిర్మాణం stat st;
 
 		DBG_OBJ(ITER, iter, ul_debug("check %s", d->d_name));
 
-		if (is_dotdir_dirent(d) || strncmp(d->d_name, "loop", 4) != 0)
-			continue;
+		ఒకవేళ (is_dotdir_dirent(d) || అక్షరశ్రేణి_పోలిక(d->d_name, "loop", 4) != 0)
+			కొనసాగు;
 
-		snprintf(name, sizeof(name), "%s/loop/backing_file", d->d_name);
-		if (fstatat(fd, name, &st, 0) != 0)
-			continue;
+		snprintf(name, పరిమాణం(name), "%s/loop/backing_file", d->d_name);
+		ఒకవేళ (fstatat(fd, name, &st, 0) != 0)
+			కొనసాగు;
 
-		if (loopiter_set_device(lc, d->d_name) == 0)
-			return 0;
+		ఒకవేళ (loopiter_సమితి_device(lc, d->d_name) == 0)
+			తిరిగి 0;
 	}
 
-	return 1;
+	తిరిగి 1;
 }
 
 /*
@@ -604,101 +604,101 @@ static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
  *          about the current loop device are available by
  *          loopcxt_get_{fd,backing_file,device,offset, ...} functions.
  */
-int loopcxt_next(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_తదుపరి(నిర్మాణం loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter;
+	నిర్మాణం loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
 
 	iter = &lc->iter;
-	if (iter->done)
-		return 1;
+	ఒకవేళ (iter->పూర్తి)
+		తిరిగి 1;
 
 	DBG_OBJ(ITER, iter, ul_debug("next"));
 
 	/* A) Look for used loop devices in /proc/partitions ("losetup -a" only)
 	 */
-	if (iter->flags & LOOPITER_FL_USED) {
-		int rc;
+	ఒకవేళ (iter->flags & LOOPITER_FL_వాడిన) {
+		పూర్ణాంకం rc;
 
-		if (loopcxt_sysfs_available(lc))
-			rc = loopcxt_next_from_sysfs(lc);
-		else
-			rc = loopcxt_next_from_proc(lc);
-		if (rc == 0)
-			return 0;
-		goto done;
+		ఒకవేళ (loopcxt_sysfs_అందుబాటు(lc))
+			rc = loopcxt_తదుపరి_from_sysfs(lc);
+		లేకపోతే
+			rc = loopcxt_తదుపరి_from_proc(lc);
+		ఒకవేళ (rc == 0)
+			తిరిగి 0;
+		వెళ్ళు పూర్తి;
 	}
 
 	/* B) Classic way, try first eight loop devices (default number
 	 *    of loop devices). This is enough for 99% of all cases.
 	 */
-	if (iter->default_check) {
+	ఒకవేళ (iter->default_check) {
 		DBG_OBJ(ITER, iter, ul_debug("next: default check"));
-		for (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
+		కొరకు (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
 							iter->ncur++) {
-			char name[16];
-			snprintf(name, sizeof(name), "loop%d", iter->ncur);
+			అక్షరం name[16];
+			snprintf(name, పరిమాణం(name), "loop%d", iter->ncur);
 
-			if (loopiter_set_device(lc, name) == 0)
-				return 0;
+			ఒకవేళ (loopiter_సమితి_device(lc, name) == 0)
+				తిరిగి 0;
 		}
 		iter->default_check = 0;
 	}
 
 	/* C) the worst possibility, scan whole /dev or /dev/loop/<N>
 	 */
-	if (!iter->minors) {
+	ఒకవేళ (!iter->minors) {
 		DBG_OBJ(ITER, iter, ul_debug("next: scanning /dev"));
 		iter->nminors = (lc->flags & LOOPDEV_FL_DEVSUBDIR) ?
-			loop_scandir(_PATH_DEV_LOOP, &iter->minors, 0) :
+			loop_scandir(మార్గం_DEV_LOOP, &iter->minors, 0) :
 			loop_scandir(_PATH_DEV, &iter->minors, 1);
 		iter->ncur = -1;
 	}
-	for (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
-		char name[16];
-		snprintf(name, sizeof(name), "loop%d", iter->minors[iter->ncur]);
+	కొరకు (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
+		అక్షరం name[16];
+		snprintf(name, పరిమాణం(name), "loop%d", iter->minors[iter->ncur]);
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		ఒకవేళ (loopiter_సమితి_device(lc, name) == 0)
+			తిరిగి 0;
 	}
-done:
+పూర్తి:
 	loopcxt_deinit_iterator(lc);
-	return 1;
+	తిరిగి 1;
 }
 
 /*
  * @device: path to device
  */
-int is_loopdev(const char *device)
+పూర్ణాంకం is_loopdev(స్థిరరాశి అక్షరం *device)
 {
-	struct stat st;
-	int rc = 0;
+	నిర్మాణం stat st;
+	పూర్ణాంకం rc = 0;
 
-	if (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
+	ఒకవేళ (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
 		rc = 0;
-	else if (major(st.st_rdev) == LOOPDEV_MAJOR)
+	లేకపోతే ఒకవేళ (major(st.st_rdev) == LOOPDEV_MAJOR)
 		rc = 1;
-	else if (sysfs_devno_is_wholedisk(st.st_rdev)) {
+	లేకపోతే ఒకవేళ (sysfs_devno_is_wholedisk(st.st_rdev)) {
 		/* It's possible that kernel creates a device with a different
 		 * major number ... check by /sys it's really loop device.
 		 */
-		char name[PATH_MAX], *cn, *p = NULL;
+		అక్షరం name[PATH_MAX], *cn, *p = ఖాళీ;
 
-		snprintf(name, sizeof(name), _PATH_SYS_DEVBLOCK "/%u:%u",
+		snprintf(name, పరిమాణం(name), మార్గం_SYS_DEVBLOCK "/%u:%u",
 				major(st.st_rdev), minor(st.st_rdev));
-		cn = ul_canonicalize_path(name);
-		if (cn)
-			p = stripoff_last_component(cn);
+		cn = ul_canonicalize_మార్గం(name);
+		ఒకవేళ (cn)
+			p = stripoff_చివరి_component(cn);
 		rc = p && ul_startswith(p, "loop");
-		free(cn);
+		విడుదల(cn);
 	}
 
-	if (rc == 0)
+	ఒకవేళ (rc == 0)
 		errno = ENODEV;
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -706,33 +706,33 @@ int is_loopdev(const char *device)
  *
  * Returns result from LOOP_GET_STAT64 ioctl or NULL on error.
  */
-struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
+నిర్మాణం loop_info64 *loopcxt_get_info(నిర్మాణం loopdev_cxt *lc)
 {
-	int fd;
+	పూర్ణాంకం fd;
 
-	if (!lc || lc->info_failed) {
+	ఒకవేళ (!lc || lc->info_failed) {
 		errno = EINVAL;
-		return NULL;
+		తిరిగి ఖాళీ;
 	}
 	errno = 0;
-	if (lc->has_info)
-		return &lc->config.info;
+	ఒకవేళ (lc->has_info)
+		తిరిగి &lc->config.info;
 
 	fd = loopcxt_get_fd(lc);
-	if (fd < 0)
-		return NULL;
+	ఒకవేళ (fd < 0)
+		తిరిగి ఖాళీ;
 
-	if (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
+	ఒకవేళ (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
 		lc->has_info = 1;
 		lc->info_failed = 0;
 		DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 OK"));
-		return &lc->config.info;
+		తిరిగి &lc->config.info;
 	}
 
 	lc->info_failed = 1;
 	DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 FAILED"));
 
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /*
@@ -741,30 +741,30 @@ struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
  * Returns (allocated) string with path to the file associated
  * with the current loop device.
  */
-char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
+అక్షరం *loopcxt_get_backing_file(నిర్మాణం loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	char *res = NULL;
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
+	అక్షరం *res = ఖాళీ;
 
-	if (sysfs)
+	ఒకవేళ (sysfs)
 		/*
 		 * This is always preferred, the loop_info64
 		 * has too small buffer for the filename.
 		 */
-		ul_path_read_string(sysfs, &res, "loop/backing_file");
+		ul_మార్గం_read_string(sysfs, &res, "loop/backing_file");
 
-	if (!res && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
+	ఒకవేళ (!res && loopcxt_ioctl_enabled(lc)) {
+		నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
 
-		if (lo) {
-			lo->lo_file_name[LO_NAME_SIZE - 2] = '*';
-			lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
-			res = strdup((char *) lo->lo_file_name);
+		ఒకవేళ (lo) {
+			lo->lo_file_name[LO_NAME_కొలత - 2] = '*';
+			lo->lo_file_name[LO_NAME_కొలత - 1] = '\0';
+			res = strdup((అక్షరం *) lo->lo_file_name);
 		}
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_file [%s]", res));
-	return res;
+	తిరిగి res;
 }
 
 /*
@@ -773,18 +773,18 @@ char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
  * Returns (allocated) string with loop reference. The same as backing file by
  * default.
  */
-char *loopcxt_get_refname(struct loopdev_cxt *lc)
+అక్షరం *loopcxt_get_refname(నిర్మాణం loopdev_cxt *lc)
 {
-	char *res = NULL;
-	struct loop_info64 *lo = loopcxt_get_info(lc);
+	అక్షరం *res = ఖాళీ;
+	నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo) {
-		lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
-		res = strdup((char *) lo->lo_file_name);
+	ఒకవేళ (lo) {
+		lo->lo_file_name[LO_NAME_కొలత - 1] = '\0';
+		res = strdup((అక్షరం *) lo->lo_file_name);
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_refname [%s]", res));
-	return res;
+	తిరిగి res;
 }
 
 /*
@@ -793,27 +793,27 @@ char *loopcxt_get_refname(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
+పూర్ణాంకం loopcxt_get_స్థానభ్రంశం(నిర్మాణం loopdev_cxt *lc, uint64_t *స్థానభ్రంశం)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
+	పూర్ణాంకం rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, offset, "loop/offset") == 0)
+	ఒకవేళ (sysfs)
+		ఒకవేళ (ul_మార్గం_read_u64(sysfs, స్థానభ్రంశం, "loop/offset") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (offset)
-				*offset = lo->lo_offset;
+	ఒకవేళ (rc && loopcxt_ioctl_enabled(lc)) {
+		నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+		ఒకవేళ (lo) {
+			ఒకవేళ (స్థానభ్రంశం)
+				*స్థానభ్రంశం = lo->lo_స్థానభ్రంశం;
 			rc = 0;
-		} else
+		} లేకపోతే
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_offset [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -822,31 +822,31 @@ int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
+పూర్ణాంకం loopcxt_get_blocksize(నిర్మాణం loopdev_cxt *lc, uint64_t *blocksize)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
+	పూర్ణాంకం rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
+	ఒకవేళ (sysfs)
+		ఒకవేళ (ul_మార్గం_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
 			rc = 0;
 
 	/* Fallback based on BLKSSZGET ioctl */
-	if (rc) {
-		int fd = loopcxt_get_fd(lc);
-		int sz = 0;
+	ఒకవేళ (rc) {
+		పూర్ణాంకం fd = loopcxt_get_fd(lc);
+		పూర్ణాంకం sz = 0;
 
-		if (fd < 0)
-			return -EINVAL;
-		rc = blkdev_get_sector_size(fd, &sz);
-		if (rc)
-			return rc;
+		ఒకవేళ (fd < 0)
+			తిరిగి -EINVAL;
+		rc = blkdev_get_sector_కొలత(fd, &sz);
+		ఒకవేళ (rc)
+			తిరిగి rc;
 
 		*blocksize = sz;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_blocksize [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -855,27 +855,27 @@ int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
+పూర్ణాంకం loopcxt_get_sizelimit(నిర్మాణం loopdev_cxt *lc, uint64_t *కొలత)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
+	పూర్ణాంకం rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, size, "loop/sizelimit") == 0)
+	ఒకవేళ (sysfs)
+		ఒకవేళ (ul_మార్గం_read_u64(sysfs, కొలత, "loop/sizelimit") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (size)
-				*size = lo->lo_sizelimit;
+	ఒకవేళ (rc && loopcxt_ioctl_enabled(lc)) {
+		నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+		ఒకవేళ (lo) {
+			ఒకవేళ (కొలత)
+				*కొలత = lo->lo_sizelimit;
 			rc = 0;
-		} else
+		} లేకపోతే
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_sizelimit [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -886,21 +886,21 @@ int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
+పూర్ణాంకం loopcxt_get_encrypt_type(నిర్మాణం loopdev_cxt *lc, uint32_t *type)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+	పూర్ణాంకం rc;
 
 	/* not provided by sysfs */
-	if (lo) {
-		if (type)
+	ఒకవేళ (lo) {
+		ఒకవేళ (type)
 			*type = lo->lo_encrypt_type;
 		rc = 0;
-	} else
+	} లేకపోతే
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_encrypt_type [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -910,15 +910,15 @@ int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
  *
  * Returns: <0 on error, 0 on success
  */
-const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
+స్థిరరాశి అక్షరం *loopcxt_get_crypt_name(నిర్మాణం loopdev_cxt *lc)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
+	నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo)
-		return (char *) lo->lo_crypt_name;
+	ఒకవేళ (lo)
+		తిరిగి (అక్షరం *) lo->lo_crypt_name;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_crypt_name failed"));
-	return NULL;
+	తిరిగి ఖాళీ;
 }
 
 /*
@@ -927,20 +927,20 @@ const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
+పూర్ణాంకం loopcxt_get_backing_devno(నిర్మాణం loopdev_cxt *lc, dev_t *devno)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+	పూర్ణాంకం rc;
 
-	if (lo) {
-		if (devno)
+	ఒకవేళ (lo) {
+		ఒకవేళ (devno)
 			*devno = lo->lo_device;
 		rc = 0;
-	} else
+	} లేకపోతే
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_devno [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -949,20 +949,20 @@ int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
+పూర్ణాంకం loopcxt_get_backing_inode(నిర్మాణం loopdev_cxt *lc, ino_t *ino)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+	పూర్ణాంకం rc;
 
-	if (lo) {
-		if (ino)
+	ఒకవేళ (lo) {
+		ఒకవేళ (ino)
 			*ino = lo->lo_inode;
 		rc = 0;
-	} else
+	} లేకపోతే
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_inode [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -982,20 +982,20 @@ int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
  *
  *  See kernel commit e03c8dd14915fabc101aa495828d58598dc5af98.
  */
-int loopmod_supports_partscan(void)
+పూర్ణాంకం loopmod_supports_partscan(శూన్య)
 {
-	int rc, ret = 0;
+	పూర్ణాంకం rc, ret = 0;
 	FILE *f;
 
-	if (get_linux_version() >= KERNEL_VERSION(3,2,0))
-		return 1;
+	ఒకవేళ (get_linux_సంస్కరణ() >= KERNEL_సంస్కరణ(3,2,0))
+		తిరిగి 1;
 
 	f = fopen("/sys/module/loop/parameters/max_part", "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	ఒకవేళ (!f)
+		తిరిగి 0;
 	rc = fscanf(f, "%d", &ret);
 	fclose(f);
-	return rc == 1 ? ret : 0;
+	తిరిగి rc == 1 ? ret : 0;
 }
 
 /*
@@ -1004,19 +1004,19 @@ int loopmod_supports_partscan(void)
  * Returns: 1 if the partscan flags is set *or* (for old kernels) partitions
  * scanning is enabled for all loop devices.
  */
-int loopcxt_is_partscan(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_is_partscan(నిర్మాణం loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
+	ఒకవేళ (sysfs) {
 		/* kernel >= 3.2 */
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/partscan") == 0)
-			return fl;
+		పూర్ణాంకం fl;
+		ఒకవేళ (ul_మార్గం_read_s32(sysfs, &fl, "loop/partscan") == 0)
+			తిరిగి fl;
 	}
 
 	/* old kernels (including kernels without loopN/loop/<flags> directory */
-	return loopmod_supports_partscan();
+	తిరిగి loopmod_supports_partscan();
 }
 
 /*
@@ -1024,22 +1024,22 @@ int loopcxt_is_partscan(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the autoclear flags is set.
  */
-int loopcxt_is_autoclear(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_is_autoclear(నిర్మాణం loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/autoclear") == 0)
-			return fl;
+	ఒకవేళ (sysfs) {
+		పూర్ణాంకం fl;
+		ఒకవేళ (ul_మార్గం_read_s32(sysfs, &fl, "loop/autoclear") == 0)
+			తిరిగి fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_AUTOCLEAR;
+	ఒకవేళ (loopcxt_ioctl_enabled(lc)) {
+		నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+		ఒకవేళ (lo)
+			తిరిగి lo->lo_flags & LO_FLAGS_AUTOCLEAR;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1047,22 +1047,22 @@ int loopcxt_is_autoclear(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the readonly flags is set.
  */
-int loopcxt_is_readonly(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_is_readonly(నిర్మాణం loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "ro") == 0)
-			return fl;
+	ఒకవేళ (sysfs) {
+		పూర్ణాంకం fl;
+		ఒకవేళ (ul_మార్గం_read_s32(sysfs, &fl, "ro") == 0)
+			తిరిగి fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_READ_ONLY;
+	ఒకవేళ (loopcxt_ioctl_enabled(lc)) {
+		నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+		ఒకవేళ (lo)
+			తిరిగి lo->lo_flags & LO_FLAGS_READ_ONLY;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1070,21 +1070,21 @@ int loopcxt_is_readonly(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the dio flags is set.
  */
-int loopcxt_is_dio(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_is_dio(నిర్మాణం loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	నిర్మాణం మార్గం_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/dio") == 0)
-			return fl;
+	ఒకవేళ (sysfs) {
+		పూర్ణాంకం fl;
+		ఒకవేళ (ul_మార్గం_read_s32(sysfs, &fl, "loop/dio") == 0)
+			తిరిగి fl;
 	}
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_DIRECT_IO;
+	ఒకవేళ (loopcxt_ioctl_enabled(lc)) {
+		నిర్మాణం loop_info64 *lo = loopcxt_get_info(lc);
+		ఒకవేళ (lo)
+			తిరిగి lo->lo_flags & LO_FLAGS_ప్రత్యక్ష_IO;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1105,84 +1105,84 @@ int loopcxt_is_dio(struct loopdev_cxt *lc)
  * Don't forget that old kernels provide very restricted (in size) backing
  * filename by LOOP_GET_STAT64 ioctl only.
  */
-int loopcxt_is_used(struct loopdev_cxt *lc,
-		    struct stat *st,
-		    const char *backing_file,
-		    uint64_t offset,
+పూర్ణాంకం loopcxt_is_వాడిన(నిర్మాణం loopdev_cxt *lc,
+		    నిర్మాణం stat *st,
+		    స్థిరరాశి అక్షరం *backing_file,
+		    uint64_t స్థానభ్రంశం,
 		    uint64_t sizelimit,
-		    int flags)
+		    పూర్ణాంకం flags)
 {
 	ino_t ino = 0;
 	dev_t dev = 0;
 
-	if (!lc)
-		return 0;
+	ఒకవేళ (!lc)
+		తిరిగి 0;
 
 	DBG_OBJ(CXT, lc, ul_debug("checking %s vs. %s",
 				loopcxt_get_device(lc),
 				backing_file));
 
-	if (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
+	ఒకవేళ (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
 		  loopcxt_get_backing_devno(lc, &dev) == 0) {
 
-		if (ino == st->st_ino && dev == st->st_dev)
-			goto found;
+		ఒకవేళ (ino == st->st_ino && dev == st->st_dev)
+			వెళ్ళు దొరికింది;
 
 		/* don't use filename if we have devno and inode */
-		return 0;
+		తిరిగి 0;
 	}
 
 	/* poor man's solution */
-	if (backing_file) {
-		char *name = loopcxt_get_backing_file(lc);
-		int rc = name && strcmp(name, backing_file) == 0;
+	ఒకవేళ (backing_file) {
+		అక్షరం *name = loopcxt_get_backing_file(lc);
+		పూర్ణాంకం rc = name && strcmp(name, backing_file) == 0;
 
-		free(name);
-		if (rc)
-			goto found;
+		విడుదల(name);
+		ఒకవేళ (rc)
+			వెళ్ళు దొరికింది;
 	}
 
-	return 0;
-found:
-	if (flags & LOOPDEV_FL_OFFSET) {
+	తిరిగి 0;
+దొరికింది:
+	ఒకవేళ (flags & LOOPDEV_FL_స్థానభ్రంశం) {
 		uint64_t off = 0;
 
-		int rc = loopcxt_get_offset(lc, &off) == 0 && off == offset;
+		పూర్ణాంకం rc = loopcxt_get_స్థానభ్రంశం(lc, &off) == 0 && off == స్థానభ్రంశం;
 
-		if (rc && flags & LOOPDEV_FL_SIZELIMIT) {
+		ఒకవేళ (rc && flags & LOOPDEV_FL_SIZELIMIT) {
 			uint64_t sz = 0;
 
-			return loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
+			తిరిగి loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
 		}
-		return rc;
+		తిరిగి rc;
 	}
-	return 1;
+	తిరిగి 1;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_offset(struct loopdev_cxt *lc, uint64_t offset)
+పూర్ణాంకం loopcxt_సమితి_స్థానభ్రంశం(నిర్మాణం loopdev_cxt *lc, uint64_t స్థానభ్రంశం)
 {
-	if (!lc)
-		return -EINVAL;
-	lc->config.info.lo_offset = offset;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
+	lc->config.info.lo_స్థానభ్రంశం = స్థానభ్రంశం;
 
-	DBG_OBJ(CXT, lc, ul_debug("set offset=%"PRIu64, offset));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set offset=%"PRIu64, స్థానభ్రంశం));
+	తిరిగి 0;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
+పూర్ణాంకం loopcxt_సమితి_sizelimit(నిర్మాణం loopdev_cxt *lc, uint64_t sizelimit)
 {
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 	lc->config.info.lo_sizelimit = sizelimit;
 
 	DBG_OBJ(CXT, lc, ul_debug("set sizelimit=%"PRIu64, sizelimit));
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1191,14 +1191,14 @@ int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
  *
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+పూర్ణాంకం loopcxt_సమితి_blocksize(నిర్మాణం loopdev_cxt *lc, uint64_t blocksize)
 {
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 	lc->blocksize = blocksize;
 
 	DBG_OBJ(CXT, lc, ul_debug("set blocksize=%"PRIu64, blocksize));
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1209,14 +1209,14 @@ int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
+పూర్ణాంకం loopcxt_సమితి_flags(నిర్మాణం loopdev_cxt *lc, uint32_t flags)
 {
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 	lc->config.info.lo_flags = flags;
 
-	DBG_OBJ(CXT, lc, ul_debug("set flags=%u", (unsigned) flags));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set flags=%u", (గుర్తులేని) flags));
+	తిరిగి 0;
 }
 
 /*
@@ -1228,17 +1228,17 @@ int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
+పూర్ణాంకం loopcxt_సమితి_refname(నిర్మాణం loopdev_cxt *lc, స్థిరరాశి అక్షరం *refname)
 {
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
-	memset(lc->config.info.lo_file_name, 0, sizeof(lc->config.info.lo_file_name));
-	if (refname)
-		xstrncpy((char *)lc->config.info.lo_file_name, refname, LO_NAME_SIZE);
+	memset(lc->config.info.lo_file_name, 0, పరిమాణం(lc->config.info.lo_file_name));
+	ఒకవేళ (refname)
+		xstrncpy((అక్షరం *)lc->config.info.lo_file_name, refname, LO_NAME_కొలత);
 
-	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (char *)lc->config.info.lo_file_name));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (అక్షరం *)lc->config.info.lo_file_name));
+	తిరిగి 0;
 }
 
 /*
@@ -1249,23 +1249,23 @@ int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
+పూర్ణాంకం loopcxt_సమితి_backing_file(నిర్మాణం loopdev_cxt *lc, స్థిరరాశి అక్షరం *filename)
 {
-	if (!lc)
-		return -EINVAL;
+	ఒకవేళ (!lc)
+		తిరిగి -EINVAL;
 
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+	ఒకవేళ (lc->flags & LOOPDEV_FL_NOFOLLOW)
 		lc->filename = strdup(filename);
-	else
-		lc->filename = ul_canonicalize_path(filename);
-	if (!lc->filename)
-		return -errno;
+	లేకపోతే
+		lc->filename = ul_canonicalize_మార్గం(filename);
+	ఒకవేళ (!lc->filename)
+		తిరిగి -errno;
 
-	if (!lc->config.info.lo_file_name[0])
-		loopcxt_set_refname(lc, lc->filename);
+	ఒకవేళ (!lc->config.info.lo_file_name[0])
+		loopcxt_సమితి_refname(lc, lc->filename);
 
 	DBG_OBJ(CXT, lc, ul_debug("set backing file=%s", lc->filename));
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1281,80 +1281,80 @@ int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
  * it closes the device when it exits and whatever consumes the device
  * next will re-open it, causing the resync.
  */
-static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
+స్థిర పూర్ణాంకం loopcxt_check_కొలత(నిర్మాణం loopdev_cxt *lc, పూర్ణాంకం file_fd)
 {
-	uint64_t size, expected_size;
-	int dev_fd;
-	struct stat st;
+	uint64_t కొలత, expected_కొలత;
+	పూర్ణాంకం dev_fd;
+	నిర్మాణం stat st;
 
-	if (!lc->config.info.lo_offset && !lc->config.info.lo_sizelimit)
-		return 0;
+	ఒకవేళ (!lc->config.info.lo_స్థానభ్రంశం && !lc->config.info.lo_sizelimit)
+		తిరిగి 0;
 
-	if (fstat(file_fd, &st)) {
+	ఒకవేళ (fstat(file_fd, &st)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to fstat backing file"));
-		return -errno;
+		తిరిగి -errno;
 	}
-	if (S_ISBLK(st.st_mode)) {
-		if (blkdev_get_size(file_fd, &expected_size)) {
+	ఒకవేళ (S_ISBLK(st.st_mode)) {
+		ఒకవేళ (blkdev_get_కొలత(file_fd, &expected_కొలత)) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to determine device size"));
-			return -errno;
+			తిరిగి -errno;
 		}
-	} else
-		expected_size = st.st_size;
+	} లేకపోతే
+		expected_కొలత = st.st_size;
 
-	if (expected_size == 0 || expected_size <= lc->config.info.lo_offset) {
+	ఒకవేళ (expected_కొలత == 0 || expected_కొలత <= lc->config.info.lo_స్థానభ్రంశం) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine expected size"));
-		return 0;	/* ignore this error */
+		తిరిగి 0;	/* ignore this error */
 	}
 
-	if (lc->config.info.lo_offset > 0)
-		expected_size -= lc->config.info.lo_offset;
+	ఒకవేళ (lc->config.info.lo_స్థానభ్రంశం > 0)
+		expected_కొలత -= lc->config.info.lo_స్థానభ్రంశం;
 
-	if (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_size)
-		expected_size = lc->config.info.lo_sizelimit;
+	ఒకవేళ (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_కొలత)
+		expected_కొలత = lc->config.info.lo_sizelimit;
 
 	dev_fd = loopcxt_get_fd(lc);
-	if (dev_fd < 0) {
+	ఒకవేళ (dev_fd < 0) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to get loop FD"));
-		return -errno;
+		తిరిగి -errno;
 	}
 
-	if (blkdev_get_size(dev_fd, &size)) {
+	ఒకవేళ (blkdev_get_కొలత(dev_fd, &కొలత)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine loopdev size"));
-		return -errno;
+		తిరిగి -errno;
 	}
 
 	/* It's block device, so, align to 512-byte sectors */
-	if (expected_size % 512) {
+	ఒకవేళ (expected_కొలత % 512) {
 		DBG_OBJ(CXT, lc, ul_debug("expected size misaligned to 512-byte sectors"));
-		expected_size = (expected_size >> 9) << 9;
+		expected_కొలత = (expected_కొలత >> 9) << 9;
 	}
 
-	if (expected_size != size) {
+	ఒకవేళ (expected_కొలత != కొలత) {
 		DBG_OBJ(CXT, lc, ul_debug("warning: loopdev and expected "
 				      "size mismatch (%ju/%ju)",
-				      size, expected_size));
+				      కొలత, expected_కొలత));
 
-		if (loopcxt_ioctl_capacity(lc)) {
+		ఒకవేళ (loopcxt_ioctl_సామర్థ్యం(lc)) {
 			/* ioctl not available */
-			if (errno == ENOTTY || errno == EINVAL)
+			ఒకవేళ (errno == ENOTTY || errno == EINVAL)
 				errno = ERANGE;
-			return -errno;
+			తిరిగి -errno;
 		}
 
-		if (blkdev_get_size(dev_fd, &size))
-			return -errno;
+		ఒకవేళ (blkdev_get_కొలత(dev_fd, &కొలత))
+			తిరిగి -errno;
 
-		if (expected_size != size) {
+		ఒకవేళ (expected_కొలత != కొలత) {
 			errno = ERANGE;
 			DBG_OBJ(CXT, lc, ul_debug("failed to set loopdev size, "
 					"size: %ju, expected: %ju",
-					size, expected_size));
-			return -errno;
+					కొలత, expected_కొలత));
+			తిరిగి -errno;
 		}
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 
@@ -1376,139 +1376,139 @@ static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_setup_device(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_అమరిక_device(నిర్మాణం loopdev_cxt *lc)
 {
-	int file_fd, dev_fd;
-	mode_t flags = O_CLOEXEC, mode = O_RDWR;
-	int rc = -1, cnt = 0;
-	int errsv = 0;
-	int fallback = 0;
+	పూర్ణాంకం file_fd, dev_fd;
+	mode_t flags = O_CLOEXEC, బహుళకం = O_RDWR;
+	పూర్ణాంకం rc = -1, cnt = 0;
+	పూర్ణాంకం errsv = 0;
+	పూర్ణాంకం fallback = 0;
 
-	if (!lc || !*lc->device || !lc->filename)
-		return -EINVAL;
+	ఒకవేళ (!lc || !*lc->device || !lc->filename)
+		తిరిగి -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("device setup requested"));
+	DBG_OBJ(అమరిక, lc, ul_debug("device setup requested"));
 
 	/*
 	 * Open backing file and device
 	 */
-	if (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
-		mode = O_RDONLY;
+	ఒకవేళ (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
+		బహుళకం = O_RDONLY;
 
-	if (lc->config.info.lo_flags & LO_FLAGS_DIRECT_IO)
-		flags |= O_DIRECT;
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
-		file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-	else
-		file_fd = open(lc->filename, mode | flags);
+	ఒకవేళ (lc->config.info.lo_flags & LO_FLAGS_ప్రత్యక్ష_IO)
+		flags |= O_ప్రత్యక్ష;
+	ఒకవేళ (lc->flags & LOOPDEV_FL_NOFOLLOW)
+		file_fd = ul_open_no_symlinks(lc->filename, బహుళకం | flags, 0);
+	లేకపోతే
+		file_fd = open(lc->filename, బహుళకం | flags);
 
-	if (file_fd < 0 && mode != O_RDONLY
+	ఒకవేళ (file_fd < 0 && బహుళకం != O_RDONLY
 	    && (errno == EROFS || errno == EACCES)) {
-		mode = O_RDONLY;
-		if (lc->flags & LOOPDEV_FL_NOFOLLOW)
-			file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-		else
-			file_fd = open(lc->filename, mode | flags);
+		బహుళకం = O_RDONLY;
+		ఒకవేళ (lc->flags & LOOPDEV_FL_NOFOLLOW)
+			file_fd = ul_open_no_symlinks(lc->filename, బహుళకం | flags, 0);
+		లేకపోతే
+			file_fd = open(lc->filename, బహుళకం | flags);
 	}
-	if (file_fd < 0) {
-		DBG_OBJ(SETUP, lc, ul_debug("open backing file failed: %m"));
-		return -errno;
+	ఒకవేళ (file_fd < 0) {
+		DBG_OBJ(అమరిక, lc, ul_debug("open backing file failed: %m"));
+		తిరిగి -errno;
 	}
-	DBG_OBJ(SETUP, lc, ul_debug("backing file open: OK"));
+	DBG_OBJ(అమరిక, lc, ul_debug("backing file open: OK"));
 
-	if (mode == O_RDONLY)
+	ఒకవేళ (బహుళకం == O_RDONLY)
 		lc->config.info.lo_flags |= LO_FLAGS_READ_ONLY;	/* kernel loopdev mode */
-	else
+	లేకపోతే
 		lc->config.info.lo_flags &= ~LO_FLAGS_READ_ONLY;
 
-	do {
+	చేయి {
 		errno = 0;
 
-		dev_fd = __loopcxt_get_fd(lc, mode);
-		if (dev_fd >= 0 || lc->control_ok == 0)
-			break;
-		if (errno != EACCES && errno != ENOENT)
-			break;
+		dev_fd = __loopcxt_get_fd(lc, బహుళకం);
+		ఒకవేళ (dev_fd >= 0 || lc->control_ok == 0)
+			ఆపు;
+		ఒకవేళ (errno != EACCES && errno != ENOENT)
+			ఆపు;
 		/* We have permissions to open /dev/loop-control, but open
 		 * /dev/loopN failed with EACCES, it's probably because udevd
 		 * does not applied chown yet. Let's wait a moment. */
 		xusleep(25000);
-	} while (cnt++ < 16);
+	} అయితే (cnt++ < 16);
 
-	if (dev_fd < 0) {
+	ఒకవేళ (dev_fd < 0) {
 		rc = -errno;
-		goto err;
+		వెళ్ళు err;
 	}
 
-	DBG_OBJ(SETUP, lc, ul_debug("device open: OK"));
+	DBG_OBJ(అమరిక, lc, ul_debug("device open: OK"));
 
 	/*
 	 * Atomic way to configure all by one ioctl call
 	 * -- since Linux v5.8-rc1, commit 3448914e8cc550ba792d4ccc74471d1ca4293aae
 	 */
 	lc->config.fd = file_fd;
-	if (lc->blocksize > 0)
-		lc->config.block_size = lc->blocksize;
+	ఒకవేళ (lc->blocksize > 0)
+		lc->config.ఖండం_కొలత = lc->blocksize;
 
 	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_CONFIGURE, &lc->config) );
-	if (rc != 0) {
+	ఒకవేళ (rc != 0) {
 		errsv = errno;
-		if (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
-			DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE failed: %m"));
-			goto err;
+		ఒకవేళ (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
+			DBG_OBJ(అమరిక, lc, ul_debug("LOOP_CONFIGURE failed: %m"));
+			వెళ్ళు err;
 		}
 		fallback = 1;
-	} else {
-		DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE: OK"));
+	} లేకపోతే {
+		DBG_OBJ(అమరిక, lc, ul_debug("LOOP_CONFIGURE: OK"));
 	}
 
 	/*
 	 * Old deprecated way; first assign backing file FD and then in the
 	 * second step set loop device properties.
 	 */
-	if (fallback) {
-		if (ioctl(dev_fd, LOOP_SET_FD, file_fd) < 0) {
+	ఒకవేళ (fallback) {
+		ఒకవేళ (ioctl(dev_fd, LOOP_సమితి_FD, file_fd) < 0) {
 			rc = -errno;
 			errsv = errno;
-			DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD failed: %m"));
-			goto err;
+			DBG_OBJ(అమరిక, lc, ul_debug("LOOP_SET_FD failed: %m"));
+			వెళ్ళు err;
 		}
 
-		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD: OK"));
+		DBG_OBJ(అమరిక, lc, ul_debug("LOOP_SET_FD: OK"));
 
-		if (lc->blocksize > 0
+		ఒకవేళ (lc->blocksize > 0
 			&& (rc = loopcxt_ioctl_blocksize(lc, lc->blocksize)) < 0) {
 			errsv = -rc;
-			goto err;
+			వెళ్ళు err;
 		}
 
-		if ((rc = loopcxt_ioctl_status(lc)) < 0) {
+		ఒకవేళ ((rc = loopcxt_ioctl_స్థితి(lc)) < 0) {
 			errsv = -rc;
-			goto err;
+			వెళ్ళు err;
 		}
 	}
 
-	if ((rc = loopcxt_check_size(lc, file_fd)))
-		goto err;
+	ఒకవేళ ((rc = loopcxt_check_కొలత(lc, file_fd)))
+		వెళ్ళు err;
 
 	close(file_fd);
 
-	memset(&lc->config, 0, sizeof(lc->config));
+	memset(&lc->config, 0, పరిమాణం(lc->config));
 	lc->has_info = 0;
 	lc->info_failed = 0;
 
-	DBG_OBJ(SETUP, lc, ul_debug("success [rc=0]"));
-	return 0;
+	DBG_OBJ(అమరిక, lc, ul_debug("success [rc=0]"));
+	తిరిగి 0;
 err:
-	if (file_fd >= 0)
+	ఒకవేళ (file_fd >= 0)
 		close(file_fd);
-	if (dev_fd >= 0 && rc != -EBUSY)
+	ఒకవేళ (dev_fd >= 0 && rc != -EBUSY)
 		ioctl(dev_fd, LOOP_CLR_FD, 0);
-	if (errsv)
+	ఒకవేళ (errsv)
 		errno = errsv;
 
-	DBG_OBJ(SETUP, lc, ul_debug("failed [rc=%d]", rc));
-	return rc;
+	DBG_OBJ(అమరిక, lc, ul_debug("failed [rc=%d]", rc));
+	తిరిగి rc;
 }
 
 
@@ -1523,90 +1523,90 @@ err:
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_ioctl_status(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_ioctl_స్థితి(నిర్మాణం loopdev_cxt *lc)
 {
-	int dev_fd, rc;
+	పూర్ణాంకం dev_fd, rc;
 
 	errno = 0;
 	dev_fd = loopcxt_get_fd(lc);
 
-	if (dev_fd < 0)
-		return -errno;
+	ఒకవేళ (dev_fd < 0)
+		తిరిగి -errno;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_STATUS64"));
+	DBG_OBJ(అమరిక, lc, ul_debug("calling LOOP_SET_STATUS64"));
 
-	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_SET_STATUS64, &lc->config.info) );
-	if (rc != 0) {
-		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64 failed: %m"));
-		return rc;
+	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_సమితి_STATUS64, &lc->config.info) );
+	ఒకవేళ (rc != 0) {
+		DBG_OBJ(అమరిక, lc, ul_debug("LOOP_SET_STATUS64 failed: %m"));
+		తిరిగి rc;
 	}
 
-	DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64: OK"));
-	return 0;
+	DBG_OBJ(అమరిక, lc, ul_debug("LOOP_SET_STATUS64: OK"));
+	తిరిగి 0;
 }
 
-int loopcxt_ioctl_capacity(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_ioctl_సామర్థ్యం(నిర్మాణం loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	పూర్ణాంకం rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ఒకవేళ (fd < 0)
+		తిరిగి -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_CAPACITY"));
+	DBG_OBJ(అమరిక, lc, ul_debug("calling LOOP_SET_CAPACITY"));
 
 	/* Kernels prior to v2.6.30 don't support this ioctl */
-	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_CAPACITY, 0) );
-	if (rc != 0) {
+	rc = repeat_on_eagain( ioctl(fd, LOOP_సమితి_సామర్థ్యం, 0) );
+	ఒకవేళ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_CAPACITY failed: %m"));
-		return rc;
+		తిరిగి rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("capacity set"));
-	return 0;
+	తిరిగి 0;
 }
 
-int loopcxt_ioctl_dio(struct loopdev_cxt *lc, unsigned long use_dio)
+పూర్ణాంకం loopcxt_ioctl_dio(నిర్మాణం loopdev_cxt *lc, గుర్తులేని దీర్ఘ use_dio)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	పూర్ణాంకం rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ఒకవేళ (fd < 0)
+		తిరిగి -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_DIRECT_IO"));
+	DBG_OBJ(అమరిక, lc, ul_debug("calling LOOP_SET_DIRECT_IO"));
 
 	/* Kernels prior to v4.4 don't support this ioctl */
-	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_DIRECT_IO, use_dio) );
-	if (rc != 0) {
+	rc = repeat_on_eagain( ioctl(fd, LOOP_సమితి_ప్రత్యక్ష_IO, use_dio) );
+	ఒకవేళ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_DIRECT_IO failed: %m"));
-		return rc;
+		తిరిగి rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("direct io set"));
-	return 0;
+	తిరిగి 0;
 }
 
 /*
  * Kernel uses "unsigned long" as ioctl arg, but we use u64 for all sizes to
  * keep loopdev internal API simple.
  */
-int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+పూర్ణాంకం loopcxt_ioctl_blocksize(నిర్మాణం loopdev_cxt *lc, uint64_t blocksize)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	పూర్ణాంకం rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ఒకవేళ (fd < 0)
+		తిరిగి -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_BLOCK_SIZE"));
+	DBG_OBJ(అమరిక, lc, ul_debug("calling LOOP_SET_BLOCK_SIZE"));
 
 	rc = repeat_on_eagain(
-		ioctl(fd, LOOP_SET_BLOCK_SIZE, (unsigned long) blocksize) );
-	if (rc != 0) {
+		ioctl(fd, LOOP_సమితి_ఖండం_కొలత, (గుర్తులేని దీర్ఘ) blocksize) );
+	ఒకవేళ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_BLOCK_SIZE failed: %m"));
-		return rc;
+		తిరిగి rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("logical block size set"));
-	return 0;
+	తిరిగి 0;
 }
 
 /*
@@ -1618,106 +1618,106 @@ int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error
  */
-static int loopcxt_get_device_nr(struct loopdev_cxt *lc, int *nr)
+స్థిర పూర్ణాంకం loopcxt_get_device_nr(నిర్మాణం loopdev_cxt *lc, పూర్ణాంకం *nr)
 {
-	const char *p, *dev;
-	int rc = -EINVAL;
+	స్థిరరాశి అక్షరం *p, *dev;
+	పూర్ణాంకం rc = -EINVAL;
 
 	errno = 0;
-	if (!lc || !nr)
-		return rc;
+	ఒకవేళ (!lc || !nr)
+		తిరిగి rc;
 	*nr = -1;
 
 	dev = loopcxt_get_device(lc);
-	if (!dev)
-		goto done;
+	ఒకవేళ (!dev)
+		వెళ్ళు పూర్తి;
 
 	p = strrchr(dev, '/');
-	if (!p)
-		goto done;
+	ఒకవేళ (!p)
+		వెళ్ళు పూర్తి;
 
-	if (sscanf(p, "/loop%d", nr) != 1 && sscanf(p, "/%d", nr) != 1)
-		goto done;
+	ఒకవేళ (అక్షరశ్రేణి_చదువు(p, "/loop%d", nr) != 1 && అక్షరశ్రేణి_చదువు(p, "/%d", nr) != 1)
+		వెళ్ళు పూర్తి;
 
-	if (*nr < 0)
-		goto done;
+	ఒకవేళ (*nr < 0)
+		వెళ్ళు పూర్తి;
 	rc = 0;
-done:
-	if (rc && !errno)
+పూర్తి:
+	ఒకవేళ (rc && !errno)
 		errno = -rc;
 	DBG_OBJ(CXT, lc, ul_debug("get_device_nr [nr=%d]", *nr));
-	return rc;
+	తిరిగి rc;
 }
 
-int loopcxt_detach_device(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_detach_device(నిర్మాణం loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	పూర్ణాంకం rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	ఒకవేళ (fd < 0)
+		తిరిగి -EINVAL;
 
-	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_CLR_FD"));
+	DBG_OBJ(అమరిక, lc, ul_debug("calling LOOP_CLR_FD"));
 
 	rc = repeat_on_eagain( ioctl(fd, LOOP_CLR_FD, 0) );
-	if (rc != 0) {
+	ఒకవేళ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_CLR_FD failed: %m"));
-		return rc;
+		తిరిగి rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("device removed"));
-	return 0;
+	తిరిగి 0;
 }
 
-int loopcxt_remove_device(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_remove_device(నిర్మాణం loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	పూర్ణాంకం rc = -EINVAL;
+	పూర్ణాంకం ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	ఒకవేళ (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
-		goto done;
+	ఒకవేళ (rc)
+		వెళ్ళు పూర్తి;
 
-	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	ctl = open(మార్గం_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
+	ఒకవేళ (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("remove_device %d", nr));
 		rc = ioctl(ctl, LOOP_CTL_REMOVE, nr);
 		close(ctl);
 	}
 	lc->control_ok = rc >= 0 ? 1 : 0;
-done:
+పూర్తి:
 	DBG_OBJ(CXT, lc, ul_debug("remove_device done [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
-int loopcxt_add_device(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_కూడు_device(నిర్మాణం loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	పూర్ణాంకం rc = -EINVAL;
+	పూర్ణాంకం ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	ఒకవేళ (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
-		goto done;
+		వెళ్ళు పూర్తి;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
-		goto done;
+	ఒకవేళ (rc)
+		వెళ్ళు పూర్తి;
 
-	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	ctl = open(మార్గం_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
+	ఒకవేళ (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("add_device %d", nr));
-		rc = ioctl(ctl, LOOP_CTL_ADD, nr);
+		rc = ioctl(ctl, LOOP_CTL_కూడు, nr);
 		close(ctl);
 	}
 	lc->control_ok = rc >= 0 ? 1 : 0;
-done:
+పూర్తి:
 	DBG_OBJ(CXT, lc, ul_debug("add_device done [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
@@ -1728,47 +1728,47 @@ done:
  *
  * Returns: 0 = success, < 0 error
  */
-int loopcxt_find_unused(struct loopdev_cxt *lc)
+పూర్ణాంకం loopcxt_కనుగొను_వాడని(నిర్మాణం loopdev_cxt *lc)
 {
-	int rc = -1;
+	పూర్ణాంకం rc = -1;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_unused requested"));
 
-	if (lc->flags & LOOPDEV_FL_CONTROL) {
-		int ctl;
+	ఒకవేళ (lc->flags & LOOPDEV_FL_CONTROL) {
+		పూర్ణాంకం ctl;
 
 		DBG_OBJ(CXT, lc, ul_debug("using loop-control"));
 
-		ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-		if (ctl >= 0)
+		ctl = open(మార్గం_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
+		ఒకవేళ (ctl >= 0)
 			rc = ioctl(ctl, LOOP_CTL_GET_FREE);
-		else
+		లేకపోతే
 			rc = -errno;
-		if (rc >= 0) {
-			char name[16];
-			snprintf(name, sizeof(name), "loop%d", rc);
+		ఒకవేళ (rc >= 0) {
+			అక్షరం name[16];
+			snprintf(name, పరిమాణం(name), "loop%d", rc);
 
-			rc = loopiter_set_device(lc, name);
+			rc = loopiter_సమితి_device(lc, name);
 		}
 		lc->control_ok = ctl >= 0 && rc == 0 ? 1 : 0;
-		if (ctl >= 0)
+		ఒకవేళ (ctl >= 0)
 			close(ctl);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by loop-control [rc=%d]", rc));
 	}
 
-	if (rc < 0 && rc != -EACCES) {
+	ఒకవేళ (rc < 0 && rc != -EACCES) {
 		DBG_OBJ(CXT, lc, ul_debug("using loop scan"));
 		rc = loopcxt_init_iterator(lc, LOOPITER_FL_FREE);
-		if (rc)
-			return rc;
+		ఒకవేళ (rc)
+			తిరిగి rc;
 
-		rc = loopcxt_next(lc);
+		rc = loopcxt_తదుపరి(lc);
 		loopcxt_deinit_iterator(lc);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by scan [rc=%d]", rc));
-		if (rc)
-			return -ENOENT;
+		ఒకవేళ (rc)
+			తిరిగి -ENOENT;
 	}
-	return rc;
+	తిరిగి rc;
 }
 
 
@@ -1776,223 +1776,223 @@ int loopcxt_find_unused(struct loopdev_cxt *lc)
 /*
  * Return: TRUE/FALSE
  */
-int loopdev_is_autoclear(const char *device)
+పూర్ణాంకం loopdev_is_autoclear(స్థిరరాశి అక్షరం *device)
 {
-	struct loopdev_cxt lc;
-	int rc;
+	నిర్మాణం loopdev_cxt lc;
+	పూర్ణాంకం rc;
 
-	if (!device)
-		return 0;
+	ఒకవేళ (!device)
+		తిరిగి 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
-		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	ఒకవేళ (!rc)
+		rc = loopcxt_సమితి_device(&lc, device);
+	ఒకవేళ (!rc)
 		rc = loopcxt_is_autoclear(&lc);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	తిరిగి rc;
 }
 
-char *loopdev_get_backing_file(const char *device)
+అక్షరం *loopdev_get_backing_file(స్థిరరాశి అక్షరం *device)
 {
-	struct loopdev_cxt lc;
-	char *res = NULL;
+	నిర్మాణం loopdev_cxt lc;
+	అక్షరం *res = ఖాళీ;
 
-	if (!device)
-		return NULL;
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_set_device(&lc, device) == 0)
+	ఒకవేళ (!device)
+		తిరిగి ఖాళీ;
+	ఒకవేళ (loopcxt_init(&lc, 0))
+		తిరిగి ఖాళీ;
+	ఒకవేళ (loopcxt_సమితి_device(&lc, device) == 0)
 		res = loopcxt_get_backing_file(&lc);
 
 	loopcxt_deinit(&lc);
-	return res;
+	తిరిగి res;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_has_backing_file(const char *device)
+పూర్ణాంకం loopdev_has_backing_file(స్థిరరాశి అక్షరం *device)
 {
-	char *tmp = loopdev_get_backing_file(device);
+	అక్షరం *tmp = loopdev_get_backing_file(device);
 
-	if (tmp) {
-		free(tmp);
-		return 1;
+	ఒకవేళ (tmp) {
+		విడుదల(tmp);
+		తిరిగి 1;
 	}
-	return 0;
+	తిరిగి 0;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_is_used(const char *device, const char *filename,
-		    uint64_t offset, uint64_t sizelimit, int flags)
+పూర్ణాంకం loopdev_is_వాడిన(స్థిరరాశి అక్షరం *device, స్థిరరాశి అక్షరం *filename,
+		    uint64_t స్థానభ్రంశం, uint64_t sizelimit, పూర్ణాంకం flags)
 {
-	struct loopdev_cxt lc;
-	struct stat st;
-	int rc = 0;
+	నిర్మాణం loopdev_cxt lc;
+	నిర్మాణం stat st;
+	పూర్ణాంకం rc = 0;
 
-	if (!device || !filename)
-		return 0;
+	ఒకవేళ (!device || !filename)
+		తిరిగి 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
-		rc = loopcxt_set_device(&lc, device);
-	if (rc)
-		return rc;
+	ఒకవేళ (!rc)
+		rc = loopcxt_సమితి_device(&lc, device);
+	ఒకవేళ (rc)
+		తిరిగి rc;
 
 	rc = !stat(filename, &st);
-	rc = loopcxt_is_used(&lc, rc ? &st : NULL, filename, offset, sizelimit, flags);
+	rc = loopcxt_is_వాడిన(&lc, rc ? &st : ఖాళీ, filename, స్థానభ్రంశం, sizelimit, flags);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	తిరిగి rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error
  */
-int loopdev_detach(const char *device)
+పూర్ణాంకం loopdev_detach(స్థిరరాశి అక్షరం *device)
 {
-	struct loopdev_cxt lc;
-	int rc;
+	నిర్మాణం loopdev_cxt lc;
+	పూర్ణాంకం rc;
 
-	if (!device)
-		return -EINVAL;
+	ఒకవేళ (!device)
+		తిరిగి -EINVAL;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
-		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	ఒకవేళ (!rc)
+		rc = loopcxt_సమితి_device(&lc, device);
+	ఒకవేళ (!rc)
 		rc = loopcxt_detach_device(&lc);
 	loopcxt_deinit(&lc);
-	return rc;
+	తిరిగి rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error, 1 not found
  */
-int loopcxt_find_by_backing_file(struct loopdev_cxt *lc, const char *filename,
-				 uint64_t offset, uint64_t sizelimit, int flags)
+పూర్ణాంకం loopcxt_కనుగొను_by_backing_file(నిర్మాణం loopdev_cxt *lc, స్థిరరాశి అక్షరం *filename,
+				 uint64_t స్థానభ్రంశం, uint64_t sizelimit, పూర్ణాంకం flags)
 {
-	int rc, hasst;
-	struct stat st;
+	పూర్ణాంకం rc, hasst;
+	నిర్మాణం stat st;
 
-	if (!filename)
-		return -EINVAL;
+	ఒకవేళ (!filename)
+		తిరిగి -EINVAL;
 
 	hasst = !stat(filename, &st);
 
-	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	rc = loopcxt_init_iterator(lc, LOOPITER_FL_వాడిన);
+	ఒకవేళ (rc)
+		తిరిగి rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
+	అయితే ((rc = loopcxt_తదుపరి(lc)) == 0) {
 
-		if (loopcxt_is_used(lc, hasst ? &st : NULL,
-				    filename, offset, sizelimit, flags))
-			break;
+		ఒకవేళ (loopcxt_is_వాడిన(lc, hasst ? &st : ఖాళీ,
+				    filename, స్థానభ్రంశం, sizelimit, flags))
+			ఆపు;
 	}
 
 	loopcxt_deinit_iterator(lc);
-	return rc;
+	తిరిగి rc;
 }
 
 /*
  * Returns: 0 = not found, < 0 error, 1 found, 2 found full size and offset match
  */
-int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
-			   uint64_t offset, uint64_t sizelimit)
+పూర్ణాంకం loopcxt_కనుగొను_overlap(నిర్మాణం loopdev_cxt *lc, స్థిరరాశి అక్షరం *filename,
+			   uint64_t స్థానభ్రంశం, uint64_t sizelimit)
 {
-	int rc, hasst;
-	struct stat st;
+	పూర్ణాంకం rc, hasst;
+	నిర్మాణం stat st;
 
-	if (!filename)
-		return -EINVAL;
+	ఒకవేళ (!filename)
+		తిరిగి -EINVAL;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap requested"));
 	hasst = !stat(filename, &st);
 
-	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	rc = loopcxt_init_iterator(lc, LOOPITER_FL_వాడిన);
+	ఒకవేళ (rc)
+		తిరిగి rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
-		uint64_t lc_sizelimit, lc_offset;
+	అయితే ((rc = loopcxt_తదుపరి(lc)) == 0) {
+		uint64_t lc_sizelimit, lc_స్థానభ్రంశం;
 
-		rc = loopcxt_is_used(lc, hasst ? &st : NULL,
-				     filename, offset, sizelimit, 0);
+		rc = loopcxt_is_వాడిన(lc, hasst ? &st : ఖాళీ,
+				     filename, స్థానభ్రంశం, sizelimit, 0);
 		/*
 		 * Either the loopdev is unused or we've got an error which can
 		 * happen when we are racing with device autoclear. Just ignore
 		 * this loopdev...
 		 */
-		if (rc <= 0)
-			continue;
+		ఒకవేళ (rc <= 0)
+			కొనసాగు;
 
 		DBG_OBJ(CXT, lc, ul_debug("found %s backed by %s",
 			loopcxt_get_device(lc), filename));
 
-		rc = loopcxt_get_offset(lc, &lc_offset);
-		if (rc) {
+		rc = loopcxt_get_స్థానభ్రంశం(lc, &lc_స్థానభ్రంశం);
+		ఒకవేళ (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get offset for device %s",
 				loopcxt_get_device(lc)));
-			continue;
+			కొనసాగు;
 		}
 		rc = loopcxt_get_sizelimit(lc, &lc_sizelimit);
-		if (rc) {
+		ఒకవేళ (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get sizelimit for device %s",
 				loopcxt_get_device(lc)));
-			continue;
+			కొనసాగు;
 		}
 
 		/* full match */
-		if (lc_sizelimit == sizelimit && lc_offset == offset) {
+		ఒకవేళ (lc_sizelimit == sizelimit && lc_స్థానభ్రంశం == స్థానభ్రంశం) {
 			DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s (full match)",
 						loopcxt_get_device(lc)));
 			rc = 2;
-			goto found;
+			వెళ్ళు దొరికింది;
 		}
 
 		/* overlap */
-		if (lc_sizelimit != 0 && offset >= lc_offset + lc_sizelimit)
-			continue;
-		if (sizelimit != 0 && offset + sizelimit <= lc_offset)
-			continue;
+		ఒకవేళ (lc_sizelimit != 0 && స్థానభ్రంశం >= lc_స్థానభ్రంశం + lc_sizelimit)
+			కొనసాగు;
+		ఒకవేళ (sizelimit != 0 && స్థానభ్రంశం + sizelimit <= lc_స్థానభ్రంశం)
+			కొనసాగు;
 
 		DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s",
 			loopcxt_get_device(lc)));
 			rc = 1;
-			goto found;
+			వెళ్ళు దొరికింది;
 	}
 
-	if (rc == 1)
+	ఒకవేళ (rc == 1)
 		rc = 0;	/* not found */
-found:
+దొరికింది:
 	loopcxt_deinit_iterator(lc);
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap done [rc=%d]", rc));
-	return rc;
+	తిరిగి rc;
 }
 
 /*
  * Returns allocated string with device name
  */
-char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64_t sizelimit, int flags)
+అక్షరం *loopdev_కనుగొను_by_backing_file(స్థిరరాశి అక్షరం *filename, uint64_t స్థానభ్రంశం, uint64_t sizelimit, పూర్ణాంకం flags)
 {
-	struct loopdev_cxt lc;
-	char *res = NULL;
+	నిర్మాణం loopdev_cxt lc;
+	అక్షరం *res = ఖాళీ;
 
-	if (!filename)
-		return NULL;
+	ఒకవేళ (!filename)
+		తిరిగి ఖాళీ;
 
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_find_by_backing_file(&lc, filename, offset, sizelimit, flags) == 0)
+	ఒకవేళ (loopcxt_init(&lc, 0))
+		తిరిగి ఖాళీ;
+	ఒకవేళ (loopcxt_కనుగొను_by_backing_file(&lc, filename, స్థానభ్రంశం, sizelimit, flags) == 0)
 		res = loopcxt_strdup_device(&lc);
 	loopcxt_deinit(&lc);
 
-	return res;
+	తిరిగి res;
 }
 
 /*
@@ -2000,59 +2000,59 @@ char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64
  * device is associated with the given @filename and @loopdev is not NULL then
  * @loopdev returns name of the device.
  */
-int loopdev_count_by_backing_file(const char *filename, char **loopdev)
+పూర్ణాంకం loopdev_లెక్క_by_backing_file(స్థిరరాశి అక్షరం *filename, అక్షరం **loopdev)
 {
-	struct loopdev_cxt lc;
-	int count = 0, rc;
+	నిర్మాణం loopdev_cxt lc;
+	పూర్ణాంకం లెక్క = 0, rc;
 
-	if (!filename)
-		return -1;
+	ఒకవేళ (!filename)
+		తిరిగి -1;
 
 	rc = loopcxt_init(&lc, 0);
-	if (rc)
-		return rc;
-	if (loopcxt_init_iterator(&lc, LOOPITER_FL_USED))
-		return -1;
+	ఒకవేళ (rc)
+		తిరిగి rc;
+	ఒకవేళ (loopcxt_init_iterator(&lc, LOOPITER_FL_వాడిన))
+		తిరిగి -1;
 
-	while(loopcxt_next(&lc) == 0) {
-		char *backing = loopcxt_get_backing_file(&lc);
+	అయితే(loopcxt_తదుపరి(&lc) == 0) {
+		అక్షరం *backing = loopcxt_get_backing_file(&lc);
 
-		if (!backing || strcmp(backing, filename) != 0) {
-			free(backing);
-			continue;
+		ఒకవేళ (!backing || strcmp(backing, filename) != 0) {
+			విడుదల(backing);
+			కొనసాగు;
 		}
 
-		free(backing);
-		if (loopdev && count == 0)
+		విడుదల(backing);
+		ఒకవేళ (loopdev && లెక్క == 0)
 			*loopdev = loopcxt_strdup_device(&lc);
-		count++;
+		లెక్క++;
 	}
 
 	loopcxt_deinit(&lc);
 
-	if (loopdev && count > 1) {
-		free(*loopdev);
-		*loopdev = NULL;
+	ఒకవేళ (loopdev && లెక్క > 1) {
+		విడుదల(*loopdev);
+		*loopdev = ఖాళీ;
 	}
-	return count;
+	తిరిగి లెక్క;
 }
 
-#ifdef TEST_PROGRAM_LOOPDEV
-int main(int argc, char *argv[])
+#నిర్వచితమైతే TEST_కార్యక్రమం_LOOPDEV
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	if (argc < 2)
-		goto usage;
+	ఒకవేళ (argc < 2)
+		వెళ్ళు usage;
 
-	if (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
-		printf("%s: %s\n", argv[2], is_loopdev(argv[2]) ? "OK" : "FAIL");
-	else
-		goto usage;
+	ఒకవేళ (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
+		రాయి("%s: %s\n", argv[2], is_loopdev(argv[2]) ? "OK" : "FAIL");
+	లేకపోతే
+		వెళ్ళు usage;
 
-	return EXIT_SUCCESS;
+	తిరిగి EXIT_SUCCESS;
 usage:
 	fprintf(stderr, "usage: %1$s --is-loopdev <dev>\n",
-			program_invocation_short_name);
-	return EXIT_FAILURE;
+			కార్యక్రమం_invocation_short_name);
+	తిరిగి EXIT_FAILURE;
 }
-#endif
+#అయితే_ముగింపు
 

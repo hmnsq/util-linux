@@ -31,63 +31,63 @@
  * Written by Karel Zak <kzak@redhat.com> [October 2021]
  */
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#అన్తర్భావ <inttypes.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/stat.h>
+#అన్తర్భావ <unistd.h>
 
 /* Linux crypto */
-#ifdef HAVE_LINUX_IF_ALG_H
+#నిర్వచితమైతే HAVE_LINUX_IF_ALG_H
 # include <sys/socket.h>
 # include <linux/if_alg.h>
 # include <sys/param.h>
 # include <sys/sendfile.h>
-#endif
+#అయితే_ముగింపు
 
-#include "c.h"
-#include "all-io.h"
-#include "fileeq.h"
-#include "debug.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "all-io.h"
+#అన్తర్భావ "fileeq.h"
+#అన్తర్భావ "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulfileeq);
-UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
+స్థిర UL_DEBUG_DEFINE_ముసుగు(ulfileeq);
+UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_ఖాళీలు_MASKNAMES;
 
-#define ULFILEEQ_DEBUG_INIT	(1 << 1)
-#define ULFILEEQ_DEBUG_CRYPTO	(1 << 2)
-#define ULFILEEQ_DEBUG_DATA	(1 << 3)
-#define ULFILEEQ_DEBUG_EQ	(1 << 4)
+#నిర్వచించు ULFILEEQ_DEBUG_INIT	(1 << 1)
+#నిర్వచించు ULFILEEQ_DEBUG_CRYPTO	(1 << 2)
+#నిర్వచించు ULFILEEQ_DEBUG_దత్తాంశం	(1 << 3)
+#నిర్వచించు ULFILEEQ_DEBUG_EQ	(1 << 4)
 
-#define DBG(m, x)		__UL_DBG(ulfileeq, ULFILEEQ_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
+#నిర్వచించు DBG(m, x)		__UL_DBG(ulfileeq, ULFILEEQ_DEBUG_, m, x)
+#నిర్వచించు DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
+#నిర్వచించు ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
 
-static void ul_fileeq_init_debug(void)
+స్థిర శూన్య ul_fileeq_init_debug(శూన్య)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	ఒకవేళ (ulfileeq_debug_ముసుగు)
+		తిరిగి;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+గణన {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
-	UL_FILEEQ_CRC32
+	UL_FILEEQ_చక్రీయ_తనిఖీ_32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
-	short digsiz;
+నిర్మాణం ul_fileeq_పద్ధతి {
+	స్థిరరాశి అక్షరం *name;	/* name used by applications */
+	స్థిరరాశి అక్షరం *kname;	/* name used by kernel crypto */
+	పూర్ణాంకం id;
+	పొట్టి digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+స్థిర స్థిరరాశి నిర్మాణం ul_fileeq_పద్ధతి ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
-#ifdef USE_FILEEQ_CRYPTOAPI
+#నిర్వచితమైతే USE_FILEEQ_CRYPTOAPI
 	[UL_FILEEQ_SHA1] = {
 		.id = UL_FILEEQ_SHA1, .name = "sha1",
 		.digsiz = 20, .kname = "sha1"
@@ -97,200 +97,200 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 		.digsiz = 32, .kname = "sha256"
 	},
 
-	[UL_FILEEQ_CRC32] = {
-		.id = UL_FILEEQ_CRC32, .name = "crc32",
+	[UL_FILEEQ_చక్రీయ_తనిఖీ_32] = {
+		.id = UL_FILEEQ_చక్రీయ_తనిఖీ_32, .name = "crc32",
 		.digsiz = 4, .kname = "crc32c"
 	}
-#endif
+#అయితే_ముగింపు
 };
 
-#ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+#నిర్వచితమైతే USE_FILEEQ_CRYPTOAPI
+స్థిర శూన్య deinit_crypto_api(నిర్మాణం ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	ఒకవేళ (!eq)
+		తిరిగి;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	ఒకవేళ (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	ఒకవేళ (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+స్థిర పూర్ణాంకం init_crypto_api(నిర్మాణం ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	నిర్మాణం sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
 
-	assert(eq->method);
-	assert(eq->method->kname);
-	assert(eq->fd_api == -1);
-	assert(eq->fd_cip == -1);
+	ప్రతిజ్ఞా(eq->పద్ధతి);
+	ప్రతిజ్ఞా(eq->పద్ధతి->kname);
+	ప్రతిజ్ఞా(eq->fd_api == -1);
+	ప్రతిజ్ఞా(eq->fd_cip == -1);
 
-	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
+	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->పద్ధతి->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
-	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
+	ప్రతిజ్ఞా(పరిమాణం(sa.salg_name) > అక్షరశ్రేణి_పొడవు(eq->పద్ధతి->kname) + 1);
+	జ్ఞాపకం_నకలు(&sa.salg_name, eq->పద్ధతి->kname, అక్షరశ్రేణి_పొడవు(eq->పద్ధతి->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
-		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
-		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
-		goto fail;
-	return 0;
+	ఒకవేళ ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+		వెళ్ళు fail;
+	ఒకవేళ (bind(eq->fd_api, (నిర్మాణం sockaddr *) &sa, పరిమాణం(sa)) != 0)
+		వెళ్ళు fail;
+	ఒకవేళ ((eq->fd_cip = accept(eq->fd_api, ఖాళీ, 0)) < 0)
+		వెళ్ళు fail;
+	తిరిగి 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	తిరిగి -1;
 }
-#endif
+#అయితే_ముగింపు
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+పూర్ణాంకం ul_fileeq_init(నిర్మాణం ul_fileeq *eq, స్థిరరాశి అక్షరం *పద్ధతి)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
-	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
+	DBG_OBJ(EQ, eq, ul_debug("init [%s]", పద్ధతి));
 
-	memset(eq, 0, sizeof(*eq));
+	memset(eq, 0, పరిమాణం(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	కొరకు (i = 0; i < ARRAY_కొలత(ul_eq_methods); i++) {
+		స్థిరరాశి నిర్మాణం ul_fileeq_పద్ధతి *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
-			eq->method = m;
-			break;
+		ఒకవేళ (strcmp(m->name, పద్ధతి) == 0) {
+			eq->పద్ధతి = m;
+			ఆపు;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
-#ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	ఒకవేళ (!eq->పద్ధతి)
+		తిరిగి -1;
+#నిర్వచితమైతే USE_FILEEQ_CRYPTOAPI
+	ఒకవేళ (eq->పద్ధతి->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
-#endif
-	return 0;
+		తిరిగి -1;
+#అయితే_ముగింపు
+	తిరిగి 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+స్థిర శూన్య reset_fileeq_bufs(నిర్మాణం ul_fileeq *eq)
 {
-	free(eq->buf_a);
-	free(eq->buf_b);
-	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
+	విడుదల(eq->buf_a);
+	విడుదల(eq->buf_b);
+	eq->buf_చివరి = eq->buf_a = eq->buf_b = ఖాళీ;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+శూన్య ul_fileeq_deinit(నిర్మాణం ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	ఒకవేళ (!eq)
+		తిరిగి;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
-#ifdef USE_FILEEQ_CRYPTOAPI
+#నిర్వచితమైతే USE_FILEEQ_CRYPTOAPI
 	deinit_crypto_api(eq);
-#endif
+#అయితే_ముగింపు
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+శూన్య ul_fileeq_దత్తాంశం_close_file(నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం)
 {
-	assert(data);
+	ప్రతిజ్ఞా(దత్తాంశం);
 
-	if (data->fd >= 0) {
-		DBG_OBJ(DATA, data, ul_debug("close"));
-		close(data->fd);
+	ఒకవేళ (దత్తాంశం->fd >= 0) {
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("close"));
+		close(దత్తాంశం->fd);
 	}
-	data->fd = -1;
+	దత్తాంశం->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+శూన్య ul_fileeq_దత్తాంశం_init(నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం)
 {
-	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
-	data->fd = -1;
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("init"));
+	memset(దత్తాంశం, 0, పరిమాణం(*దత్తాంశం));
+	దత్తాంశం->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+శూన్య ul_fileeq_దత్తాంశం_deinit(నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం)
 {
-	assert(data);
+	ప్రతిజ్ఞా(దత్తాంశం);
 
-	DBG_OBJ(DATA, data, ul_debug("deinit"));
-	free(data->blocks);
-	data->blocks = NULL;
-	data->nblocks = 0;
-	data->maxblocks = 0;
-	data->is_eof = 0;
-	data->name = NULL;
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("deinit"));
+	విడుదల(దత్తాంశం->ఖండాలు);
+	దత్తాంశం->ఖండాలు = ఖాళీ;
+	దత్తాంశం->nblocks = 0;
+	దత్తాంశం->maxblocks = 0;
+	దత్తాంశం->is_eof = 0;
+	దత్తాంశం->name = ఖాళీ;
 
-	ul_fileeq_data_close_file(data);
+	ul_fileeq_దత్తాంశం_close_file(దత్తాంశం);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+పూర్ణాంకం ul_fileeq_దత్తాంశం_associated(నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం)
 {
-	return data->name != NULL;
+	తిరిగి దత్తాంశం->name != ఖాళీ;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+శూన్య ul_fileeq_దత్తాంశం_సమితి_file(నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం, స్థిరరాశి అక్షరం *name)
 {
-	assert(data);
-	assert(name);
+	ప్రతిజ్ఞా(దత్తాంశం);
+	ప్రతిజ్ఞా(name);
 
-	DBG_OBJ(DATA, data, ul_debug("set file: %s", name));
-	ul_fileeq_data_init(data);
-	data->name = name;
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("set file: %s", name));
+	ul_fileeq_దత్తాంశం_init(దత్తాంశం);
+	దత్తాంశం->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_సమితి_కొలత(నిర్మాణం ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
 	size_t digsiz;
 
-	assert(eq);
-	assert(st_size >= 0);
-	assert(readsiz);
+	ప్రతిజ్ఞా(eq);
+	ప్రతిజ్ఞా(st_size >= 0);
+	ప్రతిజ్ఞా(readsiz);
 
 	filesiz = (uint64_t) st_size;
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	ఒకవేళ (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	ఎంపిక (eq->పద్ధతి->id) {
+	స్థితి UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
-	default:
-		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		ఆపు;
+	అప్రమేయ:
+		digsiz = eq->పద్ధతి->digsiz;
+		ఒకవేళ (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		ఒకవేళ (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		లేకపోతే ఒకవేళ (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		ఒకవేళ (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			ఒకవేళ (ceiling / maxdigs > SIZE_MAX)
+				తిరిగి false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		ఆపు;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,361 +301,361 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	తిరిగి true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+స్థిర గుర్తులేని అక్షరం *get_బఫరు(నిర్మాణం ul_fileeq *eq)
 {
-	if (!eq->buf_a)
-		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
-		eq->buf_b = malloc(eq->readsiz);
+	ఒకవేళ (!eq->buf_a)
+		eq->buf_a = జ్ఞాపకం_ఇవ్వు(eq->readsiz);
+	ఒకవేళ (!eq->buf_b)
+		eq->buf_b = జ్ఞాపకం_ఇవ్వు(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	ఒకవేళ (!eq->buf_a || !eq->buf_b)
+		తిరిగి ఖాళీ;
 
-	if (eq->buf_last == eq->buf_b)
-		eq->buf_last = eq->buf_a;
-	else
-		eq->buf_last = eq->buf_b;
+	ఒకవేళ (eq->buf_చివరి == eq->buf_b)
+		eq->buf_చివరి = eq->buf_a;
+	లేకపోతే
+		eq->buf_చివరి = eq->buf_b;
 
-	return eq->buf_last;
+	తిరిగి eq->buf_చివరి;
 }
 
-#define get_cached_nblocks(_d) \
+#నిర్వచించు get_cached_nblocks(_d) \
 			((_d)->nblocks ? (_d)->nblocks - 1 : 0)
 
-#define get_cached_offset(_e, _d) \
+#నిర్వచించు get_cached_స్థానభ్రంశం(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				పరిమాణం((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+స్థిర పూర్ణాంకం get_fd(నిర్మాణం ul_fileeq *eq, నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం, off_t *off)
 {
-	off_t o = get_cached_offset(eq, data);
+	off_t o = get_cached_స్థానభ్రంశం(eq, దత్తాంశం);
 
-	assert(eq);
-	assert(data);
+	ప్రతిజ్ఞా(eq);
+	ప్రతిజ్ఞా(దత్తాంశం);
 
 
-	if (data->fd < 0) {
-		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
-		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+	ఒకవేళ (దత్తాంశం->fd < 0) {
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("open: %s", దత్తాంశం->name));
+		దత్తాంశం->fd = open(దత్తాంశం->name, O_RDONLY | O_CLOEXEC);
+		ఒకవేళ (దత్తాంశం->fd < 0)
+			తిరిగి దత్తాంశం->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
-		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
-#endif
-		if (o) {
-			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
-			lseek(data->fd, o, SEEK_SET);
+#ఒకవేళ defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+		ignore_ఫలితం( posix_fadvise(దత్తాంశం->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
+#అయితే_ముగింపు
+		ఒకవేళ (o) {
+			DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("lseek off=%ju", (uintmax_t) o));
+			lseek(దత్తాంశం->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	ఒకవేళ (off)
 		*off = o;
 
-	return data->fd;
+	తిరిగి దత్తాంశం->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+స్థిర శూన్య memcmp_reset(నిర్మాణం ul_fileeq *eq, నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
-		data->nblocks = 1;
+	ఒకవేళ (దత్తాంశం->nblocks)
+		దత్తాంశం->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
-		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
-	data->is_eof = 0;
+	ఒకవేళ (దత్తాంశం->fd >= 0)
+		lseek(దత్తాంశం->fd, get_cached_స్థానభ్రంశం(eq, దత్తాంశం), SEEK_SET);
+	దత్తాంశం->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+స్థిర ssize_t read_ఖండం(నిర్మాణం ul_fileeq *eq, నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం,
+				uint64_t n, గుర్తులేని అక్షరం **ఖండం)
 {
-	int fd;
+	పూర్ణాంకం fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	ఒకవేళ (దత్తాంశం->is_eof)
+		తిరిగి 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	ఒకవేళ (n >= eq->blocksmax)
+		తిరిగి -EINVAL;
 
-	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	fd = get_fd(eq, దత్తాంశం, &off);
+	ఒకవేళ (fd < 0)
+		తిరిగి fd;
 
-	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug(" read block off=%ju", (uintmax_t) off));
 
-	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	*ఖండం = get_బఫరు(eq);
+	ఒకవేళ (!*ఖండం)
+		తిరిగి -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
-		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+	rsz = ul_read_all(దత్తాంశం->fd, (అక్షరం *) *ఖండం, eq->readsiz);
+	ఒకవేళ (rsz < 0) {
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("  read failed"));
+		తిరిగి rsz;
 	}
 	off += rsz;
-	data->nblocks++;
+	దత్తాంశం->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
-		data->is_eof = 1;
-		ul_fileeq_data_close_file(data);
+	ఒకవేళ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+		దత్తాంశం->is_eof = 1;
+		ul_fileeq_దత్తాంశం_close_file(దత్తాంశం);
 	}
 
-	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("  read sz=%zd", rsz));
+	తిరిగి rsz;
 }
 
-#ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+#నిర్వచితమైతే USE_FILEEQ_CRYPTOAPI
+స్థిర ssize_t get_digest(నిర్మాణం ul_fileeq *eq, నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం,
+				uint64_t n, గుర్తులేని అక్షరం **ఖండం)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	పూర్ణాంకం fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
-		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
-		assert(data->blocks);
-		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+	ఒకవేళ (n < get_cached_nblocks(దత్తాంశం)) {
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug(" digest cached"));
+		ప్రతిజ్ఞా(దత్తాంశం->ఖండాలు);
+		*ఖండం = దత్తాంశం->ఖండాలు + (n * eq->పద్ధతి->digsiz);
+		తిరిగి eq->పద్ధతి->digsiz;
 	}
 
-	if (data->is_eof) {
-		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+	ఒకవేళ (దత్తాంశం->is_eof) {
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug(" file EOF"));
+		తిరిగి 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	ఒకవేళ (n >= eq->blocksmax)
+		తిరిగి -EINVAL;
 
 	/* read new block */
-	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	fd = get_fd(eq, దత్తాంశం, &off);
+	ఒకవేళ (fd < 0)
+		తిరిగి fd;
 
-	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
-	sz = eq->method->digsiz;
+	sz = eq->పద్ధతి->digsiz;
 
-	if (!data->blocks) {
-		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
-		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+	ఒకవేళ (!దత్తాంశం->ఖండాలు) {
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
+		దత్తాంశం->ఖండాలు = జ్ఞాపకం_ఇవ్వు(eq->blocksmax * sz);
+		ఒకవేళ (!దత్తాంశం->ఖండాలు)
+			తిరిగి -ENOMEM;
 	}
 
-	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
-	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
+	rsz = sendfile(eq->fd_cip, దత్తాంశం->fd, ఖాళీ, eq->readsiz);
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	ఒకవేళ (rsz < 0)
+		తిరిగి rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
-	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	*ఖండం = దత్తాంశం->ఖండాలు + (n * eq->పద్ధతి->digsiz);
+	rsz = ul_read_all(eq->fd_cip, (అక్షరం *) *ఖండం, sz);
 
-	if (rsz > 0)
-		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
-		data->is_eof = 1;
-		ul_fileeq_data_close_file(data);
+	ఒకవేళ (rsz > 0)
+		దత్తాంశం->nblocks++;
+	ఒకవేళ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+		దత్తాంశం->is_eof = 1;
+		ul_fileeq_దత్తాంశం_close_file(దత్తాంశం);
 	}
-	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug("  get %zdB digest", rsz));
+	తిరిగి rsz;
 }
-#endif
+#అయితే_ముగింపు
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+స్థిర ssize_t get_intro(నిర్మాణం ul_fileeq *eq, నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం,
+				గుర్తులేని అక్షరం **ఖండం)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	ఒకవేళ (దత్తాంశం->nblocks == 0) {
+		పూర్ణాంకం fd = get_fd(eq, దత్తాంశం, ఖాళీ);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
-		data->nblocks = 1;
+		ఒకవేళ (fd < 0)
+			తిరిగి -1;
+		rsz = ul_read_all(fd, (అక్షరం *) దత్తాంశం->intro, పరిమాణం(దత్తాంశం->intro));
+		DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, పరిమాణం(దత్తాంశం->intro)));
+		ఒకవేళ (rsz < 0)
+			తిరిగి -1;
+		దత్తాంశం->nblocks = 1;
 	}
 
-	DBG_OBJ(DATA, data, ul_debug(" return intro"));
-	*block = data->intro;
-	return sizeof(data->intro);
+	DBG_OBJ(దత్తాంశం_2, దత్తాంశం, ul_debug(" return intro"));
+	*ఖండం = దత్తాంశం->intro;
+	తిరిగి పరిమాణం(దత్తాంశం->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+స్థిర ssize_t get_cmp_దత్తాంశం(నిర్మాణం ul_fileeq *eq, నిర్మాణం ul_fileeq_దత్తాంశం *దత్తాంశం,
+				uint64_t blockno, గుర్తులేని అక్షరం **ఖండం)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	ఒకవేళ (blockno == 0)
+		తిరిగి get_intro(eq, దత్తాంశం, ఖండం);
 
 	blockno--;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
-	default:
-		break;
+	ఎంపిక (eq->పద్ధతి->id) {
+	స్థితి UL_FILEEQ_MEMCMP:
+		తిరిగి read_ఖండం(eq, దత్తాంశం, blockno, ఖండం);
+	అప్రమేయ:
+		ఆపు;
 	}
-#ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
-#endif
+#నిర్వచితమైతే USE_FILEEQ_CRYPTOAPI
+	తిరిగి get_digest(eq, దత్తాంశం, blockno, ఖండం);
+#లేకపోతే
+	తిరిగి -1;
+#అయితే_ముగింపు
 }
 
-#define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
+#నిర్వచించు CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+పూర్ణాంకం ul_fileeq(నిర్మాణం ul_fileeq *eq,
+	      నిర్మాణం ul_fileeq_దత్తాంశం *a, నిర్మాణం ul_fileeq_దత్తాంశం *b)
 {
-	int cmp;
+	పూర్ణాంకం cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	ఒకవేళ (eq->పద్ధతి->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
-	do {
-		unsigned char *da, *db;
+	చేయి {
+		గుర్తులేని అక్షరం *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
-		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
-			goto done;
-		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
-			goto done;
-		if (ca != cb || ca == 0) {
+		ca = get_cmp_దత్తాంశం(eq, a, n, &da);
+		ఒకవేళ (ca < 0)
+			వెళ్ళు పూర్తి;
+		cb = get_cmp_దత్తాంశం(eq, b, n, &db);
+		ఒకవేళ (cb < 0)
+			వెళ్ళు పూర్తి;
+		ఒకవేళ (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			ఆపు;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} అయితే (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
-			goto done; /* filesize changed? */
+	ఒకవేళ (cmp == 0) {
+		ఒకవేళ (!a->is_eof || !b->is_eof)
+			వెళ్ళు పూర్తి; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		తిరిగి 1;
 	}
-done:
+పూర్తి:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	తిరిగి 0;
 }
 
-#ifdef TEST_PROGRAM_FILEEQ
+#నిర్వచితమైతే TEST_కార్యక్రమం_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+పూర్ణాంకం ప్రధాన(పూర్ణాంకం argc, అక్షరం *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
-		{ "method", required_argument, NULL, 'm' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	నిర్మాణం ul_fileeq eq;
+	నిర్మాణం ul_fileeq_దత్తాంశం a, b, c;
+	స్థిరరాశి అక్షరం *పద్ధతి = "sha1";
+	స్థిర స్థిరరాశి నిర్మాణం option longopts[] = {
+		{ "method", required_argument, ఖాళీ, 'm' },
+		{ "help", no_argument, ఖాళీ, 'h' },
+		{ ఖాళీ, 0, ఖాళీ, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	పూర్ణాంకం ch, rc;
+	స్థిరరాశి అక్షరం *file_a = ఖాళీ, *file_b = ఖాళీ, *file_c = ఖాళీ;
+	నిర్మాణం stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'm':
-			method = optarg;
-			break;
-		case 'h':
-			printf("usage: %s [options] <file> <file>\n"
+	అయితే ((ch = getopt_long(argc, argv, "m:", longopts, ఖాళీ)) != -1) {
+		ఎంపిక (ch) {
+		స్థితి 'm':
+			పద్ధతి = optarg;
+			ఆపు;
+		స్థితి 'h':
+			రాయి("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
-				program_invocation_short_name);
-			return EXIT_FAILURE;
+				కార్యక్రమం_invocation_short_name);
+			తిరిగి EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	ఒకవేళ (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	ఒకవేళ (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	ఒకవేళ (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	ఒకవేళ (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	ఒకవేళ (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	ఒకవేళ (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	ఒకవేళ (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	ఒకవేళ (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
-	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
-		method = "memcmp";
-		rc = ul_fileeq_init(&eq, method);
+	rc = ul_fileeq_init(&eq, పద్ధతి);
+	ఒకవేళ (rc != 0 && strcmp(పద్ధతి, "memcmp") != 0) {
+		పద్ధతి = "memcmp";
+		rc = ul_fileeq_init(&eq, పద్ధతి);
 	}
-	if (rc < 0)
+	ఒకవేళ (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
-	ul_fileeq_data_set_file(&a, file_a);
-	ul_fileeq_data_set_file(&b, file_b);
+	ul_fileeq_దత్తాంశం_సమితి_file(&a, file_a);
+	ul_fileeq_దత్తాంశం_సమితి_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
-		ul_fileeq_data_set_file(&c, file_c);
+	ఒకవేళ (file_c)
+		ul_fileeq_దత్తాంశం_సమితి_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	ఒకవేళ (!ul_fileeq_సమితి_కొలత(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
-	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	రాయి("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+	ఒకవేళ (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
-		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+		రాయి("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
 		rc = ul_fileeq(&eq, &b, &c);
-		printf("2nd vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+		రాయి("2nd vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 	}
 
-	ul_fileeq_data_deinit(&a);
-	ul_fileeq_data_deinit(&b);
+	ul_fileeq_దత్తాంశం_deinit(&a);
+	ul_fileeq_దత్తాంశం_deinit(&b);
 
-	if (file_c)
-		ul_fileeq_data_deinit(&c);
+	ఒకవేళ (file_c)
+		ul_fileeq_దత్తాంశం_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	తిరిగి EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_FILEEQ */
+#అయితే_ముగింపు /* TEST_PROGRAM_FILEEQ */

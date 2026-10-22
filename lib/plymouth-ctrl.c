@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <limits.h>
+#అన్తర్భావ <poll.h>
+#అన్తర్భావ <signal.h>
+#అన్తర్భావ <stdarg.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <sys/mman.h>
+#అన్తర్భావ <sys/socket.h>
+#అన్తర్భావ <sys/types.h>
+#అన్తర్భావ <sys/un.h>
+#అన్తర్భావ <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#అన్తర్భావ "all-io.h"
+#అన్తర్భావ "c.h"
+#అన్తర్భావ "nls.h"
+#అన్తర్భావ "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+స్థిర పూర్ణాంకం can_read(పూర్ణాంకం fd, స్థిరరాశి దీర్ఘ timeout)
 {
-	struct pollfd fds = {
+	నిర్మాణం pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	పూర్ణాంకం ret;
 
-	do {
+	చేయి {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} అయితే ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	తిరిగి (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+స్థిర పూర్ణాంకం open_un_socket_and_connect(శూన్య)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	నిర్మాణం sockaddr_un su = {
 		.sun_family = AF_UNIX,
-		.sun_path = PLYMOUTH_SOCKET_PATH,
+		.sun_path = PLYMOUTH_SOCKET_మార్గం,
 	};
-	const int one = 1;
-	int fd, ret;
+	స్థిరరాశి పూర్ణాంకం one = 1;
+	పూర్ణాంకం fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	ఒకవేళ (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		వెళ్ళు err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, పరిమాణం(one));
+	ఒకవేళ (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		వెళ్ళు err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (నిర్మాణం sockaddr *) &su,
+		offsetof(నిర్మాణం sockaddr_un, sun_path) + 1 + అక్షరశ్రేణి_పొడవు(su.sun_path+1));
+	ఒకవేళ (ret < 0) {
+		ఒకవేళ (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		వెళ్ళు err;
 	}
 err:
-	return fd;
+	తిరిగి fd;
 }
 
-int plymouth_command(int cmd, ...)
+పూర్ణాంకం plymouth_command(పూర్ణాంకం cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	నిర్మాణం sigaction sp, op;
+	పూర్ణాంకం fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	ఎంపిక (cmd) {
+	స్థితి MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ఒకవేళ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, పరిమాణం(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		ఆపు;
+	స్థితి MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ఒకవేళ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, పరిమాణం(command));
 		}
-		break;
-	default:
+		ఆపు;
+	అప్రమేయ:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	స్థితి '?':
+		వెళ్ళు err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	ఒకవేళ (fdsock >= 0) {
+		ఒకవేళ (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (అక్షరం *) &answer[0], పరిమాణం(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, ఖాళీ);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	తిరిగి ret;
 }
 

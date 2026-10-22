@@ -9,224 +9,224 @@
  *
  * Copyright (C) 2017 Karel Zak <kzak@redhat.com>
  */
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#అన్తర్భావ <errno.h>
+#అన్తర్భావ <stdio.h>
 
-#include "mbsalign.h"
-#include "mbsedit.h"
+#అన్తర్భావ "mbsalign.h"
+#అన్తర్భావ "mbsedit.h"
 
-struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
+నిర్మాణం mbs_editor *mbs_new_edit(అక్షరం *buf, size_t bufsz, size_t ncells)
 {
-	struct mbs_editor *edit = calloc(1, sizeof(*edit));
+	నిర్మాణం mbs_editor *edit = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(*edit));
 
-	if (edit) {
+	ఒకవేళ (edit) {
 		edit->buf = buf;
-		edit->max_bytes = bufsz;
+		edit->max_బైట్లు = bufsz;
 		edit->max_cells = ncells;
-		edit->cur_cells = mbs_safe_width(buf);
-		edit->cur_bytes = strlen(buf);
+		edit->cur_cells = mbs_సురక్షిత_వెడల్పు(buf);
+		edit->cur_బైట్లు = అక్షరశ్రేణి_పొడవు(buf);
 	}
-	return edit;
+	తిరిగి edit;
 }
 
-char *mbs_free_edit(struct mbs_editor *edit)
+అక్షరం *mbs_free_edit(నిర్మాణం mbs_editor *edit)
 {
-	char *ret = edit ? edit->buf : NULL;
+	అక్షరం *ret = edit ? edit->buf : ఖాళీ;
 
-	free(edit);
-	return ret;
+	విడుదల(edit);
+	తిరిగి ret;
 }
 
-static size_t mbs_next(const char *str, size_t *ncells)
+స్థిర size_t mbs_తదుపరి(స్థిరరాశి అక్షరం *str, size_t *ncells)
 {
-#ifdef HAVE_WIDECHAR
+#నిర్వచితమైతే HAVE_WIDECHAR
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	ఒకవేళ (!str || !*str)
+		తిరిగి 0;
 
-	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
+	n = mbrtowc(&wc, str, MB_CUR_MAX, ఖాళీ);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	తిరిగి n;
+#లేకపోతే
+	ఒకవేళ (!str || !*str)
+		తిరిగి 0;
 	*ncells = 1;
-	return 1;
-#endif
+	తిరిగి 1;
+#అయితే_ముగింపు
 }
 
-static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
+స్థిర size_t mbs_prev(స్థిరరాశి అక్షరం *ప్రారంభం, స్థిరరాశి అక్షరం *చివర, size_t *ncells)
 {
-#ifdef HAVE_WIDECHAR
+#నిర్వచితమైతే HAVE_WIDECHAR
 	wchar_t wc = 0;
-	const char *p, *prev;
+	స్థిరరాశి అక్షరం *p, *prev;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	ఒకవేళ (!ప్రారంభం || !చివర || ప్రారంభం == చివర || !*ప్రారంభం)
+		తిరిగి 0;
 
-	prev = p = start;
-	while (p < end) {
-		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
+	prev = p = ప్రారంభం;
+	అయితే (p < చివర) {
+		n = mbrtowc(&wc, p, MB_CUR_MAX, ఖాళీ);
 		prev = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		ఒకవేళ (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		లేకపోతే
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	ఒకవేళ (prev == చివర)
+		తిరిగి 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	తిరిగి n;
+#లేకపోతే
+	ఒకవేళ (!ప్రారంభం || !చివర || ప్రారంభం == చివర || !*ప్రారంభం)
+		తిరిగి 0;
 	*ncells = 1;
-	return 1;
-#endif
+	తిరిగి 1;
+#అయితే_ముగింపు
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+పూర్ణాంకం mbs_edit_goto(నిర్మాణం mbs_editor *edit, పూర్ణాంకం where)
 {
-	switch (where) {
-	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+	ఎంపిక (where) {
+	స్థితి MBS_EDIT_ఎడమ:
+		ఒకవేళ (edit->cursor == 0)
+			తిరిగి 1;
+		లేకపోతే {
 			size_t n, cells;
 			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			ఒకవేళ (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
-		break;
-	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		ఆపు;
+	స్థితి MBS_EDIT_కుడి:
+		ఒకవేళ (edit->cursor_cells >= edit->cur_cells)
+			తిరిగి 1;
+		లేకపోతే {
 			size_t n, cells;
-			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			n = mbs_తదుపరి(edit->buf + edit->cursor, &cells);
+			ఒకవేళ (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
 		}
-		break;
-	case MBS_EDIT_HOME:
+		ఆపు;
+	స్థితి MBS_EDIT_HOME:
 		edit->cursor = 0;
 		edit->cursor_cells = 0;
-		break;
-	case MBS_EDIT_END:
-		edit->cursor = edit->cur_bytes;
+		ఆపు;
+	స్థితి MBS_EDIT_చివర:
+		edit->cursor = edit->cur_బైట్లు;
 		edit->cursor_cells = edit->cur_cells;
-		break;
-	default:
-		return -EINVAL;
+		ఆపు;
+	అప్రమేయ:
+		తిరిగి -EINVAL;
 	}
 
-	return 0;
+	తిరిగి 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
-static size_t remove_next(char *str, size_t *ncells)
+స్థిర size_t remove_తదుపరి(అక్షరం *str, size_t *ncells)
 {
 	/* all in bytes! */
-	size_t bytes, move_bytes, n;
+	size_t బైట్లు, move_బైట్లు, n;
 
-	n          = mbs_next(str, ncells);
-	bytes      = strlen(str);
-	move_bytes = bytes - n;
+	n          = mbs_తదుపరి(str, ncells);
+	బైట్లు      = అక్షరశ్రేణి_పొడవు(str);
+	move_బైట్లు = బైట్లు - n;
 
-	memmove(str, str + n, move_bytes);
-	str[bytes - n] = '\0';
-	return n;
+	memmove(str, str + n, move_బైట్లు);
+	str[బైట్లు - n] = '\0';
+	తిరిగి n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+స్థిర size_t mbs_చొప్పించు(అక్షరం *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
-	size_t n = 1, bytes;
-	char *in;
+	size_t n = 1, బైట్లు;
+	అక్షరం *లోపల;
 
-#ifdef HAVE_WIDECHAR
+#నిర్వచితమైతే HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
-	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	లోపల = జ్ఞాపకం_ఇవ్వు(MB_CUR_MAX);
+	ఒకవేళ (!లోపల)
+		తిరిగి -1;
 
-	n = wctomb(in, wc);
-	if (n == (size_t) -1)
-		goto out;
+	n = wctomb(లోపల, wc);
+	ఒకవేళ (n == (size_t) -1)
+		వెళ్ళు బహిర్గతం;
 	*ncells = wcwidth(wc);
-#else
+#లేకపోతే
 	*ncells = 1;
-	in = (char *) &c;
-#endif
-	bytes       = strlen(str);
+	లోపల = (అక్షరం *) &c;
+#అయితే_ముగింపు
+	బైట్లు       = అక్షరశ్రేణి_పొడవు(str);
 
-	memmove(str + n, str, bytes);
-	memcpy(str, in, n);
-	str[bytes + n] = '\0';
-#ifdef HAVE_WIDECHAR
-out:
-	free(in);
-#endif
-	return n;
+	memmove(str + n, str, బైట్లు);
+	జ్ఞాపకం_నకలు(str, లోపల, n);
+	str[బైట్లు + n] = '\0';
+#నిర్వచితమైతే HAVE_WIDECHAR
+బహిర్గతం:
+	విడుదల(లోపల);
+#అయితే_ముగింపు
+	తిరిగి n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+స్థిర పూర్ణాంకం mbs_edit_remove(నిర్మాణం mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	ఒకవేళ (edit->cur_cells == 0 || edit->cursor >= edit->cur_బైట్లు)
+		తిరిగి 1;
 
-	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = remove_తదుపరి(edit->buf + edit->cursor, &ncells);
+	ఒకవేళ (n == (size_t)-1)
+		తిరిగి 1;
 
-	edit->cur_bytes -= n;
-	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	edit->cur_బైట్లు -= n;
+	edit->cur_cells = mbs_సురక్షిత_వెడల్పు(edit->buf);
+	తిరిగి 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+పూర్ణాంకం mbs_edit_delete(నిర్మాణం mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
-	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+	ఒకవేళ (edit->cursor >= edit->cur_బైట్లు
+	    && mbs_edit_goto(edit, MBS_EDIT_ఎడమ) == 1)
+		తిరిగి 1;
 
-	return mbs_edit_remove(edit);
+	తిరిగి mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+పూర్ణాంకం mbs_edit_backspace(నిర్మాణం mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	ఒకవేళ (mbs_edit_goto(edit, MBS_EDIT_ఎడమ) == 0)
+		తిరిగి mbs_edit_remove(edit);
+	తిరిగి 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+పూర్ణాంకం mbs_edit_చొప్పించు(నిర్మాణం mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	ఒకవేళ (edit->cur_బైట్లు + MB_CUR_MAX > edit->max_బైట్లు)
+		తిరిగి 1;
 
-	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = mbs_చొప్పించు(edit->buf + edit->cursor, c, &ncells);
+	ఒకవేళ (n == (size_t)-1)
+		తిరిగి 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
-	edit->cur_bytes += n;
-	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	edit->cur_బైట్లు += n;
+	edit->cur_cells = mbs_సురక్షిత_వెడల్పు(edit->buf);
+	తిరిగి 0;
 }

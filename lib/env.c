@@ -4,29 +4,29 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef HAVE_SYS_PRCTL_H
-#include <sys/prctl.h>
-#else
-#define PR_GET_DUMPABLE 3
-#endif
-#if (!defined(HAVE_PRCTL) && defined(linux))
-#include <sys/syscall.h>
-#endif
-#include <unistd.h>
-#include <sys/types.h>
+#అన్తర్భావ <stdio.h>
+#అన్తర్భావ <stdlib.h>
+#అన్తర్భావ <string.h>
+#నిర్వచితమైతే HAVE_SYS_PRCTL_H
+#అన్తర్భావ <sys/prctl.h>
+#లేకపోతే
+#నిర్వచించు PR_GET_DUMPABLE 3
+#అయితే_ముగింపు
+#ఒకవేళ (!defined(HAVE_PRCTL) && defined(linux))
+#అన్తర్భావ <sys/syscall.h>
+#అయితే_ముగింపు
+#అన్తర్భావ <unistd.h>
+#అన్తర్భావ <sys/types.h>
 
-#include "env.h"
-#include "strv.h"
-#include "all-io.h"
+#అన్తర్భావ "env.h"
+#అన్తర్భావ "strv.h"
+#అన్తర్భావ "all-io.h"
 
-#ifndef HAVE_ENVIRON_DECL
-extern char **environ;
-#endif
+#నిర్వచితం_కాకపోతే HAVE_ENVIRON_DECL
+బాహ్య అక్షరం **environ;
+#అయితే_ముగింపు
 
-static char * const forbid[] = {
+స్థిర అక్షరం * స్థిరరాశి forbid[] = {
 	"BASH_ENV=",    /* GNU creeping featurism strikes again... */
 	"ENV=",
 	"HOME=",
@@ -39,126 +39,126 @@ static char * const forbid[] = {
 	"PATH=",
 	"SHELL=",
 	"SHLIB_PATH=",
-	(char *) 0
+	(అక్షరం *) 0
 };
 
 /* these are allowed, but with no slashes inside
    (to work around security problems in GNU gettext) */
-static char * const noslash[] = {
+స్థిర అక్షరం * స్థిరరాశి noslash[] = {
 	"LANG=",
 	"LANGUAGE=",
 	"LC_",	  /* anything with the LC_ prefix */
-	(char *) 0
+	(అక్షరం *) 0
 };
 
 
-struct ul_env_list {
-	char	*name;
-	char	*value;
+నిర్మాణం ul_env_list {
+	అక్షరం	*name;
+	అక్షరం	*విలువ;
 
-	struct ul_env_list *next;
+	నిర్మాణం ul_env_list *తదుపరి;
 };
 
 /*
  * Saves to the list and returns a pointer to the new head of the list.
  */
-static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
-					 const char *name, size_t namesz,
-					 const char *value, size_t valsz)
+స్థిర నిర్మాణం ul_env_list *env_list_కూడు( నిర్మాణం ul_env_list *ls0,
+					 స్థిరరాశి అక్షరం *name, size_t namesz,
+					 స్థిరరాశి అక్షరం *విలువ, size_t valsz)
 {
-	struct ul_env_list *ls;
+	నిర్మాణం ul_env_list *ls;
 
-	ls = calloc(1, sizeof(struct ul_env_list) + namesz + valsz + 2);
-	if (!ls)
-		return ls0;
+	ls = సున్నా_జ్ఞాపకం_ఇవ్వు(1, పరిమాణం(నిర్మాణం ul_env_list) + namesz + valsz + 2);
+	ఒకవేళ (!ls)
+		తిరిగి ls0;
 
-	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
-	ls->value = ls->name + namesz + 1;
+	ls->name = ((అక్షరం *) ls) + పరిమాణం(నిర్మాణం ul_env_list);
+	ls->విలువ = ls->name + namesz + 1;
 
-	memcpy(ls->name, name, namesz);
-	memcpy(ls->value, value, valsz);
+	జ్ఞాపకం_నకలు(ls->name, name, namesz);
+	జ్ఞాపకం_నకలు(ls->విలువ, విలువ, valsz);
 
-	ls->next = ls0;
-	return ls;
+	ls->తదుపరి = ls0;
+	తిరిగి ls;
 }
 
 /*
  * Saves the @str (with the name=value string) to the @ls and returns a pointer
  * to the new head of the list.
  */
-static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
-						    const char *str)
+స్థిర నిర్మాణం ul_env_list *env_list_కూడు_from_string(నిర్మాణం ul_env_list *ls,
+						    స్థిరరాశి అక్షరం *str)
 {
 	size_t namesz = 0, valsz = 0;
-	const char *val;
+	స్థిరరాశి అక్షరం *val;
 
-	if (!str || !*str)
-		return ls;
+	ఒకవేళ (!str || !*str)
+		తిరిగి ls;
 
 	val = strchr(str, '=');
-	if (!val)
-		return ls;
+	ఒకవేళ (!val)
+		తిరిగి ls;
 	namesz = val - str;
 
 	val++;
-	valsz = strlen(val);
+	valsz = అక్షరశ్రేణి_పొడవు(val);
 
-	return env_list_add(ls, str, namesz, val, valsz);
+	తిరిగి env_list_కూడు(ls, str, namesz, val, valsz);
 }
 
 /*
  * Saves the @name and @value to @ls0 and returns a pointer to the new head of
  * the list.
  */
-struct ul_env_list *env_list_add_variable(
-				struct ul_env_list *ls,
-				const char *name, const char *value)
+నిర్మాణం ul_env_list *env_list_కూడు_variable(
+				నిర్మాణం ul_env_list *ls,
+				స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *విలువ)
 {
-	if (!name || !*name)
-		return ls;
+	ఒకవేళ (!name || !*name)
+		తిరిగి ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	తిరిగి env_list_కూడు(ls, name, అక్షరశ్రేణి_పొడవు(name), విలువ, విలువ ? అక్షరశ్రేణి_పొడవు(విలువ) : 0);
 }
 
 /*
  * Calls getenv() and adds the result to the list.
  */
-struct ul_env_list *env_list_add_getenv(struct ul_env_list *ls,
-				const char *name, const char *dflt)
+నిర్మాణం ul_env_list *env_list_కూడు_getenv(నిర్మాణం ul_env_list *ls,
+				స్థిరరాశి అక్షరం *name, స్థిరరాశి అక్షరం *dflt)
 {
-	const char *val;
+	స్థిరరాశి అక్షరం *val;
 
-	if (!name)
-		return ls;
+	ఒకవేళ (!name)
+		తిరిగి ls;
 
 	val = getenv(name);
-	if (!val)
+	ఒకవేళ (!val)
 		val= dflt;
-	if (val)
-		ls = env_list_add_variable(ls, name, val);
-	return ls;
+	ఒకవేళ (val)
+		ls = env_list_కూడు_variable(ls, name, val);
+	తిరిగి ls;
 }
 
 /*
  * Calls getenv() for each name (comma-separated) in @str and adds the results
  * to the list.
  */
-struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str)
+నిర్మాణం ul_env_list *env_list_కూడు_getenvs(నిర్మాణం ul_env_list *ls, స్థిరరాశి అక్షరం *str)
 {
-	char **all, **name;
+	అక్షరం **all, **name;
 
-	if (!str)
-		return ls;
+	ఒకవేళ (!str)
+		తిరిగి ls;
 
-	all = ul_strv_split(str, ",");
-	if (!all)
-		return ls;
+	all = ul_strv_విభజించు(str, ",");
+	ఒకవేళ (!all)
+		తిరిగి ls;
 
 	UL_STRV_FOREACH(name, all)
-		ls = env_list_add_getenv(ls, *name, NULL);
+		ls = env_list_కూడు_getenv(ls, *name, ఖాళీ);
 
 	ul_strv_free(all);
-	return ls;
+	తిరిగి ls;
 }
 
 /*
@@ -166,49 +166,49 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
  *
  * @fd must be /proc/<pid>/environ file.
 */
-struct ul_env_list *env_list_from_fd(int fd)
+నిర్మాణం ul_env_list *env_list_from_fd(పూర్ణాంకం fd)
 {
-	char *buf = NULL, *p;
+	అక్షరం *buf = ఖాళీ, *p;
 	ssize_t rc = 0;
-	struct ul_env_list *ls = NULL;
+	నిర్మాణం ul_env_list *ls = ఖాళీ;
 
 	errno = 0;
-	if ((rc = ul_read_all_alloc(fd, &buf)) < 1)
-		return NULL;
+	ఒకవేళ ((rc = ul_read_all_alloc(fd, &buf)) < 1)
+		తిరిగి ఖాళీ;
 	buf[rc] = '\0';
 	p = buf;
 
-	while (rc > 0) {
-		ls = env_list_add_from_string(ls, p);
-		p += strlen(p) + 1;
-		rc -= strlen(p) + 1;
+	అయితే (rc > 0) {
+		ls = env_list_కూడు_from_string(ls, p);
+		p += అక్షరశ్రేణి_పొడవు(p) + 1;
+		rc -= అక్షరశ్రేణి_పొడవు(p) + 1;
 	}
 
-	free(buf);
-	return ls;
+	విడుదల(buf);
+	తిరిగి ls;
 }
 
 /*
  * Use setenv() for all stuff in @ls.
  */
-int env_list_setenv(struct ul_env_list *ls, int overwrite)
+పూర్ణాంకం env_list_setenv(నిర్మాణం ul_env_list *ls, పూర్ణాంకం overwrite)
 {
-	int rc = 0;
+	పూర్ణాంకం rc = 0;
 
-	while (ls && rc == 0) {
-		if (ls->name && ls->value)
-			rc = setenv(ls->name, ls->value, overwrite);
-		ls = ls->next;
+	అయితే (ls && rc == 0) {
+		ఒకవేళ (ls->name && ls->విలువ)
+			rc = setenv(ls->name, ls->విలువ, overwrite);
+		ls = ls->తదుపరి;
 	}
-	return rc;
+	తిరిగి rc;
 }
 
-void env_list_free(struct ul_env_list *ls)
+శూన్య env_list_free(నిర్మాణం ul_env_list *ls)
 {
-	while (ls) {
-		struct ul_env_list *x = ls;
-		ls = ls->next;
-		free(x);
+	అయితే (ls) {
+		నిర్మాణం ul_env_list *x = ls;
+		ls = ls->తదుపరి;
+		విడుదల(x);
 	}
 }
 
@@ -216,84 +216,84 @@ void env_list_free(struct ul_env_list *ls)
  * Removes unwanted variables from environ[]. If @org is not NULL than stores
  * unwnated variables to the list.
  */
-void __sanitize_env(struct ul_env_list **org)
+శూన్య __sanitize_env(నిర్మాణం ul_env_list **org)
 {
-	char **envp = environ;
-	char * const *bad;
-	char **cur;
-	int last = 0;
+	అక్షరం **envp = environ;
+	అక్షరం * స్థిరరాశి *bad;
+	అక్షరం **cur;
+	పూర్ణాంకం చివరి = 0;
 
-	for (cur = envp; *cur; cur++)
-		last++;
+	కొరకు (cur = envp; *cur; cur++)
+		చివరి++;
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = forbid; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) == 0) {
-				if (org)
-					*org = env_list_add_from_string(*org, *cur);
-				last = ul_remove_entry(envp, cur - envp, last);
+	కొరకు (cur = envp; *cur; cur++) {
+		కొరకు (bad = forbid; *bad; bad++) {
+			ఒకవేళ (అక్షరశ్రేణి_పోలిక(*cur, *bad, అక్షరశ్రేణి_పొడవు(*bad)) == 0) {
+				ఒకవేళ (org)
+					*org = env_list_కూడు_from_string(*org, *cur);
+				చివరి = ul_remove_నమోదు(envp, cur - envp, చివరి);
 				cur--;
-				break;
+				ఆపు;
 			}
 		}
 	}
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = noslash; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) != 0)
-				continue;
-			if (!strchr(*cur, '/'))
-				continue;  /* OK */
-			if (org)
-				*org = env_list_add_from_string(*org, *cur);
-			last = ul_remove_entry(envp, cur - envp, last);
+	కొరకు (cur = envp; *cur; cur++) {
+		కొరకు (bad = noslash; *bad; bad++) {
+			ఒకవేళ (అక్షరశ్రేణి_పోలిక(*cur, *bad, అక్షరశ్రేణి_పొడవు(*bad)) != 0)
+				కొనసాగు;
+			ఒకవేళ (!strchr(*cur, '/'))
+				కొనసాగు;  /* OK */
+			ఒకవేళ (org)
+				*org = env_list_కూడు_from_string(*org, *cur);
+			చివరి = ul_remove_నమోదు(envp, cur - envp, చివరి);
 			cur--;
-			break;
+			ఆపు;
 		}
 	}
 }
 
-void sanitize_env(void)
+శూన్య sanitize_env(శూన్య)
 {
-	__sanitize_env(NULL);
+	__sanitize_env(ఖాళీ);
 }
 
-char *safe_getenv(const char *arg)
+అక్షరం *సురక్షిత_getenv(స్థిరరాశి అక్షరం *arg)
 {
-	if (is_privileged_execution())
-		return NULL;
-#ifdef HAVE_PRCTL
-	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#else
-#if (defined(linux) && defined(SYS_prctl))
-	if (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#endif
-#endif
-#ifdef HAVE_SECURE_GETENV
-return secure_getenv(arg);
-#elif HAVE___SECURE_GETENV
-	return __secure_getenv(arg);
-#else
-	return getenv(arg);
-#endif
+	ఒకవేళ (is_privileged_execution())
+		తిరిగి ఖాళీ;
+#నిర్వచితమైతే HAVE_PRCTL
+	ఒకవేళ (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		తిరిగి ఖాళీ;
+#లేకపోతే
+#ఒకవేళ (defined(linux) && defined(SYS_prctl))
+	ఒకవేళ (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		తిరిగి ఖాళీ;
+#అయితే_ముగింపు
+#అయితే_ముగింపు
+#నిర్వచితమైతే HAVE_SECURE_GETENV
+తిరిగి secure_getenv(arg);
+#లేదావేళ HAVE___SECURE_GETENV
+	తిరిగి __secure_getenv(arg);
+#లేకపోతే
+	తిరిగి getenv(arg);
+#అయితే_ముగింపు
 }
 
-#ifdef TEST_PROGRAM_ENV
-int main(void)
+#నిర్వచితమైతే TEST_కార్యక్రమం_ENV
+పూర్ణాంకం ప్రధాన(శూన్య)
 {
-	char *const *bad;
-	char copy[32];
-	char *p;
-	int retval = EXIT_SUCCESS;
-	struct ul_env_list *removed = NULL;
+	అక్షరం *స్థిరరాశి *bad;
+	అక్షరం copy[32];
+	అక్షరం *p;
+	పూర్ణాంకం retval = EXIT_SUCCESS;
+	నిర్మాణం ul_env_list *removed = ఖాళీ;
 
 	/* define env. */
-	for (bad = forbid; *bad; bad++) {
+	కొరకు (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		ఒకవేళ (p)
 			*p = '\0';
 		setenv(copy, "abc", 1);
 	}
@@ -302,13 +302,13 @@ int main(void)
 	__sanitize_env(&removed);
 
 	/* check removal */
-	for (bad = forbid; *bad; bad++) {
+	కొరకు (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		ఒకవేళ (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (p) {
+		ఒకవేళ (p) {
 			warnx("%s was not removed", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -318,13 +318,13 @@ int main(void)
 	env_list_setenv(removed, 0);
 
 	/* check restore */
-	for (bad = forbid; *bad; bad++) {
+	కొరకు (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		ఒకవేళ (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (!p) {
+		ఒకవేళ (!p) {
 			warnx("%s was not restored", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -332,6 +332,6 @@ int main(void)
 
 	env_list_free(removed);
 
-	return retval;
+	తిరిగి retval;
 }
-#endif
+#అయితే_ముగింపు
