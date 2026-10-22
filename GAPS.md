@@ -1,0 +1,596 @@
+# What is still missing
+
+76 languages. Each line says in how many languages it is missing.
+
+## Files in languages BURP cannot read yet
+
+- `.am`: 1 files
+
+## Keywords with no word in a language's table
+
+- guru:_exit: 75
+- guru:size_t: 71
+- guru:errno: 71
+- guru:EXIT_FAILURE: 71
+- guru:tm: 71
+- guru:close: 71
+- guru:fprintf: 71
+- guru:EXIT_SUCCESS: 71
+- guru:fputs: 71
+- guru:va_list: 71
+- guru:stderr: 71
+- guru:va_end: 71
+- guru:ERANGE: 71
+- guru:va_start: 71
+- guru:FILE: 71
+- guru:stdout: 71
+- guru:strchr: 71
+- guru:dirname: 71
+- guru:DIR: 71
+- guru:wchar_t: 71
+- guru:getenv: 71
+- guru:fputc: 71
+- guru:time_t: 71
+- guru:fclose: 71
+- guru:strrchr: 71
+- guru:closedir: 71
+- guru:BUFSIZ: 71
+- guru:fopen: 71
+- guru:strtol: 71
+- guru:SIGTERM: 71
+- guru:fstat: 71
+- guru:fgets: 71
+- guru:kill: 71
+- guru:isprint: 71
+- guru:SIGINT: 71
+- guru:fscanf: 71
+- guru:opendir: 71
+- guru:tolower: 71
+- guru:atoi: 71
+- guru:isxdigit: 71
+- guru:strtoul: 71
+- guru:fflush: 71
+- guru:memmove: 71
+- guru:va_arg: 71
+- guru:realloc: 71
+- guru:strtod: 71
+- guru:setlocale: 71
+- guru:readdir: 71
+- guru:memcmp: 71
+- guru:fork: 71
+- guru:abort: 71
+- guru:iscntrl: 71
+- guru:offsetof: 71
+- guru:strtok: 71
+- guru:strspn: 71
+- guru:mktime: 71
+- guru:strftime: 71
+- guru:bsearch: 71
+- guru:SEEK_SET: 71
+- guru:sig_atomic_t: 71
+- guru:SIG_DFL: 71
+- guru:setvbuf: 71
+- guru:clearerr: 71
+- guru:strerror: 71
+- guru:lconv: 71
+- guru:localeconv: 71
+- guru:strncpy: 71
+- guru:feof: 71
+- guru:atexit: 71
+- guru:vfprintf: 71
+- guru:mkdir: 71
+- guru:rewinddir: 71
+- guru:SIG_IGN: 71
+- guru:atol: 71
+- guru:SIGILL: 71
+- guru:SIGFPE: 71
+- guru:SIGSEGV: 71
+- guru:strcspn: 71
+- guru:fgetc: 71
+- guru:EOF: 71
+- guru:time: 71
+- guru:strcmp: 70
+- guru:memset: 70
+- guru:open: 70
+- guru:strcpy: 70
+- guru:rand: 70
+- guru:qsort: 70
+- guru:puts: 70
+- guru:srand: 70
+- guru:wait: 70
+- guru:exp: 67
+- guru:restrict: 67
+- guru:#endif: 66
+- guru:#ifdef: 66
+- guru:#define: 66
+- guru:#ifndef: 66
+- guru:#pragma: 66
+- guru:#error: 66
+- guru:unsigned: 62
+- guru:printf: 62
+- guru:strlen: 62
+- guru:memcpy: 62
+- guru:long: 62
+- guru:strncmp: 62
+- guru:malloc: 62
+- guru:calloc: 62
+- guru:isdigit: 62
+- guru:exit: 62
+- guru:short: 62
+- guru:sscanf: 62
+- guru:INT_MAX: 62
+- guru:isspace: 62
+- guru:template: 62
+- guru:isalnum: 62
+- guru:isalpha: 62
+- guru:toupper: 62
+- guru:strstr: 62
+- guru:abs: 62
+- guru:main: 54
+- guru:const: 25
+- guru:NULL: 25
+- guru:static: 25
+- guru:void: 25
+- guru:goto: 25
+- guru:free: 25
+- guru:continue: 25
+- guru:assert: 25
+- guru:switch: 25
+- guru:default: 25
+- guru:do: 25
+- guru:#elif: 25
+- guru:extern: 25
+- guru:read: 25
+- guru:write: 25
+- guru:typedef: 25
+- guru:for: 9
+- guru:char: 9
+- guru:struct: 9
+- guru:sizeof: 9
+- guru:break: 9
+- guru:case: 9
+- guru:enum: 9
+- guru:double: 9
+- guru:inline: 9
+- guru:volatile: 9
+- guru:register: 9
+- guru:signal: 9
+- guru:union: 9
+- guru:if: 1
+- guru:return: 1
+- guru:int: 1
+- guru:else: 1
+- guru:while: 1
+- guru:#else: 1
+- guru:#if: 1
+
+## Names with no dictionary entry (the most common first)
+
+- `rc`: 76
+- `buf`: 76
+- `p`: 76
+- `pc`: 76
+- `lc`: 76
+- `i`: 76
+- `fd`: 76
+- `name`: 76
+- `len`: 76
+- `c`: 76
+- `str`: 76
+- `s`: 76
+- `d`: 76
+- `a`: 76
+- `pty`: 76
+- `ul_debug`: 76
+- `b`: 76
+- `argv`: 76
+- `DBG_OBJ`: 76
+- `x`: 76
+- `n`: 76
+- `flags`: 76
+- `sz`: 76
+- `res`: 76
+- `nl`: 76
+- `ap`: 76
+- `st`: 76
+- `ret`: 76
+- `l`: 76
+- `e`: 76
+- `argc`: 76
+- `r`: 76
+- `eq`: 76
+- `dir`: 76
+- `bufsz`: 76
+- `t`: 76
+- `cc`: 76
+- `file`: 76
+- `f`: 76
+- `fmt`: 76
+- `ptr`: 76
+- `CXT`: 76
+- `UL_DLSYM`: 76
+- `m`: 76
+- `defined`: 76
+- `val`: 76
+- `iter`: 76
+- `k`: 76
+- `pid`: 76
+- `h`: 76
+- `tmp`: 76
+- `edit`: 76
+- `loopdev_cxt`: 76
+- `filename`: 76
+- `rsz`: 76
+- `devno`: 76
+- `ifaceq`: 76
+- `begin`: 76
+- `stx`: 76
+- `device`: 76
+- `setsize`: 76
+- `blk`: 76
+- `_`: 76
+- `ls`: 76
+- `error`: 76
+- `pager_process`: 76
+- `wc`: 76
+- `ipq`: 76
+- `type`: 76
+- `id`: 76
+- `ctx`: 76
+- `seq`: 76
+- `DBG`: 76
+- `z`: 76
+- `q`: 76
+- `errx`: 76
+- `ent`: 76
+- `info`: 76
+- `errsv`: 76
+- `suffix`: 76
+- `src`: 76
+- `lo`: 76
+- `w`: 76
+- `ts`: 76
+- `sub`: 76
+- `ul_systemd_opers`: 76
+- `econf_call`: 76
+- `pfd`: 76
+- `j`: 76
+- `y`: 76
+- `cap`: 76
+- `sa`: 76
+- `config`: 76
+- `addrq`: 76
+- `li`: 76
+- `v`: 76
+- `dest`: 76
+- `sysfs`: 76
+- `ifname`: 76
+- `file_list`: 76
+- `ul_selinux_opers`: 76
+- `retval`: 76
+- `ul_pty`: 76
+- `list`: 76
+- `tv`: 76
+- `netout`: 76
+- `context`: 76
+- `attr`: 76
+- `current`: 76
+- `mount_flags`: 76
+- `st_buf`: 76
+- `pwd`: 76
+- `chain`: 76
+- `namesz`: 76
+- `dflt`: 76
+- `readsiz`: 76
+- `hd`: 76
+- `frac`: 76
+- `bad`: 76
+- `IO`: 76
+- `pw`: 76
+- `copy`: 76
+- `dirfd`: 76
+- `uid`: 76
+- `dev`: 76
+- `command`: 76
+- `c2`: 76
+- `shell`: 76
+- `ul_env_list`: 76
+- `ary`: 76
+- `bufsiz`: 76
+- `ul_netaddrq_iface`: 76
+- `usec`: 76
+- `format`: 76
+- `nr`: 76
+- `sp`: 76
+- `nh`: 76
+- `R2`: 76
+- `R3`: 76
+- `R4`: 76
+- `errmesg`: 76
+- `devname`: 76
+- `fail`: 76
+- `cpu`: 76
+- `c1`: 76
+- `quality`: 76
+- `vfs`: 76
+- `define`: 76
+- `cur`: 76
+- `ul_fileeq`: 76
+- `filesiz`: 76
+- `ul_netaddrq_ip`: 76
+- `LIST`: 76
+- `callbacks`: 76
+- `R0`: 76
+- `separator`: 76
+- `project`: 76
+- `valsz`: 76
+- `HAVE_WIDECHAR`: 76
+- `cp`: 76
+- `ncells`: 76
+- `F1`: 76
+- `usec_t`: 76
+- `diskname`: 76
+- `mtpt`: 76
+- `json_format`: 76
+- `dev_fd`: 76
+- `ctl`: 76
+- `cursor`: 76
+- `F2`: 76
+- `F3`: 76
+- `F4`: 76
+- `newaddr`: 76
+- `cmd`: 76
+- `warnx`: 76
+- `ul_colors`: 76
+- `failed`: 76
+- `off`: 76
+- `sizelimit`: 76
+- `file_fd`: 76
+- `slave`: 76
+- `sb`: 76
+- `sfile`: 76
+- `rlen`: 76
+- `ssz`: 76
+- `ltm`: 76
+- `canonical`: 76
+- `color`: 76
+- `endif`: 76
+- `ul_color_ctl`: 76
+- `file_element`: 76
+- `confname`: 76
+- `digsiz`: 76
+- `ic`: 76
+- `mtlen`: 76
+- `ul_jsonwrt`: 76
+- `blocksize`: 76
+- `cells`: 76
+- `now`: 76
+- `DBG_CASE`: 76
+- `NLMSG`: 76
+- `stash`: 76
+- `rol`: 76
+- `sig`: 76
+- `oper`: 76
+- `UL_CLOEXECSTR`: 76
+- `ON_DBG`: 76
+- `nschemes`: 76
+- `ul_cryptsetup_opers`: 76
+- `org`: 76
+- `_d`: 76
+- `pipes`: 76
+- `mnt`: 76
+- `indent`: 76
+- `file_l`: 76
+- `ul_netaddrq_ip_rating`: 76
+- `dir_fd`: 76
+- `timeout`: 76
+- `master`: 76
+- `sigfd`: 76
+- `attrs`: 76
+- `ourset`: 76
+- `xx`: 76
+- `diskdevno`: 76
+- `timer`: 76
+- `ptr_idx`: 76
+- `ul_color_scheme`: 76
+- `schemes`: 76
+- `longopts`: 76
+- `ul_econf_opers`: 76
+- `econf_freeFile`: 76
+- `statx`: 76
+- `ref`: 76
+- `gr`: 76
+- `loopdev`: 76
+- `loop_info64`: 76
+- `loopcxt_get_info`: 76
+- `fl`: 76
+- `ADDR`: 76
+- `dirpath`: 76
+- `ul_strtou64`: 76
+- `is_part`: 76
+- `ch`: 76
+- `c_strcasecmp`: 76
+- `has_colors`: 76
+- `scores`: 76
+- `xstrncpy`: 76
+- `kver`: 76
+- `ITER`: 76
+- `n_spaces`: 76
+- `str_wc`: 76
+- `ipq_list`: 76
+- `pidfd_ino`: 76
+- `fdsock`: 76
+- `prc`: 76
+- `pwdbuf`: 76
+- `selinux_call`: 76
+- `ror`: 76
+- `W`: 76
+- `uuid`: 76
+- `disk_devno`: 76
+- `expected`: 76
+- `lockmode`: 76
+- `cl`: 76
+- `sep`: 76
+- `nblocks`: 76
+- `maxdigs`: 76
+- `file_c`: 76
+- `file_dev`: 76
+- `major`: 76
+- `ncur`: 76
+- `lo_file_name`: 76
+- `ul_nl_addr`: 76
+- `req`: 76
+- `options`: 76
+- `ul_signames`: 76
+- `dp`: 76
+- `optstr`: 76
+- `stop`: 76
+- `pr`: 76
+- `strptime`: 76
+- `secs`: 76
+- `tty`: 76
+- `ul_read_all`: 76
+- `rep`: 76
+- `payload`: 76
+- `UL_DEBUG_DEFINE_MASKNAMES`: 76
+- `cn`: 76
+- `list_for_each`: 76
+- `main_file`: 76
+- `arg`: 76
+- `kname`: 76
+- `xreaddir`: 76
+- `s2`: 76
+- `loopcxt_get_sysfs`: 76
+- `loopcxt_get_fd`: 76
+- `wcwidth`: 76
+- `L`: 76
+- `min`: 76
+- `dump_addrq`: 76
+
+## Comments with no translation
+
+- error: 76
+- __GNU__: 76
+- * Debug stuff (based on include/debug.h): 76
+- end of string: 76
+- 0 = not tried, 1 = loaded, -1 = failed: 76
+- DEBUG: 76
+- __linux__: 76
+- The GNU hurd is broken with respect to stat devices: 76
+- * Open directory @path in read-only mode. If the path is NULL then duplicate FD
+ * to the directory : 76
+- terminate the name: 76
+- * qsort/bsearch buddy: 76
+- align file size: 76
+- close unused end: 76
+- HAVE_GETMNTINFO: 76
+- HAVE_MNTENT_H: 76
+- * Returns:
+ *	@dflt		if @name not found
+ *	""		(empty string) if found, but value not defined
+ *	"st: 76
+- !HAVE_LIBECONF: 76
+- * The setting is removed by loopcxt_set_device() loopcxt_next()!: 76
+- * Returns: TRUE/FALSE: 76
+- *p encoded to \x??: 76
+- L'\uFFFD' (replacement char): 76
+- non printable: 76
+- all in bytes!: 76
+- Consider site addresses equally good as global: 76
+- Write only the longest living temporary address: 76
+- Prepare netlink.: 76
+- Dump addresses: 76
+- Monitor further changes: 76
+- signal EOF to pager: 76
+- * If @path is NULL then readlink is called on @pc directory.: 76
+- make sure path exists: 76
+- call me before fork(): 76
+- final wait: 76
+- i == POLLFD_MASTER: 76
+- TEST_PROGRAM: 76
+- maybe an actual name: 76
+- Wipe variables: 76
+- begin of the level name: 76
+- end of optstr: 76
+- * For example:
+ *
+ * chain: /sys/dev/block/../../devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2/ \
+ : 76
+- remove last subsystem from chain: 76
+- Private LVM devices use "LVM-<uuid>-<name>" uuid format (important
+	 * is the "LVM" prefix and "-<na: 76
+- !HAVE_TIMER_CREATE: 76
+- File descriptor in bad state: 76
+- get size in bytes: 76
+- Apple Darwin: 76
+- BLKGETSIZE: 76
+- FreeBSD: 76
+- FDGETPRM: 76
+- * This code works for FreeBSD 4.11 i386, except for the full device
+		 * (such as /dev/ad0). It does: 76
+- defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO): 76
+- get 512-byte sector count: 76
+- * Get logical sector size.
+ *
+ * This is the smallest unit the storage device can
+ * address. It is : 76
+- * Get physical block device size. The BLKPBSZGET is supported since Linux
+ * 2.6.32. For old kernels: 76
+- * Return the alignment status of a device: 76
+- probably kernel < 2.6.32: 76
+- * Note that kernel returns -1 as alignment offset if no compatible
+	 * sizes and alignments exist fo: 76
+- * Get kernel's interpretation of the device's geometry.
+ *
+ * Returns the heads and sectors - but no: 76
+- * Convert scsi type to human readable string.: 76
+- return 0 on success: 76
+- Try non-block first to provide message: 76
+- LOCK_NB: 76
+- TEST_PROGRAM_BLKDEV: 76
+- returns length from begin to the pointer: 76
+- returns width of data in safe encoding (from the begin to the pointer): 76
+- make static analyzers happy: 76
+- make sure it's terminated: 76
+- Like strlen(), sz doesn't include the last null byte.: 76
+- data in buffer is already zero-terminated: 76
+- size of allocated area (!= size of stored data: 76
+- encode data by mbs_safe_encode() to avoid control and non-printable chars: 76
+- TEST_PROGRAM_BUFFER: 76
+- * A) try strtod_l() for "C" locale: 76
+- * B) classic strtod(), but switch to "C" locale by uselocale(): 76
+- HAVE_USELOCALE: 76
+- USE_CLOCALE: 76
+- * C) classic strtod(), but switch to "C" locale by setlocale(): 76
+- * Converts private "dm-N" names to "/dev/mapper/<name>"
+ *
+ * Since 2.6.29 (patch 784aae735d9b0bba3f: 76
+- read "<name>\n" from sysfs: 76
+- * This function does not canonicalize the path! It just prepends CWD before a
+ * relative path. If t: 76
+- simple clean up: 76
+- * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success: 76
+- * Always returns a newly allocated string or NULL in case of an error. An
+ * unreachable path is not: 76
+- * Drop permissions (e.g., suid) and canonicalize the path. If the path is
+ * unreadable (for example: 76
+- prctl returns 0 or 1 for valid caps, -1 otherwise: 76
+- starting with cap=INT_MAX means we always know
+	 * that cap1 is invalid after the first iteration: 76
+- we check if the cap after this one really isn't valid: 76
+- We use capabilities system calls to propagate the permitted
+	 * capabilities into the ambient set be: 76
+- In order the make capabilities ambient, we first need to ensure
+	 * that they are all inheritable.: 76
+- This is the same check as cap_valid(), but using
+		 * the runtime value for the last valid cap.: 76
+- * Maintains human readable color names: 76
+- canonicalize sequence: 76
+- convert color names like "red" to the real sequence: 76
+- convert xx;yy sequences to "\033[xx;yy": 76
+- Bell: 76
+- Backspace: 76
+- Escape: 76
+- Form Feed: 76
+- Newline: 76
+- Carriage Return: 76
