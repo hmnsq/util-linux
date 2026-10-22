@@ -4,24 +4,24 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdint.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <sys/file.h>
+#अन्तर्भाव <sys/ioctl.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <unistd.h>
+#अन्तर्भाव <stdint.h>
 
 #ifdef HAVE_LINUX_FD_H
-#include <linux/fd.h>
+#अन्तर्भाव <linux/fd.h>
 #endif
 
 #ifdef HAVE_LINUX_BLKZONED_H
-#include <linux/blkzoned.h>
+#अन्तर्भाव <linux/blkzoned.h>
 #endif
 
 #ifdef HAVE_SYS_DISKLABEL_H
-#include <sys/disklabel.h>
+#अन्तर्भाव <sys/disklabel.h>
 #endif
 
 #ifdef HAVE_SYS_DISK_H
@@ -32,84 +32,84 @@
 # define EBADFD 77		/* File descriptor in bad state */
 #endif
 
-#include "all-io.h"
-#include "blkdev.h"
-#include "c.h"
-#include "cctype.h"
-#include "linux_version.h"
-#include "fileutils.h"
-#include "nls.h"
+#अन्तर्भाव "all-io.h"
+#अन्तर्भाव "blkdev.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "cctype.h"
+#अन्तर्भाव "linux_version.h"
+#अन्तर्भाव "fileutils.h"
+#अन्तर्भाव "nls.h"
 
-static long blkdev_valid_offset(int fd, off_t offset)
+स्थिर दीर्घ blkdev_valid_offset(पूर्णाङ्क fd, off_t offset)
 {
-	char ch;
+	वर्ण ch;
 
-	if (lseek (fd, offset, 0) < 0)
-		return 0;
-	if (ul_read_all (fd, &ch, 1) < 1)
-		return 0;
-	return 1;
+	यदि (lseek (fd, offset, 0) < 0)
+		प्रत्यागम 0;
+	यदि (ul_read_all (fd, &ch, 1) < 1)
+		प्रत्यागम 0;
+	प्रत्यागम 1;
 }
 
-int is_blkdev(int fd)
+पूर्णाङ्क is_blkdev(पूर्णाङ्क fd)
 {
-	struct stat st;
-	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+	संरचना stat st;
+	प्रत्यागम (ख_स्थिति(fd, &st) == 0 && S_ISBLK(st.st_mode));
 }
 
-off_t blkdev_find_size (int fd)
+off_t blkdev_find_size (पूर्णाङ्क fd)
 {
-	off_t high, low = 0;
+	off_t high, निचला = 0;
 
-	for (high = 1024; blkdev_valid_offset(fd, high); ) {
-		if (high == SINT_MAX(off_t)) {
-			errno = EFBIG;
-			return -1;
+	प्रति (high = 1024; blkdev_valid_offset(fd, high); ) {
+		यदि (high == SINT_MAX(off_t)) {
+			त्रुटि_सं = EFBIG;
+			प्रत्यागम -1;
 		}
 
-		low = high;
+		निचला = high;
 
-		if (high >= SINT_MAX(off_t)/2)
+		यदि (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
-		else
+		अन्यथा
 			high *= 2;
 	}
 
-	while (low < high - 1) {
-		off_t mid = (low + high) / 2;
+	यावत् (निचला < high - 1) {
+		off_t mid = (निचला + high) / 2;
 
-		if (blkdev_valid_offset (fd, mid))
-			low = mid;
-		else
+		यदि (blkdev_valid_offset (fd, mid))
+			निचला = mid;
+		अन्यथा
 			high = mid;
 	}
 	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	प्रत्यागम (निचला + 1);
 }
 
 /* get size in bytes */
-int blkdev_get_size(int fd, uint64_t *bytes)
+पूर्णाङ्क blkdev_get_size(पूर्णाङ्क fd, uint64_t *bytes)
 {
 #ifdef DKIOCGETBLOCKCOUNT
 	/* Apple Darwin */
-	if (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
+	यदि (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
 		*bytes <<= 9;
-		return 0;
+		प्रत्यागम 0;
 	}
 #endif
 
 #ifdef BLKGETSIZE64
-	if (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
-		return 0;
+	यदि (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
+		प्रत्यागम 0;
 #endif
 
 #ifdef BLKGETSIZE
 	{
-		unsigned long size;
+		अचिन्हित दीर्घ size;
 
-		if (ioctl(fd, BLKGETSIZE, &size) >= 0) {
+		यदि (ioctl(fd, BLKGETSIZE, &size) >= 0) {
 			*bytes = ((uint64_t) size) << 9;
-			return 0;
+			प्रत्यागम 0;
 		}
 	}
 
@@ -117,22 +117,22 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 
 #ifdef DIOCGMEDIASIZE
 	/* FreeBSD */
-	if (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
-		return 0;
+	यदि (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
+		प्रत्यागम 0;
 #endif
 
 #ifdef FDGETPRM
 	{
-		struct floppy_struct this_floppy;
+		संरचना floppy_struct this_floppy;
 
-		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+		यदि (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
 			*bytes = ((uint64_t) this_floppy.size) << 9;
-			return 0;
+			प्रत्यागम 0;
 		}
 	}
 #endif /* FDGETPRM */
 
-#if defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
+#यदि defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
 	{
 		/*
 		 * This code works for FreeBSD 4.11 i386, except for the full device
@@ -143,63 +143,63 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 		 * Note that FreeBSD >= 4.0 has disk devices as unbuffered (raw,
 		 * character) devices, so we need to check for S_ISCHR, too.
 		 */
-		int part = -1;
-		struct disklabel lab;
-		struct partition *pp;
-		struct stat st;
+		पूर्णाङ्क part = -1;
+		संरचना disklabel lab;
+		संरचना partition *pp;
+		संरचना stat st;
 
-		if ((fstat(fd, &st) >= 0) &&
+		यदि ((ख_स्थिति(fd, &st) >= 0) &&
 		    (S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode)))
 			part = st.st_rdev & 7;
 
-		if (part >= 0 && (ioctl(fd, DIOCGDINFO, (char *)&lab) >= 0)) {
+		यदि (part >= 0 && (ioctl(fd, DIOCGDINFO, (वर्ण *)&lab) >= 0)) {
 			pp = &lab.d_partitions[part];
-			if (pp->p_size) {
+			यदि (pp->p_size) {
 				 *bytes = ((uint64_t) pp->p_size) << 9;
-				 return 0;
+				 प्रत्यागम 0;
 			}
 		}
 	}
 #endif /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
 
 	{
-		struct stat st;
+		संरचना stat st;
 
-		if (fstat(fd, &st) != 0)
-			return -1;
-		if (S_ISREG(st.st_mode)) {
+		यदि (ख_स्थिति(fd, &st) != 0)
+			प्रत्यागम -1;
+		यदि (S_ISREG(st.st_mode)) {
 			*bytes = (uint64_t) st.st_size;
-			return 0;
+			प्रत्यागम 0;
 		}
-		if (!S_ISBLK(st.st_mode)) {
-			errno = ENOTBLK;
-			return -1;
+		यदि (!S_ISBLK(st.st_mode)) {
+			त्रुटि_सं = ENOTBLK;
+			प्रत्यागम -1;
 		}
 	}
 
 	{
 		off_t size = blkdev_find_size(fd);
 
-		if (size < 0)
-			return -1;
+		यदि (size < 0)
+			प्रत्यागम -1;
 
 		*bytes = (uint64_t) size;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
 /* get 512-byte sector count */
-int blkdev_get_sectors(int fd, uint64_t *sectors)
+पूर्णाङ्क blkdev_get_sectors(पूर्णाङ्क fd, uint64_t *sectors)
 {
 	uint64_t bytes;
 
-	if (blkdev_get_size(fd, &bytes) == 0) {
+	यदि (blkdev_get_size(fd, &bytes) == 0) {
 		*sectors = (bytes >> 9);
-		return 0;
+		प्रत्यागम 0;
 	}
 
-	return -1;
+	प्रत्यागम -1;
 }
 
 /*
@@ -209,17 +209,17 @@ int blkdev_get_sectors(int fd, uint64_t *sectors)
  * address. It is typically 512 bytes.
  */
 #ifdef BLKSSZGET
-int blkdev_get_sector_size(int fd, int *sector_size)
+पूर्णाङ्क blkdev_get_sector_size(पूर्णाङ्क fd, पूर्णाङ्क *sector_size)
 {
-	if (ioctl(fd, BLKSSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	यदि (ioctl(fd, BLKSSZGET, sector_size) >= 0)
+		प्रत्यागम 0;
+	प्रत्यागम -1;
 }
-#else
-int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
+#अन्यथा
+पूर्णाङ्क blkdev_get_sector_size(पूर्णाङ्क fd __attribute__((__unused__)), पूर्णाङ्क *sector_size)
 {
 	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	प्रत्यागम 0;
 }
 #endif
 
@@ -238,17 +238,17 @@ int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
  * }
  */
 #ifdef BLKPBSZGET
-int blkdev_get_physector_size(int fd, int *sector_size)
+पूर्णाङ्क blkdev_get_physector_size(पूर्णाङ्क fd, पूर्णाङ्क *sector_size)
 {
-	if (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	यदि (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
+		प्रत्यागम 0;
+	प्रत्यागम -1;
 }
-#else
-int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_size)
+#अन्यथा
+पूर्णाङ्क blkdev_get_physector_size(पूर्णाङ्क fd __attribute__((__unused__)), पूर्णाङ्क *sector_size)
 {
 	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	प्रत्यागम 0;
 }
 #endif
 
@@ -256,53 +256,53 @@ int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_si
  * Return the alignment status of a device
  */
 #ifdef BLKALIGNOFF
-int blkdev_is_misaligned(int fd)
+पूर्णाङ्क blkdev_is_misaligned(पूर्णाङ्क fd)
 {
-	int aligned;
+	पूर्णाङ्क aligned;
 
-	if (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
-		return 0; /* probably kernel < 2.6.32 */
+	यदि (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
+		प्रत्यागम 0; /* probably kernel < 2.6.32 */
 	/*
 	 * Note that kernel returns -1 as alignment offset if no compatible
 	 * sizes and alignments exist for stacked devices
 	 */
-	return aligned != 0 ? 1 : 0;
+	प्रत्यागम aligned != 0 ? 1 : 0;
 }
-#else
-int blkdev_is_misaligned(int fd __attribute__((__unused__)))
+#अन्यथा
+पूर्णाङ्क blkdev_is_misaligned(पूर्णाङ्क fd __attribute__((__unused__)))
 {
-	return 0;
+	प्रत्यागम 0;
 }
 #endif
 
-int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+पूर्णाङ्क open_blkdev_or_file(ध्रुव संरचना stat *st, ध्रुव वर्ण *name, ध्रुव पूर्णाङ्क oflag)
 {
-	int fd;
+	पूर्णाङ्क fd;
 
-	if (S_ISBLK(st->st_mode)) {
-		fd = open(name, oflag | O_EXCL | O_CLOEXEC);
-	} else
-		fd = open(name, oflag);
-	if (-1 < fd && !is_same_inode(fd, st)) {
-		close(fd);
-		errno = EBADFD;
-		return -1;
+	यदि (S_ISBLK(st->st_mode)) {
+		fd = खोलो(name, oflag | O_EXCL | O_CLOEXEC);
+	} अन्यथा
+		fd = खोलो(name, oflag);
+	यदि (-1 < fd && !is_same_inode(fd, st)) {
+		बंद(fd);
+		त्रुटि_सं = EBADFD;
+		प्रत्यागम -1;
 	}
-	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+	यदि (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
 		warnx(_("warning: %s is misaligned"), name);
-	return fd;
+	प्रत्यागम fd;
 }
 
 #ifdef CDROM_GET_CAPABILITY
-int blkdev_is_cdrom(int fd)
+पूर्णाङ्क blkdev_is_cdrom(पूर्णाङ्क fd)
 {
-	int ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
-	return ret < 0 ? 0 : ret;
+	पूर्णाङ्क ret = ioctl(fd, CDROM_GET_CAPABILITY, रिक्त);
+	प्रत्यागम ret < 0 ? 0 : ret;
 }
-#else
-int blkdev_is_cdrom(int fd __attribute__((__unused__)))
+#अन्यथा
+पूर्णाङ्क blkdev_is_cdrom(पूर्णाङ्क fd __attribute__((__unused__)))
 {
-	return 0;
+	प्रत्यागम 0;
 }
 #endif
 
@@ -315,176 +315,176 @@ int blkdev_is_cdrom(int fd __attribute__((__unused__)))
  * Note that this is deprecated in favor of LBA addressing.
  */
 #ifdef HDIO_GETGEO
-int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+पूर्णाङ्क blkdev_get_geometry(पूर्णाङ्क fd, अचिन्हित पूर्णाङ्क *h, अचिन्हित पूर्णाङ्क *s)
 {
-	struct hd_geometry geometry;
+	संरचना hd_geometry geometry;
 
-	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+	यदि (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
 		*h = geometry.heads;
 		*s = geometry.sectors;
-		return 0;
+		प्रत्यागम 0;
 	}
-#else
-int blkdev_get_geometry(int fd __attribute__((__unused__)),
-		unsigned int *h, unsigned int *s)
+#अन्यथा
+पूर्णाङ्क blkdev_get_geometry(पूर्णाङ्क fd __attribute__((__unused__)),
+		अचिन्हित पूर्णाङ्क *h, अचिन्हित पूर्णाङ्क *s)
 {
 	*h = 0;
 	*s = 0;
 #endif
-	return -1;
+	प्रत्यागम -1;
 }
 
 /*
  * Convert scsi type to human readable string.
  */
-const char *blkdev_scsi_type_to_name(int type)
+ध्रुव वर्ण *blkdev_scsi_type_to_name(पूर्णाङ्क type)
 {
-	switch (type) {
-	case SCSI_TYPE_DISK:
-		return "disk";
-	case SCSI_TYPE_TAPE:
-		return "tape";
-	case SCSI_TYPE_PRINTER:
-		return "printer";
-	case SCSI_TYPE_PROCESSOR:
-		return "processor";
-	case SCSI_TYPE_WORM:
-		return "worm";
-	case SCSI_TYPE_ROM:
-		return "rom";
-	case SCSI_TYPE_SCANNER:
-		return "scanner";
-	case SCSI_TYPE_MOD:
-		return "mo-disk";
-	case SCSI_TYPE_MEDIUM_CHANGER:
-		return "changer";
-	case SCSI_TYPE_COMM:
-		return "comm";
-	case SCSI_TYPE_RAID:
-		return "raid";
-	case SCSI_TYPE_ENCLOSURE:
-		return "enclosure";
-	case SCSI_TYPE_RBC:
-		return "rbc";
-	case SCSI_TYPE_OSD:
-		return "osd";
-	case SCSI_TYPE_NO_LUN:
-		return "no-lun";
-	default:
-		break;
+	विकल्प (type) {
+	पक्ष SCSI_TYPE_DISK:
+		प्रत्यागम "disk";
+	पक्ष SCSI_TYPE_TAPE:
+		प्रत्यागम "tape";
+	पक्ष SCSI_TYPE_PRINTER:
+		प्रत्यागम "printer";
+	पक्ष SCSI_TYPE_PROCESSOR:
+		प्रत्यागम "processor";
+	पक्ष SCSI_TYPE_WORM:
+		प्रत्यागम "worm";
+	पक्ष SCSI_TYPE_ROM:
+		प्रत्यागम "rom";
+	पक्ष SCSI_TYPE_SCANNER:
+		प्रत्यागम "scanner";
+	पक्ष SCSI_TYPE_MOD:
+		प्रत्यागम "mo-disk";
+	पक्ष SCSI_TYPE_MEDIUM_CHANGER:
+		प्रत्यागम "changer";
+	पक्ष SCSI_TYPE_COMM:
+		प्रत्यागम "comm";
+	पक्ष SCSI_TYPE_RAID:
+		प्रत्यागम "raid";
+	पक्ष SCSI_TYPE_ENCLOSURE:
+		प्रत्यागम "enclosure";
+	पक्ष SCSI_TYPE_RBC:
+		प्रत्यागम "rbc";
+	पक्ष SCSI_TYPE_OSD:
+		प्रत्यागम "osd";
+	पक्ष SCSI_TYPE_NO_LUN:
+		प्रत्यागम "no-lun";
+	स्वभाव:
+		भङ्ग;
 	}
-	return NULL;
+	प्रत्यागम रिक्त;
 }
 
 /* return 0 on success */
-int blkdev_lock(int fd, const char *devname, const char *lockmode)
+पूर्णाङ्क blkdev_lock(पूर्णाङ्क fd, ध्रुव वर्ण *devname, ध्रुव वर्ण *lockmode)
 {
-	int oper, rc, msg = 0;
+	पूर्णाङ्क oper, rc, संदेश = 0;
 
-	if (!lockmode)
-		lockmode = getenv("LOCK_BLOCK_DEVICE");
-	if (!lockmode)
-		return 0;
+	यदि (!lockmode)
+		lockmode = दो_पर्या("LOCK_BLOCK_DEVICE");
+	यदि (!lockmode)
+		प्रत्यागम 0;
 
-	if (c_strcasecmp(lockmode, "yes") == 0 ||
-	    strcmp(lockmode, "1") == 0)
+	यदि (c_strcasecmp(lockmode, "yes") == 0 ||
+	    म_भेद(lockmode, "1") == 0)
 		oper = LOCK_EX;
 
-	else if (c_strcasecmp(lockmode, "nonblock") == 0)
+	अन्यथा यदि (c_strcasecmp(lockmode, "nonblock") == 0)
 		oper = LOCK_EX | LOCK_NB;
 
-	else if (c_strcasecmp(lockmode, "no") == 0 ||
-		 strcmp(lockmode, "0") == 0)
-		return 0;
-	else {
+	अन्यथा यदि (c_strcasecmp(lockmode, "no") == 0 ||
+		 म_भेद(lockmode, "0") == 0)
+		प्रत्यागम 0;
+	अन्यथा {
 		warnx(_("unsupported lock mode: %s"), lockmode);
-		return -EINVAL;
+		प्रत्यागम -EINVAL;
 	}
 
-	if (!(oper & LOCK_NB)) {
+	यदि (!(oper & LOCK_NB)) {
 		/* Try non-block first to provide message */
 		rc = flock(fd, oper | LOCK_NB);
-		if (rc == 0)
-			return 0;
-		if (rc != 0 && errno == EWOULDBLOCK) {
-			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
+		यदि (rc == 0)
+			प्रत्यागम 0;
+		यदि (rc != 0 && त्रुटि_सं == EWOULDBLOCK) {
+			ख_लिखो(मानक_त्रुटि, _("%s: %s: device already locked, waiting to get lock ... "),
 					program_invocation_short_name, devname);
-			msg = 1;
+			संदेश = 1;
 		}
 	}
 	rc = flock(fd, oper);
-	if (rc != 0) {
-		switch (errno) {
-		case EWOULDBLOCK: /* LOCK_NB */
+	यदि (rc != 0) {
+		विकल्प (त्रुटि_सं) {
+		पक्ष EWOULDBLOCK: /* LOCK_NB */
 			warnx(_("%s: device already locked"), devname);
-			break;
-		default:
+			भङ्ग;
+		स्वभाव:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
-		fprintf(stderr, _("OK\n"));
-	return rc;
+	} अन्यथा यदि (संदेश)
+		ख_लिखो(मानक_त्रुटि, _("OK\n"));
+	प्रत्यागम rc;
 }
 
 #ifdef HAVE_LINUX_BLKZONED_H
-struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t nzones)
+संरचना blk_zone_report *blkdev_get_zonereport(पूर्णाङ्क fd, uint64_t sector, uint32_t nzones)
 {
-	struct blk_zone_report *rep;
-	size_t rep_size;
-	int ret;
+	संरचना blk_zone_report *rep;
+	माप_प्रकार rep_size;
+	पूर्णाङ्क ret;
 
-	rep_size = sizeof(struct blk_zone_report) + sizeof(struct blk_zone) * nzones;
-	rep = calloc(1, rep_size);
-	if (!rep)
-		return NULL;
+	rep_size = परिमाण(संरचना blk_zone_report) + परिमाण(संरचना blk_zone) * nzones;
+	rep = सुस्मृति(1, rep_size);
+	यदि (!rep)
+		प्रत्यागम रिक्त;
 
 	rep->sector = sector;
 	rep->nr_zones = nzones;
 
 	ret = ioctl(fd, BLKREPORTZONE, rep);
-	if (ret || rep->nr_zones != nzones) {
-		free(rep);
-		return NULL;
+	यदि (ret || rep->nr_zones != nzones) {
+		मुक्त(rep);
+		प्रत्यागम रिक्त;
 	}
 
-	return rep;
+	प्रत्यागम rep;
 }
 #endif
 
 
 #ifdef TEST_PROGRAM_BLKDEV
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <fcntl.h>
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
 	uint64_t bytes, sectors;
-	int sector_size, phy_sector_size;
-	int fd;
+	पूर्णाङ्क sector_size, phy_sector_size;
+	पूर्णाङ्क fd;
 
-	if (argc != 2) {
-		fprintf(stderr, "usage: %s device\n", argv[0]);
-		exit(EXIT_FAILURE);
+	यदि (argc != 2) {
+		ख_लिखो(मानक_त्रुटि, "usage: %s device\n", argv[0]);
+		निकास(निकास_त्रुटि);
 	}
 
-	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
-		err(EXIT_FAILURE, "open %s failed", argv[1]);
+	यदि ((fd = खोलो(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+		err(निकास_त्रुटि, "open %s failed", argv[1]);
 
-	if (blkdev_get_size(fd, &bytes) < 0)
-		err(EXIT_FAILURE, "blkdev_get_size() failed");
-	if (blkdev_get_sectors(fd, &sectors) < 0)
-		err(EXIT_FAILURE, "blkdev_get_sectors() failed");
-	if (blkdev_get_sector_size(fd, &sector_size) < 0)
-		err(EXIT_FAILURE, "blkdev_get_sector_size() failed");
-	if (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
-		err(EXIT_FAILURE, "blkdev_get_physector_size() failed");
+	यदि (blkdev_get_size(fd, &bytes) < 0)
+		err(निकास_त्रुटि, "blkdev_get_size() failed");
+	यदि (blkdev_get_sectors(fd, &sectors) < 0)
+		err(निकास_त्रुटि, "blkdev_get_sectors() failed");
+	यदि (blkdev_get_sector_size(fd, &sector_size) < 0)
+		err(निकास_त्रुटि, "blkdev_get_sector_size() failed");
+	यदि (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
+		err(निकास_त्रुटि, "blkdev_get_physector_size() failed");
 
-	printf("          bytes: %" PRIu64 "\n", bytes);
-	printf("        sectors: %" PRIu64 "\n", sectors);
-	printf("    sector size: %d\n", sector_size);
-	printf("phy-sector size: %d\n", phy_sector_size);
+	म_लिखो("          bytes: %" PRIu64 "\n", bytes);
+	म_लिखो("        sectors: %" PRIu64 "\n", sectors);
+	म_लिखो("    sector size: %d\n", sector_size);
+	म_लिखो("phy-sector size: %d\n", phy_sector_size);
 
-	return EXIT_SUCCESS;
+	प्रत्यागम निकास_सफल;
 }
 #endif /* TEST_PROGRAM_BLKDEV */
