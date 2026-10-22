@@ -13,14 +13,14 @@
 blkid_probe get_swap_prober(const char *devname)
 {
 	blkid_probe pr;
-	int rc;
+	целое rc;
 	const char *version = NULL;
 	char *swap_filter[] = { "swap", NULL };
 
 	pr = blkid_new_probe_from_filename(devname);
-	if (!pr) {
+	если (!pr) {
 		warn(_("%s: unable to probe device"), devname);
-		return NULL;
+		вернуть NULL;
 	}
 
 	blkid_probe_enable_superblocks(pr, TRUE);
@@ -31,24 +31,24 @@ blkid_probe get_swap_prober(const char *devname)
 	blkid_probe_filter_superblocks_type(pr, BLKID_FLTR_ONLYIN, swap_filter);
 
 	rc = blkid_do_safeprobe(pr);
-	if (rc == -1)
+	если (rc == -1)
 		warn(_("%s: unable to probe device"), devname);
-	else if (rc == -2)
+	иначе если (rc == -2)
 		warnx(_("%s: ambiguous probing result; use wipefs(8)"), devname);
-	else if (rc == 1)
+	иначе если (rc == 1)
 		warnx(_("%s: not a valid swap partition"), devname);
 
-	if (rc == 0) {
+	если (rc == 0) {
 		/* Only the SWAPSPACE2 is supported. */
-		if (blkid_probe_lookup_value(pr, "VERSION", &version, NULL) == 0
+		если (blkid_probe_lookup_value(pr, "VERSION", &version, NULL) == 0
 		    && version
 		    && strcmp(version, stringify_value(SWAP_VERSION)) != 0)
 			warnx(_("%s: unsupported swap version '%s'"),
 						devname, version);
-		else
-			return pr;
+		иначе
+			вернуть pr;
 	}
 
 	blkid_free_probe(pr);
-	return NULL;
+	вернуть NULL;
 }

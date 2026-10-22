@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		вернуть "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		вернуть ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		вернуть "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		вернуть "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		вернуть "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		вернуть "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		вернуть "AM";
 	case PM_STR:
-		return "PM";
+		вернуть "PM";
 	case DAY_1:
-		return "Sunday";
+		вернуть "Sunday";
 	case DAY_2:
-		return "Monday";
+		вернуть "Monday";
 	case DAY_3:
-		return "Tuesday";
+		вернуть "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		вернуть "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		вернуть "Thursday";
 	case DAY_6:
-		return "Friday";
+		вернуть "Friday";
 	case DAY_7:
-		return "Saturday";
+		вернуть "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		вернуть "Sun";
 	case ABDAY_2:
-		return "Mon";
+		вернуть "Mon";
 	case ABDAY_3:
-		return "Tue";
+		вернуть "Tue";
 	case ABDAY_4:
-		return "Wed";
+		вернуть "Wed";
 	case ABDAY_5:
-		return "Thu";
+		вернуть "Thu";
 	case ABDAY_6:
-		return "Fri";
+		вернуть "Fri";
 	case ABDAY_7:
-		return "Sat";
+		вернуть "Sat";
 	case MON_1:
-		return "January";
+		вернуть "January";
 	case MON_2:
-		return "February";
+		вернуть "February";
 	case MON_3:
-		return "March";
+		вернуть "March";
 	case MON_4:
-		return "April";
+		вернуть "April";
 	case MON_5:
-		return "May";
+		вернуть "May";
 	case MON_6:
-		return "June";
+		вернуть "June";
 	case MON_7:
-		return "July";
+		вернуть "July";
 	case MON_8:
-		return "August";
+		вернуть "August";
 	case MON_9:
-		return "September";
+		вернуть "September";
 	case MON_10:
-		return "October";
+		вернуть "October";
 	case MON_11:
-		return "November";
+		вернуть "November";
 	case MON_12:
-		return "December";
+		вернуть "December";
 	case ABMON_1:
-		return "Jan";
+		вернуть "Jan";
 	case ABMON_2:
-		return "Feb";
+		вернуть "Feb";
 	case ABMON_3:
-		return "Mar";
+		вернуть "Mar";
 	case ABMON_4:
-		return "Apr";
+		вернуть "Apr";
 	case ABMON_5:
-		return "May";
+		вернуть "May";
 	case ABMON_6:
-		return "Jun";
+		вернуть "Jun";
 	case ABMON_7:
-		return "Jul";
+		вернуть "Jul";
 	case ABMON_8:
-		return "Aug";
+		вернуть "Aug";
 	case ABMON_9:
-		return "Sep";
+		вернуть "Sep";
 	case ABMON_10:
-		return "Oct";
+		вернуть "Oct";
 	case ABMON_11:
-		return "Nov";
+		вернуть "Nov";
 	case ABMON_12:
-		return "Dec";
+		вернуть "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		вернуть "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		вернуть "-";
 	case YESEXPR:
-		return "^[yY]";
+		вернуть "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		вернуть "^[nN]";
 	default:
-		return "";
+		вернуть "";
 	}
 }
 

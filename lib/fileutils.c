@@ -26,24 +26,24 @@
 #include "pathnames.h"
 #include "strutils.h"
 
-int mkstemp_cloexec(char *template)
+целое mkstemp_cloexec(char *template)
 {
 #ifdef HAVE_MKOSTEMP
-	return mkostemp(template, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
-#else
-	int fd, old_flags, errno_save;
+	вернуть mkostemp(template, O_RDWR|O_CREAT|O_EXCL|O_CLOEXEC);
+#иначе
+	целое fd, old_flags, errno_save;
 
 	fd = mkstemp(template);
-	if (fd < 0)
-		return fd;
+	если (fd < 0)
+		вернуть fd;
 
 	old_flags = fcntl(fd, F_GETFD, 0);
-	if (old_flags < 0)
+	если (old_flags < 0)
 		goto unwind;
-	if (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
+	если (fcntl(fd, F_SETFD, old_flags | O_CLOEXEC) < 0)
 		goto unwind;
 
-	return fd;
+	вернуть fd;
 
 unwind:
 	errno_save = errno;
@@ -51,82 +51,82 @@ unwind:
 	close(fd);
 	errno = errno_save;
 
-	return -1;
+	вернуть -1;
 #endif
 }
 
 /* Create open temporary file in safe way.  Please notice that the
  * file permissions are -rw------- by default. */
-int xmkstemp(char **tmpname, const char *dir, const char *prefix)
+целое xmkstemp(char **tmpname, const char *dir, const char *prefix)
 {
 	char *localtmp;
 	const char *tmpenv;
 	mode_t old_mode;
-	int fd, rc;
+	целое fd, rc;
 
 	/* Some use cases must be capable of being moved atomically
 	 * with rename(2), which is the reason why dir is here.  */
 	tmpenv = dir ? dir : getenv("TMPDIR");
-	if (!tmpenv)
+	если (!tmpenv)
 		tmpenv = _PATH_TMP;
 
 	rc = asprintf(&localtmp, "%s/%s.XXXXXX", tmpenv, prefix);
-	if (rc < 0)
-		return -1;
+	если (rc < 0)
+		вернуть -1;
 
 	old_mode = umask(077);
 	fd = mkstemp_cloexec(localtmp);
 	umask(old_mode);
-	if (fd == -1) {
+	если (fd == -1) {
 		free(localtmp);
 		localtmp = NULL;
 	}
 	*tmpname = localtmp;
-	return fd;
+	вернуть fd;
 }
 
 #ifdef F_DUPFD_CLOEXEC
-int dup_fd_cloexec(int oldfd, int lowfd)
-#else
-int dup_fd_cloexec(int oldfd, int lowfd  __attribute__((__unused__)))
+целое dup_fd_cloexec(целое oldfd, целое lowfd)
+#иначе
+целое dup_fd_cloexec(целое oldfd, целое lowfd  __attribute__((__unused__)))
 #endif
 {
-	int fd, flags, errno_save;
+	целое fd, flags, errno_save;
 
 #ifdef F_DUPFD_CLOEXEC
 	fd = fcntl(oldfd, F_DUPFD_CLOEXEC, lowfd);
-	if (fd >= 0)
-		return fd;
+	если (fd >= 0)
+		вернуть fd;
 #endif
 
 	fd = dup(oldfd);
-	if (fd < 0)
-		return fd;
+	если (fd < 0)
+		вернуть fd;
 
 	flags = fcntl(fd, F_GETFD);
-	if (flags < 0)
+	если (flags < 0)
 		goto unwind;
-	if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
+	если (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) < 0)
 		goto unwind;
 
-	return fd;
+	вернуть fd;
 
 unwind:
 	errno_save = errno;
 	close(fd);
 	errno = errno_save;
 
-	return -1;
+	вернуть -1;
 }
 
 /*
  * portable getdtablesize()
  */
-unsigned int get_fd_tabsize(void)
+unsigned целое get_fd_tabsize(void)
 {
-	int m;
+	целое m;
 
-#if defined(HAVE_GETDTABLESIZE)
+#если defined(HAVE_GETDTABLESIZE)
 	m = getdtablesize();
 #elif defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
 	struct rlimit rl;
@@ -135,44 +135,44 @@ unsigned int get_fd_tabsize(void)
 	m = rl.rlim_cur;
 #elif defined(HAVE_SYSCONF) && defined(_SC_OPEN_MAX)
 	m = sysconf(_SC_OPEN_MAX);
-#else
+#иначе
 	m = OPEN_MAX;
 #endif
-	return m;
+	вернуть m;
 }
 
-void ul_close_all_fds(unsigned int first, unsigned int last)
+void ul_close_all_fds(unsigned целое first, unsigned целое last)
 {
 	struct dirent *d;
 	DIR *dir;
 
 	dir = opendir(_PATH_PROC_FDDIR);
-	if (dir) {
-		while ((d = xreaddir(dir))) {
+	если (dir) {
+		пока ((d = xreaddir(dir))) {
 			char *end;
-			unsigned int fd;
-			int dfd;
+			unsigned целое fd;
+			целое dfd;
 
 			errno = 0;
 			fd = strtoul(d->d_name, &end, 10);
 
-			if (errno || end == d->d_name || !end || *end)
+			если (errno || end == d->d_name || !end || *end)
 				continue;
 			dfd = dirfd(dir);
-			if (dfd < 0)
+			если (dfd < 0)
 				continue;
-			if ((unsigned int)dfd == fd)
+			если ((unsigned целое)dfd == fd)
 				continue;
-			if (fd < first || last < fd)
+			если (fd < first || last < fd)
 				continue;
 			close(fd);
 		}
 		closedir(dir);
-	} else {
+	} иначе {
 		unsigned fd, tbsz = get_fd_tabsize();
 
-		for (fd = 0; fd < tbsz; fd++) {
-			if (first <= fd && fd <= last)
+		для (fd = 0; fd < tbsz; fd++) {
+			если (first <= fd && fd <= last)
 				close(fd);
 		}
 	}
@@ -182,20 +182,20 @@ void ul_close_all_fds(unsigned int first, unsigned int last)
  * Fork, drop permissions, and call oper() and return result.
  */
 char *ul_restricted_path_oper(const char *path,
-		  int (*oper)(const char *path, char **result, void *data),
+		  целое (*oper)(const char *path, char **result, void *data),
 		  void *data)
 {
 	char *result = NULL;
-	int errsv = 0;
-	int pipes[2];
+	целое errsv = 0;
+	целое pipes[2];
 	ssize_t len;
 	pid_t pid;
 
-	if (!path || !*path)
-		return NULL;
+	если (!path || !*path)
+		вернуть NULL;
 
-	if (pipe(pipes) != 0)
-		return NULL;
+	если (pipe(pipes) != 0)
+		вернуть NULL;
 	/*
 	 * To accurately assume identity of getuid() we must use setuid()
 	 * but if we do that, we lose ability to reassume euid of 0, so
@@ -206,15 +206,15 @@ char *ul_restricted_path_oper(const char *path,
 	case -1:
 		close(pipes[0]);
 		close(pipes[1]);
-		return NULL;			/* fork error */
+		вернуть NULL;			/* fork error */
 	case 0:
 		close(pipes[0]);		/* close unused end */
 		pipes[0] = -1;
 		errno = 0;
 
-		if (drop_permissions() != 0)
+		если (drop_permissions() != 0)
 			result = NULL;	/* failed */
-		else
+		иначе
 			oper(path, &result, data);
 
 		len = result ? (ssize_t) strlen(result) :
@@ -222,7 +222,7 @@ char *ul_restricted_path_oper(const char *path,
 
 		/* send length or errno */
 		ul_write_all(pipes[1], (char *) &len, sizeof(len));
-		if (result)
+		если (result)
 			ul_write_all(pipes[1], result, len);
 		_exit(0);
 	default:
@@ -233,26 +233,26 @@ char *ul_restricted_path_oper(const char *path,
 	pipes[1] = -1;
 
 	/* read size or -errno */
-	if (ul_read_all(pipes[0], (char *) &len, sizeof(len)) != sizeof(len))
+	если (ul_read_all(pipes[0], (char *) &len, sizeof(len)) != sizeof(len))
 		goto done;
-	if (len < 0) {
+	если (len < 0) {
 		errsv = -len;
 		goto done;
 	}
 
 	result = malloc(len + 1);
-	if (!result) {
+	если (!result) {
 		errsv = ENOMEM;
 		goto done;
 	}
 	/* read path */
-	if (ul_read_all(pipes[0], result, len) != len) {
+	если (ul_read_all(pipes[0], result, len) != len) {
 		errsv = errno;
 		goto done;
 	}
 	result[len] = '\0';
 done:
-	if (errsv) {
+	если (errsv) {
 		free(result);
 		result = NULL;
 	}
@@ -262,43 +262,43 @@ done:
 	ignore_result( waitpid(pid, NULL, 0) );
 
 	errno = errsv;
-	return result;
+	вернуть result;
 
 }
 
-int ul_mkdir_p(const char *path, mode_t mode)
+целое ul_mkdir_p(const char *path, mode_t mode)
 {
 	char *p, *dir;
-	int rc = 0;
+	целое rc = 0;
 
-	if (!path || !*path)
-		return -EINVAL;
+	если (!path || !*path)
+		вернуть -EINVAL;
 
 	dir = p = strdup(path);
-	if (!dir)
-		return -ENOMEM;
+	если (!dir)
+		вернуть -ENOMEM;
 
-	if (*p == '/')
+	если (*p == '/')
 		p++;
 
-	while (p && *p) {
+	пока (p && *p) {
 		char *e = strchr(p, '/');
-		if (e)
+		если (e)
 			*e = '\0';
-		if (*p) {
+		если (*p) {
 			rc = mkdir(dir, mode);
-			if (rc && errno != EEXIST)
+			если (rc && errno != EEXIST)
 				break;
 			rc = 0;
 		}
-		if (!e)
+		если (!e)
 			break;
 		*e = '/';
 		p = e + 1;
 	}
 
 	free(dir);
-	return rc;
+	вернуть rc;
 }
 
 /* returns basename and keeps dirname in the @path, if @path is "/" (root)
@@ -307,48 +307,48 @@ char *stripoff_last_component(char *path)
 {
 	char *p = path ? strrchr(path, '/') : NULL;
 
-	if (!p)
-		return NULL;
+	если (!p)
+		вернуть NULL;
 	*p = '\0';
-	return p + 1;
+	вернуть p + 1;
 }
 
-static int copy_file_simple(int from, int to)
+static целое copy_file_simple(целое from, целое to)
 {
 	ssize_t nr;
 	char buf[BUFSIZ];
 
-	while ((nr = ul_read_all(from, buf, sizeof(buf))) > 0)
-		if (ul_write_all(to, buf, nr) == -1)
-			return UL_COPY_WRITE_ERROR;
-	if (nr < 0)
-		return UL_COPY_READ_ERROR;
+	пока ((nr = ul_read_all(from, buf, sizeof(buf))) > 0)
+		если (ul_write_all(to, buf, nr) == -1)
+			вернуть UL_COPY_WRITE_ERROR;
+	если (nr < 0)
+		вернуть UL_COPY_READ_ERROR;
 #ifdef HAVE_EXPLICIT_BZERO
 	explicit_bzero(buf, sizeof(buf));
 #endif
-	return 0;
+	вернуть 0;
 }
 
 /* Copies the contents of a file. Returns -1 on read error, -2 on write error. */
-int ul_copy_file(int from, int to)
+целое ul_copy_file(целое from, целое to)
 {
 #ifdef HAVE_SENDFILE
 	struct stat st;
 	ssize_t nw;
 
-	if (fstat(from, &st) == -1)
-		return UL_COPY_READ_ERROR;
-	if (!S_ISREG(st.st_mode))
-		return copy_file_simple(from, to);
-	if (ul_sendfile_all(to, from, NULL, st.st_size) < 0)
-		return copy_file_simple(from, to);
+	если (fstat(from, &st) == -1)
+		вернуть UL_COPY_READ_ERROR;
+	если (!S_ISREG(st.st_mode))
+		вернуть copy_file_simple(from, to);
+	если (ul_sendfile_all(to, from, NULL, st.st_size) < 0)
+		вернуть copy_file_simple(from, to);
 	/* ensure we either get an EOF or an error */
-	while ((nw = ul_sendfile_all(to, from, NULL, 16*1024*1024)) != 0)
-		if (nw < 0)
-			return copy_file_simple(from, to);
-	return 0;
-#else
-	return copy_file_simple(from, to);
+	пока ((nw = ul_sendfile_all(to, from, NULL, 16*1024*1024)) != 0)
+		если (nw < 0)
+			вернуть copy_file_simple(from, to);
+	вернуть 0;
+#иначе
+	вернуть copy_file_simple(from, to);
 #endif
 }
 
@@ -359,45 +359,45 @@ int ul_copy_file(int from, int to)
  *
  * Returns @buf, or NULL on error.
  */
-char *ul_fd_mkpath(char *buf, size_t bufsz, int fd)
+char *ul_fd_mkpath(char *buf, size_t bufsz, целое fd)
 {
-	int len;
+	целое len;
 
-	if (fd < 0) {
+	если (fd < 0) {
 		errno = EBADF;
-		return NULL;
+		вернуть NULL;
 	}
 
 	len = snprintf(buf, bufsz, _PATH_PROC_FDDIR "/%d", fd);
-	if (len < 0 || (size_t) len >= bufsz) {
+	если (len < 0 || (size_t) len >= bufsz) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		вернуть NULL;
 	}
 
-	return buf;
+	вернуть buf;
 }
 
 /* Returns the pathname the @fd refers to as used by the kernel, or NULL on
  * error. The result has to be deallocated by free().
  */
-char *ul_fd_get_path(int fd)
+char *ul_fd_get_path(целое fd)
 {
 	ssize_t ssz;
 	char buf[PATH_MAX];
 	char fdpath[UL_FDPATH_BUFSIZ];
 
-	if (!ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
-		return NULL;
+	если (!ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
+		вернуть NULL;
 
 	ssz = readlink(fdpath, buf, sizeof(buf));
-	if (ssz < 0)
-		return NULL;
+	если (ssz < 0)
+		вернуть NULL;
 
 	/* readlink() does not terminate the result and it does not report
 	 * truncation; a name we cannot read completely is unusable */
-	if ((size_t) ssz >= sizeof(buf)) {
+	если ((size_t) ssz >= sizeof(buf)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		вернуть NULL;
 	}
 
 	buf[ssz] = '\0';
@@ -410,26 +410,26 @@ char *ul_fd_get_path(int fd)
 	 * tell it apart we would have to stat() the name, and such a path
 	 * lookup may trigger an automount or block on an unreachable NFS
 	 * server. */
-	if (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
+	если (*buf != '/' || ul_endswith(buf, PATH_DELETED_SUFFIX)) {
 		errno = ENOENT;
-		return NULL;
+		вернуть NULL;
 	}
 
-	return strdup(buf);
+	вернуть strdup(buf);
 }
 
-int ul_reopen(int fd, int flags)
+целое ul_reopen(целое fd, целое flags)
 {
 	char *path = ul_fd_get_path(fd);
-	int ret;
+	целое ret;
 
-	if (!path)
-		return -errno;
+	если (!path)
+		вернуть -errno;
 
 	ret = open(path, flags);
 	free(path);
 
-	return ret;
+	вернуть ret;
 }
 
 
@@ -441,27 +441,27 @@ char *ul_basename(char *path)
 {
 	char *p;
 
-	if (!path || !*path)
-		return (char *) ".";	/* ugly, static string */
+	если (!path || !*path)
+		вернуть (char *) ".";	/* ugly, static string */
 
 	p = strrchr(path, '/');
-	if (!p)
-		return path;		/* no '/', return original */
+	если (!p)
+		вернуть path;		/* no '/', return original */
 
-	if (*(p + 1) != '\0')
-		return p + 1;		/* begin of the name */
+	если (*(p + 1) != '\0')
+		вернуть p + 1;		/* begin of the name */
 
-	while (p > path && *(p - 1) == '/')
+	пока (p > path && *(p - 1) == '/')
 		--p;			/* remove trailing '/' */
 
-	if (p > path) {
+	если (p > path) {
 		*p-- = '\0';
-		while (p > path && *(p - 1) != '/')
+		пока (p > path && *(p - 1) != '/')
 			--p;		/* move to the beginning of the name */
-	} else while (*(p + 1) != '\0')
+	} иначе пока (*(p + 1) != '\0')
 		++p;
 
-	return p;
+	вернуть p;
 }
 
 #ifdef HAVE_OPENAT
@@ -483,11 +483,11 @@ char *ul_basename(char *path)
  * Return: On success, a valid pointer to a file stream is returned.
  *         On failure, NULL is returned and errno is set to indicate the issue.
  */
-FILE *fopen_at_no_link(int dir, const char *filename,
-                             int flags, mode_t perm, const char *mode)
+FILE *fopen_at_no_link(целое dir, const char *filename,
+                             целое flags, mode_t perm, const char *mode)
 {
 	FILE *fp;
-	int fd;
+	целое fd;
 	struct stat st;
 
 	/* We temporarily clear the O_TRUNC bit because we do not want
@@ -497,34 +497,34 @@ FILE *fopen_at_no_link(int dir, const char *filename,
 	 * with fstat()...
 	 */
 	fd = openat(dir, filename, ((flags & ~O_TRUNC) | O_NOFOLLOW | O_CLOEXEC), perm);
-	if (fd < 0)
-		return NULL;
+	если (fd < 0)
+		вернуть NULL;
 
-	if (fstat(fd, &st)) {
+	если (fstat(fd, &st)) {
 		close(fd);
-		return NULL;
+		вернуть NULL;
 	}
 
-	if (st.st_nlink > 1) {
+	если (st.st_nlink > 1) {
 		close(fd);
 		errno = EMLINK;
-		return NULL;
+		вернуть NULL;
 	}
 
-	if ((flags & O_TRUNC) && ftruncate(fd, 0)) {
+	если ((flags & O_TRUNC) && ftruncate(fd, 0)) {
 		close(fd);
-		return NULL;
+		вернуть NULL;
 	}
 
 	fp = fdopen(fd, mode);
-	if (!fp)
+	если (!fp)
 		close(fd);
-	return fp;
+	вернуть fp;
 }
 #endif /* HAVE_OPENAT */
 
-#if defined(SYS_openat2)
-int ul_openat_resolve(int dirfd, const char *path, int flags,
+#если defined(SYS_openat2)
+целое ul_openat_resolve(целое dirfd, const char *path, целое flags,
 		      mode_t mode, unsigned long long resolve)
 {
 	struct open_how how = {
@@ -533,18 +533,18 @@ int ul_openat_resolve(int dirfd, const char *path, int flags,
 		.resolve = resolve,
 	};
 
-	return syscall(SYS_openat2, dirfd, path, &how, sizeof(how));
+	вернуть syscall(SYS_openat2, dirfd, path, &how, sizeof(how));
 }
-#else
-int ul_openat_resolve(
-		int dirfd __attribute__((__unused__)),
+#иначе
+целое ul_openat_resolve(
+		целое dirfd __attribute__((__unused__)),
 		const char *path __attribute__((__unused__)),
-		int flags __attribute__((__unused__)),
+		целое flags __attribute__((__unused__)),
 		mode_t mode __attribute__((__unused__)),
 		unsigned long long resolve __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	вернуть -1;
 }
 #endif
 
@@ -567,65 +567,65 @@ int ul_openat_resolve(
  * Returns a file descriptor, or -1 and sets errno to ELOOP when a symlink has
  * been detected, or to ENOSYS when the check is not possible.
  */
-static int open_no_symlinks_fallback(const char *path, int flags, mode_t mode)
+static целое open_no_symlinks_fallback(const char *path, целое flags, mode_t mode)
 {
 	char *abspath = NULL, *kpath = NULL;
 	struct stat st;
-	int fd = -1, errsv;
+	целое fd = -1, errsv;
 
 	/* we cannot verify a file we have to create first */
-	if (!path || (flags & O_CREAT)) {
+	если (!path || (flags & O_CREAT)) {
 		errno = ENOSYS;
-		return -1;
+		вернуть -1;
 	}
 
-	if (ul_is_relative_path(path)) {
+	если (ul_is_relative_path(path)) {
 		/* the kernel reports an absolute pathname; note that
 		 * ul_absolute_path() only prepends the CWD as returned by
 		 * getcwd(), it resolves nothing */
 		abspath = ul_absolute_path(path);
-		if (!abspath)
-			return -1;
+		если (!abspath)
+			вернуть -1;
 	}
 
-	if (flags & O_PATH)
+	если (flags & O_PATH)
 		fd = open(path, flags);
-	else
+	иначе
 		fd = open(path, O_PATH | O_CLOEXEC |
 				(flags & (O_NOFOLLOW | O_DIRECTORY)));
-	if (fd < 0)
+	если (fd < 0)
 		goto fail;
 
 	/* O_PATH|O_NOFOLLOW returns a FD to the symlink itself */
-	if (fstat(fd, &st) != 0)
+	если (fstat(fd, &st) != 0)
 		goto fail;
-	if (S_ISLNK(st.st_mode)) {
+	если (S_ISLNK(st.st_mode)) {
 		errno = ELOOP;
 		goto fail;
 	}
 
 	kpath = ul_fd_get_path(fd);
-	if (!kpath) {
+	если (!kpath) {
 		errno = ENOSYS;		/* no /proc, no verification */
 		goto fail;
 	}
 
 	/* streq_paths() ignores duplicate and trailing slashes, but "." and
 	 * ".." in the requested path are refused as a symlink */
-	if (streq_paths(abspath ? abspath : path, kpath) != 1) {
+	если (streq_paths(abspath ? abspath : path, kpath) != 1) {
 		errno = ELOOP;
 		goto fail;
 	}
 
-	if (!(flags & O_PATH)) {
+	если (!(flags & O_PATH)) {
 		char fdpath[UL_FDPATH_BUFSIZ];
-		int nfd = -1;
+		целое nfd = -1;
 
 		/* apply the caller's flags; the /proc link refers to the
 		 * verified file, the path is not resolved for the second time */
-		if (ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
+		если (ul_fd_mkpath(fdpath, sizeof(fdpath), fd))
 			nfd = open(fdpath, flags, mode);
-		if (nfd < 0)
+		если (nfd < 0)
 			goto fail;
 		close(fd);
 		fd = nfd;
@@ -633,41 +633,41 @@ static int open_no_symlinks_fallback(const char *path, int flags, mode_t mode)
 
 	free(abspath);
 	free(kpath);
-	return fd;
+	вернуть fd;
 fail:
 	errsv = errno;
 	free(abspath);
 	free(kpath);
-	if (fd >= 0)
+	если (fd >= 0)
 		close(fd);
 	errno = errsv;
-	return -1;
+	вернуть -1;
 }
-#else /* !__linux__ */
+#иначе /* !__linux__ */
 /* O_PATH and the /proc/self/fd/ names are Linux specific */
-static int open_no_symlinks_fallback(
+static целое open_no_symlinks_fallback(
 			const char *path __attribute__((__unused__)),
-			int flags __attribute__((__unused__)),
+			целое flags __attribute__((__unused__)),
 			mode_t mode __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	вернуть -1;
 }
 #endif /* __linux__ */
 
 /* Opens @path with the guarantee that no component of the path is a symbolic
  * link, otherwise it fails with ELOOP.
  */
-int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
+целое ul_open_no_symlinks(const char *path, целое flags, mode_t mode)
 {
-	int fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
+	целое fd = ul_openat_resolve(AT_FDCWD, path, flags, mode,
 				   RESOLVE_NO_SYMLINKS);
 
 	/* openat2() is Linux 5.6+ */
-	if (fd < 0 && errno == ENOSYS)
+	если (fd < 0 && errno == ENOSYS)
 		fd = open_no_symlinks_fallback(path, flags, mode);
 
-	return fd;
+	вернуть fd;
 }
 
 #ifdef HAVE_UL_SAFE_STATX
@@ -682,8 +682,8 @@ int ul_open_no_symlinks(const char *path, int flags, mode_t mode)
  *
  * Returns 0 on success, otherwise negative errno (and errno is set too).
  */
-int ul_safe_statx(int dirfd, const char *path, int flags,
-		  unsigned int mask, struct statx *stx)
+целое ul_safe_statx(целое dirfd, const char *path, целое flags,
+		  unsigned целое mask, struct statx *stx)
 {
 	assert(stx);
 
@@ -692,13 +692,13 @@ int ul_safe_statx(int dirfd, const char *path, int flags,
 	flags |= AT_STATX_DONT_SYNC | AT_NO_AUTOMOUNT;
 
 #ifdef AT_EMPTY_PATH
-	if (!path || !*path)
+	если (!path || !*path)
 		flags |= AT_EMPTY_PATH;
 #endif
-	if (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
-		return -errno;
+	если (statx(dirfd, path ? path : "", flags, mask, stx) != 0)
+		вернуть -errno;
 
-	return 0;
+	вернуть 0;
 }
 
 /* Converts @stx to @st. statx(2) is not obliged to return everything the
@@ -716,33 +716,33 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
 	st->st_blksize = stx->stx_blksize;
 
 	/* st_mode mixes two independently reported things */
-	if (stx->stx_mask & STATX_TYPE)
+	если (stx->stx_mask & STATX_TYPE)
 		st->st_mode |= stx->stx_mode & S_IFMT;
-	if (stx->stx_mask & STATX_MODE)
+	если (stx->stx_mask & STATX_MODE)
 		st->st_mode |= stx->stx_mode & ~S_IFMT;
 
-	if (stx->stx_mask & STATX_INO)
+	если (stx->stx_mask & STATX_INO)
 		st->st_ino = stx->stx_ino;
-	if (stx->stx_mask & STATX_NLINK)
+	если (stx->stx_mask & STATX_NLINK)
 		st->st_nlink = stx->stx_nlink;
-	if (stx->stx_mask & STATX_UID)
+	если (stx->stx_mask & STATX_UID)
 		st->st_uid = stx->stx_uid;
-	if (stx->stx_mask & STATX_GID)
+	если (stx->stx_mask & STATX_GID)
 		st->st_gid = stx->stx_gid;
-	if (stx->stx_mask & STATX_SIZE)
+	если (stx->stx_mask & STATX_SIZE)
 		st->st_size = stx->stx_size;
-	if (stx->stx_mask & STATX_BLOCKS)
+	если (stx->stx_mask & STATX_BLOCKS)
 		st->st_blocks = stx->stx_blocks;
 
-	if (stx->stx_mask & STATX_ATIME) {
+	если (stx->stx_mask & STATX_ATIME) {
 		st->st_atim.tv_sec  = stx->stx_atime.tv_sec;
 		st->st_atim.tv_nsec = stx->stx_atime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_MTIME) {
+	если (stx->stx_mask & STATX_MTIME) {
 		st->st_mtim.tv_sec  = stx->stx_mtime.tv_sec;
 		st->st_mtim.tv_nsec = stx->stx_mtime.tv_nsec;
 	}
-	if (stx->stx_mask & STATX_CTIME) {
+	если (stx->stx_mask & STATX_CTIME) {
 		st->st_ctim.tv_sec  = stx->stx_ctime.tv_sec;
 		st->st_ctim.tv_nsec = stx->stx_ctime.tv_nsec;
 	}
@@ -766,57 +766,57 @@ void ul_statx_to_stat(const struct statx *stx, struct stat *st)
  * -EOPNOTSUPP means the kernel did not provide the essential attributes and
  * the caller should fall back to stat().
  */
-int ul_safe_stat(const char *target, struct stat *st,
-		 int nofollow __attribute__((__unused__)),
-		 unsigned int mask __attribute__((__unused__)),
-		 unsigned int *retmask)
+целое ul_safe_stat(const char *target, struct stat *st,
+		 целое nofollow __attribute__((__unused__)),
+		 unsigned целое mask __attribute__((__unused__)),
+		 unsigned целое *retmask)
 {
 	assert(target);
 	assert(st);
 
 	memset(st, 0, sizeof(struct stat));
-	if (retmask)
+	если (retmask)
 		*retmask = 0;
 
 #ifdef HAVE_UL_SAFE_STAT
 	{
 		struct statx stx = { 0 };
-		int rc;
+		целое rc;
 
 		mask |= UL_STATX_ESSENTIAL;
 
 		rc = ul_safe_statx(AT_FDCWD, target,
 				nofollow ? AT_SYMLINK_NOFOLLOW : 0, mask, &stx);
-		if (rc)
-			return rc;
+		если (rc)
+			вернуть rc;
 
 		ul_statx_to_stat(&stx, st);
 
-		if (retmask)
+		если (retmask)
 			*retmask = stx.stx_mask;
 
-		if ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
+		если ((stx.stx_mask & UL_STATX_ESSENTIAL) != UL_STATX_ESSENTIAL) {
 			errno = EOPNOTSUPP;
-			return -EOPNOTSUPP;
+			вернуть -EOPNOTSUPP;
 		}
 
-		return 0;
+		вернуть 0;
 	}
-#else
+#иначе
 	errno = ENOSYS;
-	return -ENOSYS;
+	вернуть -ENOSYS;
 #endif
 }
 
 
 #ifdef TEST_PROGRAM_FILEUTILS
-int main(int argc, char *argv[])
+целое основной(целое argc, char *argv[])
 {
-	if (argc < 2)
+	если (argc < 2)
 		errx(EXIT_FAILURE, "Usage %s --{mkstemp,close-fds,copy-file,open-no-symlinks,safe-stat}",
 				argv[0]);
 
-	if (strcmp(argv[1], "--mkstemp") == 0) {
+	если (strcmp(argv[1], "--mkstemp") == 0) {
 		FILE *f;
 		char *tmpname = NULL;
 
@@ -825,50 +825,50 @@ int main(int argc, char *argv[])
 		free(tmpname);
 		fclose(f);
 
-	} else if (strcmp(argv[1], "--close-fds") == 0) {
+	} иначе если (strcmp(argv[1], "--close-fds") == 0) {
 		ignore_result( dup(STDIN_FILENO) );
 		ignore_result( dup(STDIN_FILENO) );
 		ignore_result( dup(STDIN_FILENO) );
 
 # ifdef HAVE_CLOSE_RANGE
-		if (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
+		если (close_range(STDERR_FILENO + 1, ~0U, 0) < 0)
 # endif
 			ul_close_all_fds(STDERR_FILENO + 1, ~0U);
 
-	} else if (strcmp(argv[1], "--copy-file") == 0) {
-		int ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
-		if (ret == UL_COPY_READ_ERROR)
+	} иначе если (strcmp(argv[1], "--copy-file") == 0) {
+		целое ret = ul_copy_file(STDIN_FILENO, STDOUT_FILENO);
+		если (ret == UL_COPY_READ_ERROR)
 			err(EXIT_FAILURE, "read");
-		else if (ret == UL_COPY_WRITE_ERROR)
+		иначе если (ret == UL_COPY_WRITE_ERROR)
 			err(EXIT_FAILURE, "write");
 
-	} else if (strcmp(argv[1], "--open-no-symlinks") == 0) {
+	} иначе если (strcmp(argv[1], "--open-no-symlinks") == 0) {
 #ifdef __linux__
-		int flags = O_PATH | O_CLOEXEC;
-#else
-		int flags = O_RDONLY | O_CLOEXEC;
+		целое flags = O_PATH | O_CLOEXEC;
+#иначе
+		целое flags = O_RDONLY | O_CLOEXEC;
 #endif
-		int fallback = 0;
+		целое fallback = 0;
 		char *name;
-		int fd, i;
+		целое fd, i;
 
-		if (argc < 3)
+		если (argc < 3)
 			errx(EXIT_FAILURE, "no path specified");
 
-		for (i = 3; i < argc; i++) {
+		для (i = 3; i < argc; i++) {
 			/* the fallback is used on kernels without openat2()
 			 * only, "--fallback" makes it testable anywhere */
-			if (strcmp(argv[i], "--fallback") == 0)
+			если (strcmp(argv[i], "--fallback") == 0)
 				fallback = 1;
-			else if (strcmp(argv[i], "--rdonly") == 0)
+			иначе если (strcmp(argv[i], "--rdonly") == 0)
 				flags = O_RDONLY | O_CLOEXEC;
 		}
 
-		if (fallback)
+		если (fallback)
 			fd = open_no_symlinks_fallback(argv[2], flags, 0);
-		else
+		иначе
 			fd = ul_open_no_symlinks(argv[2], flags, 0);
-		if (fd < 0)
+		если (fd < 0)
 			err(EXIT_FAILURE, "%s", argv[2]);
 
 		name = ul_fd_get_path(fd);
@@ -876,19 +876,19 @@ int main(int argc, char *argv[])
 		free(name);
 		close(fd);
 
-	} else if (strcmp(argv[1], "--safe-stat") == 0) {
-		unsigned int mask = 0, retmask = 0;
-		int nofollow = 0;
+	} иначе если (strcmp(argv[1], "--safe-stat") == 0) {
+		unsigned целое mask = 0, retmask = 0;
+		целое nofollow = 0;
 		struct stat st, ref;
-		int rc, i;
+		целое rc, i;
 
-		if (argc < 3)
+		если (argc < 3)
 			errx(EXIT_FAILURE, "no path specified");
 
-		for (i = 3; i < argc; i++) {
-			if (strcmp(argv[i], "--nofollow") == 0)
+		для (i = 3; i < argc; i++) {
+			если (strcmp(argv[i], "--nofollow") == 0)
 				nofollow = 1;
-			else if (strcmp(argv[i], "--basic") == 0)
+			иначе если (strcmp(argv[i], "--basic") == 0)
 				mask |= UL_STATX_BASIC;
 		}
 
@@ -899,8 +899,8 @@ int main(int argc, char *argv[])
 		/* the function returns -errno and it sets errno too */
 		printf("      rc: %d\n", rc);
 		printf("   errno: %d\n", rc ? errno : 0);
-		if (rc)
-			return EXIT_FAILURE;
+		если (rc)
+			вернуть EXIT_FAILURE;
 
 		printf("    type: %s\n", S_ISDIR(st.st_mode)  ? "dir" :
 					 S_ISREG(st.st_mode)  ? "reg" :
@@ -915,7 +915,7 @@ int main(int argc, char *argv[])
 		 * attributes advertised by @retmask are comparable, the rest
 		 * is zero in @st.
 		 */
-		if (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
+		если (nofollow ? lstat(argv[2], &ref) : stat(argv[2], &ref))
 			err(EXIT_FAILURE, "%s", argv[2]);
 
 		printf("  st_dev: %s\n", st.st_dev == ref.st_dev ? "OK" : "FAILED");
@@ -930,35 +930,35 @@ int main(int argc, char *argv[])
 			 * design, there is nothing to compare and it's not a
 			 * failure.
 			 */
-			unsigned int emask = mask | UL_STATX_ESSENTIAL;
+			unsigned целое emask = mask | UL_STATX_ESSENTIAL;
 
 # define RESULT(bit, x)	(!(retmask & (bit)) || (x) ? "OK" : "FAILED")
 
-			if (emask & STATX_TYPE)
+			если (emask & STATX_TYPE)
 				printf("  S_IFMT: %s\n", RESULT(STATX_TYPE,
 					(st.st_mode & S_IFMT) == (ref.st_mode & S_IFMT)));
-			if (emask & STATX_MODE)
+			если (emask & STATX_MODE)
 				printf(" st_mode: %s\n", RESULT(STATX_MODE,
 					(st.st_mode & ~S_IFMT) == (ref.st_mode & ~S_IFMT)));
-			if (emask & STATX_INO)
+			если (emask & STATX_INO)
 				printf("  st_ino: %s\n",
 					RESULT(STATX_INO, st.st_ino == ref.st_ino));
-			if (emask & STATX_NLINK)
+			если (emask & STATX_NLINK)
 				printf("st_nlink: %s\n",
 					RESULT(STATX_NLINK, st.st_nlink == ref.st_nlink));
-			if (emask & STATX_UID)
+			если (emask & STATX_UID)
 				printf("  st_uid: %s\n",
 					RESULT(STATX_UID, st.st_uid == ref.st_uid));
-			if (emask & STATX_GID)
+			если (emask & STATX_GID)
 				printf("  st_gid: %s\n",
 					RESULT(STATX_GID, st.st_gid == ref.st_gid));
-			if (emask & STATX_SIZE)
+			если (emask & STATX_SIZE)
 				printf(" st_size: %s\n",
 					RESULT(STATX_SIZE, st.st_size == ref.st_size));
 # undef RESULT
 		}
 #endif
 	}
-	return EXIT_SUCCESS;
+	вернуть EXIT_SUCCESS;
 }
 #endif
