@@ -6,20 +6,20 @@
  *
  * Copyright (C) 2009-2013 Karel Zak <kzak@redhat.com>
  */
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
 
-#include "canonicalize.h"
-#include "pathnames.h"
-#include "all-io.h"
-#include "strutils.h"
-#include "fileutils.h"
+#ಅನ್ತರ್ಭಾವ "canonicalize.h"
+#ಅನ್ತರ್ಭಾವ "pathnames.h"
+#ಅನ್ತರ್ಭಾವ "all-io.h"
+#ಅನ್ತರ್ಭಾವ "strutils.h"
+#ಅನ್ತರ್ಭಾವ "fileutils.h"
 
 /*
  * Converts private "dm-N" names to "/dev/mapper/<name>"
@@ -30,57 +30,57 @@
  * The @prefix allows /sys to be mounted or stored outside the system root
  * (/prefix/sys/...).
  */
-char *ul_canonicalize_dm_name_prefixed(const char *prefix, const char *ptname)
+ಅಕ್ಷರ *ul_canonicalize_dm_name_prefixed(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ptname)
 {
 	FILE	*f;
 	size_t	sz;
-	char	path[256], name[sizeof(path) - sizeof(_PATH_DEV_MAPPER)], *res = NULL;
+	ಅಕ್ಷರ	ಮಾರ್ಗ[256], name[ಗಾತ್ರ(ಮಾರ್ಗ) - ಗಾತ್ರ(ಮಾರ್ಗ_DEV_MAPPER)], *res = ಖಾಲಿ;
 
-	if (!ptname || !*ptname)
-		return NULL;
+	ಆದರೆ (!ptname || !*ptname)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (!prefix)
-		prefix = "";
+	ಆದರೆ (!ಪೂರ್ವಪ್ರತ್ಯಯ)
+		ಪೂರ್ವಪ್ರತ್ಯಯ = "";
 
-	snprintf(path, sizeof(path), "%s/sys/block/%s/dm/name", prefix, ptname);
-	if (!(f = fopen(path, "r" UL_CLOEXECSTR)))
-		return NULL;
+	snprintf(ಮಾರ್ಗ, ಗಾತ್ರ(ಮಾರ್ಗ), "%s/sys/block/%s/dm/name", ಪೂರ್ವಪ್ರತ್ಯಯ, ptname);
+	ಆದರೆ (!(f = fopen(ಮಾರ್ಗ, "r" UL_CLOEXECSTR)))
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	/* read "<name>\n" from sysfs */
-	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
-		if (name[sz - 1] == '\n')
+	ಆದರೆ (fgets(name, ಗಾತ್ರ(name), f) && (sz = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(name)) > 1) {
+		ಆದರೆ (name[sz - 1] == '\n')
 			name[sz - 1] = '\0';
 
-		snprintf(path, sizeof(path), _PATH_DEV_MAPPER "/%s", name);
+		snprintf(ಮಾರ್ಗ, ಗಾತ್ರ(ಮಾರ್ಗ), ಮಾರ್ಗ_DEV_MAPPER "/%s", name);
 
-		if ((prefix && *prefix) || access(path, F_OK) == 0)
-			res = strdup(path);
+		ಆದರೆ ((ಪೂರ್ವಪ್ರತ್ಯಯ && *ಪೂರ್ವಪ್ರತ್ಯಯ) || access(ಮಾರ್ಗ, F_OK) == 0)
+			res = strdup(ಮಾರ್ಗ);
 	}
 	fclose(f);
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
-char *ul_canonicalize_dm_name(const char *ptname)
+ಅಕ್ಷರ *ul_canonicalize_dm_name(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ptname)
 {
-	return ul_canonicalize_dm_name_prefixed(NULL, ptname);
+	ಹಿಂತಿರುಗಿ ul_canonicalize_dm_name_prefixed(ಖಾಲಿ, ptname);
 }
 
-static int is_dm_devname(char *canonical, char **name)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ is_dm_devname(ಅಕ್ಷರ *canonical, ಅಕ್ಷರ **name)
 {
-	struct stat sb;
-	char *p = strrchr(canonical, '/');
+	ರಚನೆ stat sb;
+	ಅಕ್ಷರ *p = strrchr(canonical, '/');
 
-	*name = NULL;
+	*name = ಖಾಲಿ;
 
-	if (!p
-	    || strncmp(p, "/dm-", 4) != 0
-	    || !isdigit(*(p + 4))
+	ಆದರೆ (!p
+	    || ಅಕ್ಷರಸರಣಿ_ಹೋಲಿಕೆ(p, "/dm-", 4) != 0
+	    || !ಅಂಕಿಯೇ(*(p + 4))
 	    || stat(canonical, &sb) != 0
 	    || !S_ISBLK(sb.st_mode))
-		return 0;
+		ಹಿಂತಿರುಗಿ 0;
 
 	*name = p + 1;
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
 /*
@@ -88,73 +88,73 @@ static int is_dm_devname(char *canonical, char **name)
  * relative path. If the path is no relative than returns NULL. The path does
  * not have to exist.
  */
-char *ul_absolute_path(const char *path)
+ಅಕ್ಷರ *ul_absolute_ಮಾರ್ಗ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	char cwd[PATH_MAX], *res, *p;
+	ಅಕ್ಷರ cwd[PATH_MAX], *res, *p;
 	size_t psz, csz;
 
-	if (!ul_is_relative_path(path)) {
+	ಆದರೆ (!ul_is_relative_ಮಾರ್ಗ(ಮಾರ್ಗ)) {
 		errno = EINVAL;
-		return NULL;
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 	}
-	if (!getcwd(cwd, sizeof(cwd)))
-		return NULL;
+	ಆದರೆ (!getcwd(cwd, ಗಾತ್ರ(cwd)))
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	/* simple clean up */
-	if (ul_startswith(path, "./"))
-		path += 2;
-	else if (strcmp(path, ".") == 0)
-		path = NULL;
+	ಆದರೆ (ul_startswith(ಮಾರ್ಗ, "./"))
+		ಮಾರ್ಗ += 2;
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(ಮಾರ್ಗ, ".") == 0)
+		ಮಾರ್ಗ = ಖಾಲಿ;
 
-	if (!path || !*path)
-		return strdup(cwd);
+	ಆದರೆ (!ಮಾರ್ಗ || !*ಮಾರ್ಗ)
+		ಹಿಂತಿರುಗಿ strdup(cwd);
 
-	csz = strlen(cwd);
-	psz = strlen(path);
+	csz = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(cwd);
+	psz = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(ಮಾರ್ಗ);
 
-	p = res = malloc(csz + 1 + psz + 1);
-	if (!res)
-		return NULL;
+	p = res = ಸ್ಮರಣೆ_ಕೊಡು(csz + 1 + psz + 1);
+	ಆದರೆ (!res)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	p = mempcpy(p, cwd, csz);
 	*p++ = '/';
-	memcpy(p, path, psz + 1);
+	ಸ್ಮರಣೆ_ನಕಲು(p, ಮಾರ್ಗ, psz + 1);
 
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
 /*
  * Returns: <0 on error, 1 is cannot be canonicalized (errno is set); 0 on success
  */
-static int __attribute__((nonnull(2)))
-do_canonicalize(const char *path, char **result,
-		void *data __attribute__((__unused__)))
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ __attribute__((nonnull(2)))
+do_canonicalize(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ, ಅಕ್ಷರ **ಫಲಿತಾಂಶ,
+		ಶೂನ್ಯ *ದತ್ತಾಂಶ __attribute__((__unused__)))
 {
-	char *canonical, *dmname;
+	ಅಕ್ಷರ *canonical, *dmname;
 
-	*result = NULL;
+	*ಫಲಿತಾಂಶ = ಖಾಲಿ;
 
-	if (!path || !*path) {
+	ಆದರೆ (!ಮಾರ್ಗ || !*ಮಾರ್ಗ) {
 		errno = EINVAL;
-		return -errno;
+		ಹಿಂತಿರುಗಿ -errno;
 	}
 
 	errno = 0;
-	canonical = realpath(path, NULL);
-	if (!canonical)
-		return 1;
+	canonical = realpath(ಮಾರ್ಗ, ಖಾಲಿ);
+	ಆದರೆ (!canonical)
+		ಹಿಂತಿರುಗಿ 1;
 
-	if (is_dm_devname(canonical, &dmname)) {
-		char *dm = ul_canonicalize_dm_name(dmname);
-		if (dm) {
-			free(canonical);
+	ಆದರೆ (is_dm_devname(canonical, &dmname)) {
+		ಅಕ್ಷರ *dm = ul_canonicalize_dm_name(dmname);
+		ಆದರೆ (dm) {
+			ಬಿಡುಗಡೆ(canonical);
 			canonical = dm;
 		}
 	}
 
-	if (canonical)
-		*result = canonical;
-	return 0;
+	ಆದರೆ (canonical)
+		*ಫಲಿತಾಂಶ = canonical;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /*
@@ -162,45 +162,45 @@ do_canonicalize(const char *path, char **result,
  * unreachable path is not an error (!), and in this case, it just duplicates
  * @path.
  */
-char *ul_canonicalize_path(const char *path)
+ಅಕ್ಷರ *ul_canonicalize_ಮಾರ್ಗ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	char *canonical = NULL;
+	ಅಕ್ಷರ *canonical = ಖಾಲಿ;
 
-	if (do_canonicalize(path, &canonical, NULL) == 1)
-		return strdup(path);
+	ಆದರೆ (do_canonicalize(ಮಾರ್ಗ, &canonical, ಖಾಲಿ) == 1)
+		ಹಿಂತಿರುಗಿ strdup(ಮಾರ್ಗ);
 
-	return canonical;
+	ಹಿಂತಿರುಗಿ canonical;
 }
 
 /*
  * Drop permissions (e.g., suid) and canonicalize the path. If the path is
  * unreadable (for example, due to missing permissions), it returns NULL.
  */
-char *ul_canonicalize_path_restricted(const char *path)
+ಅಕ್ಷರ *ul_canonicalize_ಮಾರ್ಗ_restricted(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮಾರ್ಗ)
 {
-	return ul_restricted_path_oper(path, do_canonicalize, NULL);
+	ಹಿಂತಿರುಗಿ ul_restricted_ಮಾರ್ಗ_oper(ಮಾರ್ಗ, do_canonicalize, ಖಾಲಿ);
 }
 
-#ifdef TEST_PROGRAM_CANONICALIZE
-int main(int argc, char **argv)
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TEST_ಕಾರ್ಯಕ್ರಮ_CANONICALIZE
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ **argv)
 {
-	char *p;
+	ಅಕ್ಷರ *p;
 
-	if (argc < 2) {
+	ಆದರೆ (argc < 2) {
 		fprintf(stderr, "usage: %s <device>\n", argv[0]);
-		exit(EXIT_FAILURE);
+		ನಿರ್ಗಮಿಸು(EXIT_FAILURE);
 	}
 
 	fprintf(stdout, "orig:            %s\n", argv[1]);
 
-	p = ul_canonicalize_path(argv[1]);
+	p = ul_canonicalize_ಮಾರ್ಗ(argv[1]);
 	fprintf(stdout, "real:            %s\n", p);
-	free(p);
+	ಬಿಡುಗಡೆ(p);
 
-	p = ul_canonicalize_path_restricted(argv[1]);
+	p = ul_canonicalize_ಮಾರ್ಗ_restricted(argv[1]);
 	fprintf(stdout, "real-restricted: %s\n", p);
-	free(p);
+	ಬಿಡುಗಡೆ(p);
 
-	exit(EXIT_SUCCESS);
+	ನಿರ್ಗಮಿಸು(EXIT_SUCCESS);
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

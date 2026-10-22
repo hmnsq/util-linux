@@ -4,379 +4,379 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#ಅನ್ತರ್ಭಾವ "buffer.h"
+#ಅನ್ತರ್ಭಾವ "mbsalign.h"
+#ಅನ್ತರ್ಭಾವ "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+ಶೂನ್ಯ ul_ಬಫರ್_reset_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf)
 {
-	if (buf->begin)
+	ಆದರೆ (buf->begin)
 		memset(buf->begin, 0, buf->sz);
-	buf->end = buf->begin;
+	buf->ಕೊನೆ = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	ಆದರೆ (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * ಗಾತ್ರ(ಅಕ್ಷರ *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಅಕ್ಷರ *ul_ಬಫರ್_free_ದತ್ತಾಂಶ_common(ರಚನೆ ul_ಬಫರ್ *buf, bool steal)
 {
-	char *t = NULL;
+	ಅಕ್ಷರ *t = ಖಾಲಿ;
 
-	assert(buf);
+	ಪ್ರತಿಜ್ಞಾ(buf);
 
-	if (steal)
+	ಆದರೆ (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	ಇಲ್ಲದಿದ್ದರೆ
+		ಬಿಡುಗಡೆ(buf->begin);
+	buf->begin = ಖಾಲಿ;
+	buf->ಕೊನೆ = ಖಾಲಿ;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	ಬಿಡುಗಡೆ(buf->ptrs);
+	buf->ptrs = ಖಾಲಿ;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	ಬಿಡುಗಡೆ(buf->encoded);
+	buf->encoded = ಖಾಲಿ;
 	buf->encoded_sz = 0;
 
-	return t;
+	ಹಿಂತಿರುಗಿ t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+ಶೂನ್ಯ ul_ಬಫರ್_free_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf)
 {
-	ul_buffer_free_data_common(buf, false);
+	ul_ಬಫರ್_free_ದತ್ತಾಂಶ_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+ಅಕ್ಷರ *ul_ಬಫರ್_steal_string(ರಚನೆ ul_ಬಫರ್ *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
-		ul_buffer_free_data(buf);
-		return NULL;
+	ಆದರೆ (ul_ಬಫರ್_is_ಖಾಲಿಗಳು(buf)) {
+		ul_ಬಫರ್_free_ದತ್ತಾಂಶ(buf);
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	ಹಿಂತಿರುಗಿ ul_ಬಫರ್_free_ದತ್ತಾಂಶ_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+ಶೂನ್ಯ ul_ಬಫರ್_ಗಣ_chunksize(ರಚನೆ ul_ಬಫರ್ *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_is_ಖಾಲಿಗಳು(ರಚನೆ ul_ಬಫರ್ *buf)
 {
-	return buf->begin == buf->end;
+	ಹಿಂತಿರುಗಿ buf->begin == buf->ಕೊನೆ;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_save_ಸೂಚಕ(ರಚನೆ ul_ಬಫರ್ *buf, ಚಿಹ್ನೆರಹಿತ ಗಿಡ್ಡ ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	ಆದರೆ (ptr_idx >= buf->nptrs) {
+		ಅಕ್ಷರ **tmp = reallocarray(buf->ptrs, ptr_idx + 1, ಗಾತ್ರ(ಅಕ್ಷರ *));
 
-		if (!tmp)
-			return -EINVAL;
+		ಆದರೆ (!tmp)
+			ಹಿಂತಿರುಗಿ -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
-	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	buf->ptrs[ptr_idx] = buf->ಕೊನೆ;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+ಅಕ್ಷರ *ul_ಬಫರ್_get_ಸೂಚಕ(ರಚನೆ ul_ಬಫರ್ *buf, ಚಿಹ್ನೆರಹಿತ ಗಿಡ್ಡ ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	ಆದರೆ (ptr_idx < buf->nptrs)
+		ಹಿಂತಿರುಗಿ buf->ptrs[ptr_idx];
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_ಬಫರ್_get_ಸೂಚಕ_ಉದ್ದಳತೆ(ರಚನೆ ul_ಬಫರ್ *buf, ಚಿಹ್ನೆರಹಿತ ಗಿಡ್ಡ ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	ಅಕ್ಷರ *ptr = ul_ಬಫರ್_get_ಸೂಚಕ(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	ಆದರೆ (ptr && ptr > buf->begin)
+		ಹಿಂತಿರುಗಿ ptr - buf->begin;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_ಬಫರ್_get_ಸುರಕ್ಷಿತ_ಸೂಚಕ_ಅಗಲ(ರಚನೆ ul_ಬಫರ್ *buf, ಚಿಹ್ನೆರಹಿತ ಗಿಡ್ಡ ptr_idx)
 {
-	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
+	size_t len = ul_ಬಫರ್_get_ಸೂಚಕ_ಉದ್ದಳತೆ(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	ಆದರೆ (!len)
+		ಹಿಂತಿರುಗಿ 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	ಹಿಂತಿರುಗಿ mbs_ಸುರಕ್ಷಿತ_nwidth(buf->begin, len, ಖಾಲಿ);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+ಶೂನ್ಯ ul_ಬಫರ್_refer_string(ರಚನೆ ul_ಬಫರ್ *buf, ಅಕ್ಷರ *str)
 {
-	if (buf->sz)
-		ul_buffer_free_data(buf);
+	ಆದರೆ (buf->sz)
+		ul_ಬಫರ್_free_ದತ್ತಾಂಶ(buf);
 	buf->begin = str;
-	buf->sz = str ? strlen(str) : 0;
-	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
+	buf->sz = str ? ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(str) : 0;
+	buf->ಕೊನೆ = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_alloc_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf, size_t sz)
 {
-	char *tmp;
+	ಅಕ್ಷರ *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	ಪ್ರತಿಜ್ಞಾ(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	ಆದರೆ (sz <= buf->sz)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (buf->end && buf->begin)
-		len = buf->end - buf->begin;
+	ಆದರೆ (buf->ಕೊನೆ && buf->begin)
+		len = buf->ಕೊನೆ - buf->begin;
 
-	if (buf->chunksize)
+	ಆದರೆ (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	ಆದರೆ (!tmp)
+		ಹಿಂತಿರುಗಿ -ENOMEM;
 
 	buf->begin = tmp;
-	buf->end = buf->begin + len;
+	buf->ಕೊನೆ = buf->begin + len;
 	buf->sz = sz;
 
-	memset(buf->end, '\0', sz - len);
+	memset(buf->ಕೊನೆ, '\0', sz - len);
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_append_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ದತ್ತಾಂಶ, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	ಆದರೆ (!buf)
+		ಹಿಂತಿರುಗಿ -EINVAL;
+	ಆದರೆ (!ದತ್ತಾಂಶ)
+		ಹಿಂತಿರುಗಿ 0;
 
-	if (buf->begin && buf->end)
-		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	ಆದರೆ (buf->begin && buf->ಕೊನೆ)
+		maxsz = buf->sz - (buf->ಕೊನೆ - buf->begin);
+	ಆದರೆ (maxsz <= sz + 1) {
+		ಪೂರ್ಣಾಂಕ rc = ul_ಬಫರ್_alloc_ದತ್ತಾಂಶ(buf, buf->sz + sz + 1);
+		ಆದರೆ (rc)
+			ಹಿಂತಿರುಗಿ rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	ಆದರೆ (!buf->ಕೊನೆ)
+		ಹಿಂತಿರುಗಿ -EINVAL;	/* make static analyzers happy */
 
-	buf->end = mempcpy(buf->end, data, sz);
-	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	buf->ಕೊನೆ = mempcpy(buf->ಕೊನೆ, ದತ್ತಾಂಶ, sz);
+	*buf->ಕೊನೆ = '\0';	/* make sure it's terminated */
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_append_char(ರಚನೆ ul_ಬಫರ್ *buf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	ಹಿಂತಿರುಗಿ ul_ಬಫರ್_append_ದತ್ತಾಂಶ(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_append_string(ರಚನೆ ul_ಬಫರ್ *buf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *str)
 {
-	if (!str)
-		return 0;
+	ಆದರೆ (!str)
+		ಹಿಂತಿರುಗಿ 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	ಹಿಂತಿರುಗಿ ul_ಬಫರ್_append_ದತ್ತಾಂಶ(buf, str, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_append_ntimes(ರಚನೆ ul_ಬಫರ್ *buf, size_t n, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *str)
 {
 	size_t i;
-	size_t len = strlen(str);
+	size_t len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	ಗಾಗಿ (i = 0; len && i < n; i++) {
+		ಪೂರ್ಣಾಂಕ rc = ul_ಬಫರ್_append_ದತ್ತಾಂಶ(buf, str, len);
+		ಆದರೆ (rc)
+			ಹಿಂತಿರುಗಿ rc;
 	}
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_appendf(ರಚನೆ ul_ಬಫರ್ *buf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, ...)
 {
 	va_list ap;
-	int res;
+	ಪೂರ್ಣಾಂಕ res;
 
 	va_start(ap, format);
-	res = ul_buffer_appendvf(buf, format, ap);
+	res = ul_ಬಫರ್_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_appendvf(ರಚನೆ ul_ಬಫರ್ *buf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	ಅಕ್ಷರ *val;
+	ಪೂರ್ಣಾಂಕ sz;
+	ಪೂರ್ಣಾಂಕ res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ಆದರೆ (sz < 0)
+		ಹಿಂತಿರುಗಿ -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
-	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	res = ul_ಬಫರ್_append_ದತ್ತಾಂಶ(buf, val, sz);
+	ಬಿಡುಗಡೆ(val);
 
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+ಪೂರ್ಣಾಂಕ ul_ಬಫರ್_ಗಣ_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ದತ್ತಾಂಶ, size_t sz)
 {
-	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ul_ಬಫರ್_reset_ದತ್ತಾಂಶ(buf);
+	ಹಿಂತಿರುಗಿ ul_ಬಫರ್_append_ದತ್ತಾಂಶ(buf, ದತ್ತಾಂಶ, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+ಅಕ್ಷರ *ul_ಬಫರ್_get_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf, size_t *sz, size_t *ಅಗಲ)
 {
-	if (sz)
-		*sz = buf->end - buf->begin;
-	if (width)
-		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	ಆದರೆ (sz)
+		*sz = buf->ಕೊನೆ - buf->begin;
+	ಆದರೆ (ಅಗಲ)
+		*ಅಗಲ = buf->begin && *buf->begin ? mbs_ಅಗಲ(buf->begin) : 0;
+	ಹಿಂತಿರುಗಿ buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+ಅಕ್ಷರ *ul_ಬಫರ್_get_string(ರಚನೆ ul_ಬಫರ್ *buf, size_t *sz, size_t *ಅಗಲ)
 {
-	char *ret;
+	ಅಕ್ಷರ *ret;
 
-	ret = ul_buffer_get_data(buf, sz, width);
+	ret = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(buf, sz, ಅಗಲ);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	ಆದರೆ (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_ಬಫರ್_get_bufsiz(ರಚನೆ ul_ಬಫರ್ *buf)
 {
-	return buf->sz;
+	ಹಿಂತಿರುಗಿ buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_ಬಫರ್_get_datasiz(ರಚನೆ ul_ಬಫರ್ *buf)
 {
-	return buf->end - buf->begin;
+	ಹಿಂತಿರುಗಿ buf->ಕೊನೆ - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+ಅಕ್ಷರ *ul_ಬಫರ್_get_ಸುರಕ್ಷಿತ_ದತ್ತಾಂಶ(ರಚನೆ ul_ಬಫರ್ *buf, size_t *sz, size_t *ಅಗಲ, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	ಅಕ್ಷರ *ದತ್ತಾಂಶ = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(buf, ಖಾಲಿ, ಖಾಲಿ);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	ಅಕ್ಷರ *res = ಖಾಲಿ;
 
-	if (!data)
-		goto nothing;
+	ಆದರೆ (!ದತ್ತಾಂಶ)
+		ಹೋಗು nothing;
 
-	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	encsz = mbs_ಸುರಕ್ಷಿತ_encode_ಗಾತ್ರ(buf->sz) + 1;
+	ಆದರೆ (encsz > buf->encoded_sz) {
+		ಅಕ್ಷರ *tmp = realloc(buf->encoded, encsz);
+		ಆದರೆ (!tmp)
+			ಹೋಗು nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
-	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	res = mbs_ಸುರಕ್ಷಿತ_encode_ಗಮ್ಯ_ಬಫರ್(ದತ್ತಾಂಶ, &wsz, buf->encoded, buf->encoded_sz, safechars);
+	ಆದರೆ (!res || !wsz || wsz == (size_t) -1)
+		ಹೋಗು nothing;
 
-	if (width)
-		*width = wsz;
-	if (sz)
-		*sz = strlen(res);
-	return res;
+	ಆದರೆ (ಅಗಲ)
+		*ಅಗಲ = wsz;
+	ಆದರೆ (sz)
+		*sz = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(res);
+	ಹಿಂತಿರುಗಿ res;
 nothing:
-	if (width)
-		*width = 0;
-	if (sz)
+	ಆದರೆ (ಅಗಲ)
+		*ಅಗಲ = 0;
+	ಆದರೆ (sz)
 		*sz = 0;
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }
 
 
-#ifdef TEST_PROGRAM_BUFFER
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TEST_ಕಾರ್ಯಕ್ರಮ_ಬಫರ್
 
-enum {
+ಎಣಿಕೆ {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಶೂನ್ಯ)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	ರಚನೆ ul_ಬಫರ್ buf = UL_INIT_ಬಫರ್;
+	ಅಕ್ಷರ *str;
 	size_t sz = 0;
 
-	ul_buffer_set_chunksize(&buf, 16);
+	ul_ಬಫರ್_ಗಣ_chunksize(&buf, 16);
 
-	ul_buffer_append_string(&buf, "AAA");
-	ul_buffer_append_data(&buf, "=", 1);
-	ul_buffer_append_string(&buf, "aaa");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
+	ul_ಬಫರ್_append_string(&buf, "AAA");
+	ul_ಬಫರ್_append_ದತ್ತಾಂಶ(&buf, "=", 1);
+	ul_ಬಫರ್_append_string(&buf, "aaa");
+	ul_ಬಫರ್_save_ಸೂಚಕ(&buf, PTR_AAA);
 
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "BBB");
-	ul_buffer_append_string(&buf, "=");
-	ul_buffer_append_string(&buf, "bbb");
-	ul_buffer_save_pointer(&buf, PTR_BBB);
+	ul_ಬಫರ್_append_ದತ್ತಾಂಶ(&buf, ",", 1);
+	ul_ಬಫರ್_append_string(&buf, "BBB");
+	ul_ಬಫರ್_append_string(&buf, "=");
+	ul_ಬಫರ್_append_string(&buf, "bbb");
+	ul_ಬಫರ್_save_ಸೂಚಕ(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(&buf, &sz, ಖಾಲಿ);
+	ಬರೆ("data [%zu] '%s'\n", sz, str);
 
-	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_pointer_length(&buf, PTR_AAA),
-			ul_buffer_get_pointer_length(&buf, PTR_BBB));
-	printf(" pointer data width: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_safe_pointer_width(&buf, PTR_AAA),
-			ul_buffer_get_safe_pointer_width(&buf, PTR_BBB));
+	ಬರೆ(" pointer data len: AAA=%zu, BBB=%zu\n",
+			ul_ಬಫರ್_get_ಸೂಚಕ_ಉದ್ದಳತೆ(&buf, PTR_AAA),
+			ul_ಬಫರ್_get_ಸೂಚಕ_ಉದ್ದಳತೆ(&buf, PTR_BBB));
+	ಬರೆ(" pointer data width: AAA=%zu, BBB=%zu\n",
+			ul_ಬಫರ್_get_ಸುರಕ್ಷಿತ_ಸೂಚಕ_ಅಗಲ(&buf, PTR_AAA),
+			ul_ಬಫರ್_get_ಸುರಕ್ಷಿತ_ಸೂಚಕ_ಅಗಲ(&buf, PTR_BBB));
 
-	ul_buffer_reset_data(&buf);
-	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
-	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
-	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
+	ul_ಬಫರ್_reset_ದತ್ತಾಂಶ(&buf);
+	ul_ಬಫರ್_append_string(&buf, "This is really long string to test the buffer function.");
+	ul_ಬಫರ್_save_ಸೂಚಕ(&buf, PTR_AAA);
+	ul_ಬಫರ್_append_string(&buf, " YES!");
+	str = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(&buf, &sz, ಖಾಲಿ);
+	ಬರೆ("data [%zu] '%s'\n", sz, str);
+	ಬರೆ(" pointer data len: AAA=%zu\n", ul_ಬಫರ್_get_ಸೂಚಕ_ಉದ್ದಳತೆ(&buf, PTR_AAA));
 
-	ul_buffer_free_data(&buf);
+	ul_ಬಫರ್_free_ದತ್ತಾಂಶ(&buf);
 	str = strdup("foo");
-	ul_buffer_refer_string(&buf, str);
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_ಬಫರ್_refer_string(&buf, str);
+	ul_ಬಫರ್_append_ದತ್ತಾಂಶ(&buf, ",", 1);
+	ul_ಬಫರ್_append_string(&buf, "bar");
+	str = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(&buf, &sz, ಖಾಲಿ);
+	ಬರೆ("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_ಬಫರ್_free_ದತ್ತಾಂಶ(&buf);
+	ul_ಬಫರ್_appendf(&buf, "a%se%d", "bcd", 10);
+	str = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(&buf, &sz, ಖಾಲಿ);
+	ಬರೆ("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_append_char(&buf, 'x');
+	ul_ಬಫರ್_free_ದತ್ತಾಂಶ(&buf);
+	ul_ಬಫರ್_append_char(&buf, 'x');
 	{
-		char c = 'y';
-		ul_buffer_append_char(&buf, c);
+		ಅಕ್ಷರ c = 'y';
+		ul_ಬಫರ್_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
-		ul_buffer_append_char(&buf, c);
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ c = 'z';
+		ul_ಬಫರ್_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_ಬಫರ್_get_ದತ್ತಾಂಶ(&buf, &sz, ಖಾಲಿ);
+	ಬರೆ("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
+	ul_ಬಫರ್_free_ದತ್ತಾಂಶ(&buf);
 
-	return EXIT_SUCCESS;
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BUFFER */
+#ಆದರೆ_ಅಂತ್ಯ /* TEST_PROGRAM_BUFFER */

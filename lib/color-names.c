@@ -4,172 +4,172 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "color-names.h"
 
-#include <ctype.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+ರಚನೆ ul_color_name {
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ cmp_color_name(ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *a0, ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ul_color_name
+		*a = (ಸ್ಥಿರಾಂಕ ರಚನೆ ul_color_name *) a0,
+		*b = (ಸ್ಥಿರಾಂಕ ರಚನೆ ul_color_name *) b0;
+	ಹಿಂತಿರುಗಿ strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *color_sequence_from_colorname(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ರಚನೆ ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
 		{ "bold",       UL_COLOR_BOLD		 },
 		{ "brown",	UL_COLOR_BROWN           },
 		{ "cyan",	UL_COLOR_CYAN            },
-		{ "darkgray",	UL_COLOR_DARK_GRAY       },
-		{ "gray",	UL_COLOR_GRAY            },
+		{ "darkgray",	UL_COLOR_DARK_ಬೂದು       },
+		{ "gray",	UL_COLOR_ಬೂದು            },
 		{ "green",	UL_COLOR_GREEN           },
 		{ "halfbright", UL_COLOR_HALFBRIGHT	 },
 		{ "lightblue",	UL_COLOR_BOLD_BLUE       },
 		{ "lightcyan",	UL_COLOR_BOLD_CYAN       },
-		{ "lightgray",	UL_COLOR_GRAY            },
+		{ "lightgray",	UL_COLOR_ಬೂದು            },
 		{ "lightgreen", UL_COLOR_BOLD_GREEN      },
 		{ "lightmagenta", UL_COLOR_BOLD_MAGENTA  },
 		{ "lightred",	UL_COLOR_BOLD_RED        },
 		{ "magenta",	UL_COLOR_MAGENTA         },
 		{ "red",	UL_COLOR_RED             },
 		{ "reset",      UL_COLOR_RESET,          },
-		{ "reverse",    UL_COLOR_REVERSE         },
+		{ "reverse",    UL_COLOR_ಹಿಮ್ಮುಖ         },
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	ರಚನೆ ul_color_name ಕೀಲಿ = { .name = str };
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	ಆದರೆ (!str)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&ಕೀಲಿ, basic_schemes, ARRAY_ಗಾತ್ರ(basic_schemes),
+				ಗಾತ್ರ(ರಚನೆ ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	ಹಿಂತಿರುಗಿ res ? res->seq : ಖಾಲಿ;
 }
 
 
-int color_is_sequence(const char *color)
+ಪೂರ್ಣಾಂಕ color_is_sequence(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *color)
 {
-	if (color && *color == 0x1B) {
-		size_t len = strlen(color);
+	ಆದರೆ (color && *color == 0x1B) {
+		size_t len = ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(color);
 
-		if (len >= 4 &&
+		ಆದರೆ (len >= 4 &&
 		    *(color + 1) == '[' &&
-		    isdigit(*(color + 2)) &&
+		    ಅಂಕಿಯೇ(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ __color_canonicalize(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *str, ಅಕ್ಷರ **seq)
 {
-	char *in, *out;
-	int len;
+	ಅಕ್ಷರ *ಒಳ, *ಹೊರಹೋಗು;
+	ಪೂರ್ಣಾಂಕ len;
 
-	if (!str)
-		return -EINVAL;
+	ಆದರೆ (!str)
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	*seq = NULL;
+	*seq = ಖಾಲಿ;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	ಆದರೆ (*str != '\\' && !strchr(str, ';') && ಅಕ್ಷರವೇ(*str)) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		ಆದರೆ (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			ಹಿಂತಿರುಗಿ *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		ಹಿಂತಿರುಗಿ 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	ಆದರೆ ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		ಹಿಂತಿರುಗಿ -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
-			*out++ = *in;
-			continue;
+	ಗಾಗಿ (ಒಳ = *seq, ಹೊರಹೋಗು = *seq; ಒಳ && *ಒಳ; ಒಳ++) {
+		ಆದರೆ (*ಒಳ != '\\') {
+			*ಹೊರಹೋಗು++ = *ಒಳ;
+			ಮುಂದುವರಿ;
 		}
-		switch(*(in + 1)) {
-		case 'a':
-			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
-			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
-			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
-			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
-			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
-			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
-			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
-			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
-			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
-			*out++ = ' ';	/* Space */
-			break;
-		case '#':
-			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
-			*out++ = '?';	/* Question mark */
-			break;
-		default:
-			*out++ = *in;
-			*out++ = *(in + 1);
-			break;
+		ಆಯ್ಕೆ(*(ಒಳ + 1)) {
+		ಸ್ಥಿತಿ 'a':
+			*ಹೊರಹೋಗು++ = '\a';	/* Bell */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'b':
+			*ಹೊರಹೋಗು++ = '\b';	/* Backspace */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'e':
+			*ಹೊರಹೋಗು++ = '\033';	/* Escape */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'f':
+			*ಹೊರಹೋಗು++ = '\f';	/* Form Feed */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'n':
+			*ಹೊರಹೋಗು++ = '\n';	/* Newline */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'r':
+			*ಹೊರಹೋಗು++ = '\r';	/* Carriage Return */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 't':
+			*ಹೊರಹೋಗು++ = '\t';	/* Tab */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ 'v':
+			*ಹೊರಹೋಗು++ = '\v';	/* Vertical Tab */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ '\\':
+			*ಹೊರಹೋಗು++ = '\\';	/* Backslash */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ '_':
+			*ಹೊರಹೋಗು++ = ' ';	/* Space */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ '#':
+			*ಹೊರಹೋಗು++ = '#';	/* Hash mark */
+			ನಿಲ್ಲಿಸು;
+		ಸ್ಥಿತಿ '?':
+			*ಹೊರಹೋಗು++ = '?';	/* Question mark */
+			ನಿಲ್ಲಿಸು;
+		ಪೂರ್ವನಿಯೋಜಿತ:
+			*ಹೊರಹೋಗು++ = *ಒಳ;
+			*ಹೊರಹೋಗು++ = *(ಒಳ + 1);
+			ನಿಲ್ಲಿಸು;
 		}
-		in++;
+		ಒಳ++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
-		*out = '\0';
+	ಆದರೆ (ಹೊರಹೋಗು) {
+		ಪ್ರತಿಜ್ಞಾ ((ಹೊರಹೋಗು - *seq) <= len);
+		*ಹೊರಹೋಗು = '\0';
 	}
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-char *color_get_sequence(const char *color)
+ಅಕ್ಷರ *color_get_sequence(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	ಅಕ್ಷರ *seq = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	ಹಿಂತಿರುಗಿ rc ? ಖಾಲಿ : seq;
 }

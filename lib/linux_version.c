@@ -2,74 +2,74 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <sys/utsname.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <sys/utsname.h>
 
-#include "c.h"
-#include "linux_version.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "linux_version.h"
 
-int get_linux_version (void)
+ಪೂರ್ಣಾಂಕ get_linux_ಆವೃತ್ತಿ (ಶೂನ್ಯ)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ kver = -1;
+	ರಚನೆ utsname uts;
+	ಪೂರ್ಣಾಂಕ x = 0, y = 0, z = 0;
+	ಪೂರ್ಣಾಂಕ n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	ಆದರೆ (kver != -1)
+		ಹಿಂತಿರುಗಿ kver;
+	ಆದರೆ (uname(&uts))
+		ಹಿಂತಿರುಗಿ kver = 0;
 
-	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	n = ಅಕ್ಷರಸರಣಿ_ಓದು(uts.release, "%d.%d.%d", &x, &y, &z);
+	ಆದರೆ (n < 1 || n > 3)
+		ಹಿಂತಿರುಗಿ kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	ಹಿಂತಿರುಗಿ kver = KERNEL_ಆವೃತ್ತಿ(x, y, z);
 }
 
-#ifdef TEST_PROGRAM_LINUXVERSION
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TEST_ಕಾರ್ಯಕ್ರಮ_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[])
 {
-	int rc = EXIT_FAILURE;
+	ಪೂರ್ಣಾಂಕ rc = EXIT_FAILURE;
 
-	if (argc == 1) {
-		printf("Linux version: %d\n", get_linux_version());
+	ಆದರೆ (argc == 1) {
+		ಬರೆ("Linux version: %d\n", get_linux_ಆವೃತ್ತಿ());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (argc == 5) {
+		ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		ಪೂರ್ಣಾಂಕ x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		ಪೂರ್ಣಾಂಕ kver = get_linux_ಆವೃತ್ತಿ();
+		ಪೂರ್ಣಾಂಕ uver = KERNEL_ಆವೃತ್ತಿ(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		ಆದರೆ (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		ಇಲ್ಲದಿದ್ದರೆ
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
-			printf("match\n");
-		else
-			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
+		ಆದರೆ (rc)
+			ಬರೆ("match\n");
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಬರೆ("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} ಇಲ್ಲದಿದ್ದರೆ
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
-				 program_invocation_short_name);
+				 ಕಾರ್ಯಕ್ರಮ_invocation_short_name);
 
-	return rc;
+	ಹಿಂತಿರುಗಿ rc;
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

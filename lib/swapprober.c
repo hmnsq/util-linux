@@ -4,51 +4,51 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
-#include "nls.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "nls.h"
 
-#include "swapheader.h"
-#include "swapprober.h"
+#ಅನ್ತರ್ಭಾವ "swapheader.h"
+#ಅನ್ತರ್ಭಾವ "swapprober.h"
 
-blkid_probe get_swap_prober(const char *devname)
+blkid_probe get_ಅದಲುಬದಲು_prober(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *devname)
 {
 	blkid_probe pr;
-	int rc;
-	const char *version = NULL;
-	char *swap_filter[] = { "swap", NULL };
+	ಪೂರ್ಣಾಂಕ rc;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಆವೃತ್ತಿ = ಖಾಲಿ;
+	ಅಕ್ಷರ *ಅದಲುಬದಲು_filter[] = { "swap", ಖಾಲಿ };
 
 	pr = blkid_new_probe_from_filename(devname);
-	if (!pr) {
+	ಆದರೆ (!pr) {
 		warn(_("%s: unable to probe device"), devname);
-		return NULL;
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 	}
 
 	blkid_probe_enable_superblocks(pr, TRUE);
-	blkid_probe_set_superblocks_flags(pr,
+	blkid_probe_ಗಣ_superblocks_flags(pr,
 			BLKID_SUBLKS_LABEL | BLKID_SUBLKS_UUID |
-			BLKID_SUBLKS_VERSION);
+			BLKID_SUBLKS_ಆವೃತ್ತಿ);
 
-	blkid_probe_filter_superblocks_type(pr, BLKID_FLTR_ONLYIN, swap_filter);
+	blkid_probe_filter_superblocks_type(pr, BLKID_FLTR_ONLYIN, ಅದಲುಬದಲು_filter);
 
 	rc = blkid_do_safeprobe(pr);
-	if (rc == -1)
+	ಆದರೆ (rc == -1)
 		warn(_("%s: unable to probe device"), devname);
-	else if (rc == -2)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (rc == -2)
 		warnx(_("%s: ambiguous probing result; use wipefs(8)"), devname);
-	else if (rc == 1)
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (rc == 1)
 		warnx(_("%s: not a valid swap partition"), devname);
 
-	if (rc == 0) {
+	ಆದರೆ (rc == 0) {
 		/* Only the SWAPSPACE2 is supported. */
-		if (blkid_probe_lookup_value(pr, "VERSION", &version, NULL) == 0
-		    && version
-		    && strcmp(version, stringify_value(SWAP_VERSION)) != 0)
+		ಆದರೆ (blkid_probe_lookup_ಮೌಲ್ಯ(pr, "VERSION", &ಆವೃತ್ತಿ, ಖಾಲಿ) == 0
+		    && ಆವೃತ್ತಿ
+		    && strcmp(ಆವೃತ್ತಿ, stringify_ಮೌಲ್ಯ(ಅದಲುಬದಲು_ಆವೃತ್ತಿ)) != 0)
 			warnx(_("%s: unsupported swap version '%s'"),
-						devname, version);
-		else
-			return pr;
+						devname, ಆವೃತ್ತಿ);
+		ಇಲ್ಲದಿದ್ದರೆ
+			ಹಿಂತಿರುಗಿ pr;
 	}
 
 	blkid_free_probe(pr);
-	return NULL;
+	ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 }

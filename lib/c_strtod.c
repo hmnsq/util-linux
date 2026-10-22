@@ -6,104 +6,104 @@
  *
  * Copyright (C) 2021 Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
 
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
+#ಅನ್ತರ್ಭಾವ <locale.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
 
-#include "c_strtod.h"
+#ಅನ್ತರ್ಭಾವ "c_strtod.h"
 
-#ifdef __APPLE__
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ __APPLE__
 # include <xlocale.h>
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#ಆದರೆ defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#ಆದರೆ defined(USE_CLOCALE)
+ಸ್ಥಿರ ಅಸ್ಥಿರ locale_t c_locale;
 
-static locale_t get_c_locale(void)
+ಸ್ಥಿರ locale_t get_c_locale(ಶೂನ್ಯ)
 {
-	if (!c_locale)
-		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	ಆದರೆ (!c_locale)
+		c_locale = newlocale(LC_ALL_ಮುಖವಾಡ, "C", (locale_t) 0);
+	ಹಿಂತಿರುಗಿ c_locale;
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
 
-double c_strtod(char const *str, char **end)
+ದ್ವಿಗುಣ c_strtod(ಅಕ್ಷರ ಸ್ಥಿರಾಂಕ *str, ಅಕ್ಷರ **ಕೊನೆ)
 {
-	double res;
-	int errsv;
+	ದ್ವಿಗುಣ res;
+	ಪೂರ್ಣಾಂಕ errsv;
 
-#if defined(USE_CLOCALE)
+#ಆದರೆ defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#ಆದರೆ defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
-#elif defined(HAVE_USELOCALE)
+	ಆದರೆ (cl)
+		ಹಿಂತಿರುಗಿ strtod_l(str, ಕೊನೆ, cl);
+#ಅಥವಾಆದರೆ defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	ಆದರೆ (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		ಆದರೆ (!org_cl)
+			ಹಿಂತಿರುಗಿ 0;
 
-		res = strtod(str, end);
+		res = strtod(str, ಕೊನೆ);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		ಹಿಂತಿರುಗಿ res;
 	}
-#endif /* HAVE_USELOCALE */
-#endif /* USE_CLOCALE */
+#ಆದರೆ_ಅಂತ್ಯ /* HAVE_USELOCALE */
+#ಆದರೆ_ಅಂತ್ಯ /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	ಅಕ್ಷರ *org_locale = setlocale(LC_NUMERIC, ಖಾಲಿ);
 
-	if (org_locale) {
+	ಆದರೆ (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		ಆದರೆ (!org_locale)
+			ಹಿಂತಿರುಗಿ 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
-	res = strtod(str, end);
+	res = strtod(str, ಕೊನೆ);
 	errsv = errno;
 
-	if (org_locale) {
+	ಆದರೆ (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
-		free(org_locale);
+		ಬಿಡುಗಡೆ(org_locale);
 	}
 	errno = errsv;
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
-#ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TEST_ಕಾರ್ಯಕ್ರಮ
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[])
 {
-	double res;
-	char *end;
+	ದ್ವಿಗುಣ res;
+	ಅಕ್ಷರ *ಕೊನೆ;
 
-	if (argc < 2) {
+	ಆದರೆ (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				ಕಾರ್ಯಕ್ರಮ_invocation_short_name);
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
 	}
 
-	res = c_strtod(argv[1], &end);
-	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
+	res = c_strtod(argv[1], &ಕೊನೆ);
+	ಬರೆ("Result: %g, errno: %d, endptr: '%s'\n", res, errno, ಕೊನೆ);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	ಹಿಂತಿರುಗಿ errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ

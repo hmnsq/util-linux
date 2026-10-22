@@ -6,67 +6,67 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
 
-#include "mangle.h"
-#include "c.h"
+#ಅನ್ತರ್ಭಾವ "mangle.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
 
-#define isoctal(a)		(((a) & ~7) == '0')
+#ವ್ಯಾಖ್ಯಾನಿಸು isoctal(a)		(((a) & ~7) == '0')
 
-#define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
+#ವ್ಯಾಖ್ಯಾನಿಸು from_hex(c)		(ಅಂಕಿಯೇ(c) ? c - '0' : tolower(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಪೂರ್ಣಾಂಕ is_unwanted_char(ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	ಹಿಂತಿರುಗಿ c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+ಅಕ್ಷರ *mangle(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s)
 {
-	char *ss, *sp;
+	ಅಕ್ಷರ *ss, *sp;
 
-	if (!s)
-		return NULL;
+	ಆದರೆ (!s)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	ss = sp = ಸ್ಮರಣೆ_ಕೊಡು(4 * ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(s) + 1);
+	ಆದರೆ (!sp)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+	ಆಗ(1) {
+		ಆದರೆ (!*s) {
 			*sp = '\0';
-			break;
+			ನಿಲ್ಲಿಸು;
 		}
-		if (is_unwanted_char(*s)) {
+		ಆದರೆ (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} ಇಲ್ಲದಿದ್ದರೆ
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	ಹಿಂತಿರುಗಿ ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+ಶೂನ್ಯ unmangle_ಗಮ್ಯ_ಬಫರ್(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s, ಅಕ್ಷರ *buf, size_t len)
 {
 	size_t sz = 0;
 
-	if (!s)
-		return;
+	ಆದರೆ (!s)
+		ಹಿಂತಿರುಗಿ;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	ಆಗ(*s && sz < len - 1) {
+		ಆದರೆ (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,128 +74,128 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+size_t unhexmangle_ಗಮ್ಯ_ಬಫರ್(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s, ಅಕ್ಷರ *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *buf0 = buf;
 
-	if (!s)
-		return 0;
+	ಆದರೆ (!s)
+		ಹಿಂತಿರುಗಿ 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+	ಆಗ(*s && sz < len - 1) {
+		ಆದರೆ (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
 		    isxdigit(s[2]) && isxdigit(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	ಹಿಂತಿರುಗಿ buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+size_t unescape_ಗಮ್ಯ_ಬಫರ್(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *wanted, ಅಕ್ಷರ *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	ಆಗ (*s && sz < len - 1) {
+		ಆದರೆ (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} ಇಲ್ಲದಿದ್ದರೆ {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	ಹಿಂತಿರುಗಿ buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *skip_nonspaces(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	ಆಗ (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	ಹಿಂತಿರುಗಿ s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+ಅಕ್ಷರ *unmangle(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *s, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ **ಕೊನೆ)
 {
-	char *buf;
-	const char *e;
+	ಅಕ್ಷರ *buf;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *e;
 	size_t sz;
 
-	if (!s)
-		return NULL;
+	ಆದರೆ (!s)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
-		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	ಆದರೆ (ಕೊನೆ)
+		*ಕೊನೆ = e;
+	ಆದರೆ (e == s)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;	/* empty string */
 
-	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	buf = ಸ್ಮರಣೆ_ಕೊಡು(sz);
+	ಆದರೆ (!buf)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	unmangle_ಗಮ್ಯ_ಬಫರ್(s, buf, sz);
+	ಹಿಂತಿರುಗಿ buf;
 }
 
-#ifdef TEST_PROGRAM_MANGLE
-#include <errno.h>
-int main(int argc, char *argv[])
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TEST_ಕಾರ್ಯಕ್ರಮ_MANGLE
+#ಅನ್ತರ್ಭಾವ <errno.h>
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
+	ಅಕ್ಷರ *p = ಖಾಲಿ;
+	ಆದರೆ (argc < 3) {
 		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
-						program_invocation_short_name);
-		return EXIT_FAILURE;
+						ಕಾರ್ಯಕ್ರಮ_invocation_short_name);
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	ಆದರೆ (!strcmp(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
-		printf("mangled: '%s'\n", p);
-		free(p);
+		ಬರೆ("mangled: '%s'\n", p);
+		ಬಿಡುಗಡೆ(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[1], "--unmangle")) {
+		ಅಕ್ಷರ *x = unmangle(argv[2], ಖಾಲಿ);
 
-		if (x) {
-			printf("unmangled: '%s'\n", x);
-			free(x);
+		ಆದರೆ (x) {
+			ಬರೆ("unmangled: '%s'\n", x);
+			ಬಿಡುಗಡೆ(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
-			unmangle_to_buffer(x, x, strlen(x) + 1);
+		ಆದರೆ (x) {
+			unmangle_ಗಮ್ಯ_ಬಫರ್(x, x, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(x) + 1);
 
-			printf("self-unmangled: '%s'\n", x);
-			free(x);
+			ಬರೆ("self-unmangled: '%s'\n", x);
+			ಬಿಡುಗಡೆ(x);
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
-			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
+	ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (!strcmp(argv[1], "--unescape")) {
+		ಅಕ್ಷರ *x = strdup(argv[2]);
+		ಆದರೆ (x) {
+			unescape_ಗಮ್ಯ_ಬಫರ್(x, ",\"", x, ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(x) + 1);
 
-			printf("self-unescaped: '%s'\n", x);
-			free(x);
+			ಬರೆ("self-unescaped: '%s'\n", x);
+			ಬಿಡುಗಡೆ(x);
 		}
 	}
 
-	return EXIT_SUCCESS;
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_MANGLE */
+#ಆದರೆ_ಅಂತ್ಯ /* TEST_PROGRAM_MANGLE */

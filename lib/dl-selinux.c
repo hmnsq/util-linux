@@ -2,21 +2,21 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#ಅನ್ತರ್ಭಾವ <dlfcn.h>
 
-#include "c.h"
-#include "dl-selinux.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "dl-selinux.h"
 
-#if defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
+#ಆದರೆ defined(HAVE_LIBSELINUX) && defined(USE_DLOPEN_SELINUX)
 
 UL_ELF_NOTE_DLOPEN("selinux",
 		    "Support for SELinux",
-		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
+		    UL_ELF_NOTE_DLOPEN_ಆದ್ಯತೆ_RECOMMENDED,
 		    "libselinux.so.1");
 
-struct ul_selinux_opers ul_selinux;
+ರಚನೆ ul_selinux_opers ul_selinux;
 
-static const struct ul_dlsym ul_selinux_symbols[] =
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ ರಚನೆ ul_dlsym ul_selinux_symbols[] =
 {
 	UL_DLSYM( ul_selinux_opers, is_selinux_enabled ),
 
@@ -40,12 +40,12 @@ static const struct ul_dlsym ul_selinux_symbols[] =
 
 	UL_DLSYM( ul_selinux_opers, selinux_check_access ),
 	UL_DLSYM( ul_selinux_opers, security_compute_relabel ),
-#ifdef HAVE_SECURITY_GET_INITIAL_CONTEXT
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_SECURITY_GET_INITIAL_CONTEXT
 	UL_DLSYM( ul_selinux_opers, security_get_initial_context ),
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 	UL_DLSYM( ul_selinux_opers, selinux_file_context_cmp ),
-	UL_DLSYM( ul_selinux_opers, selinux_trans_to_raw_context ),
-	UL_DLSYM( ul_selinux_opers, string_to_security_class ),
+	UL_DLSYM( ul_selinux_opers, selinux_trans_ಗಮ್ಯ_raw_context ),
+	UL_DLSYM( ul_selinux_opers, string_ಗಮ್ಯ_security_class ),
 
 	UL_DLSYM( ul_selinux_opers, get_default_context_with_level ),
 
@@ -54,30 +54,30 @@ static const struct ul_dlsym ul_selinux_symbols[] =
 	UL_DLSYM( ul_selinux_opers, selabel_close ),
 
 	UL_DLSYM( ul_selinux_opers, context_new ),
-	UL_DLSYM( ul_selinux_opers, context_type_set ),
+	UL_DLSYM( ul_selinux_opers, context_type_ಗಣ ),
 	UL_DLSYM( ul_selinux_opers, context_str ),
 	UL_DLSYM( ul_selinux_opers, context_free ),
 };
 
-int ul_dlopen_libselinux(void)
+ಪೂರ್ಣಾಂಕ ul_dlopen_libselinux(ಶೂನ್ಯ)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ ಸ್ಥಿತಿ_2 = 0;
+	ಸ್ಥಿರ ಶೂನ್ಯ *dl = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ಆದರೆ (ಸ್ಥಿತಿ_2)
+		ಹಿಂತಿರುಗಿ ಸ್ಥಿತಿ_2 > 0 ? 0 : -ENOSYS;
 
-#ifdef RTLD_NODELETE
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ RTLD_NODELETE
 	flags |= RTLD_NODELETE;
-#endif
-	status = ul_dlopen_symbols("libselinux.so.1", flags,
+#ಆದರೆ_ಅಂತ್ಯ
+	ಸ್ಥಿತಿ_2 = ul_dlopen_symbols("libselinux.so.1", flags,
 				   ul_selinux_symbols,
-				   ARRAY_SIZE(ul_selinux_symbols),
+				   ARRAY_ಗಾತ್ರ(ul_selinux_symbols),
 				   &ul_selinux, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	ಹಿಂತಿರುಗಿ ಸ್ಥಿತಿ_2 > 0 ? 0 : -ENOSYS;
 }
 
-#endif /* HAVE_LIBSELINUX && USE_DLOPEN_SELINUX */
+#ಆದರೆ_ಅಂತ್ಯ /* HAVE_LIBSELINUX && USE_DLOPEN_SELINUX */

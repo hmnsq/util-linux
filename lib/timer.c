@@ -6,13 +6,13 @@
  * -lrt on systems with old libc (and probably also -lpthread for static
  *  build).
  */
-#include <time.h>
-#include <signal.h>
-#include <sys/time.h>
+#ಅನ್ತರ್ಭಾವ <time.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <sys/time.h>
 
-#include "c.h"
-#include "timeutils.h"
-#include "timer.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "timeutils.h"
+#ಅನ್ತರ್ಭಾವ "timer.h"
 
 /*
  * Note the timeout is used for the first signal, then the signal is sent
@@ -31,69 +31,69 @@
  * The applications need to ensure that they can tolerate multiple signal
  * deliveries.
  */
-#ifdef HAVE_TIMER_CREATE
-int setup_timer(struct ul_timer *timer,
-		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_TIMER_CREATE
+ಪೂರ್ಣಾಂಕ ಸಿದ್ಧತೆ_timer(ರಚನೆ ul_timer *timer,
+		ರಚನೆ itimerval *timeout,
+		ಶೂನ್ಯ (*timeout_handler)(ಪೂರ್ಣಾಂಕ, siginfo_t *, ಶೂನ್ಯ *))
 {
 	time_t sec = timeout->it_value.tv_sec;
-	long usec = timeout->it_value.tv_usec;
-	struct sigaction sig_a;
-	static struct sigevent sig_e = {
+	ದೀರ್ಘ usec = timeout->it_value.tv_usec;
+	ರಚನೆ sigaction sig_a;
+	ಸ್ಥಿರ ರಚನೆ sigevent sig_e = {
 		.sigev_notify = SIGEV_SIGNAL,
 		.sigev_signo = SIGALRM
 	};
-	struct itimerspec val = {
+	ರಚನೆ itimerspec val = {
 		.it_value.tv_sec = sec,
-		.it_value.tv_nsec = usec * NSEC_PER_USEC,
+		.it_value.tv_nsec = usec * NSEC_ಪ್ರತಿ_USEC,
 		.it_interval.tv_sec = sec / 100,
-		.it_interval.tv_nsec = (sec ? sec % 100 : 1) * 10 * NSEC_PER_MSEC
+		.it_interval.tv_nsec = (sec ? sec % 100 : 1) * 10 * NSEC_ಪ್ರತಿ_MSEC
 	};
 
-	if (sigemptyset(&sig_a.sa_mask))
-		return 1;
+	ಆದರೆ (sigemptyset(&sig_a.sa_mask))
+		ಹಿಂತಿರುಗಿ 1;
 
 	sig_a.sa_flags = SA_SIGINFO;
 	sig_a.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sig_a, NULL))
-		return 1;
-	if (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
-		return 1;
-	if (timer_settime(timer->t_id, 0, &val, NULL))
-		return 1;
-	return 0;
+	ಆದರೆ (sigaction(SIGALRM, &sig_a, ಖಾಲಿ))
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (timer_create(CLOCK_MONOTONIC, &sig_e, &timer->t_id))
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (timer_settime(timer->t_id, 0, &val, ಖಾಲಿ))
+		ಹಿಂತಿರುಗಿ 1;
+	ಹಿಂತಿರುಗಿ 0;
 }
-void cancel_timer(struct ul_timer *timer)
+ಶೂನ್ಯ cancel_timer(ರಚನೆ ul_timer *timer)
 {
 	timer_delete(timer->t_id);
 }
 
-#else /* !HAVE_TIMER_CREATE */
+#ಇಲ್ಲದಿದ್ದರೆ /* !HAVE_TIMER_CREATE */
 
-int setup_timer(struct ul_timer *timer,
-		struct itimerval *timeout,
-		void (*timeout_handler)(int, siginfo_t *, void *))
+ಪೂರ್ಣಾಂಕ ಸಿದ್ಧತೆ_timer(ರಚನೆ ul_timer *timer,
+		ರಚನೆ itimerval *timeout,
+		ಶೂನ್ಯ (*timeout_handler)(ಪೂರ್ಣಾಂಕ, siginfo_t *, ಶೂನ್ಯ *))
 {
-	struct sigaction sa;
+	ರಚನೆ sigaction sa;
 
-	memset(&sa, 0, sizeof sa);
-	memset(timer, 0, sizeof(*timer));
+	memset(&sa, 0, ಗಾತ್ರ sa);
+	memset(timer, 0, ಗಾತ್ರ(*timer));
 
 	sa.sa_flags = SA_SIGINFO | SA_RESETHAND;
 	sa.sa_sigaction = timeout_handler;
 
-	if (sigaction(SIGALRM, &sa, &timer->old_sa))
-		return 1;
-	if (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
-		return 1;
-	return 0;
+	ಆದರೆ (sigaction(SIGALRM, &sa, &timer->old_sa))
+		ಹಿಂತಿರುಗಿ 1;
+	ಆದರೆ (setitimer(ITIMER_REAL, timeout, &timer->old_timer) != 0)
+		ಹಿಂತಿರುಗಿ 1;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-void cancel_timer(struct ul_timer *timer)
+ಶೂನ್ಯ cancel_timer(ರಚನೆ ul_timer *timer)
 {
-	setitimer(ITIMER_REAL, &timer->old_timer, NULL);
-	sigaction(SIGALRM, &timer->old_sa, NULL);
+	setitimer(ITIMER_REAL, &timer->old_timer, ಖಾಲಿ);
+	sigaction(SIGALRM, &timer->old_sa, ಖಾಲಿ);
 
 }
-#endif /* !HAVE_TIMER_CREATE */
+#ಆದರೆ_ಅಂತ್ಯ /* !HAVE_TIMER_CREATE */

@@ -4,62 +4,62 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2021]
  */
-#include <ctype.h>
-#include <unistd.h>
-#include <errno.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
 
-#ifdef HAVE_SYS_VFS_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_SYS_VFS_H
 # include <sys/vfs.h>
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-#include "c.h"
-#include "pathnames.h"
-#include "procfs.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "vfs.h"
-#include "debug.h"
-#include "strutils.h"
-#include "statfs_magic.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "pathnames.h"
+#ಅನ್ತರ್ಭಾವ "procfs.h"
+#ಅನ್ತರ್ಭಾವ "fileutils.h"
+#ಅನ್ತರ್ಭಾವ "all-io.h"
+#ಅನ್ತರ್ಭಾವ "vfs.h"
+#ಅನ್ತರ್ಭಾವ "debug.h"
+#ಅನ್ತರ್ಭಾವ "strutils.h"
+#ಅನ್ತರ್ಭಾವ "statfs_magic.h"
 
-static void procfs_process_deinit_path(struct path_cxt *pc);
+ಸ್ಥಿರ ಶೂನ್ಯ procfs_process_deinit_ಮಾರ್ಗ(ರಚನೆ ಮಾರ್ಗ_cxt *pc);
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulprocfs);
-UL_DEBUG_DEFINE_MASKNAMES(ulprocfs) = UL_DEBUG_EMPTY_MASKNAMES;
+ಸ್ಥಿರ UL_DEBUG_DEFINE_ಮುಖವಾಡ(ulprocfs);
+UL_DEBUG_DEFINE_MASKNAMES(ulprocfs) = UL_DEBUG_ಖಾಲಿಗಳು_MASKNAMES;
 
-#define ULPROCFS_DEBUG_INIT	(1 << 1)
-#define ULPROCFS_DEBUG_CXT	(1 << 2)
+#ವ್ಯಾಖ್ಯಾನಿಸು ULPROCFS_DEBUG_INIT	(1 << 1)
+#ವ್ಯಾಖ್ಯಾನಿಸು ULPROCFS_DEBUG_CXT	(1 << 2)
 
-#define DBG(m, x)		__UL_DBG(ulprocfs, ULPROCFS_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulprocfs, ULPROCFS_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulprocfs, ULPROCFS_DEBUG_, m, x)
+#ವ್ಯಾಖ್ಯಾನಿಸು DBG(m, x)		__UL_DBG(ulprocfs, ULPROCFS_DEBUG_, m, x)
+#ವ್ಯಾಖ್ಯಾನಿಸು DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulprocfs, ULPROCFS_DEBUG_, m, h, x)
+#ವ್ಯಾಖ್ಯಾನಿಸು ON_DBG(m, x)		__UL_DBG_CALL(ulprocfs, ULPROCFS_DEBUG_, m, x)
 
-void ul_procfs_init_debug(void)
+ಶೂನ್ಯ ul_procfs_init_debug(ಶೂನ್ಯ)
 {
-	if (ulprocfs_debug_mask)
-		return;
+	ಆದರೆ (ulprocfs_debug_ಮುಖವಾಡ)
+		ಹಿಂತಿರುಗಿ;
 	__UL_INIT_DEBUG_FROM_ENV(ulprocfs, ULPROCFS_DEBUG_, 0, ULPROCFS_DEBUG);
 }
 
-struct path_cxt *ul_new_procfs_path(pid_t pid, const char *prefix)
+ರಚನೆ ಮಾರ್ಗ_cxt *ul_new_procfs_ಮಾರ್ಗ(pid_t pid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
-	struct path_cxt *pc = ul_new_path(NULL);
+	ರಚನೆ ಮಾರ್ಗ_cxt *pc = ul_new_ಮಾರ್ಗ(ಖಾಲಿ);
 
-	if (!pc)
-		return NULL;
-	if (prefix)
-		ul_path_set_prefix(pc, prefix);
+	ಆದರೆ (!pc)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
+	ಆದರೆ (ಪೂರ್ವಪ್ರತ್ಯಯ)
+		ul_ಮಾರ್ಗ_ಗಣ_ಪೂರ್ವಪ್ರತ್ಯಯ(pc, ಪೂರ್ವಪ್ರತ್ಯಯ);
 
-	if (procfs_process_init_path(pc, pid) != 0) {
-		ul_unref_path(pc);
-		return NULL;
+	ಆದರೆ (procfs_process_init_ಮಾರ್ಗ(pc, pid) != 0) {
+		ul_unref_ಮಾರ್ಗ(pc);
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
-	return pc;
+	ಹಿಂತಿರುಗಿ pc;
 }
 
 /*
@@ -69,148 +69,148 @@ struct path_cxt *ul_new_procfs_path(pid_t pid, const char *prefix)
  * The procfs_process_deinit_path() is automatically called by ul_unref_path().
  *
  */
-int procfs_process_init_path(struct path_cxt *pc, pid_t pid)
+ಪೂರ್ಣಾಂಕ procfs_process_init_ಮಾರ್ಗ(ರಚನೆ ಮಾರ್ಗ_cxt *pc, pid_t pid)
 {
-	struct procfs_process *prc;
-	int rc;
-	char buf[sizeof(_PATH_PROC) + sizeof(stringify_value(UINT32_MAX)) + 2];
+	ರಚನೆ procfs_process *prc;
+	ಪೂರ್ಣಾಂಕ rc;
+	ಅಕ್ಷರ buf[ಗಾತ್ರ(ಮಾರ್ಗ_PROC) + ಗಾತ್ರ(stringify_ಮೌಲ್ಯ(UINT32_MAX)) + 2];
 
 	/* define path to pid stuff */
-	snprintf(buf, sizeof(buf), _PATH_PROC "/%zu", (size_t) pid);
-	rc = ul_path_set_dir(pc, buf);
-	if (rc)
-		return rc;
+	snprintf(buf, ಗಾತ್ರ(buf), ಮಾರ್ಗ_PROC "/%zu", (size_t) pid);
+	rc = ul_ಮಾರ್ಗ_ಗಣ_dir(pc, buf);
+	ಆದರೆ (rc)
+		ಹಿಂತಿರುಗಿ rc;
 
 	/* make sure path exists */
-	rc = ul_path_get_dirfd(pc);
-	if (rc < 0)
-		return rc;
+	rc = ul_ಮಾರ್ಗ_get_dirfd(pc);
+	ಆದರೆ (rc < 0)
+		ಹಿಂತಿರುಗಿ rc;
 
 	/* initialize procfs specific stuff */
-	prc = ul_path_get_dialect(pc);
-	if (!prc) {
+	prc = ul_ಮಾರ್ಗ_get_dialect(pc);
+	ಆದರೆ (!prc) {
 		DBG_OBJ(CXT, pc, ul_debug("alloc new procfs handler"));
-		prc = calloc(1, sizeof(struct procfs_process));
-		if (!prc)
-			return -ENOMEM;
+		prc = ಸೊನ್ನೆ_ಸ್ಮರಣೆ_ಕೊಡು(1, ಗಾತ್ರ(ರಚನೆ procfs_process));
+		ಆದರೆ (!prc)
+			ಹಿಂತಿರುಗಿ -ENOMEM;
 
-		ul_path_set_dialect(pc, prc, procfs_process_deinit_path);
+		ul_ಮಾರ್ಗ_ಗಣ_dialect(pc, prc, procfs_process_deinit_ಮಾರ್ಗ);
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("init procfs stuff"));
 
 	prc->pid = pid;
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-static void procfs_process_deinit_path(struct path_cxt *pc)
+ಸ್ಥಿರ ಶೂನ್ಯ procfs_process_deinit_ಮಾರ್ಗ(ರಚನೆ ಮಾರ್ಗ_cxt *pc)
 {
-	struct procfs_process *prc;
+	ರಚನೆ procfs_process *prc;
 
-	if (!pc)
-		return;
+	ಆದರೆ (!pc)
+		ಹಿಂತಿರುಗಿ;
 
 	DBG_OBJ(CXT, pc, ul_debug("deinit"));
 
-	prc = ul_path_get_dialect(pc);
-	if (!prc)
-		return;
+	prc = ul_ಮಾರ್ಗ_get_dialect(pc);
+	ಆದರೆ (!prc)
+		ಹಿಂತಿರುಗಿ;
 
-	free(prc);
-	ul_path_set_dialect(pc, NULL, NULL);
+	ಬಿಡುಗಡೆ(prc);
+	ul_ಮಾರ್ಗ_ಗಣ_dialect(pc, ಖಾಲಿ, ಖಾಲಿ);
 }
 
-static ssize_t read_procfs_file(const struct ul_vfs_ops *vfs, int fd,
-			       char *buf, size_t bufsz)
+ಸ್ಥಿರ ssize_t read_procfs_file(ಸ್ಥಿರಾಂಕ ರಚನೆ ul_vfs_ops *vfs, ಪೂರ್ಣಾಂಕ fd,
+			       ಅಕ್ಷರ *buf, size_t bufsz)
 {
 	ssize_t sz = 0;
 	size_t i;
 
-	if (fd < 0)
-		return -EINVAL;
+	ಆದರೆ (fd < 0)
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
 	sz = ul_vfs_read_all(vfs, fd, buf, bufsz);
-	if (sz <= 0)
-		return sz;
+	ಆದರೆ (sz <= 0)
+		ಹಿಂತಿರುಗಿ sz;
 
-	for (i = 0; i < (size_t) sz; i++) {
-		if (buf[i] == '\0')
+	ಗಾಗಿ (i = 0; i < (size_t) sz; i++) {
+		ಆದರೆ (buf[i] == '\0')
 			buf[i] = ' ';
 	}
 	buf[sz - 1] = '\0';
-	return sz;
+	ಹಿಂತಿರುಗಿ sz;
 }
 
-static ssize_t procfs_process_get_data_for(struct path_cxt *pc, char *buf, size_t bufsz,
-					    const char *fname)
+ಸ್ಥಿರ ssize_t procfs_process_get_ದತ್ತಾಂಶ_for(ರಚನೆ ಮಾರ್ಗ_cxt *pc, ಅಕ್ಷರ *buf, size_t bufsz,
+					    ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *fname)
 {
-	int fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, fname);
+	ಪೂರ್ಣಾಂಕ fd = ul_ಮಾರ್ಗ_open(pc, O_RDONLY|O_CLOEXEC, fname);
 
-	if (fd >= 0) {
-		ssize_t sz = read_procfs_file(pc ? pc->vfs : NULL, fd, buf, bufsz);
-		ul_vfs_close(pc ? pc->vfs : NULL, fd);
-		return sz;
+	ಆದರೆ (fd >= 0) {
+		ssize_t sz = read_procfs_file(pc ? pc->vfs : ಖಾಲಿ, fd, buf, bufsz);
+		ul_vfs_close(pc ? pc->vfs : ಖಾಲಿ, fd);
+		ಹಿಂತಿರುಗಿ sz;
 	}
-	return -errno;
+	ಹಿಂತಿರುಗಿ -errno;
 }
 
-ssize_t procfs_process_get_cmdline(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_cmdline(ರಚನೆ ಮಾರ್ಗ_cxt *pc, ಅಕ್ಷರ *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "cmdline");
+	ಹಿಂತಿರುಗಿ procfs_process_get_ದತ್ತಾಂಶ_for(pc, buf, bufsz, "cmdline");
 }
 
-ssize_t procfs_process_get_cmdname(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_cmdname(ರಚನೆ ಮಾರ್ಗ_cxt *pc, ಅಕ್ಷರ *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "comm");
+	ಹಿಂತಿರುಗಿ procfs_process_get_ದತ್ತಾಂಶ_for(pc, buf, bufsz, "comm");
 }
 
-ssize_t procfs_process_get_stat(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_stat(ರಚನೆ ಮಾರ್ಗ_cxt *pc, ಅಕ್ಷರ *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "stat");
+	ಹಿಂತಿರುಗಿ procfs_process_get_ದತ್ತಾಂಶ_for(pc, buf, bufsz, "stat");
 }
 
-ssize_t procfs_process_get_syscall(struct path_cxt *pc, char *buf, size_t bufsz)
+ssize_t procfs_process_get_syscall(ರಚನೆ ಮಾರ್ಗ_cxt *pc, ಅಕ್ಷರ *buf, size_t bufsz)
 {
-	return procfs_process_get_data_for(pc, buf, bufsz, "syscall");
+	ಹಿಂತಿರುಗಿ procfs_process_get_ದತ್ತಾಂಶ_for(pc, buf, bufsz, "syscall");
 }
 
-int procfs_process_get_stat_nth(struct path_cxt *pc, int n, uint64_t *re)
+ಪೂರ್ಣಾಂಕ procfs_process_get_stat_nth(ರಚನೆ ಮಾರ್ಗ_cxt *pc, ಪೂರ್ಣಾಂಕ n, uint64_t *re)
 {
 	ssize_t rc;
-	char *key = NULL, *tok, *p;
-	char buf[BUFSIZ];
-	int i;
+	ಅಕ್ಷರ *ಕೀಲಿ = ಖಾಲಿ, *tok, *p;
+	ಅಕ್ಷರ buf[BUFSIZ];
+	ಪೂರ್ಣಾಂಕ i;
 
-	if (n == 2 || n == 3)		/* process name and status (strings) */
-		return -EINVAL;
+	ಆದರೆ (n == 2 || n == 3)		/* process name and status (strings) */
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	rc = procfs_process_get_data_for(pc, buf, sizeof(buf), "stat");
-	if (rc < 0)
-		return rc;
+	rc = procfs_process_get_ದತ್ತಾಂಶ_for(pc, buf, ಗಾತ್ರ(buf), "stat");
+	ಆದರೆ (rc < 0)
+		ಹಿಂತಿರುಗಿ rc;
 
-	for (i = 0, tok = strtok_r(buf, " ", &key); tok;
-	     tok = strtok_r(NULL, " ", &key)) {
+	ಗಾಗಿ (i = 0, tok = strtok_r(buf, " ", &ಕೀಲಿ); tok;
+	     tok = strtok_r(ಖಾಲಿ, " ", &ಕೀಲಿ)) {
 
 		i++;
-		if (i == n)
-			return ul_strtou64(tok, re, 10);
+		ಆದರೆ (i == n)
+			ಹಿಂತಿರುಗಿ ul_strtou64(tok, re, 10);
 
 		/* skip rest of the process name */
-		if (i == 2 && (p = strrchr(key, ')')))
-			key = p + 2;
+		ಆದರೆ (i == 2 && (p = strrchr(ಕೀಲಿ, ')')))
+			ಕೀಲಿ = p + 2;
 	}
 
-	return -EINVAL;
+	ಹಿಂತಿರುಗಿ -EINVAL;
 }
 
-int procfs_process_get_uid(struct path_cxt *pc, uid_t *uid)
+ಪೂರ್ಣಾಂಕ procfs_process_get_uid(ರಚನೆ ಮಾರ್ಗ_cxt *pc, uid_t *uid)
 {
-	struct stat sb;
-	int rc;
+	ರಚನೆ stat sb;
+	ಪೂರ್ಣಾಂಕ rc;
 
-	if ((rc = ul_path_stat(pc, &sb, 0, NULL)) == 0)
+	ಆದರೆ ((rc = ul_ಮಾರ್ಗ_stat(pc, &sb, 0, ಖಾಲಿ)) == 0)
 		*uid = sb.st_uid;
-	return rc;
+	ಹಿಂತಿರುಗಿ rc;
 }
 
 /*
@@ -230,57 +230,57 @@ int procfs_process_get_uid(struct path_cxt *pc, uid_t *uid)
  *	printf("task: %d", (int) tid);
  *
  */
-int procfs_process_next_tid(struct path_cxt *pc, DIR **sub, pid_t *tid)
+ಪೂರ್ಣಾಂಕ procfs_process_ಮುಂದಿನ_tid(ರಚನೆ ಮಾರ್ಗ_cxt *pc, DIR **sub, pid_t *tid)
 {
-	struct dirent *d;
+	ರಚನೆ dirent *d;
 
-	if (!pc || !sub || !tid)
-		return -EINVAL;
+	ಆದರೆ (!pc || !sub || !tid)
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	if (!*sub) {
-		*sub = ul_path_opendir(pc, "task");
-		if (!*sub)
-			return -errno;
+	ಆದರೆ (!*sub) {
+		*sub = ul_ಮಾರ್ಗ_opendir(pc, "task");
+		ಆದರೆ (!*sub)
+			ಹಿಂತಿರುಗಿ -errno;
 	}
 
-	while ((d = xreaddir(*sub))) {
-		if (procfs_dirent_get_pid(d, tid) == 0)
-			return 0;
+	ಆಗ ((d = xreaddir(*sub))) {
+		ಆದರೆ (procfs_dirent_get_pid(d, tid) == 0)
+			ಹಿಂತಿರುಗಿ 0;
 	}
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = ಖಾಲಿ;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
+ಪೂರ್ಣಾಂಕ procfs_process_ಮುಂದಿನ_fd(ರಚನೆ ಮಾರ್ಗ_cxt *pc, DIR **sub, ಪೂರ್ಣಾಂಕ *fd)
 {
-	struct dirent *d;
+	ರಚನೆ dirent *d;
 
-	if (!pc || !sub || !fd)
-		return -EINVAL;
+	ಆದರೆ (!pc || !sub || !fd)
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	if (!*sub) {
-		*sub = ul_path_opendir(pc, "fd");
-		if (!*sub)
-			return -errno;
+	ಆದರೆ (!*sub) {
+		*sub = ul_ಮಾರ್ಗ_opendir(pc, "fd");
+		ಆದರೆ (!*sub)
+			ಹಿಂತಿರುಗಿ -errno;
 	}
 
-	while ((d = xreaddir(*sub))) {
-		uint64_t num;
-#ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
-			continue;
-#endif
-		if (ul_strtou64(d->d_name, &num, 10) < 0)
-			continue;
-		*fd = num;
-		return 0;
+	ಆಗ ((d = xreaddir(*sub))) {
+		uint64_t ಅಂಕೆ;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _DIRENT_HAVE_D_TYPE
+		ಆದರೆ (d->d_type != DT_LNK && d->d_type != DT_UNKNOWN)
+			ಮುಂದುವರಿ;
+#ಆದರೆ_ಅಂತ್ಯ
+		ಆದರೆ (ul_strtou64(d->d_name, &ಅಂಕೆ, 10) < 0)
+			ಮುಂದುವರಿ;
+		*fd = ಅಂಕೆ;
+		ಹಿಂತಿರುಗಿ 0;
 	}
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = ಖಾಲಿ;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
 /*
@@ -288,362 +288,362 @@ int procfs_process_next_fd(struct path_cxt *pc, DIR **sub, int *fd)
  */
 
 /* stupid, but good enough as a basic filter */
-int procfs_dirent_is_process(struct dirent *d)
+ಪೂರ್ಣಾಂಕ procfs_dirent_is_process(ರಚನೆ dirent *d)
 {
-#ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_DIR && d->d_type != DT_UNKNOWN)
-		return 0;
-#endif
-	if (!isdigit((unsigned char) *d->d_name))
-		return 0;
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ _DIRENT_HAVE_D_TYPE
+	ಆದರೆ (d->d_type != DT_DIR && d->d_type != DT_UNKNOWN)
+		ಹಿಂತಿರುಗಿ 0;
+#ಆದರೆ_ಅಂತ್ಯ
+	ಆದರೆ (!ಅಂಕಿಯೇ((ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ) *d->d_name))
+		ಹಿಂತಿರುಗಿ 0;
 
-	return 1;
+	ಹಿಂತಿರುಗಿ 1;
 }
 
-int procfs_dirent_get_pid(struct dirent *d, pid_t *pid)
+ಪೂರ್ಣಾಂಕ procfs_dirent_get_pid(ರಚನೆ dirent *d, pid_t *pid)
 {
-	uint64_t num;
+	uint64_t ಅಂಕೆ;
 
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	ಆದರೆ (!procfs_dirent_is_process(d))
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	if (ul_strtou64(d->d_name, &num, 10) < 0)
-		return -EINVAL;
+	ಆದರೆ (ul_strtou64(d->d_name, &ಅಂಕೆ, 10) < 0)
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	*pid = (pid_t) num;
-	return 0;
+	*pid = (pid_t) ಅಂಕೆ;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int procfs_dirent_get_uid(DIR *procfs, struct dirent *d, uid_t *uid)
+ಪೂರ್ಣಾಂಕ procfs_dirent_get_uid(DIR *procfs, ರಚನೆ dirent *d, uid_t *uid)
 {
-	struct stat st;
+	ರಚನೆ stat st;
 
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	ಆದರೆ (!procfs_dirent_is_process(d))
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	if (fstatat(dirfd(procfs), d->d_name, &st, 0))
-		return -EINVAL;
+	ಆದರೆ (fstatat(dirfd(procfs), d->d_name, &st, 0))
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
 	*uid = st.st_uid;
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int procfs_dirent_match_uid(DIR *procfs, struct dirent *d, uid_t uid)
+ಪೂರ್ಣಾಂಕ procfs_dirent_ಹೊಂದಿಕೆ_uid(DIR *procfs, ರಚನೆ dirent *d, uid_t uid)
 {
 	uid_t x;
 
-	if (procfs_dirent_get_uid(procfs, d, &x) == 0)
-		return x == uid;
+	ಆದರೆ (procfs_dirent_get_uid(procfs, d, &x) == 0)
+		ಹಿಂತಿರುಗಿ x == uid;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
 /* "name" of process; may be truncated, see prctl(2) and PR_SET_NAME.
  * The minimal of the @buf has to be 32 bytes. */
-int procfs_dirent_get_name(DIR *procfs, struct dirent *d, char *buf, size_t bufsz)
+ಪೂರ್ಣಾಂಕ procfs_dirent_get_name(DIR *procfs, ರಚನೆ dirent *d, ಅಕ್ಷರ *buf, size_t bufsz)
 {
 	FILE *f;
 	size_t sz;
-	char tmp[1024], *p, *end = NULL;
+	ಅಕ್ಷರ tmp[1024], *p, *ಕೊನೆ = ಖಾಲಿ;
 
-	if (bufsz < 32)
-		return -EINVAL;
-	if (!procfs_dirent_is_process(d))
-		return -EINVAL;
+	ಆದರೆ (bufsz < 32)
+		ಹಿಂತಿರುಗಿ -EINVAL;
+	ಆದರೆ (!procfs_dirent_is_process(d))
+		ಹಿಂತಿರುಗಿ -EINVAL;
 
-	snprintf(tmp, sizeof(tmp), "%s/stat", d->d_name);
+	snprintf(tmp, ಗಾತ್ರ(tmp), "%s/stat", d->d_name);
 	f = fopen_at(dirfd(procfs), tmp, O_CLOEXEC|O_RDONLY, "r");
-	if (!f)
-		return -errno;
+	ಆದರೆ (!f)
+		ಹಿಂತಿರುಗಿ -errno;
 
-	p = fgets(tmp, sizeof(tmp), f);
+	p = fgets(tmp, ಗಾತ್ರ(tmp), f);
 	fclose(f);
-	if (!p)
-		return -errno;
+	ಆದರೆ (!p)
+		ಹಿಂತಿರುಗಿ -errno;
 
 	/* skip PID */
-	while (*p && *p != '(')
+	ಆಗ (*p && *p != '(')
 		p++;
 
 	/* skip extra '(' */
-	while (*p && *p == '(')
+	ಆಗ (*p && *p == '(')
 		p++;
 
-	end = p;
-	while (*end && *end != ')')
-		end++;
+	ಕೊನೆ = p;
+	ಆಗ (*ಕೊನೆ && *ಕೊನೆ != ')')
+		ಕೊನೆ++;
 
-	sz = end - p;
-	if (sz >= bufsz)
+	sz = ಕೊನೆ - p;
+	ಆದರೆ (sz >= bufsz)
 		sz = bufsz - 1;
 
-	memcpy(buf, p, sz);
+	ಸ್ಮರಣೆ_ನಕಲು(buf, p, sz);
 	buf[sz] = '\0';
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-int procfs_dirent_match_name(DIR *procfs, struct dirent *d, const char *name)
+ಪೂರ್ಣಾಂಕ procfs_dirent_ಹೊಂದಿಕೆ_name(DIR *procfs, ರಚನೆ dirent *d, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	char buf[33];
+	ಅಕ್ಷರ buf[33];
 
-	if (procfs_dirent_get_name(procfs, d, buf, sizeof(buf)) == 0)
-		return strcmp(name, buf) == 0;
+	ಆದರೆ (procfs_dirent_get_name(procfs, d, buf, ಗಾತ್ರ(buf)) == 0)
+		ಹಿಂತಿರುಗಿ strcmp(name, buf) == 0;
 
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
 
-#ifdef HAVE_SYS_VFS_H
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ HAVE_SYS_VFS_H
 /* checks if fd is file in a procfs;
  * returns 1 if true, 0 if false or couldn't determine */
-int fd_is_procfs(int fd)
+ಪೂರ್ಣಾಂಕ fd_is_procfs(ಪೂರ್ಣಾಂಕ fd)
 {
-	struct statfs st;
-	int ret;
+	ರಚನೆ statfs st;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	do {
+	ಮಾಡು {
 		errno = 0;
 		ret = fstatfs(fd, &st);
 
-		if (ret < 0) {
-			if (errno != EINTR && errno != EAGAIN)
-				return 0;
+		ಆದರೆ (ret < 0) {
+			ಆದರೆ (errno != EINTR && errno != EAGAIN)
+				ಹಿಂತಿರುಗಿ 0;
 			xusleep(250000);
 		}
-	} while (ret != 0);
+	} ಆಗ (ret != 0);
 
-	return F_TYPE_EQUAL(st.f_type, STATFS_PROC_MAGIC);
+	ಹಿಂತಿರುಗಿ F_TYPE_EQUAL(st.f_type, STATFS_PROC_MAGIC);
 }
-#else
-int fd_is_procfs(int fd __attribute__((__unused__)))
+#ಇಲ್ಲದಿದ್ದರೆ
+ಪೂರ್ಣಾಂಕ fd_is_procfs(ಪೂರ್ಣಾಂಕ fd __attribute__((__unused__)))
 {
-	return 0;
+	ಹಿಂತಿರುಗಿ 0;
 }
-#endif
+#ಆದರೆ_ಅಂತ್ಯ
 
-static char *strdup_procfs_file(pid_t pid, const char *name)
+ಸ್ಥಿರ ಅಕ್ಷರ *strdup_procfs_file(pid_t pid, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name)
 {
-	char buf[BUFSIZ];
-	char *re = NULL;
-	int fd;
+	ಅಕ್ಷರ buf[BUFSIZ];
+	ಅಕ್ಷರ *re = ಖಾಲಿ;
+	ಪೂರ್ಣಾಂಕ fd;
 
-	snprintf(buf, sizeof(buf), _PATH_PROC "/%d/%s", (int) pid, name);
+	snprintf(buf, ಗಾತ್ರ(buf), ಮಾರ್ಗ_PROC "/%d/%s", (ಪೂರ್ಣಾಂಕ) pid, name);
 	fd = open(buf, O_CLOEXEC|O_RDONLY);
-	if (fd < 0)
-		return NULL;
+	ಆದರೆ (fd < 0)
+		ಹಿಂತಿರುಗಿ ಖಾಲಿ;
 
-	if (read_procfs_file(NULL, fd, buf, sizeof(buf)) > 0)
+	ಆದರೆ (read_procfs_file(ಖಾಲಿ, fd, buf, ಗಾತ್ರ(buf)) > 0)
 		re = strdup(buf);
 	close(fd);
-	return re;
+	ಹಿಂತಿರುಗಿ re;
 }
 
-char *pid_get_cmdname(pid_t pid)
+ಅಕ್ಷರ *pid_get_cmdname(pid_t pid)
 {
-	return strdup_procfs_file(pid, "comm");
+	ಹಿಂತಿರುಗಿ strdup_procfs_file(pid, "comm");
 }
 
-char *pid_get_cmdline(pid_t pid)
+ಅಕ್ಷರ *pid_get_cmdline(pid_t pid)
 {
-	return strdup_procfs_file(pid, "cmdline");
+	ಹಿಂತಿರುಗಿ strdup_procfs_file(pid, "cmdline");
 }
 
-char *pid_get_personality(pid_t pid)
+ಅಕ್ಷರ *pid_get_personality(pid_t pid)
 {
-	return strdup_procfs_file(pid, "personality");
+	ಹಿಂತಿರುಗಿ strdup_procfs_file(pid, "personality");
 }
 
-#ifdef TEST_PROGRAM_PROCFS
+#ವ್ಯಾಖ್ಯಾನಿತವಾದರೆ TEST_ಕಾರ್ಯಕ್ರಮ_PROCFS
 
-static int test_tasks(int argc, char *argv[], const char *prefix)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ test_tasks(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[], ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
-	DIR *sub = NULL;
-	struct path_cxt *pc;
+	DIR *sub = ಖಾಲಿ;
+	ರಚನೆ ಮಾರ್ಗ_cxt *pc;
 	pid_t tid = 0, pid;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
+	ಆದರೆ (argc != 2)
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
 
-	pid = strtol(argv[1], (char **) NULL, 10);
-	printf("PID=%d, TIDs:", pid);
+	pid = strtol(argv[1], (ಅಕ್ಷರ **) ಖಾಲಿ, 10);
+	ಬರೆ("PID=%d, TIDs:", pid);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_ಮಾರ್ಗ(pid, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (!pc)
 		err(EXIT_FAILURE, "alloc procfs handler failed");
 
-	while (procfs_process_next_tid(pc, &sub, &tid) == 0)
-		printf(" %d", tid);
+	ಆಗ (procfs_process_ಮುಂದಿನ_tid(pc, &sub, &tid) == 0)
+		ಬರೆ(" %d", tid);
 
-	printf("\n");
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ಬರೆ("\n");
+	ul_unref_ಮಾರ್ಗ(pc);
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
 
-static int test_fds(int argc, char *argv[], const char *prefix)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ test_fds(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[], ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
-	DIR *sub = NULL;
-	struct path_cxt *pc;
+	DIR *sub = ಖಾಲಿ;
+	ರಚನೆ ಮಾರ್ಗ_cxt *pc;
 	pid_t pid;
-	int fd = -1;
+	ಪೂರ್ಣಾಂಕ fd = -1;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
+	ಆದರೆ (argc != 2)
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
 
-	pid = strtol(argv[1], (char **) NULL, 10);
-	printf("PID=%d, FDs:", pid);
+	pid = strtol(argv[1], (ಅಕ್ಷರ **) ಖಾಲಿ, 10);
+	ಬರೆ("PID=%d, FDs:", pid);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_ಮಾರ್ಗ(pid, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (!pc)
 		err(EXIT_FAILURE, "alloc procfs handler failed");
 
-	while (procfs_process_next_fd(pc, &sub, &fd) == 0)
-		printf(" %d", fd);
+	ಆಗ (procfs_process_ಮುಂದಿನ_fd(pc, &sub, &fd) == 0)
+		ಬರೆ(" %d", fd);
 
 	fputc('\n', stdout);
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ul_unref_ಮಾರ್ಗ(pc);
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
 
-static int test_processes(int argc, char *argv[])
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ test_processes(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[])
 {
 	DIR *dir;
-	struct dirent *d;
-	char *name = NULL;
+	ರಚನೆ dirent *d;
+	ಅಕ್ಷರ *name = ಖಾಲಿ;
 	uid_t uid = (uid_t) -1;
-	char buf[128];
+	ಅಕ್ಷರ buf[128];
 
-	if (argc >= 3 && strcmp(argv[1], "--name") == 0)
+	ಆದರೆ (argc >= 3 && strcmp(argv[1], "--name") == 0)
 		name = argv[2];
-	if (argc >= 3 && strcmp(argv[1], "--uid") == 0)
+	ಆದರೆ (argc >= 3 && strcmp(argv[1], "--uid") == 0)
 		uid = (uid_t) atol(argv[2]);
 
-	dir = opendir(_PATH_PROC);
-	if (!dir)
+	dir = opendir(ಮಾರ್ಗ_PROC);
+	ಆದರೆ (!dir)
 		err(EXIT_FAILURE, "cannot open proc");
 
-	while ((d = xreaddir(dir))) {
+	ಆಗ ((d = xreaddir(dir))) {
 		pid_t pid = 0;
 
-		if (procfs_dirent_get_pid(d, &pid) != 0)
-			continue;
-		if (name && !procfs_dirent_match_name(dir, d, name))
-			continue;
-		if (uid != (uid_t) -1 && !procfs_dirent_match_uid(dir, d, uid))
-			continue;
-		procfs_dirent_get_name(dir, d, buf, sizeof(buf));
-		printf(" %d [%s]", pid, buf);
+		ಆದರೆ (procfs_dirent_get_pid(d, &pid) != 0)
+			ಮುಂದುವರಿ;
+		ಆದರೆ (name && !procfs_dirent_ಹೊಂದಿಕೆ_name(dir, d, name))
+			ಮುಂದುವರಿ;
+		ಆದರೆ (uid != (uid_t) -1 && !procfs_dirent_ಹೊಂದಿಕೆ_uid(dir, d, uid))
+			ಮುಂದುವರಿ;
+		procfs_dirent_get_name(dir, d, buf, ಗಾತ್ರ(buf));
+		ಬರೆ(" %d [%s]", pid, buf);
 	}
 
 	fputc('\n', stdout);
 	closedir(dir);
-	return EXIT_SUCCESS;
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
 
-static int test_one_process(int argc, char *argv[], const char *prefix)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ test_one_process(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[], ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
 	pid_t pid;
-	struct path_cxt *pc;
-	char buf[BUFSIZ];
+	ರಚನೆ ಮಾರ್ಗ_cxt *pc;
+	ಅಕ್ಷರ buf[BUFSIZ];
 	uid_t uid = (uid_t) -1;
 
-	if (argc != 2)
-		return EXIT_FAILURE;
-	pid = strtol(argv[1], (char **) NULL, 10);
+	ಆದರೆ (argc != 2)
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
+	pid = strtol(argv[1], (ಅಕ್ಷರ **) ಖಾಲಿ, 10);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_ಮಾರ್ಗ(pid, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	printf("%d\n", (int) pid);
+	ಬರೆ("%d\n", (ಪೂರ್ಣಾಂಕ) pid);
 
 	procfs_process_get_uid(pc, &uid);
-	printf("   UID: %zu\n", (size_t) uid);
+	ಬರೆ("   UID: %zu\n", (size_t) uid);
 
-	procfs_process_get_cmdline(pc, buf, sizeof(buf));
-	printf("   CMDLINE: '%s'\n", buf);
+	procfs_process_get_cmdline(pc, buf, ಗಾತ್ರ(buf));
+	ಬರೆ("   CMDLINE: '%s'\n", buf);
 
-	procfs_process_get_cmdname(pc, buf, sizeof(buf));
-	printf("   COMM: '%s'\n", buf);
+	procfs_process_get_cmdname(pc, buf, ಗಾತ್ರ(buf));
+	ಬರೆ("   COMM: '%s'\n", buf);
 
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ul_unref_ಮಾರ್ಗ(pc);
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
 
-static int test_isprocfs(int argc, char *argv[])
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ test_isprocfs(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[])
 {
-	const char *name = argc > 1 ? argv[1] : "/proc";
-	int fd = open(name, O_RDONLY | O_CLOEXEC);
-	int is = 0;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *name = argc > 1 ? argv[1] : "/proc";
+	ಪೂರ್ಣಾಂಕ fd = open(name, O_RDONLY | O_CLOEXEC);
+	ಪೂರ್ಣಾಂಕ is = 0;
 
-	if (fd >= 0) {
+	ಆದರೆ (fd >= 0) {
 		is = fd_is_procfs(fd);
 		close(fd);
-	} else
+	} ಇಲ್ಲದಿದ್ದರೆ
 		err(EXIT_FAILURE, "cannot open %s", name);
 
-	printf("%s: %s procfs\n", name, is ? "is" : "is NOT");
-	return is ? EXIT_SUCCESS : EXIT_FAILURE;
+	ಬರೆ("%s: %s procfs\n", name, is ? "is" : "is NOT");
+	ಹಿಂತಿರುಗಿ is ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static int test_process_stat_nth(int argc, char *argv[], const char *prefix)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ test_process_stat_nth(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[], ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ)
 {
 	pid_t pid;
-	struct path_cxt *pc;
-	uint64_t num = 0;
-	int n, ret;
+	ರಚನೆ ಮಾರ್ಗ_cxt *pc;
+	uint64_t ಅಂಕೆ = 0;
+	ಪೂರ್ಣಾಂಕ n, ret;
 
-	if (argc != 3)
-		return EXIT_FAILURE;
-	pid = strtol(argv[1], (char **) NULL, 10);
-	n = strtol(argv[2], (char **) NULL, 10);
+	ಆದರೆ (argc != 3)
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
+	pid = strtol(argv[1], (ಅಕ್ಷರ **) ಖಾಲಿ, 10);
+	n = strtol(argv[2], (ಅಕ್ಷರ **) ಖಾಲಿ, 10);
 
-	pc = ul_new_procfs_path(pid, prefix);
-	if (!pc)
+	pc = ul_new_procfs_ಮಾರ್ಗ(pid, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (!pc)
 		err(EXIT_FAILURE, "cannot alloc procfs handler");
 
-	ret = procfs_process_get_stat_nth(pc, n, &num);
-	if (ret)
+	ret = procfs_process_get_stat_nth(pc, n, &ಅಂಕೆ);
+	ಆದರೆ (ret)
 		errx(EXIT_FAILURE, "read %dth number failed: %s", n, strerror(-ret));
 
-	printf("%d: %dth %"PRIu64"\n", (int) pid, n, num);
-	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	ಬರೆ("%d: %dth %"PRIu64"\n", (ಪೂರ್ಣಾಂಕ) pid, n, ಅಂಕೆ);
+	ul_unref_ಮಾರ್ಗ(pc);
+	ಹಿಂತಿರುಗಿ EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+ಪೂರ್ಣಾಂಕ ಮುಖ್ಯ(ಪೂರ್ಣಾಂಕ argc, ಅಕ್ಷರ *argv[])
 {
-	const char *prefix = NULL;
+	ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಪೂರ್ವಪ್ರತ್ಯಯ = ಖಾಲಿ;
 
-	if (argc > 2 && strcmp(argv[1], "--prefix") == 0) {
-		prefix = argv[2];
+	ಆದರೆ (argc > 2 && strcmp(argv[1], "--prefix") == 0) {
+		ಪೂರ್ವಪ್ರತ್ಯಯ = argv[2];
 		argc -= 2;
 		argv += 2;
 	}
 
-	if (argc < 2) {
+	ಆದರೆ (argc < 2) {
 		fprintf(stderr, "usage: %1$s [--prefix <prefix>] --tasks <pid>\n"
 				"       %1$s [--prefix <prefix>] --fds <pid>\n"
 				"       %1$s --is-procfs [<dir>]\n"
 				"       %1$s --processes [--name <name>] [--uid <uid>]\n"
 				"       %1$s [--prefix <prefix>] --one <pid>\n"
 				"       %1$s [--prefix <prefix>] --stat-nth <pid> <n>\n",
-				program_invocation_short_name);
-		return EXIT_FAILURE;
+				ಕಾರ್ಯಕ್ರಮ_invocation_short_name);
+		ಹಿಂತಿರುಗಿ EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--tasks") == 0)
-		return test_tasks(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--fds") == 0)
-		return test_fds(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--processes") == 0)
-		return test_processes(argc - 1, argv + 1);
-	if (strcmp(argv[1], "--is-procfs") == 0)
-		return test_isprocfs(argc - 1, argv + 1);
-	if (strcmp(argv[1], "--one") == 0)
-		return test_one_process(argc - 1, argv + 1, prefix);
-	if (strcmp(argv[1], "--stat-nth") == 0)
-		return test_process_stat_nth(argc - 1, argv + 1, prefix);
+	ಆದರೆ (strcmp(argv[1], "--tasks") == 0)
+		ಹಿಂತಿರುಗಿ test_tasks(argc - 1, argv + 1, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (strcmp(argv[1], "--fds") == 0)
+		ಹಿಂತಿರುಗಿ test_fds(argc - 1, argv + 1, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (strcmp(argv[1], "--processes") == 0)
+		ಹಿಂತಿರುಗಿ test_processes(argc - 1, argv + 1);
+	ಆದರೆ (strcmp(argv[1], "--is-procfs") == 0)
+		ಹಿಂತಿರುಗಿ test_isprocfs(argc - 1, argv + 1);
+	ಆದರೆ (strcmp(argv[1], "--one") == 0)
+		ಹಿಂತಿರುಗಿ test_one_process(argc - 1, argv + 1, ಪೂರ್ವಪ್ರತ್ಯಯ);
+	ಆದರೆ (strcmp(argv[1], "--stat-nth") == 0)
+		ಹಿಂತಿರುಗಿ test_process_stat_nth(argc - 1, argv + 1, ಪೂರ್ವಪ್ರತ್ಯಯ);
 
-	return EXIT_FAILURE;
+	ಹಿಂತಿರುಗಿ EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_PROCUTILS */
+#ಆದರೆ_ಅಂತ್ಯ /* TEST_PROGRAM_PROCUTILS */

@@ -32,15 +32,15 @@
  * calculate a 64 bit CRC value of a sequence of bytes.
  */
 
-#include <stdbool.h>
-#include <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <stdbool.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
 
-#include "crc64.h"
+#ಅನ್ತರ್ಭಾವ "crc64.h"
 
-#define		CRC_START_64_ECMA	0x0000000000000000ull
-#define		CRC_START_64_WE		0xFFFFFFFFFFFFFFFFull
+#ವ್ಯಾಖ್ಯಾನಿಸು		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_ಆರಂಭ_64_ECMA	0x0000000000000000ull
+#ವ್ಯಾಖ್ಯಾನಿಸು		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_ಆರಂಭ_64_WE		0xFFFFFFFFFFFFFFFFull
 
-const uint64_t crc_tab64[256] = {
+ಸ್ಥಿರಾಂಕ uint64_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_tab64[256] = {
 	0x0000000000000000ull,
 	0x42F0E1EBA9EA3693ull,
 	0x85E1C3D753D46D26ull,
@@ -308,22 +308,22 @@ const uint64_t crc_tab64[256] = {
  * indicating the length.
  */
 
-uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_ecma( ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ಒಳಹರಿವು_str, size_t ಅಂಕೆ_ಬೈಟುಗಳು )
 {
 
-	uint64_t crc;
-	const unsigned char *ptr;
+	uint64_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ptr;
 	size_t a;
 
-	crc = CRC_START_64_ECMA;
-	ptr = input_str;
+	ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_ಆರಂಭ_64_ECMA;
+	ptr = ಒಳಹರಿವು_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	ಆದರೆ ( ptr != ಖಾಲಿ ) ಗಾಗಿ (a=0; a<ಅಂಕೆ_ಬೈಟುಗಳು; a++) {
 
-		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
+		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ << 8) ^ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_tab64[ ((ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc;
+	ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
 
 }  /* crc_64_ecma */
 
@@ -335,22 +335,22 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
  * parameter indicating the length.
  */
 
-uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_we( ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ಒಳಹರಿವು_str, size_t ಅಂಕೆ_ಬೈಟುಗಳು )
 {
 
-	uint64_t crc;
-	const unsigned char *ptr;
+	uint64_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *ptr;
 	size_t a;
 
-	crc = CRC_START_64_WE;
-	ptr = input_str;
+	ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_ಆರಂಭ_64_WE;
+	ptr = ಒಳಹರಿವು_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	ಆದರೆ ( ptr != ಖಾಲಿ ) ಗಾಗಿ (a=0; a<ಅಂಕೆ_ಬೈಟುಗಳು; a++) {
 
-		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
+		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ << 8) ^ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_tab64[ ((ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc ^ 0xFFFFFFFFFFFFFFFFull;
+	ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^ 0xFFFFFFFFFFFFFFFFull;
 
 }  /* crc_64_we */
 
@@ -361,9 +361,9 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
  * previous value of the CRC and the next byte of the data to be checked.
  */
 
-uint64_t ul_update_crc64( uint64_t crc, unsigned char c )
+uint64_t ul_update_crc64( uint64_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ c )
 {
 
-	return (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
+	ಹಿಂತಿರುಗಿ (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ << 8) ^ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_tab64[ ((ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
 
 }  /* update_crc_64 */

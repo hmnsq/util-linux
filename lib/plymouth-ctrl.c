@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
+#ಅನ್ತರ್ಭಾವ <limits.h>
+#ಅನ್ತರ್ಭಾವ <poll.h>
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <stdarg.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <sys/mman.h>
+#ಅನ್ತರ್ಭಾವ <sys/socket.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/un.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#ಅನ್ತರ್ಭಾವ "all-io.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "nls.h"
+#ಅನ್ತರ್ಭಾವ "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ can_read(ಪೂರ್ಣಾಂಕ fd, ಸ್ಥಿರಾಂಕ ದೀರ್ಘ timeout)
 {
-	struct pollfd fds = {
+	ರಚನೆ pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	ಪೂರ್ಣಾಂಕ ret;
 
-	do {
+	ಮಾಡು {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} ಆಗ ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	ಹಿಂತಿರುಗಿ (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+ಸ್ಥಿರ ಪೂರ್ಣಾಂಕ open_un_socket_and_connect(ಶೂನ್ಯ)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	ರಚನೆ sockaddr_un su = {
 		.sun_family = AF_UNIX,
-		.sun_path = PLYMOUTH_SOCKET_PATH,
+		.sun_path = PLYMOUTH_SOCKET_ಮಾರ್ಗ,
 	};
-	const int one = 1;
-	int fd, ret;
+	ಸ್ಥಿರಾಂಕ ಪೂರ್ಣಾಂಕ one = 1;
+	ಪೂರ್ಣಾಂಕ fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	ಆದರೆ (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		ಹೋಗು err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, ಗಾತ್ರ(one));
+	ಆದರೆ (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		ಹೋಗು err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (ರಚನೆ sockaddr *) &su,
+		offsetof(ರಚನೆ sockaddr_un, sun_path) + 1 + ಅಕ್ಷರಸರಣಿ_ಉದ್ದ(su.sun_path+1));
+	ಆದರೆ (ret < 0) {
+		ಆದರೆ (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		ಹೋಗು err;
 	}
 err:
-	return fd;
+	ಹಿಂತಿರುಗಿ fd;
 }
 
-int plymouth_command(int cmd, ...)
+ಪೂರ್ಣಾಂಕ plymouth_command(ಪೂರ್ಣಾಂಕ cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	ರಚನೆ sigaction sp, op;
+	ಪೂರ್ಣಾಂಕ fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	ಆಯ್ಕೆ (cmd) {
+	ಸ್ಥಿತಿ MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ಆದರೆ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, ಗಾತ್ರ(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		ನಿಲ್ಲಿಸು;
+	ಸ್ಥಿತಿ MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ಆದರೆ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, ಗಾತ್ರ(command));
 		}
-		break;
-	default:
+		ನಿಲ್ಲಿಸು;
+	ಪೂರ್ವನಿಯೋಜಿತ:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	ಸ್ಥಿತಿ '?':
+		ಹೋಗು err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	ಆದರೆ (fdsock >= 0) {
+		ಆದರೆ (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (ಅಕ್ಷರ *) &answer[0], ಗಾತ್ರ(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, ಖಾಲಿ);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	ಹಿಂತಿರುಗಿ ret;
 }
 

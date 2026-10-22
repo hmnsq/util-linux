@@ -38,12 +38,12 @@
  *
  */
 
-#include <stdio.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
 
-#include "crc32.h"
+#ಅನ್ತರ್ಭಾವ "crc32.h"
 
 
-static const uint32_t crc32_tab[] = {
+ಸ್ಥಿರ ಸ್ಥಿರಾಂಕ uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_tab[] = {
 	0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
 	0x706af48fL, 0xe963a535L, 0x9e6495a3L, 0x0edb8832L, 0x79dcb8a4L,
 	0xe0d5e91eL, 0x97d2d988L, 0x09b64c2bL, 0x7eb17cbdL, 0xe7b82d07L,
@@ -98,9 +98,9 @@ static const uint32_t crc32_tab[] = {
 	0x2d02ef8dL
 };
 
-static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
+ಸ್ಥಿರ ಸಾಲೊಳಗೆ uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_ಕೂಡಿಸು_char(uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ c)
 {
-	return crc32_tab[(crc ^ c) & 0xff] ^ (crc >> 8);
+	ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_tab[(ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ ^ c) & 0xff] ^ (ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ >> 8);
 }
 
 /*
@@ -108,35 +108,35 @@ static inline uint32_t crc32_add_char(uint32_t crc, unsigned char c)
  * and does __not__ xor at the end. Then individual users can do
  * whatever they need.
  */
-uint32_t ul_crc32(uint32_t seed, const unsigned char *buf, size_t len)
+uint32_t ul_ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32(uint32_t ಬೀಜ, ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *buf, size_t len)
 {
-	uint32_t crc = seed;
-	const unsigned char *p = buf;
+	uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಬೀಜ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *p = buf;
 
-	while (len) {
-		crc = crc32_add_char(crc, *p++);
+	ಆಗ (len) {
+		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_ಕೂಡಿಸು_char(ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, *p++);
 		len--;
 	}
 
-	return crc;
+	ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
 }
 
-uint32_t ul_crc32_exclude_offset(uint32_t seed, const unsigned char *buf, size_t len,
+uint32_t ul_ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_exclude_ಸ್ಥಾನಾಂತರ(uint32_t ಬೀಜ, ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *buf, size_t len,
 			      size_t exclude_off, size_t exclude_len, uint8_t exclude_fill)
 {
-	uint32_t crc = seed;
-	const unsigned char *p = buf;
+	uint32_t ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಬೀಜ;
+	ಸ್ಥಿರಾಂಕ ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ *p = buf;
 	size_t i;
 
-	for (i = 0; i < len; i++) {
-		unsigned char x = *p++;
+	ಗಾಗಿ (i = 0; i < len; i++) {
+		ಚಿಹ್ನೆರಹಿತ ಅಕ್ಷರ x = *p++;
 
-		if (i >= exclude_off && i < exclude_off + exclude_len)
+		ಆದರೆ (i >= exclude_off && i < exclude_off + exclude_len)
 			x = exclude_fill;
 
-		crc = crc32_add_char(crc, x);
+		ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ = ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ_32_ಕೂಡಿಸು_char(ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ, x);
 	}
 
-	return crc;
+	ಹಿಂತಿರುಗಿ ಚಕ್ರೀಯ_ಪರೀಕ್ಷೆ;
 }
 

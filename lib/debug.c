@@ -3,15 +3,15 @@
  * it what you wish.
  */
 
-#include "debug.h"
+#ಅನ್ತರ್ಭಾವ "debug.h"
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+#ಅನ್ತರ್ಭಾವ <stdarg.h>
+#ಅನ್ತರ್ಭಾವ <stdlib.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
 
 
-void ul_debug(const char *mesg, ...)
+ಶೂನ್ಯ ul_debug(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *mesg, ...)
 {
 	va_list ap;
 	va_start(ap, mesg);
@@ -20,67 +20,67 @@ void ul_debug(const char *mesg, ...)
 	fputc('\n', stderr);
 }
 
-void ul_debug_prefix(const char *lib, const char *flag,
-		     const void *handle, unsigned mask)
+ಶೂನ್ಯ ul_debug_ಪೂರ್ವಪ್ರತ್ಯಯ(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *lib, ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *flag,
+		     ಸ್ಥಿರಾಂಕ ಶೂನ್ಯ *handle, ಚಿಹ್ನೆರಹಿತ ಮುಖವಾಡ)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	ಆದರೆ (handle && !(ಮುಖವಾಡ & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
-unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
-			     const char *mask)
+ಚಿಹ್ನೆರಹಿತ ul_debug_parse_ಮುಖವಾಡ(ಸ್ಥಿರಾಂಕ ರಚನೆ ul_debug_maskname flagnames[],
+			     ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *ಮುಖವಾಡ)
 {
-	unsigned res;
-	char *ptr;
+	ಚಿಹ್ನೆರಹಿತ res;
+	ಅಕ್ಷರ *ptr;
 
 	/* let's check for a numeric mask first */
-	res = strtoul(mask, &ptr, 0);
+	res = strtoul(ಮುಖವಾಡ, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
-		char *msbuf, *ms, *name;
+	ಆದರೆ (ptr && *ptr && flagnames && flagnames[0].name) {
+		ಅಕ್ಷರ *msbuf, *ms, *name;
 		res = 0;
 
-		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		ms = msbuf = strdup(ಮುಖವಾಡ);
+		ಆದರೆ (!ms)
+			ಹಿಂತಿರುಗಿ res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
-			const struct ul_debug_maskname *d;
+		ಆಗ ((name = strtok_r(ms, ",", &ptr))) {
+			ಸ್ಥಿರಾಂಕ ರಚನೆ ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
-					res |= d->mask;
-					break;
+			ಗಾಗಿ (d = flagnames; d && d->name; d++) {
+				ಆದರೆ (strcmp(name, d->name) == 0) {
+					res |= d->ಮುಖವಾಡ;
+					ನಿಲ್ಲಿಸು;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
-				break;
+			ಆದರೆ (res == UL_DEBUG_ALL)
+				ನಿಲ್ಲಿಸು;
 		}
-		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+		ಬಿಡುಗಡೆ(msbuf);
+	} ಇಲ್ಲದಿದ್ದರೆ ಆದರೆ (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	ಹಿಂತಿರುಗಿ res;
 }
 
-void ul_debug_print_masks(const char *env,
-			  const struct ul_debug_maskname flagnames[])
+ಶೂನ್ಯ ul_debug_print_masks(ಸ್ಥಿರಾಂಕ ಅಕ್ಷರ *env,
+			  ಸ್ಥಿರಾಂಕ ರಚನೆ ul_debug_maskname flagnames[])
 {
-	const struct ul_debug_maskname *d;
+	ಸ್ಥಿರಾಂಕ ರಚನೆ ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	ಆದರೆ (!flagnames)
+		ಹಿಂತಿರುಗಿ;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
-			continue;
+	ಗಾಗಿ (d = flagnames; d && d->name; d++) {
+		ಆದರೆ (!d->help)
+			ಮುಂದುವರಿ;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
-				d->name, d->mask, d->help);
+				d->name, d->ಮುಖವಾಡ, d->help);
 	}
 }
