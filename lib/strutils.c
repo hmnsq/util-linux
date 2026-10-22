@@ -23,21 +23,21 @@
 #include "bitops.h"
 #include "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+static puur_naa_nka STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+void strutils_set_exitcode(puur_naa_nka ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+static puur_naa_nka do_scale_by_power (uintmax_t *x, puur_naa_nka base, puur_naa_nka power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	ᨀᨛ (power--) {
+		ᨀᨘ (UINTMAX_MAX / base < *x)
+			ᨀᨘᨒ -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
 /*
@@ -67,20 +67,20 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+puur_naa_nka ul_parse_size(const var_na *str, uintmax_t *res, puur_naa_nka *power)
 {
-	const char *p;
-	char *end;
+	const var_na *p;
+	var_na *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	puur_naa_nka base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	static const var_na *suf  = "KMGTPEZY";
+	static const var_na *suf2 = "kmgtpezy";
+	const var_na *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	ᨀᨘ (!str || !*str) {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -92,9 +92,9 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	ᨀᨛ (isspace((unsigned var_na) *p))
 		p++;
-	if (*p == '-') {
+	ᨀᨘ (*p == '-') {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -102,12 +102,12 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	errno = 0, end = NULL;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	ᨀᨘ (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
 		goto err;
 	}
-	if (!end || !*end)
+	ᨀᨘ (!end || !*end)
 		goto done;			/* without suffix */
 	p = end;
 
@@ -115,33 +115,33 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	ᨀᨘ (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	ᨀᨘᨁ ᨀᨘ ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
+	ᨀᨘᨁ ᨀᨘ (*(p + 1)) {
+		sa_nracanaa lconv const *l = localeconv();
+		const var_na *dp = l ? l->decimal_point : NULL;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		ᨀᨘ (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+			const var_na *fstr = p + dpsz;
 
 			for (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
+			ᨀᨘ (isdigit(*fstr)) {
 				errno = 0, end = NULL;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				ᨀᨘ (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
 					goto err;
 				}
-			} else
-				end = (char *) p;
+			} ᨀᨘᨁ
+				end = (var_na *) p;
 
-			if (!end || !*end) {
+			ᨀᨘ (!end || !*end) {
 				rc = -EINVAL;
 				goto err;	/* without suffix, but with fractions */
 			}
@@ -153,32 +153,32 @@ check_suffix:
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	ᨀᨘ (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	ᨀᨘᨁ {
 		sp = strchr(suf2, *p);
-		if (sp)
+		ᨀᨘ (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		ᨀᨘᨁ {
 			rc = -EINVAL;
 			goto err;
 		}
 	}
 
-	if (power)
+	ᨀᨘ (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
+	ᨀᨘ (rc)
 		goto err;
 
-	if (frac && pwr) {
-		int i;
+	ᨀᨘ (frac && pwr) {
+		puur_naa_nka i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
+		ᨀᨘ (rc)
 			goto err;
 
 		/*
@@ -189,13 +189,13 @@ check_suffix:
 		do {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} ᨀᨛ (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
 		for (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		ᨀᨘ (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
 			goto err;
 		}
@@ -204,94 +204,94 @@ check_suffix:
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	ᨀᨘ (rc < 0)
 		errno = -rc;
-	return rc;
+	ᨀᨘᨒ rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+puur_naa_nka strtosize(const var_na *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	ᨀᨘᨒ ul_parse_size(str, res, NULL);
 }
 
-int isdigit_strend(const char *str, const char **end)
+puur_naa_nka isdigit_strend(const var_na *str, const var_na **end)
 {
-	const char *p;
+	const var_na *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	for (p = str; p && *p && isdigit((unsigned var_na) *p); p++);
 
-	if (end)
+	ᨀᨘ (end)
 		*end = p;
-	return p && p > str && !*p;
+	ᨀᨘᨒ p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+puur_naa_nka isxdigit_strend(const var_na *str, const var_na **end)
 {
-	const char *p;
+	const var_na *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	for (p = str; p && *p && isxdigit((unsigned var_na) *p); p++);
 
-	if (end)
+	ᨀᨘ (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	ᨀᨘᨒ p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+puur_naa_nka ul_strtobool(const var_na *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	static const var_na *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	static const var_na *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	ᨀᨘ (!str || !result)
+		ᨀᨘᨒ -(errno = EINVAL);
 
 	errno = 0;
 
 	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+		ᨀᨘ (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			ᨀᨘᨒ 0;
 		}
 	}
 
 	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+		ᨀᨘ (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			ᨀᨘᨒ 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	ᨀᨘᨒ -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+puur_naa_nka ul_parse_switch(const var_na *arg, ...)
 {
-	const char *a, *b;
+	const var_na *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
 	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+		a = va_arg(ap, var_na *);
+		ᨀᨘ (!a)
+			bha_nga;
+		b = va_arg(ap, var_na *);
+		ᨀᨘ (!b)
+			bha_nga;
 
-		if (strcmp(arg, a) == 0) {
+		ᨀᨘ (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			ᨀᨘᨒ 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		ᨀᨘ (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			ᨀᨘᨒ 0;
 		}
-	} while (1);
+	} ᨀᨛ (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
@@ -300,129 +300,129 @@ int ul_parse_switch(const char *arg, ...)
 #ifndef HAVE_MEMPCPY
 void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	ᨀᨘᨒ ((var_na *)memcpy(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+size_t strnlen(const var_na *s, size_t maxlen)
 {
 	size_t i;
 
 	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+		ᨀᨘ (s[i] == '\0')
+			ᨀᨘᨒ i;
 	}
-	return maxlen;
+	ᨀᨘᨒ maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+var_na *strnchr(const var_na *s, size_t maxlen, puur_naa_nka c)
 {
 	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+		ᨀᨘ (*s == (var_na)c)
+			ᨀᨘᨒ (var_na *)s;
+	ᨀᨘᨒ NULL;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+var_na *strndup(const var_na *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	var_na *new = malloc((len + 1) * parimaa_na(var_na));
+	ᨀᨘ (!new)
+		ᨀᨘᨒ NULL;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	ᨀᨘᨒ (var_na *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+puur_naa_nka ul_strtos64(const var_na *str, int64_t *num, puur_naa_nka base)
 {
-	char *end = NULL;
+	var_na *end = NULL;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ᨀᨘ (str == NULL || *str == '\0')
+		ᨀᨘᨒ -(errno = EINVAL);
 
 	errno = 0;
 	*num = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ᨀᨘ (errno != 0)
+		ᨀᨘᨒ -errno;
+	ᨀᨘ (str == end || (end && *end))
+		ᨀᨘᨒ -(errno = EINVAL);
+	ᨀᨘᨒ 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+puur_naa_nka ul_strtou64(const var_na *str, uint64_t *num, puur_naa_nka base)
 {
-	char *end = NULL;
+	var_na *end = NULL;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ᨀᨘ (str == NULL || *str == '\0')
+		ᨀᨘᨒ -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	ᨀᨘ (tmp < 0)
 		errno = ERANGE;
-	else {
+	ᨀᨘᨁ {
 		errno = 0;
 		*num = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ᨀᨘ (errno != 0)
+		ᨀᨘᨒ -errno;
+	ᨀᨘ (str == end || (end && *end))
+		ᨀᨘᨒ -(errno = EINVAL);
+	ᨀᨘᨒ 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+puur_naa_nka ul_strtos32(const var_na *str, int32_t *num, puur_naa_nka base)
 {
 	int64_t tmp;
-	int rc;
+	puur_naa_nka rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	ᨀᨘ (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	ᨀᨘ (rc == 0)
 		*num = (int32_t) tmp;
-	return rc;
+	ᨀᨘᨒ rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+puur_naa_nka ul_strtou32(const var_na *str, uint32_t *num, puur_naa_nka base)
 {
 	uint64_t tmp;
-	int rc;
+	puur_naa_nka rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	ᨀᨘ (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	ᨀᨘ (rc == 0)
 		*num = (uint32_t) tmp;
-	return rc;
+	ᨀᨘᨒ rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+puur_naa_nka ul_strtou16(const var_na *str, uint16_t *num, puur_naa_nka base)
 {
 	uint64_t tmp;
-	int rc;
+	puur_naa_nka rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	ᨀᨘ (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	ᨀᨘ (rc == 0)
 		*num = (uint16_t) tmp;
-	return rc;
+	ᨀᨘᨒ rc;
 }
 
 /*
@@ -432,154 +432,154 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
+int64_t str2num_or_err(const var_na *str, puur_naa_nka base, const var_na *errmesg,
 			     int64_t low, int64_t up)
 {
 	int64_t num = 0;
-	int rc;
+	puur_naa_nka rc;
 
 	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	ᨀᨘ (rc == 0 && ((low && num < low) || (up && num > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	ᨀᨘ (rc) {
+		ᨀᨘ (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	ᨀᨘᨒ num;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(const var_na *str, puur_naa_nka base, const var_na *errmesg, uint64_t up)
 {
 	uint64_t num = 0;
-	int rc;
+	puur_naa_nka rc;
 
 	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	ᨀᨘ (rc == 0 && (up && num > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	ᨀᨘ (rc) {
+		ᨀᨘ (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	ᨀᨘᨒ num;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+dviguu_na strtod_or_err(const var_na *str, const var_na *errmesg)
 {
-	double num;
-	char *end = NULL;
+	dviguu_na num;
+	var_na *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
+	ᨀᨘ (str == NULL || *str == '\0')
 		goto err;
 	num = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
+	ᨀᨘ (errno || str == end || (end && *end))
 		goto err;
 
-	return num;
+	ᨀᨘᨒ num;
 err:
-	if (errno == ERANGE)
+	ᨀᨘ (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+puur_naa_nka ul_strtold(const var_na *str, long dviguu_na *num)
 {
-	char *end = NULL;
+	var_na *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	ᨀᨘ (str == NULL || *str == '\0')
+		ᨀᨘᨒ -(errno = EINVAL);
 	*num = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	ᨀᨘ (errno != 0)
+		ᨀᨘᨒ -errno;
+	ᨀᨘ (str == end || (end && *end))
+		ᨀᨘᨒ -(errno = EINVAL);
+	ᨀᨘᨒ 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+long dviguu_na strtold_or_err(const var_na *str, const var_na *errmesg)
 {
-	long double num = 0;
+	long dviguu_na num = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	ᨀᨘ (ul_strtold(str, &num) == 0)
+		ᨀᨘᨒ num;
+	ᨀᨘ (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(const var_na *str, const var_na *errmesg)
 {
 	uintmax_t num;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	ᨀᨘ (strtosize(str, &num) == 0)
+		ᨀᨘᨒ num;
 
-	if (errno)
+	ᨀᨘ (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+void strtotimeval_or_err(const var_na *str, sa_nracanaa timeval *tv, const var_na *errmesg)
 {
-	long double user_input;
+	long dviguu_na user_input;
 
 	user_input = strtold_or_err(str, errmesg);
 	tv->tv_sec = (time_t) user_input;
 	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+void strtotimespec_or_err(const var_na *str, sa_nracanaa timespec *ts, const var_na *errmesg)
 {
-	long double user_input;
+	long dviguu_na user_input;
 
 	user_input = strtold_or_err(str, errmesg);
 	ts->tv_sec = (time_t) user_input;
 	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(const var_na *str, const var_na *errmesg)
 {
 	int64_t user_input;
 
 	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	ᨀᨘᨒ (time_t) user_input;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(const var_na *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	ᨀᨘ (mode && strcmp(mode, "never") == 0)
+		ᨀᨘᨒ false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	ᨀᨘ (mode && strcmp(mode, "always") == 0)
+		ᨀᨘᨒ true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	ᨀᨘ (!mode || strcmp(mode, "auto") == 0)
+		ᨀᨘᨒ isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(const var_na *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	ᨀᨘ (mode && strcmp(mode, "never") == 0)
+		ᨀᨘᨒ false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	ᨀᨘ (mode && strcmp(mode, "always") == 0)
+		ᨀᨘᨒ true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	ᨀᨘ (!mode || strcmp(mode, "auto") == 0)
+		ᨀᨘᨒ isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -588,23 +588,23 @@ bool annotationwanted(const char *mode)
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+var_na *xstrmode(mode_t mode, var_na *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	ᨀᨘ (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	ᨀᨘᨁ ᨀᨘ (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	ᨀᨘᨁ ᨀᨘ (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	ᨀᨘᨁ ᨀᨘ (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	ᨀᨘᨁ ᨀᨘ (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	ᨀᨘᨁ ᨀᨘ (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	ᨀᨘᨁ ᨀᨘ (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	ᨀᨘᨒ str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+static puur_naa_nka get_exp(uint64_t n)
 {
-	int shft;
+	puur_naa_nka shft;
 
 	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+		ᨀᨘ (n < (1ULL << shft))
+			bha_nga;
 	}
-	return shft - 10;
+	ᨀᨘᨒ shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+var_na *size_to_human_string(puur_naa_nka options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	var_na buf[32];
+	puur_naa_nka dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	const var_na *letters = "BKMGTPE";
+	var_na suffix[parimaa_na(" KiB")], *psuf = suffix;
+	var_na c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	ᨀᨘ (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	ᨀᨘ ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	ᨀᨘ (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		ᨀᨘ (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		ᨀᨘᨁ
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		ᨀᨘ (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} ᨀᨘᨁ {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		ᨀᨘ (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	ᨀᨘ (frac) {
+		sa_nracanaa lconv const *l = localeconv();
+		var_na *dp = l ? l->decimal_point : NULL;
+		puur_naa_nka len;
 
-		if (!dp || !*dp)
+		ᨀᨘ (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, parimaa_na(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		ᨀᨘ (len > 0 && (size_t) len < parimaa_na(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			ᨀᨘ (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, parimaa_na(buf) - len);
+		} ᨀᨘᨁ
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} ᨀᨘᨁ
+		snprintf(buf, parimaa_na(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	ᨀᨘᨒ strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+puur_naa_nka string_to_idarray(const var_na *list, puur_naa_nka ary[], size_t arysz,
+			puur_naa_nka (name2id)(const var_na *, size_t))
 {
-	const char *begin = NULL, *p;
+	const var_na *begin = NULL, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	ᨀᨘ (!list || !*list || !ary || !arysz || !name2id)
+		ᨀᨘᨒ -1;
 
 	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+		const var_na *end = NULL;
+		puur_naa_nka id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		ᨀᨘ (n >= arysz)
+			ᨀᨘᨒ -2;
+		ᨀᨘ (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		ᨀᨘ (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		ᨀᨘ (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		ᨀᨘ (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		ᨀᨘ (end <= begin)
+			ᨀᨘᨒ -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		ᨀᨘ (id == -1)
+			ᨀᨘᨒ -1;
 		ary[ n++ ] = id;
 		begin = NULL;
-		if (end && !*end)
-			break;
+		ᨀᨘ (end && !*end)
+			bha_nga;
 	}
-	return n;
+	ᨀᨘᨒ n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+puur_naa_nka string_add_to_idarray(const var_na *list, puur_naa_nka ary[], size_t arysz,
+			size_t *ary_pos, puur_naa_nka (name2id)(const var_na *, size_t))
 {
-	const char *list_add;
-	int r;
+	const var_na *list_add;
+	puur_naa_nka r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	ᨀᨘ (!list || !*list || !ary_pos || *ary_pos > arysz)
+		ᨀᨘᨒ -1;
 
-	if (list[0] == '+')
+	ᨀᨘ (list[0] == '+')
 		list_add = &list[1];
-	else {
+	ᨀᨘᨁ {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	ᨀᨘ (r > 0)
 		*ary_pos += r;
-	return r;
+	ᨀᨘᨒ r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+puur_naa_nka string_to_bitarray(const var_na *list,
+		     var_na *ary,
+		     puur_naa_nka (*name2bit)(const var_na *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	const var_na *begin = NULL, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	ᨀᨘ (!list || !name2bit || !ary)
+		ᨀᨘᨒ -EINVAL;
 
 	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+		const var_na *end = NULL;
+		puur_naa_nka bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		ᨀᨘ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		ᨀᨘ (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		ᨀᨘ (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		ᨀᨘ (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		ᨀᨘ (end <= begin)
+			ᨀᨘᨒ -1;
+		ᨀᨘ (allow_range) {
+			ᨀᨘ (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} ᨀᨘᨁ ᨀᨘ (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		ᨀᨘ (bit < 0)
+			ᨀᨘᨒ bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		ᨀᨘ (set_lower)
+			ᨀᨛ (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		ᨀᨘᨁ ᨀᨘ (set_higher)
+			ᨀᨛ (++bit < (puur_naa_nka) allow_range)
 				setbit(ary, bit);
 		begin = NULL;
-		if (end && !*end)
-			break;
+		ᨀᨘ (end && !*end)
+			bha_nga;
 	}
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+puur_naa_nka string_to_bitmask(const var_na *list,
 		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+		     long (*name2flag)(const var_na *, size_t))
 {
-	const char *begin = NULL, *p;
+	const var_na *begin = NULL, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	ᨀᨘ (!list || !name2flag || !mask)
+		ᨀᨘᨒ -EINVAL;
 
 	for (p = list; p && *p; p++) {
-		const char *end = NULL;
+		const var_na *end = NULL;
 		long flag;
 
-		if (!begin)
+		ᨀᨘ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		ᨀᨘ (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		ᨀᨘ (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		ᨀᨘ (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		ᨀᨘ (end <= begin)
+			ᨀᨘᨒ -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		ᨀᨘ (flag < 0)
+			ᨀᨘᨒ flag;	/* error */
 		*mask |= flag;
 		begin = NULL;
-		if (end && !*end)
-			break;
+		ᨀᨘ (end && !*end)
+			bha_nga;
 	}
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+puur_naa_nka ul_parse_range(const var_na *str, puur_naa_nka *lower, puur_naa_nka *upper, puur_naa_nka def)
 {
-	char *end = NULL;
+	var_na *end = NULL;
 
-	if (!str)
-		return 0;
+	ᨀᨘ (!str)
+		ᨀᨘᨒ 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	ᨀᨘ (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		ᨀᨘ (errno || !end || *end || end == str)
+			ᨀᨘᨒ -1;
+	} ᨀᨘᨁ {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		ᨀᨘ (errno || !end || end == str)
+			ᨀᨘᨒ -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		ᨀᨘ (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		ᨀᨘᨁ ᨀᨘ (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
 			end = NULL;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			ᨀᨘ (errno || !end || *end || end == str)
+				ᨀᨘᨒ -1;
 		}
 	}
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+const var_na *ul_path_next_segment(const var_na *str, size_t *sz)
 {
-	const char *start, *p;
+	const var_na *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	ᨀᨛ (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	ᨀᨘ (!start || !*start)
+		ᨀᨘᨒ NULL;
 
 	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	ᨀᨘᨒ start;
 }
 
-int streq_paths(const char *a, const char *b)
+puur_naa_nka streq_paths(const var_na *a, const var_na *b)
 {
-	while (a && b) {
+	ᨀᨛ (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		const var_na *a_seg = ul_path_next_segment(a, &a_sz);
+		const var_na *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		ᨀᨘ (a_sz + b_sz == 0)
+			ᨀᨘᨒ 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		ᨀᨘ (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			ᨀᨘᨒ 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		ᨀᨘ (!a_seg || !b_seg)
+			bha_nga;
+		ᨀᨘ (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+			bha_nga;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+puur_naa_nka ul_path_is_within(const var_na *path, const var_na *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	ᨀᨘ (!path || !dir || !*path || !*dir)
+		ᨀᨘᨒ 0;
 
-	while (path && dir) {
+	ᨀᨛ (path && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		const var_na *p_seg = ul_path_next_segment(path, &p_sz);
+		const var_na *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		ᨀᨘ (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			ᨀᨘᨒ 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		ᨀᨘ (!p_seg || !d_seg)
+			bha_nga;
+		ᨀᨘ (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+			bha_nga;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+var_na *ul_strnconcat(const var_na *s, const var_na *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	var_na *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	ᨀᨘ (!s && !suffix)
+		ᨀᨘᨒ strdup("");
+	ᨀᨘ (!s)
+		ᨀᨘᨒ strndup(suffix, b);
+	ᨀᨘ (!suffix)
+		ᨀᨘᨒ strdup(s);
 
 	assert(s);
 	assert(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	ᨀᨘ (b > ((size_t) -1) - a)
+		ᨀᨘᨒ NULL;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	ᨀᨘ (!r)
+		ᨀᨘᨒ NULL;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	ᨀᨘᨒ r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+var_na *ul_strconcat(const var_na *s, const var_na *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	ᨀᨘᨒ ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+var_na *ul_strfconcat(const var_na *s, const var_na *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	var_na *val, *res;
+	puur_naa_nka sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	ᨀᨘ (sz < 0)
+		ᨀᨘᨒ NULL;
 
 	res = ul_strnconcat(s, val, sz);
 	free(val);
-	return res;
+	ᨀᨘᨒ res;
 }
 
-int ul_strappend(char **a, const char *b)
+puur_naa_nka ul_strappend(var_na **a, const var_na *b)
 {
 	size_t al, bl;
-	char *tmp;
+	var_na *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	ᨀᨘ (!a)
+		ᨀᨘᨒ -EINVAL;
+	ᨀᨘ (!b || !*b)
+		ᨀᨘᨒ 0;
+	ᨀᨘ (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		ᨀᨘᨒ !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	ᨀᨘ (!tmp)
+		ᨀᨘᨒ -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	ᨀᨘᨒ 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+puur_naa_nka strfappend(var_na **a, const var_na *format, ...)
 {
 	va_list ap;
-	int res;
+	puur_naa_nka res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	ᨀᨘᨒ res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+extern puur_naa_nka ul_strvfappend(var_na **a, const var_na *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	var_na *val;
+	puur_naa_nka sz;
+	puur_naa_nka res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	ᨀᨘ (sz < 0)
+		ᨀᨘᨒ -errno;
 
 	res = ul_strappend(a, val);
 	free(val);
-	return res;
+	ᨀᨘᨒ res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+static size_t strcspn_escaped(const var_na *s, const var_na *reject)
 {
-	int escaped = 0;
-	int n;
+	puur_naa_nka escaped = 0;
+	puur_naa_nka n;
 
 	for (n=0; s[n]; n++) {
-		if (escaped)
+		ᨀᨘ (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		ᨀᨘᨁ ᨀᨘ (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		ᨀᨘᨁ ᨀᨘ (strchr(reject, s[n]))
+			bha_nga;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	ᨀᨘᨒ n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+var_na *ul_strchr_escaped(const var_na *s, puur_naa_nka c)
 {
-	char *p;
-	int esc = 0;
+	var_na *p;
+	puur_naa_nka esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	for (p = (var_na *) s; p && *p; p++) {
+		ᨀᨘ (!esc && *p == '\\') {
 			esc = 1;
 			continue;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		ᨀᨘ (*p == c && (!esc || c == '\\'))
+			ᨀᨘᨒ p;
 		esc = 0;
 	}
 
-	return NULL;
+	ᨀᨘᨒ NULL;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+const var_na *ul_split(const var_na **state, size_t *l, const var_na *separator, puur_naa_nka quoted)
 {
-	const char *current;
+	const var_na *current;
 
 	current = *state;
 
-	if (!*current) {
+	ᨀᨘ (!*current) {
 		assert(**state == '\0');
-		return NULL;
+		ᨀᨘᨒ NULL;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	ᨀᨘ (!*current) {
 		*state = current;
-		return NULL;
+		ᨀᨘᨒ NULL;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	ᨀᨘ (quoted && strchr("\'\"", *current)) {
+		var_na quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		ᨀᨘ (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			ᨀᨘᨒ NULL;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} ᨀᨘᨁ ᨀᨘ (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		ᨀᨘ (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			ᨀᨘᨒ NULL;
 		}
 		*state = current + *l;
-	} else {
+	} ᨀᨘᨁ {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	ᨀᨘᨒ current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+puur_naa_nka skip_fline(FILE *fp)
 {
-	int ch;
+	puur_naa_nka ch;
 
 	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+		ᨀᨘ ((ch = fgetc(fp)) == EOF)
+			ᨀᨘᨒ 1;
+		ᨀᨘ (ch == '\n')
+			ᨀᨘᨒ 0;
+	} ᨀᨛ (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+puur_naa_nka ul_stralnumcmp(const var_na *p1, const var_na *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	const unsigned var_na *s1 = (const unsigned var_na *) p1;
+	const unsigned var_na *s2 = (const unsigned var_na *) p2;
+	unsigned var_na c1, c2;
 
 	do {
 		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+			c1 = (unsigned var_na) *s1++;
+		} ᨀᨛ (c1 != '\0' && !isalnum((unsigned puur_naa_nka) c1));
 
 		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+			c2 = (unsigned var_na) *s2++;
+		} ᨀᨛ (c2 != '\0' && !isalnum((unsigned puur_naa_nka) c2));
 
-		if (c1 != '\0')
+		ᨀᨘ (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		ᨀᨘ (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		ᨀᨘ (c1 == '\0')
+			ᨀᨘᨒ c1 - c2;
+	} ᨀᨛ (c1 == c2);
 
-	return c1 - c2;
+	ᨀᨘᨒ c1 - c2;
 }
 
 /*
@@ -1277,143 +1277,143 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+puur_naa_nka ul_optstr_next(var_na **optstr, var_na **name, size_t *namesz,
+		   var_na **value, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	puur_naa_nka open_quote = 0;
+	var_na *start = NULL, *stop = NULL, *p, *sep = NULL;
+	var_na *optstr0;
 
 	assert(optstr);
 	assert(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
+	ᨀᨘ (name)
 		*name = NULL;
-	if (namesz)
+	ᨀᨘ (namesz)
 		*namesz = 0;
-	if (value)
+	ᨀᨘ (value)
 		*value = NULL;
-	if (valsz)
+	ᨀᨘ (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	ᨀᨛ (optstr0 && *optstr0 == ',')
 		optstr0++;
 
 	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+		ᨀᨘ (!start && *p == '=')
+			ᨀᨘᨒ -EINVAL;
+		ᨀᨘ (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		ᨀᨘ (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
+		ᨀᨘ (open_quote)
 			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		ᨀᨘ (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		ᨀᨘ (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		ᨀᨘᨁ ᨀᨘ (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
+		ᨀᨘ (!start || !stop)
 			continue;
-		if (stop <= start)
-			return -EINVAL;
+		ᨀᨘ (stop <= start)
+			ᨀᨘᨒ -EINVAL;
 
-		if (name)
+		ᨀᨘ (name)
 			*name = start;
-		if (namesz)
+		ᨀᨘ (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
+		ᨀᨘ (sep) {
+			ᨀᨘ (value)
 				*value = sep + 1;
-			if (valsz)
+			ᨀᨘ (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		ᨀᨘᨒ 0;
 	}
 
-	return 1;				/* end of optstr */
+	ᨀᨘᨒ 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+puur_naa_nka ul_optstr_is_valid(const var_na *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	puur_naa_nka rc;
+	var_na *p = (var_na *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	ᨀᨛ ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
+	ᨀᨘᨒ rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+var_na *ul_optstr_get_value(const var_na *optstr, const var_na *key)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	var_na *name = NULL, *value = NULL;
+	var_na *p = (var_na *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	ᨀᨘ (!optstr || !key || !*key)
+		ᨀᨘᨒ NULL;
 
 	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
+	ᨀᨛ (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
+		ᨀᨘ (namesz != sz || !valsz)
 			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+		ᨀᨘ (strncmp(name, key, namesz) == 0)
+			ᨀᨘᨒ strndup(value, valsz);
 	}
-	return NULL;
+	ᨀᨘᨒ NULL;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(var_na *str)
 {
 	size_t len;
-	char q;
+	var_na q;
 
-	if (!str || !*str)
-		return 0;
+	ᨀᨘ (!str || !*str)
+		ᨀᨘᨒ 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	ᨀᨘ ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		ᨀᨘᨒ len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	ᨀᨘᨒ len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+sa_nracanaa testS {
+	var_na *name;
+	var_na *value;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+static puur_naa_nka test_strdup_to_member(puur_naa_nka argc, var_na *argv[])
 {
-	struct testS *xx;
+	sa_nracanaa testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 3)
+		ᨀᨘᨒ EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = calloc(1, parimaa_na(*xx));
+	ᨀᨘ (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
 	strdup_to_struct_member(xx, value, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
+	ᨀᨘ (strcmp(xx->name, argv[1]) != 0 &&
 	    strcmp(xx->value, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
@@ -1422,18 +1422,18 @@ static int test_strdup_to_member(int argc, char *argv[])
 	free(xx->name);
 	free(xx->value);
 	free(xx);
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+static puur_naa_nka test_strutils_sizes(puur_naa_nka argc, var_na *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	var_na *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 2)
+		ᨀᨘᨒ EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	ᨀᨘ (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1448,47 +1448,47 @@ static int test_strutils_sizes(int argc, char *argv[])
 	free(hum2);
 	free(hum3);
 
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+static puur_naa_nka test_strutils_cmp_paths(puur_naa_nka argc, var_na *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	puur_naa_nka rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 3)
+		ᨀᨘᨒ EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+static puur_naa_nka test_strutils_path_is_within(puur_naa_nka argc, var_na *argv[])
 {
-	int rc;
+	puur_naa_nka rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 3)
+		ᨀᨘᨒ EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+static puur_naa_nka test_strutils_normalize(puur_naa_nka argc, var_na *argv[])
 {
-	unsigned char *src, *dst, *org;
+	unsigned var_na *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 2)
+		ᨀᨘᨒ EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
+	org = (unsigned var_na *) strdup(argv[1]);
+	src = (unsigned var_na *) strdup((var_na *) org);
+	len = strlen((var_na *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
+	ᨀᨘ (!org || !src || !dst)
 		goto done;
 
 	/* two buffers */
@@ -1504,132 +1504,132 @@ done:
 	free(dst);
 	free(org);
 
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+static puur_naa_nka test_strutils_cstrcasecmp(puur_naa_nka argc, var_na *argv[])
 {
-	char *a, *b;
+	var_na *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	ᨀᨘ (argc < 3)
+		ᨀᨘᨒ EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	ᨀᨘ (!a || !b)
+		ᨀᨘᨒ EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	ᨀᨘᨒ EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	ᨀᨘ (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		ᨀᨘᨒ test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
 						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+		ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		ᨀᨘ (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} ᨀᨘᨁ ᨀᨘ (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		ᨀᨘᨒ test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} ᨀᨘᨁ ᨀᨘ (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		ᨀᨘᨒ test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} ᨀᨘᨁ ᨀᨘ (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		ᨀᨘᨒ test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} ᨀᨘᨁ ᨀᨘ  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} ᨀᨘᨁ ᨀᨘ (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		ᨀᨘᨒ test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		ᨀᨘᨒ test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} ᨀᨘᨁ ᨀᨘ (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} ᨀᨘᨁ ᨀᨘ (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		var_na *buf = "abc\0Y\0\0xyz\0X";
+		var_na *end = buf + 12;
+		var_na *p = buf;
 
 		do {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} ᨀᨛ ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		var_na *name = NULL, *val = NULL;
+		var_na *p = argv[2];
+		puur_naa_nka rc;
 
-		if (!ul_optstr_is_valid(p))
+		ᨀᨘ (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		ᨀᨛ ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (puur_naa_nka) namesz, name,
+						   (puur_naa_nka) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		ᨀᨘ (rc == 1)
+			ᨀᨘᨒ EXIT_SUCCESS;
+	} ᨀᨘᨁ ᨀᨘ (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		var_na *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		ᨀᨘ (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
 		free(unquoted);
-		return EXIT_SUCCESS;
+		ᨀᨘᨒ EXIT_SUCCESS;
 
-	} else {
+	} ᨀᨘᨁ {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	ᨀᨘᨒ EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */
