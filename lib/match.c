@@ -20,18 +20,18 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+ціле match_fstype(const char *type, const char *pattern)
 {
-	int no = 0;		/* negated types list */
-	int len;
+	ціле no = 0;		/* negated types list */
+	ціле len;
 	const char *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	якщо (!pattern && !type)
+		повернути 1;
+	якщо (!pattern)
+		повернути 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	якщо (!strncmp(pattern, "no", 2)) {
 		no = 1;
 		pattern += 2;
 	}
@@ -39,16 +39,16 @@ int match_fstype(const char *type, const char *pattern)
 	/* Does type occur in types, separated by commas? */
 	len = strlen(type);
 	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	поки(1) {
+		якщо (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			повернути 0;
+		якщо (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			повернути !no;
 		p = strchr(p,',');
-		if (!p)
+		якщо (!p)
 			break;
 		p++;
 	}
-	return no;
+	повернути no;
 }

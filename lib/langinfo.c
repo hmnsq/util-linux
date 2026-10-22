@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		повернути "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		повернути ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		повернути "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		повернути "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		повернути "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		повернути "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		повернути "AM";
 	case PM_STR:
-		return "PM";
+		повернути "PM";
 	case DAY_1:
-		return "Sunday";
+		повернути "Sunday";
 	case DAY_2:
-		return "Monday";
+		повернути "Monday";
 	case DAY_3:
-		return "Tuesday";
+		повернути "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		повернути "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		повернути "Thursday";
 	case DAY_6:
-		return "Friday";
+		повернути "Friday";
 	case DAY_7:
-		return "Saturday";
+		повернути "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		повернути "Sun";
 	case ABDAY_2:
-		return "Mon";
+		повернути "Mon";
 	case ABDAY_3:
-		return "Tue";
+		повернути "Tue";
 	case ABDAY_4:
-		return "Wed";
+		повернути "Wed";
 	case ABDAY_5:
-		return "Thu";
+		повернути "Thu";
 	case ABDAY_6:
-		return "Fri";
+		повернути "Fri";
 	case ABDAY_7:
-		return "Sat";
+		повернути "Sat";
 	case MON_1:
-		return "January";
+		повернути "January";
 	case MON_2:
-		return "February";
+		повернути "February";
 	case MON_3:
-		return "March";
+		повернути "March";
 	case MON_4:
-		return "April";
+		повернути "April";
 	case MON_5:
-		return "May";
+		повернути "May";
 	case MON_6:
-		return "June";
+		повернути "June";
 	case MON_7:
-		return "July";
+		повернути "July";
 	case MON_8:
-		return "August";
+		повернути "August";
 	case MON_9:
-		return "September";
+		повернути "September";
 	case MON_10:
-		return "October";
+		повернути "October";
 	case MON_11:
-		return "November";
+		повернути "November";
 	case MON_12:
-		return "December";
+		повернути "December";
 	case ABMON_1:
-		return "Jan";
+		повернути "Jan";
 	case ABMON_2:
-		return "Feb";
+		повернути "Feb";
 	case ABMON_3:
-		return "Mar";
+		повернути "Mar";
 	case ABMON_4:
-		return "Apr";
+		повернути "Apr";
 	case ABMON_5:
-		return "May";
+		повернути "May";
 	case ABMON_6:
-		return "Jun";
+		повернути "Jun";
 	case ABMON_7:
-		return "Jul";
+		повернути "Jul";
 	case ABMON_8:
-		return "Aug";
+		повернути "Aug";
 	case ABMON_9:
-		return "Sep";
+		повернути "Sep";
 	case ABMON_10:
-		return "Oct";
+		повернути "Oct";
 	case ABMON_11:
-		return "Nov";
+		повернути "Nov";
 	case ABMON_12:
-		return "Dec";
+		повернути "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		повернути "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		повернути "-";
 	case YESEXPR:
-		return "^[yY]";
+		повернути "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		повернути "^[nN]";
 	default:
-		return "";
+		повернути "";
 	}
 }
 

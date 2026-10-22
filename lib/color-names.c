@@ -17,12 +17,12 @@ struct ul_color_name {
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+static ціле cmp_color_name(const void *a0, const void *b0)
 {
 	const struct ul_color_name
 		*a = (const struct ul_color_name *) a0,
 		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	повернути strcmp(a->name, b->name);
 }
 
 /*
@@ -57,59 +57,59 @@ const char *color_sequence_from_colorname(const char *str)
 	struct ul_color_name key = { .name = str };
 	const struct ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	якщо (!str)
+		повернути NULL;
 
 	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
 				sizeof(struct ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	повернути res ? res->seq : NULL;
 }
 
 
-int color_is_sequence(const char *color)
+ціле color_is_sequence(const char *color)
 {
-	if (color && *color == 0x1B) {
+	якщо (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		якщо (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		повернути 1;
 	}
 
-	return 0;
+	повернути 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+static ціле __color_canonicalize(const char *str, char **seq)
 {
 	char *in, *out;
-	int len;
+	ціле len;
 
-	if (!str)
-		return -EINVAL;
+	якщо (!str)
+		повернути -EINVAL;
 
 	*seq = NULL;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+	якщо (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
 		const char *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		якщо (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			повернути *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		повернути 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	якщо ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		повернути -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	для (in = *seq, out = *seq; in && *in; in++) {
+		якщо (*in != '\\') {
 			*out++ = *in;
 			continue;
 		}
@@ -158,18 +158,18 @@ static int __color_canonicalize(const char *str, char **seq)
 		in++;
 	}
 
-	if (out) {
+	якщо (out) {
 		assert ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	повернути 0;
 }
 
 char *color_get_sequence(const char *color)
 {
 	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	ціле rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	повернути rc ? NULL : seq;
 }

@@ -23,21 +23,21 @@
 #include "bitops.h"
 #include "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+static ціле STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+void strutils_set_exitcode(ціле ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+static ціле do_scale_by_power (uintmax_t *x, ціле base, ціле power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	поки (power--) {
+		якщо (UINTMAX_MAX / base < *x)
+			повернути -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	повернути 0;
 }
 
 /*
@@ -67,12 +67,12 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+ціле ul_parse_size(const char *str, uintmax_t *res, ціле *power)
 {
 	const char *p;
 	char *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	ціле base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
 	static const char *suf  = "KMGTPEZY";
 	static const char *suf2 = "kmgtpezy";
@@ -80,7 +80,7 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 
 	*res = 0;
 
-	if (!str || !*str) {
+	якщо (!str || !*str) {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -92,9 +92,9 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	поки (isspace((unsigned char) *p))
 		p++;
-	if (*p == '-') {
+	якщо (*p == '-') {
 		rc = -EINVAL;
 		goto err;
 	}
@@ -102,12 +102,12 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	errno = 0, end = NULL;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	якщо (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
 		goto err;
 	}
-	if (!end || !*end)
+	якщо (!end || !*end)
 		goto done;			/* without suffix */
 	p = end;
 
@@ -115,33 +115,33 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	якщо (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	інакше якщо ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
+	інакше якщо (*(p + 1)) {
 		struct lconv const *l = localeconv();
 		const char *dp = l ? l->decimal_point : NULL;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+		якщо (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
 			const char *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			для (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
+			якщо (isdigit(*fstr)) {
 				errno = 0, end = NULL;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				якщо (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
 					goto err;
 				}
-			} else
+			} інакше
 				end = (char *) p;
 
-			if (!end || !*end) {
+			якщо (!end || !*end) {
 				rc = -EINVAL;
 				goto err;	/* without suffix, but with fractions */
 			}
@@ -153,32 +153,32 @@ check_suffix:
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	якщо (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	інакше {
 		sp = strchr(suf2, *p);
-		if (sp)
+		якщо (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		інакше {
 			rc = -EINVAL;
 			goto err;
 		}
 	}
 
-	if (power)
+	якщо (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
+	якщо (rc)
 		goto err;
 
-	if (frac && pwr) {
-		int i;
+	якщо (frac && pwr) {
+		ціле i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
+		якщо (rc)
 			goto err;
 
 		/*
@@ -189,13 +189,13 @@ check_suffix:
 		do {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} поки (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		для (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		якщо (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
 			goto err;
 		}
@@ -204,71 +204,71 @@ check_suffix:
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	якщо (rc < 0)
 		errno = -rc;
-	return rc;
+	повернути rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+ціле strtosize(const char *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	повернути ul_parse_size(str, res, NULL);
 }
 
-int isdigit_strend(const char *str, const char **end)
-{
-	const char *p;
-
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
-
-	if (end)
-		*end = p;
-	return p && p > str && !*p;
-}
-
-int isxdigit_strend(const char *str, const char **end)
+ціле isdigit_strend(const char *str, const char **end)
 {
 	const char *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	для (p = str; p && *p && isdigit((unsigned char) *p); p++);
 
-	if (end)
+	якщо (end)
+		*end = p;
+	повернути p && p > str && !*p;
+}
+
+ціле isxdigit_strend(const char *str, const char **end)
+{
+	const char *p;
+
+	для (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+
+	якщо (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	повернути p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+ціле ul_strtobool(const char *str, bool *result)
 {
 	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
 	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	якщо (!str || !result)
+		повернути -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	для (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		якщо (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			повернути 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	для (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		якщо (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			повернути 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	повернути -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+ціле ul_parse_switch(const char *arg, ...)
 {
 	const char *a, *b;
 	va_list ap;
@@ -276,22 +276,22 @@ int ul_parse_switch(const char *arg, ...)
 	va_start(ap, arg);
 	do {
 		a = va_arg(ap, char *);
-		if (!a)
+		якщо (!a)
 			break;
 		b = va_arg(ap, char *);
-		if (!b)
+		якщо (!b)
 			break;
 
-		if (strcmp(arg, a) == 0) {
+		якщо (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			повернути 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		якщо (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			повернути 0;
 		}
-	} while (1);
+	} поки (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
@@ -300,7 +300,7 @@ int ul_parse_switch(const char *arg, ...)
 #ifndef HAVE_MEMPCPY
 void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	повернути ((char *)memcpy(dest, src, n)) + n;
 }
 #endif
 
@@ -309,21 +309,21 @@ size_t strnlen(const char *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	для (i = 0; i < maxlen; i++) {
+		якщо (s[i] == '\0')
+			повернути i;
 	}
-	return maxlen;
+	повернути maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+char *strnchr(const char *s, size_t maxlen, ціле c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	для (; maxlen-- && *s != '\0'; ++s)
+		якщо (*s == (char)c)
+			повернути (char *)s;
+	повернути NULL;
 }
 #endif
 
@@ -332,97 +332,97 @@ char *strndup(const char *s, size_t n)
 {
 	size_t len = strnlen(s, n);
 	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	якщо (!new)
+		повернути NULL;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	повернути (char *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+ціле ul_strtos64(const char *str, int64_t *num, ціле base)
 {
 	char *end = NULL;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	якщо (str == NULL || *str == '\0')
+		повернути -(errno = EINVAL);
 
 	errno = 0;
 	*num = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	якщо (errno != 0)
+		повернути -errno;
+	якщо (str == end || (end && *end))
+		повернути -(errno = EINVAL);
+	повернути 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+ціле ul_strtou64(const char *str, uint64_t *num, ціле base)
 {
 	char *end = NULL;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	якщо (str == NULL || *str == '\0')
+		повернути -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	якщо (tmp < 0)
 		errno = ERANGE;
-	else {
+	інакше {
 		errno = 0;
 		*num = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	якщо (errno != 0)
+		повернути -errno;
+	якщо (str == end || (end && *end))
+		повернути -(errno = EINVAL);
+	повернути 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+ціле ul_strtos32(const char *str, int32_t *num, ціле base)
 {
 	int64_t tmp;
-	int rc;
+	ціле rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	якщо (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	якщо (rc == 0)
 		*num = (int32_t) tmp;
-	return rc;
+	повернути rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+ціле ul_strtou32(const char *str, uint32_t *num, ціле base)
 {
 	uint64_t tmp;
-	int rc;
+	ціле rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	якщо (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	якщо (rc == 0)
 		*num = (uint32_t) tmp;
-	return rc;
+	повернути rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+ціле ul_strtou16(const char *str, uint16_t *num, ціле base)
 {
 	uint64_t tmp;
-	int rc;
+	ціле rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	якщо (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
+	якщо (rc == 0)
 		*num = (uint16_t) tmp;
-	return rc;
+	повернути rc;
 }
 
 /*
@@ -432,39 +432,39 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
+int64_t str2num_or_err(const char *str, ціле base, const char *errmesg,
 			     int64_t low, int64_t up)
 {
 	int64_t num = 0;
-	int rc;
+	ціле rc;
 
 	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	якщо (rc == 0 && ((low && num < low) || (up && num > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	якщо (rc) {
+		якщо (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	повернути num;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(const char *str, ціле base, const char *errmesg, uint64_t up)
 {
 	uint64_t num = 0;
-	int rc;
+	ціле rc;
 
 	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	якщо (rc == 0 && (up && num > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	якщо (rc) {
+		якщо (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	повернути num;
 }
 
 double strtod_or_err(const char *str, const char *errmesg)
@@ -473,44 +473,44 @@ double strtod_or_err(const char *str, const char *errmesg)
 	char *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
+	якщо (str == NULL || *str == '\0')
 		goto err;
 	num = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
+	якщо (errno || str == end || (end && *end))
 		goto err;
 
-	return num;
+	повернути num;
 err:
-	if (errno == ERANGE)
+	якщо (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+ціле ul_strtold(const char *str, long double *num)
 {
 	char *end = NULL;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	якщо (str == NULL || *str == '\0')
+		повернути -(errno = EINVAL);
 	*num = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	якщо (errno != 0)
+		повернути -errno;
+	якщо (str == end || (end && *end))
+		повернути -(errno = EINVAL);
+	повернути 0;
 }
 
 long double strtold_or_err(const char *str, const char *errmesg)
 {
 	long double num = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	якщо (ul_strtold(str, &num) == 0)
+		повернути num;
+	якщо (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -520,10 +520,10 @@ uintmax_t strtosize_or_err(const char *str, const char *errmesg)
 {
 	uintmax_t num;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	якщо (strtosize(str, &num) == 0)
+		повернути num;
 
-	if (errno)
+	якщо (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
@@ -553,33 +553,33 @@ time_t strtotime_or_err(const char *str, const char *errmesg)
 	int64_t user_input;
 
 	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	повернути (time_t) user_input;
 }
 
 bool hyperlinkwanted(const char *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	якщо (mode && strcmp(mode, "never") == 0)
+		повернути false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	якщо (mode && strcmp(mode, "always") == 0)
+		повернути true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	якщо (!mode || strcmp(mode, "auto") == 0)
+		повернути isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
 bool annotationwanted(const char *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	якщо (mode && strcmp(mode, "never") == 0)
+		повернути false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	якщо (mode && strcmp(mode, "always") == 0)
+		повернути true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	якщо (!mode || strcmp(mode, "auto") == 0)
+		повернути isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -592,19 +592,19 @@ char *xstrmode(mode_t mode, char *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	якщо (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	інакше якщо (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	інакше якщо (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	інакше якщо (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	інакше якщо (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	інакше якщо (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	інакше якщо (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	повернути str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+static ціле get_exp(uint64_t n)
 {
-	int shft;
+	ціле shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
+	для (shft = 10; shft <= 60; shft += 10) {
+		якщо (n < (1ULL << shft))
 			break;
 	}
-	return shft - 10;
+	повернути shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+char *size_to_human_string(ціле options, uint64_t bytes)
 {
 	char buf[32];
-	int dec, exp;
+	ціле dec, exp;
 	uint64_t frac;
 	const char *letters = "BKMGTPE";
 	char suffix[sizeof(" KiB")], *psuf = suffix;
 	char c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	якщо (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	якщо ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	якщо (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		якщо (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		інакше
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		якщо (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} інакше {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		якщо (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
+	якщо (frac) {
 		struct lconv const *l = localeconv();
 		char *dp = l ? l->decimal_point : NULL;
-		int len;
+		ціле len;
 
-		if (!dp || !*dp)
+		якщо (!dp || !*dp)
 			dp = ".";
 
 		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		якщо (len > 0 && (size_t) len < sizeof(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			якщо (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
 			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+		} інакше
 			*buf = '\0';	/* snprintf error */
-	} else
+	} інакше
 		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	повернути strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+ціле string_to_idarray(const char *list, ціле ary[], size_t arysz,
+			ціле (name2id)(const char *, size_t))
 {
 	const char *begin = NULL, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	якщо (!list || !*list || !ary || !arysz || !name2id)
+		повернути -1;
 
-	for (p = list; p && *p; p++) {
+	для (p = list; p && *p; p++) {
 		const char *end = NULL;
-		int id;
+		ціле id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		якщо (n >= arysz)
+			повернути -2;
+		якщо (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		якщо (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		якщо (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		якщо (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		якщо (end <= begin)
+			повернути -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		якщо (id == -1)
+			повернути -1;
 		ary[ n++ ] = id;
 		begin = NULL;
-		if (end && !*end)
+		якщо (end && !*end)
 			break;
 	}
-	return n;
+	повернути n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+ціле string_add_to_idarray(const char *list, ціле ary[], size_t arysz,
+			size_t *ary_pos, ціле (name2id)(const char *, size_t))
 {
 	const char *list_add;
-	int r;
+	ціле r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	якщо (!list || !*list || !ary_pos || *ary_pos > arysz)
+		повернути -1;
 
-	if (list[0] == '+')
+	якщо (list[0] == '+')
 		list_add = &list[1];
-	else {
+	інакше {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	якщо (r > 0)
 		*ary_pos += r;
-	return r;
+	повернути r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
+ціле string_to_bitarray(const char *list,
 		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+		     ціле (*name2bit)(const char *, size_t),
 		     size_t allow_range)
 {
 	const char *begin = NULL, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	якщо (!list || !name2bit || !ary)
+		повернути -EINVAL;
 
-	for (p = list; p && *p; p++) {
+	для (p = list; p && *p; p++) {
 		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+		ціле bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		якщо (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		якщо (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		якщо (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		якщо (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		якщо (end <= begin)
+			повернути -1;
+		якщо (allow_range) {
+			якщо (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} інакше якщо (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		якщо (bit < 0)
+			повернути bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		якщо (set_lower)
+			поки (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		інакше якщо (set_higher)
+			поки (++bit < (ціле) allow_range)
 				setbit(ary, bit);
 		begin = NULL;
-		if (end && !*end)
+		якщо (end && !*end)
 			break;
 	}
-	return 0;
+	повернути 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+ціле string_to_bitmask(const char *list,
 		     unsigned long *mask,
 		     long (*name2flag)(const char *, size_t))
 {
 	const char *begin = NULL, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	якщо (!list || !name2flag || !mask)
+		повернути -EINVAL;
 
-	for (p = list; p && *p; p++) {
+	для (p = list; p && *p; p++) {
 		const char *end = NULL;
 		long flag;
 
-		if (!begin)
+		якщо (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		якщо (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		якщо (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
+		якщо (!begin || !end)
 			continue;
-		if (end <= begin)
-			return -1;
+		якщо (end <= begin)
+			повернути -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		якщо (flag < 0)
+			повернути flag;	/* error */
 		*mask |= flag;
 		begin = NULL;
-		if (end && !*end)
+		якщо (end && !*end)
 			break;
 	}
-	return 0;
+	повернути 0;
 }
 
 /*
@@ -909,39 +909,39 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+ціле ul_parse_range(const char *str, ціле *lower, ціле *upper, ціле def)
 {
 	char *end = NULL;
 
-	if (!str)
-		return 0;
+	якщо (!str)
+		повернути 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	якщо (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		якщо (errno || !end || *end || end == str)
+			повернути -1;
+	} інакше {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		якщо (errno || !end || end == str)
+			повернути -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		якщо (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		інакше якщо (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
 			end = NULL;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			якщо (errno || !end || *end || end == str)
+				повернути -1;
 		}
 	}
-	return 0;
+	повернути 0;
 }
 
 const char *ul_path_next_segment(const char *str, size_t *sz)
@@ -950,22 +950,22 @@ const char *ul_path_next_segment(const char *str, size_t *sz)
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	поки (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	якщо (!start || !*start)
+		повернути NULL;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	для (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	повернути start;
 }
 
-int streq_paths(const char *a, const char *b)
+ціле streq_paths(const char *a, const char *b)
 {
-	while (a && b) {
+	поки (a && b) {
 		size_t a_sz, b_sz;
 		const char *a_seg = ul_path_next_segment(a, &a_sz);
 		const char *b_seg = ul_path_next_segment(b, &b_sz);
@@ -976,51 +976,51 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		якщо (a_sz + b_sz == 0)
+			повернути 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		якщо (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			повернути 1;
 
-		if (!a_seg || !b_seg)
+		якщо (!a_seg || !b_seg)
 			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+		якщо (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
 			break;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	повернути 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+ціле ul_path_is_within(const char *path, const char *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	якщо (!path || !dir || !*path || !*dir)
+		повернути 0;
 
-	while (path && dir) {
+	поки (path && dir) {
 		size_t p_sz, d_sz;
 		const char *p_seg = ul_path_next_segment(path, &p_sz);
 		const char *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		якщо (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			повернути 1;
 
-		if (!p_seg || !d_seg)
+		якщо (!p_seg || !d_seg)
 			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+		якщо (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
 			break;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	повернути 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
@@ -1029,35 +1029,35 @@ char *ul_strnconcat(const char *s, const char *suffix, size_t b)
 	size_t a;
 	char *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	якщо (!s && !suffix)
+		повернути strdup("");
+	якщо (!s)
+		повернути strndup(suffix, b);
+	якщо (!suffix)
+		повернути strdup(s);
 
 	assert(s);
 	assert(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	якщо (b > ((size_t) -1) - a)
+		повернути NULL;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	якщо (!r)
+		повернути NULL;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	повернути r;
 }
 
 /* concatenate two strings to a new string */
 char *ul_strconcat(const char *s, const char *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	повернути ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
@@ -1065,89 +1065,89 @@ char *ul_strfconcat(const char *s, const char *format, ...)
 {
 	va_list ap;
 	char *val, *res;
-	int sz;
+	ціле sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	якщо (sz < 0)
+		повернути NULL;
 
 	res = ul_strnconcat(s, val, sz);
 	free(val);
-	return res;
+	повернути res;
 }
 
-int ul_strappend(char **a, const char *b)
+ціле ul_strappend(char **a, const char *b)
 {
 	size_t al, bl;
 	char *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	якщо (!a)
+		повернути -EINVAL;
+	якщо (!b || !*b)
+		повернути 0;
+	якщо (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		повернути !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	якщо (!tmp)
+		повернути -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	повернути 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+ціле strfappend(char **a, const char *format, ...)
 {
 	va_list ap;
-	int res;
+	ціле res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	повернути res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+extern ціле ul_strvfappend(char **a, const char *format, va_list ap)
 {
 	char *val;
-	int sz;
-	int res;
+	ціле sz;
+	ціле res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	якщо (sz < 0)
+		повернути -errno;
 
 	res = ul_strappend(a, val);
 	free(val);
-	return res;
+	повернути res;
 }
 
 static size_t strcspn_escaped(const char *s, const char *reject)
 {
-	int escaped = 0;
-	int n;
+	ціле escaped = 0;
+	ціле n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	для (n=0; s[n]; n++) {
+		якщо (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		інакше якщо (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
+		інакше якщо (strchr(reject, s[n]))
 			break;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	повернути n - escaped;
 }
 
 /*
@@ -1163,87 +1163,87 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+char *ul_strchr_escaped(const char *s, ціле c)
 {
 	char *p;
-	int esc = 0;
+	ціле esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	для (p = (char *) s; p && *p; p++) {
+		якщо (!esc && *p == '\\') {
 			esc = 1;
 			continue;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		якщо (*p == c && (!esc || c == '\\'))
+			повернути p;
 		esc = 0;
 	}
 
-	return NULL;
+	повернути NULL;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+const char *ul_split(const char **state, size_t *l, const char *separator, ціле quoted)
 {
 	const char *current;
 
 	current = *state;
 
-	if (!*current) {
+	якщо (!*current) {
 		assert(**state == '\0');
-		return NULL;
+		повернути NULL;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	якщо (!*current) {
 		*state = current;
-		return NULL;
+		повернути NULL;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
+	якщо (quoted && strchr("\'\"", *current)) {
 		char quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		якщо (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			повернути NULL;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} інакше якщо (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		якщо (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			повернути NULL;
 		}
 		*state = current + *l;
-	} else {
+	} інакше {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	повернути current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+ціле skip_fline(FILE *fp)
 {
-	int ch;
+	ціле ch;
 
 	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+		якщо ((ch = fgetc(fp)) == EOF)
+			повернути 1;
+		якщо (ch == '\n')
+			повернути 0;
+	} поки (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+ціле ul_stralnumcmp(const char *p1, const char *p2)
 {
 	const unsigned char *s1 = (const unsigned char *) p1;
 	const unsigned char *s2 = (const unsigned char *) p2;
@@ -1252,21 +1252,21 @@ int ul_stralnumcmp(const char *p1, const char *p2)
 	do {
 		do {
 			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+		} поки (c1 != '\0' && !isalnum((unsigned ціле) c1));
 
 		do {
 			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		} поки (c2 != '\0' && !isalnum((unsigned ціле) c2));
 
-		if (c1 != '\0')
+		якщо (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		якщо (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		якщо (c1 == '\0')
+			повернути c1 - c2;
+	} поки (c1 == c2);
 
-	return c1 - c2;
+	повернути c1 - c2;
 }
 
 /*
@@ -1277,10 +1277,10 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
+ціле ul_optstr_next(char **optstr, char **name, size_t *namesz,
 		   char **value, size_t *valsz)
 {
-	int open_quote = 0;
+	ціле open_quote = 0;
 	char *start = NULL, *stop = NULL, *p, *sep = NULL;
 	char *optstr0;
 
@@ -1289,65 +1289,65 @@ int ul_optstr_next(char **optstr, char **name, size_t *namesz,
 
 	optstr0 = *optstr;
 
-	if (name)
+	якщо (name)
 		*name = NULL;
-	if (namesz)
+	якщо (namesz)
 		*namesz = 0;
-	if (value)
+	якщо (value)
 		*value = NULL;
-	if (valsz)
+	якщо (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	поки (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	для (p = optstr0; p && *p; p++) {
+		якщо (!start && *p == '=')
+			повернути -EINVAL;
+		якщо (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		якщо (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
+		якщо (open_quote)
 			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		якщо (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		якщо (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		інакше якщо (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
+		якщо (!start || !stop)
 			continue;
-		if (stop <= start)
-			return -EINVAL;
+		якщо (stop <= start)
+			повернути -EINVAL;
 
-		if (name)
+		якщо (name)
 			*name = start;
-		if (namesz)
+		якщо (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
+		якщо (sep) {
+			якщо (value)
 				*value = sep + 1;
-			if (valsz)
+			якщо (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		повернути 0;
 	}
 
-	return 1;				/* end of optstr */
+	повернути 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+ціле ul_optstr_is_valid(const char *optstr)
 {
-	int rc;
+	ціле rc;
 	char *p = (char *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	поки ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
+	повернути rc < 0 ? 0 : 1;
 }
 
 char *ul_optstr_get_value(const char *optstr, const char *key)
@@ -1356,17 +1356,17 @@ char *ul_optstr_get_value(const char *optstr, const char *key)
 	char *name = NULL, *value = NULL;
 	char *p = (char *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	якщо (!optstr || !key || !*key)
+		повернути NULL;
 
 	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
+	поки (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
+		якщо (namesz != sz || !valsz)
 			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+		якщо (strncmp(name, key, namesz) == 0)
+			повернути strndup(value, valsz);
 	}
-	return NULL;
+	повернути NULL;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
@@ -1378,18 +1378,18 @@ size_t ul_unquote(char *str)
 	size_t len;
 	char q;
 
-	if (!str || !*str)
-		return 0;
+	якщо (!str || !*str)
+		повернути 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	якщо ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		повернути len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	повернути len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
@@ -1399,21 +1399,21 @@ struct testS {
 	char *value;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+static ціле test_strdup_to_member(ціле argc, char *argv[])
 {
 	struct testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	якщо (argc < 3)
+		повернути EXIT_FAILURE;
 
 	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	якщо (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
 	strdup_to_struct_member(xx, value, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
+	якщо (strcmp(xx->name, argv[1]) != 0 &&
 	    strcmp(xx->value, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
@@ -1422,18 +1422,18 @@ static int test_strdup_to_member(int argc, char *argv[])
 	free(xx->name);
 	free(xx->value);
 	free(xx);
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+static ціле test_strutils_sizes(ціле argc, char *argv[])
 {
 	uintmax_t size = 0;
 	char *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	якщо (argc < 2)
+		повернути EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	якщо (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1448,47 +1448,47 @@ static int test_strutils_sizes(int argc, char *argv[])
 	free(hum2);
 	free(hum3);
 
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+static ціле test_strutils_cmp_paths(ціле argc, char *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	ціле rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	якщо (argc < 3)
+		повернути EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+static ціле test_strutils_path_is_within(ціле argc, char *argv[])
 {
-	int rc;
+	ціле rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	якщо (argc < 3)
+		повернути EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+static ціле test_strutils_normalize(ціле argc, char *argv[])
 {
 	unsigned char *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	якщо (argc < 2)
+		повернути EXIT_FAILURE;
 
 	org = (unsigned char *) strdup(argv[1]);
 	src = (unsigned char *) strdup((char *) org);
 	len = strlen((char *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
+	якщо (!org || !src || !dst)
 		goto done;
 
 	/* two buffers */
@@ -1504,132 +1504,132 @@ done:
 	free(dst);
 	free(org);
 
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+static ціле test_strutils_cstrcasecmp(ціле argc, char *argv[])
 {
 	char *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	якщо (argc < 3)
+		повернути EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	якщо (!a || !b)
+		повернути EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+ціле main(ціле argc, char *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	якщо (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		повернути test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
 						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+		повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		якщо (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} інакше якщо (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		повернути test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} інакше якщо (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		повернути test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} інакше якщо (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		повернути test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} інакше якщо  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} інакше якщо (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		повернути test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		повернути test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} інакше якщо (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+	} інакше якщо (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
 		char *buf = "abc\0Y\0\0xyz\0X";
 		char *end = buf + 12;
 		char *p = buf;
 
 		do {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} поки ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
 		char *name = NULL, *val = NULL;
 		char *p = argv[2];
-		int rc;
+		ціле rc;
 
-		if (!ul_optstr_is_valid(p))
+		якщо (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		поки ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (ціле) namesz, name,
+						   (ціле) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		якщо (rc == 1)
+			повернути EXIT_SUCCESS;
+	} інакше якщо (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
 		char *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		якщо (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
 		free(unquoted);
-		return EXIT_SUCCESS;
+		повернути EXIT_SUCCESS;
 
-	} else {
+	} інакше {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	повернути EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */

@@ -28,10 +28,10 @@ static void ul_strv_clear(char **l)
 {
         char **k;
 
-        if (!l)
-                return;
+        якщо (!l)
+                повернути;
 
-        for (k = l; *k; k++)
+        для (k = l; *k; k++)
                 free(*k);
 
         *l = NULL;
@@ -41,7 +41,7 @@ char **ul_strv_free(char **l)
 {
         ul_strv_clear(l);
         free(l);
-        return NULL;
+        повернути NULL;
 }
 
 char **ul_strv_copy(char * const *l)
@@ -49,32 +49,32 @@ char **ul_strv_copy(char * const *l)
         char **r, **k;
 
         k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        якщо (!r)
+                повернути NULL;
 
-        if (l)
-                for (; *l; k++, l++) {
+        якщо (l)
+                для (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        якщо (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                повернути NULL;
                         }
                 }
 
         *k = NULL;
-        return r;
+        повернути r;
 }
 
 unsigned ul_strv_length(char * const *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        якщо (!l)
+                повернути 0;
 
-        for (; *l; l++)
+        для (; *l; l++)
                 n++;
 
-        return n;
+        повернути n;
 }
 
 static char **ul_strv_new_ap(const char *x, va_list ap)
@@ -89,12 +89,12 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
+        якщо (x) {
                 n = x == (const char*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
+                поки ((s = va_arg(aq, const char*))) {
+                        якщо (s == (const char*) -1)
                                 continue;
 
                         n++;
@@ -104,24 +104,24 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
         }
 
         a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        якщо (!a)
+                повернути NULL;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        якщо (x) {
+                якщо (x != (const char*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
+                        якщо (!a[i])
                                 goto fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                поки ((s = va_arg(ap, const char*))) {
 
-                        if (s == (const char*) -1)
+                        якщо (s == (const char*) -1)
                                 continue;
 
                         a[i] = strdup(s);
-                        if (!a[i])
+                        якщо (!a[i])
                                 goto fail;
 
                         i++;
@@ -130,11 +130,11 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
 
         a[i] = NULL;
 
-        return a;
+        повернути a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        повернути NULL;
 }
 
 char **ul_strv_new(const char *x, ...)
@@ -146,48 +146,48 @@ char **ul_strv_new(const char *x, ...)
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        повернути r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+ціле ul_strv_extend_strv(char ***a, char **b)
 {
-        int r;
+        ціле r;
         char **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                якщо (r < 0)
+                        повернути r;
         }
 
-        return 0;
+        повернути 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+ціле ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
 {
-        int r;
+        ціле r;
         char **s;
 
         UL_STRV_FOREACH(s, b) {
                 char *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                якщо (!v)
+                        повернути -ENOMEM;
 
                 r = ul_strv_push(a, v);
-                if (r < 0) {
+                якщо (r < 0) {
                         free(v);
-                        return r;
+                        повернути r;
                 }
         }
 
-        return 0;
+        повернути 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        для ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
@@ -207,22 +207,22 @@ char **ul_strv_split(const char *s, const char *separator)
                 n++;
 
         r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        якщо (!r)
+                повернути NULL;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                якщо (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        повернути NULL;
                 }
 
                 i++;
         }
 
         r[i] = NULL;
-        return r;
+        повернути r;
 }
 
 char *ul_strv_join(char **l, const char *separator)
@@ -231,25 +231,25 @@ char *ul_strv_join(char **l, const char *separator)
         char **s;
         size_t n, k;
 
-        if (!separator)
+        якщо (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                якщо (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        якщо (!r)
+                повернути NULL;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                якщо (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,55 +257,55 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        повернути r;
 }
 
-int ul_strv_push(char ***l, char *value)
+ціле ul_strv_push(char ***l, char *value)
 {
         char **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        якщо (!value)
+                повернути 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        якщо (m < n)
+                повернути -ENOMEM;
 
         c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        якщо (!c)
+                повернути -ENOMEM;
 
         c[n] = value;
         c[n+1] = NULL;
 
         *l = c;
-        return 0;
+        повернути 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+ціле ul_strv_push_prepend(char ***l, char *value)
 {
         char **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        якщо (!value)
+                повернути 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        якщо (m < n)
+                повернути -ENOMEM;
 
         c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        якщо (!c)
+                повернути -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        для (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
         c[0] = value;
@@ -314,93 +314,93 @@ int ul_strv_push_prepend(char ***l, char *value)
         free(*l);
         *l = c;
 
-        return 0;
+        повернути 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+ціле ul_strv_consume(char ***l, char *value)
 {
-        int r;
+        ціле r;
 
         r = ul_strv_push(l, value);
-        if (r < 0)
+        якщо (r < 0)
                 free(value);
 
-        return r;
+        повернути r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+ціле ul_strv_consume_prepend(char ***l, char *value)
 {
-        int r;
+        ціле r;
 
         r = ul_strv_push_prepend(l, value);
-        if (r < 0)
+        якщо (r < 0)
                 free(value);
 
-        return r;
+        повернути r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+ціле ul_strv_extend(char ***l, const char *value)
 {
         char *v;
 
-        if (!value)
-                return 0;
+        якщо (!value)
+                повернути 0;
 
         v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        якщо (!v)
+                повернути -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        повернути ul_strv_consume(l, v);
 }
 
 char **ul_strv_remove(char **l, const char *s)
 {
         char **f, **t;
 
-        if (!l)
-                return NULL;
+        якщо (!l)
+                повернути NULL;
 
         assert(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
+        для (f = t = l; *f; f++)
+                якщо (strcmp(*f, s) == 0)
                         free(*f);
-                else
+                інакше
                         *(t++) = *f;
 
         *t = NULL;
-        return l;
+        повернути l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+ціле ul_strv_extendf(char ***l, const char *format, ...)
 {
         va_list ap;
         char *x;
-        int r;
+        ціле r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        якщо (r < 0)
+                повернути -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        повернути ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+ціле ul_strv_extendv(char ***l, const char *format, va_list ap)
 {
         char *x;
-        int r;
+        ціле r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        якщо (r < 0)
+                повернути -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        повернути ul_strv_consume(l, x);
 }
 
 char **ul_strv_reverse(char **l)
@@ -408,10 +408,10 @@ char **ul_strv_reverse(char **l)
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        якщо (n <= 1)
+                повернути l;
 
-        for (i = 0; i < n / 2; i++) {
+        для (i = 0; i < n / 2; i++) {
                 char *t;
 
                 t = l[i];
@@ -419,5 +419,5 @@ char **ul_strv_reverse(char **l)
                 l[n-1-i] = t;
         }
 
-        return l;
+        повернути l;
 }

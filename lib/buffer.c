@@ -10,11 +10,11 @@
 
 void ul_buffer_reset_data(struct ul_buffer *buf)
 {
-	if (buf->begin)
+	якщо (buf->begin)
 		memset(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
+	якщо (buf->ptrs && buf->nptrs)
 		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
 }
 
@@ -24,9 +24,9 @@ static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal
 
 	assert(buf);
 
-	if (steal)
+	якщо (steal)
 		t = buf->begin;
-	else
+	інакше
 		free(buf->begin);
 	buf->begin = NULL;
 	buf->end = NULL;
@@ -40,7 +40,7 @@ static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal
 	buf->encoded = NULL;
 	buf->encoded_sz = 0;
 
-	return t;
+	повернути t;
 }
 
 void ul_buffer_free_data(struct ul_buffer *buf)
@@ -50,12 +50,12 @@ void ul_buffer_free_data(struct ul_buffer *buf)
 
 char *ul_buffer_steal_string(struct ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	якщо (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		повернути NULL;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	повернути ul_buffer_free_data_common(buf, true);
 }
 
 void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
@@ -63,32 +63,32 @@ void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+ціле ul_buffer_is_empty(struct ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	повернути buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+ціле ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
+	якщо (ptr_idx >= buf->nptrs) {
 		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
 
-		if (!tmp)
-			return -EINVAL;
+		якщо (!tmp)
+			повернути -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	повернути 0;
 }
 
 
 char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	якщо (ptr_idx < buf->nptrs)
+		повернути buf->ptrs[ptr_idx];
+	повернути NULL;
 }
 
 /* returns length from begin to the pointer */
@@ -96,9 +96,9 @@ size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_id
 {
 	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	якщо (ptr && ptr > buf->begin)
+		повернути ptr - buf->begin;
+	повернути 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
@@ -106,40 +106,40 @@ size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short pt
 {
 	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	якщо (!len)
+		повернути 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	повернути mbs_safe_nwidth(buf->begin, len, NULL);
 }
 
 void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
 {
-	if (buf->sz)
+	якщо (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
 	buf->sz = str ? strlen(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+ціле ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 {
 	char *tmp;
 	size_t len = 0;
 
 	assert(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	якщо (sz <= buf->sz)
+		повернути 0;
 
-	if (buf->end && buf->begin)
+	якщо (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	якщо (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	якщо (!tmp)
+		повернути -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
@@ -147,101 +147,101 @@ int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 
 	memset(buf->end, '\0', sz - len);
 
-	return 0;
+	повернути 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+ціле ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	якщо (!buf)
+		повернути -EINVAL;
+	якщо (!data)
+		повернути 0;
 
-	if (buf->begin && buf->end)
+	якщо (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	якщо (maxsz <= sz + 1) {
+		ціле rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		якщо (rc)
+			повернути rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	якщо (!buf->end)
+		повернути -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	повернути 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+ціле ul_buffer_append_char(struct ul_buffer *buf, const char c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	повернути ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+ціле ul_buffer_append_string(struct ul_buffer *buf, const char *str)
 {
-	if (!str)
-		return 0;
+	якщо (!str)
+		повернути 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	повернути ul_buffer_append_data(buf, str, strlen(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+ціле ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
 {
 	size_t i;
 	size_t len = strlen(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	для (i = 0; len && i < n; i++) {
+		ціле rc = ul_buffer_append_data(buf, str, len);
+		якщо (rc)
+			повернути rc;
 	}
-	return 0;
+	повернути 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+ціле ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
 {
 	va_list ap;
-	int res;
+	ціле res;
 
 	va_start(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	повернути res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+ціле ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
 {
 	char *val;
-	int sz;
-	int res;
+	ціле sz;
+	ціле res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	якщо (sz < 0)
+		повернути -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
 	free(val);
 
-	return res;
+	повернути res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+ціле ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	повернути ul_buffer_append_data(buf, data, sz);
 }
 
 char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
 {
-	if (sz)
+	якщо (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	якщо (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	повернути buf->begin;
 }
 
 char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
@@ -251,21 +251,21 @@ char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	якщо (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	повернути ret;
 }
 
 /* size of allocated area (!= size of stored data */
 size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
 {
-	return buf->sz;
+	повернути buf->sz;
 }
 
 size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	повернути buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
@@ -275,33 +275,33 @@ char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, 
 	size_t encsz, wsz = 0;
 	char *res = NULL;
 
-	if (!data)
+	якщо (!data)
 		goto nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
+	якщо (encsz > buf->encoded_sz) {
 		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
+		якщо (!tmp)
 			goto nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
+	якщо (!res || !wsz || wsz == (size_t) -1)
 		goto nothing;
 
-	if (width)
+	якщо (width)
 		*width = wsz;
-	if (sz)
+	якщо (sz)
 		*sz = strlen(res);
-	return res;
+	повернути res;
 nothing:
-	if (width)
+	якщо (width)
 		*width = 0;
-	if (sz)
+	якщо (sz)
 		*sz = 0;
-	return NULL;
+	повернути NULL;
 }
 
 
@@ -312,7 +312,7 @@ enum {
 	PTR_BBB,
 };
 
-int main(void)
+ціле main(void)
 {
 	struct ul_buffer buf = UL_INIT_BUFFER;
 	char *str;
@@ -377,6 +377,6 @@ int main(void)
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BUFFER */

@@ -32,13 +32,13 @@ static const char *pager_argv[] = { "sh", "-c", NULL, NULL };
 struct child_process {
 	const char **argv;
 	pid_t pid;
-	int in;
+	ціле in;
 
-	int header_lines;
-	int header_width;
+	ціле header_lines;
+	ціле header_width;
 
-	int org_err;
-	int org_out;
+	ціле org_err;
+	ціле org_out;
 	struct sigaction orig_sigchld;
 	struct sigaction orig_sigint;
 	struct sigaction orig_sighup;
@@ -51,7 +51,7 @@ static struct child_process pager_process;
 static volatile sig_atomic_t pager_caught_signal;
 static volatile sig_atomic_t pager_caught_sigpipe;
 
-static inline void close_pair(int fd[2])
+static inline void close_pair(ціле fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
@@ -61,44 +61,44 @@ static void pager_preexec(void)
 {
 	const char *less_env = getenv("LESS");
 	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
-	int header_width = pager_process.header_width;
+	ціле header_lines = pager_process.header_lines;
+	ціле header_width = pager_process.header_width;
 	char *less_val = NULL;
 
-	if (header_lines > 0 && header_width > 0)
+	якщо (header_lines > 0 && header_width > 0)
 		less_val = ul_strfconcat(base, " --header %d,%d",
 					 header_lines, header_width);
-	else if (header_width > 0)
+	інакше якщо (header_width > 0)
 		less_val = ul_strfconcat(base, " --header 0,%d",
 					 header_width);
-	else if (header_lines > 0)
+	інакше якщо (header_lines > 0)
 		less_val = ul_strfconcat(base, " --header %d",
 					 header_lines);
 
-	if (less_val) {
-		if (setenv("LESS", less_val, 1) != 0)
+	якщо (less_val) {
+		якщо (setenv("LESS", less_val, 1) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 		free(less_val);
-	} else if (less_env == NULL) {
-		if (setenv("LESS", "FRSX", 0) != 0)
+	} інакше якщо (less_env == NULL) {
+		якщо (setenv("LESS", "FRSX", 0) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 	}
 
-	if (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
+	якщо (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LV");
 }
 
-static int start_command(struct child_process *cmd)
+static ціле start_command(struct child_process *cmd)
 {
-	int fdin[2];
+	ціле fdin[2];
 
-	if (pipe(fdin) < 0)
-		return -1;
+	якщо (pipe(fdin) < 0)
+		повернути -1;
 	cmd->in = fdin[1];
 
 	fflush(NULL);
 	cmd->pid = fork();
-	if (!cmd->pid) {
+	якщо (!cmd->pid) {
 		dup2(fdin[0], STDIN_FILENO);
 		close_pair(fdin);
 
@@ -107,95 +107,95 @@ static int start_command(struct child_process *cmd)
 		errexec(cmd->argv[0]);
 	}
 
-	if (cmd->pid < 0) {
+	якщо (cmd->pid < 0) {
 		cmd->pid = 0;
 		close_pair(fdin);
-		return -1;
+		повернути -1;
 	}
 
 	close(fdin[0]);
-	return 0;
+	повернути 0;
 }
 
-static int wait_for_pager(void)
+static ціле wait_for_pager(void)
 {
 	pid_t waiting;
-	int ret, status;
+	ціле ret, status;
 
 	do {
 		waiting = waitpid(pager_process.pid, &status, 0);
-	} while (waiting == -1 && errno == EINTR);
+	} поки (waiting == -1 && errno == EINTR);
 
-	if (waiting == -1)
+	якщо (waiting == -1)
 		ret = -1;
-	else if (waiting == pager_process.pid && WIFEXITED(status))
+	інакше якщо (waiting == pager_process.pid && WIFEXITED(status))
 		ret = WEXITSTATUS(status);
-	else
+	інакше
 		ret = 1;
 
 	pager_process.pid = 0;
 
-	return ret;
+	повернути ret;
 }
 
-static void catch_signal(int signo)
+static void catch_signal(ціле signo)
 {
 	pager_caught_signal = signo;
 }
 
-static void catch_sigpipe(int signo)
+static void catch_sigpipe(ціле signo)
 {
 	pager_caught_sigpipe = signo;
 }
 
-static void wait_for_pager_signal(int signo __attribute__ ((__unused__)))
+static void wait_for_pager_signal(ціле signo __attribute__ ((__unused__)))
 {
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* async-signal safe: wait for all children, including pager */
-	while (wait(NULL) != -1 || errno == EINTR)
+	поки (wait(NULL) != -1 || errno == EINTR)
 		;
 
 	_exit(EXIT_FAILURE);
 }
 
-static int has_command(const char *cmd)
+static ціле has_command(const char *cmd)
 {
 	const char *path;
 	char *b, *c, *p, *s;
-	int rc = 0;
+	ціле rc = 0;
 
-	if (!cmd)
+	якщо (!cmd)
 		goto done;
 
 	c = xstrdup(cmd);
-	if (!c)
+	якщо (!c)
 		goto done;
 	b = strtok(c, " ");	/* cmd may contain options */
-	if (!b)
+	якщо (!b)
 		goto cleanup;
 
-	if (strchr(b, '/')) {
+	якщо (strchr(b, '/')) {
 		rc = access(b, X_OK) == 0;
 		goto cleanup;
 	}
 
 	path = getenv("PATH");
-	if (!path)
+	якщо (!path)
 		goto cleanup;
 	p = xstrdup(path);
-	if (!p)
+	якщо (!p)
 		goto cleanup;
 
-	for (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
-		int fd = open(s, O_RDONLY|O_CLOEXEC);
-		if (fd < 0)
+	для (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
+		ціле fd = open(s, O_RDONLY|O_CLOEXEC);
+		якщо (fd < 0)
 			continue;
 		rc = faccessat(fd, b, X_OK, 0) == 0;
 		close(fd);
-		if (rc)
+		якщо (rc)
 			break;
 	}
 	free(p);
@@ -203,7 +203,7 @@ cleanup:
 	free(c);
 done:
 	/*fprintf(stderr, "has PAGER '%s': rc=%d\n", cmd, rc);*/
-	return rc;
+	повернути rc;
 }
 
 static void __setup_pager(void)
@@ -211,16 +211,16 @@ static void __setup_pager(void)
 	const char *pager = getenv("PAGER");
 	struct sigaction sa;
 
-	if (!isatty(STDOUT_FILENO))
-		return;
+	якщо (!isatty(STDOUT_FILENO))
+		повернути;
 
-	if (!pager)
+	якщо (!pager)
 		pager = "less";
-	else if (!*pager || !strcmp(pager, "cat"))
-		return;
+	інакше якщо (!*pager || !strcmp(pager, "cat"))
+		повернути;
 
-	if (!has_command(pager))
-		return;
+	якщо (!has_command(pager))
+		повернути;
 
 	/* spawn the pager */
 	pager_argv[2] = pager;
@@ -233,15 +233,15 @@ static void __setup_pager(void)
 	/* this makes sure that waitpid works as expected */
 	sigaction(SIGCHLD, &sa, &pager_process.orig_sigchld);
 
-	if (start_command(&pager_process)) {
+	якщо (start_command(&pager_process)) {
 		sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-		return;
+		повернути;
 	}
 
 	/* original process continues, but writes to the pipe */
 	dup2(pager_process.in, STDOUT_FILENO);
 	setvbuf(stdout, NULL, _IOLBF, 0);
-	if (isatty(STDERR_FILENO)) {
+	якщо (isatty(STDERR_FILENO)) {
 		dup2(pager_process.in, STDERR_FILENO);
 		setvbuf(stderr, NULL, _IOLBF, 0);
 	}
@@ -276,10 +276,10 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+void pager_open_header(ціле header_lines, ціле first_col_width)
 {
-	if (pager_process.pid)
-		return;		/* already running */
+	якщо (pager_process.pid)
+		повернути;		/* already running */
 
 	pager_process.header_lines = header_lines;
 	pager_process.header_width = first_col_width;
@@ -287,13 +287,13 @@ void pager_open_header(int header_lines, int first_col_width)
 	pager_process.org_out = dup(STDOUT_FILENO);
 	pager_process.org_err = dup(STDERR_FILENO);
 
-	if (pager_process.org_out != -1 && pager_process.org_err != -1)
+	якщо (pager_process.org_out != -1 && pager_process.org_err != -1)
 		__setup_pager();
 
-	if (!pager_process.pid) {
-		if (pager_process.org_out != -1)
+	якщо (!pager_process.pid) {
+		якщо (pager_process.org_out != -1)
 			close(pager_process.org_out);
-		if (pager_process.org_err != -1)
+		якщо (pager_process.org_err != -1)
 			close(pager_process.org_err);
 		memset(&pager_process, 0, sizeof(pager_process));
 	}
@@ -304,10 +304,10 @@ void pager_open_header(int header_lines, int first_col_width)
 void pager_close(void)
 {
 	struct sigaction sa;
-	int ret, safe_errno;
+	ціле ret, safe_errno;
 
-	if (pager_process.pid == 0)
-		return;
+	якщо (pager_process.pid == 0)
+		повернути;
 
 	memset(&sa, 0, sizeof(sa));
 	sa.sa_handler = catch_signal;
@@ -345,10 +345,10 @@ void pager_close(void)
 	sigaction(SIGPIPE, &pager_process.orig_sigpipe, NULL);
 	errno = safe_errno;
 
-	if (ret == -1)
+	якщо (ret == -1)
 		err(EXIT_FAILURE, _("waitpid failed"));
 
-	if (pager_caught_signal || (pager_caught_sigpipe && ret))
+	якщо (pager_caught_signal || (pager_caught_sigpipe && ret))
 		exit(EXIT_FAILURE);
 
 	memset(&pager_process, 0, sizeof(pager_process));
@@ -371,22 +371,22 @@ bool pager_is_enabled(enum ul_pagermode mode)
 {
 	switch (mode) {
 	case UL_PAGER_ALWAYS:
-		return true;
+		повернути true;
 	case UL_PAGER_NEVER:
-		return false;
+		повернути false;
 	case UL_PAGER_AUTO: {
 		const char *s;
 		bool val;
 
-		if (!isatty(STDOUT_FILENO))
-			return false;
+		якщо (!isatty(STDOUT_FILENO))
+			повернути false;
 		s = safe_getenv("PAGER_ENABLE");
-		if (!s || ul_strtobool(s, &val) != 0)
-			return false;
-		return val;
+		якщо (!s || ul_strtobool(s, &val) != 0)
+			повернути false;
+		повернути val;
 	}
 	default:
-		return false;
+		повернути false;
 	}
 }
 
@@ -394,15 +394,15 @@ bool pager_is_enabled(enum ul_pagermode mode)
 
 #define MAX 255
 
-int main(int argc __attribute__ ((__unused__)),
+ціле main(ціле argc __attribute__ ((__unused__)),
 	 char *argv[] __attribute__ ((__unused__)))
 {
-	int i;
+	ціле i;
 
 	pager_open();
-	for (i = 0; i < MAX; i++)
+	для (i = 0; i < MAX; i++)
 		printf("%d\n", i);
 	pager_close();
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PAGER */

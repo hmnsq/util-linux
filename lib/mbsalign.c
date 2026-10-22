@@ -28,29 +28,29 @@ static const char *skip_ansi_escape(const char *p, const char *end)
 {
 	const char *q;
 
-	if (p >= end || (unsigned char) *p != '\033' || p + 1 >= end)
-		return NULL;
+	якщо (p >= end || (unsigned char) *p != '\033' || p + 1 >= end)
+		повернути NULL;
 
 	q = p + 1;
-	if (*q == '[') {
+	якщо (*q == '[') {
 		q++;
 		/* CSI parameter bytes (0x30-0x3f) are followed by intermediate
 		 * bytes (0x20-0x2f) and a final byte (0x40-0x7e). None of them
 		 * occupies a cell.
 		 */
-		while (q < end && (unsigned char) *q >= 0x30
+		поки (q < end && (unsigned char) *q >= 0x30
 				&& (unsigned char) *q <= 0x3f)
 			q++;
-		while (q < end && (unsigned char) *q >= 0x20
+		поки (q < end && (unsigned char) *q >= 0x20
 				&& (unsigned char) *q <= 0x2f)
 			q++;
-		if (q < end && (unsigned char) *q >= 0x40
+		якщо (q < end && (unsigned char) *q >= 0x40
 				&& (unsigned char) *q <= 0x7e)
-			return q + 1;
-	} else if (*q && strchr("()*+", *q) && q + 1 < end)
-		return q + 2;
+			повернути q + 1;
+	} інакше якщо (*q && strchr("()*+", *q) && q + 1 < end)
+		повернути q + 2;
 
-	return NULL;
+	повернути NULL;
 }
 
 /*
@@ -68,17 +68,17 @@ size_t mbs_nwidth(const char *buf, size_t bufsz)
 	mbstate_t st;
 	memset(&st, 0, sizeof(st));
 #endif
-	if (p && *p && bufsz)
+	якщо (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if (*p == '\033') {
+	поки (p && *p && p <= last) {
+		якщо (*p == '\033') {
 			const char *e = skip_ansi_escape(p, last + 1);
 
 			p = e ? e : p + 1;
 			continue;
 		}
-		if (iscntrl((unsigned char) *p)) {
+		якщо (iscntrl((unsigned char) *p)) {
 			p++;
 			continue;
 		}
@@ -86,30 +86,30 @@ size_t mbs_nwidth(const char *buf, size_t bufsz)
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-		if (len == 0)
+		якщо (len == 0)
 			break;
-		if (len > 0 && iswprint(wc)) {
-			int x = wcwidth(wc);
-			if (x > 0)
+		якщо (len > 0 && iswprint(wc)) {
+			ціле x = wcwidth(wc);
+			якщо (x > 0)
 				width += x;
-		} else if (len == (size_t) -1 || len == (size_t) -2)
+		} інакше якщо (len == (size_t) -1 || len == (size_t) -2)
 			len = 1;
 		p += len;
-#else
-		if (isprint((unsigned char) *p))
+#інакше
+		якщо (isprint((unsigned char) *p))
 			width++;
 		p++;
 #endif
 	}
 
-	return width;
+	повернути width;
 }
 
 size_t mbs_width(const char *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_nwidth(s, strlen(s));
+	якщо (!s || !*s)
+		повернути 0;
+	повернути mbs_nwidth(s, strlen(s));
 }
 
 /*
@@ -128,60 +128,60 @@ size_t mbs_safe_nwidth(const char *buf, size_t bufsz, size_t *sz)
 	mbstate_t st;
 	memset(&st, 0, sizeof(st));
 #endif
-	if (p && *p && bufsz)
+	якщо (p && *p && bufsz)
 		last = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if ((p < last && *p == '\\' && *(p + 1) == 'x')
+	поки (p && *p && p <= last) {
+		якщо ((p < last && *p == '\\' && *(p + 1) == 'x')
 		    || iscntrl((unsigned char) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		інакше {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
+			якщо (len == 0)
 				break;
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			якщо (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
-				if (isprint((unsigned char) *p))
+				якщо (isprint((unsigned char) *p))
 					width += 1, bytes += 1;
-				else
+				інакше
 					width += 4, bytes += 4;
 
-			} else if (!iswprint(wc)) {
+			} інакше якщо (!iswprint(wc)) {
 				width += len * 4;	/* hex encode whole sequence */
 				bytes += len * 4;
-			} else {
+			} інакше {
 				width += wcwidth(wc);	/* number of cells */
 				bytes += len;		/* number of bytes */
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
+#інакше
+		інакше якщо (!isprint((unsigned char) *p)) {
 			width += 4, bytes += 4;		/* *p encoded to \x?? */
 			p++;
-		} else {
+		} інакше {
 			width++, bytes++;
 			p++;
 		}
 #endif
 	}
 
-	if (sz)
+	якщо (sz)
 		*sz = bytes;
-	return width;
+	повернути width;
 }
 
 size_t mbs_safe_width(const char *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_safe_nwidth(s, strlen(s), NULL);
+	якщо (!s || !*s)
+		повернути 0;
+	повернути mbs_safe_nwidth(s, strlen(s), NULL);
 }
 
 /*
@@ -196,32 +196,32 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 {
 	const char *p = s;
 	char *r;
-	int rsz;
+	ціле rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
 	memset(&st, 0, sizeof(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	якщо (!sz || !buf || !bufsiz)
+		повернути NULL;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (ціле) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
-		if (safechars && strchr(safechars, *p)) {
-			if (rsz < 2)
+	поки (p && *p) {
+		якщо (safechars && strchr(safechars, *p)) {
+			якщо (rsz < 2)
 				break;
 			*r++ = *p++;
 			rsz--;
 			continue;
 		}
 
-		if ((*p == '\\' && *(p + 1) == 'x')
+		якщо ((*p == '\\' && *(p + 1) == 'x')
 		    || iscntrl((unsigned char) *p)) {
-			if (rsz < 5)
+			якщо (rsz < 5)
 				break;
 			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
 			r += 4;
@@ -230,47 +230,47 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 			p++;
 		}
 #ifdef HAVE_WIDECHAR
-		else {
+		інакше {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
+			якщо (len == 0)
 				break;		/* end of string */
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			якщо (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
 				/*
 				 * Not valid multibyte sequence -- maybe it's
 				 * printable char according to the current locales.
 				 */
-				if (!isprint((unsigned char) *p)) {
-					if (rsz < 5)
+				якщо (!isprint((unsigned char) *p)) {
+					якщо (rsz < 5)
 						break;
 					snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
-				} else {
-					if (rsz < 2)
+				} інакше {
+					якщо (rsz < 2)
 						break;
 					(*width)++;
 					*r++ = *p;
 					rsz--;
 				}
-			} else if (!iswprint(wc)) {
+			} інакше якщо (!iswprint(wc)) {
 				size_t i;
-				for (i = 0; i < len; i++) {
-					if (rsz < 5)
+				для (i = 0; i < len; i++) {
+					якщо (rsz < 5)
 						break;
 					snprintf(r, rsz, "\\x%02x", (unsigned char) p[i]);
 					r += 4;
 					rsz -= 4;
 					*width += 4;
 				}
-				if (i < len)
+				якщо (i < len)
 					break;
-			} else {
-				if (rsz < (int)len + 1)
+			} інакше {
+				якщо (rsz < (ціле)len + 1)
 					break;
 				memcpy(r, p, len);
 				r += len;
@@ -279,17 +279,17 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
-			if (rsz < 5)
+#інакше
+		інакше якщо (!isprint((unsigned char) *p)) {
+			якщо (rsz < 5)
 				break;
 			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
 			p++;
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < 2)
+		} інакше {
+			якщо (rsz < 2)
 				break;
 			*r++ = *p++;
 			rsz--;
@@ -299,7 +299,7 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
 	}
 
 	*r = '\0';
-	return buf;
+	повернути buf;
 }
 
 /*
@@ -313,60 +313,60 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
 {
 	const char *p = s;
 	char *r;
-	int rsz;
+	ціле rsz;
 	size_t sz = s ? strlen(s) : 0;
 
 #ifdef HAVE_WIDECHAR
 	mbstate_t st;
 	memset(&st, 0, sizeof(st));
 #endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	якщо (!sz || !buf || !bufsiz)
+		повернути NULL;
 
 	r = buf;
-	rsz = (int) bufsiz;
+	rsz = (ціле) bufsiz;
 	*width = 0;
 
-	while (p && *p) {
+	поки (p && *p) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
-#else
+#інакше
 		size_t len = 1;
 #endif
 
-		if (len == 0)
+		якщо (len == 0)
 			break;		/* end of string */
 
-		if (len == (size_t) -1 || len == (size_t) -2) {
+		якщо (len == (size_t) -1 || len == (size_t) -2) {
 			len = 1;
 			/*
 			 * Not valid multibyte sequence -- maybe it's
 			 * printable char according to the current locales.
 			 */
-			if (!isprint((unsigned char) *p)) {
-				if (rsz < 5)
+			якщо (!isprint((unsigned char) *p)) {
+				якщо (rsz < 5)
 					break;
 				snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
 				r += 4;
 				rsz -= 4;
 				*width += 4;
-			} else {
-				if (rsz < 2)
+			} інакше {
+				якщо (rsz < 2)
 					break;
 				(*width)++;
 				*r++ = *p;
 				rsz--;
 			}
-		} else if (*p == '\\' && *(p + 1) == 'x') {
-			if (rsz < 5)
+		} інакше якщо (*p == '\\' && *(p + 1) == 'x') {
+			якщо (rsz < 5)
 				break;
 			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
 			r += 4;
 			rsz -= 4;
 			*width += 4;
-		} else {
-			if (rsz < (int)len + 1)
+		} інакше {
+			якщо (rsz < (ціле)len + 1)
 				break;
 			r = mempcpy(r, p, len);
 			rsz -= len;
@@ -376,7 +376,7 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
 	}
 
 	*r = '\0';
-	return buf;
+	повернути buf;
 }
 
 /*
@@ -384,7 +384,7 @@ char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size
  */
 size_t mbs_safe_encode_size(size_t bytes)
 {
-	return (bytes * 4) + 1;
+	повернути (bytes * 4) + 1;
 }
 
 /*
@@ -394,15 +394,15 @@ size_t mbs_safe_decode_size(const char *p)
 {
 	size_t bytes = 0;
 
-	while (p && *p) {
-		if (*p == '\\' && *(p + 1) == 'x' &&
+	поки (p && *p) {
+		якщо (*p == '\\' && *(p + 1) == 'x' &&
 		    isxdigit(*(p + 2)) && isxdigit(*(p + 3)))
 			p += 4;
-		else
+		інакше
 			p++;
 		bytes++;
 	}
-	return bytes;
+	повернути bytes;
 }
 
 /*
@@ -415,15 +415,15 @@ char *mbs_safe_encode(const char *s, size_t *width)
 	size_t bufsz;
 	char *buf, *ret = NULL;
 
-	if (!sz)
-		return NULL;
+	якщо (!sz)
+		повернути NULL;
 	bufsz = mbs_safe_encode_size(sz);
 	buf = malloc(bufsz);
-	if (buf)
+	якщо (buf)
 		ret = mbs_safe_encode_to_buffer(s, width, buf, bufsz, NULL);
-	if (!ret)
+	якщо (!ret)
 		free(buf);
-	return ret;
+	повернути ret;
 }
 
 /*
@@ -436,15 +436,15 @@ char *mbs_invalid_encode(const char *s, size_t *width)
 	size_t bufsz;
 	char *buf, *ret = NULL;
 
-	if (!sz)
-		return NULL;
+	якщо (!sz)
+		повернути NULL;
 	bufsz = mbs_safe_encode_size(sz);
 	buf = malloc(bufsz);
-	if (buf)
+	якщо (buf)
 		ret = mbs_invalid_encode_to_buffer(s, width, buf, bufsz);
-	if (!ret)
+	якщо (!ret)
 		free(buf);
-	return ret;
+	повернути ret;
 }
 
 #ifdef HAVE_WIDECHAR
@@ -454,16 +454,16 @@ wc_ensure_printable (wchar_t *wchars)
 {
   bool replaced = false;
   wchar_t *wc = wchars;
-  while (*wc)
+  поки (*wc)
     {
-      if (!iswprint ((wint_t) *wc))
+      якщо (!iswprint ((wint_t) *wc))
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           replaced = true;
         }
       wc++;
     }
-  return replaced;
+  повернути replaced;
 }
 
 /* Return the wchar after a complete ANSI escape sequence, or NULL. */
@@ -472,23 +472,23 @@ wc_skip_ansi_escape (wchar_t *wc)
 {
   wchar_t *p = wc + 1;
 
-  if (*wc != L'\033' || !*p)
-    return NULL;
+  якщо (*wc != L'\033' || !*p)
+    повернути NULL;
 
-  if (*p == L'[')
+  якщо (*p == L'[')
     {
       p++;
-      while (*p >= 0x30 && *p <= 0x3f)
+      поки (*p >= 0x30 && *p <= 0x3f)
         p++;
-      while (*p >= 0x20 && *p <= 0x2f)
+      поки (*p >= 0x20 && *p <= 0x2f)
         p++;
-      if (*p >= 0x40 && *p <= 0x7e)
-        return p + 1;
+      якщо (*p >= 0x40 && *p <= 0x7e)
+        повернути p + 1;
     }
-  else if ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
-    return p + 2;
+  інакше якщо ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
+    повернути p + 2;
 
-  return NULL;
+  повернути NULL;
 }
 
 /* Truncate wchar string to width cells.
@@ -498,49 +498,49 @@ static size_t
 wc_truncate (wchar_t *wc, size_t width)
 {
   size_t cells = 0;
-  int next_cells = 0;
+  ціле next_cells = 0;
 
-  while (*wc)
+  поки (*wc)
     {
       wchar_t *after_escape = wc_skip_ansi_escape (wc);
-      if (after_escape)
+      якщо (after_escape)
         {
           wc = after_escape;
           continue;
         }
 
       next_cells = wcwidth (*wc);
-      if (next_cells == -1) /* non printable */
+      якщо (next_cells == -1) /* non printable */
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           next_cells = 1;
         }
-      if (cells + next_cells > width)
+      якщо (cells + next_cells > width)
         break;
 
       cells += next_cells;
       wc++;
     }
   *wc = L'\0';
-  return cells;
+  повернути cells;
 }
 
-static int
+static ціле
 rpl_wcswidth (const wchar_t *s, size_t n)
 {
-  int ret = 0;
+  ціле ret = 0;
 
-  while (n-- > 0 && *s != L'\0')
+  поки (n-- > 0 && *s != L'\0')
     {
-      int nwidth = wcwidth (*s++);
-      if (nwidth == -1)             /* non printable */
-        return -1;
-      if (ret > (INT_MAX - nwidth)) /* overflow */
-        return -1;
+      ціле nwidth = wcwidth (*s++);
+      якщо (nwidth == -1)             /* non printable */
+        повернути -1;
+      якщо (ret > (INT_MAX - nwidth)) /* overflow */
+        повернути -1;
       ret += nwidth;
     }
 
-  return ret;
+  повернути ret;
 }
 #endif /* HAVE_WIDECHAR */
 
@@ -556,33 +556,33 @@ mbs_truncate(char *str, size_t *width)
 	ssize_t sz = mbstowcs(NULL, str, 0);
 	wchar_t *wcs = NULL;
 
-	if (sz == (ssize_t) -1)
+	якщо (sz == (ssize_t) -1)
 		goto done;
 
 	wcs = calloc(1, (sz + 1) * sizeof(wchar_t));
-	if (!wcs)
+	якщо (!wcs)
 		goto done;
 
-	if (!mbstowcs(wcs, str, sz))
+	якщо (!mbstowcs(wcs, str, sz))
 		goto done;
 	*width = wc_truncate(wcs, *width);
 	bytes = wcstombs(str, wcs, bytes);
 done:
 	free(wcs);
-#else
+#інакше
 	{
 		const char *p = str;
 		const char *end = str + bytes;
 		size_t cells = 0;
 
-		while (p < end) {
+		поки (p < end) {
 			const char *after_escape = skip_ansi_escape(p, end);
 
-			if (after_escape) {
+			якщо (after_escape) {
 				p = after_escape;
 				continue;
 			}
-			if (cells >= *width)
+			якщо (cells >= *width)
 				break;
 			p++;
 			cells++;
@@ -591,9 +591,9 @@ done:
 		*width = cells;
 	}
 #endif
-	if (bytes >= 0)
+	якщо (bytes >= 0)
 		str[bytes] = '\0';
-	return bytes;
+	повернути bytes;
 }
 
 /* Write N_SPACES space characters to DEST while ensuring
@@ -602,19 +602,19 @@ done:
    A pointer to the terminating NUL is returned.  */
 
 static char*
-mbs_align_pad (char *dest, const char* dest_end, size_t n_spaces, int padchar)
+mbs_align_pad (char *dest, const char* dest_end, size_t n_spaces, ціле padchar)
 {
-  for (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
+  для (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
     *dest++ = padchar;
   *dest = '\0';
-  return dest;
+  повернути dest;
 }
 
 size_t
 mbsalign (const char *src, char *dest, size_t dest_size,
-          size_t *width, mbs_align_t align, int flags)
+          size_t *width, mbs_align_t align, ціле flags)
 {
-	return mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
+	повернути mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
 }
 
 /* Align a string, SRC, in a field of *WIDTH columns, handling multi-byte
@@ -634,11 +634,11 @@ size_t
 mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 	               size_t *width, mbs_align_t align,
 #ifdef HAVE_WIDECHAR
-		       int flags,
-#else
-		       int flags __attribute__((__unused__)),
+		       ціле flags,
+#інакше
+		       ціле flags __attribute__((__unused__)),
 #endif
-		       int padchar)
+		       ціле padchar)
 {
   size_t ret = -1;
   size_t src_size = strlen (src) + 1;
@@ -656,26 +656,26 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
   /* In multi-byte locales convert to wide characters
      to allow easy truncation. Also determine number
      of screen columns used.  */
-  if (MB_CUR_MAX > 1)
+  якщо (MB_CUR_MAX > 1)
     {
       size_t src_chars = mbstowcs (NULL, src, 0);
-      if (src_chars == (size_t) -1)
+      якщо (src_chars == (size_t) -1)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
+          якщо (flags & MBA_UNIBYTE_FALLBACK)
             goto mbsalign_unibyte;
-          else
+          інакше
             goto mbsalign_cleanup;
         }
       src_chars += 1; /* make space for NUL */
       str_wc = malloc (src_chars * sizeof (wchar_t));
-      if (str_wc == NULL)
+      якщо (str_wc == NULL)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
+          якщо (flags & MBA_UNIBYTE_FALLBACK)
             goto mbsalign_unibyte;
-          else
+          інакше
             goto mbsalign_cleanup;
         }
-      if (mbstowcs (str_wc, src, src_chars) != 0)
+      якщо (mbstowcs (str_wc, src, src_chars) != 0)
         {
           str_wc[src_chars - 1] = L'\0';
           wc_enabled = true;
@@ -686,20 +686,20 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 
   /* If we transformed or need to truncate the source string
      then create a modified copy of it.  */
-  if (wc_enabled && (conversion || (n_cols > *width)))
+  якщо (wc_enabled && (conversion || (n_cols > *width)))
     {
-        if (conversion)
+        якщо (conversion)
           {
              /* May have increased the size by converting
                 \t to \uFFFD for example.  */
             src_size = wcstombs(NULL, str_wc, 0) + 1;
           }
         newstr = malloc (src_size);
-        if (newstr == NULL)
+        якщо (newstr == NULL)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
+          якщо (flags & MBA_UNIBYTE_FALLBACK)
             goto mbsalign_unibyte;
-          else
+          інакше
             goto mbsalign_cleanup;
         }
         str_to_print = newstr;
@@ -710,13 +710,13 @@ mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
 mbsalign_unibyte:
 #endif
 
-  if (n_cols > *width) /* Unibyte truncation required.  */
+  якщо (n_cols > *width) /* Unibyte truncation required.  */
     {
       n_cols = *width;
       n_used_bytes = n_cols;
     }
 
-  if (*width > n_cols) /* Padding required.  */
+  якщо (*width > n_cols) /* Padding required.  */
     n_spaces = *width - n_cols;
 
   /* indicate to caller how many cells needed (not including padding).  */
@@ -726,7 +726,7 @@ mbsalign_unibyte:
   ret = n_used_bytes + (n_spaces * 1);
 
   /* Write as much NUL terminated output to DEST as possible.  */
-  if (dest_size != 0)
+  якщо (dest_size != 0)
     {
       char *dest_end = dest + dest_size - 1;
       size_t start_spaces;
@@ -761,5 +761,5 @@ mbsalign_cleanup:
   free (str_wc);
   free (newstr);
 
-  return ret;
+  повернути ret;
 }

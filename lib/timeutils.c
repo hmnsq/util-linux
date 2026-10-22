@@ -29,7 +29,7 @@
 
 #define streq(a,b) (strcmp((a),(b)) == 0)
 
-static int parse_sec(const char *t, usec_t *usec)
+static ціле parse_sec(const char *t, usec_t *usec)
 {
 	static const struct {
 		const char *suffix;
@@ -67,22 +67,22 @@ static int parse_sec(const char *t, usec_t *usec)
 
 	const char *p;
 	usec_t r = 0;
-	int something = FALSE;
+	ціле something = FALSE;
 
 	assert(t);
 	assert(usec);
 
 	p = t;
-	for (;;) {
+	для (;;) {
 		long long l, z = 0;
 		char *e;
 		unsigned i, n = 0;
 
 		p += strspn(p, WHITESPACE);
 
-		if (*p == 0) {
-			if (!something)
-				return -EINVAL;
+		якщо (*p == 0) {
+			якщо (!something)
+				повернути -EINVAL;
 
 			break;
 		}
@@ -90,38 +90,38 @@ static int parse_sec(const char *t, usec_t *usec)
 		errno = 0;
 		l = strtoll(p, &e, 10);
 
-		if (errno > 0)
-			return -errno;
+		якщо (errno > 0)
+			повернути -errno;
 
-		if (l < 0)
-			return -ERANGE;
+		якщо (l < 0)
+			повернути -ERANGE;
 
-		if (*e == '.') {
+		якщо (*e == '.') {
 			char *b = e + 1;
 
 			errno = 0;
 			z = strtoll(b, &e, 10);
-			if (errno > 0)
-				return -errno;
+			якщо (errno > 0)
+				повернути -errno;
 
-			if (z < 0)
-				return -ERANGE;
+			якщо (z < 0)
+				повернути -ERANGE;
 
-			if (e == b)
-				return -EINVAL;
+			якщо (e == b)
+				повернути -EINVAL;
 
 			n = e - b;
 
-		} else if (e == p)
-			return -EINVAL;
+		} інакше якщо (e == p)
+			повернути -EINVAL;
 
 		e += strspn(e, WHITESPACE);
 
-		for (i = 0; i < ARRAY_SIZE(table); i++)
-			if (ul_startswith(e, table[i].suffix)) {
+		для (i = 0; i < ARRAY_SIZE(table); i++)
+			якщо (ul_startswith(e, table[i].suffix)) {
 				usec_t k = (usec_t) z * table[i].usec;
 
-				for (; n > 0; n--)
+				для (; n > 0; n--)
 					k /= 10;
 
 				r += (usec_t) l *table[i].usec + k;
@@ -131,58 +131,58 @@ static int parse_sec(const char *t, usec_t *usec)
 				break;
 			}
 
-		if (i >= ARRAY_SIZE(table))
-			return -EINVAL;
+		якщо (i >= ARRAY_SIZE(table))
+			повернути -EINVAL;
 
 	}
 
 	*usec = r;
 
-	return 0;
+	повернути 0;
 }
 
-static int parse_subseconds(const char *t, usec_t *usec)
+static ціле parse_subseconds(const char *t, usec_t *usec)
 {
 	usec_t ret = 0;
 	usec_t factor = USEC_PER_SEC / 10;
 
-	if (*t != '.' && *t != ',')
-		return -1;
+	якщо (*t != '.' && *t != ',')
+		повернути -1;
 
-	while (*(++t)) {
-		if (!isdigit(*t) || factor < 1)
-			return -1;
+	поки (*(++t)) {
+		якщо (!isdigit(*t) || factor < 1)
+			повернути -1;
 
 		ret += ((usec_t) *t - '0') * factor;
 		factor /= 10;
 	}
 
 	*usec = ret;
-	return 0;
+	повернути 0;
 }
 
 static const char *parse_epoch_seconds(const char *t, struct tm *tm)
 {
 	int64_t s;
 	time_t st;
-	int f, c;
+	ціле f, c;
 
 	f = sscanf(t, "%"SCNd64"%n", &s, &c);
-	if (f < 1)
-		return NULL;
+	якщо (f < 1)
+		повернути NULL;
 	st = s;
-	if ((int64_t) st < s)
-		return NULL;
-	if (!localtime_r(&st, tm))
-		return NULL;
-	return t + c;
+	якщо ((int64_t) st < s)
+		повернути NULL;
+	якщо (!localtime_r(&st, tm))
+		повернути NULL;
+	повернути t + c;
 }
 
-static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
+static ціле parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 {
 	static const struct {
 		const char *name;
-		const int nr;
+		const ціле nr;
 	} day_nr[] = {
 		{ "Sunday",	0 },
 		{ "Sun",	0 },
@@ -203,7 +203,7 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	const char *k;
 	struct tm tm, copy;
 	usec_t plus = 0, minus = 0, ret = 0;
-	int r, weekday = -1;
+	ціле r, weekday = -1;
 	unsigned i;
 
 	/*
@@ -239,68 +239,68 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 	localtime_r(&x, &tm);
 	tm.tm_isdst = -1;
 
-	if (streq(t, "now"))
+	якщо (streq(t, "now"))
 		goto finish;
 
-	else if (streq(t, "today")) {
+	інакше якщо (streq(t, "today")) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (streq(t, "yesterday")) {
+	} інакше якщо (streq(t, "yesterday")) {
 		tm.tm_mday--;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (streq(t, "tomorrow")) {
+	} інакше якщо (streq(t, "tomorrow")) {
 		tm.tm_mday++;
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 
-	} else if (t[0] == '+') {
+	} інакше якщо (t[0] == '+') {
 
 		r = parse_sec(t + 1, &plus);
-		if (r < 0)
-			return r;
+		якщо (r < 0)
+			повернути r;
 
 		goto finish;
-	} else if (t[0] == '-') {
+	} інакше якщо (t[0] == '-') {
 
 		r = parse_sec(t + 1, &minus);
-		if (r < 0)
-			return r;
+		якщо (r < 0)
+			повернути r;
 
 		goto finish;
-	} else if (t[0] == '@') {
+	} інакше якщо (t[0] == '@') {
 		k = parse_epoch_seconds(t + 1, &tm);
-		if (k && *k == 0)
+		якщо (k && *k == 0)
 			goto finish;
-		else if (k && parse_subseconds(k, &ret) == 0)
+		інакше якщо (k && parse_subseconds(k, &ret) == 0)
 			goto finish;
 
-		return -EINVAL;
-	} else if (ul_endswith(t, " ago")) {
+		повернути -EINVAL;
+	} інакше якщо (ul_endswith(t, " ago")) {
 		char *z;
 
 		z = strndup(t, strlen(t) - 4);
-		if (!z)
-			return -ENOMEM;
+		якщо (!z)
+			повернути -ENOMEM;
 
 		r = parse_sec(z, &minus);
 		free(z);
-		if (r < 0)
-			return r;
+		якщо (r < 0)
+			повернути r;
 
 		goto finish;
 	}
 
-	for (i = 0; i < ARRAY_SIZE(day_nr); i++) {
+	для (i = 0; i < ARRAY_SIZE(day_nr); i++) {
 		size_t skip;
 
-		if (!startswith_no_case(t, day_nr[i].name))
+		якщо (!startswith_no_case(t, day_nr[i].name))
 			continue;
 
 		skip = strlen(day_nr[i].name);
-		if (t[skip] != ' ')
+		якщо (t[skip] != ' ')
 			continue;
 
 		weekday = day_nr[i].nr;
@@ -310,102 +310,102 @@ static int parse_timestamp_reference(time_t x, const char *t, usec_t *usec)
 
 	copy = tm;
 	k = strptime(t, "%y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
+	якщо (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	інакше якщо (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M:%S", &tm);
-	if (k && *k == 0)
+	якщо (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	інакше якщо (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%dT%H:%M:%S", &tm);
-	if (k && *k == 0)
+	якщо (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	інакше якщо (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	якщо (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d %H:%M", &tm);
-	if (k && *k == 0) {
+	якщо (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%y-%m-%d", &tm);
-	if (k && *k == 0) {
+	якщо (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y-%m-%d", &tm);
-	if (k && *k == 0) {
+	якщо (k && *k == 0) {
 		tm.tm_sec = tm.tm_min = tm.tm_hour = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%H:%M:%S", &tm);
-	if (k && *k == 0)
+	якщо (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	інакше якщо (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
 	tm = copy;
 	k = strptime(t, "%H:%M", &tm);
-	if (k && *k == 0) {
+	якщо (k && *k == 0) {
 		tm.tm_sec = 0;
 		goto finish;
 	}
 
 	tm = copy;
 	k = strptime(t, "%Y%m%d%H%M%S", &tm);
-	if (k && *k == 0)
+	якщо (k && *k == 0)
 		goto finish;
-	else if (k && parse_subseconds(k, &ret) == 0)
+	інакше якщо (k && parse_subseconds(k, &ret) == 0)
 		goto finish;
 
-	return -EINVAL;
+	повернути -EINVAL;
 
  finish:
 	x = mktime(&tm);
-	if (x == (time_t)-1)
-		return -EINVAL;
+	якщо (x == (time_t)-1)
+		повернути -EINVAL;
 
-	if (weekday >= 0 && tm.tm_wday != weekday)
-		return -EINVAL;
+	якщо (weekday >= 0 && tm.tm_wday != weekday)
+		повернути -EINVAL;
 
 	ret += (usec_t) x * USEC_PER_SEC;
 
-	if (minus > ret)
-		return -ERANGE;
-	if ((ret + plus) < ret)
-		return -ERANGE;
+	якщо (minus > ret)
+		повернути -ERANGE;
+	якщо ((ret + plus) < ret)
+		повернути -ERANGE;
 
 	ret += plus;
 	ret -= minus;
 
 	*usec = ret;
 
-	return 0;
+	повернути 0;
 }
 
-int ul_parse_timestamp(const char *t, usec_t *usec)
+ціле ul_parse_timestamp(const char *t, usec_t *usec)
 {
-	return parse_timestamp_reference(time(NULL), t, usec);
+	повернути parse_timestamp_reference(time(NULL), t, usec);
 }
 
 /* Returns the difference in seconds between its argument and GMT. If if TP is
@@ -413,14 +413,14 @@ int ul_parse_timestamp(const char *t, usec_t *usec)
  * tzset is called so, for example, 'TZ="UTC" hwclock' will work as expected.
  * Derived from glibc/time/strftime_l.c
  */
-int get_gmtoff(const struct tm *tp)
+ціле get_gmtoff(const struct tm *tp)
 {
-	if (tp->tm_isdst < 0)
-		return 0;
+	якщо (tp->tm_isdst < 0)
+		повернути 0;
 
-#if HAVE_TM_GMTOFF
-	return tp->tm_gmtoff;
-#else
+#якщо HAVE_TM_GMTOFF
+	повернути tp->tm_gmtoff;
+#інакше
 	struct tm tm;
 	struct tm gtm;
 	struct tm ltm = *tp;
@@ -429,19 +429,19 @@ int get_gmtoff(const struct tm *tp)
 	tzset();
 	lt = mktime(&ltm);
 	/* Check if mktime returning -1 is an error or a valid time_t */
-	if (lt == (time_t) -1) {
-		if (! localtime_r(&lt, &tm)
+	якщо (lt == (time_t) -1) {
+		якщо (! localtime_r(&lt, &tm)
 			|| ((ltm.tm_sec ^ tm.tm_sec)
 			    | (ltm.tm_min ^ tm.tm_min)
 			    | (ltm.tm_hour ^ tm.tm_hour)
 			    | (ltm.tm_mday ^ tm.tm_mday)
 			    | (ltm.tm_mon ^ tm.tm_mon)
 			    | (ltm.tm_year ^ tm.tm_year)))
-			return 0;
+			повернути 0;
 	}
 
-	if (! gmtime_r(&lt, &gtm))
-		return 0;
+	якщо (! gmtime_r(&lt, &gtm))
+		повернути 0;
 
 	/* Calculate the GMT offset, that is, the difference between the
 	 * TP argument (ltm) and GMT (gtm).
@@ -450,204 +450,204 @@ int get_gmtoff(const struct tm *tp)
 	 * Take care to avoid int overflow in leap day calculations, but it's OK
 	 * to assume that A and B are close to each other.
 	 */
-	int a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
-	int b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
-	int a100 = a4 / 25 - (a4 % 25 < 0);
-	int b100 = b4 / 25 - (b4 % 25 < 0);
-	int a400 = a100 >> 2;
-	int b400 = b100 >> 2;
-	int intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
+	ціле a4 = (ltm.tm_year >> 2) + (1900 >> 2) - ! (ltm.tm_year & 3);
+	ціле b4 = (gtm.tm_year >> 2) + (1900 >> 2) - ! (gtm.tm_year & 3);
+	ціле a100 = a4 / 25 - (a4 % 25 < 0);
+	ціле b100 = b4 / 25 - (b4 % 25 < 0);
+	ціле a400 = a100 >> 2;
+	ціле b400 = b100 >> 2;
+	ціле intervening_leap_days = (a4 - b4) - (a100 - b100) + (a400 - b400);
 
-	int years = ltm.tm_year - gtm.tm_year;
-	int days = (365 * years + intervening_leap_days
+	ціле years = ltm.tm_year - gtm.tm_year;
+	ціле days = (365 * years + intervening_leap_days
 		    + (ltm.tm_yday - gtm.tm_yday));
 
-	return (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
+	повернути (60 * (60 * (24 * days + (ltm.tm_hour - gtm.tm_hour))
 		+ (ltm.tm_min - gtm.tm_min)) + (ltm.tm_sec - gtm.tm_sec));
 #endif
 }
 
-static int format_iso_time(const struct tm *tm, uint32_t nsec, int flags, char *buf, size_t bufsz)
+static ціле format_iso_time(const struct tm *tm, uint32_t nsec, ціле flags, char *buf, size_t bufsz)
 {
 	uint32_t usec = nsec / NSEC_PER_USEC;
 	char *p = buf;
-	int len;
+	ціле len;
 
-	if (flags & ISO_DATE) {
+	якщо (flags & ISO_DATE) {
 		len = snprintf(p, bufsz, "%4ld-%.2d-%.2d",
 			       tm->tm_year + (long) 1900,
 			       tm->tm_mon + 1, tm->tm_mday);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if ((flags & ISO_DATE) && (flags & ISO_TIME)) {
-		if (bufsz < 1)
+	якщо ((flags & ISO_DATE) && (flags & ISO_TIME)) {
+		якщо (bufsz < 1)
 			goto err;
 		*p++ = (flags & ISO_T) ? 'T' : ' ';
 		bufsz--;
 	}
 
-	if (flags & ISO_TIME) {
+	якщо (flags & ISO_TIME) {
 		len = snprintf(p, bufsz, "%02d:%02d:%02d", tm->tm_hour,
 			       tm->tm_min, tm->tm_sec);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_DOTNSEC) {
+	якщо (flags & ISO_DOTNSEC) {
 		len = snprintf(p, bufsz, ".%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMANSEC) {
+	} інакше якщо (flags & ISO_COMMANSEC) {
 		len = snprintf(p, bufsz, ",%09"PRIu32, nsec);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
-	} else if (flags & ISO_DOTUSEC) {
+	} інакше якщо (flags & ISO_DOTUSEC) {
 		len = snprintf(p, bufsz, ".%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 
-	} else if (flags & ISO_COMMAUSEC) {
+	} інакше якщо (flags & ISO_COMMAUSEC) {
 		len = snprintf(p, bufsz, ",%06"PRIu32, usec);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 		bufsz -= len;
 		p += len;
 	}
 
-	if (flags & ISO_TIMEZONE) {
-		int tmin  = get_gmtoff(tm) / 60;
-		int zhour = tmin / 60;
-		int zmin  = abs(tmin % 60);
+	якщо (flags & ISO_TIMEZONE) {
+		ціле tmin  = get_gmtoff(tm) / 60;
+		ціле zhour = tmin / 60;
+		ціле zmin  = abs(tmin % 60);
 		len = snprintf(p, bufsz, "%+03d:%02d", zhour,zmin);
-		if (len < 0 || (size_t) len > bufsz)
+		якщо (len < 0 || (size_t) len > bufsz)
 			goto err;
 	}
-	return 0;
+	повернути 0;
  err:
 	warnx(_("format_iso_time: buffer overflow."));
-	return -1;
+	повернути -1;
 }
 
 /* timespec to ISO 8601 */
-int strtimespec_iso(const struct timespec *ts, int flags, char *buf, size_t bufsz)
+ціле strtimespec_iso(const struct timespec *ts, ціле flags, char *buf, size_t bufsz)
 {
 	struct tm tm;
 	struct tm *rc;
 
-	if (flags & ISO_GMTIME)
+	якщо (flags & ISO_GMTIME)
 		rc = gmtime_r(&ts->tv_sec, &tm);
-	else
+	інакше
 		rc = localtime_r(&ts->tv_sec, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
+	якщо (rc)
+		повернути format_iso_time(&tm, ts->tv_nsec, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)(ts->tv_sec));
-	return -1;
+	повернути -1;
 }
 
 /* timeval to ISO 8601 */
-int strtimeval_iso(const struct timeval *tv, int flags, char *buf, size_t bufsz)
+ціле strtimeval_iso(const struct timeval *tv, ціле flags, char *buf, size_t bufsz)
 {
 	struct timespec ts = {
 		.tv_sec = tv->tv_sec,
 		.tv_nsec = tv->tv_usec * NSEC_PER_USEC,
 	};
 
-	return strtimespec_iso(&ts, flags, buf, bufsz);
+	повернути strtimespec_iso(&ts, flags, buf, bufsz);
 }
 
 /* struct tm to ISO 8601 */
-int strtm_iso(const struct tm *tm, int flags, char *buf, size_t bufsz)
+ціле strtm_iso(const struct tm *tm, ціле flags, char *buf, size_t bufsz)
 {
-	return format_iso_time(tm, 0, flags, buf, bufsz);
+	повернути format_iso_time(tm, 0, flags, buf, bufsz);
 }
 
 /* time_t to ISO 8601 */
-int strtime_iso(const time_t *t, int flags, char *buf, size_t bufsz)
+ціле strtime_iso(const time_t *t, ціле flags, char *buf, size_t bufsz)
 {
 	struct tm tm;
 	struct tm *rc;
 
-	if (flags & ISO_GMTIME)
+	якщо (flags & ISO_GMTIME)
 		rc = gmtime_r(t, &tm);
-	else
+	інакше
 		rc = localtime_r(t, &tm);
 
-	if (rc)
-		return format_iso_time(&tm, 0, flags, buf, bufsz);
+	якщо (rc)
+		повернути format_iso_time(&tm, 0, flags, buf, bufsz);
 
 	warnx(_("time %jd is out of range."), (intmax_t)*t);
-	return -1;
+	повернути -1;
 }
 
 /* relative time functions */
-static inline int time_is_thisyear(struct tm const *const tm,
+static inline ціле time_is_thisyear(struct tm const *const tm,
 				   struct tm const *const tmnow)
 {
-	return tm->tm_year == tmnow->tm_year;
+	повернути tm->tm_year == tmnow->tm_year;
 }
 
-static inline int time_is_today(struct tm const *const tm,
+static inline ціле time_is_today(struct tm const *const tm,
 				struct tm const *const tmnow)
 {
-	return (tm->tm_yday == tmnow->tm_yday &&
+	повернути (tm->tm_yday == tmnow->tm_yday &&
 		time_is_thisyear(tm, tmnow));
 }
 
-int strtime_short(const time_t *t, struct timeval *now, int flags, char *buf, size_t bufsz)
+ціле strtime_short(const time_t *t, struct timeval *now, ціле flags, char *buf, size_t bufsz)
 {
 	struct tm tm, tmnow;
-	int rc = 0;
+	ціле rc = 0;
 
-	if (now->tv_sec == 0)
+	якщо (now->tv_sec == 0)
 		gettimeofday(now, NULL);
 
 	localtime_r(t, &tm);
 	localtime_r(&now->tv_sec, &tmnow);
 
-	if (time_is_today(&tm, &tmnow)) {
+	якщо (time_is_today(&tm, &tmnow)) {
 		rc = snprintf(buf, bufsz, "%02d:%02d", tm.tm_hour, tm.tm_min);
-		if (rc < 0 || (size_t) rc > bufsz)
-			return -1;
+		якщо (rc < 0 || (size_t) rc > bufsz)
+			повернути -1;
 		rc = 1;
 
-	} else if (time_is_thisyear(&tm, &tmnow)) {
-		if (flags & UL_SHORTTIME_THISYEAR_HHMM)
+	} інакше якщо (time_is_thisyear(&tm, &tmnow)) {
+		якщо (flags & UL_SHORTTIME_THISYEAR_HHMM)
 			rc = strftime(buf, bufsz, "%b%d/%H:%M", &tm);
-		else
+		інакше
 			rc = strftime(buf, bufsz, "%b%d", &tm);
-	} else
+	} інакше
 		rc = strftime(buf, bufsz, "%Y-%b%d", &tm);
 
-	return rc <= 0 ? -1 : 0;
+	повернути rc <= 0 ? -1 : 0;
 }
 
-int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
+ціле strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 {
 	time_t secs = ts->tv_sec;
 	size_t i, parts = 0;
-	int rc;
+	ціле rc;
 
-	if (bufsz)
+	якщо (bufsz)
 		buf[0] = '\0';
 
 	static const struct {
 		const char * const suffix;
-		int width;
+		ціле width;
 		int64_t secs;
 	} table[] = {
 		{ "y", 4, NSEC_PER_YEAR   / NSEC_PER_SEC },
@@ -657,14 +657,14 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		{ "s", 2, NSEC_PER_SEC    / NSEC_PER_SEC },
 	};
 
-	for (i = 0; i < ARRAY_SIZE(table); i++) {
-		if (secs >= table[i].secs) {
+	для (i = 0; i < ARRAY_SIZE(table); i++) {
+		якщо (secs >= table[i].secs) {
 			rc = snprintf(buf, bufsz,
 				      "%*"PRId64"%s%s",
 				      parts ? table[i].width : 0,
 				      secs / table[i].secs, table[i].suffix,
 				      secs % table[i].secs ? " " : "");
-			if (rc < 0 || (size_t) rc > bufsz)
+			якщо (rc < 0 || (size_t) rc > bufsz)
 				goto err;
 			parts++;
 			buf += rc;
@@ -673,24 +673,24 @@ int strtimespec_relative(const struct timespec *ts, char *buf, size_t bufsz)
 		}
 	}
 
-	if (ts->tv_nsec) {
-		if (ts->tv_nsec % NSEC_PER_MSEC) {
+	якщо (ts->tv_nsec) {
+		якщо (ts->tv_nsec % NSEC_PER_MSEC) {
 			rc = snprintf(buf, bufsz, "%*ldns",
 				      parts ? 10 : 0, ts->tv_nsec);
-			if (rc < 0 || (size_t) rc > bufsz)
+			якщо (rc < 0 || (size_t) rc > bufsz)
 				goto err;
-		} else {
+		} інакше {
 			rc = snprintf(buf, bufsz, "%*llums",
 				      parts ? 4 : 0, ts->tv_nsec / NSEC_PER_MSEC);
-			if (rc < 0 || (size_t) rc > bufsz)
+			якщо (rc < 0 || (size_t) rc > bufsz)
 				goto err;
 		}
 	}
 
-	return 0;
+	повернути 0;
  err:
 	warnx(_("format_reltime: buffer overflow."));
-	return -1;
+	повернути -1;
 }
 
 #ifndef HAVE_TIMEGM
@@ -702,20 +702,20 @@ time_t timegm(struct tm *tm)
 	setenv("TZ", "", 1);
 	tzset();
 	ret = mktime(tm);
-	if (zone)
+	якщо (zone)
 		setenv("TZ", zone, 1);
-	else
+	інакше
 		unsetenv("TZ");
 	tzset();
-	return ret;
+	повернути ret;
 }
 #endif /* HAVE_TIMEGM */
 
 #ifdef TEST_PROGRAM_TIMEUTILS
 
-static int run_unittest_timestamp(void)
+static ціле run_unittest_timestamp(void)
 {
-	int rc = EXIT_SUCCESS;
+	ціле rc = EXIT_SUCCESS;
 	time_t reference = 1674180427;
 	static const struct testcase {
 		const char * const input;
@@ -745,35 +745,35 @@ static int run_unittest_timestamp(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+	для (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
 		usec_t result;
-		int r = parse_timestamp_reference(reference, t.input, &result);
-		if (r) {
+		ціле r = parse_timestamp_reference(reference, t.input, &result);
+		якщо (r) {
 			fprintf(stderr, "Could not parse '%s'\n", t.input);
 			rc = EXIT_FAILURE;
 		}
 
-		if (result != t.expected) {
+		якщо (result != t.expected) {
 			fprintf(stderr, "#%02zu %-25s: %"PRIu64" != %"PRIu64"\n",
 				i, t.input, result, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	повернути rc;
 }
 
-static int run_unittest_format(void)
+static ціле run_unittest_format(void)
 {
-	int rc = EXIT_SUCCESS;
+	ціле rc = EXIT_SUCCESS;
 	const struct timespec ts = {
 		.tv_sec = 1674180427,
 		.tv_nsec = 12345,
 	};
 	char buf[FORMAT_TIMESTAMP_MAX];
 	static const struct testcase {
-		int flags;
+		ціле flags;
 		const char * const expected;
 	} testcases[] = {
 		{ ISO_DATE,               "2023-01-20"                       },
@@ -787,26 +787,26 @@ static int run_unittest_format(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+	для (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
-		int r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
-		if (r) {
+		ціле r = strtimespec_iso(&ts, t.flags, buf, sizeof(buf));
+		якщо (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		якщо (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu %-20s != %-20s\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	повернути rc;
 }
 
-static int run_unittest_format_relative(void)
+static ціле run_unittest_format_relative(void)
 {
-	int rc = EXIT_SUCCESS;
+	ціле rc = EXIT_SUCCESS;
 	char buf[FORMAT_TIMESTAMP_MAX];
 	static const struct testcase {
 		struct timespec ts;
@@ -834,52 +834,52 @@ static int run_unittest_format_relative(void)
 	setenv("TZ", "GMT", 1);
 	tzset();
 
-	for (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
+	для (size_t i = 0; i < ARRAY_SIZE(testcases); i++) {
 		struct testcase t = testcases[i];
-		int r = strtimespec_relative(&t.ts, buf, sizeof(buf));
-		if (r) {
+		ціле r = strtimespec_relative(&t.ts, buf, sizeof(buf));
+		якщо (r) {
 			fprintf(stderr, "Could not format '%s'\n", t.expected);
 			rc = EXIT_FAILURE;
 		}
 
-		if (strcmp(buf, t.expected)) {
+		якщо (strcmp(buf, t.expected)) {
 			fprintf(stderr, "#%02zu '%-20s' != '%-20s'\n", i, buf, t.expected);
 			rc = EXIT_FAILURE;
 		}
 	}
 
-	return rc;
+	повернути rc;
 }
 
-int main(int argc, char *argv[])
+ціле main(ціле argc, char *argv[])
 {
 	struct timespec ts = { 0 };
 	char buf[ISO_BUFSIZ];
-	int r;
+	ціле r;
 
-	if (argc < 2) {
+	якщо (argc < 2) {
 		fprintf(stderr, "usage: %s [<time> [<usec>]] | [--timestamp <str>] | [--unittest-timestamp]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if (strcmp(argv[1], "--unittest-timestamp") == 0)
-		return run_unittest_timestamp();
-	else if (strcmp(argv[1], "--unittest-format") == 0)
-		return run_unittest_format();
-	else if (strcmp(argv[1], "--unittest-format-relative") == 0)
-		return run_unittest_format_relative();
+	якщо (strcmp(argv[1], "--unittest-timestamp") == 0)
+		повернути run_unittest_timestamp();
+	інакше якщо (strcmp(argv[1], "--unittest-format") == 0)
+		повернути run_unittest_format();
+	інакше якщо (strcmp(argv[1], "--unittest-format-relative") == 0)
+		повернути run_unittest_format_relative();
 
-	if (strcmp(argv[1], "--timestamp") == 0) {
+	якщо (strcmp(argv[1], "--timestamp") == 0) {
 		usec_t usec = 0;
 
 		r = ul_parse_timestamp(argv[2], &usec);
-		if (r)
+		якщо (r)
 			errx(EXIT_FAILURE, "Can not parse '%s': %s", argv[2], strerror(-r));
 		ts.tv_sec = (time_t) (usec / USEC_PER_SEC);
 		ts.tv_nsec = (usec % USEC_PER_SEC) * NSEC_PER_USEC;
-	} else {
+	} інакше {
 		ts.tv_sec = strtos64_or_err(argv[1], "failed to parse <time>");
-		if (argc == 3)
+		якщо (argc == 3)
 			ts.tv_nsec = strtos64_or_err(argv[2], "failed to parse <usec>")
 				     * NSEC_PER_USEC;
 	}
@@ -900,7 +900,7 @@ int main(int argc, char *argv[])
 	strtimespec_relative(&ts, buf, sizeof(buf));
 	printf("Rel:  '%s'\n", buf);
 
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_TIMEUTILS */

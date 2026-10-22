@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+ціле ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, ціле flags)
 {
-	int rc;
+	ціле rc;
 	char *end = NULL;
 	int64_t num = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	якщо (!pidstr || !*pidstr || !pid_num)
+		повернути -(errno = EINVAL);
 
 	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	якщо (num == 0 && end == pidstr)
+		повернути -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	якщо (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
+		повернути -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	якщо (num == 0 && !(flags & UL_PID_ZERO))
+		повернути -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	якщо (num < 0 && !(flags & UL_PID_NEGATIVE))
+		повернути -(errno = ERANGE);
 
 	*pid_num = (pid_t) num;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	якщо (*end == ':' && pfd_ino && num > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		якщо (rc < 0)
+			повернути rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		якщо (*pfd_ino == 0)
+			повернути -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	якщо (end && *end != '\0')
+		повернути -(errno = EINVAL);
+	повернути 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, ціле flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	якщо (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -103,9 +103,9 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+ціле main(ціле argc, char **argv)
 {
-	int c, flags = 0, rc = 0;
+	ціле c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
 	pid_t pid_num = 0;
 	char *str = NULL;
@@ -117,7 +117,7 @@ int main(int argc, char **argv)
 		{ NULL, 0, NULL, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
+	поки((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
 		switch(c) {
 		case 'n':
 			flags |= UL_PID_NEGATIVE;
@@ -133,19 +133,19 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (optind == argc)
+	якщо (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
 	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	якщо (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
 	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	якщо (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	повернути EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */
