@@ -4,33 +4,33 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#شامل "c.h"
+#شامل "color-names.h"
 
-#include <ctype.h>
+#شامل <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+ساختار ul_color_name {
+	ثابت نویسه *name;
+	ثابت نویسه *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+ایستا صحیح cmp_color_name(ثابت تهی *a0, ثابت تهی *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	ثابت ساختار ul_color_name
+		*a = (ثابت ساختار ul_color_name *) a0,
+		*b = (ثابت ساختار ul_color_name *) b0;
+	بازگشت strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+ثابت نویسه *color_sequence_from_colorname(ثابت نویسه *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	ایستا ثابت ساختار ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
@@ -54,122 +54,122 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	ساختار ul_color_name کلید = { .name = str };
+	ثابت ساختار ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	اگر (!str)
+		بازگشت پوچ;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&کلید, basic_schemes, ARRAY_SIZE(basic_schemes),
+				اندازه(ساختار ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	بازگشت res ? res->seq : پوچ;
 }
 
 
-int color_is_sequence(const char *color)
+صحیح color_is_sequence(ثابت نویسه *color)
 {
-	if (color && *color == 0x1B) {
+	اگر (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		اگر (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		بازگشت 1;
 	}
 
-	return 0;
+	بازگشت 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+ایستا صحیح __color_canonicalize(ثابت نویسه *str, نویسه **seq)
 {
-	char *in, *out;
-	int len;
+	نویسه *in, *out;
+	صحیح len;
 
-	if (!str)
-		return -EINVAL;
+	اگر (!str)
+		بازگشت -EINVAL;
 
-	*seq = NULL;
+	*seq = پوچ;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	اگر (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+		ثابت نویسه *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		اگر (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			بازگشت *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		بازگشت 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	اگر ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		بازگشت -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	برای (in = *seq, out = *seq; in && *in; in++) {
+		اگر (*in != '\\') {
 			*out++ = *in;
-			continue;
+			ادامه;
 		}
-		switch(*(in + 1)) {
-		case 'a':
+		انتخاب(*(in + 1)) {
+		حالت 'a':
 			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
+			بشکن;
+		حالت 'b':
 			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
+			بشکن;
+		حالت 'e':
 			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
+			بشکن;
+		حالت 'f':
 			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
+			بشکن;
+		حالت 'n':
 			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
+			بشکن;
+		حالت 'r':
 			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
+			بشکن;
+		حالت 't':
 			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
+			بشکن;
+		حالت 'v':
 			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
+			بشکن;
+		حالت '\\':
 			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
+			بشکن;
+		حالت '_':
 			*out++ = ' ';	/* Space */
-			break;
-		case '#':
+			بشکن;
+		حالت '#':
 			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
+			بشکن;
+		حالت '?':
 			*out++ = '?';	/* Question mark */
-			break;
-		default:
+			بشکن;
+		پیشفرض:
 			*out++ = *in;
 			*out++ = *(in + 1);
-			break;
+			بشکن;
 		}
 		in++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
+	اگر (out) {
+		أكد ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	بازگشت 0;
 }
 
-char *color_get_sequence(const char *color)
+نویسه *color_get_sequence(ثابت نویسه *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	نویسه *seq = پوچ;
+	صحیح rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	بازگشت rc ? پوچ : seq;
 }

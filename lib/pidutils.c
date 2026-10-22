@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#شامل <stdlib.h>
+#شامل <sys/stat.h>
+#شامل <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#شامل "nls.h"
+#شامل "strutils.h"
+#شامل "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+صحیح ul_parse_pid_str(نویسه *pidstr, pid_t *pid_رقم, uint64_t *pfd_ino, صحیح flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	صحیح rc;
+	نویسه *end = پوچ;
+	int64_t رقم = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	اگر (!pidstr || !*pidstr || !pid_رقم)
+		بازگشت -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	رقم = strtoimax(pidstr, &end, 10);
+	اگر (رقم == 0 && end == pidstr)
+		بازگشت -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	اگر (errno == ERANGE || رقم < SINT_MIN(pid_t) || رقم > SINT_MAX(pid_t))
+		بازگشت -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	اگر (رقم == 0 && !(flags & UL_PID_ZERO))
+		بازگشت -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	اگر (رقم < 0 && !(flags & UL_PID_NEGATIVE))
+		بازگشت -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_رقم = (pid_t) رقم;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	اگر (*end == ':' && pfd_ino && رقم > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		اگر (rc < 0)
+			بازگشت rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		اگر (*pfd_ino == 0)
+			بازگشت -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	اگر (end && *end != '\0')
+		بازگشت -(errno = EINVAL);
+	بازگشت 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+تهی ul_parse_pid_str_or_err(نویسه *pidstr, pid_t *pid_رقم, uint64_t *pfd_ino, صحیح flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	اگر (ul_parse_pid_str(pidstr, pid_رقم, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -92,9 +92,9 @@ void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, in
 
 #ifdef TEST_PROGRAM_PARSEPID
 
-#include <getopt.h>
+#شامل <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+ایستا تهی __attribute__((__noreturn__)) usage(تهی)
 {
 	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
 	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+صحیح اصلی(صحیح argc, نویسه **argv)
 {
-	int c, flags = 0, rc = 0;
+	صحیح c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_رقم = 0;
+	نویسه *str = پوچ;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	ایستا ثابت ساختار option longopts[] = {
+		{ "zero",	0, پوچ, 'z' },
+		{ "negative",	0, پوچ, 'n' },
+		{ "help",       0, پوچ, 'h' },
+		{ پوچ, 0, پوچ, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	وقتی((c = getopt_long(argc, argv, "nhz", longopts, پوچ)) != -1) {
+		انتخاب(c) {
+		حالت 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			بشکن;
+		حالت 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			بشکن;
+		حالت 'h':
 			usage();
-			break;
-		default:
+			بشکن;
+		پیشفرض:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	اگر (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	rc = ul_parse_pid_str(str, &pid_رقم, &pidfd_ino, flags);
+	اگر (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	printf("PID: %d\n", pid_رقم);
+	اگر (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	بازگشت EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */

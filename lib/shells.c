@@ -1,78 +1,78 @@
 /*
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
-#include <sys/types.h>
-#include <pwd.h>
-#include <stdlib.h>
-#include <paths.h>
-#include <unistd.h>
-#include <sys/syslog.h>
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-#include "dl-econf.h"
+#شامل <sys/types.h>
+#شامل <pwd.h>
+#شامل <stdlib.h>
+#شامل <paths.h>
+#شامل <unistd.h>
+#شامل <sys/syslog.h>
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+#شامل "dl-econf.h"
 #endif
 
-#include "closestream.h"
-#include "shells.h"
+#شامل "closestream.h"
+#شامل "shells.h"
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-econf_file *open_etc_shells(void)
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+econf_file *open_etc_shells(تهی)
 {
 	econf_err error;
-	econf_file *key_file = NULL;
+	econf_file *کلید_file = پوچ;
 
-	if (ul_dlopen_libeconf() != 0)
-		return NULL;
+	اگر (ul_dlopen_libeconf() != 0)
+		بازگشت پوچ;
 
-	error = econf_call(econf_readDirs)(&key_file,
+	error = econf_call(econf_readDirs)(&کلید_file,
 			       _PATH_VENDORDIR,
 			       "/etc",
 			       "shells",
-			       NULL,
+			       پوچ,
 			       "", /* key only */
 			       "#" /* comment */);
-	if (error) {
+	اگر (error) {
 		syslog(LOG_ALERT,
 		       _("Cannot parse shells files: %s"),
 		       econf_call(econf_errString)(error));
-		return NULL;
+		بازگشت پوچ;
 	}
 
-	return key_file;
+	بازگشت کلید_file;
 }
 #endif
 
 /*
  *  print_shells () -- /etc/shells is outputted to stdout.
  */
-extern void print_shells(FILE *out, const char *format)
+بیرونی تهی print_shells(FILE *out, ثابت نویسه *format)
 {
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
 	size_t size = 0;
 	econf_err error;
-	char **keys = NULL;
-	econf_file *key_file = open_etc_shells();
+	نویسه **کلیدها = پوچ;
+	econf_file *کلید_file = open_etc_shells();
 
-	if (!key_file)
-	  return;
+	اگر (!کلید_file)
+	  بازگشت;
 
-	error = econf_call(econf_getKeys)(key_file, NULL, &size, &keys);
-	if (error) {
-		econf_call(econf_freeFile)(key_file);
+	error = econf_call(econf_get_کلیدها)(کلید_file, پوچ, &size, &کلیدها);
+	اگر (error) {
+		econf_call(econf_freeFile)(کلید_file);
 		errx(EXIT_FAILURE,
 		  _("Cannot evaluate entries in shells files: %s"),
 		  econf_call(econf_errString)(error));
 	}
 
-	for (size_t i = 0; i < size; i++) {
-		fprintf(out, format, keys[i]);
+	برای (size_t i = 0; i < size; i++) {
+		fprintf(out, format, کلیدها[i]);
 	}
-	econf_call(econf_freeArray)(keys);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	econf_call(econf_freeArray)(کلیدها);
+	econf_call(econf_freeFile)(کلید_file);
+#وگرنه
+	نویسه *s;
 
 	setusershell();
-	while ((s = getusershell()))
+	وقتی ((s = getusershell()))
 		fprintf(out, format, s);
 	endusershell();
 #endif
@@ -84,43 +84,43 @@ extern void print_shells(FILE *out, const char *format)
  *  or vendor defined files.
  *  Return 1 if found and return 0 if not found.
  */
-extern int is_known_shell(const char *shell_name)
+بیرونی صحیح is_known_shell(ثابت نویسه *shell_name)
 {
-	int ret = 0;
+	صحیح ret = 0;
 
-	if (!shell_name)
-		return 0;
+	اگر (!shell_name)
+		بازگشت 0;
 
-#if defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
-	char *val = NULL;
+#اگر defined (HAVE_LIBECONF) && defined (USE_VENDORDIR)
+	نویسه *val = پوچ;
 	econf_err error;
-	econf_file *key_file = open_etc_shells();
+	econf_file *کلید_file = open_etc_shells();
 
-	if (!key_file)
-		return 0;
+	اگر (!کلید_file)
+		بازگشت 0;
 
-	error = econf_call(econf_getStringValue) (key_file, NULL, shell_name, &val);
-	if (error) {
-		if (error != ECONF_NOKEY)
+	error = econf_call(econf_get_String_مقدار) (کلید_file, پوچ, shell_name, &val);
+	اگر (error) {
+		اگر (error != ECONF_NOKEY)
 			syslog(LOG_ALERT,
 			       _("Cannot evaluate entries in shells files: %s"),
 			       econf_call(econf_errString)(error));
-	} else
+	} وگرنه
 		ret = 1;
 
-	free(val);
-	econf_call(econf_freeFile)(key_file);
-#else
-	char *s;
+	آزاد(val);
+	econf_call(econf_freeFile)(کلید_file);
+#وگرنه
+	نویسه *s;
 
 	setusershell();
-	while ((s = getusershell())) {
-		if (*s != '#' && strcmp(shell_name, s) == 0) {
+	وقتی ((s = getusershell())) {
+		اگر (*s != '#' && strcmp(shell_name, s) == 0) {
 			ret = 1;
-			break;
+			بشکن;
 		}
 	}
 	endusershell();
 #endif
-	return ret;
+	بازگشت ret;
 }

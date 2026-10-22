@@ -5,21 +5,21 @@
  * Authors: 2012 Ondrej Oprala <ooprala@redhat.com>
  *          2012-2025 Karel Zak <kzak@redhat.com>
  */
-#include <assert.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <ctype.h>
+#شامل <assert.h>
+#شامل <sys/stat.h>
+#شامل <sys/types.h>
+#شامل <dirent.h>
+#شامل <ctype.h>
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
-# if defined(HAVE_NCURSESW_NCURSES_H)
+#اگر defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+# اگر defined(HAVE_NCURSESW_NCURSES_H)
 #  include <ncursesw/ncurses.h>
 # elif defined(HAVE_NCURSES_NCURSES_H)
 #  include <ncurses/ncurses.h>
 # elif defined(HAVE_NCURSES_H)
 #  include <ncurses.h>
 # endif
-# if defined(HAVE_NCURSESW_TERM_H)
+# اگر defined(HAVE_NCURSESW_TERM_H)
 #  include <ncursesw/term.h>
 # elif defined(HAVE_NCURSES_TERM_H)
 #  include <ncurses/term.h>
@@ -28,28 +28,28 @@
 # endif
 #endif
 
-#include "c.h"
-#include "cctype.h"
-#include "colors.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "strutils.h"
+#شامل "c.h"
+#شامل "cctype.h"
+#شامل "colors.h"
+#شامل "nls.h"
+#شامل "pathnames.h"
+#شامل "strutils.h"
 
-#include "debug.h"
+#شامل "debug.h"
 
 /*
  * Default behavior, may be overridden by terminal-colors.d/{enable,disable}.
  */
 #ifdef USE_COLORS_BY_DEFAULT
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_AUTO	/* check isatty() */
-#else
+#وگرنه
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_NEVER	/* no colors by default */
 #endif
 
 /*
  * terminal-colors.d debug stuff
  */
-static UL_DEBUG_DEFINE_MASK(termcolors);
+ایستا UL_DEBUG_DEFINE_MASK(termcolors);
 UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define TERMCOLORS_DEBUG_INIT	(1 << 1)
@@ -62,7 +62,7 @@ UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 /*
  * terminal-colors.d file types
  */
-enum {
+شمارش {
 	UL_COLORFILE_DISABLE,		/* .disable */
 	UL_COLORFILE_ENABLE,		/* .enable */
 	UL_COLORFILE_SCHEME,		/* .scheme */
@@ -70,9 +70,9 @@ enum {
 	__UL_COLORFILE_COUNT
 };
 
-struct ul_color_scheme {
-	char *name;
-	char *seq;
+ساختار ul_color_scheme {
+	نویسه *name;
+	نویسه *seq;
 };
 
 /*
@@ -89,69 +89,69 @@ struct ul_color_scheme {
  *
  * the match with higher score wins. The score is per type.
  */
-struct ul_color_ctl {
-	const char	*utilname;	/* util name */
-	const char	*termname;	/* terminal name ($TERM) */
+ساختار ul_color_ctl {
+	ثابت نویسه	*utilname;	/* util name */
+	ثابت نویسه	*termname;	/* terminal name ($TERM) */
 
-	char		*sfile;	/* path to scheme */
+	نویسه		*sfile;	/* path to scheme */
 
-	struct ul_color_scheme	*schemes;	/* array with color schemes */
+	ساختار ul_color_scheme	*schemes;	/* array with color schemes */
 	size_t			nschemes;	/* number of the items */
 	size_t			schemes_sz;	/* number of the allocated items */
 
-	int		mode;		/* UL_COLORMODE_* */
-	unsigned int	has_colors : 1,	/* based on mode and scores[] */
+	صحیح		mode;		/* UL_COLORMODE_* */
+	unsigned صحیح	has_colors : 1,	/* based on mode and scores[] */
 			disabled   : 1, /* disable colors */
 			cs_configured : 1, /* color schemes read */
 			configured : 1; /* terminal-colors.d parsed */
 
-	int		scores[__UL_COLORFILE_COUNT];	/* the best match */
+	صحیح		scores[__UL_COLORFILE_COUNT];	/* the best match */
 };
 
 /*
  * Control struct, globally shared.
  */
-static struct ul_color_ctl ul_colors;
+ایستا ساختار ul_color_ctl ul_colors;
 
-static void colors_free_schemes(struct ul_color_ctl *cc);
-static int colors_read_schemes(struct ul_color_ctl *cc);
+ایستا تهی colors_free_schemes(ساختار ul_color_ctl *cc);
+ایستا صحیح colors_read_schemes(ساختار ul_color_ctl *cc);
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_scheme_name(const void *a0, const void *b0)
+ایستا صحیح cmp_scheme_name(ثابت تهی *a0, ثابت تهی *b0)
 {
-	const struct ul_color_scheme *a = (const struct ul_color_scheme *) a0,
-				     *b = (const struct ul_color_scheme *) b0;
-	return strcmp(a->name, b->name);
+	ثابت ساختار ul_color_scheme *a = (ثابت ساختار ul_color_scheme *) a0,
+				     *b = (ثابت ساختار ul_color_scheme *) b0;
+	بازگشت strcmp(a->name, b->name);
 }
 
 /*
  * Resets control struct (note that we don't allocate the struct)
  */
-static void colors_reset(struct ul_color_ctl *cc)
+ایستا تهی colors_reset(ساختار ul_color_ctl *cc)
 {
-	if (!cc)
-		return;
+	اگر (!cc)
+		بازگشت;
 
 	colors_free_schemes(cc);
 
-	free(cc->sfile);
+	آزاد(cc->sfile);
 
-	cc->sfile = NULL;
-	cc->utilname = NULL;
-	cc->termname = NULL;
+	cc->sfile = پوچ;
+	cc->utilname = پوچ;
+	cc->termname = پوچ;
 	cc->mode = UL_COLORMODE_UNDEF;
 
-	memset(cc->scores, 0, sizeof(cc->scores));
+	memset(cc->scores, 0, اندازه(cc->scores));
 }
 
-static void colors_debug(struct ul_color_ctl *cc)
+ایستا تهی colors_debug(ساختار ul_color_ctl *cc)
 {
 	size_t i;
 
-	if (!cc)
-		return;
+	اگر (!cc)
+		بازگشت;
 
 	printf("Colors:\n");
 	printf("\tutilname = '%s'\n", cc->utilname);
@@ -169,7 +169,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < ARRAY_SIZE(cc->scores); i++)
+	برای (i = 0; i < ARRAY_SIZE(cc->scores); i++)
 		printf("\tscore %s = %d\n",
 				i == UL_COLORFILE_DISABLE ? "disable" :
 				i == UL_COLORFILE_ENABLE ? "enable" :
@@ -178,9 +178,9 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < cc->nschemes; i++) {
+	برای (i = 0; i < cc->nschemes; i++) {
 		printf("\tscheme #%02zu ", i);
-		color_scheme_enable(cc->schemes[i].name, NULL);
+		color_scheme_enable(cc->schemes[i].name, پوچ);
 		fputs(cc->schemes[i].name, stdout);
 		color_disable();
 		fputc('\n', stdout);
@@ -191,42 +191,42 @@ static void colors_debug(struct ul_color_ctl *cc)
 /*
  * Parses [[<utilname>][@<termname>].]<type>
  */
-static int filename_to_tokens(const char *str,
-			      const char **name, size_t *namesz,
-			      const char **term, size_t *termsz,
-			      int  *filetype)
+ایستا صحیح filename_to_tokens(ثابت نویسه *str,
+			      ثابت نویسه **name, size_t *namesz,
+			      ثابت نویسه **term, size_t *termsz,
+			      صحیح  *filetype)
 {
-	const char *type_start, *term_start, *p;
+	ثابت نویسه *type_start, *term_start, *p;
 
-	if (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
-		return -EINVAL;
+	اگر (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
+		بازگشت -EINVAL;
 
 	/* parse .type */
 	p = strrchr(str, '.');
 	type_start = p ? p + 1 : str;
 
-	if (strcmp(type_start, "disable") == 0)
+	اگر (strcmp(type_start, "disable") == 0)
 		*filetype = UL_COLORFILE_DISABLE;
-	else if (strcmp(type_start, "enable") == 0)
+	وگرنه اگر (strcmp(type_start, "enable") == 0)
 		*filetype = UL_COLORFILE_ENABLE;
-	else if (strcmp(type_start, "scheme") == 0)
+	وگرنه اگر (strcmp(type_start, "scheme") == 0)
 		*filetype = UL_COLORFILE_SCHEME;
-	else {
+	وگرنه {
 		DBG(CONF, ul_debug("unknown type '%s'", type_start));
-		return 1;				/* unknown type */
+		بازگشت 1;				/* unknown type */
 	}
 
-	if (type_start == str)
-		return 0;				/* "type" only */
+	اگر (type_start == str)
+		بازگشت 0;				/* "type" only */
 
 	/* parse @termname */
 	p = strchr(str, '@');
-	term_start = p ? p + 1 : NULL;
-	if (term_start) {
+	term_start = p ? p + 1 : پوچ;
+	اگر (term_start) {
 		*term = term_start;
 		*termsz = type_start - term_start - 1;
-		if (term_start - 1 == str)
-			return 0;			/* "@termname.type" */
+		اگر (term_start - 1 == str)
+			بازگشت 0;			/* "@termname.type" */
 	}
 
 	/* parse utilname */
@@ -234,7 +234,7 @@ static int filename_to_tokens(const char *str,
 	*name = str;
 	*namesz = p - str - 1;
 
-	return 0;
+	بازگشت 0;
 }
 
 /*
@@ -242,48 +242,48 @@ static int filename_to_tokens(const char *str,
  * The result is stored to cc->scores. The path to the best "scheme"
  * file is stored to cc->scheme.
  */
-static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
+ایستا صحیح colors_readdir(ساختار ul_color_ctl *cc, ثابت نویسه *dirname)
 {
 	DIR *dir;
-	int rc = -ENOENT;
-	struct dirent *d;
-	char sfile[PATH_MAX] = { '\0' };
+	صحیح rc = -ENOENT;
+	ساختار dirent *d;
+	نویسه sfile[PATH_MAX] = { '\0' };
 	size_t namesz, termsz;
 
-	if (!dirname || !cc || !cc->utilname || !*cc->utilname)
-		return -EINVAL;
+	اگر (!dirname || !cc || !cc->utilname || !*cc->utilname)
+		بازگشت -EINVAL;
 
 	DBG(CONF, ul_debug("reading dir: '%s'", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return -errno;
+	اگر (!dir)
+		بازگشت -errno;
 
 	namesz = strlen(cc->utilname);
 	termsz = cc->termname ? strlen(cc->termname) : 0;
 
-	while ((d = readdir(dir))) {
-		int type, score = 1;
-		const char *tk_name = NULL, *tk_term = NULL;
+	وقتی ((d = readdir(dir))) {
+		صحیح type, score = 1;
+		ثابت نویسه *tk_name = پوچ, *tk_term = پوچ;
 		size_t tk_namesz = 0, tk_termsz = 0;
 
-		if (*d->d_name == '.')
-			continue;
+		اگر (*d->d_name == '.')
+			ادامه;
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
+		اگر (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
 		    d->d_type != DT_REG)
-			continue;
+			ادامه;
 #endif
-		if (filename_to_tokens(d->d_name,
+		اگر (filename_to_tokens(d->d_name,
 				       &tk_name, &tk_namesz,
 				       &tk_term, &tk_termsz, &type) != 0)
-			continue;
+			ادامه;
 
 		/* count theoretical score before we check names to avoid
 		 * unnecessary strcmp() */
-		if (tk_name)
+		اگر (tk_name)
 			score += 20;
-		if (tk_term)
+		اگر (tk_term)
 			score += 10;
 
 		DBG(CONF, ul_debug("item '%s': score=%d "
@@ -293,17 +293,17 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 			tk_termsz, tk_term));
 
 
-		if (score < cc->scores[type])
-			continue;
+		اگر (score < cc->scores[type])
+			ادامه;
 
 		/* filter out by names */
-		if (tk_namesz && (tk_namesz != namesz ||
+		اگر (tk_namesz && (tk_namesz != namesz ||
 				 strncmp(tk_name, cc->utilname, namesz) != 0))
-			continue;
+			ادامه;
 
-		if (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
+		اگر (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
 				  strncmp(tk_term, cc->termname, termsz) != 0))
-			continue;
+			ادامه;
 
 		DBG(CONF, ul_debug("setting '%s' from %d -to-> %d",
 					type == UL_COLORFILE_SCHEME ? "scheme" :
@@ -312,22 +312,22 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 					cc->scores[type], score));
 		cc->scores[type] = score;
 		rc = 0;
-		if (type == UL_COLORFILE_SCHEME)
-			strncpy(sfile, d->d_name, sizeof(sfile));
+		اگر (type == UL_COLORFILE_SCHEME)
+			strncpy(sfile, d->d_name, اندازه(sfile));
 	}
 
-	if (*sfile) {
-		sfile[sizeof(sfile) - 1] = '\0';
-		if (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
+	اگر (*sfile) {
+		sfile[اندازه(sfile) - 1] = '\0';
+		اگر (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
 			rc = -ENOMEM;
 	}
 
 	closedir(dir);
-	return rc;
+	بازگشت rc;
 }
 
 /* atexit() wrapper */
-static void colors_deinit(void)
+ایستا تهی colors_deinit(تهی)
 {
 	colors_reset(&ul_colors);
 }
@@ -335,51 +335,51 @@ static void colors_deinit(void)
 /*
  * Returns path to $XDG_CONFIG_HOME/terminal-colors.d
  */
-static char *colors_get_homedir(char *buf, size_t bufsz)
+ایستا نویسه *colors_get_homedir(نویسه *buf, size_t bufsz)
 {
-	char *p = getenv("XDG_CONFIG_HOME");
+	نویسه *p = getenv("XDG_CONFIG_HOME");
 
-	if (p) {
+	اگر (p) {
 		snprintf(buf, bufsz, "%s/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		بازگشت buf;
 	}
 
 	p = getenv("HOME");
-	if (p) {
+	اگر (p) {
 		snprintf(buf, bufsz, "%s/.config/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		بازگشت buf;
 	}
 
-	return NULL;
+	بازگشت پوچ;
 }
 
 /*
  * Adds one color sequence to array with color scheme.
  */
-static int colors_add_scheme(struct ul_color_ctl *cc,
-			     const char *name,
-			     const char *seq0)
+ایستا صحیح colors_add_scheme(ساختار ul_color_ctl *cc,
+			     ثابت نویسه *name,
+			     ثابت نویسه *seq0)
 {
-	struct ul_color_scheme *cs = NULL;
-	char *seq = NULL;
-	int rc;
+	ساختار ul_color_scheme *cs = پوچ;
+	نویسه *seq = پوچ;
+	صحیح rc;
 
-	if (!cc || !name || !*name || !seq0 || !*seq0)
-		return -EINVAL;
+	اگر (!cc || !name || !*name || !seq0 || !*seq0)
+		بازگشت -EINVAL;
 
 	DBG(SCHEME, ul_debug("add '%s'", name));
 
 	seq = color_get_sequence(seq0);
-	if (!seq)
-		return -EINVAL;
+	اگر (!seq)
+		بازگشت -EINVAL;
 	rc = -ENOMEM;
 
 	/* enlarge the array */
-	if (cc->nschemes == cc->schemes_sz) {
-		void *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
-					 sizeof(struct ul_color_scheme));
-		if (!tmp)
-			goto err;
+	اگر (cc->nschemes == cc->schemes_sz) {
+		تهی *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
+					 اندازه(ساختار ul_color_scheme));
+		اگر (!tmp)
+			برو err;
 		cc->schemes = tmp;
 		cc->schemes_sz = cc->nschemes + 10;
 	}
@@ -388,37 +388,37 @@ static int colors_add_scheme(struct ul_color_ctl *cc,
 	cs = &cc->schemes[cc->nschemes];
 	cs->seq = seq;
 	cs->name = strdup(name);
-	if (!cs->name)
-		goto err;
+	اگر (!cs->name)
+		برو err;
 
 	cc->nschemes++;
-	return 0;
+	بازگشت 0;
 err:
-	if (cs) {
-		free(cs->seq);
-		free(cs->name);
-		cs->seq = cs->name = NULL;
-	} else
-		free(seq);
-	return rc;
+	اگر (cs) {
+		آزاد(cs->seq);
+		آزاد(cs->name);
+		cs->seq = cs->name = پوچ;
+	} وگرنه
+		آزاد(seq);
+	بازگشت rc;
 }
 
 /*
  * Deallocates all regards to color schemes
  */
-static void colors_free_schemes(struct ul_color_ctl *cc)
+ایستا تهی colors_free_schemes(ساختار ul_color_ctl *cc)
 {
 	size_t i;
 
 	DBG(SCHEME, ul_debug("free scheme"));
 
-	for (i = 0; i < cc->nschemes; i++) {
-		free(cc->schemes[i].name);
-		free(cc->schemes[i].seq);
+	برای (i = 0; i < cc->nschemes; i++) {
+		آزاد(cc->schemes[i].name);
+		آزاد(cc->schemes[i].seq);
 	}
 
-	free(cc->schemes);
-	cc->schemes = NULL;
+	آزاد(cc->schemes);
+	cc->schemes = پوچ;
 	cc->nschemes = 0;
 	cc->schemes_sz = 0;
 }
@@ -426,152 +426,152 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
 /*
  * The scheme configuration has to be sorted for bsearch
  */
-static void colors_sort_schemes(struct ul_color_ctl *cc)
+ایستا تهی colors_sort_schemes(ساختار ul_color_ctl *cc)
 {
-	if (!cc->nschemes)
-		return;
+	اگر (!cc->nschemes)
+		بازگشت;
 
 	DBG(SCHEME, ul_debug("sort scheme"));
 
 	qsort(cc->schemes, cc->nschemes,
-	      sizeof(struct ul_color_scheme), cmp_scheme_name);
+	      اندازه(ساختار ul_color_scheme), cmp_scheme_name);
 }
 
 /*
  * Returns just one color scheme
  */
-static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
-						 const char *name)
+ایستا ساختار ul_color_scheme *colors_get_scheme(ساختار ul_color_ctl *cc,
+						 ثابت نویسه *name)
 {
-	struct ul_color_scheme key = { .name = (char *) name}, *res;
+	ساختار ul_color_scheme کلید = { .name = (نویسه *) name}, *res;
 
-	if (!cc || !name || !*name)
-		return NULL;
+	اگر (!cc || !name || !*name)
+		بازگشت پوچ;
 
-	if (!cc->cs_configured) {
-		int rc = colors_read_schemes(cc);
-		if (rc)
-			return NULL;
+	اگر (!cc->cs_configured) {
+		صحیح rc = colors_read_schemes(cc);
+		اگر (rc)
+			بازگشت پوچ;
 	}
-	if (!cc->nschemes)
-		return NULL;
+	اگر (!cc->nschemes)
+		بازگشت پوچ;
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
-	res = bsearch(&key, cc->schemes, cc->nschemes,
-				sizeof(struct ul_color_scheme),
+	res = bsearch(&کلید, cc->schemes, cc->nschemes,
+				اندازه(ساختار ul_color_scheme),
 				cmp_scheme_name);
 
-	return res && res->seq ? res  : NULL;
+	بازگشت res && res->seq ? res  : پوچ;
 }
 
 /*
  * Parses filenames in terminal-colors.d
  */
-static int colors_read_configuration(struct ul_color_ctl *cc)
+ایستا صحیح colors_read_configuration(ساختار ul_color_ctl *cc)
 {
-	int rc = -ENOENT;
-	char *dirname, buf[PATH_MAX];
+	صحیح rc = -ENOENT;
+	نویسه *dirname, buf[PATH_MAX];
 
 	cc->termname = getenv("TERM");
 
-	dirname = colors_get_homedir(buf, sizeof(buf));
-	if (dirname)
+	dirname = colors_get_homedir(buf, اندازه(buf));
+	اگر (dirname)
 		rc = colors_readdir(cc, dirname);		/* ~/.config */
-	if (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
+	اگر (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
 		rc = colors_readdir(cc, _PATH_TERMCOLORS_DIR);	/* /etc */
 
 	cc->configured = 1;
-	return rc;
+	بازگشت rc;
 }
 
 /*
  * Reads terminal-colors.d/ scheme file into array schemes
  */
-static int colors_read_schemes(struct ul_color_ctl *cc)
+ایستا صحیح colors_read_schemes(ساختار ul_color_ctl *cc)
 {
-	int rc = 0;
-	FILE *f = NULL;
-	char buf[BUFSIZ],
+	صحیح rc = 0;
+	FILE *f = پوچ;
+	نویسه buf[BUFSIZ],
 	     cn[129], seq[129];
 
-	if (!cc->configured)
+	اگر (!cc->configured)
 		rc = colors_read_configuration(cc);
 
 	cc->cs_configured = 1;
 
-	if (rc || !cc->sfile)
-		goto done;
+	اگر (rc || !cc->sfile)
+		برو done;
 
 	DBG(SCHEME, ul_debug("reading file '%s'", cc->sfile));
 
 	f = fopen(cc->sfile, "r" UL_CLOEXECSTR);
-	if (!f) {
+	اگر (!f) {
 		rc = -errno;
-		goto done;
+		برو done;
 	}
 
-	while (fgets(buf, sizeof(buf), f)) {
-		char *p = strchr(buf, '\n');
+	وقتی (fgets(buf, اندازه(buf), f)) {
+		نویسه *p = strchr(buf, '\n');
 
-		if (!p) {
-			if (feof(f))
+		اگر (!p) {
+			اگر (feof(f))
 				p = strchr(buf, '\0');
-			else {
+			وگرنه {
 				rc = -errno;
-				goto done;
+				برو done;
 			}
 		}
 		*p = '\0';
-		p = (char *) skip_blank(buf);
-		if (*p == '\0' || *p == '#')
-			continue;
+		p = (نویسه *) skip_blank(buf);
+		اگر (*p == '\0' || *p == '#')
+			ادامه;
 
 		rc = sscanf(p, "%128[^ ] %128[^\n ]", cn, seq);
-		if (rc == 2 && *cn && *seq) {
+		اگر (rc == 2 && *cn && *seq) {
 			rc = colors_add_scheme(cc, cn, seq);	/* set rc=0 on success */
-			if (rc)
-				goto done;
+			اگر (rc)
+				برو done;
 		}
 	}
 	rc = 0;
 
 done:
-	if (f)
+	اگر (f)
 		fclose(f);
 	colors_sort_schemes(cc);
 
-	return rc;
+	بازگشت rc;
 }
 
 
-static void termcolors_init_debug(void)
+ایستا تهی termcolors_init_debug(تهی)
 {
 	__UL_INIT_DEBUG_FROM_ENV(termcolors, TERMCOLORS_DEBUG_, 0, TERMINAL_COLORS_DEBUG);
 }
 
-static int colors_terminal_is_ready(void)
+ایستا صحیح colors_terminal_is_ready(تهی)
 {
-	int ncolors = -1;
+	صحیح ncolors = -1;
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+#اگر defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 	{
-		int ret;
+		صحیح ret;
 
 		/* setupterm() allocates memory, del_curterm() deallocates it */
-		if (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
+		اگر (setupterm(پوچ, STDOUT_FILENO, &ret) == 0 && ret == 1) {
 			ncolors = tigetnum("colors");
 			del_curterm(cur_term);
 		}
 	}
 #endif
-	if (1 < ncolors) {
+	اگر (1 < ncolors) {
 		DBG(CONF, ul_debug("terminal is ready (supports %d colors)", ncolors));
-		return 1;
+		بازگشت 1;
 	}
 
 	DBG(CONF, ul_debug("terminal is NOT ready (no colors)"));
-	return 0;
+	بازگشت 0;
 }
 
 /**
@@ -584,61 +584,61 @@ static int colors_terminal_is_ready(void)
  *
  * Returns: >0 on success.
  */
-int colors_init(int mode, const char *name)
+صحیح colors_init(صحیح mode, ثابت نویسه *name)
 {
-	int ready = -1;
-	struct ul_color_ctl *cc = &ul_colors;
+	صحیح ready = -1;
+	ساختار ul_color_ctl *cc = &ul_colors;
 
 	cc->utilname = name;
 
 	termcolors_init_debug();
 
-	if (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
+	اگر (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
 		cc->mode = UL_COLORMODE_NEVER;
-	else
+	وگرنه
 		cc->mode = mode;
 
-	if (cc->mode == UL_COLORMODE_UNDEF
-	    && getenv("NO_COLOR") == NULL
+	اگر (cc->mode == UL_COLORMODE_UNDEF
+	    && getenv("NO_COLOR") == پوچ
 	    && (ready = colors_terminal_is_ready())) {
 
-		int rc = colors_read_configuration(cc);
-		if (rc)
+		صحیح rc = colors_read_configuration(cc);
+		اگر (rc)
 			cc->mode = UL_COLORMODE_DEFAULT;
-		else {
+		وگرنه {
 
 			/* evaluate scores */
-			if (cc->scores[UL_COLORFILE_DISABLE] >
+			اگر (cc->scores[UL_COLORFILE_DISABLE] >
 			    cc->scores[UL_COLORFILE_ENABLE])
 				cc->mode = UL_COLORMODE_NEVER;
-			else
+			وگرنه
 				cc->mode = UL_COLORMODE_DEFAULT;
 
 			atexit(colors_deinit);
 		}
 	}
 
-	switch (cc->mode) {
-	case UL_COLORMODE_AUTO:
+	انتخاب (cc->mode) {
+	حالت UL_COLORMODE_AUTO:
 		cc->has_colors = ready == -1 ? colors_terminal_is_ready() : ready;
-		break;
-	case UL_COLORMODE_ALWAYS:
+		بشکن;
+	حالت UL_COLORMODE_ALWAYS:
 		cc->has_colors = 1;
-		break;
-	case UL_COLORMODE_NEVER:
-	default:
+		بشکن;
+	حالت UL_COLORMODE_NEVER:
+	پیشفرض:
 		cc->has_colors = 0;
 	}
 
 	ON_DBG(CONF, colors_debug(cc));
 
-	return cc->has_colors;
+	بازگشت cc->has_colors;
 }
 
 /*
  * Temporary disable colors (this setting is independent on terminal-colors.d/)
  */
-void colors_off(void)
+تهی colors_off(تهی)
 {
 	ul_colors.disabled = 1;
 }
@@ -646,7 +646,7 @@ void colors_off(void)
 /*
  * Enable colors
  */
-void colors_on(void)
+تهی colors_on(تهی)
 {
 	ul_colors.disabled = 0;
 }
@@ -654,51 +654,51 @@ void colors_on(void)
 /*
  * Is terminal-colors.d/ configured to use colors?
  */
-int colors_wanted(void)
+صحیح colors_wanted(تهی)
 {
-	return ul_colors.has_colors;
+	بازگشت ul_colors.has_colors;
 }
 
 /*
  * Returns mode
  */
-int colors_mode(void)
+صحیح colors_mode(تهی)
 {
-	return ul_colors.mode;
+	بازگشت ul_colors.mode;
 }
 
 /*
  * Enable @seq color
  */
-void color_fenable(const char *seq, FILE *f)
+تهی color_fenable(ثابت نویسه *seq, FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors && seq)
+	اگر (!ul_colors.disabled && ul_colors.has_colors && seq)
 		fputs(seq, f);
 }
 
 /*
  * Returns escape sequence by logical @name, if undefined then returns @dflt.
  */
-const char *color_scheme_get_sequence(const char *name, const char *dflt)
+ثابت نویسه *color_scheme_get_sequence(ثابت نویسه *name, ثابت نویسه *dflt)
 {
-	struct ul_color_scheme *cs;
+	ساختار ul_color_scheme *cs;
 
-	if (ul_colors.disabled || !ul_colors.has_colors)
-		return NULL;
+	اگر (ul_colors.disabled || !ul_colors.has_colors)
+		بازگشت پوچ;
 
 	cs = colors_get_scheme(&ul_colors, name);
-	return cs && cs->seq ? cs->seq : dflt;
+	بازگشت cs && cs->seq ? cs->seq : dflt;
 }
 
 /*
  * Enable color by logical @name, if undefined enable @dflt.
  */
-void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
+تهی color_scheme_fenable(ثابت نویسه *name, ثابت نویسه *dflt, FILE *f)
 {
-	const char *seq = color_scheme_get_sequence(name, dflt);
+	ثابت نویسه *seq = color_scheme_get_sequence(name, dflt);
 
-	if (!seq)
-		return;
+	اگر (!seq)
+		بازگشت;
 	color_fenable(seq, f);
 }
 
@@ -706,122 +706,122 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
 /*
  * Disable previously enabled color
  */
-void color_fdisable(FILE *f)
+تهی color_fdisable(FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
+	اگر (!ul_colors.disabled && ul_colors.has_colors)
 		fputs(UL_COLOR_RESET, f);
 }
 
 /*
  * Get reset sequence
  */
-const char *color_get_disable_sequence(void)
+ثابت نویسه *color_get_disable_sequence(تهی)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
-		return UL_COLOR_RESET;
-	else
-		return "";
+	اگر (!ul_colors.disabled && ul_colors.has_colors)
+		بازگشت UL_COLOR_RESET;
+	وگرنه
+		بازگشت "";
 }
 
 /*
  * Parses @str to return UL_COLORMODE_*
  */
-int colormode_from_string(const char *str)
+صحیح colormode_from_string(ثابت نویسه *str)
 {
 	size_t i;
-	static const char *const modes[] = {
+	ایستا ثابت نویسه *ثابت modes[] = {
 		[UL_COLORMODE_AUTO]   = "auto",
 		[UL_COLORMODE_NEVER]  = "never",
 		[UL_COLORMODE_ALWAYS] = "always",
 		[UL_COLORMODE_UNDEF] = ""
 	};
 
-	if (!str || !*str)
-		return -EINVAL;
+	اگر (!str || !*str)
+		بازگشت -EINVAL;
 
-	assert(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
+	أكد(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
 
-	for (i = 0; i < ARRAY_SIZE(modes); i++) {
-		if (c_strcasecmp(str, modes[i]) == 0)
-			return i;
+	برای (i = 0; i < ARRAY_SIZE(modes); i++) {
+		اگر (c_strcasecmp(str, modes[i]) == 0)
+			بازگشت i;
 	}
 
-	return -EINVAL;
+	بازگشت -EINVAL;
 }
 
 /*
  * Parses @str and exit(EXIT_FAILURE) on error
  */
-int colormode_or_err(const char *str)
+صحیح colormode_or_err(ثابت نویسه *str)
 {
-	const char *p = str && *str == '=' ? str + 1 : str;
-	int colormode;
+	ثابت نویسه *p = str && *str == '=' ? str + 1 : str;
+	صحیح colormode;
 
 	colormode = colormode_from_string(p);
-	if (colormode < 0)
+	اگر (colormode < 0)
 		errx(EXIT_FAILURE, _("unsupported color mode: %s"), p);
 
-	return colormode;
+	بازگشت colormode;
 }
 
 #ifdef TEST_PROGRAM_COLORS
 # include <getopt.h>
-int main(int argc, char *argv[])
+صحیح اصلی(صحیح argc, نویسه *argv[])
 {
-	static const struct option longopts[] = {
-		{ "mode",	required_argument, NULL, 'm' },
-		{ "color",	required_argument, NULL, 'c' },
-		{ "color-scheme", required_argument, NULL, 'C' },
-		{ "name",	required_argument, NULL, 'n' },
-		{ NULL, 0, NULL, 0 }
+	ایستا ثابت ساختار option longopts[] = {
+		{ "mode",	required_argument, پوچ, 'm' },
+		{ "color",	required_argument, پوچ, 'c' },
+		{ "color-scheme", required_argument, پوچ, 'C' },
+		{ "name",	required_argument, پوچ, 'n' },
+		{ پوچ, 0, پوچ, 0 }
 	};
-	int c, mode = UL_COLORMODE_UNDEF;	/* default */
-	const char *color = "red", *name = NULL, *color_scheme = NULL;
-	char *seq = NULL;
+	صحیح c, mode = UL_COLORMODE_UNDEF;	/* default */
+	ثابت نویسه *color = "red", *name = پوچ, *color_scheme = پوچ;
+	نویسه *seq = پوچ;
 
-	while ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
-		switch (c) {
-		case 'c':
+	وقتی ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, پوچ)) != -1) {
+		انتخاب (c) {
+		حالت 'c':
 			color = optarg;
-			break;
-		case 'C':
+			بشکن;
+		حالت 'C':
 			color_scheme = optarg;
-			break;
-		case 'm':
+			بشکن;
+		حالت 'm':
 			mode = colormode_or_err(optarg);
-			break;
-		case 'n':
+			بشکن;
+		حالت 'n':
 			name = optarg;
-			break;
-		default:
+			بشکن;
+		پیشفرض:
 			fprintf(stderr, "usage: %s [options]\n"
 			" -m, --mode <auto|never|always>  default is undefined\n"
 			" -c, --color <red|blue|...>      color for the test message\n"
 			" -C, --color-scheme <name>       color for the test message\n"
 			" -n, --name <utilname>           util name\n",
 			program_invocation_short_name);
-			return EXIT_FAILURE;
+			بازگشت EXIT_FAILURE;
 		}
 	}
 
 	colors_init(mode, name ? name : program_invocation_short_name);
 
-	if (color_is_sequence(color))
+	اگر (color_is_sequence(color))
 		seq = strdup(color);
-	else
+	وگرنه
 		seq = color_get_sequence(color);
 
-	if (color_scheme)
+	اگر (color_scheme)
 		color_scheme_enable(color_scheme, seq);
-	else
+	وگرنه
 		color_enable(seq);
 	printf("Hello World!");
 	color_disable();
 	fputc('\n', stdout);
 
-	free(seq);
+	آزاد(seq);
 
-	return EXIT_SUCCESS;
+	بازگشت EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_COLORS */
 

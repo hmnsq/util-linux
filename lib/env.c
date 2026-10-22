@@ -4,29 +4,29 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#شامل <stdio.h>
+#شامل <stdlib.h>
+#شامل <string.h>
 #ifdef HAVE_SYS_PRCTL_H
-#include <sys/prctl.h>
-#else
+#شامل <sys/prctl.h>
+#وگرنه
 #define PR_GET_DUMPABLE 3
 #endif
-#if (!defined(HAVE_PRCTL) && defined(linux))
-#include <sys/syscall.h>
+#اگر (!defined(HAVE_PRCTL) && defined(linux))
+#شامل <sys/syscall.h>
 #endif
-#include <unistd.h>
-#include <sys/types.h>
+#شامل <unistd.h>
+#شامل <sys/types.h>
 
-#include "env.h"
-#include "strv.h"
-#include "all-io.h"
+#شامل "env.h"
+#شامل "strv.h"
+#شامل "all-io.h"
 
 #ifndef HAVE_ENVIRON_DECL
-extern char **environ;
+بیرونی نویسه **environ;
 #endif
 
-static char * const forbid[] = {
+ایستا نویسه * ثابت forbid[] = {
 	"BASH_ENV=",    /* GNU creeping featurism strikes again... */
 	"ENV=",
 	"HOME=",
@@ -39,126 +39,126 @@ static char * const forbid[] = {
 	"PATH=",
 	"SHELL=",
 	"SHLIB_PATH=",
-	(char *) 0
+	(نویسه *) 0
 };
 
 /* these are allowed, but with no slashes inside
    (to work around security problems in GNU gettext) */
-static char * const noslash[] = {
+ایستا نویسه * ثابت noslash[] = {
 	"LANG=",
 	"LANGUAGE=",
 	"LC_",	  /* anything with the LC_ prefix */
-	(char *) 0
+	(نویسه *) 0
 };
 
 
-struct ul_env_list {
-	char	*name;
-	char	*value;
+ساختار ul_env_list {
+	نویسه	*name;
+	نویسه	*مقدار;
 
-	struct ul_env_list *next;
+	ساختار ul_env_list *next;
 };
 
 /*
  * Saves to the list and returns a pointer to the new head of the list.
  */
-static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
-					 const char *name, size_t namesz,
-					 const char *value, size_t valsz)
+ایستا ساختار ul_env_list *env_list_add( ساختار ul_env_list *ls0,
+					 ثابت نویسه *name, size_t namesz,
+					 ثابت نویسه *مقدار, size_t valsz)
 {
-	struct ul_env_list *ls;
+	ساختار ul_env_list *ls;
 
-	ls = calloc(1, sizeof(struct ul_env_list) + namesz + valsz + 2);
-	if (!ls)
-		return ls0;
+	ls = calloc(1, اندازه(ساختار ul_env_list) + namesz + valsz + 2);
+	اگر (!ls)
+		بازگشت ls0;
 
-	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
-	ls->value = ls->name + namesz + 1;
+	ls->name = ((نویسه *) ls) + اندازه(ساختار ul_env_list);
+	ls->مقدار = ls->name + namesz + 1;
 
 	memcpy(ls->name, name, namesz);
-	memcpy(ls->value, value, valsz);
+	memcpy(ls->مقدار, مقدار, valsz);
 
 	ls->next = ls0;
-	return ls;
+	بازگشت ls;
 }
 
 /*
  * Saves the @str (with the name=value string) to the @ls and returns a pointer
  * to the new head of the list.
  */
-static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
-						    const char *str)
+ایستا ساختار ul_env_list *env_list_add_from_string(ساختار ul_env_list *ls,
+						    ثابت نویسه *str)
 {
 	size_t namesz = 0, valsz = 0;
-	const char *val;
+	ثابت نویسه *val;
 
-	if (!str || !*str)
-		return ls;
+	اگر (!str || !*str)
+		بازگشت ls;
 
 	val = strchr(str, '=');
-	if (!val)
-		return ls;
+	اگر (!val)
+		بازگشت ls;
 	namesz = val - str;
 
 	val++;
 	valsz = strlen(val);
 
-	return env_list_add(ls, str, namesz, val, valsz);
+	بازگشت env_list_add(ls, str, namesz, val, valsz);
 }
 
 /*
  * Saves the @name and @value to @ls0 and returns a pointer to the new head of
  * the list.
  */
-struct ul_env_list *env_list_add_variable(
-				struct ul_env_list *ls,
-				const char *name, const char *value)
+ساختار ul_env_list *env_list_add_variable(
+				ساختار ul_env_list *ls,
+				ثابت نویسه *name, ثابت نویسه *مقدار)
 {
-	if (!name || !*name)
-		return ls;
+	اگر (!name || !*name)
+		بازگشت ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	بازگشت env_list_add(ls, name, strlen(name), مقدار, مقدار ? strlen(مقدار) : 0);
 }
 
 /*
  * Calls getenv() and adds the result to the list.
  */
-struct ul_env_list *env_list_add_getenv(struct ul_env_list *ls,
-				const char *name, const char *dflt)
+ساختار ul_env_list *env_list_add_getenv(ساختار ul_env_list *ls,
+				ثابت نویسه *name, ثابت نویسه *dflt)
 {
-	const char *val;
+	ثابت نویسه *val;
 
-	if (!name)
-		return ls;
+	اگر (!name)
+		بازگشت ls;
 
 	val = getenv(name);
-	if (!val)
+	اگر (!val)
 		val= dflt;
-	if (val)
+	اگر (val)
 		ls = env_list_add_variable(ls, name, val);
-	return ls;
+	بازگشت ls;
 }
 
 /*
  * Calls getenv() for each name (comma-separated) in @str and adds the results
  * to the list.
  */
-struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str)
+ساختار ul_env_list *env_list_add_getenvs(ساختار ul_env_list *ls, ثابت نویسه *str)
 {
-	char **all, **name;
+	نویسه **all, **name;
 
-	if (!str)
-		return ls;
+	اگر (!str)
+		بازگشت ls;
 
 	all = ul_strv_split(str, ",");
-	if (!all)
-		return ls;
+	اگر (!all)
+		بازگشت ls;
 
 	UL_STRV_FOREACH(name, all)
-		ls = env_list_add_getenv(ls, *name, NULL);
+		ls = env_list_add_getenv(ls, *name, پوچ);
 
 	ul_strv_free(all);
-	return ls;
+	بازگشت ls;
 }
 
 /*
@@ -166,49 +166,49 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
  *
  * @fd must be /proc/<pid>/environ file.
 */
-struct ul_env_list *env_list_from_fd(int fd)
+ساختار ul_env_list *env_list_from_fd(صحیح fd)
 {
-	char *buf = NULL, *p;
+	نویسه *buf = پوچ, *p;
 	ssize_t rc = 0;
-	struct ul_env_list *ls = NULL;
+	ساختار ul_env_list *ls = پوچ;
 
 	errno = 0;
-	if ((rc = ul_read_all_alloc(fd, &buf)) < 1)
-		return NULL;
+	اگر ((rc = ul_read_all_alloc(fd, &buf)) < 1)
+		بازگشت پوچ;
 	buf[rc] = '\0';
 	p = buf;
 
-	while (rc > 0) {
+	وقتی (rc > 0) {
 		ls = env_list_add_from_string(ls, p);
 		p += strlen(p) + 1;
 		rc -= strlen(p) + 1;
 	}
 
-	free(buf);
-	return ls;
+	آزاد(buf);
+	بازگشت ls;
 }
 
 /*
  * Use setenv() for all stuff in @ls.
  */
-int env_list_setenv(struct ul_env_list *ls, int overwrite)
+صحیح env_list_setenv(ساختار ul_env_list *ls, صحیح overwrite)
 {
-	int rc = 0;
+	صحیح rc = 0;
 
-	while (ls && rc == 0) {
-		if (ls->name && ls->value)
-			rc = setenv(ls->name, ls->value, overwrite);
+	وقتی (ls && rc == 0) {
+		اگر (ls->name && ls->مقدار)
+			rc = setenv(ls->name, ls->مقدار, overwrite);
 		ls = ls->next;
 	}
-	return rc;
+	بازگشت rc;
 }
 
-void env_list_free(struct ul_env_list *ls)
+تهی env_list_free(ساختار ul_env_list *ls)
 {
-	while (ls) {
-		struct ul_env_list *x = ls;
+	وقتی (ls) {
+		ساختار ul_env_list *x = ls;
 		ls = ls->next;
-		free(x);
+		آزاد(x);
 	}
 }
 
@@ -216,84 +216,84 @@ void env_list_free(struct ul_env_list *ls)
  * Removes unwanted variables from environ[]. If @org is not NULL than stores
  * unwnated variables to the list.
  */
-void __sanitize_env(struct ul_env_list **org)
+تهی __sanitize_env(ساختار ul_env_list **org)
 {
-	char **envp = environ;
-	char * const *bad;
-	char **cur;
-	int last = 0;
+	نویسه **envp = environ;
+	نویسه * ثابت *bad;
+	نویسه **cur;
+	صحیح last = 0;
 
-	for (cur = envp; *cur; cur++)
+	برای (cur = envp; *cur; cur++)
 		last++;
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = forbid; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) == 0) {
-				if (org)
+	برای (cur = envp; *cur; cur++) {
+		برای (bad = forbid; *bad; bad++) {
+			اگر (strncmp(*cur, *bad, strlen(*bad)) == 0) {
+				اگر (org)
 					*org = env_list_add_from_string(*org, *cur);
 				last = ul_remove_entry(envp, cur - envp, last);
 				cur--;
-				break;
+				بشکن;
 			}
 		}
 	}
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = noslash; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) != 0)
-				continue;
-			if (!strchr(*cur, '/'))
-				continue;  /* OK */
-			if (org)
+	برای (cur = envp; *cur; cur++) {
+		برای (bad = noslash; *bad; bad++) {
+			اگر (strncmp(*cur, *bad, strlen(*bad)) != 0)
+				ادامه;
+			اگر (!strchr(*cur, '/'))
+				ادامه;  /* OK */
+			اگر (org)
 				*org = env_list_add_from_string(*org, *cur);
 			last = ul_remove_entry(envp, cur - envp, last);
 			cur--;
-			break;
+			بشکن;
 		}
 	}
 }
 
-void sanitize_env(void)
+تهی sanitize_env(تهی)
 {
-	__sanitize_env(NULL);
+	__sanitize_env(پوچ);
 }
 
-char *safe_getenv(const char *arg)
+نویسه *safe_getenv(ثابت نویسه *arg)
 {
-	if (is_privileged_execution())
-		return NULL;
+	اگر (is_privileged_execution())
+		بازگشت پوچ;
 #ifdef HAVE_PRCTL
-	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#else
-#if (defined(linux) && defined(SYS_prctl))
-	if (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
+	اگر (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		بازگشت پوچ;
+#وگرنه
+#اگر (defined(linux) && defined(SYS_prctl))
+	اگر (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		بازگشت پوچ;
 #endif
 #endif
 #ifdef HAVE_SECURE_GETENV
-return secure_getenv(arg);
-#elif HAVE___SECURE_GETENV
-	return __secure_getenv(arg);
-#else
-	return getenv(arg);
+بازگشت secure_getenv(arg);
+#وگرنهاگر HAVE___SECURE_GETENV
+	بازگشت __secure_getenv(arg);
+#وگرنه
+	بازگشت getenv(arg);
 #endif
 }
 
 #ifdef TEST_PROGRAM_ENV
-int main(void)
+صحیح اصلی(تهی)
 {
-	char *const *bad;
-	char copy[32];
-	char *p;
-	int retval = EXIT_SUCCESS;
-	struct ul_env_list *removed = NULL;
+	نویسه *ثابت *bad;
+	نویسه copy[32];
+	نویسه *p;
+	صحیح retval = EXIT_SUCCESS;
+	ساختار ul_env_list *removed = پوچ;
 
 	/* define env. */
-	for (bad = forbid; *bad; bad++) {
+	برای (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		اگر (p)
 			*p = '\0';
 		setenv(copy, "abc", 1);
 	}
@@ -302,13 +302,13 @@ int main(void)
 	__sanitize_env(&removed);
 
 	/* check removal */
-	for (bad = forbid; *bad; bad++) {
+	برای (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		اگر (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (p) {
+		اگر (p) {
 			warnx("%s was not removed", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -318,13 +318,13 @@ int main(void)
 	env_list_setenv(removed, 0);
 
 	/* check restore */
-	for (bad = forbid; *bad; bad++) {
+	برای (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		اگر (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (!p) {
+		اگر (!p) {
 			warnx("%s was not restored", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -332,6 +332,6 @@ int main(void)
 
 	env_list_free(removed);
 
-	return retval;
+	بازگشت retval;
 }
 #endif
