@@ -63,8 +63,8 @@ UL_DEBUG_DEFINE_MASKNAMES(loopdev) = UL_DEBUG_EMPTY_MASKNAMES;
 
 static void loopdev_init_debug(void)
 {
-	if (loopdev_debug_mask)
-		return;
+	အကယ်၍ (loopdev_debug_mask)
+		ပြန်ပေး;
 	__UL_INIT_DEBUG_FROM_ENV(loopdev, LOOPDEV_DEBUG_, 0, LOOPDEV_DEBUG);
 }
 
@@ -79,17 +79,17 @@ static void loopdev_init_debug(void)
  * Calls @x and repeat on EAGAIN
  */
 #define repeat_on_eagain(x) __extension__ ({			\
-		int _c = 0, _e;					\
+		ကိန်းပြည့် _c = 0, _e;					\
 		do {						\
 			errno = 0;				\
 			_e = x;					\
-			if (_e == 0 || errno != EAGAIN)		\
-				break;				\
-			if (_c >= LOOPDEV_MAX_TRIES)		\
-				break;				\
+			အကယ်၍ (_e == 0 || errno != EAGAIN)		\
+				bha_nga;				\
+			အကယ်၍ (_c >= LOOPDEV_MAX_TRIES)		\
+				bha_nga;				\
 			xusleep(250000);			\
 			_c++;					\
-		} while (1);					\
+		} နေစဉ် (1);					\
 		_e == 0 ? 0 : errno ? -errno : -1;		\
 	})
 
@@ -105,12 +105,12 @@ static void loopdev_init_debug(void)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
+ကိန်းပြည့် loopcxt_set_device(sa_nracanaa loopdev_cxt *lc, const var_na *device)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
-	if (lc->fd >= 0) {
+	အကယ်၍ (lc->fd >= 0) {
 		close(lc->fd);
 		DBG_OBJ(CXT, lc, ul_debug("closing old open fd"));
 	}
@@ -122,58 +122,58 @@ int loopcxt_set_device(struct loopdev_cxt *lc, const char *device)
 	lc->has_info = 0;
 	lc->info_failed = 0;
 	*lc->device = '\0';
-	memset(&lc->config, 0, sizeof(lc->config));
+	memset(&lc->config, 0, parimaa_na(lc->config));
 
 	/* set new */
-	if (device) {
-		if (*device != '/') {
-			const char *dir = _PATH_DEV;
+	အကယ်၍ (device) {
+		အကယ်၍ (*device != '/') {
+			const var_na *dir = _PATH_DEV;
 
 			/* compose device name for /dev/loop<n> or /dev/loop/<n> */
-			if (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
-				if (strlen(device) < 5)
-					return -1;
+			အကယ်၍ (lc->flags & LOOPDEV_FL_DEVSUBDIR) {
+				အကယ်၍ (strlen(device) < 5)
+					ပြန်ပေး -1;
 				device += 4;
 				dir = _PATH_DEV_LOOP "/";	/* _PATH_DEV uses trailing slash */
 			}
-			snprintf(lc->device, sizeof(lc->device), "%s%s",
+			snprintf(lc->device, parimaa_na(lc->device), "%s%s",
 				dir, device);
-		} else
-			xstrncpy(lc->device, device, sizeof(lc->device));
+		} မဟုတ်ပါက
+			xstrncpy(lc->device, device, parimaa_na(lc->device));
 
 		DBG_OBJ(CXT, lc, ul_debug("%s name assigned", device));
 	}
 
 	ul_unref_path(lc->sysfs);
 	lc->sysfs = NULL;
-	return 0;
+	ပြန်ပေး 0;
 }
 
-int loopcxt_has_device(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_has_device(sa_nracanaa loopdev_cxt *lc)
 {
-	return lc && *lc->device;
+	ပြန်ပေး lc && *lc->device;
 }
 
-dev_t loopcxt_get_devno(struct loopdev_cxt *lc)
+dev_t loopcxt_get_devno(sa_nracanaa loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (!lc->devno)
+	အကယ်၍ (!lc || !loopcxt_has_device(lc))
+		ပြန်ပေး 0;
+	အကယ်၍ (!lc->devno)
 		lc->devno = sysfs_devname_to_devno(lc->device);
-	return lc->devno;
+	ပြန်ပေး lc->devno;
 }
 
-int loopcxt_is_lost(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_is_lost(sa_nracanaa loopdev_cxt *lc)
 {
-	if (!lc || !loopcxt_has_device(lc))
-		return 0;
-	if (lc->is_lost)
-		return 1;
+	အကယ်၍ (!lc || !loopcxt_has_device(lc))
+		ပြန်ပေး 0;
+	အကယ်၍ (lc->is_lost)
+		ပြန်ပေး 1;
 
 	lc->is_lost = access(lc->device, F_OK) != 0
 			&& loopcxt_get_devno(lc) != 0;
 
-	return lc->is_lost;
+	ပြန်ပေး lc->is_lost;
 }
 
 /*
@@ -190,32 +190,32 @@ int loopcxt_is_lost(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_init(struct loopdev_cxt *lc, int flags)
+ကိန်းပြည့် loopcxt_init(sa_nracanaa loopdev_cxt *lc, ကိန်းပြည့် flags)
 {
-	int rc;
-	struct stat st;
-	struct loopdev_cxt dummy = UL_LOOPDEVCXT_EMPTY;
+	ကိန်းပြည့် rc;
+	sa_nracanaa stat st;
+	sa_nracanaa loopdev_cxt dummy = UL_LOOPDEVCXT_EMPTY;
 
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
 	loopdev_init_debug();
 	DBG_OBJ(CXT, lc, ul_debug("initialize context"));
 
-	memcpy(lc, &dummy, sizeof(dummy));
+	memcpy(lc, &dummy, parimaa_na(dummy));
 	lc->flags = flags;
 
 	rc = loopcxt_set_device(lc, NULL);
-	if (rc)
-		return rc;
+	အကယ်၍ (rc)
+		ပြန်ပေး rc;
 
-	if (stat(_PATH_SYS_BLOCK, &st) || !S_ISDIR(st.st_mode)) {
+	အကယ်၍ (stat(_PATH_SYS_BLOCK, &st) || !S_ISDIR(st.st_mode)) {
 		lc->flags |= LOOPDEV_FL_NOSYSFS;
 		lc->flags &= ~LOOPDEV_FL_NOIOCTL;
 		DBG_OBJ(CXT, lc, ul_debug("init: disable /sys usage"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
+	အကယ်၍ (!(lc->flags & LOOPDEV_FL_NOSYSFS) &&
 	    get_linux_version() >= KERNEL_VERSION(2,6,37)) {
 		/*
 		 * Use only sysfs for basic information about loop devices
@@ -224,12 +224,12 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
 		DBG_OBJ(CXT, lc, ul_debug("init: ignore ioctls"));
 	}
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(_PATH_DEV_LOOPCTL, &st)) {
+	အကယ်၍ (!(lc->flags & LOOPDEV_FL_CONTROL) && !stat(_PATH_DEV_LOOPCTL, &st)) {
 		lc->flags |= LOOPDEV_FL_CONTROL;
 		DBG_OBJ(CXT, lc, ul_debug("init: loop-control detected "));
 	}
 
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -237,12 +237,12 @@ int loopcxt_init(struct loopdev_cxt *lc, int flags)
  *
  * Deinitialize loop context
  */
-void loopcxt_deinit(struct loopdev_cxt *lc)
+void loopcxt_deinit(sa_nracanaa loopdev_cxt *lc)
 {
-	int errsv = errno;
+	ကိန်းပြည့် errsv = errno;
 
-	if (!lc)
-		return;
+	အကယ်၍ (!lc)
+		ပြန်ပေး;
 
 	DBG_OBJ(CXT, lc, ul_debug("de-initialize"));
 
@@ -260,11 +260,11 @@ void loopcxt_deinit(struct loopdev_cxt *lc)
  *
  * Returns newly allocated device path.
  */
-char *loopcxt_strdup_device(struct loopdev_cxt *lc)
+var_na *loopcxt_strdup_device(sa_nracanaa loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device)
-		return NULL;
-	return strdup(lc->device);
+	အကယ်၍ (!lc || !*lc->device)
+		ပြန်ပေး NULL;
+	ပြန်ပေး strdup(lc->device);
 }
 
 /*
@@ -272,9 +272,9 @@ char *loopcxt_strdup_device(struct loopdev_cxt *lc)
  *
  * Returns pointer device name in the @lc struct.
  */
-const char *loopcxt_get_device(struct loopdev_cxt *lc)
+const var_na *loopcxt_get_device(sa_nracanaa loopdev_cxt *lc)
 {
-	return lc && *lc->device ? lc->device : NULL;
+	ပြန်ပေး lc && *lc->device ? lc->device : NULL;
 }
 
 /*
@@ -282,67 +282,67 @@ const char *loopcxt_get_device(struct loopdev_cxt *lc)
  *
  * Returns pointer to the sysfs context (see lib/sysfs.c)
  */
-static struct path_cxt *loopcxt_get_sysfs(struct loopdev_cxt *lc)
+static sa_nracanaa path_cxt *loopcxt_get_sysfs(sa_nracanaa loopdev_cxt *lc)
 {
-	if (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
-		return NULL;
+	အကယ်၍ (!lc || !*lc->device || (lc->flags & LOOPDEV_FL_NOSYSFS))
+		ပြန်ပေး NULL;
 
-	if (!lc->sysfs) {
+	အကယ်၍ (!lc->sysfs) {
 		dev_t devno = loopcxt_get_devno(lc);
-		if (!devno) {
+		အကယ်၍ (!devno) {
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: failed devname to devno"));
-			return NULL;
+			ပြန်ပေး NULL;
 		}
 
 		lc->sysfs = ul_new_sysfs_path(devno, NULL, NULL);
-		if (!lc->sysfs)
+		အကယ်၍ (!lc->sysfs)
 			DBG_OBJ(CXT, lc, ul_debug("sysfs: init failed"));
 	}
 
-	return lc->sysfs;
+	ပြန်ပေး lc->sysfs;
 }
 
-static int __loopcxt_get_fd(struct loopdev_cxt *lc, mode_t mode)
+static ကိန်းပြည့် __loopcxt_get_fd(sa_nracanaa loopdev_cxt *lc, mode_t mode)
 {
-	int old = -1;
+	ကိန်းပြည့် old = -1;
 
-	if (!lc || !*lc->device)
-		return -EINVAL;
+	အကယ်၍ (!lc || !*lc->device)
+		ပြန်ပေး -EINVAL;
 
 	/* It's okay to return a FD with read-write permissions if someone
 	 * asked for read-only, but you shouldn't do the opposite.
 	 *
 	 * (O_RDONLY is a widely usable default.)
 	 */
-	if (lc->fd >= 0 && mode == O_RDWR && lc->mode == O_RDONLY) {
+	အကယ်၍ (lc->fd >= 0 && mode == O_RDWR && lc->mode == O_RDONLY) {
 		DBG_OBJ(CXT, lc, ul_debug("closing already open device (mode mismatch)"));
 		old = lc->fd;
 		lc->fd = -1;
 	}
 
-	if (lc->fd < 0) {
+	အကယ်၍ (lc->fd < 0) {
 		lc->mode = mode;
 		lc->fd = open(lc->device, lc->mode | O_CLOEXEC);
 		DBG_OBJ(CXT, lc, ul_debug("open %s [%s]: %m", lc->device,
 				mode == O_RDONLY ? "ro" :
 				mode == O_RDWR ? "rw" : "??"));
 
-		if (lc->fd < 0 && old >= 0) {
+		အကယ်၍ (lc->fd < 0 && old >= 0) {
 			/* restore original on error */
 			lc->fd = old;
 			old = -1;
 		}
 	}
 
-	if (old >= 0)
+	အကယ်၍ (old >= 0)
 		close(old);
-	return lc->fd;
+	ပြန်ပေး lc->fd;
 }
 
 /* default is read-only file descriptor, it's enough for all ioctls */
-int loopcxt_get_fd(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_get_fd(sa_nracanaa loopdev_cxt *lc)
 {
-	return __loopcxt_get_fd(lc, O_RDONLY);
+	ပြန်ပေး __loopcxt_get_fd(lc, O_RDONLY);
 }
 
 /*
@@ -353,13 +353,13 @@ int loopcxt_get_fd(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
+ကိန်းပြည့် loopcxt_init_iterator(sa_nracanaa loopdev_cxt *lc, ကိန်းပြည့် flags)
 {
-	struct loopdev_iter *iter;
-	struct stat st;
+	sa_nracanaa loopdev_iter *iter;
+	sa_nracanaa stat st;
 
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
 
 	iter = &lc->iter;
@@ -367,22 +367,22 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
 
 	/* always zeroize
 	 */
-	memset(iter, 0, sizeof(*iter));
+	memset(iter, 0, parimaa_na(*iter));
 	iter->ncur = -1;
 	iter->flags = flags;
 	iter->default_check = 1;
 
-	if (!lc->extra_check) {
+	အကယ်၍ (!lc->extra_check) {
 		/*
 		 * Check for /dev/loop/<N> subdirectory
 		 */
-		if (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
+		အကယ်၍ (!(lc->flags & LOOPDEV_FL_DEVSUBDIR) &&
 		    stat(_PATH_DEV_LOOP, &st) == 0 && S_ISDIR(st.st_mode))
 			lc->flags |= LOOPDEV_FL_DEVSUBDIR;
 
 		lc->extra_check = 1;
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -390,24 +390,24 @@ int loopcxt_init_iterator(struct loopdev_cxt *lc, int flags)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_deinit_iterator(sa_nracanaa loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter;
+	sa_nracanaa loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
 	iter = &lc->iter;
 	DBG_OBJ(ITER, iter, ul_debug("de-initialize"));
 
 	free(iter->minors);
-	if (iter->proc)
+	အကယ်၍ (iter->proc)
 		fclose(iter->proc);
-	if (iter->sysblock)
+	အကယ်၍ (iter->sysblock)
 		closedir(iter->sysblock);
 
-	memset(iter, 0, sizeof(*iter));
-	return 0;
+	memset(iter, 0, parimaa_na(*iter));
+	ပြန်ပေး 0;
 }
 
 /*
@@ -417,36 +417,36 @@ int loopcxt_deinit_iterator(struct loopdev_cxt *lc)
  * Returns: <0 on error, 0 on success, 1 device does not match with
  *         LOOPITER_FL_{USED,FREE} flags.
  */
-static int loopiter_set_device(struct loopdev_cxt *lc, const char *device)
+static ကိန်းပြည့် loopiter_set_device(sa_nracanaa loopdev_cxt *lc, const var_na *device)
 {
-	int rc = loopcxt_set_device(lc, device);
-	int used;
+	ကိန်းပြည့် rc = loopcxt_set_device(lc, device);
+	ကိန်းပြည့် used;
 
-	if (rc)
-		return rc;
+	အကယ်၍ (rc)
+		ပြန်ပေး rc;
 
-	if (!(lc->iter.flags & LOOPITER_FL_USED) &&
+	အကယ်၍ (!(lc->iter.flags & LOOPITER_FL_USED) &&
 	    !(lc->iter.flags & LOOPITER_FL_FREE))
-		return 0;	/* caller does not care about device status */
+		ပြန်ပေး 0;	/* caller does not care about device status */
 
 	used = loopcxt_get_offset(lc, NULL) == 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_USED) && used)
-		return 0;
+	အကယ်၍ ((lc->iter.flags & LOOPITER_FL_USED) && used)
+		ပြန်ပေး 0;
 
-	if ((lc->iter.flags & LOOPITER_FL_FREE) && !used)
-		return 0;
+	အကယ်၍ ((lc->iter.flags & LOOPITER_FL_FREE) && !used)
+		ပြန်ပေး 0;
 
 	DBG_OBJ(ITER, &lc->iter, ul_debug("failed to use %s device", lc->device));
 
 	ignore_result( loopcxt_set_device(lc, NULL) );
-	return 1;
+	ပြန်ပေး 1;
 }
 
-static int cmpnum(const void *p1, const void *p2)
+static ကိန်းပြည့် cmpnum(const void *p1, const void *p2)
 {
-	return (((* (const int *) p1) > (* (const int *) p2)) -
-			((* (const int *) p1) < (* (const int *) p2)));
+	ပြန်ပေး (((* (const ကိန်းပြည့် *) p1) > (* (const ကိန်းပြည့် *) p2)) -
+			((* (const ကိန်းပြည့် *) p1) < (* (const ကိန်းပြည့် *) p2)));
 }
 
 /*
@@ -454,70 +454,70 @@ static int cmpnum(const void *p1, const void *p2)
  * We needn't full loop device names -- loop numbers (loop<N>)
  * are enough.
  */
-static int loop_scandir(const char *dirname, int **ary, int hasprefix)
+static ကိန်းပြည့် loop_scandir(const var_na *dirname, ကိန်းပြည့် **ary, ကိန်းပြည့် hasprefix)
 {
 	DIR *dir;
-	struct dirent *d;
-	unsigned int n, count = 0, arylen = 0;
+	sa_nracanaa dirent *d;
+	unsigned ကိန်းပြည့် n, count = 0, arylen = 0;
 
-	if (!dirname || !ary)
-		return 0;
+	အကယ်၍ (!dirname || !ary)
+		ပြန်ပေး 0;
 
 	DBG(ITER, ul_debug("scan dir: %s", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return 0;
+	အကယ်၍ (!dir)
+		ပြန်ပေး 0;
 	free(*ary);
 	*ary = NULL;
 
-	while((d = readdir(dir))) {
+	နေစဉ်((d = readdir(dir))) {
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
+		အကယ်၍ (d->d_type != DT_BLK && d->d_type != DT_UNKNOWN &&
 		    d->d_type != DT_LNK)
 			continue;
 #endif
-		if (is_dotdir_dirent(d))
+		အကယ်၍ (is_dotdir_dirent(d))
 			continue;
 
-		if (hasprefix) {
+		အကယ်၍ (hasprefix) {
 			/* /dev/loop<N> */
-			if (sscanf(d->d_name, "loop%u", &n) != 1)
+			အကယ်၍ (sscanf(d->d_name, "loop%u", &n) != 1)
 				continue;
-		} else {
+		} မဟုတ်ပါက {
 			/* /dev/loop/<N> */
-			char *end = NULL;
+			var_na *end = NULL;
 
 			errno = 0;
 			n = strtol(d->d_name, &end, 10);
-			if (d->d_name == end || (end && *end) || errno)
+			အကယ်၍ (d->d_name == end || (end && *end) || errno)
 				continue;
 		}
-		if (n < LOOPDEV_DEFAULT_NNODES)
+		အကယ်၍ (n < LOOPDEV_DEFAULT_NNODES)
 			continue;			/* ignore loop<0..7> */
 
-		if (count + 1 > arylen) {
-			int *tmp;
+		အကယ်၍ (count + 1 > arylen) {
+			ကိန်းပြည့် *tmp;
 
 			arylen += 1;
 
-			tmp = reallocarray(*ary, arylen, sizeof(int));
-			if (!tmp) {
+			tmp = reallocarray(*ary, arylen, parimaa_na(ကိန်းပြည့်));
+			အကယ်၍ (!tmp) {
 				free(*ary);
 				*ary = NULL;
 				closedir(dir);
-				return -1;
+				ပြန်ပေး -1;
 			}
 			*ary = tmp;
 		}
-		if (*ary)
+		အကယ်၍ (*ary)
 			(*ary)[count++] = n;
 	}
-	if (count && *ary)
-		qsort(*ary, count, sizeof(int), cmpnum);
+	အကယ်၍ (count && *ary)
+		qsort(*ary, count, parimaa_na(ကိန်းပြည့်), cmpnum);
 
 	closedir(dir);
-	return count;
+	ပြန်ပေး count;
 }
 
 /*
@@ -525,34 +525,34 @@ static int loop_scandir(const char *dirname, int **ary, int hasprefix)
  *
  * Loop devices smaller than 512 bytes are invisible for this function.
  */
-static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
+static ကိန်းပြည့် loopcxt_next_from_proc(sa_nracanaa loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter = &lc->iter;
-	char buf[BUFSIZ];
+	sa_nracanaa loopdev_iter *iter = &lc->iter;
+	var_na buf[BUFSIZ];
 
 	DBG_OBJ(ITER, iter, ul_debug("scan /proc/partitions"));
 
-	if (!iter->proc)
+	အကယ်၍ (!iter->proc)
 		iter->proc = fopen(_PATH_PROC_PARTITIONS, "r" UL_CLOEXECSTR);
-	if (!iter->proc)
-		return 1;
+	အကယ်၍ (!iter->proc)
+		ပြန်ပေး 1;
 
-	while (fgets(buf, sizeof(buf), iter->proc)) {
-		unsigned int m;
-		char name[128 + 1];
+	နေစဉ် (fgets(buf, parimaa_na(buf), iter->proc)) {
+		unsigned ကိန်းပြည့် m;
+		var_na name[128 + 1];
 
 
-		if (sscanf(buf, " %u %*s %*s %128[^\n ]",
+		အကယ်၍ (sscanf(buf, " %u %*s %*s %128[^\n ]",
 			   &m, name) != 2 || m != LOOPDEV_MAJOR)
 			continue;
 
 		DBG_OBJ(ITER, iter, ul_debug("checking %s", name));
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		အကယ်၍ (loopiter_set_device(lc, name) == 0)
+			ပြန်ပေး 0;
 	}
 
-	return 1;
+	ပြန်ပေး 1;
 }
 
 /*
@@ -561,40 +561,40 @@ static int loopcxt_next_from_proc(struct loopdev_cxt *lc)
  *
  * This is preferred method.
  */
-static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
+static ကိန်းပြည့် loopcxt_next_from_sysfs(sa_nracanaa loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter = &lc->iter;
-	struct dirent *d;
-	int fd;
+	sa_nracanaa loopdev_iter *iter = &lc->iter;
+	sa_nracanaa dirent *d;
+	ကိန်းပြည့် fd;
 
 	DBG_OBJ(ITER, iter, ul_debug("scanning /sys/block"));
 
-	if (!iter->sysblock)
+	အကယ်၍ (!iter->sysblock)
 		iter->sysblock = opendir(_PATH_SYS_BLOCK);
 
-	if (!iter->sysblock)
-		return 1;
+	အကယ်၍ (!iter->sysblock)
+		ပြန်ပေး 1;
 
 	fd = dirfd(iter->sysblock);
 
-	while ((d = readdir(iter->sysblock))) {
-		char name[NAME_MAX + 18 + 1];
-		struct stat st;
+	နေစဉ် ((d = readdir(iter->sysblock))) {
+		var_na name[NAME_MAX + 18 + 1];
+		sa_nracanaa stat st;
 
 		DBG_OBJ(ITER, iter, ul_debug("check %s", d->d_name));
 
-		if (is_dotdir_dirent(d) || strncmp(d->d_name, "loop", 4) != 0)
+		အကယ်၍ (is_dotdir_dirent(d) || strncmp(d->d_name, "loop", 4) != 0)
 			continue;
 
-		snprintf(name, sizeof(name), "%s/loop/backing_file", d->d_name);
-		if (fstatat(fd, name, &st, 0) != 0)
+		snprintf(name, parimaa_na(name), "%s/loop/backing_file", d->d_name);
+		အကယ်၍ (fstatat(fd, name, &st, 0) != 0)
 			continue;
 
-		if (loopiter_set_device(lc, d->d_name) == 0)
-			return 0;
+		အကယ်၍ (loopiter_set_device(lc, d->d_name) == 0)
+			ပြန်ပေး 0;
 	}
 
-	return 1;
+	ပြန်ပေး 1;
 }
 
 /*
@@ -604,101 +604,101 @@ static int loopcxt_next_from_sysfs(struct loopdev_cxt *lc)
  *          about the current loop device are available by
  *          loopcxt_get_{fd,backing_file,device,offset, ...} functions.
  */
-int loopcxt_next(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_next(sa_nracanaa loopdev_cxt *lc)
 {
-	struct loopdev_iter *iter;
+	sa_nracanaa loopdev_iter *iter;
 
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
 
 	iter = &lc->iter;
-	if (iter->done)
-		return 1;
+	အကယ်၍ (iter->done)
+		ပြန်ပေး 1;
 
 	DBG_OBJ(ITER, iter, ul_debug("next"));
 
 	/* A) Look for used loop devices in /proc/partitions ("losetup -a" only)
 	 */
-	if (iter->flags & LOOPITER_FL_USED) {
-		int rc;
+	အကယ်၍ (iter->flags & LOOPITER_FL_USED) {
+		ကိန်းပြည့် rc;
 
-		if (loopcxt_sysfs_available(lc))
+		အကယ်၍ (loopcxt_sysfs_available(lc))
 			rc = loopcxt_next_from_sysfs(lc);
-		else
+		မဟုတ်ပါက
 			rc = loopcxt_next_from_proc(lc);
-		if (rc == 0)
-			return 0;
+		အကယ်၍ (rc == 0)
+			ပြန်ပေး 0;
 		goto done;
 	}
 
 	/* B) Classic way, try first eight loop devices (default number
 	 *    of loop devices). This is enough for 99% of all cases.
 	 */
-	if (iter->default_check) {
+	အကယ်၍ (iter->default_check) {
 		DBG_OBJ(ITER, iter, ul_debug("next: default check"));
-		for (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
+		အတွက် (++iter->ncur; iter->ncur < LOOPDEV_DEFAULT_NNODES;
 							iter->ncur++) {
-			char name[16];
-			snprintf(name, sizeof(name), "loop%d", iter->ncur);
+			var_na name[16];
+			snprintf(name, parimaa_na(name), "loop%d", iter->ncur);
 
-			if (loopiter_set_device(lc, name) == 0)
-				return 0;
+			အကယ်၍ (loopiter_set_device(lc, name) == 0)
+				ပြန်ပေး 0;
 		}
 		iter->default_check = 0;
 	}
 
 	/* C) the worst possibility, scan whole /dev or /dev/loop/<N>
 	 */
-	if (!iter->minors) {
+	အကယ်၍ (!iter->minors) {
 		DBG_OBJ(ITER, iter, ul_debug("next: scanning /dev"));
 		iter->nminors = (lc->flags & LOOPDEV_FL_DEVSUBDIR) ?
 			loop_scandir(_PATH_DEV_LOOP, &iter->minors, 0) :
 			loop_scandir(_PATH_DEV, &iter->minors, 1);
 		iter->ncur = -1;
 	}
-	for (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
-		char name[16];
-		snprintf(name, sizeof(name), "loop%d", iter->minors[iter->ncur]);
+	အတွက် (++iter->ncur; iter->ncur < iter->nminors; iter->ncur++) {
+		var_na name[16];
+		snprintf(name, parimaa_na(name), "loop%d", iter->minors[iter->ncur]);
 
-		if (loopiter_set_device(lc, name) == 0)
-			return 0;
+		အကယ်၍ (loopiter_set_device(lc, name) == 0)
+			ပြန်ပေး 0;
 	}
 done:
 	loopcxt_deinit_iterator(lc);
-	return 1;
+	ပြန်ပေး 1;
 }
 
 /*
  * @device: path to device
  */
-int is_loopdev(const char *device)
+ကိန်းပြည့် is_loopdev(const var_na *device)
 {
-	struct stat st;
-	int rc = 0;
+	sa_nracanaa stat st;
+	ကိန်းပြည့် rc = 0;
 
-	if (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
+	အကယ်၍ (!device || stat(device, &st) != 0 || !S_ISBLK(st.st_mode))
 		rc = 0;
-	else if (major(st.st_rdev) == LOOPDEV_MAJOR)
+	မဟုတ်ပါက အကယ်၍ (major(st.st_rdev) == LOOPDEV_MAJOR)
 		rc = 1;
-	else if (sysfs_devno_is_wholedisk(st.st_rdev)) {
+	မဟုတ်ပါက အကယ်၍ (sysfs_devno_is_wholedisk(st.st_rdev)) {
 		/* It's possible that kernel creates a device with a different
 		 * major number ... check by /sys it's really loop device.
 		 */
-		char name[PATH_MAX], *cn, *p = NULL;
+		var_na name[PATH_MAX], *cn, *p = NULL;
 
-		snprintf(name, sizeof(name), _PATH_SYS_DEVBLOCK "/%u:%u",
+		snprintf(name, parimaa_na(name), _PATH_SYS_DEVBLOCK "/%u:%u",
 				major(st.st_rdev), minor(st.st_rdev));
 		cn = ul_canonicalize_path(name);
-		if (cn)
+		အကယ်၍ (cn)
 			p = stripoff_last_component(cn);
 		rc = p && ul_startswith(p, "loop");
 		free(cn);
 	}
 
-	if (rc == 0)
+	အကယ်၍ (rc == 0)
 		errno = ENODEV;
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -706,33 +706,33 @@ int is_loopdev(const char *device)
  *
  * Returns result from LOOP_GET_STAT64 ioctl or NULL on error.
  */
-struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
+sa_nracanaa loop_info64 *loopcxt_get_info(sa_nracanaa loopdev_cxt *lc)
 {
-	int fd;
+	ကိန်းပြည့် fd;
 
-	if (!lc || lc->info_failed) {
+	အကယ်၍ (!lc || lc->info_failed) {
 		errno = EINVAL;
-		return NULL;
+		ပြန်ပေး NULL;
 	}
 	errno = 0;
-	if (lc->has_info)
-		return &lc->config.info;
+	အကယ်၍ (lc->has_info)
+		ပြန်ပေး &lc->config.info;
 
 	fd = loopcxt_get_fd(lc);
-	if (fd < 0)
-		return NULL;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး NULL;
 
-	if (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
+	အကယ်၍ (ioctl(fd, LOOP_GET_STATUS64, &lc->config.info) == 0) {
 		lc->has_info = 1;
 		lc->info_failed = 0;
 		DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 OK"));
-		return &lc->config.info;
+		ပြန်ပေး &lc->config.info;
 	}
 
 	lc->info_failed = 1;
 	DBG_OBJ(CXT, lc, ul_debug("reading loop_info64 FAILED"));
 
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
 /*
@@ -741,30 +741,30 @@ struct loop_info64 *loopcxt_get_info(struct loopdev_cxt *lc)
  * Returns (allocated) string with path to the file associated
  * with the current loop device.
  */
-char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
+var_na *loopcxt_get_backing_file(sa_nracanaa loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	char *res = NULL;
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	var_na *res = NULL;
 
-	if (sysfs)
+	အကယ်၍ (sysfs)
 		/*
 		 * This is always preferred, the loop_info64
 		 * has too small buffer for the filename.
 		 */
 		ul_path_read_string(sysfs, &res, "loop/backing_file");
 
-	if (!res && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
+	အကယ်၍ (!res && loopcxt_ioctl_enabled(lc)) {
+		sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
 
-		if (lo) {
+		အကယ်၍ (lo) {
 			lo->lo_file_name[LO_NAME_SIZE - 2] = '*';
 			lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
-			res = strdup((char *) lo->lo_file_name);
+			res = strdup((var_na *) lo->lo_file_name);
 		}
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_file [%s]", res));
-	return res;
+	ပြန်ပေး res;
 }
 
 /*
@@ -773,18 +773,18 @@ char *loopcxt_get_backing_file(struct loopdev_cxt *lc)
  * Returns (allocated) string with loop reference. The same as backing file by
  * default.
  */
-char *loopcxt_get_refname(struct loopdev_cxt *lc)
+var_na *loopcxt_get_refname(sa_nracanaa loopdev_cxt *lc)
 {
-	char *res = NULL;
-	struct loop_info64 *lo = loopcxt_get_info(lc);
+	var_na *res = NULL;
+	sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo) {
+	အကယ်၍ (lo) {
 		lo->lo_file_name[LO_NAME_SIZE - 1] = '\0';
-		res = strdup((char *) lo->lo_file_name);
+		res = strdup((var_na *) lo->lo_file_name);
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_refname [%s]", res));
-	return res;
+	ပြန်ပေး res;
 }
 
 /*
@@ -793,27 +793,27 @@ char *loopcxt_get_refname(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
+ကိန်းပြည့် loopcxt_get_offset(sa_nracanaa loopdev_cxt *lc, uint64_t *offset)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ကိန်းပြည့် rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, offset, "loop/offset") == 0)
+	အကယ်၍ (sysfs)
+		အကယ်၍ (ul_path_read_u64(sysfs, offset, "loop/offset") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (offset)
+	အကယ်၍ (rc && loopcxt_ioctl_enabled(lc)) {
+		sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+		အကယ်၍ (lo) {
+			အကယ်၍ (offset)
 				*offset = lo->lo_offset;
 			rc = 0;
-		} else
+		} မဟုတ်ပါက
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_offset [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -822,31 +822,31 @@ int loopcxt_get_offset(struct loopdev_cxt *lc, uint64_t *offset)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
+ကိန်းပြည့် loopcxt_get_blocksize(sa_nracanaa loopdev_cxt *lc, uint64_t *blocksize)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ကိန်းပြည့် rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
+	အကယ်၍ (sysfs)
+		အကယ်၍ (ul_path_read_u64(sysfs, blocksize, "queue/logical_block_size") == 0)
 			rc = 0;
 
 	/* Fallback based on BLKSSZGET ioctl */
-	if (rc) {
-		int fd = loopcxt_get_fd(lc);
-		int sz = 0;
+	အကယ်၍ (rc) {
+		ကိန်းပြည့် fd = loopcxt_get_fd(lc);
+		ကိန်းပြည့် sz = 0;
 
-		if (fd < 0)
-			return -EINVAL;
+		အကယ်၍ (fd < 0)
+			ပြန်ပေး -EINVAL;
 		rc = blkdev_get_sector_size(fd, &sz);
-		if (rc)
-			return rc;
+		အကယ်၍ (rc)
+			ပြန်ပေး rc;
 
 		*blocksize = sz;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_blocksize [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -855,27 +855,27 @@ int loopcxt_get_blocksize(struct loopdev_cxt *lc, uint64_t *blocksize)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
+ကိန်းပြည့် loopcxt_get_sizelimit(sa_nracanaa loopdev_cxt *lc, uint64_t *size)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
-	int rc = -EINVAL;
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	ကိန်းပြည့် rc = -EINVAL;
 
-	if (sysfs)
-		if (ul_path_read_u64(sysfs, size, "loop/sizelimit") == 0)
+	အကယ်၍ (sysfs)
+		အကယ်၍ (ul_path_read_u64(sysfs, size, "loop/sizelimit") == 0)
 			rc = 0;
 
-	if (rc && loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo) {
-			if (size)
+	အကယ်၍ (rc && loopcxt_ioctl_enabled(lc)) {
+		sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+		အကယ်၍ (lo) {
+			အကယ်၍ (size)
 				*size = lo->lo_sizelimit;
 			rc = 0;
-		} else
+		} မဟုတ်ပါက
 			rc = -errno;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("get_sizelimit [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -886,21 +886,21 @@ int loopcxt_get_sizelimit(struct loopdev_cxt *lc, uint64_t *size)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
+ကိန်းပြည့် loopcxt_get_encrypt_type(sa_nracanaa loopdev_cxt *lc, uint32_t *type)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+	ကိန်းပြည့် rc;
 
 	/* not provided by sysfs */
-	if (lo) {
-		if (type)
+	အကယ်၍ (lo) {
+		အကယ်၍ (type)
 			*type = lo->lo_encrypt_type;
 		rc = 0;
-	} else
+	} မဟုတ်ပါက
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_encrypt_type [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -910,15 +910,15 @@ int loopcxt_get_encrypt_type(struct loopdev_cxt *lc, uint32_t *type)
  *
  * Returns: <0 on error, 0 on success
  */
-const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
+const var_na *loopcxt_get_crypt_name(sa_nracanaa loopdev_cxt *lc)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
+	sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
 
-	if (lo)
-		return (char *) lo->lo_crypt_name;
+	အကယ်၍ (lo)
+		ပြန်ပေး (var_na *) lo->lo_crypt_name;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_crypt_name failed"));
-	return NULL;
+	ပြန်ပေး NULL;
 }
 
 /*
@@ -927,20 +927,20 @@ const char *loopcxt_get_crypt_name(struct loopdev_cxt *lc)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
+ကိန်းပြည့် loopcxt_get_backing_devno(sa_nracanaa loopdev_cxt *lc, dev_t *devno)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+	ကိန်းပြည့် rc;
 
-	if (lo) {
-		if (devno)
+	အကယ်၍ (lo) {
+		အကယ်၍ (devno)
 			*devno = lo->lo_device;
 		rc = 0;
-	} else
+	} မဟုတ်ပါက
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_devno [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -949,20 +949,20 @@ int loopcxt_get_backing_devno(struct loopdev_cxt *lc, dev_t *devno)
  *
  * Returns: <0 on error, 0 on success
  */
-int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
+ကိန်းပြည့် loopcxt_get_backing_inode(sa_nracanaa loopdev_cxt *lc, ino_t *ino)
 {
-	struct loop_info64 *lo = loopcxt_get_info(lc);
-	int rc;
+	sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+	ကိန်းပြည့် rc;
 
-	if (lo) {
-		if (ino)
+	အကယ်၍ (lo) {
+		အကယ်၍ (ino)
 			*ino = lo->lo_inode;
 		rc = 0;
-	} else
+	} မဟုတ်ပါက
 		rc = -errno;
 
 	DBG_OBJ(CXT, lc, ul_debug("get_backing_inode [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -982,20 +982,20 @@ int loopcxt_get_backing_inode(struct loopdev_cxt *lc, ino_t *ino)
  *
  *  See kernel commit e03c8dd14915fabc101aa495828d58598dc5af98.
  */
-int loopmod_supports_partscan(void)
+ကိန်းပြည့် loopmod_supports_partscan(void)
 {
-	int rc, ret = 0;
+	ကိန်းပြည့် rc, ret = 0;
 	FILE *f;
 
-	if (get_linux_version() >= KERNEL_VERSION(3,2,0))
-		return 1;
+	အကယ်၍ (get_linux_version() >= KERNEL_VERSION(3,2,0))
+		ပြန်ပေး 1;
 
 	f = fopen("/sys/module/loop/parameters/max_part", "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	အကယ်၍ (!f)
+		ပြန်ပေး 0;
 	rc = fscanf(f, "%d", &ret);
 	fclose(f);
-	return rc == 1 ? ret : 0;
+	ပြန်ပေး rc == 1 ? ret : 0;
 }
 
 /*
@@ -1004,19 +1004,19 @@ int loopmod_supports_partscan(void)
  * Returns: 1 if the partscan flags is set *or* (for old kernels) partitions
  * scanning is enabled for all loop devices.
  */
-int loopcxt_is_partscan(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_is_partscan(sa_nracanaa loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
+	အကယ်၍ (sysfs) {
 		/* kernel >= 3.2 */
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/partscan") == 0)
-			return fl;
+		ကိန်းပြည့် fl;
+		အကယ်၍ (ul_path_read_s32(sysfs, &fl, "loop/partscan") == 0)
+			ပြန်ပေး fl;
 	}
 
 	/* old kernels (including kernels without loopN/loop/<flags> directory */
-	return loopmod_supports_partscan();
+	ပြန်ပေး loopmod_supports_partscan();
 }
 
 /*
@@ -1024,22 +1024,22 @@ int loopcxt_is_partscan(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the autoclear flags is set.
  */
-int loopcxt_is_autoclear(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_is_autoclear(sa_nracanaa loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/autoclear") == 0)
-			return fl;
+	အကယ်၍ (sysfs) {
+		ကိန်းပြည့် fl;
+		အကယ်၍ (ul_path_read_s32(sysfs, &fl, "loop/autoclear") == 0)
+			ပြန်ပေး fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_AUTOCLEAR;
+	အကယ်၍ (loopcxt_ioctl_enabled(lc)) {
+		sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+		အကယ်၍ (lo)
+			ပြန်ပေး lo->lo_flags & LO_FLAGS_AUTOCLEAR;
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1047,22 +1047,22 @@ int loopcxt_is_autoclear(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the readonly flags is set.
  */
-int loopcxt_is_readonly(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_is_readonly(sa_nracanaa loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "ro") == 0)
-			return fl;
+	အကယ်၍ (sysfs) {
+		ကိန်းပြည့် fl;
+		အကယ်၍ (ul_path_read_s32(sysfs, &fl, "ro") == 0)
+			ပြန်ပေး fl;
 	}
 
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_READ_ONLY;
+	အကယ်၍ (loopcxt_ioctl_enabled(lc)) {
+		sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+		အကယ်၍ (lo)
+			ပြန်ပေး lo->lo_flags & LO_FLAGS_READ_ONLY;
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1070,21 +1070,21 @@ int loopcxt_is_readonly(struct loopdev_cxt *lc)
  *
  * Returns: 1 if the dio flags is set.
  */
-int loopcxt_is_dio(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_is_dio(sa_nracanaa loopdev_cxt *lc)
 {
-	struct path_cxt *sysfs = loopcxt_get_sysfs(lc);
+	sa_nracanaa path_cxt *sysfs = loopcxt_get_sysfs(lc);
 
-	if (sysfs) {
-		int fl;
-		if (ul_path_read_s32(sysfs, &fl, "loop/dio") == 0)
-			return fl;
+	အကယ်၍ (sysfs) {
+		ကိန်းပြည့် fl;
+		အကယ်၍ (ul_path_read_s32(sysfs, &fl, "loop/dio") == 0)
+			ပြန်ပေး fl;
 	}
-	if (loopcxt_ioctl_enabled(lc)) {
-		struct loop_info64 *lo = loopcxt_get_info(lc);
-		if (lo)
-			return lo->lo_flags & LO_FLAGS_DIRECT_IO;
+	အကယ်၍ (loopcxt_ioctl_enabled(lc)) {
+		sa_nracanaa loop_info64 *lo = loopcxt_get_info(lc);
+		အကယ်၍ (lo)
+			ပြန်ပေး lo->lo_flags & LO_FLAGS_DIRECT_IO;
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1105,84 +1105,84 @@ int loopcxt_is_dio(struct loopdev_cxt *lc)
  * Don't forget that old kernels provide very restricted (in size) backing
  * filename by LOOP_GET_STAT64 ioctl only.
  */
-int loopcxt_is_used(struct loopdev_cxt *lc,
-		    struct stat *st,
-		    const char *backing_file,
+ကိန်းပြည့် loopcxt_is_used(sa_nracanaa loopdev_cxt *lc,
+		    sa_nracanaa stat *st,
+		    const var_na *backing_file,
 		    uint64_t offset,
 		    uint64_t sizelimit,
-		    int flags)
+		    ကိန်းပြည့် flags)
 {
 	ino_t ino = 0;
 	dev_t dev = 0;
 
-	if (!lc)
-		return 0;
+	အကယ်၍ (!lc)
+		ပြန်ပေး 0;
 
 	DBG_OBJ(CXT, lc, ul_debug("checking %s vs. %s",
 				loopcxt_get_device(lc),
 				backing_file));
 
-	if (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
+	အကယ်၍ (st && loopcxt_get_backing_inode(lc, &ino) == 0 &&
 		  loopcxt_get_backing_devno(lc, &dev) == 0) {
 
-		if (ino == st->st_ino && dev == st->st_dev)
+		အကယ်၍ (ino == st->st_ino && dev == st->st_dev)
 			goto found;
 
 		/* don't use filename if we have devno and inode */
-		return 0;
+		ပြန်ပေး 0;
 	}
 
 	/* poor man's solution */
-	if (backing_file) {
-		char *name = loopcxt_get_backing_file(lc);
-		int rc = name && strcmp(name, backing_file) == 0;
+	အကယ်၍ (backing_file) {
+		var_na *name = loopcxt_get_backing_file(lc);
+		ကိန်းပြည့် rc = name && strcmp(name, backing_file) == 0;
 
 		free(name);
-		if (rc)
+		အကယ်၍ (rc)
 			goto found;
 	}
 
-	return 0;
+	ပြန်ပေး 0;
 found:
-	if (flags & LOOPDEV_FL_OFFSET) {
+	အကယ်၍ (flags & LOOPDEV_FL_OFFSET) {
 		uint64_t off = 0;
 
-		int rc = loopcxt_get_offset(lc, &off) == 0 && off == offset;
+		ကိန်းပြည့် rc = loopcxt_get_offset(lc, &off) == 0 && off == offset;
 
-		if (rc && flags & LOOPDEV_FL_SIZELIMIT) {
+		အကယ်၍ (rc && flags & LOOPDEV_FL_SIZELIMIT) {
 			uint64_t sz = 0;
 
-			return loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
+			ပြန်ပေး loopcxt_get_sizelimit(lc, &sz) == 0 && sz == sizelimit;
 		}
-		return rc;
+		ပြန်ပေး rc;
 	}
-	return 1;
+	ပြန်ပေး 1;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_offset(struct loopdev_cxt *lc, uint64_t offset)
+ကိန်းပြည့် loopcxt_set_offset(sa_nracanaa loopdev_cxt *lc, uint64_t offset)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 	lc->config.info.lo_offset = offset;
 
 	DBG_OBJ(CXT, lc, ul_debug("set offset=%"PRIu64, offset));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
+ကိန်းပြည့် loopcxt_set_sizelimit(sa_nracanaa loopdev_cxt *lc, uint64_t sizelimit)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 	lc->config.info.lo_sizelimit = sizelimit;
 
 	DBG_OBJ(CXT, lc, ul_debug("set sizelimit=%"PRIu64, sizelimit));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1191,14 +1191,14 @@ int loopcxt_set_sizelimit(struct loopdev_cxt *lc, uint64_t sizelimit)
  *
  * The setting is removed by loopcxt_set_device() loopcxt_next()!
  */
-int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+ကိန်းပြည့် loopcxt_set_blocksize(sa_nracanaa loopdev_cxt *lc, uint64_t blocksize)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 	lc->blocksize = blocksize;
 
 	DBG_OBJ(CXT, lc, ul_debug("set blocksize=%"PRIu64, blocksize));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1209,14 +1209,14 @@ int loopcxt_set_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
+ကိန်းပြည့် loopcxt_set_flags(sa_nracanaa loopdev_cxt *lc, uint32_t flags)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 	lc->config.info.lo_flags = flags;
 
 	DBG_OBJ(CXT, lc, ul_debug("set flags=%u", (unsigned) flags));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1228,17 +1228,17 @@ int loopcxt_set_flags(struct loopdev_cxt *lc, uint32_t flags)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
+ကိန်းပြည့် loopcxt_set_refname(sa_nracanaa loopdev_cxt *lc, const var_na *refname)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
-	memset(lc->config.info.lo_file_name, 0, sizeof(lc->config.info.lo_file_name));
-	if (refname)
-		xstrncpy((char *)lc->config.info.lo_file_name, refname, LO_NAME_SIZE);
+	memset(lc->config.info.lo_file_name, 0, parimaa_na(lc->config.info.lo_file_name));
+	အကယ်၍ (refname)
+		xstrncpy((var_na *)lc->config.info.lo_file_name, refname, LO_NAME_SIZE);
 
-	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (char *)lc->config.info.lo_file_name));
-	return 0;
+	DBG_OBJ(CXT, lc, ul_debug("set refname=%s", (var_na *)lc->config.info.lo_file_name));
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1249,23 +1249,23 @@ int loopcxt_set_refname(struct loopdev_cxt *lc, const char *refname)
  *
  * Returns: 0 on success, <0 on error.
  */
-int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
+ကိန်းပြည့် loopcxt_set_backing_file(sa_nracanaa loopdev_cxt *lc, const var_na *filename)
 {
-	if (!lc)
-		return -EINVAL;
+	အကယ်၍ (!lc)
+		ပြန်ပေး -EINVAL;
 
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+	အကယ်၍ (lc->flags & LOOPDEV_FL_NOFOLLOW)
 		lc->filename = strdup(filename);
-	else
+	မဟုတ်ပါက
 		lc->filename = ul_canonicalize_path(filename);
-	if (!lc->filename)
-		return -errno;
+	အကယ်၍ (!lc->filename)
+		ပြန်ပေး -errno;
 
-	if (!lc->config.info.lo_file_name[0])
+	အကယ်၍ (!lc->config.info.lo_file_name[0])
 		loopcxt_set_refname(lc, lc->filename);
 
 	DBG_OBJ(CXT, lc, ul_debug("set backing file=%s", lc->filename));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1281,80 +1281,80 @@ int loopcxt_set_backing_file(struct loopdev_cxt *lc, const char *filename)
  * it closes the device when it exits and whatever consumes the device
  * next will re-open it, causing the resync.
  */
-static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
+static ကိန်းပြည့် loopcxt_check_size(sa_nracanaa loopdev_cxt *lc, ကိန်းပြည့် file_fd)
 {
 	uint64_t size, expected_size;
-	int dev_fd;
-	struct stat st;
+	ကိန်းပြည့် dev_fd;
+	sa_nracanaa stat st;
 
-	if (!lc->config.info.lo_offset && !lc->config.info.lo_sizelimit)
-		return 0;
+	အကယ်၍ (!lc->config.info.lo_offset && !lc->config.info.lo_sizelimit)
+		ပြန်ပေး 0;
 
-	if (fstat(file_fd, &st)) {
+	အကယ်၍ (fstat(file_fd, &st)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to fstat backing file"));
-		return -errno;
+		ပြန်ပေး -errno;
 	}
-	if (S_ISBLK(st.st_mode)) {
-		if (blkdev_get_size(file_fd, &expected_size)) {
+	အကယ်၍ (S_ISBLK(st.st_mode)) {
+		အကယ်၍ (blkdev_get_size(file_fd, &expected_size)) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to determine device size"));
-			return -errno;
+			ပြန်ပေး -errno;
 		}
-	} else
+	} မဟုတ်ပါက
 		expected_size = st.st_size;
 
-	if (expected_size == 0 || expected_size <= lc->config.info.lo_offset) {
+	အကယ်၍ (expected_size == 0 || expected_size <= lc->config.info.lo_offset) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine expected size"));
-		return 0;	/* ignore this error */
+		ပြန်ပေး 0;	/* ignore this error */
 	}
 
-	if (lc->config.info.lo_offset > 0)
+	အကယ်၍ (lc->config.info.lo_offset > 0)
 		expected_size -= lc->config.info.lo_offset;
 
-	if (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_size)
+	အကယ်၍ (lc->config.info.lo_sizelimit > 0 && lc->config.info.lo_sizelimit < expected_size)
 		expected_size = lc->config.info.lo_sizelimit;
 
 	dev_fd = loopcxt_get_fd(lc);
-	if (dev_fd < 0) {
+	အကယ်၍ (dev_fd < 0) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to get loop FD"));
-		return -errno;
+		ပြန်ပေး -errno;
 	}
 
-	if (blkdev_get_size(dev_fd, &size)) {
+	အကယ်၍ (blkdev_get_size(dev_fd, &size)) {
 		DBG_OBJ(CXT, lc, ul_debug("failed to determine loopdev size"));
-		return -errno;
+		ပြန်ပေး -errno;
 	}
 
 	/* It's block device, so, align to 512-byte sectors */
-	if (expected_size % 512) {
+	အကယ်၍ (expected_size % 512) {
 		DBG_OBJ(CXT, lc, ul_debug("expected size misaligned to 512-byte sectors"));
 		expected_size = (expected_size >> 9) << 9;
 	}
 
-	if (expected_size != size) {
+	အကယ်၍ (expected_size != size) {
 		DBG_OBJ(CXT, lc, ul_debug("warning: loopdev and expected "
 				      "size mismatch (%ju/%ju)",
 				      size, expected_size));
 
-		if (loopcxt_ioctl_capacity(lc)) {
+		အကယ်၍ (loopcxt_ioctl_capacity(lc)) {
 			/* ioctl not available */
-			if (errno == ENOTTY || errno == EINVAL)
+			အကယ်၍ (errno == ENOTTY || errno == EINVAL)
 				errno = ERANGE;
-			return -errno;
+			ပြန်ပေး -errno;
 		}
 
-		if (blkdev_get_size(dev_fd, &size))
-			return -errno;
+		အကယ်၍ (blkdev_get_size(dev_fd, &size))
+			ပြန်ပေး -errno;
 
-		if (expected_size != size) {
+		အကယ်၍ (expected_size != size) {
 			errno = ERANGE;
 			DBG_OBJ(CXT, lc, ul_debug("failed to set loopdev size, "
 					"size: %ju, expected: %ju",
 					size, expected_size));
-			return -errno;
+			ပြန်ပေး -errno;
 		}
 	}
 
-	return 0;
+	ပြန်ပေး 0;
 }
 
 
@@ -1376,66 +1376,66 @@ static int loopcxt_check_size(struct loopdev_cxt *lc, int file_fd)
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_setup_device(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_setup_device(sa_nracanaa loopdev_cxt *lc)
 {
-	int file_fd, dev_fd;
+	ကိန်းပြည့် file_fd, dev_fd;
 	mode_t flags = O_CLOEXEC, mode = O_RDWR;
-	int rc = -1, cnt = 0;
-	int errsv = 0;
-	int fallback = 0;
+	ကိန်းပြည့် rc = -1, cnt = 0;
+	ကိန်းပြည့် errsv = 0;
+	ကိန်းပြည့် fallback = 0;
 
-	if (!lc || !*lc->device || !lc->filename)
-		return -EINVAL;
+	အကယ်၍ (!lc || !*lc->device || !lc->filename)
+		ပြန်ပေး -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("device setup requested"));
 
 	/*
 	 * Open backing file and device
 	 */
-	if (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
+	အကယ်၍ (lc->config.info.lo_flags & LO_FLAGS_READ_ONLY)
 		mode = O_RDONLY;
 
-	if (lc->config.info.lo_flags & LO_FLAGS_DIRECT_IO)
+	အကယ်၍ (lc->config.info.lo_flags & LO_FLAGS_DIRECT_IO)
 		flags |= O_DIRECT;
-	if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+	အကယ်၍ (lc->flags & LOOPDEV_FL_NOFOLLOW)
 		file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-	else
+	မဟုတ်ပါက
 		file_fd = open(lc->filename, mode | flags);
 
-	if (file_fd < 0 && mode != O_RDONLY
+	အကယ်၍ (file_fd < 0 && mode != O_RDONLY
 	    && (errno == EROFS || errno == EACCES)) {
 		mode = O_RDONLY;
-		if (lc->flags & LOOPDEV_FL_NOFOLLOW)
+		အကယ်၍ (lc->flags & LOOPDEV_FL_NOFOLLOW)
 			file_fd = ul_open_no_symlinks(lc->filename, mode | flags, 0);
-		else
+		မဟုတ်ပါက
 			file_fd = open(lc->filename, mode | flags);
 	}
-	if (file_fd < 0) {
+	အကယ်၍ (file_fd < 0) {
 		DBG_OBJ(SETUP, lc, ul_debug("open backing file failed: %m"));
-		return -errno;
+		ပြန်ပေး -errno;
 	}
 	DBG_OBJ(SETUP, lc, ul_debug("backing file open: OK"));
 
-	if (mode == O_RDONLY)
+	အကယ်၍ (mode == O_RDONLY)
 		lc->config.info.lo_flags |= LO_FLAGS_READ_ONLY;	/* kernel loopdev mode */
-	else
+	မဟုတ်ပါက
 		lc->config.info.lo_flags &= ~LO_FLAGS_READ_ONLY;
 
 	do {
 		errno = 0;
 
 		dev_fd = __loopcxt_get_fd(lc, mode);
-		if (dev_fd >= 0 || lc->control_ok == 0)
-			break;
-		if (errno != EACCES && errno != ENOENT)
-			break;
+		အကယ်၍ (dev_fd >= 0 || lc->control_ok == 0)
+			bha_nga;
+		အကယ်၍ (errno != EACCES && errno != ENOENT)
+			bha_nga;
 		/* We have permissions to open /dev/loop-control, but open
 		 * /dev/loopN failed with EACCES, it's probably because udevd
 		 * does not applied chown yet. Let's wait a moment. */
 		xusleep(25000);
-	} while (cnt++ < 16);
+	} နေစဉ် (cnt++ < 16);
 
-	if (dev_fd < 0) {
+	အကယ်၍ (dev_fd < 0) {
 		rc = -errno;
 		goto err;
 	}
@@ -1447,18 +1447,18 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 	 * -- since Linux v5.8-rc1, commit 3448914e8cc550ba792d4ccc74471d1ca4293aae
 	 */
 	lc->config.fd = file_fd;
-	if (lc->blocksize > 0)
+	အကယ်၍ (lc->blocksize > 0)
 		lc->config.block_size = lc->blocksize;
 
 	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_CONFIGURE, &lc->config) );
-	if (rc != 0) {
+	အကယ်၍ (rc != 0) {
 		errsv = errno;
-		if (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
+		အကယ်၍ (errno != EINVAL && errno != ENOTTY && errno != ENOSYS) {
 			DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE failed: %m"));
 			goto err;
 		}
 		fallback = 1;
-	} else {
+	} မဟုတ်ပါက {
 		DBG_OBJ(SETUP, lc, ul_debug("LOOP_CONFIGURE: OK"));
 	}
 
@@ -1466,8 +1466,8 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 	 * Old deprecated way; first assign backing file FD and then in the
 	 * second step set loop device properties.
 	 */
-	if (fallback) {
-		if (ioctl(dev_fd, LOOP_SET_FD, file_fd) < 0) {
+	အကယ်၍ (fallback) {
+		အကယ်၍ (ioctl(dev_fd, LOOP_SET_FD, file_fd) < 0) {
 			rc = -errno;
 			errsv = errno;
 			DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD failed: %m"));
@@ -1476,39 +1476,39 @@ int loopcxt_setup_device(struct loopdev_cxt *lc)
 
 		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_FD: OK"));
 
-		if (lc->blocksize > 0
+		အကယ်၍ (lc->blocksize > 0
 			&& (rc = loopcxt_ioctl_blocksize(lc, lc->blocksize)) < 0) {
 			errsv = -rc;
 			goto err;
 		}
 
-		if ((rc = loopcxt_ioctl_status(lc)) < 0) {
+		အကယ်၍ ((rc = loopcxt_ioctl_status(lc)) < 0) {
 			errsv = -rc;
 			goto err;
 		}
 	}
 
-	if ((rc = loopcxt_check_size(lc, file_fd)))
+	အကယ်၍ ((rc = loopcxt_check_size(lc, file_fd)))
 		goto err;
 
 	close(file_fd);
 
-	memset(&lc->config, 0, sizeof(lc->config));
+	memset(&lc->config, 0, parimaa_na(lc->config));
 	lc->has_info = 0;
 	lc->info_failed = 0;
 
 	DBG_OBJ(SETUP, lc, ul_debug("success [rc=0]"));
-	return 0;
+	ပြန်ပေး 0;
 err:
-	if (file_fd >= 0)
+	အကယ်၍ (file_fd >= 0)
 		close(file_fd);
-	if (dev_fd >= 0 && rc != -EBUSY)
+	အကယ်၍ (dev_fd >= 0 && rc != -EBUSY)
 		ioctl(dev_fd, LOOP_CLR_FD, 0);
-	if (errsv)
+	အကယ်၍ (errsv)
 		errno = errsv;
 
 	DBG_OBJ(SETUP, lc, ul_debug("failed [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 
@@ -1523,90 +1523,90 @@ err:
  *
  * Returns: <0 on error, 0 on success.
  */
-int loopcxt_ioctl_status(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_ioctl_status(sa_nracanaa loopdev_cxt *lc)
 {
-	int dev_fd, rc;
+	ကိန်းပြည့် dev_fd, rc;
 
 	errno = 0;
 	dev_fd = loopcxt_get_fd(lc);
 
-	if (dev_fd < 0)
-		return -errno;
+	အကယ်၍ (dev_fd < 0)
+		ပြန်ပေး -errno;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_STATUS64"));
 
 	rc = repeat_on_eagain( ioctl(dev_fd, LOOP_SET_STATUS64, &lc->config.info) );
-	if (rc != 0) {
+	အကယ်၍ (rc != 0) {
 		DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64 failed: %m"));
-		return rc;
+		ပြန်ပေး rc;
 	}
 
 	DBG_OBJ(SETUP, lc, ul_debug("LOOP_SET_STATUS64: OK"));
-	return 0;
+	ပြန်ပေး 0;
 }
 
-int loopcxt_ioctl_capacity(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_ioctl_capacity(sa_nracanaa loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ကိန်းပြည့် rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_CAPACITY"));
 
 	/* Kernels prior to v2.6.30 don't support this ioctl */
 	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_CAPACITY, 0) );
-	if (rc != 0) {
+	အကယ်၍ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_CAPACITY failed: %m"));
-		return rc;
+		ပြန်ပေး rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("capacity set"));
-	return 0;
+	ပြန်ပေး 0;
 }
 
-int loopcxt_ioctl_dio(struct loopdev_cxt *lc, unsigned long use_dio)
+ကိန်းပြည့် loopcxt_ioctl_dio(sa_nracanaa loopdev_cxt *lc, unsigned long use_dio)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ကိန်းပြည့် rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_DIRECT_IO"));
 
 	/* Kernels prior to v4.4 don't support this ioctl */
 	rc = repeat_on_eagain( ioctl(fd, LOOP_SET_DIRECT_IO, use_dio) );
-	if (rc != 0) {
+	အကယ်၍ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_DIRECT_IO failed: %m"));
-		return rc;
+		ပြန်ပေး rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("direct io set"));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
  * Kernel uses "unsigned long" as ioctl arg, but we use u64 for all sizes to
  * keep loopdev internal API simple.
  */
-int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
+ကိန်းပြည့် loopcxt_ioctl_blocksize(sa_nracanaa loopdev_cxt *lc, uint64_t blocksize)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ကိန်းပြည့် rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_SET_BLOCK_SIZE"));
 
 	rc = repeat_on_eagain(
 		ioctl(fd, LOOP_SET_BLOCK_SIZE, (unsigned long) blocksize) );
-	if (rc != 0) {
+	အကယ်၍ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_SET_BLOCK_SIZE failed: %m"));
-		return rc;
+		ပြန်ပေး rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("logical block size set"));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
@@ -1618,72 +1618,72 @@ int loopcxt_ioctl_blocksize(struct loopdev_cxt *lc, uint64_t blocksize)
  *
  * Returns: 0 on success, <0 on error
  */
-static int loopcxt_get_device_nr(struct loopdev_cxt *lc, int *nr)
+static ကိန်းပြည့် loopcxt_get_device_nr(sa_nracanaa loopdev_cxt *lc, ကိန်းပြည့် *nr)
 {
-	const char *p, *dev;
-	int rc = -EINVAL;
+	const var_na *p, *dev;
+	ကိန်းပြည့် rc = -EINVAL;
 
 	errno = 0;
-	if (!lc || !nr)
-		return rc;
+	အကယ်၍ (!lc || !nr)
+		ပြန်ပေး rc;
 	*nr = -1;
 
 	dev = loopcxt_get_device(lc);
-	if (!dev)
+	အကယ်၍ (!dev)
 		goto done;
 
 	p = strrchr(dev, '/');
-	if (!p)
+	အကယ်၍ (!p)
 		goto done;
 
-	if (sscanf(p, "/loop%d", nr) != 1 && sscanf(p, "/%d", nr) != 1)
+	အကယ်၍ (sscanf(p, "/loop%d", nr) != 1 && sscanf(p, "/%d", nr) != 1)
 		goto done;
 
-	if (*nr < 0)
+	အကယ်၍ (*nr < 0)
 		goto done;
 	rc = 0;
 done:
-	if (rc && !errno)
+	အကယ်၍ (rc && !errno)
 		errno = -rc;
 	DBG_OBJ(CXT, lc, ul_debug("get_device_nr [nr=%d]", *nr));
-	return rc;
+	ပြန်ပေး rc;
 }
 
-int loopcxt_detach_device(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_detach_device(sa_nracanaa loopdev_cxt *lc)
 {
-	int rc, fd = loopcxt_get_fd(lc);
+	ကိန်းပြည့် rc, fd = loopcxt_get_fd(lc);
 
-	if (fd < 0)
-		return -EINVAL;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး -EINVAL;
 
 	DBG_OBJ(SETUP, lc, ul_debug("calling LOOP_CLR_FD"));
 
 	rc = repeat_on_eagain( ioctl(fd, LOOP_CLR_FD, 0) );
-	if (rc != 0) {
+	အကယ်၍ (rc != 0) {
 		DBG_OBJ(CXT, lc, ul_debug("LOOP_CLR_FD failed: %m"));
-		return rc;
+		ပြန်ပေး rc;
 	}
 
 	DBG_OBJ(CXT, lc, ul_debug("device removed"));
-	return 0;
+	ပြန်ပေး 0;
 }
 
-int loopcxt_remove_device(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_remove_device(sa_nracanaa loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	ကိန်းပြည့် rc = -EINVAL;
+	ကိန်းပြည့် ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	အကယ်၍ (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
 		goto done;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
+	အကယ်၍ (rc)
 		goto done;
 
 	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	အကယ်၍ (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("remove_device %d", nr));
 		rc = ioctl(ctl, LOOP_CTL_REMOVE, nr);
 		close(ctl);
@@ -1691,25 +1691,25 @@ int loopcxt_remove_device(struct loopdev_cxt *lc)
 	lc->control_ok = rc >= 0 ? 1 : 0;
 done:
 	DBG_OBJ(CXT, lc, ul_debug("remove_device done [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
-int loopcxt_add_device(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_add_device(sa_nracanaa loopdev_cxt *lc)
 {
-	int rc = -EINVAL;
-	int ctl, nr = -1;
+	ကိန်းပြည့် rc = -EINVAL;
+	ကိန်းပြည့် ctl, nr = -1;
 
-	if (!(lc->flags & LOOPDEV_FL_CONTROL)) {
+	အကယ်၍ (!(lc->flags & LOOPDEV_FL_CONTROL)) {
 		rc = -ENOSYS;
 		goto done;
 	}
 
 	rc = loopcxt_get_device_nr(lc, &nr);
-	if (rc)
+	အကယ်၍ (rc)
 		goto done;
 
 	ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-	if (ctl >= 0) {
+	အကယ်၍ (ctl >= 0) {
 		DBG_OBJ(CXT, lc, ul_debug("add_device %d", nr));
 		rc = ioctl(ctl, LOOP_CTL_ADD, nr);
 		close(ctl);
@@ -1717,7 +1717,7 @@ int loopcxt_add_device(struct loopdev_cxt *lc)
 	lc->control_ok = rc >= 0 ? 1 : 0;
 done:
 	DBG_OBJ(CXT, lc, ul_debug("add_device done [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
@@ -1728,47 +1728,47 @@ done:
  *
  * Returns: 0 = success, < 0 error
  */
-int loopcxt_find_unused(struct loopdev_cxt *lc)
+ကိန်းပြည့် loopcxt_find_unused(sa_nracanaa loopdev_cxt *lc)
 {
-	int rc = -1;
+	ကိန်းပြည့် rc = -1;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_unused requested"));
 
-	if (lc->flags & LOOPDEV_FL_CONTROL) {
-		int ctl;
+	အကယ်၍ (lc->flags & LOOPDEV_FL_CONTROL) {
+		ကိန်းပြည့် ctl;
 
 		DBG_OBJ(CXT, lc, ul_debug("using loop-control"));
 
 		ctl = open(_PATH_DEV_LOOPCTL, O_RDWR|O_CLOEXEC);
-		if (ctl >= 0)
+		အကယ်၍ (ctl >= 0)
 			rc = ioctl(ctl, LOOP_CTL_GET_FREE);
-		else
+		မဟုတ်ပါက
 			rc = -errno;
-		if (rc >= 0) {
-			char name[16];
-			snprintf(name, sizeof(name), "loop%d", rc);
+		အကယ်၍ (rc >= 0) {
+			var_na name[16];
+			snprintf(name, parimaa_na(name), "loop%d", rc);
 
 			rc = loopiter_set_device(lc, name);
 		}
 		lc->control_ok = ctl >= 0 && rc == 0 ? 1 : 0;
-		if (ctl >= 0)
+		အကယ်၍ (ctl >= 0)
 			close(ctl);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by loop-control [rc=%d]", rc));
 	}
 
-	if (rc < 0 && rc != -EACCES) {
+	အကယ်၍ (rc < 0 && rc != -EACCES) {
 		DBG_OBJ(CXT, lc, ul_debug("using loop scan"));
 		rc = loopcxt_init_iterator(lc, LOOPITER_FL_FREE);
-		if (rc)
-			return rc;
+		အကယ်၍ (rc)
+			ပြန်ပေး rc;
 
 		rc = loopcxt_next(lc);
 		loopcxt_deinit_iterator(lc);
 		DBG_OBJ(CXT, lc, ul_debug("find_unused by scan [rc=%d]", rc));
-		if (rc)
-			return -ENOENT;
+		အကယ်၍ (rc)
+			ပြန်ပေး -ENOENT;
 	}
-	return rc;
+	ပြန်ပေး rc;
 }
 
 
@@ -1776,149 +1776,149 @@ int loopcxt_find_unused(struct loopdev_cxt *lc)
 /*
  * Return: TRUE/FALSE
  */
-int loopdev_is_autoclear(const char *device)
+ကိန်းပြည့် loopdev_is_autoclear(const var_na *device)
 {
-	struct loopdev_cxt lc;
-	int rc;
+	sa_nracanaa loopdev_cxt lc;
+	ကိန်းပြည့် rc;
 
-	if (!device)
-		return 0;
+	အကယ်၍ (!device)
+		ပြန်ပေး 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
+	အကယ်၍ (!rc)
 		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	အကယ်၍ (!rc)
 		rc = loopcxt_is_autoclear(&lc);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	ပြန်ပေး rc;
 }
 
-char *loopdev_get_backing_file(const char *device)
+var_na *loopdev_get_backing_file(const var_na *device)
 {
-	struct loopdev_cxt lc;
-	char *res = NULL;
+	sa_nracanaa loopdev_cxt lc;
+	var_na *res = NULL;
 
-	if (!device)
-		return NULL;
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_set_device(&lc, device) == 0)
+	အကယ်၍ (!device)
+		ပြန်ပေး NULL;
+	အကယ်၍ (loopcxt_init(&lc, 0))
+		ပြန်ပေး NULL;
+	အကယ်၍ (loopcxt_set_device(&lc, device) == 0)
 		res = loopcxt_get_backing_file(&lc);
 
 	loopcxt_deinit(&lc);
-	return res;
+	ပြန်ပေး res;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_has_backing_file(const char *device)
+ကိန်းပြည့် loopdev_has_backing_file(const var_na *device)
 {
-	char *tmp = loopdev_get_backing_file(device);
+	var_na *tmp = loopdev_get_backing_file(device);
 
-	if (tmp) {
+	အကယ်၍ (tmp) {
 		free(tmp);
-		return 1;
+		ပြန်ပေး 1;
 	}
-	return 0;
+	ပြန်ပေး 0;
 }
 
 /*
  * Returns: TRUE/FALSE
  */
-int loopdev_is_used(const char *device, const char *filename,
-		    uint64_t offset, uint64_t sizelimit, int flags)
+ကိန်းပြည့် loopdev_is_used(const var_na *device, const var_na *filename,
+		    uint64_t offset, uint64_t sizelimit, ကိန်းပြည့် flags)
 {
-	struct loopdev_cxt lc;
-	struct stat st;
-	int rc = 0;
+	sa_nracanaa loopdev_cxt lc;
+	sa_nracanaa stat st;
+	ကိန်းပြည့် rc = 0;
 
-	if (!device || !filename)
-		return 0;
+	အကယ်၍ (!device || !filename)
+		ပြန်ပေး 0;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
+	အကယ်၍ (!rc)
 		rc = loopcxt_set_device(&lc, device);
-	if (rc)
-		return rc;
+	အကယ်၍ (rc)
+		ပြန်ပေး rc;
 
 	rc = !stat(filename, &st);
 	rc = loopcxt_is_used(&lc, rc ? &st : NULL, filename, offset, sizelimit, flags);
 
 	loopcxt_deinit(&lc);
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error
  */
-int loopdev_detach(const char *device)
+ကိန်းပြည့် loopdev_detach(const var_na *device)
 {
-	struct loopdev_cxt lc;
-	int rc;
+	sa_nracanaa loopdev_cxt lc;
+	ကိန်းပြည့် rc;
 
-	if (!device)
-		return -EINVAL;
+	အကယ်၍ (!device)
+		ပြန်ပေး -EINVAL;
 
 	rc = loopcxt_init(&lc, 0);
-	if (!rc)
+	အကယ်၍ (!rc)
 		rc = loopcxt_set_device(&lc, device);
-	if (!rc)
+	အကယ်၍ (!rc)
 		rc = loopcxt_detach_device(&lc);
 	loopcxt_deinit(&lc);
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
  * Returns: 0 = success, < 0 error, 1 not found
  */
-int loopcxt_find_by_backing_file(struct loopdev_cxt *lc, const char *filename,
-				 uint64_t offset, uint64_t sizelimit, int flags)
+ကိန်းပြည့် loopcxt_find_by_backing_file(sa_nracanaa loopdev_cxt *lc, const var_na *filename,
+				 uint64_t offset, uint64_t sizelimit, ကိန်းပြည့် flags)
 {
-	int rc, hasst;
-	struct stat st;
+	ကိန်းပြည့် rc, hasst;
+	sa_nracanaa stat st;
 
-	if (!filename)
-		return -EINVAL;
+	အကယ်၍ (!filename)
+		ပြန်ပေး -EINVAL;
 
 	hasst = !stat(filename, &st);
 
 	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	အကယ်၍ (rc)
+		ပြန်ပေး rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
+	နေစဉ် ((rc = loopcxt_next(lc)) == 0) {
 
-		if (loopcxt_is_used(lc, hasst ? &st : NULL,
+		အကယ်၍ (loopcxt_is_used(lc, hasst ? &st : NULL,
 				    filename, offset, sizelimit, flags))
-			break;
+			bha_nga;
 	}
 
 	loopcxt_deinit_iterator(lc);
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
  * Returns: 0 = not found, < 0 error, 1 found, 2 found full size and offset match
  */
-int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
+ကိန်းပြည့် loopcxt_find_overlap(sa_nracanaa loopdev_cxt *lc, const var_na *filename,
 			   uint64_t offset, uint64_t sizelimit)
 {
-	int rc, hasst;
-	struct stat st;
+	ကိန်းပြည့် rc, hasst;
+	sa_nracanaa stat st;
 
-	if (!filename)
-		return -EINVAL;
+	အကယ်၍ (!filename)
+		ပြန်ပေး -EINVAL;
 
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap requested"));
 	hasst = !stat(filename, &st);
 
 	rc = loopcxt_init_iterator(lc, LOOPITER_FL_USED);
-	if (rc)
-		return rc;
+	အကယ်၍ (rc)
+		ပြန်ပေး rc;
 
-	while ((rc = loopcxt_next(lc)) == 0) {
+	နေစဉ် ((rc = loopcxt_next(lc)) == 0) {
 		uint64_t lc_sizelimit, lc_offset;
 
 		rc = loopcxt_is_used(lc, hasst ? &st : NULL,
@@ -1928,27 +1928,27 @@ int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 		 * happen when we are racing with device autoclear. Just ignore
 		 * this loopdev...
 		 */
-		if (rc <= 0)
+		အကယ်၍ (rc <= 0)
 			continue;
 
 		DBG_OBJ(CXT, lc, ul_debug("found %s backed by %s",
 			loopcxt_get_device(lc), filename));
 
 		rc = loopcxt_get_offset(lc, &lc_offset);
-		if (rc) {
+		အကယ်၍ (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get offset for device %s",
 				loopcxt_get_device(lc)));
 			continue;
 		}
 		rc = loopcxt_get_sizelimit(lc, &lc_sizelimit);
-		if (rc) {
+		အကယ်၍ (rc) {
 			DBG_OBJ(CXT, lc, ul_debug("failed to get sizelimit for device %s",
 				loopcxt_get_device(lc)));
 			continue;
 		}
 
 		/* full match */
-		if (lc_sizelimit == sizelimit && lc_offset == offset) {
+		အကယ်၍ (lc_sizelimit == sizelimit && lc_offset == offset) {
 			DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s (full match)",
 						loopcxt_get_device(lc)));
 			rc = 2;
@@ -1956,9 +1956,9 @@ int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 		}
 
 		/* overlap */
-		if (lc_sizelimit != 0 && offset >= lc_offset + lc_sizelimit)
+		အကယ်၍ (lc_sizelimit != 0 && offset >= lc_offset + lc_sizelimit)
 			continue;
-		if (sizelimit != 0 && offset + sizelimit <= lc_offset)
+		အကယ်၍ (sizelimit != 0 && offset + sizelimit <= lc_offset)
 			continue;
 
 		DBG_OBJ(CXT, lc, ul_debug("overlapping loop device %s",
@@ -1967,32 +1967,32 @@ int loopcxt_find_overlap(struct loopdev_cxt *lc, const char *filename,
 			goto found;
 	}
 
-	if (rc == 1)
+	အကယ်၍ (rc == 1)
 		rc = 0;	/* not found */
 found:
 	loopcxt_deinit_iterator(lc);
 	DBG_OBJ(CXT, lc, ul_debug("find_overlap done [rc=%d]", rc));
-	return rc;
+	ပြန်ပေး rc;
 }
 
 /*
  * Returns allocated string with device name
  */
-char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64_t sizelimit, int flags)
+var_na *loopdev_find_by_backing_file(const var_na *filename, uint64_t offset, uint64_t sizelimit, ကိန်းပြည့် flags)
 {
-	struct loopdev_cxt lc;
-	char *res = NULL;
+	sa_nracanaa loopdev_cxt lc;
+	var_na *res = NULL;
 
-	if (!filename)
-		return NULL;
+	အကယ်၍ (!filename)
+		ပြန်ပေး NULL;
 
-	if (loopcxt_init(&lc, 0))
-		return NULL;
-	if (loopcxt_find_by_backing_file(&lc, filename, offset, sizelimit, flags) == 0)
+	အကယ်၍ (loopcxt_init(&lc, 0))
+		ပြန်ပေး NULL;
+	အကယ်၍ (loopcxt_find_by_backing_file(&lc, filename, offset, sizelimit, flags) == 0)
 		res = loopcxt_strdup_device(&lc);
 	loopcxt_deinit(&lc);
 
-	return res;
+	ပြန်ပေး res;
 }
 
 /*
@@ -2000,59 +2000,59 @@ char *loopdev_find_by_backing_file(const char *filename, uint64_t offset, uint64
  * device is associated with the given @filename and @loopdev is not NULL then
  * @loopdev returns name of the device.
  */
-int loopdev_count_by_backing_file(const char *filename, char **loopdev)
+ကိန်းပြည့် loopdev_count_by_backing_file(const var_na *filename, var_na **loopdev)
 {
-	struct loopdev_cxt lc;
-	int count = 0, rc;
+	sa_nracanaa loopdev_cxt lc;
+	ကိန်းပြည့် count = 0, rc;
 
-	if (!filename)
-		return -1;
+	အကယ်၍ (!filename)
+		ပြန်ပေး -1;
 
 	rc = loopcxt_init(&lc, 0);
-	if (rc)
-		return rc;
-	if (loopcxt_init_iterator(&lc, LOOPITER_FL_USED))
-		return -1;
+	အကယ်၍ (rc)
+		ပြန်ပေး rc;
+	အကယ်၍ (loopcxt_init_iterator(&lc, LOOPITER_FL_USED))
+		ပြန်ပေး -1;
 
-	while(loopcxt_next(&lc) == 0) {
-		char *backing = loopcxt_get_backing_file(&lc);
+	နေစဉ်(loopcxt_next(&lc) == 0) {
+		var_na *backing = loopcxt_get_backing_file(&lc);
 
-		if (!backing || strcmp(backing, filename) != 0) {
+		အကယ်၍ (!backing || strcmp(backing, filename) != 0) {
 			free(backing);
 			continue;
 		}
 
 		free(backing);
-		if (loopdev && count == 0)
+		အကယ်၍ (loopdev && count == 0)
 			*loopdev = loopcxt_strdup_device(&lc);
 		count++;
 	}
 
 	loopcxt_deinit(&lc);
 
-	if (loopdev && count > 1) {
+	အကယ်၍ (loopdev && count > 1) {
 		free(*loopdev);
 		*loopdev = NULL;
 	}
-	return count;
+	ပြန်ပေး count;
 }
 
 #ifdef TEST_PROGRAM_LOOPDEV
-int main(int argc, char *argv[])
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na *argv[])
 {
-	if (argc < 2)
+	အကယ်၍ (argc < 2)
 		goto usage;
 
-	if (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
+	အကယ်၍ (strcmp(argv[1], "--is-loopdev") == 0 && argc == 3)
 		printf("%s: %s\n", argv[2], is_loopdev(argv[2]) ? "OK" : "FAIL");
-	else
+	မဟုတ်ပါက
 		goto usage;
 
-	return EXIT_SUCCESS;
+	ပြန်ပေး EXIT_SUCCESS;
 usage:
 	fprintf(stderr, "usage: %1$s --is-loopdev <dev>\n",
 			program_invocation_short_name);
-	return EXIT_FAILURE;
+	ပြန်ပေး EXIT_FAILURE;
 }
 #endif
 

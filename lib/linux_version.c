@@ -8,68 +8,68 @@
 #include "c.h"
 #include "linux_version.h"
 
-int get_linux_version (void)
+ကိန်းပြည့် get_linux_version (void)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	static ကိန်းပြည့် kver = -1;
+	sa_nracanaa utsname uts;
+	ကိန်းပြည့် x = 0, y = 0, z = 0;
+	ကိန်းပြည့် n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	အကယ်၍ (kver != -1)
+		ပြန်ပေး kver;
+	အကယ်၍ (uname(&uts))
+		ပြန်ပေး kver = 0;
 
 	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	အကယ်၍ (n < 1 || n > 3)
+		ပြန်ပေး kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	ပြန်ပေး kver = KERNEL_VERSION(x, y, z);
 }
 
 #ifdef TEST_PROGRAM_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na *argv[])
 {
-	int rc = EXIT_FAILURE;
+	ကိန်းပြည့် rc = EXIT_FAILURE;
 
-	if (argc == 1) {
+	အကယ်၍ (argc == 1) {
 		printf("Linux version: %d\n", get_linux_version());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} မဟုတ်ပါက အကယ်၍ (argc == 5) {
+		const var_na *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		ကိန်းပြည့် x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		ကိန်းပြည့် kver = get_linux_version();
+		ကိန်းပြည့် uver = KERNEL_VERSION(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		အကယ်၍ (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		မဟုတ်ပါက အကယ်၍ (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		မဟုတ်ပါက အကယ်၍ (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		မဟုတ်ပါက
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
+		အကယ်၍ (rc)
 			printf("match\n");
-		else
+		မဟုတ်ပါက
 			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} မဟုတ်ပါက
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
 				 program_invocation_short_name);
 
-	return rc;
+	ပြန်ပေး rc;
 }
 #endif

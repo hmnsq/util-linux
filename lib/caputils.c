@@ -25,44 +25,44 @@
 #include "procfs.h"
 #include "nls.h"
 
-static int test_cap(unsigned int cap)
+static ကိန်းပြည့် test_cap(unsigned ကိန်းပြည့် cap)
 {
 	/* prctl returns 0 or 1 for valid caps, -1 otherwise */
-	return prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
+	ပြန်ပေး prctl(PR_CAPBSET_READ, cap, 0, 0, 0) >= 0;
 }
 
-static int cap_last_by_bsearch(int *ret)
+static ကိန်းပြည့် cap_last_by_bsearch(ကိန်းပြည့် *ret)
 {
 	/* starting with cap=INT_MAX means we always know
 	 * that cap1 is invalid after the first iteration */
-	int cap = INT_MAX;
-	unsigned int cap0 = 0, cap1 = INT_MAX;
+	ကိန်းပြည့် cap = INT_MAX;
+	unsigned ကိန်းပြည့် cap0 = 0, cap1 = INT_MAX;
 
-	while ((int)cap0 < cap) {
-		if (test_cap(cap))
+	နေစဉ် ((ကိန်းပြည့်)cap0 < cap) {
+		အကယ်၍ (test_cap(cap))
 			cap0 = cap;
-		else
+		မဟုတ်ပါက
 			cap1 = cap;
 
 		cap = (cap0 + cap1) / 2U;
 	}
 
 	*ret = cap;
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static int cap_last_by_procfs(int *ret)
+static ကိန်းပြည့် cap_last_by_procfs(ကိန်းပြည့် *ret)
 {
 	FILE *f = fopen(_PATH_PROC_CAPLASTCAP, "r" UL_CLOEXECSTR);
-	int rc = -EINVAL;
+	ကိန်းပြည့် rc = -EINVAL;
 
 	*ret = 0;
 
-	if (f && fd_is_procfs(fileno(f))) {
-		int cap;
+	အကယ်၍ (f && fd_is_procfs(fileno(f))) {
+		ကိန်းပြည့် cap;
 
 		/* we check if the cap after this one really isn't valid */
-		if (fscanf(f, "%d", &cap) == 1 &&
+		အကယ်၍ (fscanf(f, "%d", &cap) == 1 &&
 		    cap < INT_MAX && !test_cap(cap + 1)) {
 
 			*ret = cap;
@@ -70,21 +70,21 @@ static int cap_last_by_procfs(int *ret)
 		}
 	}
 
-	if (f)
+	အကယ်၍ (f)
 		fclose(f);
-	return rc;
+	ပြန်ပေး rc;
 }
 
-int cap_last_cap(void)
+ကိန်းပြည့် cap_last_cap(void)
 {
-	static int cap = -1;
+	static ကိန်းပြည့် cap = -1;
 
-	if (cap != -1)
-		return cap;
-	if (cap_last_by_procfs(&cap) < 0)
+	အကယ်၍ (cap != -1)
+		ပြန်ပေး cap;
+	အကယ်၍ (cap_last_by_procfs(&cap) < 0)
 		cap_last_by_bsearch(&cap);
 
-	return cap;
+	ပြန်ပေး cap;
 }
 
 void cap_permitted_to_ambient(void)
@@ -92,14 +92,14 @@ void cap_permitted_to_ambient(void)
 	/* We use capabilities system calls to propagate the permitted
 	 * capabilities into the ambient set because we may have
 	 * already forked so be in async-signal-safe context. */
-	struct __user_cap_header_struct header = {
+	sa_nracanaa __user_cap_header_struct header = {
 		.version = _LINUX_CAPABILITY_VERSION_3,
 		.pid = 0,
 	};
-	struct __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
+	sa_nracanaa __user_cap_data_struct payload[_LINUX_CAPABILITY_U32S_3] = {{ 0 }};
 	uint64_t effective, cap;
 
-	if (capget(&header, payload) < 0)
+	အကယ်၍ (capget(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capget failed"));
 
 	/* In order the make capabilities ambient, we first need to ensure
@@ -107,49 +107,49 @@ void cap_permitted_to_ambient(void)
 	payload[0].inheritable = payload[0].permitted;
 	payload[1].inheritable = payload[1].permitted;
 
-	if (capset(&header, payload) < 0)
+	အကယ်၍ (capset(&header, payload) < 0)
 		err(EXIT_FAILURE, _("capset failed"));
 
 	effective = ((uint64_t)payload[1].effective << 32) |  (uint64_t)payload[0].effective;
 
-	for (cap = 0; cap < (sizeof(effective) * 8); cap++) {
+	အတွက် (cap = 0; cap < (parimaa_na(effective) * 8); cap++) {
 		/* This is the same check as cap_valid(), but using
 		 * the runtime value for the last valid cap. */
-		if (cap > (uint64_t) cap_last_cap())
+		အကယ်၍ (cap > (uint64_t) cap_last_cap())
 			continue;
 
-		if ((effective & (1ULL << cap))
+		အကယ်၍ ((effective & (1ULL << cap))
 		    && prctl(PR_CAP_AMBIENT, PR_CAP_AMBIENT_RAISE, cap, 0, 0) < 0)
 			err(EXIT_FAILURE, _("prctl(PR_CAP_AMBIENT) failed"));
 	}
 }
 
 #ifdef TEST_PROGRAM_CAPUTILS
-int main(int argc, char *argv[])
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na *argv[])
 {
-	int rc = 0, cap;
+	ကိန်းပြည့် rc = 0, cap;
 
-	if (argc < 2) {
+	အကယ်၍ (argc < 2) {
 		fprintf(stderr, "usage: %1$s --last-by-procfs\n"
 				"       %1$s --last-by-bsearch\n"
 				"       %1$s --last\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		ပြန်ပေး EXIT_FAILURE;
 	}
 
-	if (strcmp(argv[1], "--last-by-procfs") == 0) {
+	အကယ်၍ (strcmp(argv[1], "--last-by-procfs") == 0) {
 		rc = cap_last_by_procfs(&cap);
-		if (rc == 0)
+		အကယ်၍ (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last-by-bsearch") == 0) {
+	} မဟုတ်ပါက အကယ်၍ (strcmp(argv[1], "--last-by-bsearch") == 0) {
 		rc = cap_last_by_bsearch(&cap);
-		if (rc == 0)
+		အကယ်၍ (rc == 0)
 			printf("last cap: %d\n", cap);
 
-	} else if (strcmp(argv[1], "--last") == 0)
+	} မဟုတ်ပါက အကယ်၍ (strcmp(argv[1], "--last") == 0)
 		printf("last cap: %d\n", cap_last_cap());
 
-	return rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
+	ပြန်ပေး rc == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 #endif

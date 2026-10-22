@@ -64,26 +64,26 @@ UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 
 static void ul_fileeq_init_debug(void)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	အကယ်၍ (ulfileeq_debug_mask)
+		ပြန်ပေး;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+ga_nanaa {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
 	UL_FILEEQ_CRC32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
+sa_nracanaa ul_fileeq_method {
+	const var_na *name;	/* name used by applications */
+	const var_na *kname;	/* name used by kernel crypto */
+	ကိန်းပြည့် id;
 	short digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+static const sa_nracanaa ul_fileeq_method ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
@@ -105,25 +105,25 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 };
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+static void deinit_crypto_api(sa_nracanaa ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	အကယ်၍ (!eq)
+		ပြန်ပေး;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	အကယ်၍ (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	အကယ်၍ (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+static ကိန်းပြည့် init_crypto_api(sa_nracanaa ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	sa_nracanaa sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
@@ -135,63 +135,63 @@ static int init_crypto_api(struct ul_fileeq *eq)
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
+	assert(parimaa_na(sa.salg_name) > strlen(eq->method->kname) + 1);
 	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+	အကယ်၍ ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
 		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
+	အကယ်၍ (bind(eq->fd_api, (sa_nracanaa sockaddr *) &sa, parimaa_na(sa)) != 0)
 		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
+	အကယ်၍ ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
 		goto fail;
-	return 0;
+	ပြန်ပေး 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	ပြန်ပေး -1;
 }
 #endif
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+ကိန်းပြည့် ul_fileeq_init(sa_nracanaa ul_fileeq *eq, const var_na *method)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
 	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
 
-	memset(eq, 0, sizeof(*eq));
+	memset(eq, 0, parimaa_na(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	အတွက် (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
+		const sa_nracanaa ul_fileeq_method *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
+		အကယ်၍ (strcmp(m->name, method) == 0) {
 			eq->method = m;
-			break;
+			bha_nga;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
+	အကယ်၍ (!eq->method)
+		ပြန်ပေး -1;
 #ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	အကယ်၍ (eq->method->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
+		ပြန်ပေး -1;
 #endif
-	return 0;
+	ပြန်ပေး 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+static void reset_fileeq_bufs(sa_nracanaa ul_fileeq *eq)
 {
 	free(eq->buf_a);
 	free(eq->buf_b);
 	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+void ul_fileeq_deinit(sa_nracanaa ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	အကယ်၍ (!eq)
+		ပြန်ပေး;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
 #ifdef USE_FILEEQ_CRYPTOAPI
@@ -200,25 +200,25 @@ void ul_fileeq_deinit(struct ul_fileeq *eq)
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+void ul_fileeq_data_close_file(sa_nracanaa ul_fileeq_data *data)
 {
 	assert(data);
 
-	if (data->fd >= 0) {
+	အကယ်၍ (data->fd >= 0) {
 		DBG_OBJ(DATA, data, ul_debug("close"));
 		close(data->fd);
 	}
 	data->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+void ul_fileeq_data_init(sa_nracanaa ul_fileeq_data *data)
 {
 	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
+	memset(data, 0, parimaa_na(*data));
 	data->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+void ul_fileeq_data_deinit(sa_nracanaa ul_fileeq_data *data)
 {
 	assert(data);
 
@@ -233,12 +233,12 @@ void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
 	ul_fileeq_data_close_file(data);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+ကိန်းပြည့် ul_fileeq_data_associated(sa_nracanaa ul_fileeq_data *data)
 {
-	return data->name != NULL;
+	ပြန်ပေး data->name != NULL;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+void ul_fileeq_data_set_file(sa_nracanaa ul_fileeq_data *data, const var_na *name)
 {
 	assert(data);
 	assert(name);
@@ -248,7 +248,7 @@ void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
 	data->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_set_size(sa_nracanaa ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
@@ -262,35 +262,35 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	အကယ်၍ (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
 	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	pak_sa UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
+		bha_nga;
 	default:
 		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		အကယ်၍ (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		အကယ်၍ (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		မဟုတ်ပါက အကယ်၍ (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		အကယ်၍ (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			အကယ်၍ (ceiling / maxdigs > SIZE_MAX)
+				ပြန်ပေး false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		bha_nga;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,25 +301,25 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	ပြန်ပေး true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+static unsigned var_na *get_buffer(sa_nracanaa ul_fileeq *eq)
 {
-	if (!eq->buf_a)
+	အကယ်၍ (!eq->buf_a)
 		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
+	အကယ်၍ (!eq->buf_b)
 		eq->buf_b = malloc(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	အကယ်၍ (!eq->buf_a || !eq->buf_b)
+		ပြန်ပေး NULL;
 
-	if (eq->buf_last == eq->buf_b)
+	အကယ်၍ (eq->buf_last == eq->buf_b)
 		eq->buf_last = eq->buf_a;
-	else
+	မဟုတ်ပါက
 		eq->buf_last = eq->buf_b;
 
-	return eq->buf_last;
+	ပြန်ပေး eq->buf_last;
 }
 
 #define get_cached_nblocks(_d) \
@@ -327,11 +327,11 @@ static unsigned char *get_buffer(struct ul_fileeq *eq)
 
 #define get_cached_offset(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				parimaa_na((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+static ကိန်းပြည့် get_fd(sa_nracanaa ul_fileeq *eq, sa_nracanaa ul_fileeq_data *data, off_t *off)
 {
 	off_t o = get_cached_offset(eq, data);
 
@@ -339,309 +339,309 @@ static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
 	assert(data);
 
 
-	if (data->fd < 0) {
+	အကယ်၍ (data->fd < 0) {
 		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
 		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+		အကယ်၍ (data->fd < 0)
+			ပြန်ပေး data->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+#အကယ်၍ defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
 		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
 #endif
-		if (o) {
+		အကယ်၍ (o) {
 			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
 			lseek(data->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	အကယ်၍ (off)
 		*off = o;
 
-	return data->fd;
+	ပြန်ပေး data->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+static void memcmp_reset(sa_nracanaa ul_fileeq *eq, sa_nracanaa ul_fileeq_data *data)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
+	အကယ်၍ (data->nblocks)
 		data->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
+	အကယ်၍ (data->fd >= 0)
 		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
 	data->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+static ssize_t read_block(sa_nracanaa ul_fileeq *eq, sa_nracanaa ul_fileeq_data *data,
+				uint64_t n, unsigned var_na **block)
 {
-	int fd;
+	ကိန်းပြည့် fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	အကယ်၍ (data->is_eof)
+		ပြန်ပေး 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	အကယ်၍ (n >= eq->blocksmax)
+		ပြန်ပေး -EINVAL;
 
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
 
 	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	အကယ်၍ (!*block)
+		ပြန်ပေး -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
+	rsz = ul_read_all(data->fd, (var_na *) *block, eq->readsiz);
+	အကယ်၍ (rsz < 0) {
 		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+		ပြန်ပေး rsz;
 	}
 	off += rsz;
 	data->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	အကယ်၍ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 
 	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	ပြန်ပေး rsz;
 }
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+static ssize_t get_digest(sa_nracanaa ul_fileeq *eq, sa_nracanaa ul_fileeq_data *data,
+				uint64_t n, unsigned var_na **block)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	ကိန်းပြည့် fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
+	အကယ်၍ (n < get_cached_nblocks(data)) {
 		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
 		assert(data->blocks);
 		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+		ပြန်ပေး eq->method->digsiz;
 	}
 
-	if (data->is_eof) {
+	အကယ်၍ (data->is_eof) {
 		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+		ပြန်ပေး 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	အကယ်၍ (n >= eq->blocksmax)
+		ပြန်ပေး -EINVAL;
 
 	/* read new block */
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	အကယ်၍ (fd < 0)
+		ပြန်ပေး fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
 	sz = eq->method->digsiz;
 
-	if (!data->blocks) {
+	အကယ်၍ (!data->blocks) {
 		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
 		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+		အကယ်၍ (!data->blocks)
+			ပြန်ပေး -ENOMEM;
 	}
 
 	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
 	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	အကယ်၍ (rsz < 0)
+		ပြန်ပေး rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
 	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	rsz = ul_read_all(eq->fd_cip, (var_na *) *block, sz);
 
-	if (rsz > 0)
+	အကယ်၍ (rsz > 0)
 		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	အကယ်၍ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	ပြန်ပေး rsz;
 }
 #endif
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+static ssize_t get_intro(sa_nracanaa ul_fileeq *eq, sa_nracanaa ul_fileeq_data *data,
+				unsigned var_na **block)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	အကယ်၍ (data->nblocks == 0) {
+		ကိန်းပြည့် fd = get_fd(eq, data, NULL);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
+		အကယ်၍ (fd < 0)
+			ပြန်ပေး -1;
+		rsz = ul_read_all(fd, (var_na *) data->intro, parimaa_na(data->intro));
+		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, parimaa_na(data->intro)));
+		အကယ်၍ (rsz < 0)
+			ပြန်ပေး -1;
 		data->nblocks = 1;
 	}
 
 	DBG_OBJ(DATA, data, ul_debug(" return intro"));
 	*block = data->intro;
-	return sizeof(data->intro);
+	ပြန်ပေး parimaa_na(data->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+static ssize_t get_cmp_data(sa_nracanaa ul_fileeq *eq, sa_nracanaa ul_fileeq_data *data,
+				uint64_t blockno, unsigned var_na **block)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	အကယ်၍ (blockno == 0)
+		ပြန်ပေး get_intro(eq, data, block);
 
 	blockno--;
 
 	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
+	pak_sa UL_FILEEQ_MEMCMP:
+		ပြန်ပေး read_block(eq, data, blockno, block);
 	default:
-		break;
+		bha_nga;
 	}
 #ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
+	ပြန်ပေး get_digest(eq, data, blockno, block);
+#မဟုတ်ပါက
+	ပြန်ပေး -1;
 #endif
 }
 
 #define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+ကိန်းပြည့် ul_fileeq(sa_nracanaa ul_fileeq *eq,
+	      sa_nracanaa ul_fileeq_data *a, sa_nracanaa ul_fileeq_data *b)
 {
-	int cmp;
+	ကိန်းပြည့် cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	အကယ်၍ (eq->method->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
 	do {
-		unsigned char *da, *db;
+		unsigned var_na *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
 		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
+		အကယ်၍ (ca < 0)
 			goto done;
 		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
+		အကယ်၍ (cb < 0)
 			goto done;
-		if (ca != cb || ca == 0) {
+		အကယ်၍ (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			bha_nga;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} နေစဉ် (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
+	အကယ်၍ (cmp == 0) {
+		အကယ်၍ (!a->is_eof || !b->is_eof)
 			goto done; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		ပြန်ပေး 1;
 	}
 done:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	ပြန်ပေး 0;
 }
 
 #ifdef TEST_PROGRAM_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+ကိန်းပြည့် main(ကိန်းပြည့် argc, var_na *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
+	sa_nracanaa ul_fileeq eq;
+	sa_nracanaa ul_fileeq_data a, b, c;
+	const var_na *method = "sha1";
+	static const sa_nracanaa option longopts[] = {
 		{ "method", required_argument, NULL, 'm' },
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, 0, NULL, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	ကိန်းပြည့် ch, rc;
+	const var_na *file_a = NULL, *file_b = NULL, *file_c = NULL;
+	sa_nracanaa stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
+	နေစဉ် ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
 		switch (ch) {
-		case 'm':
+		pak_sa 'm':
 			method = optarg;
-			break;
-		case 'h':
+			bha_nga;
+		pak_sa 'h':
 			printf("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
 				program_invocation_short_name);
-			return EXIT_FAILURE;
+			ပြန်ပေး EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	အကယ်၍ (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	အကယ်၍ (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	အကယ်၍ (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	အကယ်၍ (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	အကယ်၍ (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	အကယ်၍ (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	အကယ်၍ (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	အကယ်၍ (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
 	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
+	အကယ်၍ (rc != 0 && strcmp(method, "memcmp") != 0) {
 		method = "memcmp";
 		rc = ul_fileeq_init(&eq, method);
 	}
-	if (rc < 0)
+	အကယ်၍ (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
 	ul_fileeq_data_set_file(&a, file_a);
 	ul_fileeq_data_set_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
+	အကယ်၍ (file_c)
 		ul_fileeq_data_set_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	အကယ်၍ (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
 	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	အကယ်၍ (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
 		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
@@ -652,10 +652,10 @@ int main(int argc, char *argv[])
 	ul_fileeq_data_deinit(&a);
 	ul_fileeq_data_deinit(&b);
 
-	if (file_c)
+	အကယ်၍ (file_c)
 		ul_fileeq_data_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	ပြန်ပေး EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_FILEEQ */

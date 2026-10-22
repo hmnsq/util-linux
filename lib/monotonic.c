@@ -15,66 +15,66 @@
 #include "c.h"
 #include "monotonic.h"
 
-int get_boot_time(struct timeval *boot_time __attribute__((__unused__)))
+ကိန်းပြည့် get_boot_time(sa_nracanaa timeval *boot_time __attribute__((__unused__)))
 {
 #ifdef CLOCK_BOOTTIME
-	struct timespec hires_uptime = { 0 };
-	struct timeval lores_uptime = { 0 };
+	sa_nracanaa timespec hires_uptime = { 0 };
+	sa_nracanaa timeval lores_uptime = { 0 };
 #endif
-	struct timeval now = { 0 };
+	sa_nracanaa timeval now = { 0 };
 #ifdef HAVE_SYSINFO
-	struct sysinfo info;
+	sa_nracanaa sysinfo info;
 #endif
 
-	if (gettimeofday(&now, NULL) != 0)
-		return -errno;
+	အကယ်၍ (gettimeofday(&now, NULL) != 0)
+		ပြန်ပေး -errno;
 #ifdef CLOCK_BOOTTIME
-	if (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
+	အကယ်၍ (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
 		TIMESPEC_TO_TIMEVAL(&lores_uptime, &hires_uptime);
 		timersub(&now, &lores_uptime, boot_time);
-		return 0;
+		ပြန်ပေး 0;
 	}
 #endif
 #ifdef HAVE_SYSINFO
 	/* fallback */
-	if (sysinfo(&info) != 0)
-		return -errno;
+	အကယ်၍ (sysinfo(&info) != 0)
+		ပြန်ပေး -errno;
 
 	boot_time->tv_sec = now.tv_sec - info.uptime;
 	boot_time->tv_usec = 0;
-	return 0;
-#else
-	return -ENOSYS;
+	ပြန်ပေး 0;
+#မဟုတ်ပါက
+	ပြန်ပေး -ENOSYS;
 #endif
 }
 
 usec_t get_suspended_time(void)
 {
-#if defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
-	struct timespec boot, mono;
+#အကယ်၍ defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
+	sa_nracanaa timespec boot, mono;
 
-	if (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
+	အကယ်၍ (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
 	    clock_gettime(CLOCK_MONOTONIC, &mono) == 0)
-		return timespec_to_usec(&boot) - timespec_to_usec(&mono);
+		ပြန်ပေး timespec_to_usec(&boot) - timespec_to_usec(&mono);
 #endif
-	return 0;
+	ပြန်ပေး 0;
 }
 
-int gettime_monotonic(struct timeval *tv)
+ကိန်းပြည့် gettime_monotonic(sa_nracanaa timeval *tv)
 {
 #ifdef CLOCK_MONOTONIC
 	/* Can slew only by ntp and adjtime */
-	int ret;
-	struct timespec ts;
+	ကိန်းပြည့် ret;
+	sa_nracanaa timespec ts;
 
 	/* Linux specific, can't slew */
-	if (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
+	အကယ်၍ (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
 		tv->tv_sec = ts.tv_sec;
 		tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
 	}
-	return ret;
-#else
-	return gettimeofday(tv, NULL);
+	ပြန်ပေး ret;
+#မဟုတ်ပါက
+	ပြန်ပေး gettimeofday(tv, NULL);
 #endif
 }
 
