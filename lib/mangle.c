@@ -18,55 +18,55 @@
 
 #define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+static anta_hstha จำนวนเต็ม is_unwanted_char(unsigned var_na c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	คืน c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+var_na *mangle(const var_na *s)
 {
-	char *ss, *sp;
+	var_na *ss, *sp;
 
-	if (!s)
-		return NULL;
+	ถ้า (!s)
+		คืน NULL;
 
 	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	ถ้า (!sp)
+		คืน NULL;
+	ขณะ(1) {
+		ถ้า (!*s) {
 			*sp = '\0';
-			break;
+			bha_nga;
 		}
-		if (is_unwanted_char(*s)) {
+		ถ้า (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} มิฉะนั้น
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	คืน ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+void unmangle_to_buffer(const var_na *s, var_na *buf, size_t len)
 {
 	size_t sz = 0;
 
-	if (!s)
-		return;
+	ถ้า (!s)
+		คืน;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	ขณะ(*s && sz < len - 1) {
+		ถ้า (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} มิฉะนั้น {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,111 +74,111 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+size_t unhexmangle_to_buffer(const var_na *s, var_na *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	const var_na *buf0 = buf;
 
-	if (!s)
-		return 0;
+	ถ้า (!s)
+		คืน 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+	ขณะ(*s && sz < len - 1) {
+		ถ้า (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
 		    isxdigit(s[2]) && isxdigit(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} มิฉะนั้น {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	คืน buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+size_t unescape_to_buffer(const var_na *s, const var_na *wanted, var_na *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	const var_na *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	ขณะ (*s && sz < len - 1) {
+		ถ้า (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} มิฉะนั้น {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	คืน buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+static anta_hstha const var_na *skip_nonspaces(const var_na *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	ขณะ (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	คืน s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+var_na *unmangle(const var_na *s, const var_na **end)
 {
-	char *buf;
-	const char *e;
+	var_na *buf;
+	const var_na *e;
 	size_t sz;
 
-	if (!s)
-		return NULL;
+	ถ้า (!s)
+		คืน NULL;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
+	ถ้า (end)
 		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	ถ้า (e == s)
+		คืน NULL;	/* empty string */
 
 	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	ถ้า (!buf)
+		คืน NULL;
 
 	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	คืน buf;
 }
 
 #ifdef TEST_PROGRAM_MANGLE
 #include <errno.h>
-int main(int argc, char *argv[])
+จำนวนเต็ม หลัก(จำนวนเต็ม argc, var_na *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
+	var_na *p = NULL;
+	ถ้า (argc < 3) {
 		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
 						program_invocation_short_name);
-		return EXIT_FAILURE;
+		คืน EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	ถ้า (!strcmp(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
 		printf("mangled: '%s'\n", p);
 		free(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	มิฉะนั้น ถ้า (!strcmp(argv[1], "--unmangle")) {
+		var_na *x = unmangle(argv[2], NULL);
 
-		if (x) {
+		ถ้า (x) {
 			printf("unmangled: '%s'\n", x);
 			free(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
+		ถ้า (x) {
 			unmangle_to_buffer(x, x, strlen(x) + 1);
 
 			printf("self-unmangled: '%s'\n", x);
@@ -186,9 +186,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
+	มิฉะนั้น ถ้า (!strcmp(argv[1], "--unescape")) {
+		var_na *x = strdup(argv[2]);
+		ถ้า (x) {
 			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
 
 			printf("self-unescaped: '%s'\n", x);
@@ -196,6 +196,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	return EXIT_SUCCESS;
+	คืน EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_MANGLE */

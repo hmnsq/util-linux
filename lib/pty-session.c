@@ -40,19 +40,19 @@ UL_DEBUG_DEFINE_MASKNAMES(ulpty) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulpty, ULPTY_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulpty, ULPTY_DEBUG_, m, x)
 
-void ul_pty_init_debug(int mask)
+void ul_pty_init_debug(จำนวนเต็ม mask)
 {
-	if (ulpty_debug_mask)
-		return;
+	ถ้า (ulpty_debug_mask)
+		คืน;
 	__UL_INIT_DEBUG_FROM_ENV(ulpty, ULPTY_DEBUG_, mask, ULPTY_DEBUG);
 }
 
-struct ul_pty *ul_new_pty(int is_stdin_tty)
+sa_nracanaa ul_pty *ul_new_pty(จำนวนเต็ม is_stdin_tty)
 {
-	struct ul_pty *pty = calloc(1, sizeof(*pty));
+	sa_nracanaa ul_pty *pty = calloc(1, parimaa_na(*pty));
 
-	if (!pty)
-		return NULL;
+	ถ้า (!pty)
+		คืน NULL;
 
 	DBG_OBJ(SETUP, pty, ul_debug("alloc handler"));
 	pty->isterm = is_stdin_tty;
@@ -61,81 +61,81 @@ struct ul_pty *ul_new_pty(int is_stdin_tty)
 	pty->sigfd = -1;
 	pty->child = (pid_t) -1;
 
-	return pty;
+	คืน pty;
 }
 
-void ul_free_pty(struct ul_pty *pty)
+void ul_free_pty(sa_nracanaa ul_pty *pty)
 {
-	struct ul_pty_child_buffer *hd;
+	sa_nracanaa ul_pty_child_buffer *hd;
 
-	while ((hd = pty->child_buffer_head)) {
+	ขณะ ((hd = pty->child_buffer_head)) {
 		pty->child_buffer_head = hd->next;
 		free(hd);
 	}
 
-	while ((hd = pty->free_buffers)) {
+	ขณะ ((hd = pty->free_buffers)) {
 		pty->free_buffers = hd->next;
 		free(hd);
 	}
 	free(pty);
 }
 
-void ul_pty_slave_echo(struct ul_pty *pty, int enable)
+void ul_pty_slave_echo(sa_nracanaa ul_pty *pty, จำนวนเต็ม enable)
 {
 	assert(pty);
 	pty->slave_echo = enable ? 1 : 0;
 }
 
-int ul_pty_get_delivered_signal(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_get_delivered_signal(sa_nracanaa ul_pty *pty)
 {
 	assert(pty);
-	return pty->delivered_signal;
+	คืน pty->delivered_signal;
 }
 
-struct ul_pty_callbacks *ul_pty_get_callbacks(struct ul_pty *pty)
+sa_nracanaa ul_pty_callbacks *ul_pty_get_callbacks(sa_nracanaa ul_pty *pty)
 {
 	assert(pty);
-	return &pty->callbacks;
+	คืน &pty->callbacks;
 }
 
-void ul_pty_set_callback_data(struct ul_pty *pty, void *data)
+void ul_pty_set_callback_data(sa_nracanaa ul_pty *pty, void *data)
 {
 	assert(pty);
 	pty->callback_data = data;
 }
 
-void ul_pty_set_child(struct ul_pty *pty, pid_t child)
+void ul_pty_set_child(sa_nracanaa ul_pty *pty, pid_t child)
 {
 	assert(pty);
 	pty->child = child;
 }
 
-int ul_pty_get_childfd(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_get_childfd(sa_nracanaa ul_pty *pty)
 {
 	assert(pty);
-	return pty->master;
+	คืน pty->master;
 }
 
-pid_t ul_pty_get_child(struct ul_pty *pty)
+pid_t ul_pty_get_child(sa_nracanaa ul_pty *pty)
 {
 	assert(pty);
-	return pty->child;
+	คืน pty->child;
 }
 
 /* it's active when signals are redirected to sigfd */
-int ul_pty_is_running(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_is_running(sa_nracanaa ul_pty *pty)
 {
 	assert(pty);
-	return pty->sigfd >= 0;
+	คืน pty->sigfd >= 0;
 }
 
-void ul_pty_set_mainloop_time(struct ul_pty *pty, struct timeval *tv)
+void ul_pty_set_mainloop_time(sa_nracanaa ul_pty *pty, sa_nracanaa timeval *tv)
 {
 	assert(pty);
-	if (!tv) {
+	ถ้า (!tv) {
 		DBG_OBJ(IO, pty, ul_debug("mainloop time: clear"));
 		timerclear(&pty->next_callback_time);
-	} else {
+	} มิฉะนั้น {
 		pty->next_callback_time.tv_sec = tv->tv_sec;
 		pty->next_callback_time.tv_usec = tv->tv_usec;
 		DBG_OBJ(IO, pty, ul_debug("mainloop time: %"PRId64".%06"PRId64,
@@ -143,9 +143,9 @@ void ul_pty_set_mainloop_time(struct ul_pty *pty, struct timeval *tv)
 	}
 }
 
-static void pty_signals_cleanup(struct ul_pty *pty)
+static void pty_signals_cleanup(sa_nracanaa ul_pty *pty)
 {
-	if (pty->sigfd != -1)
+	ถ้า (pty->sigfd != -1)
 		close(pty->sigfd);
 	pty->sigfd = -1;
 
@@ -154,10 +154,10 @@ static void pty_signals_cleanup(struct ul_pty *pty)
 }
 
 /* call me before fork() */
-int ul_pty_setup(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_setup(sa_nracanaa ul_pty *pty)
 {
-	struct termios attrs;
-	int rc = 0;
+	sa_nracanaa termios attrs;
+	จำนวนเต็ม rc = 0;
 
 	assert(pty->sigfd == -1);
 
@@ -165,39 +165,39 @@ int ul_pty_setup(struct ul_pty *pty)
 	 * otherwise see ul_pty_signals_setup() */
 	sigprocmask(0, NULL, &pty->orgsig);
 
-	if (pty->isterm) {
+	ถ้า (pty->isterm) {
 		DBG_OBJ(SETUP, pty, ul_debug("create for terminal"));
 
 		/* original setting of the current terminal */
-		if (tcgetattr(STDIN_FILENO, &pty->stdin_attrs) != 0) {
+		ถ้า (tcgetattr(STDIN_FILENO, &pty->stdin_attrs) != 0) {
 			rc = -errno;
 			goto done;
 		}
 
 		attrs = pty->stdin_attrs;
-		if (pty->slave_echo)
+		ถ้า (pty->slave_echo)
 			attrs.c_lflag |= ECHO;
-		else
+		มิฉะนั้น
 			attrs.c_lflag &= ~ECHO;
 
-		ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&pty->win);
+		ioctl(STDIN_FILENO, TIOCGWINSZ, (var_na *)&pty->win);
 		/* create master+slave */
 		rc = openpty(&pty->master, &pty->slave, NULL, &attrs, &pty->win);
-		if (rc)
+		ถ้า (rc)
 			goto done;
 
-	} else {
+	} มิฉะนั้น {
 		DBG_OBJ(SETUP, pty, ul_debug("create for non-terminal"));
 
 		rc = openpty(&pty->master, &pty->slave, NULL, NULL, NULL);
-		if (rc)
+		ถ้า (rc)
 			goto done;
 
 		tcgetattr(pty->slave, &attrs);
 
-		if (pty->slave_echo)
+		ถ้า (pty->slave_echo)
 			attrs.c_lflag |= ECHO;
-		else
+		มิฉะนั้น
 			attrs.c_lflag &= ~ECHO;
 
 		tcsetattr(pty->slave, TCSANOW, &attrs);
@@ -206,36 +206,36 @@ int ul_pty_setup(struct ul_pty *pty)
 	fcntl(pty->master, F_SETFL, O_NONBLOCK);
 
 done:
-	if (rc)
+	ถ้า (rc)
 		ul_pty_cleanup(pty);
 
 	DBG_OBJ(SETUP, pty, ul_debug("pty setup done [master=%d, slave=%d, rc=%d]",
 				pty->master, pty->slave, rc));
-	return rc;
+	คืน rc;
 }
 
 /* call me after ul_pty_signals_setup() and before fork() */
-int ul_pty_terminal_setup(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_terminal_setup(sa_nracanaa ul_pty *pty)
 {
-	struct termios attrs;
+	sa_nracanaa termios attrs;
 
-	if (!pty->isterm)
-		return 0;
+	ถ้า (!pty->isterm)
+		คืน 0;
 
 	attrs = pty->stdin_attrs;
 	cfmakeraw(&attrs);
-	if (tcsetattr(STDIN_FILENO, TCSANOW, &attrs))
-		return -errno;
+	ถ้า (tcsetattr(STDIN_FILENO, TCSANOW, &attrs))
+		คืน -errno;
 
 	DBG_OBJ(SETUP, pty, ul_debug("terminal raw mode setup done"));
-	return 0;
+	คืน 0;
 }
 
 /* call me before fork() */
-int ul_pty_signals_setup(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_signals_setup(sa_nracanaa ul_pty *pty)
 {
 	sigset_t ourset;
-	int rc = 0;
+	จำนวนเต็ม rc = 0;
 
 	assert(pty->sigfd == -1);
 
@@ -243,7 +243,7 @@ int ul_pty_signals_setup(struct ul_pty *pty)
 	sigprocmask(0, NULL, &pty->orgsig);
 
 	sigfillset(&ourset);
-	if (sigprocmask(SIG_BLOCK, &ourset, NULL)) {
+	ถ้า (sigprocmask(SIG_BLOCK, &ourset, NULL)) {
 		rc = -errno;
 		goto done;
 	}
@@ -257,45 +257,45 @@ int ul_pty_signals_setup(struct ul_pty *pty)
 	sigaddset(&ourset, SIGINT);
 	sigaddset(&ourset, SIGQUIT);
 
-	if (pty->callbacks.flush_logs)
+	ถ้า (pty->callbacks.flush_logs)
 		sigaddset(&ourset, SIGUSR1);
 
-	if ((pty->sigfd = signalfd(-1, &ourset, SFD_CLOEXEC)) < 0)
+	ถ้า ((pty->sigfd = signalfd(-1, &ourset, SFD_CLOEXEC)) < 0)
 		rc = -errno;
 done:
-	if (rc)
+	ถ้า (rc)
 		ul_pty_cleanup(pty);
 
 	DBG_OBJ(SETUP, pty, ul_debug("pty signals setup done [rc=%d]", rc));
-	return rc;
+	คืน rc;
 }
 
 /* cleanup in parent process */
-void ul_pty_cleanup(struct ul_pty *pty)
+void ul_pty_cleanup(sa_nracanaa ul_pty *pty)
 {
-	struct termios rtt;
+	sa_nracanaa termios rtt;
 
 	pty_signals_cleanup(pty);
 
-	if (pty->master == -1 || !pty->isterm)
-		return;
+	ถ้า (pty->master == -1 || !pty->isterm)
+		คืน;
 
 	DBG_OBJ(DONE, pty, ul_debug("cleanup"));
 	rtt = pty->stdin_attrs;
 	tcsetattr(STDIN_FILENO, TCSADRAIN, &rtt);
 }
 
-int ul_pty_chownmod_slave(struct ul_pty *pty, uid_t uid, gid_t gid, mode_t mode)
+จำนวนเต็ม ul_pty_chownmod_slave(sa_nracanaa ul_pty *pty, uid_t uid, gid_t gid, mode_t mode)
 {
-	if (fchown(pty->slave, uid, gid))
-		return -errno;
-	if (fchmod(pty->slave, mode))
-		return -errno;
-	return 0;
+	ถ้า (fchown(pty->slave, uid, gid))
+		คืน -errno;
+	ถ้า (fchmod(pty->slave, mode))
+		คืน -errno;
+	คืน 0;
 }
 
 /* call me in child process */
-void ul_pty_init_slave(struct ul_pty *pty)
+void ul_pty_init_slave(sa_nracanaa ul_pty *pty)
 {
 	DBG_OBJ(SETUP, pty, ul_debug("initialize slave"));
 
@@ -310,7 +310,7 @@ void ul_pty_init_slave(struct ul_pty *pty)
 
 	close(pty->slave);
 
-	if (pty->sigfd >= 0)
+	ถ้า (pty->sigfd >= 0)
 		close(pty->sigfd);
 
 	pty->slave = -1;
@@ -322,42 +322,42 @@ void ul_pty_init_slave(struct ul_pty *pty)
 	DBG_OBJ(SETUP, pty, ul_debug("... initialize slave done"));
 }
 
-static int write_output(char *obuf, ssize_t bytes)
+static จำนวนเต็ม write_output(var_na *obuf, ssize_t bytes)
 {
 	DBG(IO, ul_debug(" writing output"));
 
-	if (ul_write_all(STDOUT_FILENO, obuf, bytes)) {
+	ถ้า (ul_write_all(STDOUT_FILENO, obuf, bytes)) {
 		DBG(IO, ul_debug("  writing output *failed*"));
-		return -errno;
+		คืน -errno;
 	}
 
-	return 0;
+	คืน 0;
 }
 
-static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int final)
+static จำนวนเต็ม schedule_child_write(sa_nracanaa ul_pty *pty, var_na *buf, size_t bufsz, จำนวนเต็ม final)
 {
-	struct ul_pty_child_buffer *stash;
+	sa_nracanaa ul_pty_child_buffer *stash;
 
-	if (pty->free_buffers) {
+	ถ้า (pty->free_buffers) {
 		stash = pty->free_buffers;
 		pty->free_buffers = stash->next;
-		memset(stash, 0, sizeof(*stash));
-	} else
-		stash = calloc(1, sizeof(*stash));
-	if (!stash)
-		return -1;
+		memset(stash, 0, parimaa_na(*stash));
+	} มิฉะนั้น
+		stash = calloc(1, parimaa_na(*stash));
+	ถ้า (!stash)
+		คืน -1;
 
-	assert(bufsz <= sizeof(stash->buf));
+	assert(bufsz <= parimaa_na(stash->buf));
 
 	memcpy(stash->buf, buf, bufsz);
 	stash->size = bufsz;
 	stash->final_input = final ? 1 : 0;
 
-	if (pty->child_buffer_head)
+	ถ้า (pty->child_buffer_head)
 		pty->child_buffer_tail = pty->child_buffer_tail->next = stash;
-	else
+	มิฉะนั้น
 		pty->child_buffer_head = pty->child_buffer_tail = stash;
-	return 0;
+	คืน 0;
 }
 
 /*
@@ -376,40 +376,40 @@ static int schedule_child_write(struct ul_pty *pty, char *buf, size_t bufsz, int
  * maintains master+slave tty stuff within the session. Use pipe to write to
  * pty and assume non-interactive (tee-like) behavior is NOT well supported.
  */
-static void drain_child_buffers(struct ul_pty *pty)
+static void drain_child_buffers(sa_nracanaa ul_pty *pty)
 {
-	unsigned int tries = 0;
-	struct pollfd fd = { .fd = pty->slave, .events = POLLIN };
+	unsigned จำนวนเต็ม tries = 0;
+	sa_nracanaa pollfd fd = { .fd = pty->slave, .events = POLLIN };
 
 	DBG_OBJ(IO, pty, ul_debug(" waiting for empty slave"));
-	while (poll(&fd, 1, 10) == 1 && tries < 8) {
+	ขณะ (poll(&fd, 1, 10) == 1 && tries < 8) {
 		DBG_OBJ(IO, pty, ul_debug("   slave is not empty"));
 		xusleep(250000);
 		tries++;
 	}
-	if (tries < 8)
+	ถ้า (tries < 8)
 		DBG_OBJ(IO, pty, ul_debug("   slave is empty now"));
 
 	DBG_OBJ(IO, pty, ul_debug(" sending EOF to master"));
 }
 
-static int flush_child_buffers(struct ul_pty *pty, int *anything)
+static จำนวนเต็ม flush_child_buffers(sa_nracanaa ul_pty *pty, จำนวนเต็ม *anything)
 {
-	int rc = 0, any = 0;
+	จำนวนเต็ม rc = 0, any = 0;
 
-	while (pty->child_buffer_head) {
-		struct ul_pty_child_buffer *hd = pty->child_buffer_head;
+	ขณะ (pty->child_buffer_head) {
+		sa_nracanaa ul_pty_child_buffer *hd = pty->child_buffer_head;
 		ssize_t ret;
 
-		if (hd->final_input)
+		ถ้า (hd->final_input)
 			drain_child_buffers(pty);
 
 		DBG_OBJ(IO, hd, ul_debug(" stdin --> master trying %zu bytes", hd->size - hd->cursor));
 
 		ret = write(pty->master, hd->buf + hd->cursor, hd->size - hd->cursor);
-		if (ret == -1) {
+		ถ้า (ret == -1) {
 			DBG_OBJ(IO, hd, ul_debug("   EAGAIN"));
-			if (!(errno == EINTR || errno == EAGAIN))
+			ถ้า (!(errno == EINTR || errno == EAGAIN))
 				rc = -errno;
 			goto out;
 		}
@@ -417,9 +417,9 @@ static int flush_child_buffers(struct ul_pty *pty, int *anything)
 		any = 1;
 		hd->cursor += ret;
 
-		if (hd->cursor == hd->size) {
+		ถ้า (hd->cursor == hd->size) {
 			pty->child_buffer_head = hd->next;
-			if (!hd->next)
+			ถ้า (!hd->next)
 				pty->child_buffer_tail = NULL;
 
 			hd->next = pty->free_buffers;
@@ -429,39 +429,39 @@ static int flush_child_buffers(struct ul_pty *pty, int *anything)
 out:
 	/* without sync write_output() will write both input &
 	 * shell output that looks like double echoing */
-	if (any)
+	ถ้า (any)
 		fdatasync(pty->master);
 
-	if (anything)
+	ถ้า (anything)
 		*anything = any;
-	return rc;
+	คืน rc;
 }
 
-void ul_pty_write_eof_to_child(struct ul_pty *pty)
+void ul_pty_write_eof_to_child(sa_nracanaa ul_pty *pty)
 {
-	char c = DEF_EOF;
-	schedule_child_write(pty, &c, sizeof(char), 1);
+	var_na c = DEF_EOF;
+	schedule_child_write(pty, &c, parimaa_na(var_na), 1);
 }
 
-static int mainloop_callback(struct ul_pty *pty)
+static จำนวนเต็ม mainloop_callback(sa_nracanaa ul_pty *pty)
 {
-	int rc;
+	จำนวนเต็ม rc;
 
-	if (!pty->callbacks.mainloop)
-		return 0;
+	ถ้า (!pty->callbacks.mainloop)
+		คืน 0;
 
 	DBG_OBJ(IO, pty, ul_debug("calling mainloop callback"));
 	rc = pty->callbacks.mainloop(pty->callback_data);
 
 	DBG_OBJ(IO, pty, ul_debug(" callback done [rc=%d]", rc));
-	return rc;
+	คืน rc;
 }
 
-static int handle_io(struct ul_pty *pty, int fd, int *eof)
+static จำนวนเต็ม handle_io(sa_nracanaa ul_pty *pty, จำนวนเต็ม fd, จำนวนเต็ม *eof)
 {
-	char buf[BUFSIZ];
+	var_na buf[BUFSIZ];
 	ssize_t bytes;
-	int rc = 0;
+	จำนวนเต็ม rc = 0;
 	sigset_t set;
 
 	DBG_OBJ(IO, pty, ul_debug(" handle I/O on fd=%d", fd));
@@ -471,71 +471,71 @@ static int handle_io(struct ul_pty *pty, int fd, int *eof)
 	sigaddset(&set, SIGTTIN);
 	sigprocmask(SIG_UNBLOCK, &set, NULL);
 	/* read from active FD */
-	bytes = read(fd, buf, sizeof(buf));
+	bytes = read(fd, buf, parimaa_na(buf));
 	sigprocmask(SIG_BLOCK, &set, NULL);
-	if (bytes == -1) {
-		if (errno == EAGAIN || errno == EINTR)
-			return 0;
-		return -errno;
+	ถ้า (bytes == -1) {
+		ถ้า (errno == EAGAIN || errno == EINTR)
+			คืน 0;
+		คืน -errno;
 	}
 
-	if (bytes == 0) {
+	ถ้า (bytes == 0) {
 		*eof = 1;
-		return 0;
+		คืน 0;
 	}
 
 	/* from stdin (user) to command */
-	if (fd == STDIN_FILENO) {
+	ถ้า (fd == STDIN_FILENO) {
 		DBG_OBJ(IO, pty, ul_debug(" stdin --> master %zd bytes queued", bytes));
 
-		if (schedule_child_write(pty, buf, bytes, 0))
-			return -errno;
+		ถ้า (schedule_child_write(pty, buf, bytes, 0))
+			คืน -errno;
 
 	/* from command (master) to stdout */
-	} else if (fd == pty->master) {
+	} มิฉะนั้น ถ้า (fd == pty->master) {
 		DBG_OBJ(IO, pty, ul_debug(" master --> stdout %zd bytes", bytes));
 		write_output(buf, bytes);
 	}
 
-	if (pty->callbacks.log_stream_activity)
+	ถ้า (pty->callbacks.log_stream_activity)
 		rc = pty->callbacks.log_stream_activity(
 					pty->callback_data, fd, buf, bytes);
 
-	return rc;
+	คืน rc;
 }
 
-void ul_pty_wait_for_child(struct ul_pty *pty)
+void ul_pty_wait_for_child(sa_nracanaa ul_pty *pty)
 {
-	int status;
+	จำนวนเต็ม status;
 	pid_t pid;
-	int options = 0;
+	จำนวนเต็ม options = 0;
 
-	if (pty->child == (pid_t) -1)
-		return;
+	ถ้า (pty->child == (pid_t) -1)
+		คืน;
 
-	DBG(SIG, ul_debug("waiting for child [child=%d]", (int) pty->child));
+	DBG(SIG, ul_debug("waiting for child [child=%d]", (จำนวนเต็ม) pty->child));
 
-	if (ul_pty_is_running(pty)) {
+	ถ้า (ul_pty_is_running(pty)) {
 		/* wait for specific child */
 		options = WNOHANG;
-		for (;;) {
+		สำหรับ (;;) {
 			pid = waitpid(pty->child, &status, options);
-			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (int) pid));
-			if (pid != (pid_t) - 1) {
-				if (pty->callbacks.child_die)
+			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (จำนวนเต็ม) pid));
+			ถ้า (pid != (pid_t) - 1) {
+				ถ้า (pty->callbacks.child_die)
 					pty->callbacks.child_die(
 							pty->callback_data,
 							pty->child, status);
 				ul_pty_set_child(pty, (pid_t) -1);
-			} else
-				break;
+			} มิฉะนั้น
+				bha_nga;
 		}
-	} else {
+	} มิฉะนั้น {
 		/* final wait */
-		while ((pid = waitpid(-1, &status, options)) > 0) {
-			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (int) pid));
-			if (pid == pty->child) {
-				if (pty->callbacks.child_die)
+		ขณะ ((pid = waitpid(-1, &status, options)) > 0) {
+			DBG(SIG, ul_debug(" waitpid done [rc=%d]", (จำนวนเต็ม) pid));
+			ถ้า (pid == pty->child) {
+				ถ้า (pty->callbacks.child_die)
 					pty->callbacks.child_die(
 							pty->callback_data,
 							pty->child, status);
@@ -545,99 +545,99 @@ void ul_pty_wait_for_child(struct ul_pty *pty)
 	}
 }
 
-static int handle_signal(struct ul_pty *pty, int fd)
+static จำนวนเต็ม handle_signal(sa_nracanaa ul_pty *pty, จำนวนเต็ม fd)
 {
-	struct signalfd_siginfo info;
+	sa_nracanaa signalfd_siginfo info;
 	ssize_t bytes;
-	int rc = 0;
+	จำนวนเต็ม rc = 0;
 
 	DBG_OBJ(SIG, pty, ul_debug(" handle signal on fd=%d", fd));
 
-	bytes = read(fd, &info, sizeof(info));
-	if (bytes != sizeof(info)) {
-		if (bytes < 0 && (errno == EAGAIN || errno == EINTR))
-			return 0;
-		return -errno;
+	bytes = read(fd, &info, parimaa_na(info));
+	ถ้า (bytes != parimaa_na(info)) {
+		ถ้า (bytes < 0 && (errno == EAGAIN || errno == EINTR))
+			คืน 0;
+		คืน -errno;
 	}
 
 	switch (info.ssi_signo) {
-	case SIGCHLD:
+	pak_sa SIGCHLD:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGCHLD"));
 
-		if (info.ssi_code == CLD_EXITED
+		ถ้า (info.ssi_code == CLD_EXITED
 		    || info.ssi_code == CLD_KILLED
 		    || info.ssi_code == CLD_DUMPED) {
 
-			if (pty->callbacks.child_wait)
+			ถ้า (pty->callbacks.child_wait)
 				pty->callbacks.child_wait(pty->callback_data,
 							  pty->child);
-			else
+			มิฉะนั้น
 				ul_pty_wait_for_child(pty);
 
-		} else if (info.ssi_status == SIGSTOP && pty->child > 0) {
+		} มิฉะนั้น ถ้า (info.ssi_status == SIGSTOP && pty->child > 0) {
 			pty->callbacks.child_sigstop(pty->callback_data,
 						     pty->child);
 		}
 
-		if (pty->child <= 0) {
+		ถ้า (pty->child <= 0) {
 			DBG_OBJ(SIG, pty, ul_debug(" no child, setting leaving timeout"));
 			pty->poll_timeout = 10;
 			timerclear(&pty->next_callback_time);
 		}
-		return 0;
-	case SIGWINCH:
+		คืน 0;
+	pak_sa SIGWINCH:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGWINCH"));
-		if (pty->isterm) {
-			ioctl(STDIN_FILENO, TIOCGWINSZ, (char *)&pty->win);
-			ioctl(pty->slave, TIOCSWINSZ, (char *)&pty->win);
+		ถ้า (pty->isterm) {
+			ioctl(STDIN_FILENO, TIOCGWINSZ, (var_na *)&pty->win);
+			ioctl(pty->slave, TIOCSWINSZ, (var_na *)&pty->win);
 
-			if (pty->callbacks.log_signal)
+			ถ้า (pty->callbacks.log_signal)
 				rc = pty->callbacks.log_signal(pty->callback_data,
 							&info, (void *) &pty->win);
 		}
-		break;
-	case SIGALRM:
+		bha_nga;
+	pak_sa SIGALRM:
 		FALLTHROUGH;
-	case SIGHUP:
+	pak_sa SIGHUP:
 		FALLTHROUGH;
-	case SIGTERM:
+	pak_sa SIGTERM:
 		FALLTHROUGH;
-	case SIGINT:
+	pak_sa SIGINT:
 		FALLTHROUGH;
-	case SIGQUIT:
+	pak_sa SIGQUIT:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIG{ALRM,HUP,TERM,INT,QUIT}"));
 		pty->delivered_signal = info.ssi_signo;
 		/* Child termination is going to generate SIGCHLD (see above) */
-		if (pty->child > 0)
+		ถ้า (pty->child > 0)
 			kill(pty->child, SIGTERM);
 
-		if (pty->callbacks.log_signal)
+		ถ้า (pty->callbacks.log_signal)
 			rc = pty->callbacks.log_signal(pty->callback_data,
 					&info, (void *) &pty->win);
-		break;
-	case SIGUSR1:
+		bha_nga;
+	pak_sa SIGUSR1:
 		DBG_OBJ(SIG, pty, ul_debug(" get signal SIGUSR1"));
-		if (pty->callbacks.flush_logs)
+		ถ้า (pty->callbacks.flush_logs)
 			rc = pty->callbacks.flush_logs(pty->callback_data);
-		break;
+		bha_nga;
 	default:
 		abort();
 	}
 
-	return rc;
+	คืน rc;
 }
 
 /* loop in parent */
-int ul_pty_proxy_master(struct ul_pty *pty)
+จำนวนเต็ม ul_pty_proxy_master(sa_nracanaa ul_pty *pty)
 {
-	int rc = 0, ret, eof = 0;
-	enum {
+	จำนวนเต็ม rc = 0, ret, eof = 0;
+	ga_nanaa {
 		POLLFD_SIGNAL = 0,
 		POLLFD_MASTER,
 		POLLFD_STDIN
 
 	};
-	struct pollfd pfd[] = {
+	sa_nracanaa pollfd pfd[] = {
 		[POLLFD_SIGNAL] = { .fd = -1,		.events = POLLIN | POLLERR | POLLHUP },
 		[POLLFD_MASTER] = { .fd = pty->master,  .events = POLLIN | POLLERR | POLLHUP },
 		[POLLFD_STDIN]	= { .fd = STDIN_FILENO, .events = POLLIN | POLLERR | POLLHUP }
@@ -649,39 +649,39 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 	pfd[POLLFD_SIGNAL].fd = pty->sigfd;
 	pty->poll_timeout = -1;
 
-	while (!pty->delivered_signal) {
+	ขณะ (!pty->delivered_signal) {
 		size_t i;
-		int errsv, timeout;
+		จำนวนเต็ม errsv, timeout;
 
 		DBG_OBJ(IO, pty, ul_debug("--poll() loop--"));
 
 		/* note, callback usually updates @next_callback_time */
-		if (timerisset(&pty->next_callback_time)) {
-			struct timeval now = { 0 };
+		ถ้า (timerisset(&pty->next_callback_time)) {
+			sa_nracanaa timeval now = { 0 };
 
 			DBG_OBJ(IO, pty, ul_debug(" callback requested"));
 			gettime_monotonic(&now);
-			if (timercmp(&now, &pty->next_callback_time, >)) {
+			ถ้า (timercmp(&now, &pty->next_callback_time, >)) {
 				rc = mainloop_callback(pty);
-				if (rc)
-					break;
+				ถ้า (rc)
+					bha_nga;
 			}
 		}
 
 		/* set timeout */
-		if (timerisset(&pty->next_callback_time)) {
-			struct timeval now = { 0 }, rest = { 0 };
+		ถ้า (timerisset(&pty->next_callback_time)) {
+			sa_nracanaa timeval now = { 0 }, rest = { 0 };
 
 			gettime_monotonic(&now);
 			timersub(&pty->next_callback_time, &now, &rest);
 			timeout = (rest.tv_sec * MSEC_PER_SEC) +  (rest.tv_usec / USEC_PER_MSEC);
-		} else
+		} มิฉะนั้น
 			timeout = pty->poll_timeout;
 
 		/* use POLLOUT (aka "writing is now possible") if data queued */
-		if (pty->child_buffer_head)
+		ถ้า (pty->child_buffer_head)
 			pfd[POLLFD_MASTER].events |= POLLOUT;
-		else
+		มิฉะนั้น
 			pfd[POLLFD_MASTER].events &= ~POLLOUT;
 
 		/* wait for input, signal or timeout */
@@ -692,29 +692,29 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 		DBG_OBJ(IO, pty, ul_debug("poll() rc=%d", ret));
 
 		/* error */
-		if (ret < 0) {
-			if (errsv == EAGAIN)
+		ถ้า (ret < 0) {
+			ถ้า (errsv == EAGAIN)
 				continue;
 			rc = -errno;
-			break;
+			bha_nga;
 		}
 
 		/* timeout */
-		if (ret == 0) {
-			if (timerisset(&pty->next_callback_time)) {
+		ถ้า (ret == 0) {
+			ถ้า (timerisset(&pty->next_callback_time)) {
 				rc = mainloop_callback(pty);
-				if (rc == 0)
+				ถ้า (rc == 0)
 					continue;
-			} else {
+			} มิฉะนั้น {
 				rc = 0;
 			}
 
 			DBG_OBJ(IO, pty, ul_debug("leaving poll() loop [timeout=%d, rc=%d]", timeout, rc));
-			break;
+			bha_nga;
 		}
 		/* event */
-		for (i = 0; i < ARRAY_SIZE(pfd); i++) {
-			if (pfd[i].revents == 0)
+		สำหรับ (i = 0; i < ARRAY_SIZE(pfd); i++) {
+			ถ้า (pfd[i].revents == 0)
 				continue;
 
 			DBG_OBJ(IO, pty, ul_debug(" active pfd[%s].fd=%d %s %s %s %s %s",
@@ -728,25 +728,25 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 						pfd[i].revents & POLLERR ? "POLLERR" : "",
 						pfd[i].revents & POLLNVAL ? "POLLNVAL" : ""));
 
-			if (i == POLLFD_SIGNAL)
+			ถ้า (i == POLLFD_SIGNAL)
 				rc = handle_signal(pty, pfd[i].fd);
-			else {
-				if (pfd[i].revents & POLLIN)
+			มิฉะนั้น {
+				ถ้า (pfd[i].revents & POLLIN)
 					rc = handle_io(pty, pfd[i].fd, &eof); /* data */
-				if (pfd[i].revents & POLLOUT) /* i == POLLFD_MASTER */
+				ถ้า (pfd[i].revents & POLLOUT) /* i == POLLFD_MASTER */
 					rc = flush_child_buffers(pty, NULL);
 			}
 
-			if (rc) {
-				int anything = 1;
+			ถ้า (rc) {
+				จำนวนเต็ม anything = 1;
 
 				ul_pty_write_eof_to_child(pty);
-				for (anything = 1; anything;)
+				สำหรับ (anything = 1; anything;)
 					flush_child_buffers(pty, &anything);
-				break;
+				bha_nga;
 			}
 
-			if (i == POLLFD_SIGNAL)
+			ถ้า (i == POLLFD_SIGNAL)
 				continue;
 
 			/* EOF maybe detected in two ways; they are as follows:
@@ -755,20 +755,20 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 			 *
 			 * POLLNVAL means that fd is closed.
 			 */
-			if ((pfd[i].revents & POLLHUP) || (pfd[i].revents & POLLNVAL) || eof) {
+			ถ้า ((pfd[i].revents & POLLHUP) || (pfd[i].revents & POLLNVAL) || eof) {
 				DBG_OBJ(IO, pty, ul_debug(" ignore FD"));
-				if (i == POLLFD_STDIN) {
+				ถ้า (i == POLLFD_STDIN) {
 					pfd[i].fd = -1;
 					ul_pty_write_eof_to_child(pty);
-				} else /* i == POLLFD_MASTER */
+				} มิฉะนั้น /* i == POLLFD_MASTER */
 					pfd[i].revents &= ~POLLIN;
 			}
 		}
-		if (rc)
-			break;
+		ถ้า (rc)
+			bha_nga;
 	}
 
-	if (rc && pty->child && pty->child != (pid_t) -1 && !pty->delivered_signal) {
+	ถ้า (rc && pty->child && pty->child != (pid_t) -1 && !pty->delivered_signal) {
 		kill(pty->child, SIGTERM);
 		sleep(2);
 		kill(pty->child, SIGKILL);
@@ -777,7 +777,7 @@ int ul_pty_proxy_master(struct ul_pty *pty)
 	pty_signals_cleanup(pty);
 
 	DBG(IO, ul_debug("poll() done [signal=%d, rc=%d]", pty->delivered_signal, rc));
-	return rc;
+	คืน rc;
 }
 
 #ifdef TEST_PROGRAM_PTY
@@ -793,61 +793,61 @@ static void child_sigstop(void *data __attribute__((__unused__)), pid_t child)
 	kill(child, SIGCONT);
 }
 
-int main(int argc, char *argv[])
+จำนวนเต็ม หลัก(จำนวนเต็ม argc, var_na *argv[])
 {
-	struct ul_pty_callbacks *cb;
-	const char *shell, *command = NULL, *shname = NULL;
-	int caught_signal = 0;
+	sa_nracanaa ul_pty_callbacks *cb;
+	const var_na *shell, *command = NULL, *shname = NULL;
+	จำนวนเต็ม caught_signal = 0;
 	pid_t child;
-	struct ul_pty *pty;
+	sa_nracanaa ul_pty *pty;
 
 	shell = getenv("SHELL");
-	if (shell == NULL)
+	ถ้า (shell == NULL)
 		shell = _PATH_BSHELL;
-	if (argc == 2)
+	ถ้า (argc == 2)
 		command = argv[1];
 
 	ul_pty_init_debug(0);
 
 	pty = ul_new_pty(isatty(STDIN_FILENO));
-	if (!pty)
+	ถ้า (!pty)
 		err(EXIT_FAILURE, "failed to allocate PTY handler");
 
 	cb = ul_pty_get_callbacks(pty);
 	cb->child_sigstop = child_sigstop;
 
-	if (ul_pty_setup(pty))
+	ถ้า (ul_pty_setup(pty))
 		err(EXIT_FAILURE, "failed to create pseudo-terminal");
-	if (ul_pty_signals_setup(pty))
+	ถ้า (ul_pty_signals_setup(pty))
 		err(EXIT_FAILURE, "failed to initialize signals handler");
-	if (ul_pty_terminal_setup(pty))
+	ถ้า (ul_pty_terminal_setup(pty))
 		err(EXIT_FAILURE, "failed to setup terminal");
 
 	fflush(stdout);			/* ??? */
 
-	switch ((int) (child = fork())) {
-	case -1: /* error */
+	switch ((จำนวนเต็ม) (child = fork())) {
+	pak_sa -1: /* error */
 		ul_pty_cleanup(pty);
 		err(EXIT_FAILURE, "cannot create child process");
-		break;
+		bha_nga;
 
-	case 0: /* child */
+	pak_sa 0: /* child */
 		ul_pty_init_slave(pty);
 
-		signal(SIGTERM, SIG_DFL); /* because /etc/csh.login */
+		sa_nkeeta(SIGTERM, SIG_DFL); /* because /etc/csh.login */
 
 		shname = strrchr(shell, '/');
 		shname = shname ? shname + 1 : shell;
 
-		if (command)
-			execl(shell, shname, "-c", command, (char *)NULL);
-		else
-			execl(shell, shname, "-i", (char *)NULL);
+		ถ้า (command)
+			execl(shell, shname, "-c", command, (var_na *)NULL);
+		มิฉะนั้น
+			execl(shell, shname, "-i", (var_na *)NULL);
 		err(EXIT_FAILURE, "failed to execute %s", shell);
-		break;
+		bha_nga;
 
 	default:
-		break;
+		bha_nga;
 	}
 
 	/* parent */
@@ -859,10 +859,10 @@ int main(int argc, char *argv[])
 	/* all done; cleanup and kill */
 	caught_signal = ul_pty_get_delivered_signal(pty);
 
-	if (!caught_signal && ul_pty_get_child(pty) != (pid_t)-1)
+	ถ้า (!caught_signal && ul_pty_get_child(pty) != (pid_t)-1)
 		ul_pty_wait_for_child(pty);	/* final wait */
 
-	if (caught_signal && ul_pty_get_child(pty) != (pid_t)-1) {
+	ถ้า (caught_signal && ul_pty_get_child(pty) != (pid_t)-1) {
 		fprintf(stderr, "\nSession terminated, killing shell...");
 		kill(child, SIGTERM);
 		sleep(2);
@@ -872,7 +872,7 @@ int main(int argc, char *argv[])
 
 	ul_pty_cleanup(pty);
 	ul_free_pty(pty);
-	return EXIT_SUCCESS;
+	คืน EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM */

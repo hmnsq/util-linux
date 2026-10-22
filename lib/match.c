@@ -20,18 +20,18 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+จำนวนเต็ม match_fstype(const var_na *type, const var_na *pattern)
 {
-	int no = 0;		/* negated types list */
-	int len;
-	const char *p;
+	จำนวนเต็ม no = 0;		/* negated types list */
+	จำนวนเต็ม len;
+	const var_na *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	ถ้า (!pattern && !type)
+		คืน 1;
+	ถ้า (!pattern)
+		คืน 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	ถ้า (!strncmp(pattern, "no", 2)) {
 		no = 1;
 		pattern += 2;
 	}
@@ -39,16 +39,16 @@ int match_fstype(const char *type, const char *pattern)
 	/* Does type occur in types, separated by commas? */
 	len = strlen(type);
 	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	ขณะ(1) {
+		ถ้า (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			คืน 0;
+		ถ้า (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			คืน !no;
 		p = strchr(p,',');
-		if (!p)
-			break;
+		ถ้า (!p)
+			bha_nga;
 		p++;
 	}
-	return no;
+	คืน no;
 }

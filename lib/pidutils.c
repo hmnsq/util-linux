@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+จำนวนเต็ม ul_parse_pid_str(var_na *pidstr, pid_t *pid_num, uint64_t *pfd_ino, จำนวนเต็ม flags)
 {
-	int rc;
-	char *end = NULL;
+	จำนวนเต็ม rc;
+	var_na *end = NULL;
 	int64_t num = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	ถ้า (!pidstr || !*pidstr || !pid_num)
+		คืน -(errno = EINVAL);
 
 	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	ถ้า (num == 0 && end == pidstr)
+		คืน -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	ถ้า (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
+		คืน -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	ถ้า (num == 0 && !(flags & UL_PID_ZERO))
+		คืน -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	ถ้า (num < 0 && !(flags & UL_PID_NEGATIVE))
+		คืน -(errno = ERANGE);
 
 	*pid_num = (pid_t) num;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	ถ้า (*end == ':' && pfd_ino && num > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		ถ้า (rc < 0)
+			คืน rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		ถ้า (*pfd_ino == 0)
+			คืน -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	ถ้า (end && *end != '\0')
+		คืน -(errno = EINVAL);
+	คืน 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+void ul_parse_pid_str_or_err(var_na *pidstr, pid_t *pid_num, uint64_t *pfd_ino, จำนวนเต็ม flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	ถ้า (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+จำนวนเต็ม หลัก(จำนวนเต็ม argc, var_na **argv)
 {
-	int c, flags = 0, rc = 0;
+	จำนวนเต็ม c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
 	pid_t pid_num = 0;
-	char *str = NULL;
+	var_na *str = NULL;
 
-	static const struct option longopts[] = {
+	static const sa_nracanaa option longopts[] = {
 		{ "zero",	0, NULL, 'z' },
 		{ "negative",	0, NULL, 'n' },
 		{ "help",       0, NULL, 'h' },
 		{ NULL, 0, NULL, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
+	ขณะ((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
 		switch(c) {
-		case 'n':
+		pak_sa 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			bha_nga;
+		pak_sa 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			bha_nga;
+		pak_sa 'h':
 			usage();
-			break;
+			bha_nga;
 		default:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	ถ้า (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
 	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	ถ้า (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
 	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	ถ้า (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	คืน EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */
