@@ -10,242 +10,242 @@
  * by Davidlohr Bueso <dave@xxxxxxx> - March 2012.
  */
 
-#include <unistd.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <signal.h>
+#ضمن <unistd.h>
+#ضمن <stdbool.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/types.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/wait.h>
+#ضمن <signal.h>
 
-#include "c.h"
-#include "xalloc.h"
-#include "nls.h"
-#include "strutils.h"
-#include "ttyutils.h"
-#include "pager.h"
-#include "env.h"
+#ضمن "c.h"
+#ضمن "xalloc.h"
+#ضمن "nls.h"
+#ضمن "strutils.h"
+#ضمن "ttyutils.h"
+#ضمن "pager.h"
+#ضمن "env.h"
 
-static const char *pager_argv[] = { "sh", "-c", NULL, NULL };
+ساكن ثابت حرف *pager_argv[] = { "sh", "-c", عدم, عدم };
 
-struct child_process {
-	const char **argv;
+بنية فرزند_process {
+	ثابت حرف **argv;
 	pid_t pid;
-	int in;
+	صحيح درون;
 
-	int header_lines;
-	int header_width;
+	صحيح سرآیند_سطرها;
+	صحيح سرآیند_عرض;
 
-	int org_err;
-	int org_out;
-	struct sigaction orig_sigchld;
-	struct sigaction orig_sigint;
-	struct sigaction orig_sighup;
-	struct sigaction orig_sigterm;
-	struct sigaction orig_sigquit;
-	struct sigaction orig_sigpipe;
+	صحيح org_err;
+	صحيح org_بیرون;
+	بنية sigaction orig_sigchld;
+	بنية sigaction orig_sigint;
+	بنية sigaction orig_sighup;
+	بنية sigaction orig_sigterm;
+	بنية sigaction orig_sigquit;
+	بنية sigaction orig_sigpipe;
 };
-static struct child_process pager_process;
+ساكن بنية فرزند_process pager_process;
 
-static volatile sig_atomic_t pager_caught_signal;
-static volatile sig_atomic_t pager_caught_sigpipe;
+ساكن متطاير sig_atomic_t pager_caught_signal;
+ساكن متطاير sig_atomic_t pager_caught_sigpipe;
 
-static inline void close_pair(int fd[2])
+ساكن مضمن فراغ close_pair(صحيح fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
 }
 
-static void pager_preexec(void)
+ساكن فراغ pager_preexec(فراغ)
 {
-	const char *less_env = getenv("LESS");
-	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
-	int header_width = pager_process.header_width;
-	char *less_val = NULL;
+	ثابت حرف *less_env = getenv("LESS");
+	ثابت حرف *پایه = less_env ? less_env : "FRSX";
+	صحيح سرآیند_سطرها = pager_process.سرآیند_سطرها;
+	صحيح سرآیند_عرض = pager_process.سرآیند_عرض;
+	حرف *less_val = عدم;
 
-	if (header_lines > 0 && header_width > 0)
-		less_val = ul_strfconcat(base, " --header %d,%d",
-					 header_lines, header_width);
-	else if (header_width > 0)
-		less_val = ul_strfconcat(base, " --header 0,%d",
-					 header_width);
-	else if (header_lines > 0)
-		less_val = ul_strfconcat(base, " --header %d",
-					 header_lines);
+	إذا (سرآیند_سطرها > 0 && سرآیند_عرض > 0)
+		less_val = ul_strfconcat(پایه, " --header %d,%d",
+					 سرآیند_سطرها, سرآیند_عرض);
+	وإلا إذا (سرآیند_عرض > 0)
+		less_val = ul_strfconcat(پایه, " --header 0,%d",
+					 سرآیند_عرض);
+	وإلا إذا (سرآیند_سطرها > 0)
+		less_val = ul_strfconcat(پایه, " --header %d",
+					 سرآیند_سطرها);
 
-	if (less_val) {
-		if (setenv("LESS", less_val, 1) != 0)
+	إذا (less_val) {
+		إذا (setenv("LESS", less_val, 1) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
-		free(less_val);
-	} else if (less_env == NULL) {
-		if (setenv("LESS", "FRSX", 0) != 0)
+		حرر(less_val);
+	} وإلا إذا (less_env == عدم) {
+		إذا (setenv("LESS", "FRSX", 0) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 	}
 
-	if (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
+	إذا (getenv("LV") == عدم && setenv("LV", "-c", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LV");
 }
 
-static int start_command(struct child_process *cmd)
+ساكن صحيح شروع_command(بنية فرزند_process *cmd)
 {
-	int fdin[2];
+	صحيح fdin[2];
 
-	if (pipe(fdin) < 0)
-		return -1;
-	cmd->in = fdin[1];
+	إذا (pipe(fdin) < 0)
+		أرجع -1;
+	cmd->درون = fdin[1];
 
-	fflush(NULL);
+	fflush(عدم);
 	cmd->pid = fork();
-	if (!cmd->pid) {
+	إذا (!cmd->pid) {
 		dup2(fdin[0], STDIN_FILENO);
 		close_pair(fdin);
 
 		pager_preexec();
-		execvp(cmd->argv[0], (char *const*) cmd->argv);
+		execvp(cmd->argv[0], (حرف *ثابت*) cmd->argv);
 		errexec(cmd->argv[0]);
 	}
 
-	if (cmd->pid < 0) {
+	إذا (cmd->pid < 0) {
 		cmd->pid = 0;
 		close_pair(fdin);
-		return -1;
+		أرجع -1;
 	}
 
 	close(fdin[0]);
-	return 0;
+	أرجع 0;
 }
 
-static int wait_for_pager(void)
+ساكن صحيح wait_for_pager(فراغ)
 {
-	pid_t waiting;
-	int ret, status;
+	pid_t انتظار;
+	صحيح ret, وضعیت;
 
-	do {
-		waiting = waitpid(pager_process.pid, &status, 0);
-	} while (waiting == -1 && errno == EINTR);
+	افعل {
+		انتظار = waitpid(pager_process.pid, &وضعیت, 0);
+	} طالما (انتظار == -1 && errno == EINTR);
 
-	if (waiting == -1)
+	إذا (انتظار == -1)
 		ret = -1;
-	else if (waiting == pager_process.pid && WIFEXITED(status))
-		ret = WEXITSTATUS(status);
-	else
+	وإلا إذا (انتظار == pager_process.pid && WIFEXITED(وضعیت))
+		ret = WEXITSTATUS(وضعیت);
+	وإلا
 		ret = 1;
 
 	pager_process.pid = 0;
 
-	return ret;
+	أرجع ret;
 }
 
-static void catch_signal(int signo)
+ساكن فراغ catch_signal(صحيح signo)
 {
 	pager_caught_signal = signo;
 }
 
-static void catch_sigpipe(int signo)
+ساكن فراغ catch_sigpipe(صحيح signo)
 {
 	pager_caught_sigpipe = signo;
 }
 
-static void wait_for_pager_signal(int signo __attribute__ ((__unused__)))
+ساكن فراغ wait_for_pager_signal(صحيح signo __attribute__ ((__unused__)))
 {
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* async-signal safe: wait for all children, including pager */
-	while (wait(NULL) != -1 || errno == EINTR)
+	طالما (wait(عدم) != -1 || errno == EINTR)
 		;
 
 	_exit(EXIT_FAILURE);
 }
 
-static int has_command(const char *cmd)
+ساكن صحيح has_command(ثابت حرف *cmd)
 {
-	const char *path;
-	char *b, *c, *p, *s;
-	int rc = 0;
+	ثابت حرف *مسیر;
+	حرف *b, *c, *p, *s;
+	صحيح rc = 0;
 
-	if (!cmd)
-		goto done;
+	إذا (!cmd)
+		اذهب انجامشده;
 
 	c = xstrdup(cmd);
-	if (!c)
-		goto done;
+	إذا (!c)
+		اذهب انجامشده;
 	b = strtok(c, " ");	/* cmd may contain options */
-	if (!b)
-		goto cleanup;
+	إذا (!b)
+		اذهب cleanup;
 
-	if (strchr(b, '/')) {
+	إذا (strchr(b, '/')) {
 		rc = access(b, X_OK) == 0;
-		goto cleanup;
+		اذهب cleanup;
 	}
 
-	path = getenv("PATH");
-	if (!path)
-		goto cleanup;
-	p = xstrdup(path);
-	if (!p)
-		goto cleanup;
+	مسیر = getenv("PATH");
+	إذا (!مسیر)
+		اذهب cleanup;
+	p = xstrdup(مسیر);
+	إذا (!p)
+		اذهب cleanup;
 
-	for (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
-		int fd = open(s, O_RDONLY|O_CLOEXEC);
-		if (fd < 0)
-			continue;
+	لكل (s = strtok(p, ":"); s; s = strtok(عدم, ":")) {
+		صحيح fd = open(s, O_RDONLY|O_CLOEXEC);
+		إذا (fd < 0)
+			استمر;
 		rc = faccessat(fd, b, X_OK, 0) == 0;
 		close(fd);
-		if (rc)
-			break;
+		إذا (rc)
+			اكسر;
 	}
-	free(p);
+	حرر(p);
 cleanup:
-	free(c);
-done:
+	حرر(c);
+انجامشده:
 	/*fprintf(stderr, "has PAGER '%s': rc=%d\n", cmd, rc);*/
-	return rc;
+	أرجع rc;
 }
 
-static void __setup_pager(void)
+ساكن فراغ __setup_pager(فراغ)
 {
-	const char *pager = getenv("PAGER");
-	struct sigaction sa;
+	ثابت حرف *pager = getenv("PAGER");
+	بنية sigaction sa;
 
-	if (!isatty(STDOUT_FILENO))
-		return;
+	إذا (!isatty(STDOUT_FILENO))
+		أرجع;
 
-	if (!pager)
+	إذا (!pager)
 		pager = "less";
-	else if (!*pager || !strcmp(pager, "cat"))
-		return;
+	وإلا إذا (!*pager || !strcmp(pager, "cat"))
+		أرجع;
 
-	if (!has_command(pager))
-		return;
+	إذا (!has_command(pager))
+		أرجع;
 
 	/* spawn the pager */
 	pager_argv[2] = pager;
 	pager_process.argv = pager_argv;
-	pager_process.in = -1;
+	pager_process.درون = -1;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = SIG_DFL;
 
 	/* this makes sure that waitpid works as expected */
 	sigaction(SIGCHLD, &sa, &pager_process.orig_sigchld);
 
-	if (start_command(&pager_process)) {
-		sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-		return;
+	إذا (شروع_command(&pager_process)) {
+		sigaction(SIGCHLD, &pager_process.orig_sigchld, عدم);
+		أرجع;
 	}
 
 	/* original process continues, but writes to the pipe */
-	dup2(pager_process.in, STDOUT_FILENO);
-	setvbuf(stdout, NULL, _IOLBF, 0);
-	if (isatty(STDERR_FILENO)) {
-		dup2(pager_process.in, STDERR_FILENO);
-		setvbuf(stderr, NULL, _IOLBF, 0);
+	dup2(pager_process.درون, STDOUT_FILENO);
+	setvbuf(stdout, عدم, _IOLBF, 0);
+	إذا (isatty(STDERR_FILENO)) {
+		dup2(pager_process.درون, STDERR_FILENO);
+		setvbuf(stderr, عدم, _IOLBF, 0);
 	}
-	close(pager_process.in);
+	close(pager_process.درون);
 
 	sa.sa_handler = wait_for_pager_signal;
 
@@ -263,9 +263,9 @@ static void __setup_pager(void)
 
 /* Setup pager and redirect output, the pager may be closed by pager_close().
  */
-void pager_open(void)
+فراغ pager_open(فراغ)
 {
-	pager_open_header(0, 0);
+	pager_open_سرآیند(0, 0);
 }
 
 /* Setup pager with "less --header" support to freeze header lines and
@@ -276,49 +276,49 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+فراغ pager_open_سرآیند(صحيح سرآیند_سطرها, صحيح اولی_ستون_عرض)
 {
-	if (pager_process.pid)
-		return;		/* already running */
+	إذا (pager_process.pid)
+		أرجع;		/* already running */
 
-	pager_process.header_lines = header_lines;
-	pager_process.header_width = first_col_width;
+	pager_process.سرآیند_سطرها = سرآیند_سطرها;
+	pager_process.سرآیند_عرض = اولی_ستون_عرض;
 
-	pager_process.org_out = dup(STDOUT_FILENO);
+	pager_process.org_بیرون = dup(STDOUT_FILENO);
 	pager_process.org_err = dup(STDERR_FILENO);
 
-	if (pager_process.org_out != -1 && pager_process.org_err != -1)
+	إذا (pager_process.org_بیرون != -1 && pager_process.org_err != -1)
 		__setup_pager();
 
-	if (!pager_process.pid) {
-		if (pager_process.org_out != -1)
-			close(pager_process.org_out);
-		if (pager_process.org_err != -1)
+	إذا (!pager_process.pid) {
+		إذا (pager_process.org_بیرون != -1)
+			close(pager_process.org_بیرون);
+		إذا (pager_process.org_err != -1)
 			close(pager_process.org_err);
-		memset(&pager_process, 0, sizeof(pager_process));
+		memset(&pager_process, 0, حجم(pager_process));
 	}
 }
 
 /* Close pager and restore original std{out,err}.
  */
-void pager_close(void)
+فراغ pager_close(فراغ)
 {
-	struct sigaction sa;
-	int ret, safe_errno;
+	بنية sigaction sa;
+	صحيح ret, امن_errno;
 
-	if (pager_process.pid == 0)
-		return;
+	إذا (pager_process.pid == 0)
+		أرجع;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, حجم(sa));
 	sa.sa_handler = catch_signal;
 
 	/* set flag instead of calling wait_for_pager again */
-	sigaction(SIGINT,  &sa, NULL);
-	sigaction(SIGHUP,  &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGINT,  &sa, عدم);
+	sigaction(SIGHUP,  &sa, عدم);
+	sigaction(SIGTERM, &sa, عدم);
+	sigaction(SIGQUIT, &sa, عدم);
 
-	fflush(NULL);
+	fflush(عدم);
 
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
@@ -326,32 +326,32 @@ void pager_close(void)
 
 	/* restore original output */
 	clearerr(stdout);
-	dup2(pager_process.org_out, STDOUT_FILENO);
+	dup2(pager_process.org_بیرون, STDOUT_FILENO);
 	clearerr(stderr);
 	dup2(pager_process.org_err, STDERR_FILENO);
 
-	close(pager_process.org_out);
+	close(pager_process.org_بیرون);
 	close(pager_process.org_err);
 
 	ret = wait_for_pager();
 
 	/* restore original signal settings */
-	safe_errno = errno;
-	sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-	sigaction(SIGINT,  &pager_process.orig_sigint, NULL);
-	sigaction(SIGHUP,  &pager_process.orig_sighup, NULL);
-	sigaction(SIGTERM, &pager_process.orig_sigterm, NULL);
-	sigaction(SIGQUIT, &pager_process.orig_sigquit, NULL);
-	sigaction(SIGPIPE, &pager_process.orig_sigpipe, NULL);
-	errno = safe_errno;
+	امن_errno = errno;
+	sigaction(SIGCHLD, &pager_process.orig_sigchld, عدم);
+	sigaction(SIGINT,  &pager_process.orig_sigint, عدم);
+	sigaction(SIGHUP,  &pager_process.orig_sighup, عدم);
+	sigaction(SIGTERM, &pager_process.orig_sigterm, عدم);
+	sigaction(SIGQUIT, &pager_process.orig_sigquit, عدم);
+	sigaction(SIGPIPE, &pager_process.orig_sigpipe, عدم);
+	errno = امن_errno;
 
-	if (ret == -1)
+	إذا (ret == -1)
 		err(EXIT_FAILURE, _("waitpid failed"));
 
-	if (pager_caught_signal || (pager_caught_sigpipe && ret))
-		exit(EXIT_FAILURE);
+	إذا (pager_caught_signal || (pager_caught_sigpipe && ret))
+		خروج(EXIT_FAILURE);
 
-	memset(&pager_process, 0, sizeof(pager_process));
+	memset(&pager_process, 0, حجم(pager_process));
 	pager_caught_signal = 0;
 	pager_caught_sigpipe = 0;
 }
@@ -367,42 +367,42 @@ void pager_close(void)
  * a pager. The variable is also suppressed in privileged (SUID/SGID)
  * contexts via safe_getenv().
  */
-bool pager_is_enabled(enum ul_pagermode mode)
+bool pager_is_enabled(تعداد ul_pagermode نما)
 {
-	switch (mode) {
-	case UL_PAGER_ALWAYS:
-		return true;
-	case UL_PAGER_NEVER:
-		return false;
-	case UL_PAGER_AUTO: {
-		const char *s;
+	بدل (نما) {
+	حالة UL_PAGER_ALWAYS:
+		أرجع true;
+	حالة UL_PAGER_NEVER:
+		أرجع false;
+	حالة UL_PAGER_AUTO: {
+		ثابت حرف *s;
 		bool val;
 
-		if (!isatty(STDOUT_FILENO))
-			return false;
-		s = safe_getenv("PAGER_ENABLE");
-		if (!s || ul_strtobool(s, &val) != 0)
-			return false;
-		return val;
+		إذا (!isatty(STDOUT_FILENO))
+			أرجع false;
+		s = امن_getenv("PAGER_ENABLE");
+		إذا (!s || ul_strtobool(s, &val) != 0)
+			أرجع false;
+		أرجع val;
 	}
-	default:
-		return false;
+	افتراضي:
+		أرجع false;
 	}
 }
 
-#ifdef TEST_PROGRAM_PAGER
+#اگر_تعریف_شده TEST_برنامه_PAGER
 
-#define MAX 255
+#تعریف_کن MAX 255
 
-int main(int argc __attribute__ ((__unused__)),
-	 char *argv[] __attribute__ ((__unused__)))
+صحيح اصلی(صحيح argc __attribute__ ((__unused__)),
+	 حرف *argv[] __attribute__ ((__unused__)))
 {
-	int i;
+	صحيح i;
 
 	pager_open();
-	for (i = 0; i < MAX; i++)
-		printf("%d\n", i);
+	لكل (i = 0; i < MAX; i++)
+		چاپ_کن("%d\n", i);
 	pager_close();
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_PAGER */
+#پایان_اگر /* TEST_PROGRAM_PAGER */

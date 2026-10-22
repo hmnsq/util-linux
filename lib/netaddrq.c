@@ -11,47 +11,47 @@
  *
  */
 
-#include <net/if.h>
-#include <netinet/in.h>
-#include <linux/rtnetlink.h>
-#include <linux/if_addr.h>
-#include "netaddrq.h"
-#include "list.h"
-#include "debug.h"
+#ضمن <net/if.h>
+#ضمن <netinet/in.h>
+#ضمن <linux/rtnetlink.h>
+#ضمن <linux/if_addr.h>
+#ضمن "netaddrq.h"
+#ضمن "list.h"
+#ضمن "debug.h"
 
 /* Maximal number of interfaces. The algorithm has a quadratic complexity,
  * don't overflood it. */
-const int max_ifaces = 12;
+ثابت صحيح max_ifaces = 12;
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-#define ULNETADDRQ_DEBUG_HELP	(1 << 0)
-#define ULNETADDRQ_DEBUG_INIT	(1 << 1)
-#define ULNETADDRQ_DEBUG_ADDRQ	(1 << 2)
-#define ULNETADDRQ_DEBUG_LIST	(1 << 3)
-#define ULNETADDRQ_DEBUG_BEST	(1 << 4)
+#تعریف_کن ULNETADDRQ_DEBUG_HELP	(1 << 0)
+#تعریف_کن ULNETADDRQ_DEBUG_INIT	(1 << 1)
+#تعریف_کن ULNETADDRQ_DEBUG_ADDRQ	(1 << 2)
+#تعریف_کن ULNETADDRQ_DEBUG_LIST	(1 << 3)
+#تعریف_کن ULNETADDRQ_DEBUG_بهترین	(1 << 4)
 
-static UL_DEBUG_DEFINE_MASK(netaddrq);
+ساكن UL_DEBUG_DEFINE_ماسک(netaddrq);
 UL_DEBUG_DEFINE_MASKNAMES(netaddrq) =
 {
 	{ "all",   UL_DEBUG_ALL,		"complete address processing" },
 	{ "help",  ULNETADDRQ_DEBUG_HELP,	"this help" },
 	{ "addrq", ULNETADDRQ_DEBUG_ADDRQ,	"address rating" },
 	{ "list",  ULNETADDRQ_DEBUG_LIST,	"list processing" },
-	{ "best",  ULNETADDRQ_DEBUG_BEST,	"searching best address" },
+	{ "best",  ULNETADDRQ_DEBUG_بهترین,	"searching best address" },
 
-	{ NULL, 0 }
+	{ عدم, 0 }
 };
 
-#define DBG(m, x)		__UL_DBG(netaddrq, ULNETADDRQ_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(netaddrq, ULNETADDRQ_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(netaddrq, ULNETADDRQ_DEBUG_, m, x)
+#تعریف_کن DBG(m, x)		__UL_DBG(netaddrq, ULNETADDRQ_DEBUG_, m, x)
+#تعریف_کن DBG_OBJ(m, h, x)	__UL_DBG_OBJ(netaddrq, ULNETADDRQ_DEBUG_, m, h, x)
+#تعریف_کن ON_DBG(m, x)		__UL_DBG_CALL(netaddrq, ULNETADDRQ_DEBUG_, m, x)
 
-static void netaddrq_init_debug(void)
+ساكن فراغ netaddrq_init_debug(فراغ)
 {
-	if (netaddrq_debug_mask)
-		return;
+	إذا (netaddrq_debug_ماسک)
+		أرجع;
 
 	__UL_INIT_DEBUG_FROM_ENV(netaddrq, ULNETADDRQ_DEBUG_, 0,
 				 ULNETADDRQ_DEBUG);
@@ -60,38 +60,38 @@ static void netaddrq_init_debug(void)
 				UL_DEBUG_MASKNAMES(netaddrq)));
 }
 
-static inline enum ul_netaddrq_ip_rating
-evaluate_ip_quality(struct ul_nl_addr *addr) {
-	enum ul_netaddrq_ip_rating quality;
+ساكن مضمن تعداد ul_netaddrq_ip_rating
+evaluate_ip_quality(بنية ul_nl_addr *addr) {
+	تعداد ul_netaddrq_ip_rating quality;
 
-	switch (addr->ifa_scope) {
-	case RT_SCOPE_UNIVERSE:
+	بدل (addr->ifa_scope) {
+	حالة RT_SCOPE_UNIVERSE:
 		quality = ULNETLINK_RATING_SCOPE_UNIVERSE;
-		break;
-	case RT_SCOPE_LINK:
+		اكسر;
+	حالة RT_SCOPE_LINK:
 		quality = ULNETLINK_RATING_SCOPE_LINK;
-		break;
-	case RT_SCOPE_SITE:
+		اكسر;
+	حالة RT_SCOPE_SITE:
 		quality = ULNETLINK_RATING_SCOPE_SITE;
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		quality = ULNETLINK_RATING_BAD;
-		break;
+		اكسر;
 	}
-	if (addr->ifa_flags & IFA_F_TEMPORARY) {
-		if (quality <= ULNETLINK_RATING_F_TEMPORARY)
+	إذا (addr->ifa_flags & IFA_F_TEMPORARY) {
+		إذا (quality <= ULNETLINK_RATING_F_TEMPORARY)
 			quality = ULNETLINK_RATING_F_TEMPORARY;
 	}
-	return quality;
+	أرجع quality;
 }
 
-#define DBG_CASE(x) case x: str = #x; break
-#define DBG_CASE_DEF8(x) default: snprintf(strx+2, 3, "%02hhx", x); str = strx; break
-static char *ip_rating_as_string(enum ul_netaddrq_ip_rating q)
+#تعریف_کن DBG_CASE(x) حالة x: str = #x; اكسر
+#تعریف_کن DBG_CASE_DEF8(x) افتراضي: snprintf(strx+2, 3, "%02hhx", x); str = strx; اكسر
+ساكن حرف *ip_rating_as_string(تعداد ul_netaddrq_ip_rating q)
 {
-	char *str;
-	static char strx[5] = "0x";
-	switch (q) {
+	حرف *str;
+	ساكن حرف strx[5] = "0x";
+	بدل (q) {
 		DBG_CASE(ULNETLINK_RATING_SCOPE_UNIVERSE);
 		DBG_CASE(ULNETLINK_RATING_SCOPE_SITE);
 		DBG_CASE(ULNETLINK_RATING_F_TEMPORARY);
@@ -99,27 +99,27 @@ static char *ip_rating_as_string(enum ul_netaddrq_ip_rating q)
 		DBG_CASE(ULNETLINK_RATING_BAD);
 		DBG_CASE_DEF8(q);
 	}
-	return str;
+	أرجع str;
 }
 
 /* Netlink callback evaluating the address quality and building the list of
  * interface lists */
-static int callback_addrq(struct ul_nl_data *nl)
+ساكن صحيح callback_addrq(بنية ul_nl_داده *nl)
 {
-	struct ul_netaddrq_data *addrq = UL_NETADDRQ_DATA(nl);
-	struct list_head *li, *ipq_list;
-	struct ul_netaddrq_iface *ifaceq = NULL;
-	struct ul_netaddrq_ip *ipq = NULL;
-	int rc;
+	بنية ul_netaddrq_داده *addrq = UL_NETADDRQ_داده(nl);
+	بنية list_سر *li, *ipq_list;
+	بنية ul_netaddrq_iface *ifaceq = عدم;
+	بنية ul_netaddrq_ip *ipq = عدم;
+	صحيح rc;
 	bool *ifaces_change;
 
 	DBG_OBJ(LIST, addrq, ul_debug("callback_addrq() for %s on %s",
-			      ul_nl_addr_ntop_address(&(nl->addr)),
+			      ul_nl_addr_ntop_آدرس(&(nl->addr)),
 			      nl->addr.ifname));
-	if (addrq->callback_pre)
+	إذا (addrq->callback_pre)
 	{
 		DBG_OBJ(LIST, addrq, ul_debug("callback_pre"));
-		if ((rc = (*(addrq->callback_pre))(nl)))
+		إذا ((rc = (*(addrq->callback_pre))(nl)))
 			DBG_OBJ(LIST, nl, ul_debug("callback_pre rc != 0"));
 	}
 
@@ -127,100 +127,100 @@ static int callback_addrq(struct ul_nl_data *nl)
 	addrq->nifaces = 0;
 
 	list_for_each(li, &(addrq->ifaces)) {
-		struct ul_netaddrq_iface *ifaceqq;
+		بنية ul_netaddrq_iface *ifaceqq;
 
-		ifaceqq = list_entry(li, struct ul_netaddrq_iface, entry);
-		if (ifaceqq->ifa_index == nl->addr.ifa_index) {
+		ifaceqq = list_مدخل(li, بنية ul_netaddrq_iface, مدخل);
+		إذا (ifaceqq->ifa_index == nl->addr.ifa_index) {
 			ifaceq = ifaceqq;
 			DBG_OBJ(LIST, ifaceq, ul_debug(
 					      "%s found in addrq",
 					      nl->addr.ifname));
-			break;
+			اكسر;
 		}
 		addrq->nifaces++;
 	}
 
-	if (ifaceq == NULL) {
-		if (nl->rtm_event) {
-			if (addrq->nifaces >= max_ifaces) {
+	إذا (ifaceq == عدم) {
+		إذا (nl->rtm_event) {
+			إذا (addrq->nifaces >= max_ifaces) {
 				DBG_OBJ(LIST, addrq, ul_debug(
 						       "too many interfaces"));
-				addrq->overflow = true;
-				return UL_NL_IFACES_MAX;
+				addrq->سرریز = true;
+				أرجع UL_NL_IFACES_MAX;
 			}
 			DBG_OBJ(LIST, addrq, ul_debug(
 					       "new ifa_index in addrq"));
-			if (!(ifaceq = malloc(sizeof(struct ul_netaddrq_iface))))
-				return -ENOMEM;
-			INIT_LIST_HEAD(&(ifaceq->ip_quality_list_4));
-			INIT_LIST_HEAD(&(ifaceq->ip_quality_list_6));
+			إذا (!(ifaceq = حافظه_بده(حجم(بنية ul_netaddrq_iface))))
+				أرجع -ENOMEM;
+			INIT_LIST_سر(&(ifaceq->ip_quality_list_4));
+			INIT_LIST_سر(&(ifaceq->ip_quality_list_6));
 			ifaceq->ifa_index = nl->addr.ifa_index;
-			if (!(ifaceq->ifname = strdup(nl->addr.ifname)))
+			إذا (!(ifaceq->ifname = strdup(nl->addr.ifname)))
 			{
 				DBG_OBJ(LIST, addrq, ul_debug(
 						      "malloc() failed"));
-				free(ifaceq);
-				return -ENOMEM;
+				حرر(ifaceq);
+				أرجع -ENOMEM;
 			}
-			list_add_tail(&(ifaceq->entry), &(addrq->ifaces));
+			list_جمع_کن_دم(&(ifaceq->مدخل), &(addrq->ifaces));
 			DBG_OBJ(LIST, ifaceq, ul_debug(
 					       "new interface"));
-		} else {
+		} وإلا {
 			/* Should never happen. */
 			DBG_OBJ(LIST, ifaceq, ul_debug(
 					       "interface not found"));
-			return UL_NL_SOFT_ERROR;
+			أرجع UL_NL_SOFT_ERROR;
 		}
 	}
-	if (nl->addr.ifa_family == AF_INET) {
+	إذا (nl->addr.ifa_family == AF_INET) {
 		ipq_list = &(ifaceq->ip_quality_list_4);
 		ifaces_change = &(addrq->ifaces_change_4);
-	} else {
+	} وإلا {
 	/* if (nl->addr.ifa_family == AF_INET6) */
 		ipq_list = &(ifaceq->ip_quality_list_6);
 		ifaces_change = &(addrq->ifaces_change_6);
 	}
 
 	list_for_each(li, ipq_list) {
-		struct ul_netaddrq_ip *ipqq;
+		بنية ul_netaddrq_ip *ipqq;
 
-		ipqq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (ipqq->addr->address_len == nl->addr.address_len)
-			if (!memcmp(ipqq->addr->address, nl->addr.address,
-				   nl->addr.address_len)) {
+		ipqq = list_مدخل(li, بنية ul_netaddrq_ip, مدخل);
+		إذا (ipqq->addr->آدرس_len == nl->addr.آدرس_len)
+			إذا (!memcmp(ipqq->addr->آدرس, nl->addr.آدرس,
+				   nl->addr.آدرس_len)) {
 				ipq = ipqq;
 				DBG_OBJ(LIST, ipq, ul_debug(
 						      "address found in ipq_list"));
-				break;
+				اكسر;
 			}
 	}
-	if (ipq == NULL) {
+	إذا (ipq == عدم) {
 			DBG_OBJ(LIST, ipq_list, ul_debug(
 					      "address not found in the list"));
 	}
 
 	/* From now on, rc is return code */
 	rc = 0;
-	if (UL_NL_IS_RTM_NEW(nl)) {
-		struct ul_nl_addr *addr;
+	إذا (UL_NL_IS_RTM_NEW(nl)) {
+		بنية ul_nl_addr *addr;
 
 		addr = ul_nl_addr_dup(&(nl->addr));
-		if (!addr) {
+		إذا (!addr) {
 			rc = -ENOMEM;
-			goto error;
+			اذهب error;
 		}
-		if (ipq == NULL) {
-			if (!(ipq = malloc(sizeof(struct ul_netaddrq_ip))))
+		إذا (ipq == عدم) {
+			إذا (!(ipq = حافظه_بده(حجم(بنية ul_netaddrq_ip))))
 			{
 				rc = -ENOMEM;
 				ul_nl_addr_free(addr);
-				goto error;
+				اذهب error;
 			}
 			ipq->addr = addr;
-			list_add_tail(&(ipq->entry), ipq_list);
+			list_جمع_کن_دم(&(ipq->مدخل), ipq_list);
 			DBG_OBJ(LIST, ipq, ul_debug("new address"));
 			*ifaces_change = true;
-		} else {
+		} وإلا {
 			DBG_OBJ(LIST, addrq, ul_debug("updating address data"));
 			ul_nl_addr_free(ipq->addr);
 			ipq->addr = addr;
@@ -228,472 +228,472 @@ static int callback_addrq(struct ul_nl_data *nl)
 		ipq->quality = evaluate_ip_quality(addr);
 		DBG_OBJ(ADDRQ, addrq,
 		    ul_debug("%s rating: %s",
-				ul_nl_addr_ntop_address(&(nl->addr)),
+				ul_nl_addr_ntop_آدرس(&(nl->addr)),
 				ip_rating_as_string(ipq->quality)));
-	} else {
+	} وإلا {
 		/* UL_NL_RTM_DEL */
-		if (ipq == NULL)
+		إذا (ipq == عدم)
 		{
 			/* Should not happen. */
 			DBG_OBJ(LIST, nl, ul_debug(
 					      "UL_NL_RTM_DEL: unknown address"));
-			return UL_NL_SOFT_ERROR;
+			أرجع UL_NL_SOFT_ERROR;
 		}
 		/* Delist the address */
 		DBG_OBJ(LIST, ipq, ul_debug("removing address"));
 		*ifaces_change = true;
-		list_del(&(ipq->entry));
+		list_del(&(ipq->مدخل));
 		ul_nl_addr_free(ipq->addr);
-		free(ipq);
+		حرر(ipq);
 	error:
-		if (list_empty(&(ifaceq->ip_quality_list_4)) &&
-		    list_empty(&(ifaceq->ip_quality_list_6))) {
+		إذا (list_خالی(&(ifaceq->ip_quality_list_4)) &&
+		    list_خالی(&(ifaceq->ip_quality_list_6))) {
 		DBG_OBJ(LIST, ifaceq,
 		    ul_debug("deleted last address, removing interface"));
-			list_del(&(ifaceq->entry));
+			list_del(&(ifaceq->مدخل));
 			addrq->nifaces--;
-			free(ifaceq->ifname);
-			free(ifaceq);
+			حرر(ifaceq->ifname);
+			حرر(ifaceq);
 		}
 	}
-	if (!rc && addrq->callback_post)
+	إذا (!rc && addrq->callback_post)
 	{
 		DBG_OBJ(LIST, addrq, ul_debug("callback_post"));
-		if ((rc = (*(addrq->callback_post))(nl)))
+		إذا ((rc = (*(addrq->callback_post))(nl)))
 			DBG_OBJ(LIST, nl, ul_debug("callback_post rc != 0"));
 	}
-	return rc;
+	أرجع rc;
 }
 
 /* Initialize ul_nl_data for use with netlink-addr-quality */
-int ul_netaddrq_init(struct ul_nl_data *nl, ul_nl_callback callback_pre,
-		     ul_nl_callback callback_post, void *data)
+صحيح ul_netaddrq_init(بنية ul_nl_داده *nl, ul_nl_callback callback_pre,
+		     ul_nl_callback callback_post, فراغ *داده)
 {
-	struct ul_netaddrq_data *addrq;
+	بنية ul_netaddrq_داده *addrq;
 
 	netaddrq_init_debug();
-	if (!(nl->data_addr = calloc(1, sizeof(struct ul_netaddrq_data))))
-		return -ENOMEM;
+	إذا (!(nl->داده_addr = حافظه_صفر_بده(1, حجم(بنية ul_netaddrq_داده))))
+		أرجع -ENOMEM;
 	nl->callback_addr = callback_addrq;
-	addrq = UL_NETADDRQ_DATA(nl);
+	addrq = UL_NETADDRQ_داده(nl);
 	addrq->callback_pre = callback_pre;
 	addrq->callback_post = callback_post;
-	addrq->callback_data = data;
-	INIT_LIST_HEAD(&(addrq->ifaces));
+	addrq->callback_داده = داده;
+	INIT_LIST_سر(&(addrq->ifaces));
 	DBG_OBJ(LIST, addrq, ul_debug("callback initialized"));
-	return 0;
+	أرجع 0;
 }
 
-enum ul_netaddrq_ip_rating
-ul_netaddrq_iface_bestaddr(struct list_head *ipq_list,
-			   struct ul_netaddrq_ip *(*best)[__ULNETLINK_RATING_MAX])
+تعداد ul_netaddrq_ip_rating
+ul_netaddrq_iface_bestaddr(بنية list_سر *ipq_list,
+			   بنية ul_netaddrq_ip *(*بهترین)[__ULNETLINK_RATING_MAX])
 {
-	struct list_head *li;
-	struct ul_netaddrq_ip *ipq;
-	enum ul_netaddrq_ip_rating threshold;
+	بنية list_سر *li;
+	بنية ul_netaddrq_ip *ipq;
+	تعداد ul_netaddrq_ip_rating آستانه;
 
-	threshold = __ULNETLINK_RATING_MAX;
+	آستانه = __ULNETLINK_RATING_MAX;
 	list_for_each(li, ipq_list)
 	{
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
+		ipq = list_مدخل(li, بنية ul_netaddrq_ip, مدخل);
 
-		if (!(*best)[ipq->quality] ||
+		إذا (!(*بهترین)[ipq->quality] ||
 		    ipq->addr->ifa_valid >
-		    (*best)[ipq->quality]->addr->ifa_valid)
+		    (*بهترین)[ipq->quality]->addr->ifa_valid)
 		{
-			DBG_OBJ(BEST, (*best),
+			DBG_OBJ(بهترین_2, (*بهترین),
 			    ul_debug("%s -> best[%s]",
-					ul_nl_addr_ntop_address(ipq->addr),
+					ul_nl_addr_ntop_آدرس(ipq->addr),
 					ip_rating_as_string(ipq->quality)));
-			(*best)[ipq->quality] = ipq;
+			(*بهترین)[ipq->quality] = ipq;
 		}
 
-		if (ipq->quality < threshold)
+		إذا (ipq->quality < آستانه)
 		{
-			threshold = ipq->quality;
-			DBG(BEST,
-			    ul_debug("threshold %s", ip_rating_as_string(threshold)));
+			آستانه = ipq->quality;
+			DBG(بهترین_2,
+			    ul_debug("threshold %s", ip_rating_as_string(آستانه)));
 
 		}
 	}
-	return threshold;
+	أرجع آستانه;
 }
 
-enum ul_netaddrq_ip_rating
-ul_netaddrq_bestaddr(struct ul_nl_data *nl,
-		     struct ul_netaddrq_iface **best_ifaceq,
-		     struct ul_netaddrq_ip *(*best)[__ULNETLINK_RATING_MAX],
+تعداد ul_netaddrq_ip_rating
+ul_netaddrq_bestaddr(بنية ul_nl_داده *nl,
+		     بنية ul_netaddrq_iface **بهترین_ifaceq,
+		     بنية ul_netaddrq_ip *(*بهترین)[__ULNETLINK_RATING_MAX],
 		     uint8_t ifa_family)
 {
-	struct ul_netaddrq_data *addrq = UL_NETADDRQ_DATA(nl);
-	struct list_head *li;
-	struct ul_netaddrq_iface *ifaceq;
+	بنية ul_netaddrq_داده *addrq = UL_NETADDRQ_داده(nl);
+	بنية list_سر *li;
+	بنية ul_netaddrq_iface *ifaceq;
 	size_t ipqo;
-	enum ul_netaddrq_ip_rating threshold;
+	تعداد ul_netaddrq_ip_rating آستانه;
 
-	if (ifa_family == AF_INET) {
-		ipqo = offsetof(struct ul_netaddrq_iface, ip_quality_list_4);
-	} else {
+	إذا (ifa_family == AF_INET) {
+		ipqo = offsetof(بنية ul_netaddrq_iface, ip_quality_list_4);
+	} وإلا {
 	/* if (ifa_family == AF_INET6) */
-		ipqo = offsetof(struct ul_netaddrq_iface, ip_quality_list_6);
+		ipqo = offsetof(بنية ul_netaddrq_iface, ip_quality_list_6);
 	}
 
-	threshold = __ULNETLINK_RATING_MAX;
+	آستانه = __ULNETLINK_RATING_MAX;
 	list_for_each(li, &(addrq->ifaces))
 	{
-		struct list_head *ipq_list;
-		enum ul_netaddrq_ip_rating t;
+		بنية list_سر *ipq_list;
+		تعداد ul_netaddrq_ip_rating t;
 
-		ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+		ifaceq = list_مدخل(li, بنية ul_netaddrq_iface, مدخل);
 
-		ipq_list = (struct list_head*)((char*)ifaceq + ipqo);
+		ipq_list = (بنية list_سر*)((حرف*)ifaceq + ipqo);
 
-		t = ul_netaddrq_iface_bestaddr(ipq_list, best);
-		if (t < threshold)
+		t = ul_netaddrq_iface_bestaddr(ipq_list, بهترین);
+		إذا (t < آستانه)
 		{
-			DBG_OBJ(BEST, *best,
+			DBG_OBJ(بهترین_2, *بهترین,
 			    ul_debug("best iface %s, threshold %u",
 					ifaceq->ifname, t));
-			*best_ifaceq = ifaceq;
-			threshold = t;
+			*بهترین_ifaceq = ifaceq;
+			آستانه = t;
 		}
 	}
-	return threshold;
+	أرجع آستانه;
 }
 
-const char *ul_netaddrq_get_best_ipp(struct ul_nl_data *nl,
+ثابت حرف *ul_netaddrq_get_بهترین_ipp(بنية ul_nl_داده *nl,
 				     uint8_t ifa_family,
-				     enum ul_netaddrq_ip_rating *threshold,
-				     struct ul_netaddrq_iface **best_ifaceq)
+				     تعداد ul_netaddrq_ip_rating *آستانه,
+				     بنية ul_netaddrq_iface **بهترین_ifaceq)
 {
-	struct ul_netaddrq_ip *best[__ULNETLINK_RATING_MAX];
+	بنية ul_netaddrq_ip *بهترین[__ULNETLINK_RATING_MAX];
 
-	memset(best, 0, sizeof(best));
-	*threshold = ul_netaddrq_bestaddr(nl, best_ifaceq, &best, ifa_family);
-	if (*threshold != __ULNETLINK_RATING_MAX)
-		return ul_nl_addr_ntop_address(best[*threshold]->addr);
-	return NULL;
+	memset(بهترین, 0, حجم(بهترین));
+	*آستانه = ul_netaddrq_bestaddr(nl, بهترین_ifaceq, &بهترین, ifa_family);
+	إذا (*آستانه != __ULNETLINK_RATING_MAX)
+		أرجع ul_nl_addr_ntop_آدرس(بهترین[*آستانه]->addr);
+	أرجع عدم;
 }
 
-struct ul_netaddrq_iface *ul_netaddrq_iface_by_name(const struct ul_nl_data *nl,
-						    const char *ifname)
+بنية ul_netaddrq_iface *ul_netaddrq_iface_by_name(ثابت بنية ul_nl_داده *nl,
+						    ثابت حرف *ifname)
 {
-	struct list_head *li;
-	struct ul_netaddrq_iface *ifaceq;
+	بنية list_سر *li;
+	بنية ul_netaddrq_iface *ifaceq;
 
 	list_for_each_netaddrq_iface(li, nl)
 	{
-		ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+		ifaceq = list_مدخل(li, بنية ul_netaddrq_iface, مدخل);
 
-		if (!strcmp(ifaceq->ifname, ifname))
-			return ifaceq;
+		إذا (!strcmp(ifaceq->ifname, ifname))
+			أرجع ifaceq;
 	}
-	return NULL;
+	أرجع عدم;
 }
 
-#ifdef TEST_PROGRAM_NETADDRQ
+#اگر_تعریف_شده TEST_برنامه_NETADDRQ
 /* This test program shows several possibilities for cherry-picking of IP
  * addresses based on its rating. But there are many more possibilities in the
  * criteria selection. ADDRQ_MODE_GOOD is the most smart one. */
-enum addrq_print_mode {
-	ADDRQ_MODE_BESTOFALL,	/* Best address of all interfaces */
-	ADDRQ_MODE_BEST,	/* Best address per interface */
-	ADDRQ_MODE_GOOD,	/* All global or site addresses, if none, the
+تعداد addrq_print_نما {
+	ADDRQ_نما_BESTOFALL,	/* Best address of all interfaces */
+	ADDRQ_نما_بهترین,	/* Best address per interface */
+	ADDRQ_نما_GOOD,	/* All global or site addresses, if none, the
 				 * longest living temporary, if none, link */
-	ADDRQ_MODE_ALL		/* All available addresses */
+	ADDRQ_نما_ALL		/* All available addresses */
 };
 
 /* In our example addrq->callback_data is a simple FILE *. In more complex
  * programs it could be a pointer to an arbitrary struct */
-#define netout (FILE *)(UL_NETADDRQ_DATA(nl)->callback_data)
+#تعریف_کن netout (FILE *)(UL_NETADDRQ_داده(nl)->callback_داده)
 
 /* This example uses separate threshold for IPv4 and IPv6, so the best IPv4 and
  * best IPv6 addresses are printed. */
-static void dump_iface_best(struct ul_nl_data *nl,
-			    struct ul_netaddrq_iface *ifaceq)
+ساكن فراغ dump_iface_بهترین(بنية ul_nl_داده *nl,
+			    بنية ul_netaddrq_iface *ifaceq)
 {
-	struct ul_netaddrq_ip *best[__ULNETLINK_RATING_MAX];
-	enum ul_netaddrq_ip_rating threshold;
-	bool first = true;
+	بنية ul_netaddrq_ip *بهترین[__ULNETLINK_RATING_MAX];
+	تعداد ul_netaddrq_ip_rating آستانه;
+	bool اولی = true;
 
-	memset(best, 0, sizeof(best));
-	threshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
-					       &best);
-	if (threshold != __ULNETLINK_RATING_MAX)
+	memset(بهترین, 0, حجم(بهترین));
+	آستانه = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
+					       &بهترین);
+	إذا (آستانه != __ULNETLINK_RATING_MAX)
 	{
-		fprintf(netout, "%s IPv4: %s", (first ? "best address" : " "),
-		       ul_nl_addr_ntop_address(best[threshold]->addr));
-		first = false;
+		fprintf(netout, "%s IPv4: %s", (اولی ? "best address" : " "),
+		       ul_nl_addr_ntop_آدرس(بهترین[آستانه]->addr));
+		اولی = false;
 	}
-	memset(best, 0, sizeof(best));
-	threshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_6),
-					       &best);
-	if (threshold != __ULNETLINK_RATING_MAX)
+	memset(بهترین, 0, حجم(بهترین));
+	آستانه = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_6),
+					       &بهترین);
+	إذا (آستانه != __ULNETLINK_RATING_MAX)
 	{
-		fprintf(netout, "%s IPv6: %s", (first ? "best address" : " "),
-		       ul_nl_addr_ntop_address(best[threshold]->addr));
-		first = false;
+		fprintf(netout, "%s IPv6: %s", (اولی ? "best address" : " "),
+		       ul_nl_addr_ntop_آدرس(بهترین[آستانه]->addr));
+		اولی = false;
 	}
-	if (!first)
+	إذا (!اولی)
 		fprintf(netout, " on interface %s\n",
 		       ifaceq->ifname);
 }
 
 /* This example uses common threshold for IPv4 and IPv6, so e. g. worse rated
  * IPv6 are completely ignored. */
-static void dump_iface_good(struct ul_nl_data *nl,
-			    struct ul_netaddrq_iface *ifaceq)
+ساكن فراغ dump_iface_good(بنية ul_nl_داده *nl,
+			    بنية ul_netaddrq_iface *ifaceq)
 {
-	struct ul_netaddrq_ip *best4[__ULNETLINK_RATING_MAX];
-	struct ul_netaddrq_ip *best6[__ULNETLINK_RATING_MAX];
-	struct list_head *li;
-	enum ul_netaddrq_ip_rating threshold = __ULNETLINK_RATING_MAX - 1;
-	enum ul_netaddrq_ip_rating fthreshold; /* per family threshold */
-	bool first = true;
+	بنية ul_netaddrq_ip *best4[__ULNETLINK_RATING_MAX];
+	بنية ul_netaddrq_ip *best6[__ULNETLINK_RATING_MAX];
+	بنية list_سر *li;
+	تعداد ul_netaddrq_ip_rating آستانه = __ULNETLINK_RATING_MAX - 1;
+	تعداد ul_netaddrq_ip_rating fthreshold; /* per family threshold */
+	bool اولی = true;
 
-	memset(best4, 0, sizeof(best4));
-	threshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
+	memset(best4, 0, حجم(best4));
+	آستانه = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_4),
 					       &best4);
-	memset(best6, 0, sizeof(best6));
+	memset(best6, 0, حجم(best6));
 	fthreshold = ul_netaddrq_iface_bestaddr(&(ifaceq->ip_quality_list_6),
 						&best6);
-	if (fthreshold < threshold)
-		threshold = fthreshold;
+	إذا (fthreshold < آستانه)
+		آستانه = fthreshold;
 
 	list_for_each(li, &(ifaceq->ip_quality_list_4))
 	{
-		struct ul_netaddrq_ip *ipq;
+		بنية ul_netaddrq_ip *ipq;
 
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (threshold <= ULNETLINK_RATING_SCOPE_LINK &&
-		    ( ipq->quality <= threshold ||
+		ipq = list_مدخل(li, بنية ul_netaddrq_ip, مدخل);
+		إذا (آستانه <= ULNETLINK_RATING_SCOPE_LINK &&
+		    ( ipq->quality <= آستانه ||
 		      /* Consider site addresses equally good as global */
 		      ipq->quality == ULNETLINK_RATING_SCOPE_SITE) &&
-		    best4[threshold])
+		    best4[آستانه])
 		{
-			if (first)
+			إذا (اولی)
 			{
 				fprintf(netout, "%s: ", ifaceq->ifname);
-				first = false;
+				اولی = false;
 			}
-			else
+			وإلا
 				fprintf(netout, " ");
 			/* Write only the longest living temporary address */
-			if (threshold == ULNETLINK_RATING_F_TEMPORARY)
+			إذا (آستانه == ULNETLINK_RATING_F_TEMPORARY)
 			{
-				fputs(ul_nl_addr_ntop_address(best4[ULNETLINK_RATING_F_TEMPORARY]->addr),
+				fputs(ul_nl_addr_ntop_آدرس(best4[ULNETLINK_RATING_F_TEMPORARY]->addr),
 				      netout);
-				goto temp_cont4;
+				اذهب موقت_cont4;
 			}
-			else
-				fputs(ul_nl_addr_ntop_address(ipq->addr),
+			وإلا
+				fputs(ul_nl_addr_ntop_آدرس(ipq->addr),
 				      netout);
 		}
-	temp_cont4:;
+	موقت_cont4:;
 	}
 
 	list_for_each(li, &(ifaceq->ip_quality_list_6))
 	{
-		struct ul_netaddrq_ip *ipq;
+		بنية ul_netaddrq_ip *ipq;
 
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (threshold <= ULNETLINK_RATING_SCOPE_LINK &&
-		    ( ipq->quality <= threshold ||
+		ipq = list_مدخل(li, بنية ul_netaddrq_ip, مدخل);
+		إذا (آستانه <= ULNETLINK_RATING_SCOPE_LINK &&
+		    ( ipq->quality <= آستانه ||
 		      /* Consider site addresses equally good as global */
 		      ipq->quality == ULNETLINK_RATING_SCOPE_SITE) &&
-		    best6[threshold])
+		    best6[آستانه])
 		{
-			if (first)
+			إذا (اولی)
 			{
 				fprintf(netout, "%s: ", ifaceq->ifname);
-				first = false;
+				اولی = false;
 			}
-			else
+			وإلا
 				fprintf(netout, " ");
 			/* Write only the longest living temporary address */
-			if (threshold == ULNETLINK_RATING_F_TEMPORARY)
+			إذا (آستانه == ULNETLINK_RATING_F_TEMPORARY)
 			{
-				fputs(ul_nl_addr_ntop_address(best6[ULNETLINK_RATING_F_TEMPORARY]->addr),
+				fputs(ul_nl_addr_ntop_آدرس(best6[ULNETLINK_RATING_F_TEMPORARY]->addr),
 				      netout);
-				goto temp_cont6;
+				اذهب موقت_cont6;
 			}
-			else
-				fputs(ul_nl_addr_ntop_address(ipq->addr),
+			وإلا
+				fputs(ul_nl_addr_ntop_آدرس(ipq->addr),
 				      netout);
 		}
-	temp_cont6:;
+	موقت_cont6:;
 	}
-	if (!first)
+	إذا (!اولی)
 		fputs("\n", netout);
 }
 
-static void dump_iface_all(struct ul_nl_data *nl,
-			   struct ul_netaddrq_iface *ifaceq)
+ساكن فراغ dump_iface_all(بنية ul_nl_داده *nl,
+			   بنية ul_netaddrq_iface *ifaceq)
 {
-	struct list_head *li;
-	struct ul_netaddrq_ip *ipq;
-	bool first = true;
+	بنية list_سر *li;
+	بنية ul_netaddrq_ip *ipq;
+	bool اولی = true;
 
 	list_for_each(li, &(ifaceq->ip_quality_list_4))
 	{
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (first)
+		ipq = list_مدخل(li, بنية ul_netaddrq_ip, مدخل);
+		إذا (اولی)
 		{
 			fprintf(netout, "%s: ", ifaceq->ifname);
-			first = false;
+			اولی = false;
 		}
-		else
+		وإلا
 			fprintf(netout, " ");
-		fputs(ul_nl_addr_ntop_address(ipq->addr), netout);
+		fputs(ul_nl_addr_ntop_آدرس(ipq->addr), netout);
 	}
 	list_for_each(li, &(ifaceq->ip_quality_list_6))
 	{
-		ipq = list_entry(li, struct ul_netaddrq_ip, entry);
-		if (first)
+		ipq = list_مدخل(li, بنية ul_netaddrq_ip, مدخل);
+		إذا (اولی)
 		{
 			fprintf(netout, "%s: ", ifaceq->ifname);
-			first = false;
+			اولی = false;
 		}
-		else
+		وإلا
 			fprintf(netout, " ");
-		fputs(ul_nl_addr_ntop_address(ipq->addr), netout);
+		fputs(ul_nl_addr_ntop_آدرس(ipq->addr), netout);
 	}
-	if (!first)
+	إذا (!اولی)
 		fputs("\n", netout);
 }
 
-static void dump_addrq(struct ul_nl_data *nl, enum addrq_print_mode c)
+ساكن فراغ dump_addrq(بنية ul_nl_داده *nl, تعداد addrq_print_نما c)
 {
-	struct list_head *li;
-	struct ul_netaddrq_iface *ifaceq;
-	enum ul_netaddrq_ip_rating threshold;
+	بنية list_سر *li;
+	بنية ul_netaddrq_iface *ifaceq;
+	تعداد ul_netaddrq_ip_rating آستانه;
 
-	switch(c)
+	بدل(c)
 	{
-	case ADDRQ_MODE_BESTOFALL:
+	حالة ADDRQ_نما_BESTOFALL:
 	{
-		struct ul_netaddrq_iface *best_ifaceq;
-		const char *best_ipp;
+		بنية ul_netaddrq_iface *بهترین_ifaceq;
+		ثابت حرف *بهترین_ipp;
 
-		best_ipp = ul_netaddrq_get_best_ipp(nl, AF_INET,
-						    &threshold, &best_ifaceq);
-		if (best_ipp)
+		بهترین_ipp = ul_netaddrq_get_بهترین_ipp(nl, AF_INET,
+						    &آستانه, &بهترین_ifaceq);
+		إذا (بهترین_ipp)
 			fprintf(netout, "best IPv4 address: %s on %s\n",
-				best_ipp, best_ifaceq->ifname);
-		best_ipp = ul_netaddrq_get_best_ipp(nl, AF_INET6,
-						    &threshold, &best_ifaceq);
-		if (best_ipp)
+				بهترین_ipp, بهترین_ifaceq->ifname);
+		بهترین_ipp = ul_netaddrq_get_بهترین_ipp(nl, AF_INET6,
+						    &آستانه, &بهترین_ifaceq);
+		إذا (بهترین_ipp)
 			fprintf(netout, "best IPv6 address: %s on %s\n",
-				best_ipp, best_ifaceq->ifname);
+				بهترین_ipp, بهترین_ifaceq->ifname);
 	}
-	break;
-	case ADDRQ_MODE_BEST:
+	اكسر;
+	حالة ADDRQ_نما_بهترین:
 	{
 		list_for_each_netaddrq_iface(li, nl)
 		{
-			ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+			ifaceq = list_مدخل(li, بنية ul_netaddrq_iface, مدخل);
 
-			dump_iface_best(nl, ifaceq);
+			dump_iface_بهترین(nl, ifaceq);
 		}
 	}
-	break;
-	case ADDRQ_MODE_GOOD:
+	اكسر;
+	حالة ADDRQ_نما_GOOD:
 	{
 		list_for_each_netaddrq_iface(li, nl)
 		{
-			ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+			ifaceq = list_مدخل(li, بنية ul_netaddrq_iface, مدخل);
 
 			dump_iface_good(nl, ifaceq);
 		}
 	}
-	break;
-	case ADDRQ_MODE_ALL:
+	اكسر;
+	حالة ADDRQ_نما_ALL:
 		list_for_each_netaddrq_iface(li, nl)
 		{
-			ifaceq = list_entry(li, struct ul_netaddrq_iface, entry);
+			ifaceq = list_مدخل(li, بنية ul_netaddrq_iface, مدخل);
 
 			dump_iface_all(nl,ifaceq);
 		}
-	break;
+	اكسر;
 	}
 }
 
-static int callback_post(struct ul_nl_data *nl)
+ساكن صحيح callback_post(بنية ul_nl_داده *nl)
 {
 	/* If not processing dump, process the change immediately by the
 	 * callback. */
-	if (!nl->dumping)
+	إذا (!nl->dumping)
 	{
 		/* If there is no change in the list, do nothing */
-		if (!(UL_NETADDRQ_DATA(nl)->ifaces_change_4 ||
-		      UL_NETADDRQ_DATA(nl)->ifaces_change_6))
+		إذا (!(UL_NETADDRQ_داده(nl)->ifaces_change_4 ||
+		      UL_NETADDRQ_داده(nl)->ifaces_change_6))
 		{
 			fputs("\n\nNo changes in the address list.\n", netout);
-			return 0;
+			أرجع 0;
 		}
-		UL_NETADDRQ_DATA(nl)->ifaces_change_4 = false;
-		UL_NETADDRQ_DATA(nl)->ifaces_change_6 = false;
+		UL_NETADDRQ_داده(nl)->ifaces_change_4 = false;
+		UL_NETADDRQ_داده(nl)->ifaces_change_6 = false;
 		fputs("\n\nNetwork change detected:\n", netout);
 		fputs("\nbest address:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_BESTOFALL);
+		dump_addrq(nl, ADDRQ_نما_BESTOFALL);
 
 		fputs("\nbest addresses dump:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_BEST);
+		dump_addrq(nl, ADDRQ_نما_بهترین);
 
 		fputs("\ngood addresses dump:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_GOOD);
+		dump_addrq(nl, ADDRQ_نما_GOOD);
 
 		fputs("\nall addresses dump:\n", netout);
-		dump_addrq(nl, ADDRQ_MODE_ALL);
+		dump_addrq(nl, ADDRQ_نما_ALL);
 	}
-	return 0;
+	أرجع 0;
 }
 
-int main(int argc __attribute__((__unused__)), char *argv[] __attribute__((__unused__)))
+صحيح اصلی(صحيح argc __attribute__((__unused__)), حرف *argv[] __attribute__((__unused__)))
 {
-	int rc = 1;
-	int ulrc;
-	struct ul_nl_data nl;
-	FILE *out = stdout;
-	struct ul_netaddrq_iface *ifaceq;
-	const char *ifname = "eth0";
+	صحيح rc = 1;
+	صحيح ulrc;
+	بنية ul_nl_داده nl;
+	FILE *بیرون = stdout;
+	بنية ul_netaddrq_iface *ifaceq;
+	ثابت حرف *ifname = "eth0";
 
 	/* Prepare netlink. */
 	ul_nl_init(&nl);
-	if ((ul_netaddrq_init(&nl, NULL, callback_post, (void *)out)))
-		return -1;
+	إذا ((ul_netaddrq_init(&nl, عدم, callback_post, (فراغ *)بیرون)))
+		أرجع -1;
 
 	/* Dump addresses */
-	if (ul_nl_open(&nl,
+	إذا (ul_nl_open(&nl,
 		       RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR))
-		return -1;
-	if (ul_nl_request_dump(&nl, RTM_GETADDR))
-		goto error;
-	if (ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP) != UL_NL_DONE)
-		goto error;
-	fputs("RTM_GETADDR dump finished.", out);
+		أرجع -1;
+	إذا (ul_nl_request_dump(&nl, RTM_GETADDR))
+		اذهب error;
+	إذا (ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP) != UL_NL_انجامشده)
+		اذهب error;
+	fputs("RTM_GETADDR dump finished.", بیرون);
 
 	/* Example of several types of dump */
-	fputs("\nbest address:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_BESTOFALL);
+	fputs("\nbest address:\n", بیرون);
+	dump_addrq(&nl, ADDRQ_نما_BESTOFALL);
 
-	fputs("\nbest addresses dump:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_BEST);
+	fputs("\nbest addresses dump:\n", بیرون);
+	dump_addrq(&nl, ADDRQ_نما_بهترین);
 
-	fputs("\ngood addresses dump:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_GOOD);
+	fputs("\ngood addresses dump:\n", بیرون);
+	dump_addrq(&nl, ADDRQ_نما_GOOD);
 
-	fputs("\nall addresses dump:\n", out);
-	dump_addrq(&nl, ADDRQ_MODE_ALL);
+	fputs("\nall addresses dump:\n", بیرون);
+	dump_addrq(&nl, ADDRQ_نما_ALL);
 
-	fputs("\naddresses for interface ", out);
-	if ((ifaceq = ul_netaddrq_iface_by_name(&nl, ifname)))
+	fputs("\naddresses for interface ", بیرون);
+	إذا ((ifaceq = ul_netaddrq_iface_by_name(&nl, ifname)))
 		dump_iface_all(&nl, ifaceq);
-	else
-		fprintf(out, "%s not found.", ifname);
+	وإلا
+		fprintf(بیرون, "%s not found.", ifname);
 
 	/* Monitor further changes */
-	fputs("\nGoing to monitor mode.\n", out);
+	fputs("\nGoing to monitor mode.\n", بیرون);
 
 	/* In this example UL_NL_RETURN never appears, as callback does
 	 * not use it. */
@@ -710,11 +710,11 @@ int main(int argc __attribute__((__unused__)), char *argv[] __attribute__((__unu
 	 *    and process the result in the loop.
 	 */
 	ulrc = ul_nl_process(&nl, UL_NL_SYNC, UL_NL_LOOP);
-	if (!ulrc || ulrc == UL_NL_RETURN)
+	إذا (!ulrc || ulrc == UL_NL_RETURN)
 		rc = 0;
 error:
-	if ((ul_nl_close(&nl)))
+	إذا ((ul_nl_close(&nl)))
 		rc = 1;
-	return rc;
+	أرجع rc;
 }
-#endif /* TEST_PROGRAM_NETADDRQ */
+#پایان_اگر /* TEST_PROGRAM_NETADDRQ */

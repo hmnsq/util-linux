@@ -4,379 +4,379 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include "buffer.h"
-#include "mbsalign.h"
-#include "strutils.h"
+#ضمن "buffer.h"
+#ضمن "mbsalign.h"
+#ضمن "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+فراغ ul_میانگیر_reset_داده(بنية ul_میانگیر *buf)
 {
-	if (buf->begin)
+	إذا (buf->begin)
 		memset(buf->begin, 0, buf->sz);
-	buf->end = buf->begin;
+	buf->انتها = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	إذا (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * حجم(حرف *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+ساكن مضمن حرف *ul_میانگیر_free_داده_common(بنية ul_میانگیر *buf, bool steal)
 {
-	char *t = NULL;
+	حرف *t = عدم;
 
-	assert(buf);
+	أكد(buf);
 
-	if (steal)
+	إذا (steal)
 		t = buf->begin;
-	else
-		free(buf->begin);
-	buf->begin = NULL;
-	buf->end = NULL;
+	وإلا
+		حرر(buf->begin);
+	buf->begin = عدم;
+	buf->انتها = عدم;
 	buf->sz = 0;
 
-	free(buf->ptrs);
-	buf->ptrs = NULL;
+	حرر(buf->ptrs);
+	buf->ptrs = عدم;
 	buf->nptrs = 0;
 
-	free(buf->encoded);
-	buf->encoded = NULL;
+	حرر(buf->encoded);
+	buf->encoded = عدم;
 	buf->encoded_sz = 0;
 
-	return t;
+	أرجع t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+فراغ ul_میانگیر_free_داده(بنية ul_میانگیر *buf)
 {
-	ul_buffer_free_data_common(buf, false);
+	ul_میانگیر_free_داده_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+حرف *ul_میانگیر_steal_string(بنية ul_میانگیر *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
-		ul_buffer_free_data(buf);
-		return NULL;
+	إذا (ul_میانگیر_is_خالی(buf)) {
+		ul_میانگیر_free_داده(buf);
+		أرجع عدم;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	أرجع ul_میانگیر_free_داده_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+فراغ ul_میانگیر_مجموعه_chunksize(بنية ul_میانگیر *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+صحيح ul_میانگیر_is_خالی(بنية ul_میانگیر *buf)
 {
-	return buf->begin == buf->end;
+	أرجع buf->begin == buf->انتها;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+صحيح ul_میانگیر_save_اشاره_گر(بنية ul_میانگیر *buf, بیعلامت کوتاه ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	إذا (ptr_idx >= buf->nptrs) {
+		حرف **tmp = reallocarray(buf->ptrs, ptr_idx + 1, حجم(حرف *));
 
-		if (!tmp)
-			return -EINVAL;
+		إذا (!tmp)
+			أرجع -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
-	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	buf->ptrs[ptr_idx] = buf->انتها;
+	أرجع 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+حرف *ul_میانگیر_get_اشاره_گر(بنية ul_میانگیر *buf, بیعلامت کوتاه ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	إذا (ptr_idx < buf->nptrs)
+		أرجع buf->ptrs[ptr_idx];
+	أرجع عدم;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_میانگیر_get_اشاره_گر_درازی(بنية ul_میانگیر *buf, بیعلامت کوتاه ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	حرف *ptr = ul_میانگیر_get_اشاره_گر(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	إذا (ptr && ptr > buf->begin)
+		أرجع ptr - buf->begin;
+	أرجع 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_میانگیر_get_امن_اشاره_گر_عرض(بنية ul_میانگیر *buf, بیعلامت کوتاه ptr_idx)
 {
-	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
+	size_t len = ul_میانگیر_get_اشاره_گر_درازی(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	إذا (!len)
+		أرجع 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	أرجع mbs_امن_nwidth(buf->begin, len, عدم);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+فراغ ul_میانگیر_refer_string(بنية ul_میانگیر *buf, حرف *str)
 {
-	if (buf->sz)
-		ul_buffer_free_data(buf);
+	إذا (buf->sz)
+		ul_میانگیر_free_داده(buf);
 	buf->begin = str;
-	buf->sz = str ? strlen(str) : 0;
-	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
+	buf->sz = str ? طول_رشته(str) : 0;
+	buf->انتها = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+صحيح ul_میانگیر_alloc_داده(بنية ul_میانگیر *buf, size_t sz)
 {
-	char *tmp;
+	حرف *tmp;
 	size_t len = 0;
 
-	assert(buf);
+	أكد(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	إذا (sz <= buf->sz)
+		أرجع 0;
 
-	if (buf->end && buf->begin)
-		len = buf->end - buf->begin;
+	إذا (buf->انتها && buf->begin)
+		len = buf->انتها - buf->begin;
 
-	if (buf->chunksize)
+	إذا (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	إذا (!tmp)
+		أرجع -ENOMEM;
 
 	buf->begin = tmp;
-	buf->end = buf->begin + len;
+	buf->انتها = buf->begin + len;
 	buf->sz = sz;
 
-	memset(buf->end, '\0', sz - len);
+	memset(buf->انتها, '\0', sz - len);
 
-	return 0;
+	أرجع 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+صحيح ul_میانگیر_append_داده(بنية ul_میانگیر *buf, ثابت حرف *داده, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	إذا (!buf)
+		أرجع -EINVAL;
+	إذا (!داده)
+		أرجع 0;
 
-	if (buf->begin && buf->end)
-		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	إذا (buf->begin && buf->انتها)
+		maxsz = buf->sz - (buf->انتها - buf->begin);
+	إذا (maxsz <= sz + 1) {
+		صحيح rc = ul_میانگیر_alloc_داده(buf, buf->sz + sz + 1);
+		إذا (rc)
+			أرجع rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	إذا (!buf->انتها)
+		أرجع -EINVAL;	/* make static analyzers happy */
 
-	buf->end = mempcpy(buf->end, data, sz);
-	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	buf->انتها = mempcpy(buf->انتها, داده, sz);
+	*buf->انتها = '\0';	/* make sure it's terminated */
+	أرجع 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+صحيح ul_میانگیر_append_char(بنية ul_میانگیر *buf, ثابت حرف c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	أرجع ul_میانگیر_append_داده(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+صحيح ul_میانگیر_append_string(بنية ul_میانگیر *buf, ثابت حرف *str)
 {
-	if (!str)
-		return 0;
+	إذا (!str)
+		أرجع 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	أرجع ul_میانگیر_append_داده(buf, str, طول_رشته(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+صحيح ul_میانگیر_append_ntimes(بنية ul_میانگیر *buf, size_t n, ثابت حرف *str)
 {
 	size_t i;
-	size_t len = strlen(str);
+	size_t len = طول_رشته(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	لكل (i = 0; len && i < n; i++) {
+		صحيح rc = ul_میانگیر_append_داده(buf, str, len);
+		إذا (rc)
+			أرجع rc;
 	}
-	return 0;
+	أرجع 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+صحيح ul_میانگیر_appendf(بنية ul_میانگیر *buf, ثابت حرف *format, ...)
 {
 	va_list ap;
-	int res;
+	صحيح res;
 
 	va_start(ap, format);
-	res = ul_buffer_appendvf(buf, format, ap);
+	res = ul_میانگیر_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	أرجع res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+صحيح ul_میانگیر_appendvf(بنية ul_میانگیر *buf, ثابت حرف *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	حرف *val;
+	صحيح sz;
+	صحيح res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	إذا (sz < 0)
+		أرجع -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
-	res = ul_buffer_append_data(buf, val, sz);
-	free(val);
+	res = ul_میانگیر_append_داده(buf, val, sz);
+	حرر(val);
 
-	return res;
+	أرجع res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+صحيح ul_میانگیر_مجموعه_داده(بنية ul_میانگیر *buf, ثابت حرف *داده, size_t sz)
 {
-	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ul_میانگیر_reset_داده(buf);
+	أرجع ul_میانگیر_append_داده(buf, داده, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+حرف *ul_میانگیر_get_داده(بنية ul_میانگیر *buf, size_t *sz, size_t *عرض)
 {
-	if (sz)
-		*sz = buf->end - buf->begin;
-	if (width)
-		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	إذا (sz)
+		*sz = buf->انتها - buf->begin;
+	إذا (عرض)
+		*عرض = buf->begin && *buf->begin ? mbs_عرض(buf->begin) : 0;
+	أرجع buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+حرف *ul_میانگیر_get_string(بنية ul_میانگیر *buf, size_t *sz, size_t *عرض)
 {
-	char *ret;
+	حرف *ret;
 
-	ret = ul_buffer_get_data(buf, sz, width);
+	ret = ul_میانگیر_get_داده(buf, sz, عرض);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	إذا (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	أرجع ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_میانگیر_get_bufsiz(بنية ul_میانگیر *buf)
 {
-	return buf->sz;
+	أرجع buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_میانگیر_get_datasiz(بنية ul_میانگیر *buf)
 {
-	return buf->end - buf->begin;
+	أرجع buf->انتها - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+حرف *ul_میانگیر_get_امن_داده(بنية ul_میانگیر *buf, size_t *sz, size_t *عرض, ثابت حرف *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	حرف *داده = ul_میانگیر_get_داده(buf, عدم, عدم);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	حرف *res = عدم;
 
-	if (!data)
-		goto nothing;
+	إذا (!داده)
+		اذهب nothing;
 
-	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
-			goto nothing;
+	encsz = mbs_امن_encode_اندازه(buf->sz) + 1;
+	إذا (encsz > buf->encoded_sz) {
+		حرف *tmp = realloc(buf->encoded, encsz);
+		إذا (!tmp)
+			اذهب nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
-	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
-		goto nothing;
+	res = mbs_امن_encode_مقصد_میانگیر(داده, &wsz, buf->encoded, buf->encoded_sz, safechars);
+	إذا (!res || !wsz || wsz == (size_t) -1)
+		اذهب nothing;
 
-	if (width)
-		*width = wsz;
-	if (sz)
-		*sz = strlen(res);
-	return res;
+	إذا (عرض)
+		*عرض = wsz;
+	إذا (sz)
+		*sz = طول_رشته(res);
+	أرجع res;
 nothing:
-	if (width)
-		*width = 0;
-	if (sz)
+	إذا (عرض)
+		*عرض = 0;
+	إذا (sz)
 		*sz = 0;
-	return NULL;
+	أرجع عدم;
 }
 
 
-#ifdef TEST_PROGRAM_BUFFER
+#اگر_تعریف_شده TEST_برنامه_میانگیر
 
-enum {
+تعداد {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+صحيح اصلی(فراغ)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	بنية ul_میانگیر buf = UL_INIT_میانگیر;
+	حرف *str;
 	size_t sz = 0;
 
-	ul_buffer_set_chunksize(&buf, 16);
+	ul_میانگیر_مجموعه_chunksize(&buf, 16);
 
-	ul_buffer_append_string(&buf, "AAA");
-	ul_buffer_append_data(&buf, "=", 1);
-	ul_buffer_append_string(&buf, "aaa");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
+	ul_میانگیر_append_string(&buf, "AAA");
+	ul_میانگیر_append_داده(&buf, "=", 1);
+	ul_میانگیر_append_string(&buf, "aaa");
+	ul_میانگیر_save_اشاره_گر(&buf, PTR_AAA);
 
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "BBB");
-	ul_buffer_append_string(&buf, "=");
-	ul_buffer_append_string(&buf, "bbb");
-	ul_buffer_save_pointer(&buf, PTR_BBB);
+	ul_میانگیر_append_داده(&buf, ",", 1);
+	ul_میانگیر_append_string(&buf, "BBB");
+	ul_میانگیر_append_string(&buf, "=");
+	ul_میانگیر_append_string(&buf, "bbb");
+	ul_میانگیر_save_اشاره_گر(&buf, PTR_BBB);
 
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_میانگیر_get_داده(&buf, &sz, عدم);
+	چاپ_کن("data [%zu] '%s'\n", sz, str);
 
-	printf(" pointer data len: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_pointer_length(&buf, PTR_AAA),
-			ul_buffer_get_pointer_length(&buf, PTR_BBB));
-	printf(" pointer data width: AAA=%zu, BBB=%zu\n",
-			ul_buffer_get_safe_pointer_width(&buf, PTR_AAA),
-			ul_buffer_get_safe_pointer_width(&buf, PTR_BBB));
+	چاپ_کن(" pointer data len: AAA=%zu, BBB=%zu\n",
+			ul_میانگیر_get_اشاره_گر_درازی(&buf, PTR_AAA),
+			ul_میانگیر_get_اشاره_گر_درازی(&buf, PTR_BBB));
+	چاپ_کن(" pointer data width: AAA=%zu, BBB=%zu\n",
+			ul_میانگیر_get_امن_اشاره_گر_عرض(&buf, PTR_AAA),
+			ul_میانگیر_get_امن_اشاره_گر_عرض(&buf, PTR_BBB));
 
-	ul_buffer_reset_data(&buf);
-	ul_buffer_append_string(&buf, "This is really long string to test the buffer function.");
-	ul_buffer_save_pointer(&buf, PTR_AAA);
-	ul_buffer_append_string(&buf, " YES!");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
-	printf(" pointer data len: AAA=%zu\n", ul_buffer_get_pointer_length(&buf, PTR_AAA));
+	ul_میانگیر_reset_داده(&buf);
+	ul_میانگیر_append_string(&buf, "This is really long string to test the buffer function.");
+	ul_میانگیر_save_اشاره_گر(&buf, PTR_AAA);
+	ul_میانگیر_append_string(&buf, " YES!");
+	str = ul_میانگیر_get_داده(&buf, &sz, عدم);
+	چاپ_کن("data [%zu] '%s'\n", sz, str);
+	چاپ_کن(" pointer data len: AAA=%zu\n", ul_میانگیر_get_اشاره_گر_درازی(&buf, PTR_AAA));
 
-	ul_buffer_free_data(&buf);
+	ul_میانگیر_free_داده(&buf);
 	str = strdup("foo");
-	ul_buffer_refer_string(&buf, str);
-	ul_buffer_append_data(&buf, ",", 1);
-	ul_buffer_append_string(&buf, "bar");
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_میانگیر_refer_string(&buf, str);
+	ul_میانگیر_append_داده(&buf, ",", 1);
+	ul_میانگیر_append_string(&buf, "bar");
+	str = ul_میانگیر_get_داده(&buf, &sz, عدم);
+	چاپ_کن("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_appendf(&buf, "a%se%d", "bcd", 10);
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	ul_میانگیر_free_داده(&buf);
+	ul_میانگیر_appendf(&buf, "a%se%d", "bcd", 10);
+	str = ul_میانگیر_get_داده(&buf, &sz, عدم);
+	چاپ_کن("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
-	ul_buffer_append_char(&buf, 'x');
+	ul_میانگیر_free_داده(&buf);
+	ul_میانگیر_append_char(&buf, 'x');
 	{
-		char c = 'y';
-		ul_buffer_append_char(&buf, c);
+		حرف c = 'y';
+		ul_میانگیر_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
-		ul_buffer_append_char(&buf, c);
+		ثابت حرف c = 'z';
+		ul_میانگیر_append_char(&buf, c);
 	}
-	str = ul_buffer_get_data(&buf, &sz, NULL);
-	printf("data [%zu] '%s'\n", sz, str);
+	str = ul_میانگیر_get_داده(&buf, &sz, عدم);
+	چاپ_کن("data [%zu] '%s'\n", sz, str);
 
-	ul_buffer_free_data(&buf);
+	ul_میانگیر_free_داده(&buf);
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BUFFER */
+#پایان_اگر /* TEST_PROGRAM_BUFFER */

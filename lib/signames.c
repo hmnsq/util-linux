@@ -8,39 +8,39 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#ضمن <ctype.h>		/* for isdigit() */
+#ضمن <signal.h>
+#ضمن <unistd.h>
+#ضمن <string.h>
+#ضمن <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#ضمن "c.h"
+#ضمن "cctype.h"
+#ضمن "strutils.h"
+#ضمن "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+ساكن ثابت بنية ul_signal_name {
+	ثابت حرف *name;
+	صحيح val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
 	{ "INT",	SIGINT },	/* 2 */
 	{ "QUIT",	SIGQUIT },	/* 3 */
 	{ "ILL",	SIGILL },	/* 4 */
-#ifdef SIGTRAP
+#اگر_تعریف_شده SIGTRAP
 	{ "TRAP",	SIGTRAP },	/* 5 */
-#endif
+#پایان_اگر
 	{ "ABRT",	SIGABRT },	/* 6 */
-#ifdef SIGIOT
+#اگر_تعریف_شده SIGIOT
 	{ "IOT",	SIGIOT },	/* 6, same as SIGABRT */
-#endif
-#ifdef SIGEMT
+#پایان_اگر
+#اگر_تعریف_شده SIGEMT
 	{ "EMT",	SIGEMT },	/* 7 (mips,alpha,sparc*) */
-#endif
-#ifdef SIGBUS
+#پایان_اگر
+#اگر_تعریف_شده SIGBUS
 	{ "BUS",	SIGBUS },	/* 7 (arm,i386,m68k,ppc), 10 (mips,alpha,sparc*) */
-#endif
+#پایان_اگر
 	{ "FPE",	SIGFPE },	/* 8 */
 	{ "KILL",	SIGKILL },	/* 9 */
 	{ "USR1",	SIGUSR1 },	/* 10 (arm,i386,m68k,ppc), 30 (alpha,sparc*), 16 (mips) */
@@ -49,126 +49,126 @@ static const struct ul_signal_name {
 	{ "PIPE",	SIGPIPE },	/* 13 */
 	{ "ALRM",	SIGALRM },	/* 14 */
 	{ "TERM",	SIGTERM },	/* 15 */
-#ifdef SIGSTKFLT
+#اگر_تعریف_شده SIGSTKFLT
 	{ "STKFLT",	SIGSTKFLT },	/* 16 (arm,i386,m68k,ppc) */
-#endif
+#پایان_اگر
 	{ "CHLD",	SIGCHLD },	/* 17 (arm,i386,m68k,ppc), 20 (alpha,sparc*), 18 (mips) */
-#ifdef SIGCLD
+#اگر_تعریف_شده SIGCLD
 	{ "CLD",	SIGCLD },	/* same as SIGCHLD (mips) */
-#endif
+#پایان_اگر
 	{ "CONT",	SIGCONT },	/* 18 (arm,i386,m68k,ppc), 19 (alpha,sparc*), 25 (mips) */
 	{ "STOP",	SIGSTOP },	/* 19 (arm,i386,m68k,ppc), 17 (alpha,sparc*), 23 (mips) */
 	{ "TSTP",	SIGTSTP },	/* 20 (arm,i386,m68k,ppc), 18 (alpha,sparc*), 24 (mips) */
 	{ "TTIN",	SIGTTIN },	/* 21 (arm,i386,m68k,ppc,alpha,sparc*), 26 (mips) */
 	{ "TTOU",	SIGTTOU },	/* 22 (arm,i386,m68k,ppc,alpha,sparc*), 27 (mips) */
-#ifdef SIGURG
+#اگر_تعریف_شده SIGURG
 	{ "URG",	SIGURG },	/* 23 (arm,i386,m68k,ppc), 16 (alpha,sparc*), 21 (mips) */
-#endif
-#ifdef SIGXCPU
+#پایان_اگر
+#اگر_تعریف_شده SIGXCPU
 	{ "XCPU",	SIGXCPU },	/* 24 (arm,i386,m68k,ppc,alpha,sparc*), 30 (mips) */
-#endif
-#ifdef SIGXFSZ
+#پایان_اگر
+#اگر_تعریف_شده SIGXFSZ
 	{ "XFSZ",	SIGXFSZ },	/* 25 (arm,i386,m68k,ppc,alpha,sparc*), 31 (mips) */
-#endif
-#ifdef SIGVTALRM
+#پایان_اگر
+#اگر_تعریف_شده SIGVTALRM
 	{ "VTALRM",	SIGVTALRM },	/* 26 (arm,i386,m68k,ppc,alpha,sparc*), 28 (mips) */
-#endif
-#ifdef SIGPROF
+#پایان_اگر
+#اگر_تعریف_شده SIGPROF
 	{ "PROF",	SIGPROF },	/* 27 (arm,i386,m68k,ppc,alpha,sparc*), 29 (mips) */
-#endif
-#ifdef SIGWINCH
+#پایان_اگر
+#اگر_تعریف_شده SIGWINCH
 	{ "WINCH",	SIGWINCH },	/* 28 (arm,i386,m68k,ppc,alpha,sparc*), 20 (mips) */
-#endif
-#ifdef SIGIO
+#پایان_اگر
+#اگر_تعریف_شده SIGIO
 	{ "IO",		SIGIO },	/* 29 (arm,i386,m68k,ppc), 23 (alpha,sparc*), 22 (mips) */
-#endif
-#ifdef SIGPOLL
+#پایان_اگر
+#اگر_تعریف_شده SIGPOLL
 	{ "POLL",	SIGPOLL },	/* same as SIGIO */
-#endif
-#ifdef SIGINFO
+#پایان_اگر
+#اگر_تعریف_شده SIGINFO
 	{ "INFO",	SIGINFO },	/* 29 (alpha) */
-#endif
-#ifdef SIGLOST
+#پایان_اگر
+#اگر_تعریف_شده SIGLOST
 	{ "LOST",	SIGLOST },	/* 29 (arm,i386,m68k,ppc,sparc*) */
-#endif
-#ifdef SIGPWR
+#پایان_اگر
+#اگر_تعریف_شده SIGPWR
 	{ "PWR",	SIGPWR },	/* 30 (arm,i386,m68k,ppc), 29 (alpha,sparc*), 19 (mips) */
-#endif
-#ifdef SIGUNUSED
+#پایان_اگر
+#اگر_تعریف_شده SIGUNUSED
 	{ "UNUSED",	SIGUNUSED },	/* 31 (arm,i386,m68k,ppc) */
-#endif
-#ifdef SIGSYS
+#پایان_اگر
+#اگر_تعریف_شده SIGSYS
 	{ "SYS",	SIGSYS },	/* 31 (mips,alpha,sparc*) */
-#endif
+#پایان_اگر
 };
 
-#ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+#اگر_تعریف_شده SIGRTMIN
+ساكن صحيح rtsig_مقصد_signum(ثابت حرف *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	صحيح رقم, maxi = 0;
+	حرف *ep = عدم;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	إذا (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	وإلا إذا (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	إذا (!آیا_رقم(*sig))
+		أرجع -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	رقم = strtol(sig, &ep, 10);
+	إذا (!ep || sig == ep || errno || رقم < 0)
+		أرجع -1;
+	رقم = maxi ? SIGRTMAX - رقم : SIGRTMIN + رقم;
+	إذا (رقم < SIGRTMIN || SIGRTMAX < رقم)
+		أرجع -1;
+	أرجع رقم;
 }
-#endif
+#پایان_اگر
 
-int signame_to_signum(const char *sig)
+صحيح signame_مقصد_signum(ثابت حرف *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	إذا (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
-#ifdef SIGRTMIN
+#اگر_تعریف_شده SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
-#endif
+	إذا (!c_strncasecmp(sig, "rt", 2))
+		أرجع rtsig_مقصد_signum(sig + 2);
+#پایان_اگر
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	لكل (n = 0; n < ARRAY_اندازه(ul_signames); n++) {
+		إذا (!c_strcasecmp(ul_signames[n].name, sig))
+			أرجع ul_signames[n].val;
 	}
-	return -1;
+	أرجع -1;
 }
 
-const char *signum_to_signame(int signum)
+ثابت حرف *signum_مقصد_signame(صحيح signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	لكل (n = 0; n < ARRAY_اندازه(ul_signames); n++) {
+		إذا (ul_signames[n].val == signum) {
+			أرجع ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+صحيح get_signame_by_idx(size_t idx, ثابت حرف **signame, صحيح *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	إذا (idx >= ARRAY_اندازه(ul_signames))
+		أرجع -1;
 
-	if (signame)
+	إذا (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	إذا (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	أرجع 0;
 
 }
 

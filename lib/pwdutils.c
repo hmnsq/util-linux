@@ -2,141 +2,141 @@
  * No copyright is claimed. This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdlib.h>
-#include <assert.h>
-#include <unistd.h>
+#ضمن <stdlib.h>
+#ضمن <assert.h>
+#ضمن <unistd.h>
 
-#include "c.h"
-#include "pwdutils.h"
-#include "xalloc.h"
-#include "strutils.h"
+#ضمن "c.h"
+#ضمن "pwdutils.h"
+#ضمن "xalloc.h"
+#ضمن "strutils.h"
 
-struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
+بنية passwd *xgetpwuid(uid_t uid, حرف **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	بنية passwd *pwd = عدم, *res = عدم;
+	صحيح rc;
 
-	assert(pwdbuf);
+	أكد(pwdbuf);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, حجم(بنية passwd));
 
 	errno = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
+	إذا (rc != 0) {
 		errno = rc;
-		goto failed;
+		اذهب failed;
 	}
-	if (!res) {
+	إذا (!res) {
 		errno = EINVAL;
-		goto failed;
+		اذهب failed;
 	}
-	return pwd;
+	أرجع pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	حرر(pwd);
+	حرر(*pwdbuf);
+	أرجع عدم;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
  * as @str. In case of error returns NULL and sets errno, for unknown user it
  * sets errno to EINVAL.
  */
-struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
+بنية passwd *xgetuserpw(ثابت حرف *str ,حرف **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	بنية passwd *pwd = عدم, *res = عدم;
+	صحيح rc;
 	uint64_t uid;
 
-	assert(pwdbuf);
-	assert(str);
+	أكد(pwdbuf);
+	أكد(str);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, حجم(بنية passwd));
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
+	إذا (rc == -ERANGE) {
 		errno = ERANGE;
-		goto failed;
+		اذهب failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	إذا (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
+	} وإلا {
+		إذا (uid > MAX_از_UINT_TYPE(uid_t)) {
 			errno = ERANGE;
-			goto failed;
+			اذهب failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	إذا (rc != 0) {
 		errno = rc;
-		goto failed;
+		اذهب failed;
 	}
-	if (!res) {
+	إذا (!res) {
 		errno = EINVAL;
-		goto failed;
+		اذهب failed;
 	}
-	return pwd;
+	أرجع pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	حرر(pwd);
+	حرر(*pwdbuf);
+	أرجع عدم;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
  * as @str. In case of error returns NULL and sets errno, for unknown group it
  * sets errno to EINVAL.
  */
-struct group *xgetgroup(const char *str, char **grpbuf)
+بنية group *xgetgroup(ثابت حرف *str, حرف **grpbuf)
 {
-	struct group *grp = NULL, *res = NULL;
-	int rc;
+	بنية group *grp = عدم, *res = عدم;
+	صحيح rc;
 	uint64_t gid;
 
-	assert(grpbuf);
-	assert(str);
+	أكد(grpbuf);
+	أكد(str);
 
 	*grpbuf = xmalloc(UL_GETPW_BUFSIZ);
-	grp = xcalloc(1, sizeof(struct group));
+	grp = xcalloc(1, حجم(بنية group));
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
+	إذا (rc == -ERANGE) {
 		errno = ERANGE;
-		goto failed;
+		اذهب failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	إذا (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
+	} وإلا {
+		إذا (gid > MAX_از_UINT_TYPE(gid_t)) {
 			errno = ERANGE;
-			goto failed;
+			اذهب failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	إذا (rc != 0) {
 		errno = rc;
-		goto failed;
+		اذهب failed;
 	}
-	if (!res) {
+	إذا (!res) {
 		errno = EINVAL;
-		goto failed;
+		اذهب failed;
 	}
-	return grp;
+	أرجع grp;
 failed:
-	free(grp);
-	free(*grpbuf);
-	return NULL;
+	حرر(grp);
+	حرر(*grpbuf);
+	أرجع عدم;
 }
 
-char *xgetlogin(void)
+حرف *xgetlogin(فراغ)
 {
-	struct passwd *pw = NULL;
+	بنية passwd *pw = عدم;
 	uid_t ruid;
 
 	/* GNU Hurd implementation has an extension where a process can exist in a
@@ -153,12 +153,12 @@ char *xgetlogin(void)
 	errno = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	إذا (errno == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	إذا (pw && pw->pw_name && *pw->pw_name)
+		أرجع xstrdup(pw->pw_name);
 
-	return NULL;
+	أرجع عدم;
 }
 
 /*
@@ -169,41 +169,41 @@ char *xgetlogin(void)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct group *ul_getgrp_str(const char *str, gid_t *result)
+بنية group *ul_getgrp_str(ثابت حرف *str, gid_t *نتیجه)
 {
-	int rc;
-	uint64_t num = 0;
-	struct group *gr;
+	صحيح rc;
+	uint64_t رقم = 0;
+	بنية group *gr;
 
-	if (result)
-		*result = (gid_t) -1;
+	إذا (نتیجه)
+		*نتیجه = (gid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	rc = ul_strtou64(str, &رقم, 10);
+	إذا (rc == -ERANGE || رقم > MAX_از_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
-		return NULL;
+		أرجع عدم;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	إذا (rc == -EINVAL) {
 		errno = 0;
 		gr = getgrnam(str);
-		if (gr && result)
-			*result = gr->gr_gid;
-		else if (!gr && !errno)
+		إذا (gr && نتیجه)
+			*نتیجه = gr->gr_gid;
+		وإلا إذا (!gr && !errno)
 			errno = EINVAL;
-		return gr;
+		أرجع gr;
 	}
 
-	if (result)
-		*result = (gid_t) num;
+	إذا (نتیجه)
+		*نتیجه = (gid_t) رقم;
 
 	errno = 0;
-	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
+	gr = getgrgid((gid_t) رقم);
+	إذا (!gr && !errno)
 		errno = EINVAL;
 
-	return gr;
+	أرجع gr;
 }
 
 /*
@@ -214,69 +214,69 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
+بنية passwd *ul_getuserpw_str(ثابت حرف *str, uid_t *نتیجه)
 {
-	int rc;
-	uint64_t num = 0;
-	struct passwd *pw;
+	صحيح rc;
+	uint64_t رقم = 0;
+	بنية passwd *pw;
 
-	if (result)
-		*result = (uid_t) -1;
+	إذا (نتیجه)
+		*نتیجه = (uid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	rc = ul_strtou64(str, &رقم, 10);
+	إذا (rc == -ERANGE || رقم > MAX_از_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
-		return NULL;
+		أرجع عدم;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	إذا (rc == -EINVAL) {
 		errno = 0;
 		pw = getpwnam(str);
-		if (pw && result)
-			*result = pw->pw_uid;
-		else if (!pw && !errno)
+		إذا (pw && نتیجه)
+			*نتیجه = pw->pw_uid;
+		وإلا إذا (!pw && !errno)
 			errno = EINVAL;
-		return pw;
+		أرجع pw;
 	}
 
-	if (result)
-		*result = (uid_t) num;
+	إذا (نتیجه)
+		*نتیجه = (uid_t) رقم;
 
 	errno = 0;
-	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
+	pw = getpwuid((uid_t) رقم);
+	إذا (!pw && !errno)
 		errno = EINVAL;
 
-	return pw;
+	أرجع pw;
 }
 
-#ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+#اگر_تعریف_شده TEST_برنامه
+صحيح اصلی(صحيح argc, حرف *argv[])
 {
-	char *buf = NULL;
-	struct passwd *pwd = NULL;
+	حرف *buf = عدم;
+	بنية passwd *pwd = عدم;
 
-	if (argc != 2) {
+	إذا (argc != 2) {
 		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+		أرجع EXIT_FAILURE;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
+	إذا (!pwd)
 		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
 
-	printf("Username: %s\n", pwd->pw_name);
-	printf("UID:      %u\n", pwd->pw_uid);
-	printf("HOME:     %s\n", pwd->pw_dir);
-	printf("GECO:     %s\n", pwd->pw_gecos);
+	چاپ_کن("Username: %s\n", pwd->pw_name);
+	چاپ_کن("UID:      %u\n", pwd->pw_uid);
+	چاپ_کن("HOME:     %s\n", pwd->pw_dir);
+	چاپ_کن("GECO:     %s\n", pwd->pw_gecos);
 
-	free(pwd);
-	free(buf);
+	حرر(pwd);
+	حرر(buf);
 
-	printf("Current:  %s\n", (buf = xgetlogin()));
-	free(buf);
+	چاپ_کن("Current:  %s\n", (buf = xgetlogin()));
+	حرر(buf);
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM */
+#پایان_اگر /* TEST_PROGRAM */
