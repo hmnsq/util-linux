@@ -5,76 +5,76 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <time.h>
-#include <signal.h>
+#ضمن <time.h>
+#ضمن <signal.h>
 #ifdef HAVE_SYSINFO
-#include <sys/sysinfo.h>
+#ضمن <sys/sysinfo.h>
 #endif
-#include <sys/time.h>
+#ضمن <sys/time.h>
 
-#include "c.h"
-#include "monotonic.h"
+#ضمن "c.h"
+#ضمن "monotonic.h"
 
-int get_boot_time(struct timeval *boot_time __attribute__((__unused__)))
+صحيح get_boot_time(بنية timeval *boot_time __attribute__((__unused__)))
 {
 #ifdef CLOCK_BOOTTIME
-	struct timespec hires_uptime = { 0 };
-	struct timeval lores_uptime = { 0 };
+	بنية timespec hires_uptime = { 0 };
+	بنية timeval lores_uptime = { 0 };
 #endif
-	struct timeval now = { 0 };
+	بنية timeval now = { 0 };
 #ifdef HAVE_SYSINFO
-	struct sysinfo info;
+	بنية sysinfo info;
 #endif
 
-	if (gettimeofday(&now, NULL) != 0)
-		return -errno;
+	إذا (gettimeofday(&now, عدم) != 0)
+		إرجاع -errno;
 #ifdef CLOCK_BOOTTIME
-	if (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
+	إذا (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
 		TIMESPEC_TO_TIMEVAL(&lores_uptime, &hires_uptime);
 		timersub(&now, &lores_uptime, boot_time);
-		return 0;
+		إرجاع 0;
 	}
 #endif
 #ifdef HAVE_SYSINFO
 	/* fallback */
-	if (sysinfo(&info) != 0)
-		return -errno;
+	إذا (sysinfo(&info) != 0)
+		إرجاع -errno;
 
 	boot_time->tv_sec = now.tv_sec - info.uptime;
 	boot_time->tv_usec = 0;
-	return 0;
-#else
-	return -ENOSYS;
+	إرجاع 0;
+#وإلا
+	إرجاع -ENOSYS;
 #endif
 }
 
-usec_t get_suspended_time(void)
+usec_t get_suspended_time(فراغ)
 {
-#if defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
-	struct timespec boot, mono;
+#إذا defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
+	بنية timespec boot, mono;
 
-	if (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
+	إذا (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
 	    clock_gettime(CLOCK_MONOTONIC, &mono) == 0)
-		return timespec_to_usec(&boot) - timespec_to_usec(&mono);
+		إرجاع timespec_to_usec(&boot) - timespec_to_usec(&mono);
 #endif
-	return 0;
+	إرجاع 0;
 }
 
-int gettime_monotonic(struct timeval *tv)
+صحيح gettime_monotonic(بنية timeval *tv)
 {
 #ifdef CLOCK_MONOTONIC
 	/* Can slew only by ntp and adjtime */
-	int ret;
-	struct timespec ts;
+	صحيح ret;
+	بنية timespec ts;
 
 	/* Linux specific, can't slew */
-	if (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
+	إذا (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
 		tv->tv_sec = ts.tv_sec;
 		tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
 	}
-	return ret;
-#else
-	return gettimeofday(tv, NULL);
+	إرجاع ret;
+#وإلا
+	إرجاع gettimeofday(tv, عدم);
 #endif
 }
 
