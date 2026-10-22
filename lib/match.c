@@ -5,10 +5,10 @@
  * GNU Lesser General Public License.
  */
 
-#include <string.h>
+#ضمن <string.h>
 
-#include "match.h"
-#include "cctype.h"
+#ضمن "match.h"
+#ضمن "cctype.h"
 
 /*
  * match_fstype:
@@ -20,35 +20,35 @@
  * also be used for individual items in the @pattern list. So,
  * "nofoo,bar" has the same meaning as "nofoo,nobar".
  */
-int match_fstype(const char *type, const char *pattern)
+صحيح میل_fstype(ثابت حرف *type, ثابت حرف *نمونہ)
 {
-	int no = 0;		/* negated types list */
-	int len;
-	const char *p;
+	صحيح no = 0;		/* negated types list */
+	صحيح len;
+	ثابت حرف *p;
 
-	if (!pattern && !type)
-		return 1;
-	if (!pattern)
-		return 0;
+	إذا (!نمونہ && !type)
+		أرجع 1;
+	إذا (!نمونہ)
+		أرجع 0;
 
-	if (!strncmp(pattern, "no", 2)) {
+	إذا (!لڑی_مقابلہ(نمونہ, "no", 2)) {
 		no = 1;
-		pattern += 2;
+		نمونہ += 2;
 	}
 
 	/* Does type occur in types, separated by commas? */
-	len = strlen(type);
-	p = pattern;
-	while(1) {
-		if (!strncmp(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
+	len = لڑی_لمبائی(type);
+	p = نمونہ;
+	طالما(1) {
+		إذا (!لڑی_مقابلہ(p, "no", 2) && !c_strncasecmp(p+2, type, len) &&
 		    (p[len+2] == 0 || p[len+2] == ','))
-			return 0;
-		if (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
-			return !no;
+			أرجع 0;
+		إذا (c_strncasecmp(p, type, len) == 0 && (p[len] == 0 || p[len] == ','))
+			أرجع !no;
 		p = strchr(p,',');
-		if (!p)
-			break;
+		إذا (!p)
+			اكسر;
 		p++;
 	}
-	return no;
+	أرجع no;
 }

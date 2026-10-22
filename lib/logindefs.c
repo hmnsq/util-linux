@@ -19,204 +19,204 @@
  *    products derived from this software without their specific prior
  *   written permission.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <pwd.h>
+#ضمن <assert.h>
+#ضمن <ctype.h>
+#ضمن <errno.h>
+#ضمن <limits.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/syslog.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/types.h>
+#ضمن <pwd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "closestream.h"
-#include "logindefs.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "xalloc.h"
+#ضمن "c.h"
+#ضمن "cctype.h"
+#ضمن "closestream.h"
+#ضمن "logindefs.h"
+#ضمن "nls.h"
+#ضمن "pathnames.h"
+#ضمن "xalloc.h"
 
 
-static void (*logindefs_loader)(void *) = NULL;
-static void *logindefs_loader_data = NULL;
+ساكن فراغ (*logindefs_loader)(فراغ *) = عدم;
+ساكن فراغ *logindefs_loader_انکڑے = عدم;
 
-void logindefs_set_loader(void (*loader)(void *data), void *data)
+فراغ logindefs_سیٹ_loader(فراغ (*loader)(فراغ *انکڑے), فراغ *انکڑے)
 {
 	logindefs_loader = loader;
-	logindefs_loader_data = data;
+	logindefs_loader_انکڑے = انکڑے;
 }
 
-#ifndef HAVE_LIBECONF
+#جے_بنا_تعریف HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+بنية شے {
+	حرف *name;		/* name of the option.  */
+	حرف *قدر;		/* value of the option.  */
+	حرف *رستہ;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	بنية شے *اگلا;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+ساكن بنية شے *list = عدم;
 
-void free_getlogindefs_data(void)
+فراغ free_getlogindefs_انکڑے(فراغ)
 {
-	struct item *ptr;
+	بنية شے *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	طالما (ptr) {
+		بنية شے *tmp = ptr->اگلا;
 
-		free(ptr->path);
-		free(ptr->name);
-		free(ptr->value);
-		free(ptr);
+		حرر(ptr->رستہ);
+		حرر(ptr->name);
+		حرر(ptr->قدر);
+		حرر(ptr);
 		ptr = tmp;
 	}
 
-	list = NULL;
+	list = عدم;
 }
 
-static void store(const char *name, const char *value, const char *path)
+ساكن فراغ store(ثابت حرف *name, ثابت حرف *قدر, ثابت حرف *رستہ)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	بنية شے *new = xmalloc(حجم(بنية شے));
 
-	if (!name)
+	إذا (!name)
 		abort();
 
 	new->name = xstrdup(name);
-	new->value = value && *value ? xstrdup(value) : NULL;
-	new->path = xstrdup(path);
-	new->next = list;
+	new->قدر = قدر && *قدر ? xstrdup(قدر) : عدم;
+	new->رستہ = xstrdup(رستہ);
+	new->اگلا = list;
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+فراغ logindefs_لدو_file(ثابت حرف *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	حرف buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	إذا (!f)
+		أرجع;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	طالما (fgets(buf, حجم(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		حرف *p, *name, *انکڑے = عدم;
 
-		if (*buf == '#' || *buf == '\n')
-			continue;	/* only comment or empty line */
+		إذا (*buf == '#' || *buf == '\n')
+			استمر;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		إذا (p)
 			*p = '\0';
-		else {
-			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+		وإلا {
+			size_t n = لڑی_لمبائی(buf);
+			إذا (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
-			continue;	/* empty line */
+		إذا (!*buf)
+			استمر;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		طالما (*name && خلا_اے((بنانشانی)*name))
 			name++;
 
 		/* go to the end of the name */
-		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
-			data++;
-		if (data > name && *data)
-			*data++ = '\0';
+		انکڑے = name;
+		طالما (*انکڑے && !(خلا_اے((بنانشانی)*انکڑے) || *انکڑے == '='))
+			انکڑے++;
+		إذا (انکڑے > name && *انکڑے)
+			*انکڑے++ = '\0';
 
-		if (!*name || data == name)
-			continue;
+		إذا (!*name || انکڑے == name)
+			استمر;
 
 		/* go to the begin of the value */
-		while (*data
-		       && (isspace((unsigned)*data) || *data == '='
-			   || *data == '"'))
-			data++;
+		طالما (*انکڑے
+		       && (خلا_اے((بنانشانی)*انکڑے) || *انکڑے == '='
+			   || *انکڑے == '"'))
+			انکڑے++;
 
 		/* remove space at the end of the value */
-		p = data + strlen(data);
-		if (p > data)
+		p = انکڑے + لڑی_لمبائی(انکڑے);
+		إذا (p > انکڑے)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		طالما (p > انکڑے && (خلا_اے((بنانشانی)*p) || *p == '"'))
 			*p-- = '\0';
 
-		store(name, data, filename);
+		store(name, انکڑے, filename);
 	}
 
 	fclose(f);
 }
 
-static void load_defaults(void)
+ساكن فراغ لدو_defaults(فراغ)
 {
-	if (logindefs_loader)
-		logindefs_loader(logindefs_loader_data);
-	else
-		logindefs_load_file(_PATH_LOGINDEFS);
+	إذا (logindefs_loader)
+		logindefs_loader(logindefs_loader_انکڑے);
+	وإلا
+		logindefs_لدو_file(رستہ_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+ساكن بنية شے *تلاش(ثابت حرف *name)
 {
-	struct item *ptr;
+	بنية شے *ptr;
 
-	if (!list)
-		load_defaults();
+	إذا (!list)
+		لدو_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
-		ptr = ptr->next;
+	طالما (ptr != عدم) {
+		إذا (c_strcasecmp(name, ptr->name) == 0)
+			أرجع ptr;
+		ptr = ptr->اگلا;
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
-static const char *search_config(const char *name)
+ساكن ثابت حرف *تلاش_config(ثابت حرف *name)
 {
-	struct item *ptr;
+	بنية شے *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
-		ptr = ptr->next;
+	طالما (ptr != عدم) {
+		إذا (c_strcasecmp(name, ptr->name) == 0)
+			أرجع ptr->رستہ;
+		ptr = ptr->اگلا;
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+صحيح getlogindefs_bool(ثابت حرف *name, صحيح dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	بنية شے *ptr = تلاش(name);
+	أرجع ptr && ptr->قدر ? (c_strcasecmp(ptr->قدر, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+بنانشانی لما getlogindefs_عدد(ثابت حرف *name, بنانشانی لما dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
-	unsigned long retval;
+	بنية شے *ptr = تلاش(name);
+	حرف *سرا = عدم;
+	بنانشانی لما retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	إذا (!ptr || !ptr->قدر)
+		أرجع dflt;
 
 	errno = 0;
-	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	retval = strtoul(ptr->قدر, &سرا, 0);
+	إذا (سرا && *سرا == '\0' && !errno)
+		أرجع retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
-	       search_config(name), name, ptr->value);
-	return dflt;
+	       تلاش_config(name), name, ptr->قدر);
+	أرجع dflt;
 }
 
 /*
@@ -225,142 +225,142 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+ثابت حرف *getlogindefs_str(ثابت حرف *name, ثابت حرف *dflt)
 {
-	struct item *ptr = search(name);
+	بنية شے *ptr = تلاش(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	إذا (!ptr)
+		أرجع dflt;
+	إذا (!ptr->قدر)
+		أرجع "";
+	أرجع ptr->قدر;
 }
 
-#else /* !HAVE_LIBECONF */
+#وإلا /* !HAVE_LIBECONF */
 
-#include "dl-econf.h"
+#ضمن "dl-econf.h"
 
-static econf_file *file = NULL;
+ساكن econf_file *file = عدم;
 
-void free_getlogindefs_data(void)
+فراغ free_getlogindefs_انکڑے(فراغ)
 {
-	if (file)
+	إذا (file)
 		econf_call(econf_freeFile)(file);
-	file = NULL;
+	file = عدم;
 }
 
-static void load_defaults(void)
+ساكن فراغ لدو_defaults(فراغ)
 {
 	econf_err error;
 
-	if (file != NULL)
-		free_getlogindefs_data();
+	إذا (file != عدم)
+		free_getlogindefs_انکڑے();
 
-	if (ul_dlopen_libeconf() == 0) {
-#ifdef HAVE_ECONF_READCONFIG
-		error = econf_call(econf_readConfig)(&file, NULL,
-				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+	إذا (ul_dlopen_libeconf() == 0) {
+#جے_تعریف_شدہ HAVE_ECONF_READCONFIG
+		error = econf_call(econf_readConfig)(&file, عدم,
+				UL_VENDORDIR_رستہ, "login", "defs", "= \t", "#");
+#وإلا
 		error = econf_call(econf_readDirs)(&file,
-				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
-#endif
-		if (error)
+				UL_VENDORDIR_رستہ, "/etc", "login", "defs", "= \t", "#");
+#جے_انت
+		إذا (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
-		logindefs_loader(logindefs_loader_data);
+	إذا (logindefs_loader)
+		logindefs_loader(logindefs_loader_انکڑے);
 
 }
 
-void logindefs_load_file(const char *filename)
+فراغ logindefs_لدو_file(ثابت حرف *filename)
 {
-	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	econf_file *file_l = عدم, *file_m = عدم;
+	حرف *رستہ;
 
-	logindefs_loader = NULL; /* No recursion */
+	logindefs_loader = عدم; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	إذا (ul_dlopen_libeconf() != 0)
+		أرجع;
 
-#if USE_VENDORDIR
-	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
+#إذا USE_VENDORDIR
+	xasprintf(&رستہ, رستہ_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	إذا (!econf_call(econf_readFile)(&file_l, رستہ, "= \t", "#")) {
+		إذا (file == عدم)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		وإلا إذا (!econf_call(econf_ملاؤ_Files)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
-#endif
+	حرر (رستہ);
+#جے_انت
 
-	xasprintf(&path, "/etc/%s", filename);
+	xasprintf(&رستہ, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	إذا (!econf_call(econf_readFile)(&file_l, رستہ, "= \t", "#")) {
+		إذا (file == عدم)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		وإلا إذا (!econf_call(econf_ملاؤ_Files)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} وإلا إذا (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		إذا (file == عدم)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		وإلا إذا (!econf_call(econf_ملاؤ_Files)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	حرر (رستہ);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+صحيح getlogindefs_bool(ثابت حرف *name, صحيح dflt)
 {
-	bool value;
+	bool قدر;
 	econf_err error;
 
-	if (!file)
-		load_defaults();
+	إذا (!file)
+		لدو_defaults();
 
-	if (!file)
-		return dflt;
+	إذا (!file)
+		أرجع dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	إذا ((error = econf_call(econf_get_Bool_قدر)(file, عدم, name, &قدر))) {
+		إذا (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		أرجع dflt;
 	}
-	return value;
+	أرجع قدر;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+بنانشانی لما getlogindefs_عدد(ثابت حرف *name, بنانشانی لما dflt)
 {
-	uint64_t value;
+	uint64_t قدر;
 	econf_err error;
 
-	if (!file)
-		load_defaults();
+	إذا (!file)
+		لدو_defaults();
 
-	if (!file)
-		return dflt;
+	إذا (!file)
+		أرجع dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	إذا ((error = econf_call(econf_get_UInt64_قدر)(file, عدم, name, &قدر))) {
+		إذا (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		أرجع dflt;
 	}
-	return value;
+	أرجع قدر;
 }
 
 /*
@@ -369,29 +369,29 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+ثابت حرف *getlogindefs_str(ثابت حرف *name, ثابت حرف *dflt)
 {
-	char *value;
+	حرف *قدر;
 	econf_err error;
 
-	if (!file)
-		load_defaults();
+	إذا (!file)
+		لدو_defaults();
 
-	if (!file)
-		return dflt;
+	إذا (!file)
+		أرجع dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	إذا ((error = econf_call(econf_get_String_قدر)(file, عدم, name, &قدر))) {
+		إذا (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		أرجع dflt;
 	}
-	if (value)
-		return value;
+	إذا (قدر)
+		أرجع قدر;
 
-	return xstrdup("");
+	أرجع xstrdup("");
 }
-#endif /* !HAVE_LIBECONF */
+#جے_انت /* !HAVE_LIBECONF */
 
 /*
  * For compatibility with shadow-utils we have to support additional
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+صحيح logindefs_setenv(ثابت حرف *name, ثابت حرف *conf, ثابت حرف *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	ثابت حرف *val = getlogindefs_str(conf, dflt);
+	ثابت حرف *p;
 
-	if (!val)
-		return -1;
+	إذا (!val)
+		أرجع -1;
 
 	p = strchr(val, '=');
-	if (p) {
-		size_t sz = strlen(name);
+	إذا (p) {
+		size_t sz = لڑی_لمبائی(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		إذا (لڑی_مقابلہ(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			إذا (*val == '"')
 				val++;
-			if (!*val)
+			إذا (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	أرجع val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+صحيح logindefs_setenv_رستہ(uid_t uid)
 {
-	int rc = 0;
+	صحيح rc = 0;
 
-	if (uid)
+	إذا (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
-		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
+	وإلا إذا ((rc = logindefs_setenv("PATH", "ENV_SUPATH", عدم)) != 0)
+		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", رستہ_DEFPATH_جڑ);
 
-	return rc;
+	أرجع rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+صحيح effective_access(ثابت حرف *رستہ, صحيح منوال)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	صحيح fd = open(رستہ, منوال);
+	إذا (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	أرجع fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+صحيح get_hushlogin_حالت(بنية passwd *pwd, ثابت حرف *override_home, صحيح force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	ثابت حرف *files[] = { رستہ_HUSHLOGINS, رستہ_HUSHLOGIN, عدم };
+	ثابت حرف *file;
+	حرف buf[BUFSIZ];
+	صحيح i;
 
-	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	file = getlogindefs_str("HUSHLOGIN_FILE", عدم);
+	إذا (file) {
+		إذا (!*file)
+			أرجع 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
-		files[1] = NULL;
+		files[1] = عدم;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	لكل (i = 0; files[i]; i++) {
+		صحيح ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		إذا (*file == '/') {
+			بنية stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
-				continue;	/* file does not exist */
+			إذا (stat(file, &st) != 0)
+				استمر;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			إذا (st.st_size == 0)
+				أرجع 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
-				continue;	/* ignore errors... */
+			إذا (!f)
+				استمر;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
-					buf[strlen(buf) - 1] = '\0';
+			طالما (ok == 0 && fgets(buf, حجم(buf), f)) {
+				إذا (buf[0] != '\0')
+					buf[لڑی_لمبائی(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			إذا (ok)
+				أرجع 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			أرجع 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
-			continue;
+		إذا (لڑی_لمبائی(pwd->pw_dir) + لڑی_لمبائی(file) + 2 > حجم(buf))
+			استمر;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
-			continue;
+		إذا (snprintf(buf, حجم(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+			استمر;
 
-		if (force_check) {
+		إذا (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			إذا (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			إذا (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
-				exit(EXIT_FAILURE);
+				باہر_نکلو(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			إذا (ok)
+				أرجع 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		وإلا {
+			صحيح rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			إذا (rc == 0)
+				أرجع 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			إذا (rc == -1 && errno == EACCES)
+				أرجع -1;
 		}
 
 	}
 
-	return 0;
+	أرجع 0;
 }
-#ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+#جے_تعریف_شدہ TEST_پروگرام
+صحيح مکھ(صحيح argc, حرف *argv[])
 {
-	char *name, *type;
+	حرف *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	إذا (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
-	logindefs_load_file(argv[1]);
+	logindefs_لدو_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
-#ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+	إذا (argc != 4) {	/* list all */
+#جے_تعریف_شدہ HAVE_LIBECONF
+		صحيح i;
+		حرف *کلیدیں[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
-				NULL};
+				عدم};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		لكل (i = 0; file && کلیدیں[i] != عدم; i++) {
+			حرف *قدر = عدم;
 
-			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
-			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
+			econf_call(econf_get_String_قدر)(file, عدم, کلیدیں[i], &قدر);
+			لکھو ("%s: $%s: '%s'\n", argv[1], کلیدیں[i], قدر);
 		}
 
-		if (file)
+		إذا (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#وإلا
+		بنية شے *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
-			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
-			       ptr->value);
-#endif
-		return EXIT_SUCCESS;
+		لكل (ptr = list; ptr; ptr = ptr->اگلا)
+			لکھو("%s: $%s: '%s'\n", ptr->رستہ, ptr->name,
+			       ptr->قدر);
+#جے_انت
+		أرجع EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
-		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
-		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
-		printf("$%s: '%s'\n", name,
+	إذا (strcmp(type, "str") == 0)
+		لکھو("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
+	وإلا إذا (strcmp(type, "num") == 0)
+		لکھو("$%s: '%lu'\n", name, getlogindefs_عدد(name, 0));
+	وإلا إذا (strcmp(type, "bool") == 0)
+		لکھو("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif
+#جے_انت

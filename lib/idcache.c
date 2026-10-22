@@ -4,122 +4,122 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
+#ضمن <pwd.h>
+#ضمن <grp.h>
+#ضمن <sys/types.h>
 
-#include "c.h"
-#include "widechar.h"
-#include "idcache.h"
+#ضمن "c.h"
+#ضمن "widechar.h"
+#ضمن "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+بنية identry *get_id(بنية idcache *ic, بنانشانی لما صحيح id)
 {
-	struct identry *ent;
+	بنية identry *ent;
 
-	if (!ic)
-		return NULL;
+	إذا (!ic)
+		أرجع عدم;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	لكل (ent = ic->ent; ent; ent = ent->اگلا) {
+		إذا (ent->id == id)
+			أرجع ent;
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
-struct idcache *new_idcache(void)
+بنية idcache *new_idcache(فراغ)
 {
-	return calloc(1, sizeof(struct idcache));
+	أرجع صفر_حافظہ_دیو(1, حجم(بنية idcache));
 }
 
-void free_idcache(struct idcache *ic)
+فراغ free_idcache(بنية idcache *ic)
 {
-	struct identry *ent;
+	بنية identry *ent;
 
-	if (!ic)
-		return;
+	إذا (!ic)
+		أرجع;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
-		free(ent->name);
-		free(ent);
-		ent = next;
+	طالما (ent) {
+		بنية identry *اگلا = ent->اگلا;
+		حرر(ent->name);
+		حرر(ent);
+		ent = اگلا;
 	}
 
-	free(ic);
+	حرر(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+ساكن فراغ جوڑو_id(بنية idcache *ic, حرف *name, بنانشانی لما صحيح id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	بنية identry *ent, *x;
+	صحيح w = 0;
 
-	if (!ic)
-		return;
+	إذا (!ic)
+		أرجع;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = صفر_حافظہ_دیو(1, حجم(بنية identry));
+	إذا (!ent)
+		أرجع;
 	ent->id = id;
 
-	if (name) {
-#ifdef HAVE_WIDECHAR
+	إذا (name) {
+#جے_تعریف_شدہ HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		إذا (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
-#endif
-			w = strlen(name);
+		وإلا
+#جے_انت
+			w = لڑی_لمبائی(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	إذا (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
-			free(ent);
-			return;
+		إذا (!ent->name) {
+			حرر(ent);
+			أرجع;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
-			free(ent);
-			return;
+	} وإلا {
+		إذا (asprintf(&ent->name, "%lu", id) < 0) {
+			حرر(ent);
+			أرجع;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	لكل (x = ic->ent; x && x->اگلا; x = x->اگلا);
 
-	if (x)
-		x->next = ent;
-	else
+	إذا (x)
+		x->اگلا = ent;
+	وإلا
 		ic->ent = ent;
 
-	if (w <= 0)
-		w = ent->name ? strlen(ent->name) : 0;
-	ic->width = ic->width < w ? w : ic->width;
+	إذا (w <= 0)
+		w = ent->name ? لڑی_لمبائی(ent->name) : 0;
+	ic->چوڑائی = ic->چوڑائی < w ? w : ic->چوڑائی;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+فراغ جوڑو_uid(بنية idcache *cache, بنانشانی لما صحيح id)
 {
-	struct identry *ent = get_id(cache, id);
+	بنية identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
-		add_id(cache, pw ? pw->pw_name : NULL, id);
+	إذا (!ent) {
+		بنية passwd *pw = getpwuid((uid_t) id);
+		جوڑو_id(cache, pw ? pw->pw_name : عدم, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+فراغ جوڑو_gid(بنية idcache *cache, بنانشانی لما صحيح id)
 {
-	struct identry *ent = get_id(cache, id);
+	بنية identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
-		add_id(cache, gr ? gr->gr_name : NULL, id);
+	إذا (!ent) {
+		بنية group *gr = getgrgid((gid_t) id);
+		جوڑو_id(cache, gr ? gr->gr_name : عدم, id);
 	}
 }
 

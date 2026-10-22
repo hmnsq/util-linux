@@ -4,62 +4,62 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2011]
  */
-#include <ctype.h>
-#include <inttypes.h>
-#include <libgen.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ضمن <ctype.h>
+#ضمن <inttypes.h>
+#ضمن <libgen.h>
+#ضمن <fcntl.h>
+#ضمن <sys/stat.h>
+#ضمن <unistd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "pathnames.h"
-#include "sysfs.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "debug.h"
-#include "strutils.h"
-#include "buffer.h"
+#ضمن "c.h"
+#ضمن "cctype.h"
+#ضمن "pathnames.h"
+#ضمن "sysfs.h"
+#ضمن "fileutils.h"
+#ضمن "all-io.h"
+#ضمن "debug.h"
+#ضمن "strutils.h"
+#ضمن "buffer.h"
 
-static void sysfs_blkdev_deinit_path(struct path_cxt *pc);
-static int  sysfs_blkdev_enoent_redirect(struct path_cxt *pc, const char *path, int *dirfd);
+ساكن فراغ sysfs_blkdev_deinit_رستہ(بنية رستہ_cxt *pc);
+ساكن صحيح  sysfs_blkdev_enoent_redirect(بنية رستہ_cxt *pc, ثابت حرف *رستہ, صحيح *dirfd);
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulsysfs);
-UL_DEBUG_DEFINE_MASKNAMES(ulsysfs) = UL_DEBUG_EMPTY_MASKNAMES;
+ساكن UL_DEBUG_DEFINE_نقاب(ulsysfs);
+UL_DEBUG_DEFINE_MASKNAMES(ulsysfs) = UL_DEBUG_خالی_تھاواں_MASKNAMES;
 
-#define ULSYSFS_DEBUG_INIT	(1 << 1)
-#define ULSYSFS_DEBUG_CXT	(1 << 2)
+#تعریف_کرو ULSYSFS_DEBUG_INIT	(1 << 1)
+#تعریف_کرو ULSYSFS_DEBUG_CXT	(1 << 2)
 
-#define DBG(m, x)		__UL_DBG(ulsysfs, ULSYSFS_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulsysfs, ULSYSFS_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulsysfs, ULSYSFS_DEBUG_, m, x)
+#تعریف_کرو DBG(m, x)		__UL_DBG(ulsysfs, ULSYSFS_DEBUG_, m, x)
+#تعریف_کرو DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulsysfs, ULSYSFS_DEBUG_, m, h, x)
+#تعریف_کرو ON_DBG(m, x)		__UL_DBG_CALL(ulsysfs, ULSYSFS_DEBUG_, m, x)
 
-void ul_sysfs_init_debug(void)
+فراغ ul_sysfs_init_debug(فراغ)
 {
-	if (ulsysfs_debug_mask)
-		return;
+	إذا (ulsysfs_debug_نقاب)
+		أرجع;
 	__UL_INIT_DEBUG_FROM_ENV(ulsysfs, ULSYSFS_DEBUG_, 0, ULSYSFS_DEBUG);
 }
 
-struct path_cxt *ul_new_sysfs_path(dev_t devno, struct path_cxt *parent, const char *prefix)
+بنية رستہ_cxt *ul_new_sysfs_رستہ(dev_t devno, بنية رستہ_cxt *ماپا, ثابت حرف *اگیتر)
 {
-	struct path_cxt *pc = ul_new_path(NULL);
+	بنية رستہ_cxt *pc = ul_new_رستہ(عدم);
 
-	if (!pc)
-		return NULL;
-	if (prefix)
-		ul_path_set_prefix(pc, prefix);
+	إذا (!pc)
+		أرجع عدم;
+	إذا (اگیتر)
+		ul_رستہ_سیٹ_اگیتر(pc, اگیتر);
 
-	if (sysfs_blkdev_init_path(pc, devno, parent) != 0) {
-		ul_unref_path(pc);
-		return NULL;
+	إذا (sysfs_blkdev_init_رستہ(pc, devno, ماپا) != 0) {
+		ul_unref_رستہ(pc);
+		أرجع عدم;
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
-	return pc;
+	أرجع pc;
 }
 
 /*
@@ -69,90 +69,90 @@ struct path_cxt *ul_new_sysfs_path(dev_t devno, struct path_cxt *parent, const c
  * The sysfs_blkdev_deinit_path() is automatically called by ul_unref_path().
  *
  */
-int sysfs_blkdev_init_path(struct path_cxt *pc, dev_t devno, struct path_cxt *parent)
+صحيح sysfs_blkdev_init_رستہ(بنية رستہ_cxt *pc, dev_t devno, بنية رستہ_cxt *ماپا)
 {
-	struct sysfs_blkdev *blk;
-	int rc;
-	char buf[sizeof(_PATH_SYS_DEVBLOCK)
-		 + sizeof(stringify_value(UINT32_MAX)) * 2
+	بنية sysfs_blkdev *blk;
+	صحيح rc;
+	حرف buf[حجم(رستہ_SYS_DEVBLOCK)
+		 + حجم(stringify_قدر(UINT32_MAX)) * 2
 		 + 3];
 
 	/* define path to devno stuff */
-	snprintf(buf, sizeof(buf), _PATH_SYS_DEVBLOCK "/%u:%u", major(devno), minor(devno));
-	rc = ul_path_set_dir(pc, buf);
-	if (rc)
-		return rc;
+	snprintf(buf, حجم(buf), رستہ_SYS_DEVBLOCK "/%u:%u", major(devno), minor(devno));
+	rc = ul_رستہ_سیٹ_dir(pc, buf);
+	إذا (rc)
+		أرجع rc;
 
 	/* make sure path exists */
-	rc = ul_path_get_dirfd(pc);
-	if (rc < 0)
-		return rc;
+	rc = ul_رستہ_get_dirfd(pc);
+	إذا (rc < 0)
+		أرجع rc;
 
 	/* initialize sysfs blkdev specific stuff */
-	blk = ul_path_get_dialect(pc);
-	if (!blk) {
+	blk = ul_رستہ_get_dialect(pc);
+	إذا (!blk) {
 		DBG_OBJ(CXT, pc, ul_debug("alloc new sysfs handler"));
-		blk = calloc(1, sizeof(struct sysfs_blkdev));
-		if (!blk)
-			return -ENOMEM;
+		blk = صفر_حافظہ_دیو(1, حجم(بنية sysfs_blkdev));
+		إذا (!blk)
+			أرجع -ENOMEM;
 
-		ul_path_set_dialect(pc, blk, sysfs_blkdev_deinit_path);
-		ul_path_set_enoent_redirect(pc, sysfs_blkdev_enoent_redirect);
+		ul_رستہ_سیٹ_dialect(pc, blk, sysfs_blkdev_deinit_رستہ);
+		ul_رستہ_سیٹ_enoent_redirect(pc, sysfs_blkdev_enoent_redirect);
 	}
 
 	DBG_OBJ(CXT, pc, ul_debug("init sysfs stuff"));
 
 	blk->devno = devno;
-	sysfs_blkdev_set_parent(pc, parent);
+	sysfs_blkdev_سیٹ_ماپا(pc, ماپا);
 
-	return 0;
+	أرجع 0;
 }
 
-static void sysfs_blkdev_deinit_path(struct path_cxt *pc)
+ساكن فراغ sysfs_blkdev_deinit_رستہ(بنية رستہ_cxt *pc)
 {
-	struct sysfs_blkdev *blk;
+	بنية sysfs_blkdev *blk;
 
-	if (!pc)
-		return;
+	إذا (!pc)
+		أرجع;
 
 	DBG_OBJ(CXT, pc, ul_debug("deinit"));
 
-	blk = ul_path_get_dialect(pc);
-	if (!blk)
-		return;
+	blk = ul_رستہ_get_dialect(pc);
+	إذا (!blk)
+		أرجع;
 
-	ul_unref_path(blk->parent);
-	free(blk);
+	ul_unref_رستہ(blk->ماپا);
+	حرر(blk);
 
-	ul_path_set_dialect(pc, NULL, NULL);
+	ul_رستہ_سیٹ_dialect(pc, عدم, عدم);
 }
 
-int sysfs_blkdev_set_parent(struct path_cxt *pc, struct path_cxt *parent)
+صحيح sysfs_blkdev_سیٹ_ماپا(بنية رستہ_cxt *pc, بنية رستہ_cxt *ماپا)
 {
-	struct sysfs_blkdev *blk = ul_path_get_dialect(pc);
+	بنية sysfs_blkdev *blk = ul_رستہ_get_dialect(pc);
 
-	if (!pc || !blk)
-		return -EINVAL;
+	إذا (!pc || !blk)
+		أرجع -EINVAL;
 
-	if (blk->parent) {
-		ul_unref_path(blk->parent);
-		blk->parent = NULL;
+	إذا (blk->ماپا) {
+		ul_unref_رستہ(blk->ماپا);
+		blk->ماپا = عدم;
 	}
 
-	if (parent) {
-		ul_ref_path(parent);
-		blk->parent = parent;
-	} else
-		blk->parent = NULL;
+	إذا (ماپا) {
+		ul_ref_رستہ(ماپا);
+		blk->ماپا = ماپا;
+	} وإلا
+		blk->ماپا = عدم;
 
 	DBG_OBJ(CXT, pc, ul_debug("new parent"));
-	return 0;
+	أرجع 0;
 }
 
-struct path_cxt *sysfs_blkdev_get_parent(struct path_cxt *pc)
+بنية رستہ_cxt *sysfs_blkdev_get_ماپا(بنية رستہ_cxt *pc)
 {
-	struct sysfs_blkdev *blk = ul_path_get_dialect(pc);
-	return blk ? blk->parent : NULL;
+	بنية sysfs_blkdev *blk = ul_رستہ_get_dialect(pc);
+	أرجع blk ? blk->ماپا : عدم;
 }
 
 /*
@@ -162,104 +162,104 @@ struct path_cxt *sysfs_blkdev_get_parent(struct path_cxt *pc)
  *	/sys/dev/block/8:1/queue/logical_block_size redirects to
  *	/sys/dev/block/8:0/queue/logical_block_size
  */
-static int sysfs_blkdev_enoent_redirect(struct path_cxt *pc, const char *path, int *dirfd)
+ساكن صحيح sysfs_blkdev_enoent_redirect(بنية رستہ_cxt *pc, ثابت حرف *رستہ, صحيح *dirfd)
 {
-	struct sysfs_blkdev *blk = ul_path_get_dialect(pc);
+	بنية sysfs_blkdev *blk = ul_رستہ_get_dialect(pc);
 
-	if (blk && blk->parent && path) {
-		*dirfd = ul_path_get_dirfd(blk->parent);
-		if (*dirfd >= 0) {
-			DBG_OBJ(CXT, pc, ul_debug("%s redirected to parent", path));
-			return 0;
+	إذا (blk && blk->ماپا && رستہ) {
+		*dirfd = ul_رستہ_get_dirfd(blk->ماپا);
+		إذا (*dirfd >= 0) {
+			DBG_OBJ(CXT, pc, ul_debug("%s redirected to parent", رستہ));
+			أرجع 0;
 		}
 	}
-	return 1;	/* no redirect */
+	أرجع 1;	/* no redirect */
 }
 
-char *sysfs_blkdev_get_name(struct path_cxt *pc, char *buf, size_t bufsiz)
+حرف *sysfs_blkdev_get_name(بنية رستہ_cxt *pc, حرف *buf, size_t bufsiz)
 {
-	char link[PATH_MAX];
-	char *name;
+	حرف link[PATH_MAX];
+	حرف *name;
 	ssize_t	sz;
 
 	/* read /sys/dev/block/<maj:min> link */
-	sz = ul_path_readlink(pc, link, sizeof(link), NULL);
-	if (sz < 0)
-		return NULL;
+	sz = ul_رستہ_readlink(pc, link, حجم(link), عدم);
+	إذا (sz < 0)
+		أرجع عدم;
 
 	name = strrchr(link, '/');
-	if (!name)
-		return NULL;
+	إذا (!name)
+		أرجع عدم;
 
 	name++;
-	sz = strlen(name);
-	if ((size_t) sz + 1 > bufsiz)
-		return NULL;
+	sz = لڑی_لمبائی(name);
+	إذا ((size_t) sz + 1 > bufsiz)
+		أرجع عدم;
 
-	memcpy(buf, name, sz + 1);
-	sysfs_devname_sys_to_dev(buf);
-	return buf;
+	حافظہ_نقل(buf, name, sz + 1);
+	sysfs_devname_sys_منزل_dev(buf);
+	أرجع buf;
 }
 
-int sysfs_blkdev_is_partition_dirent(DIR *dir, struct dirent *d, const char *parent_name)
+صحيح sysfs_blkdev_is_حصے_کرو_dirent(DIR *dir, بنية dirent *d, ثابت حرف *ماپا_name)
 {
-	char path[NAME_MAX + 6 + 1];
+	حرف رستہ[NAME_MAX + 6 + 1];
 
-#ifdef _DIRENT_HAVE_D_TYPE
-	if (d->d_type != DT_DIR &&
+#جے_تعریف_شدہ _DIRENT_HAVE_D_TYPE
+	إذا (d->d_type != DT_DIR &&
 	    d->d_type != DT_LNK &&
 	    d->d_type != DT_UNKNOWN)
-		return 0;
-#endif
+		أرجع 0;
+#جے_انت
 	size_t len = 0;
 
-	if (parent_name) {
-		const char *p = parent_name;
+	إذا (ماپا_name) {
+		ثابت حرف *p = ماپا_name;
 
 		/* /dev/sda --> "sda" */
-		if (*parent_name == '/') {
-			p = strrchr(parent_name, '/');
-			if (!p)
-				return 0;
+		إذا (*ماپا_name == '/') {
+			p = strrchr(ماپا_name, '/');
+			إذا (!p)
+				أرجع 0;
 			p++;
 		}
 
-		len = strlen(p);
-		if ((strlen(d->d_name) <= len) || (strncmp(p, d->d_name, len) != 0))
+		len = لڑی_لمبائی(p);
+		إذا ((لڑی_لمبائی(d->d_name) <= len) || (لڑی_مقابلہ(p, d->d_name, len) != 0))
 			len = 0;
 	}
 
-	if (len > 0) {
+	إذا (len > 0) {
 		/* partitions subdir name is
 		 *	"<parent>[:digit:]" or "<parent>p[:digit:]"
 		 */
-		return ((*(d->d_name + len) == 'p' && isdigit(*(d->d_name + len + 1)))
-			|| isdigit(*(d->d_name + len)));
+		أرجع ((*(d->d_name + len) == 'p' && ہندسہ_اے(*(d->d_name + len + 1)))
+			|| ہندسہ_اے(*(d->d_name + len)));
 	}
 
 	/* Cannot use /partition file, not supported on old sysfs */
-	snprintf(path, sizeof(path), "%s/start", d->d_name);
+	snprintf(رستہ, حجم(رستہ), "%s/start", d->d_name);
 
-	return faccessat(dirfd(dir), path, R_OK, 0) == 0;
+	أرجع faccessat(dirfd(dir), رستہ, R_OK, 0) == 0;
 }
 
-int sysfs_blkdev_count_partitions(struct path_cxt *pc, const char *devname)
+صحيح sysfs_blkdev_گنتی_partitions(بنية رستہ_cxt *pc, ثابت حرف *devname)
 {
 	DIR *dir;
-	struct dirent *d;
-	int r = 0;
+	بنية dirent *d;
+	صحيح r = 0;
 
-	dir = ul_path_opendir(pc, NULL);
-	if (!dir)
-		return 0;
+	dir = ul_رستہ_opendir(pc, عدم);
+	إذا (!dir)
+		أرجع 0;
 
-	while ((d = xreaddir(dir))) {
-		if (sysfs_blkdev_is_partition_dirent(dir, d, devname))
+	طالما ((d = xreaddir(dir))) {
+		إذا (sysfs_blkdev_is_حصے_کرو_dirent(dir, d, devname))
 			r++;
 	}
 
 	closedir(dir);
-	return r;
+	أرجع r;
 }
 
 /*
@@ -269,34 +269,34 @@ int sysfs_blkdev_count_partitions(struct path_cxt *pc, const char *devname)
  * Note that this code does not expect any special format of the
  * partitions devnames.
  */
-dev_t sysfs_blkdev_partno_to_devno(struct path_cxt *pc, int partno)
+dev_t sysfs_blkdev_partno_منزل_devno(بنية رستہ_cxt *pc, صحيح partno)
 {
 	DIR *dir;
-	struct dirent *d;
+	بنية dirent *d;
 	dev_t devno = 0;
 
-	dir = ul_path_opendir(pc, NULL);
-	if (!dir)
-		return 0;
+	dir = ul_رستہ_opendir(pc, عدم);
+	إذا (!dir)
+		أرجع 0;
 
-	while ((d = xreaddir(dir))) {
-		int n;
+	طالما ((d = xreaddir(dir))) {
+		صحيح n;
 
-		if (!sysfs_blkdev_is_partition_dirent(dir, d, NULL))
-			continue;
+		إذا (!sysfs_blkdev_is_حصے_کرو_dirent(dir, d, عدم))
+			استمر;
 
-		if (ul_path_readf_s32(pc, &n, "%s/partition", d->d_name))
-			continue;
+		إذا (ul_رستہ_readf_s32(pc, &n, "%s/partition", d->d_name))
+			استمر;
 
-		if (n == partno) {
-			if (ul_path_readf_majmin(pc, &devno, "%s/dev", d->d_name) == 0)
-				break;
+		إذا (n == partno) {
+			إذا (ul_رستہ_readf_majmin(pc, &devno, "%s/dev", d->d_name) == 0)
+				اكسر;
 		}
 	}
 
 	closedir(dir);
-	DBG_OBJ(CXT, pc, ul_debug("partno (%d) -> devno (%d)", (int) partno, (int) devno));
-	return devno;
+	DBG_OBJ(CXT, pc, ul_debug("partno (%d) -> devno (%d)", (صحيح) partno, (صحيح) devno));
+	أرجع devno;
 }
 
 
@@ -304,32 +304,32 @@ dev_t sysfs_blkdev_partno_to_devno(struct path_cxt *pc, int partno)
  * Returns slave name if there is only one slave, otherwise returns NULL.
  * The result should be deallocated by free().
  */
-char *sysfs_blkdev_get_slave(struct path_cxt *pc)
+حرف *sysfs_blkdev_get_slave(بنية رستہ_cxt *pc)
 {
 	DIR *dir;
-	struct dirent *d;
-	char *name = NULL;
+	بنية dirent *d;
+	حرف *name = عدم;
 
-	dir = ul_path_opendir(pc, "slaves");
-	if (!dir)
-		return NULL;
+	dir = ul_رستہ_opendir(pc, "slaves");
+	إذا (!dir)
+		أرجع عدم;
 
-	while ((d = xreaddir(dir))) {
-		if (name)
-			goto err;	/* more slaves */
+	طالما ((d = xreaddir(dir))) {
+		إذا (name)
+			اذهب err;	/* more slaves */
 		name = strdup(d->d_name);
 	}
 
 	closedir(dir);
-	return name;
+	أرجع name;
 err:
-	free(name);
+	حرر(name);
 	closedir(dir);
-	return NULL;
+	أرجع عدم;
 }
 
 
-#define SUBSYSTEM_LINKNAME	"/subsystem"
+#تعریف_کرو SUBSYSTEM_LINKNAME	"/subsystem"
 
 /*
  * For example:
@@ -341,23 +341,23 @@ err:
  * basename of the readlink result, and remove the last subdirectory from the
  * <chain> path.
  */
-static char *get_subsystem(char *chain, char *buf, size_t bufsz)
+ساكن حرف *get_subsystem(حرف *chain, حرف *buf, size_t bufsz)
 {
 	size_t len;
-	char *p;
+	حرف *p;
 
-	if (!chain || !*chain)
-		return NULL;
+	إذا (!chain || !*chain)
+		أرجع عدم;
 
-	len = strlen(chain);
-	if (len + sizeof(SUBSYSTEM_LINKNAME) > PATH_MAX)
-		return NULL;
+	len = لڑی_لمبائی(chain);
+	إذا (len + حجم(SUBSYSTEM_LINKNAME) > PATH_MAX)
+		أرجع عدم;
 
-	do {
+	افعل {
 		ssize_t sz;
 
 		/* append "/subsystem" to the path */
-		memcpy(chain + len, SUBSYSTEM_LINKNAME, sizeof(SUBSYSTEM_LINKNAME));
+		حافظہ_نقل(chain + len, SUBSYSTEM_LINKNAME, حجم(SUBSYSTEM_LINKNAME));
 
 		/* try if subsystem symlink exists */
 		sz = readlink(chain, buf, bufsz - 1);
@@ -365,52 +365,52 @@ static char *get_subsystem(char *chain, char *buf, size_t bufsz)
 		/* remove last subsystem from chain */
 		chain[len] = '\0';
 		p = strrchr(chain, '/');
-		if (p) {
+		إذا (p) {
 			*p = '\0';
 			len = p - chain;
 		}
 
-		if (sz > 0) {
+		إذا (sz > 0) {
 			/* we found symlink to subsystem, return basename */
 			buf[sz] = '\0';
-			return basename(buf);
+			أرجع basename(buf);
 		}
 
-	} while (p);
+	} طالما (p);
 
-	return NULL;
+	أرجع عدم;
 }
 
 /*
  * Returns complete path to the device, the path contains all subsystems
  * used for the device.
  */
-char *sysfs_blkdev_get_devchain(struct path_cxt *pc, char *buf, size_t bufsz)
+حرف *sysfs_blkdev_get_devchain(بنية رستہ_cxt *pc, حرف *buf, size_t bufsz)
 {
 	/* read /sys/dev/block/<maj>:<min> symlink */
 	ssize_t ssz;
 	size_t sz = 0;
-	struct ul_buffer tmp = UL_INIT_BUFFER;
-	const char *p;
-	char *res = NULL;
+	بنية ul_بفر tmp = UL_INIT_بفر;
+	ثابت حرف *p;
+	حرف *res = عدم;
 
-	ssz = ul_path_readlink(pc, buf, bufsz, NULL);
-	if (ssz <= 0)
-		return NULL;
+	ssz = ul_رستہ_readlink(pc, buf, bufsz, عدم);
+	إذا (ssz <= 0)
+		أرجع عدم;
 
-	if ((p = ul_path_get_prefix(pc)))
-		ul_buffer_append_string(&tmp, p);
+	إذا ((p = ul_رستہ_get_اگیتر(pc)))
+		ul_بفر_append_string(&tmp, p);
 
-	ul_buffer_append_string(&tmp, _PATH_SYS_DEVBLOCK "/");
-	ul_buffer_append_data(&tmp, buf, ssz);
+	ul_بفر_append_string(&tmp, رستہ_SYS_DEVBLOCK "/");
+	ul_بفر_append_انکڑے(&tmp, buf, ssz);
 
-	p = ul_buffer_get_string(&tmp, &sz, NULL);
-	if (p && sz <= bufsz) {
-		memcpy(buf, p, sz);
+	p = ul_بفر_get_string(&tmp, &sz, عدم);
+	إذا (p && sz <= bufsz) {
+		حافظہ_نقل(buf, p, sz);
 		res = buf;
 	}
-	ul_buffer_free_data(&tmp);
-	return res;
+	ul_بفر_free_انکڑے(&tmp);
+	أرجع res;
 }
 
 /*
@@ -419,28 +419,28 @@ char *sysfs_blkdev_get_devchain(struct path_cxt *pc, char *buf, size_t bufsz)
  *
  * Returns: 0 in success, <0 on error, 1 on end of chain
  */
-int sysfs_blkdev_next_subsystem(struct path_cxt *pc __attribute__((unused)),
-			 char *devchain, char **subsys)
+صحيح sysfs_blkdev_اگلا_subsystem(بنية رستہ_cxt *pc __attribute__((بن_ورتیا)),
+			 حرف *devchain, حرف **subsys)
 {
-	char subbuf[PATH_MAX];
-	char *sub;
+	حرف subbuf[PATH_MAX];
+	حرف *sub;
 
-	if (!subsys || !devchain)
-		return -EINVAL;
+	إذا (!subsys || !devchain)
+		أرجع -EINVAL;
 
-	*subsys = NULL;
+	*subsys = عدم;
 
-	while ((sub = get_subsystem(devchain, subbuf, sizeof(subbuf)))) {
+	طالما ((sub = get_subsystem(devchain, subbuf, حجم(subbuf)))) {
 		*subsys = strdup(sub);
-		if (!*subsys)
-			return -ENOMEM;
-		return 0;
+		إذا (!*subsys)
+			أرجع -ENOMEM;
+		أرجع 0;
 	}
 
-	return 1;
+	أرجع 1;
 }
 
-#define REMOVABLE_FILENAME	"/removable"
+#تعریف_کرو REMOVABLE_FILENAME	"/removable"
 
 /*
  * For example:
@@ -448,40 +448,40 @@ int sysfs_blkdev_next_subsystem(struct path_cxt *pc __attribute__((unused)),
  * chain: /sys/dev/block/../../devices/pci0000:00/0000:00:1a.0/usb1/1-1/1-1.2/ \
  *                           1-1.2:1.0/host65/target65:0:0/65:0:0:0/block/sdb
  */
-static int sysfs_devchain_is_removable(char *chain)
+ساكن صحيح sysfs_devchain_is_removable(حرف *chain)
 {
 	size_t len;
-	char buf[20];
-	char *p;
+	حرف buf[20];
+	حرف *p;
 
-	if (!chain || !*chain)
-		return 0;
+	إذا (!chain || !*chain)
+		أرجع 0;
 
-	len = strlen(chain);
-	if (len + sizeof(REMOVABLE_FILENAME) > PATH_MAX)
-		return 0;
+	len = لڑی_لمبائی(chain);
+	إذا (len + حجم(REMOVABLE_FILENAME) > PATH_MAX)
+		أرجع 0;
 
-	do {
-		int fd, rc;
+	افعل {
+		صحيح fd, rc;
 
 		/* append "/removable" to the path */
-		memcpy(chain + len, REMOVABLE_FILENAME, sizeof(REMOVABLE_FILENAME));
+		حافظہ_نقل(chain + len, REMOVABLE_FILENAME, حجم(REMOVABLE_FILENAME));
 
 		/* root of device hierarchy */
-		if (strcmp(chain, "/sys/dev/block" REMOVABLE_FILENAME) == 0)
-			break;
+		إذا (strcmp(chain, "/sys/dev/block" REMOVABLE_FILENAME) == 0)
+			اكسر;
 
 		/* try to read it */
 		fd = open(chain, O_RDONLY | O_CLOEXEC);
-		if (fd != -1) {
-			rc = ul_read_all(fd, buf, sizeof(buf));
+		إذا (fd != -1) {
+			rc = ul_read_all(fd, buf, حجم(buf));
 			close(fd);
 
-			if (rc > 0) {
-				if (strncmp(buf, "fixed", min(rc, 5)) == 0) {
-					return 0;
-				} else if (strncmp(buf, "removable", min(rc, 9)) == 0) {
-					return 1;
+			إذا (rc > 0) {
+				إذا (لڑی_مقابلہ(buf, "fixed", min(rc, 5)) == 0) {
+					أرجع 0;
+				} وإلا إذا (لڑی_مقابلہ(buf, "removable", min(rc, 9)) == 0) {
+					أرجع 1;
 				}
 			}
 		}
@@ -489,79 +489,79 @@ static int sysfs_devchain_is_removable(char *chain)
 		/* remove last subsystem from chain */
 		chain[len] = '\0';
 		p = strrchr(chain, '/');
-		if (p) {
+		إذا (p) {
 			*p = '\0';
 			len = p - chain;
 		}
 
-	} while (p);
+	} طالما (p);
 
-	return 0;
+	أرجع 0;
 }
 
-int sysfs_blkdev_is_hotpluggable(struct path_cxt *pc)
+صحيح sysfs_blkdev_is_hotpluggable(بنية رستہ_cxt *pc)
 {
-	char buf[PATH_MAX], *chain;
+	حرف buf[PATH_MAX], *chain;
 
-	chain = sysfs_blkdev_get_devchain(pc, buf, sizeof(buf));
-	return sysfs_devchain_is_removable(chain);
+	chain = sysfs_blkdev_get_devchain(pc, buf, حجم(buf));
+	أرجع sysfs_devchain_is_removable(chain);
 }
 
-int sysfs_blkdev_is_removable(struct path_cxt *pc)
+صحيح sysfs_blkdev_is_removable(بنية رستہ_cxt *pc)
 {
-	int rc = 0;
+	صحيح rc = 0;
 
 	// FIXME usb is not actually removable
 
 	/* check /sys/dev/block/<maj>:<min>/removable attribute */
-	if (ul_path_read_s32(pc, &rc, "removable") == 0)
-		return rc;
+	إذا (ul_رستہ_read_s32(pc, &rc, "removable") == 0)
+		أرجع rc;
 
-	return 0;
+	أرجع 0;
 }
 
-static int get_dm_wholedisk(struct path_cxt *pc, char *diskname,
+ساكن صحيح get_dm_wholedisk(بنية رستہ_cxt *pc, حرف *diskname,
                             size_t len, dev_t *diskdevno)
 {
-	int rc = 0;
-	char *name;
+	صحيح rc = 0;
+	حرف *name;
 
 	/* Note: sysfs_blkdev_get_slave() returns the first slave only;
 	 * if there are more slaves, it returns NULL.
 	 */
 	name = sysfs_blkdev_get_slave(pc);
-	if (!name)
-		return -1;
+	إذا (!name)
+		أرجع -1;
 
-	if (diskname && len)
+	إذا (diskname && len)
 		xstrncpy(diskname, name, len);
 
-	if (diskdevno) {
-		*diskdevno = __sysfs_devname_to_devno(ul_path_get_prefix(pc), name, NULL);
-		if (!*diskdevno)
+	إذا (diskdevno) {
+		*diskdevno = __sysfs_devname_to_devno(ul_رستہ_get_اگیتر(pc), name, عدم);
+		إذا (!*diskdevno)
 			rc = -1;
 	}
 
-	free(name);
-	return rc;
+	حرر(name);
+	أرجع rc;
 }
 
 /*
  * Returns by @diskdevno whole disk device devno and (optionally) by
  * @diskname the whole disk device name.
  */
-int sysfs_blkdev_get_wholedisk(	struct path_cxt *pc,
-				char *diskname,
+صحيح sysfs_blkdev_get_wholedisk(	بنية رستہ_cxt *pc,
+				حرف *diskname,
 				size_t len,
 				dev_t *diskdevno)
 {
-	int is_part = 0;
+	صحيح is_part = 0;
 
-	if (!pc)
-		return -1;
+	إذا (!pc)
+		أرجع -1;
 
-	is_part = ul_path_access(pc, F_OK, "partition") == 0;
-	if (!is_part) {
+	is_part = ul_رستہ_access(pc, F_OK, "partition") == 0;
+	إذا (!is_part) {
 		/*
 		 * Extra case for partitions mapped by device-mapper.
 		 *
@@ -570,86 +570,86 @@ int sysfs_blkdev_get_wholedisk(	struct path_cxt *pc,
 		 * mapped by DM don't have such file, but they have "part"
 		 * prefix in DM UUID.
 		 */
-		char *uuid = NULL, *tmp, *prefix;
+		حرف *uuid = عدم, *tmp, *اگیتر;
 
-		ul_path_read_string(pc, &uuid, "dm/uuid");
+		ul_رستہ_read_string(pc, &uuid, "dm/uuid");
 		tmp = uuid;
-		prefix = uuid ? strsep(&tmp, "-") : NULL;
+		اگیتر = uuid ? strsep(&tmp, "-") : عدم;
 
-		if (prefix && c_strncasecmp(prefix, "part", 4) == 0)
+		إذا (اگیتر && c_strncasecmp(اگیتر, "part", 4) == 0)
 			is_part = 1;
-		free(uuid);
+		حرر(uuid);
 
-		if (is_part &&
+		إذا (is_part &&
 			get_dm_wholedisk(pc, diskname, len, diskdevno) == 0)
 			/*
 			 * partitioned device, mapped by DM
 			 */
-			goto done;
+			اذهب پورا;
 
 		is_part = 0;
 	}
 
-	if (!is_part) {
+	إذا (!is_part) {
 		/*
 		 * unpartitioned device
 		 */
-		if (diskname && !sysfs_blkdev_get_name(pc, diskname, len))
-			goto err;
-		if (diskdevno)
+		إذا (diskname && !sysfs_blkdev_get_name(pc, diskname, len))
+			اذهب err;
+		إذا (diskdevno)
 			*diskdevno = sysfs_blkdev_get_devno(pc);
-	} else {
+	} وإلا {
 		/*
 		 * partitioned device
 		 *  - readlink /sys/dev/block/8:1   = ../../block/sda/sda1
 		 *  - dirname  ../../block/sda/sda1 = ../../block/sda
 		 *  - basename ../../block/sda	  = sda
 		 */
-		char linkpath[PATH_MAX];
-		char *name;
+		حرف linkpath[PATH_MAX];
+		حرف *name;
 		ssize_t	linklen;
 
-		linklen = ul_path_readlink(pc, linkpath, sizeof(linkpath), NULL);
-		if (linklen < 0)
-			goto err;
+		linklen = ul_رستہ_readlink(pc, linkpath, حجم(linkpath), عدم);
+		إذا (linklen < 0)
+			اذهب err;
 
-		stripoff_last_component(linkpath);	  /* dirname */
-		name = stripoff_last_component(linkpath);   /* basename */
-		if (!name)
-			goto err;
+		stripoff_آخری_component(linkpath);	  /* dirname */
+		name = stripoff_آخری_component(linkpath);   /* basename */
+		إذا (!name)
+			اذهب err;
 
-		sysfs_devname_sys_to_dev(name);
-		if (diskname && len)
+		sysfs_devname_sys_منزل_dev(name);
+		إذا (diskname && len)
 			xstrncpy(diskname, name, len);
 
-		if (diskdevno) {
-			*diskdevno = __sysfs_devname_to_devno(ul_path_get_prefix(pc), name, NULL);
-			if (!*diskdevno)
-				goto err;
+		إذا (diskdevno) {
+			*diskdevno = __sysfs_devname_to_devno(ul_رستہ_get_اگیتر(pc), name, عدم);
+			إذا (!*diskdevno)
+				اذهب err;
 		}
 	}
 
-done:
-	return 0;
+پورا:
+	أرجع 0;
 err:
-	return -1;
+	أرجع -1;
 }
 
-int sysfs_devno_to_wholedisk(dev_t devno, char *diskname,
+صحيح sysfs_devno_منزل_wholedisk(dev_t devno, حرف *diskname,
 		             size_t len, dev_t *diskdevno)
 {
-	struct path_cxt *pc;
-	int rc = 0;
+	بنية رستہ_cxt *pc;
+	صحيح rc = 0;
 
-	if (!devno)
-		return -EINVAL;
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		return -ENOMEM;
+	إذا (!devno)
+		أرجع -EINVAL;
+	pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	إذا (!pc)
+		أرجع -ENOMEM;
 
 	rc = sysfs_blkdev_get_wholedisk(pc, diskname, len, diskdevno);
-	ul_unref_path(pc);
-	return rc;
+	ul_unref_رستہ(pc);
+	أرجع rc;
 }
 
 /*
@@ -664,422 +664,422 @@ int sysfs_devno_to_wholedisk(dev_t devno, char *diskname,
  *
  * The @uuid (if not NULL) returns DM device UUID, use free() to deallocate.
  */
-int sysfs_devno_is_dm_hidden(dev_t devno, char **uuid,
-			     const struct ul_vfs_ops *vfs)
+صحيح sysfs_devno_is_dm_hidden(dev_t devno, حرف **uuid,
+			     ثابت بنية ul_vfs_ops *vfs)
 {
-	struct path_cxt *pc = NULL;
-	char *id = NULL;
-	int rc = 0;
+	بنية رستہ_cxt *pc = عدم;
+	حرف *id = عدم;
+	صحيح rc = 0;
 
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		goto done;
-	ul_path_refer_vfs(pc, vfs);
-	if (ul_path_read_string(pc, &id, "dm/uuid") <= 0 || !id)
-		goto done;
+	pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	إذا (!pc)
+		اذهب پورا;
+	ul_رستہ_refer_vfs(pc, vfs);
+	إذا (ul_رستہ_read_string(pc, &id, "dm/uuid") <= 0 || !id)
+		اذهب پورا;
 
 	/* Private LVM devices use "LVM-<uuid>-<name>" uuid format (important
 	 * is the "LVM" prefix and "-<name>" postfix).
 	 */
-	if (strncmp(id, "LVM-", 4) == 0) {
-		char *p = strrchr(id + 4, '-');
+	إذا (لڑی_مقابلہ(id, "LVM-", 4) == 0) {
+		حرف *p = strrchr(id + 4, '-');
 
-		if (p && *(p + 1))
+		إذا (p && *(p + 1))
 			rc = 1;
 	}
-done:
-	ul_unref_path(pc);
-	if (uuid)
+پورا:
+	ul_unref_رستہ(pc);
+	إذا (uuid)
 		*uuid = id;
-	else
-		free(id);
-	return rc;
+	وإلا
+		حرر(id);
+	أرجع rc;
 }
 
 /*
  * Returns 1 if the device is private device mapper device. The @uuid
  * (if not NULL) returns DM device UUID, use free() to deallocate.
  */
-int sysfs_devno_is_dm_private(dev_t devno, char **uuid,
-			      const struct ul_vfs_ops *vfs)
+صحيح sysfs_devno_is_dm_نجی(dev_t devno, حرف **uuid,
+			      ثابت بنية ul_vfs_ops *vfs)
 {
-	struct path_cxt *pc = NULL;
-	char *id = NULL;
-	int rc = 0;
+	بنية رستہ_cxt *pc = عدم;
+	حرف *id = عدم;
+	صحيح rc = 0;
 
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		goto done;
-	ul_path_refer_vfs(pc, vfs);
-	if (ul_path_read_string(pc, &id, "dm/uuid") <= 0 || !id)
-		goto done;
+	pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	إذا (!pc)
+		اذهب پورا;
+	ul_رستہ_refer_vfs(pc, vfs);
+	إذا (ul_رستہ_read_string(pc, &id, "dm/uuid") <= 0 || !id)
+		اذهب پورا;
 
 	/* Private LVM devices use "LVM-<uuid>-<name>" uuid format (important
 	 * is the "LVM" prefix and "-<name>" postfix).
 	 */
-	if (strncmp(id, "LVM-", 4) == 0) {
-		char *p = strrchr(id + 4, '-');
+	إذا (لڑی_مقابلہ(id, "LVM-", 4) == 0) {
+		حرف *p = strrchr(id + 4, '-');
 
-		if (p && *(p + 1))
+		إذا (p && *(p + 1))
 			rc = 1;
 
 	/* Private Stratis devices prefix the UUID with "stratis-1-private"
 	 */
-	} else if (strncmp(id, "stratis-1-private", 17) == 0) {
+	} وإلا إذا (لڑی_مقابلہ(id, "stratis-1-private", 17) == 0) {
 		rc = 1;
 	}
-done:
-	ul_unref_path(pc);
-	if (uuid)
+پورا:
+	ul_unref_رستہ(pc);
+	إذا (uuid)
 		*uuid = id;
-	else
-		free(id);
-	return rc;
+	وإلا
+		حرر(id);
+	أرجع rc;
 }
 
 /*
  * Return 0 or 1, or < 0 in case of error
  */
-int sysfs_devno_is_wholedisk(dev_t devno)
+صحيح sysfs_devno_is_wholedisk(dev_t devno)
 {
 	dev_t disk;
 
-	if (sysfs_devno_to_wholedisk(devno, NULL, 0, &disk) != 0)
-		return -1;
+	إذا (sysfs_devno_منزل_wholedisk(devno, عدم, 0, &disk) != 0)
+		أرجع -1;
 
-	return devno == disk;
+	أرجع devno == disk;
 }
 
 
-int sysfs_blkdev_scsi_get_hctl(struct path_cxt *pc, int *h, int *c, int *t, int *l)
+صحيح sysfs_blkdev_scsi_get_hctl(بنية رستہ_cxt *pc, صحيح *h, صحيح *c, صحيح *t, صحيح *l)
 {
-	char buf[PATH_MAX], *hctl;
-	struct sysfs_blkdev *blk;
+	حرف buf[PATH_MAX], *hctl;
+	بنية sysfs_blkdev *blk;
 	ssize_t len;
 
-	blk = ul_path_get_dialect(pc);
+	blk = ul_رستہ_get_dialect(pc);
 
-	if (!blk || blk->hctl_error)
-		return -EINVAL;
-	if (blk->has_hctl)
-		goto done;
+	إذا (!blk || blk->hctl_error)
+		أرجع -EINVAL;
+	إذا (blk->has_hctl)
+		اذهب پورا;
 
 	blk->hctl_error = 1;
-	len = ul_path_readlink(pc, buf, sizeof(buf), "device");
-	if (len < 0)
-		return len;
+	len = ul_رستہ_readlink(pc, buf, حجم(buf), "device");
+	إذا (len < 0)
+		أرجع len;
 
 	hctl = strrchr(buf, '/');
-	if (!hctl)
-		return -1;
+	إذا (!hctl)
+		أرجع -1;
 	hctl++;
 
-	if (sscanf(hctl, "%u:%u:%u:%u",	&blk->scsi_host, &blk->scsi_channel,
-				&blk->scsi_target, &blk->scsi_lun) != 4)
-		return -1;
+	إذا (لڑی_توں_پڑھو(hctl, "%u:%u:%u:%u",	&blk->scsi_host, &blk->scsi_channel,
+				&blk->scsi_نشانہ, &blk->scsi_lun) != 4)
+		أرجع -1;
 
 	blk->has_hctl = 1;
-done:
-	if (h)
+پورا:
+	إذا (h)
 		*h = blk->scsi_host;
-	if (c)
+	إذا (c)
 		*c = blk->scsi_channel;
-	if (t)
-		*t = blk->scsi_target;
-	if (l)
+	إذا (t)
+		*t = blk->scsi_نشانہ;
+	إذا (l)
 		*l = blk->scsi_lun;
 
 	blk->hctl_error = 0;
-	return 0;
+	أرجع 0;
 }
 
 
-static char *scsi_host_attribute_path(
-			struct path_cxt *pc,
-			const char *type,
-			char *buf,
+ساكن حرف *scsi_host_attribute_رستہ(
+			بنية رستہ_cxt *pc,
+			ثابت حرف *type,
+			حرف *buf,
 			size_t bufsz,
-			const char *attr)
+			ثابت حرف *attr)
 {
-	int len;
-	int host;
-	const char *prefix;
+	صحيح len;
+	صحيح host;
+	ثابت حرف *اگیتر;
 
-	if (sysfs_blkdev_scsi_get_hctl(pc, &host, NULL, NULL, NULL))
-		return NULL;
+	إذا (sysfs_blkdev_scsi_get_hctl(pc, &host, عدم, عدم, عدم))
+		أرجع عدم;
 
-	prefix = ul_path_get_prefix(pc);
-	if (!prefix)
-		prefix = "";
+	اگیتر = ul_رستہ_get_اگیتر(pc);
+	إذا (!اگیتر)
+		اگیتر = "";
 
-	if (attr)
+	إذا (attr)
 		len = snprintf(buf, bufsz, "%s%s/%s_host/host%d/%s",
-				prefix, _PATH_SYS_CLASS, type, host, attr);
-	else
+				اگیتر, رستہ_SYS_CLASS, type, host, attr);
+	وإلا
 		len = snprintf(buf, bufsz, "%s%s/%s_host/host%d",
-				prefix, _PATH_SYS_CLASS, type, host);
+				اگیتر, رستہ_SYS_CLASS, type, host);
 
-	return (len < 0 || (size_t) len >= bufsz) ? NULL : buf;
+	أرجع (len < 0 || (size_t) len >= bufsz) ? عدم : buf;
 }
 
-char *sysfs_blkdev_scsi_host_strdup_attribute(struct path_cxt *pc,
-			const char *type, const char *attr)
+حرف *sysfs_blkdev_scsi_host_strdup_attribute(بنية رستہ_cxt *pc,
+			ثابت حرف *type, ثابت حرف *attr)
 {
-	char buf[1024];
-	int rc;
+	حرف buf[1024];
+	صحيح rc;
 	FILE *f;
 
-	if (!attr || !type ||
-	    !scsi_host_attribute_path(pc, type, buf, sizeof(buf), attr))
-		return NULL;
+	إذا (!attr || !type ||
+	    !scsi_host_attribute_رستہ(pc, type, buf, حجم(buf), attr))
+		أرجع عدم;
 
-	if (!(f = fopen(buf, "r" UL_CLOEXECSTR)))
-		return NULL;
+	إذا (!(f = fopen(buf, "r" UL_CLOEXECSTR)))
+		أرجع عدم;
 
 	rc = fscanf(f, "%1023[^\n]", buf);
 	fclose(f);
 
-	return rc == 1 ? strdup(buf) : NULL;
+	أرجع rc == 1 ? strdup(buf) : عدم;
 }
 
-int sysfs_blkdev_scsi_host_is(struct path_cxt *pc, const char *type)
+صحيح sysfs_blkdev_scsi_host_is(بنية رستہ_cxt *pc, ثابت حرف *type)
 {
-	char buf[PATH_MAX];
-	struct stat st;
+	حرف buf[PATH_MAX];
+	بنية stat st;
 
-	if (!type || !scsi_host_attribute_path(pc, type,
-				buf, sizeof(buf), NULL))
-		return 0;
+	إذا (!type || !scsi_host_attribute_رستہ(pc, type,
+				buf, حجم(buf), عدم))
+		أرجع 0;
 
-	return stat(buf, &st) == 0 && S_ISDIR(st.st_mode);
+	أرجع stat(buf, &st) == 0 && S_ISDIR(st.st_mode);
 }
 
-static char *scsi_attribute_path(struct path_cxt *pc,
-		char *buf, size_t bufsz, const char *attr)
+ساكن حرف *scsi_attribute_رستہ(بنية رستہ_cxt *pc,
+		حرف *buf, size_t bufsz, ثابت حرف *attr)
 {
-	int len, h, c, t, l;
-	const char *prefix;
+	صحيح len, h, c, t, l;
+	ثابت حرف *اگیتر;
 
-	if (sysfs_blkdev_scsi_get_hctl(pc, &h, &c, &t, &l) != 0)
-		return NULL;
+	إذا (sysfs_blkdev_scsi_get_hctl(pc, &h, &c, &t, &l) != 0)
+		أرجع عدم;
 
-	prefix = ul_path_get_prefix(pc);
-	if (!prefix)
-		prefix = "";
+	اگیتر = ul_رستہ_get_اگیتر(pc);
+	إذا (!اگیتر)
+		اگیتر = "";
 
-	if (attr)
+	إذا (attr)
 		len = snprintf(buf, bufsz, "%s%s/devices/%d:%d:%d:%d/%s",
-				prefix, _PATH_SYS_SCSI,
+				اگیتر, رستہ_SYS_SCSI,
 				h,c,t,l, attr);
-	else
+	وإلا
 		len = snprintf(buf, bufsz, "%s%s/devices/%d:%d:%d:%d",
-				prefix, _PATH_SYS_SCSI,
+				اگیتر, رستہ_SYS_SCSI,
 				h,c,t,l);
-	return (len < 0 || (size_t) len >= bufsz) ? NULL : buf;
+	أرجع (len < 0 || (size_t) len >= bufsz) ? عدم : buf;
 }
 
-int sysfs_blkdev_scsi_has_attribute(struct path_cxt *pc, const char *attr)
+صحيح sysfs_blkdev_scsi_has_attribute(بنية رستہ_cxt *pc, ثابت حرف *attr)
 {
-	char path[PATH_MAX];
-	struct stat st;
+	حرف رستہ[PATH_MAX];
+	بنية stat st;
 
-	if (!scsi_attribute_path(pc, path, sizeof(path), attr))
-		return 0;
+	إذا (!scsi_attribute_رستہ(pc, رستہ, حجم(رستہ), attr))
+		أرجع 0;
 
-	return stat(path, &st) == 0;
+	أرجع stat(رستہ, &st) == 0;
 }
 
-int sysfs_blkdev_scsi_path_contains(struct path_cxt *pc, const char *pattern)
+صحيح sysfs_blkdev_scsi_رستہ_شامل_اے(بنية رستہ_cxt *pc, ثابت حرف *نمونہ)
 {
-	char path[PATH_MAX], linkc[PATH_MAX];
-	struct stat st;
+	حرف رستہ[PATH_MAX], linkc[PATH_MAX];
+	بنية stat st;
 	ssize_t len;
 
-	if (!scsi_attribute_path(pc, path, sizeof(path), NULL))
-		return 0;
+	إذا (!scsi_attribute_رستہ(pc, رستہ, حجم(رستہ), عدم))
+		أرجع 0;
 
-	if (stat(path, &st) != 0)
-		return 0;
+	إذا (stat(رستہ, &st) != 0)
+		أرجع 0;
 
-	len = readlink(path, linkc, sizeof(linkc) - 1);
-	if (len < 0)
-		return 0;
+	len = readlink(رستہ, linkc, حجم(linkc) - 1);
+	إذا (len < 0)
+		أرجع 0;
 
 	linkc[len] = '\0';
-	return strstr(linkc, pattern) != NULL;
+	أرجع لڑی_کھوج(linkc, نمونہ) != عدم;
 }
 
-static dev_t read_devno(const char *path)
+ساكن dev_t read_devno(ثابت حرف *رستہ)
 {
 	FILE *f;
-	int maj = 0, min = 0;
+	صحيح maj = 0, min = 0;
 	dev_t dev = 0;
 
-	f = fopen(path, "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	f = fopen(رستہ, "r" UL_CLOEXECSTR);
+	إذا (!f)
+		أرجع 0;
 
-	if (fscanf(f, "%d:%d", &maj, &min) == 2)
+	إذا (fscanf(f, "%d:%d", &maj, &min) == 2)
 		dev = makedev(maj, min);
 	fclose(f);
-	return dev;
+	أرجع dev;
 }
 
-int sysfs_devname_is_hidden(const char *prefix, const char *name)
+صحيح sysfs_devname_is_hidden(ثابت حرف *اگیتر, ثابت حرف *name)
 {
-	char buf[PATH_MAX];
-	int rc = 0, hidden = 0, len;
+	حرف buf[PATH_MAX];
+	صحيح rc = 0, hidden = 0, len;
 	FILE *f;
 
-	if (strncmp("/dev/", name, 5) == 0)
-		return 0;
+	إذا (لڑی_مقابلہ("/dev/", name, 5) == 0)
+		أرجع 0;
 
-	if (!prefix)
-		prefix = "";
+	إذا (!اگیتر)
+		اگیتر = "";
 	/*
 	 * Create path to /sys/block/<name>/hidden
 	 */
-	len = snprintf(buf, sizeof(buf),
-			"%s" _PATH_SYS_BLOCK "/%s/hidden",
-			prefix, name);
+	len = snprintf(buf, حجم(buf),
+			"%s" رستہ_SYS_بلاک "/%s/hidden",
+			اگیتر, name);
 
-	if (len < 0 || (size_t) len + 1 > sizeof(buf))
-		return 0;
+	إذا (len < 0 || (size_t) len + 1 > حجم(buf))
+		أرجع 0;
 
 	f = fopen(buf, "r" UL_CLOEXECSTR);
-	if (!f)
-		return 0;
+	إذا (!f)
+		أرجع 0;
 
 	rc = fscanf(f, "%d", &hidden);
 	fclose(f);
 
-	return rc == 1 ? hidden : 0;
+	أرجع rc == 1 ? hidden : 0;
 }
 
 
-dev_t __sysfs_devname_to_devno(const char *prefix, const char *name, const char *parent)
+dev_t __sysfs_devname_to_devno(ثابت حرف *اگیتر, ثابت حرف *name, ثابت حرف *ماپا)
 {
-	char buf[PATH_MAX];
-	char *_name = NULL, *_parent = NULL;	/* name as encoded in sysfs */
+	حرف buf[PATH_MAX];
+	حرف *_name = عدم, *ماپا_2 = عدم;	/* name as encoded in sysfs */
 	dev_t dev = 0;
-	int len;
+	صحيح len;
 
-	if (!prefix)
-		prefix = "";
+	إذا (!اگیتر)
+		اگیتر = "";
 
-	assert(name);
+	أكد(name);
 
-	if (strncmp("/dev/", name, 5) == 0) {
+	إذا (لڑی_مقابلہ("/dev/", name, 5) == 0) {
 		/*
 		 * Read from /dev
 		 */
-		struct stat st;
+		بنية stat st;
 
-		if (stat(name, &st) == 0) {
+		إذا (stat(name, &st) == 0) {
 			dev = st.st_rdev;
-			goto done;
+			اذهب پورا;
 		}
 		name += 5;	/* unaccessible, or not node in /dev */
 	}
 
 	_name = strdup(name);
-	if (!_name)
-		goto done;
-	sysfs_devname_dev_to_sys(_name);
+	إذا (!_name)
+		اذهب پورا;
+	sysfs_devname_dev_منزل_sys(_name);
 
-	if (parent) {
-		_parent = strdup(parent);
-		if (!_parent)
-			goto done;
+	إذا (ماپا) {
+		ماپا_2 = strdup(ماپا);
+		إذا (!ماپا_2)
+			اذهب پورا;
 	}
 
-	if (parent && strncmp("dm-", name, 3) != 0) {
+	إذا (ماپا && لڑی_مقابلہ("dm-", name, 3) != 0) {
 		/*
 		 * Create path to /sys/block/<parent>/<name>/dev
 		 */
-		sysfs_devname_dev_to_sys(_parent);
-		len = snprintf(buf, sizeof(buf),
-				"%s" _PATH_SYS_BLOCK "/%s/%s/dev",
-				prefix,	_parent, _name);
-		if (len < 0 || (size_t) len >= sizeof(buf))
-			goto done;
+		sysfs_devname_dev_منزل_sys(ماپا_2);
+		len = snprintf(buf, حجم(buf),
+				"%s" رستہ_SYS_بلاک "/%s/%s/dev",
+				اگیتر,	ماپا_2, _name);
+		إذا (len < 0 || (size_t) len >= حجم(buf))
+			اذهب پورا;
 
 		/* don't try anything else for dm-* */
 		dev = read_devno(buf);
-		goto done;
+		اذهب پورا;
 	}
 
 	/*
 	 * Read from /sys/block/<sysname>/dev
 	 */
-	len = snprintf(buf, sizeof(buf),
-			"%s" _PATH_SYS_BLOCK "/%s/dev",
-			prefix, _name);
-	if (len < 0 || (size_t) len >= sizeof(buf))
-		goto done;
+	len = snprintf(buf, حجم(buf),
+			"%s" رستہ_SYS_بلاک "/%s/dev",
+			اگیتر, _name);
+	إذا (len < 0 || (size_t) len >= حجم(buf))
+		اذهب پورا;
 	dev = read_devno(buf);
 
 	/*
 	 * Read from /sys/block/<parent>/<partition>/dev
 	 */
-	if (!dev && parent && ul_startswith(name, parent)) {
-		len = snprintf(buf, sizeof(buf),
-				"%s" _PATH_SYS_BLOCK "/%s/%s/dev",
-				prefix, _parent, _name);
-		if (len < 0 || (size_t) len >= sizeof(buf))
-			goto done;
+	إذا (!dev && ماپا && ul_startswith(name, ماپا)) {
+		len = snprintf(buf, حجم(buf),
+				"%s" رستہ_SYS_بلاک "/%s/%s/dev",
+				اگیتر, ماپا_2, _name);
+		إذا (len < 0 || (size_t) len >= حجم(buf))
+			اذهب پورا;
 		dev = read_devno(buf);
 	}
 
 	/*
 	 * Read from /sys/block/<sysname>/device/dev
 	 */
-	if (!dev) {
-		len = snprintf(buf, sizeof(buf),
-				"%s" _PATH_SYS_BLOCK "/%s/device/dev",
-				prefix, _name);
-		if (len < 0 || (size_t) len >= sizeof(buf))
-			goto done;
+	إذا (!dev) {
+		len = snprintf(buf, حجم(buf),
+				"%s" رستہ_SYS_بلاک "/%s/device/dev",
+				اگیتر, _name);
+		إذا (len < 0 || (size_t) len >= حجم(buf))
+			اذهب پورا;
 		dev = read_devno(buf);
 	}
-done:
-	free(_name);
-	free(_parent);
-	return dev;
+پورا:
+	حرر(_name);
+	حرر(ماپا_2);
+	أرجع dev;
 }
 
-dev_t sysfs_devname_to_devno(const char *name)
+dev_t sysfs_devname_منزل_devno(ثابت حرف *name)
 {
-	return __sysfs_devname_to_devno(NULL, name, NULL);
+	أرجع __sysfs_devname_to_devno(عدم, name, عدم);
 }
 
-char *sysfs_blkdev_get_path(struct path_cxt *pc, char *buf, size_t bufsiz)
+حرف *sysfs_blkdev_get_رستہ(بنية رستہ_cxt *pc, حرف *buf, size_t bufsiz)
 {
-	const char *name = sysfs_blkdev_get_name(pc, buf, bufsiz);
-	char *res = NULL;
+	ثابت حرف *name = sysfs_blkdev_get_name(pc, buf, bufsiz);
+	حرف *res = عدم;
 	size_t sz;
-	struct stat st;
+	بنية stat st;
 
-	if (!name)
-		goto done;
+	إذا (!name)
+		اذهب پورا;
 
-	sz = strlen(name);
-	if (sz + sizeof("/dev/") > bufsiz)
-		goto done;
+	sz = لڑی_لمبائی(name);
+	إذا (sz + حجم("/dev/") > bufsiz)
+		اذهب پورا;
 
 	/* create the final "/dev/<name>" string */
 	memmove(buf + 5, name, sz + 1);
-	memcpy(buf, "/dev/", 5);
+	حافظہ_نقل(buf, "/dev/", 5);
 
-	if (!stat(buf, &st) && S_ISBLK(st.st_mode) && st.st_rdev == sysfs_blkdev_get_devno(pc))
+	إذا (!stat(buf, &st) && S_ISBLK(st.st_mode) && st.st_rdev == sysfs_blkdev_get_devno(pc))
 		res = buf;
-done:
-	return res;
+پورا:
+	أرجع res;
 }
 
-dev_t sysfs_blkdev_get_devno(struct path_cxt *pc)
+dev_t sysfs_blkdev_get_devno(بنية رستہ_cxt *pc)
 {
-	return ((struct sysfs_blkdev *) ul_path_get_dialect(pc))->devno;
+	أرجع ((بنية sysfs_blkdev *) ul_رستہ_get_dialect(pc))->devno;
 }
 
 /*
@@ -1087,216 +1087,216 @@ dev_t sysfs_blkdev_get_devno(struct path_cxt *pc)
  *
  * Please, use more robust blkid_devno_to_devname() in your applications.
  */
-char *sysfs_devno_to_devpath(dev_t devno, char *buf, size_t bufsiz)
+حرف *sysfs_devno_منزل_devpath(dev_t devno, حرف *buf, size_t bufsiz)
 {
-	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
-	char *res = NULL;
+	بنية رستہ_cxt *pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	حرف *res = عدم;
 
-	if (pc) {
-		res = sysfs_blkdev_get_path(pc, buf, bufsiz);
-		ul_unref_path(pc);
+	إذا (pc) {
+		res = sysfs_blkdev_get_رستہ(pc, buf, bufsiz);
+		ul_unref_رستہ(pc);
 	}
-	return res;
+	أرجع res;
 }
 
-char *sysfs_devno_to_devname(dev_t devno, char *buf, size_t bufsiz)
+حرف *sysfs_devno_منزل_devname(dev_t devno, حرف *buf, size_t bufsiz)
 {
-	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
-	char *res = NULL;
+	بنية رستہ_cxt *pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	حرف *res = عدم;
 
-	if (pc) {
+	إذا (pc) {
 		res = sysfs_blkdev_get_name(pc, buf, bufsiz);
-		ul_unref_path(pc);
+		ul_unref_رستہ(pc);
 	}
-	return res;
+	أرجع res;
 }
 
-int sysfs_devno_count_partitions(dev_t devno)
+صحيح sysfs_devno_گنتی_partitions(dev_t devno)
 {
-	struct path_cxt *pc = ul_new_sysfs_path(devno, NULL, NULL);
-	int n = 0;
+	بنية رستہ_cxt *pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	صحيح n = 0;
 
-	if (pc) {
-		char buf[PATH_MAX + 1];
-		char *name = sysfs_blkdev_get_name(pc, buf, sizeof(buf));
+	إذا (pc) {
+		حرف buf[PATH_MAX + 1];
+		حرف *name = sysfs_blkdev_get_name(pc, buf, حجم(buf));
 
-		n = sysfs_blkdev_count_partitions(pc, name);
-		ul_unref_path(pc);
+		n = sysfs_blkdev_گنتی_partitions(pc, name);
+		ul_unref_رستہ(pc);
 	}
-	return n;
+	أرجع n;
 }
 
-char *sysfs_chrdev_devno_to_devname(dev_t devno, char *buf, size_t bufsiz)
+حرف *sysfs_chrdev_devno_منزل_devname(dev_t devno, حرف *buf, size_t bufsiz)
 {
-	char link[PATH_MAX];
-	struct path_cxt *pc;
-	char *name;
+	حرف link[PATH_MAX];
+	بنية رستہ_cxt *pc;
+	حرف *name;
 	ssize_t	sz;
 
-	pc = ul_new_path(_PATH_SYS_DEVCHAR "/%u:%u", major(devno), minor(devno));
-	if (!pc)
-		return NULL;
+	pc = ul_new_رستہ(رستہ_SYS_DEVCHAR "/%u:%u", major(devno), minor(devno));
+	إذا (!pc)
+		أرجع عدم;
 
 	/* read /sys/dev/char/<maj:min> link */
-	sz = ul_path_readlink(pc, link, sizeof(link), NULL);
-	ul_unref_path(pc);
+	sz = ul_رستہ_readlink(pc, link, حجم(link), عدم);
+	ul_unref_رستہ(pc);
 
-	if (sz < 0)
-		return NULL;
+	إذا (sz < 0)
+		أرجع عدم;
 
 	name = strrchr(link, '/');
-	if (!name)
-		return NULL;
+	إذا (!name)
+		أرجع عدم;
 
 	name++;
-	sz = strlen(name);
-	if ((size_t) sz + 1 > bufsiz)
-		return NULL;
+	sz = لڑی_لمبائی(name);
+	إذا ((size_t) sz + 1 > bufsiz)
+		أرجع عدم;
 
-	memcpy(buf, name, sz + 1);
-	sysfs_devname_sys_to_dev(buf);
-	return buf;
+	حافظہ_نقل(buf, name, sz + 1);
+	sysfs_devname_sys_منزل_dev(buf);
+	أرجع buf;
 
 }
 
-enum sysfs_byteorder sysfs_get_byteorder(struct path_cxt *pc)
+تعداد sysfs_byteorder sysfs_get_byteorder(بنية رستہ_cxt *pc)
 {
-	int rc;
-	char buf[BUFSIZ];
-	enum sysfs_byteorder ret;
+	صحيح rc;
+	حرف buf[BUFSIZ];
+	تعداد sysfs_byteorder ret;
 
-	rc = ul_path_read_buffer(pc, buf, sizeof(buf), _PATH_SYS_CPU_BYTEORDER);
-	if (rc < 0)
-		goto unknown;
+	rc = ul_رستہ_read_بفر(pc, buf, حجم(buf), رستہ_SYS_CPU_BYTEORDER);
+	إذا (rc < 0)
+		اذهب unknown;
 
-	if (strncmp(buf, "little", sizeof(buf)) == 0) {
+	إذا (لڑی_مقابلہ(buf, "little", حجم(buf)) == 0) {
 		ret = SYSFS_BYTEORDER_LITTLE;
-		goto out;
-	} else if (strncmp(buf, "big", sizeof(buf)) == 0) {
+		اذهب باہرلا;
+	} وإلا إذا (لڑی_مقابلہ(buf, "big", حجم(buf)) == 0) {
 		ret = SYSFS_BYTEORDER_BIG;
-		goto out;
+		اذهب باہرلا;
 	}
 
 unknown:
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#إذا __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 	ret = SYSFS_BYTEORDER_LITTLE;
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#وإلاإذا __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 	ret = SYSFS_BYTEORDER_BIG;
-#else
-#error Unknown byte order
-#endif
+#وإلا
+#غلطی Unknown byte ترتیب
+#جے_انت
 
-out:
-	return ret;
+باہرلا:
+	أرجع ret;
 }
 
-int sysfs_get_address_bits(struct path_cxt *pc)
+صحيح sysfs_get_پتہ_بٹ(بنية رستہ_cxt *pc)
 {
-	int rc;
-	int address_bits;
+	صحيح rc;
+	صحيح پتہ_بٹ;
 
-	rc = ul_path_scanf(pc, _PATH_SYS_ADDRESS_BITS, "%d", &address_bits);
-	if (rc < 0)
-		return rc;
-	if (address_bits < 0)
-		return -EINVAL;
-	return address_bits;
+	rc = ul_رستہ_scanf(pc, رستہ_SYS_پتہ_بٹ, "%d", &پتہ_بٹ);
+	إذا (rc < 0)
+		أرجع rc;
+	إذا (پتہ_بٹ < 0)
+		أرجع -EINVAL;
+	أرجع پتہ_بٹ;
 }
 
 
-#ifdef TEST_PROGRAM_SYSFS
-#include <errno.h>
-#include <stdlib.h>
+#جے_تعریف_شدہ TEST_پروگرام_SYSFS
+#ضمن <errno.h>
+#ضمن <stdlib.h>
 
-int main(int argc, char *argv[])
+صحيح مکھ(صحيح argc, حرف *argv[])
 {
-	struct path_cxt *pc;
-	char *devname;
+	بنية رستہ_cxt *pc;
+	حرف *devname;
 	dev_t devno, disk_devno;
-	char path[PATH_MAX], *sub, *chain;
-	char diskname[32];
-	int i, is_part, rc = EXIT_SUCCESS;
+	حرف رستہ[PATH_MAX], *sub, *chain;
+	حرف diskname[32];
+	صحيح i, is_part, rc = EXIT_SUCCESS;
 	uint64_t u64;
 
-	if (argc != 2)
+	إذا (argc != 2)
 		errx(EXIT_FAILURE, "usage: %s <devname>", argv[0]);
 
 	ul_sysfs_init_debug();
 
 	devname = argv[1];
-	devno = sysfs_devname_to_devno(devname);
+	devno = sysfs_devname_منزل_devno(devname);
 
-	if (!devno)
+	إذا (!devno)
 		err(EXIT_FAILURE, "failed to read devno");
 
-	printf("non-context:\n");
-	printf(" DEVNO:   %u (%u:%u)\n", (unsigned int) devno, major(devno), minor(devno));
-	printf(" DEVNAME: %s\n", sysfs_devno_to_devname(devno, path, sizeof(path)));
-	printf(" DEVPATH: %s\n", sysfs_devno_to_devpath(devno, path, sizeof(path)));
+	لکھو("non-context:\n");
+	لکھو(" DEVNO:   %u (%u:%u)\n", (بنانشانی صحيح) devno, major(devno), minor(devno));
+	لکھو(" DEVNAME: %s\n", sysfs_devno_منزل_devname(devno, رستہ, حجم(رستہ)));
+	لکھو(" DEVPATH: %s\n", sysfs_devno_منزل_devpath(devno, رستہ, حجم(رستہ)));
 
-	sysfs_devno_to_wholedisk(devno, diskname, sizeof(diskname), &disk_devno);
-	printf(" WHOLEDISK-DEVNO:   %u (%u:%u)\n", (unsigned int) disk_devno, major(disk_devno), minor(disk_devno));
-	printf(" WHOLEDISK-DEVNAME: %s\n", diskname);
+	sysfs_devno_منزل_wholedisk(devno, diskname, حجم(diskname), &disk_devno);
+	لکھو(" WHOLEDISK-DEVNO:   %u (%u:%u)\n", (بنانشانی صحيح) disk_devno, major(disk_devno), minor(disk_devno));
+	لکھو(" WHOLEDISK-DEVNAME: %s\n", diskname);
 
-	pc = ul_new_sysfs_path(devno, NULL, NULL);
-	if (!pc)
-		goto done;
+	pc = ul_new_sysfs_رستہ(devno, عدم, عدم);
+	إذا (!pc)
+		اذهب پورا;
 
-	printf("context based:\n");
+	لکھو("context based:\n");
 	devno = sysfs_blkdev_get_devno(pc);
-	printf(" DEVNO:   %u (%u:%u)\n", (unsigned int) devno, major(devno), minor(devno));
-	printf(" DEVNAME: %s\n", sysfs_blkdev_get_name(pc, path, sizeof(path)));
-	printf(" DEVPATH: %s\n", sysfs_blkdev_get_path(pc, path, sizeof(path)));
+	لکھو(" DEVNO:   %u (%u:%u)\n", (بنانشانی صحيح) devno, major(devno), minor(devno));
+	لکھو(" DEVNAME: %s\n", sysfs_blkdev_get_name(pc, رستہ, حجم(رستہ)));
+	لکھو(" DEVPATH: %s\n", sysfs_blkdev_get_رستہ(pc, رستہ, حجم(رستہ)));
 
-	sysfs_devno_to_wholedisk(devno, diskname, sizeof(diskname), &disk_devno);
-	printf(" WHOLEDISK-DEVNO: %u (%u:%u)\n", (unsigned int) disk_devno, major(disk_devno), minor(disk_devno));
-	printf(" WHOLEDISK-DEVNAME: %s\n", diskname);
+	sysfs_devno_منزل_wholedisk(devno, diskname, حجم(diskname), &disk_devno);
+	لکھو(" WHOLEDISK-DEVNO: %u (%u:%u)\n", (بنانشانی صحيح) disk_devno, major(disk_devno), minor(disk_devno));
+	لکھو(" WHOLEDISK-DEVNAME: %s\n", diskname);
 
-	is_part = ul_path_access(pc, F_OK, "partition") == 0;
-	printf(" PARTITION: %s\n", is_part ? "YES" : "NOT");
+	is_part = ul_رستہ_access(pc, F_OK, "partition") == 0;
+	لکھو(" PARTITION: %s\n", is_part ? "YES" : "NOT");
 
-	if (is_part && disk_devno) {
-		struct path_cxt *disk_pc =  ul_new_sysfs_path(disk_devno, NULL, NULL);
-		sysfs_blkdev_set_parent(pc, disk_pc);
+	إذا (is_part && disk_devno) {
+		بنية رستہ_cxt *disk_pc =  ul_new_sysfs_رستہ(disk_devno, عدم, عدم);
+		sysfs_blkdev_سیٹ_ماپا(pc, disk_pc);
 
-		ul_unref_path(disk_pc);
+		ul_unref_رستہ(disk_pc);
 	}
 
-	printf(" HOTPLUG: %s\n", sysfs_blkdev_is_hotpluggable(pc) ? "yes" : "no");
-	printf(" REMOVABLE: %s\n", sysfs_blkdev_is_removable(pc) ? "yes" : "no");
-	printf(" SLAVES: %d\n", ul_path_count_dirents(pc, "slaves"));
+	لکھو(" HOTPLUG: %s\n", sysfs_blkdev_is_hotpluggable(pc) ? "yes" : "no");
+	لکھو(" REMOVABLE: %s\n", sysfs_blkdev_is_removable(pc) ? "yes" : "no");
+	لکھو(" SLAVES: %d\n", ul_رستہ_گنتی_dirents(pc, "slaves"));
 
-	if (!is_part) {
-		printf("First 5 partitions:\n");
-		for (i = 1; i <= 5; i++) {
-			dev_t dev = sysfs_blkdev_partno_to_devno(pc, i);
-			if (dev)
-				printf("\t#%d %u:%u\n", i, major(dev), minor(dev));
+	إذا (!is_part) {
+		لکھو("First 5 partitions:\n");
+		لكل (i = 1; i <= 5; i++) {
+			dev_t dev = sysfs_blkdev_partno_منزل_devno(pc, i);
+			إذا (dev)
+				لکھو("\t#%d %u:%u\n", i, major(dev), minor(dev));
 		}
 	}
 
-	if (ul_path_read_u64(pc, &u64, "size") != 0)
-		printf(" (!) read SIZE failed\n");
-	else
-		printf(" SIZE: %"PRIu64"\n", u64);
+	إذا (ul_رستہ_read_u64(pc, &u64, "size") != 0)
+		لکھو(" (!) read SIZE failed\n");
+	وإلا
+		لکھو(" SIZE: %"PRIu64"\n", u64);
 
-	if (ul_path_read_s32(pc, &i, "queue/hw_sector_size"))
-		printf(" (!) read SECTOR failed\n");
-	else
-		printf(" SECTOR: %d\n", i);
+	إذا (ul_رستہ_read_s32(pc, &i, "queue/hw_sector_size"))
+		لکھو(" (!) read SECTOR failed\n");
+	وإلا
+		لکھو(" SECTOR: %d\n", i);
 
 
-	chain = sysfs_blkdev_get_devchain(pc, path, sizeof(path));
-	printf(" SUBSYSTEMS:\n");
+	chain = sysfs_blkdev_get_devchain(pc, رستہ, حجم(رستہ));
+	لکھو(" SUBSYSTEMS:\n");
 
-	while (chain && sysfs_blkdev_next_subsystem(pc, chain, &sub) == 0) {
-		printf("\t%s\n", sub);
-		free(sub);
+	طالما (chain && sysfs_blkdev_اگلا_subsystem(pc, chain, &sub) == 0) {
+		لکھو("\t%s\n", sub);
+		حرر(sub);
 	}
 
 	rc = EXIT_SUCCESS;
-done:
-	ul_unref_path(pc);
-	return rc;
+پورا:
+	ul_unref_رستہ(pc);
+	أرجع rc;
 }
-#endif /* TEST_PROGRAM_SYSFS */
+#جے_انت /* TEST_PROGRAM_SYSFS */
