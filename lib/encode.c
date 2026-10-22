@@ -8,66 +8,66 @@
  * This file may be redistributed under the terms of the
  * GNU Lesser General Public License.
  */
-#include "c.h"
-#include "encode.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "encode.h"
 
-size_t ul_encode_to_utf8(int enc, unsigned char *dest, size_t len,
-			const unsigned char *src, size_t count)
+माप_प्रकार ul_encode_to_utf8(पूर्णाङ्क enc, अचिन्हित वर्ण *dest, माप_प्रकार len,
+			ध्रुव अचिन्हित वर्ण *src, माप_प्रकार गिनती)
 {
-	size_t i, j;
+	माप_प्रकार i, j;
 	uint32_t c;
 	uint16_t c2;
 
-	for (j = i = 0; i < count; i++) {
-		if (enc == UL_ENCODE_UTF16LE) {
-			if (i+2 > count)
-				break;
+	प्रति (j = i = 0; i < गिनती; i++) {
+		यदि (enc == UL_ENCODE_UTF16LE) {
+			यदि (i+2 > गिनती)
+				भङ्ग;
 			c = (src[i+1] << 8) | src[i];
 			i++;
-		} else if (enc == UL_ENCODE_UTF16BE) {
-			if (i+2 > count)
-				break;
+		} अन्यथा यदि (enc == UL_ENCODE_UTF16BE) {
+			यदि (i+2 > गिनती)
+				भङ्ग;
 			c = (src[i] << 8) | src[i+1];
 			i++;
-		} else if (enc == UL_ENCODE_LATIN1) {
+		} अन्यथा यदि (enc == UL_ENCODE_LATIN1) {
 			c = src[i];
-		} else {
-			return 0;
+		} अन्यथा {
+			प्रत्यागम 0;
 		}
-		if ((enc == UL_ENCODE_UTF16LE || enc == UL_ENCODE_UTF16BE) &&
-		    c >= 0xD800 && c <= 0xDBFF && i+2 < count) {
-			if (enc == UL_ENCODE_UTF16LE)
+		यदि ((enc == UL_ENCODE_UTF16LE || enc == UL_ENCODE_UTF16BE) &&
+		    c >= 0xD800 && c <= 0xDBFF && i+2 < गिनती) {
+			यदि (enc == UL_ENCODE_UTF16LE)
 				c2 = (src[i+2] << 8) | src[i+1];
-			else
+			अन्यथा
 				c2 = (src[i+1] << 8) | src[i+2];
-			if (c2 >= 0xDC00 && c2 <= 0xDFFF) {
+			यदि (c2 >= 0xDC00 && c2 <= 0xDFFF) {
 				c = 0x10000 + ((c - 0xD800) << 10) + (c2 - 0xDC00);
 				i += 2;
 			}
 		}
-		if (c == 0) {
+		यदि (c == 0) {
 			dest[j] = '\0';
-			break;
+			भङ्ग;
 		}
 
-		if (c < 0x80) {
-			if (j+1 >= len)
-				break;
+		यदि (c < 0x80) {
+			यदि (j+1 >= len)
+				भङ्ग;
 			dest[j++] = (uint8_t) c;
-		} else if (c < 0x800) {
-			if (j+2 >= len)
-				break;
+		} अन्यथा यदि (c < 0x800) {
+			यदि (j+2 >= len)
+				भङ्ग;
 			dest[j++] = (uint8_t) (0xc0 | (c >> 6));
 			dest[j++] = (uint8_t) (0x80 | (c & 0x3f));
-		} else if (c < 0x10000) {
-			if (j+3 >= len)
-				break;
+		} अन्यथा यदि (c < 0x10000) {
+			यदि (j+3 >= len)
+				भङ्ग;
 			dest[j++] = (uint8_t) (0xe0 | (c >> 12));
 			dest[j++] = (uint8_t) (0x80 | ((c >> 6) & 0x3f));
 			dest[j++] = (uint8_t) (0x80 | (c & 0x3f));
-		} else {
-			if (j+4 >= len)
-				break;
+		} अन्यथा {
+			यदि (j+4 >= len)
+				भङ्ग;
 			dest[j++] = (uint8_t) (0xf0 | (c >> 18));
 			dest[j++] = (uint8_t) (0x80 | ((c >> 12) & 0x3f));
 			dest[j++] = (uint8_t) (0x80 | ((c >> 6) & 0x3f));
@@ -75,5 +75,5 @@ size_t ul_encode_to_utf8(int enc, unsigned char *dest, size_t len,
 		}
 	}
 	dest[j] = '\0';
-	return j;
+	प्रत्यागम j;
 }
