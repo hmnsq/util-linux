@@ -2,21 +2,21 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <dlfcn.h>
+#ಅನ್ತರ್ಭಾವ <dlfcn.h>
 
-#include "c.h"
-#include "dl-econf.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "dl-econf.h"
 
-#if defined(HAVE_LIBECONF) && defined(USE_DLOPEN_ECONF)
+#ಯದಿ defined(HAVE_LIBECONF) && defined(USE_DLOPEN_ECONF)
 
 UL_ELF_NOTE_DLOPEN("econf",
 		    "Support for libeconf",
 		    UL_ELF_NOTE_DLOPEN_PRIORITY_RECOMMENDED,
 		    "libeconf.so.0");
 
-struct ul_econf_opers ul_econf;
+ಸಂರಚನಾ ul_econf_opers ul_econf;
 
-static const struct ul_dlsym ul_econf_symbols[] =
+ಸ್ಥಿರ ಧ್ರುವ ಸಂರಚನಾ ul_dlsym ul_econf_symbols[] =
 {
 	UL_DLSYM( ul_econf_opers, econf_readFile ),
 	UL_DLSYM( ul_econf_opers, econf_mergeFiles ),
@@ -24,25 +24,25 @@ static const struct ul_dlsym ul_econf_symbols[] =
 	UL_DLSYM( ul_econf_opers, econf_readConfig ),
 #endif
 	UL_DLSYM( ul_econf_opers, econf_readDirs ),
-	UL_DLSYM( ul_econf_opers, econf_getKeys ),
-	UL_DLSYM( ul_econf_opers, econf_getStringValue ),
-	UL_DLSYM( ul_econf_opers, econf_getBoolValue ),
-	UL_DLSYM( ul_econf_opers, econf_getUInt64Value ),
+	UL_DLSYM( ul_econf_opers, econf_get_ಕೀಲಿಗಳು ),
+	UL_DLSYM( ul_econf_opers, econf_get_String_ಮೌಲ್ಯ ),
+	UL_DLSYM( ul_econf_opers, econf_get_Bool_ಮೌಲ್ಯ ),
+	UL_DLSYM( ul_econf_opers, econf_get_UInt64_ಮೌಲ್ಯ ),
 	UL_DLSYM( ul_econf_opers, econf_errString ),
 
 	UL_DLSYM( ul_econf_opers, econf_freeFile ),
 	UL_DLSYM( ul_econf_opers, econf_freeArray ),
 };
 
-int ul_dlopen_libeconf(void)
+ಪೂರ್ಣಾಙ್ಕ ul_dlopen_libeconf(ಶೂನ್ಯ)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
-	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ status = 0;
+	ಸ್ಥಿರ ಶೂನ್ಯ *dl = ರಿಕ್ತ;
+	ಪೂರ್ಣಾಙ್ಕ flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ಯದಿ (status)
+		ಪ್ರತ್ಯಾಗಮ status > 0 ? 0 : -ENOSYS;
 
 #ifdef RTLD_NODELETE
 	flags |= RTLD_NODELETE;
@@ -52,7 +52,7 @@ int ul_dlopen_libeconf(void)
 				   ARRAY_SIZE(ul_econf_symbols),
 				   &ul_econf, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	ಪ್ರತ್ಯಾಗಮ status > 0 ? 0 : -ENOSYS;
 }
 
 #endif /* HAVE_LIBECONF && USE_DLOPEN_ECONF */

@@ -42,4 +42,4 @@
 #define XXH_STATIC_LINKING_ONLY   /* access advanced declarations */
 #define XXH_IMPLEMENTATION   /* access definitions */
 
-#include "xxhash.h"
+#ಅನ್ತರ್ಭಾವ "xxhash.h"

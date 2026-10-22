@@ -8,20 +8,20 @@
  *  Niklas Hambüchen <mail@nh2.me>
  */
 
-#include <ctype.h>		/* for isdigit() */
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
+#ಅನ್ತರ್ಭಾವ <ctype.h>		/* for isdigit() */
+#ಅನ್ತರ್ಭಾವ <signal.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
+#ಅನ್ತರ್ಭಾವ <string.h>
+#ಅನ್ತರ್ಭಾವ <errno.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "strutils.h"
-#include "signames.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "cctype.h"
+#ಅನ್ತರ್ಭಾವ "strutils.h"
+#ಅನ್ತರ್ಭಾವ "signames.h"
 
-static const struct ul_signal_name {
-	const char *name;
-	int val;
+ಸ್ಥಿರ ಧ್ರುವ ಸಂರಚನಾ ul_signal_name {
+	ಧ್ರುವ ವರ್ಣ *name;
+	ಪೂರ್ಣಾಙ್ಕ val;
 } ul_signames[] = {
 	/* POSIX signals */
 	{ "HUP",	SIGHUP },	/* 1 */
@@ -103,72 +103,72 @@ static const struct ul_signal_name {
 };
 
 #ifdef SIGRTMIN
-static int rtsig_to_signum(const char *sig)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ rtsig_to_signum(ಧ್ರುವ ವರ್ಣ *sig)
 {
-	int num, maxi = 0;
-	char *ep = NULL;
+	ಪೂರ್ಣಾಙ್ಕ ಅಂಕೆ, maxi = 0;
+	ವರ್ಣ *ep = ರಿಕ್ತ;
 
-	if (c_strncasecmp(sig, "min+", 4) == 0)
+	ಯದಿ (c_strncasecmp(sig, "min+", 4) == 0)
 		sig += 4;
-	else if (c_strncasecmp(sig, "max-", 4) == 0) {
+	ಅನ್ಯಥಾ ಯದಿ (c_strncasecmp(sig, "max-", 4) == 0) {
 		sig += 4;
 		maxi = 1;
 	}
-	if (!isdigit(*sig))
-		return -1;
+	ಯದಿ (!isdigit(*sig))
+		ಪ್ರತ್ಯಾಗಮ -1;
 	errno = 0;
-	num = strtol(sig, &ep, 10);
-	if (!ep || sig == ep || errno || num < 0)
-		return -1;
-	num = maxi ? SIGRTMAX - num : SIGRTMIN + num;
-	if (num < SIGRTMIN || SIGRTMAX < num)
-		return -1;
-	return num;
+	ಅಂಕೆ = strtol(sig, &ep, 10);
+	ಯದಿ (!ep || sig == ep || errno || ಅಂಕೆ < 0)
+		ಪ್ರತ್ಯಾಗಮ -1;
+	ಅಂಕೆ = maxi ? SIGRTMAX - ಅಂಕೆ : SIGRTMIN + ಅಂಕೆ;
+	ಯದಿ (ಅಂಕೆ < SIGRTMIN || SIGRTMAX < ಅಂಕೆ)
+		ಪ್ರತ್ಯಾಗಮ -1;
+	ಪ್ರತ್ಯಾಗಮ ಅಂಕೆ;
 }
 #endif
 
-int signame_to_signum(const char *sig)
+ಪೂರ್ಣಾಙ್ಕ signame_to_signum(ಧ್ರುವ ವರ್ಣ *sig)
 {
 	size_t n;
 
-	if (!c_strncasecmp(sig, "sig", 3))
+	ಯದಿ (!c_strncasecmp(sig, "sig", 3))
 		sig += 3;
 #ifdef SIGRTMIN
 	/* RT signals */
-	if (!c_strncasecmp(sig, "rt", 2))
-		return rtsig_to_signum(sig + 2);
+	ಯದಿ (!c_strncasecmp(sig, "rt", 2))
+		ಪ್ರತ್ಯಾಗಮ rtsig_to_signum(sig + 2);
 #endif
 	/* Normal signals */
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (!c_strcasecmp(ul_signames[n].name, sig))
-			return ul_signames[n].val;
+	ಪ್ರತಿ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ಯದಿ (!c_strcasecmp(ul_signames[n].name, sig))
+			ಪ್ರತ್ಯಾಗಮ ul_signames[n].val;
 	}
-	return -1;
+	ಪ್ರತ್ಯಾಗಮ -1;
 }
 
-const char *signum_to_signame(int signum)
+ಧ್ರುವ ವರ್ಣ *signum_to_signame(ಪೂರ್ಣಾಙ್ಕ signum)
 {
 	size_t n;
 
-	for (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
-		if (ul_signames[n].val == signum) {
-			return ul_signames[n].name;
+	ಪ್ರತಿ (n = 0; n < ARRAY_SIZE(ul_signames); n++) {
+		ಯದಿ (ul_signames[n].val == signum) {
+			ಪ್ರತ್ಯಾಗಮ ul_signames[n].name;
 		}
 	}
 
-	return NULL;
+	ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 }
 
-int get_signame_by_idx(size_t idx, const char **signame, int *signum)
+ಪೂರ್ಣಾಙ್ಕ get_signame_by_idx(size_t idx, ಧ್ರುವ ವರ್ಣ **signame, ಪೂರ್ಣಾಙ್ಕ *signum)
 {
-	if (idx >= ARRAY_SIZE(ul_signames))
-		return -1;
+	ಯದಿ (idx >= ARRAY_SIZE(ul_signames))
+		ಪ್ರತ್ಯಾಗಮ -1;
 
-	if (signame)
+	ಯದಿ (signame)
 		*signame = ul_signames[idx].name;
-	if (signum)
+	ಯದಿ (signum)
 		*signum = ul_signames[idx].val;
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 
 }
 

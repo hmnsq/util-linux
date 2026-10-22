@@ -31,11 +31,11 @@
  * Written by Karel Zak <kzak@redhat.com> [October 2021]
  */
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ಅನ್ತರ್ಭಾವ <inttypes.h>
+#ಅನ್ತರ್ಭಾವ <stdio.h>
+#ಅನ್ತರ್ಭಾವ <sys/types.h>
+#ಅನ್ತರ್ಭಾವ <sys/stat.h>
+#ಅನ್ತರ್ಭಾವ <unistd.h>
 
 /* Linux crypto */
 #ifdef HAVE_LINUX_IF_ALG_H
@@ -45,12 +45,12 @@
 # include <sys/sendfile.h>
 #endif
 
-#include "c.h"
-#include "all-io.h"
-#include "fileeq.h"
-#include "debug.h"
+#ಅನ್ತರ್ಭಾವ "c.h"
+#ಅನ್ತರ್ಭಾವ "all-io.h"
+#ಅನ್ತರ್ಭಾವ "fileeq.h"
+#ಅನ್ತರ್ಭಾವ "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulfileeq);
+ಸ್ಥಿರ UL_DEBUG_DEFINE_MASK(ulfileeq);
 UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULFILEEQ_DEBUG_INIT	(1 << 1)
@@ -62,28 +62,28 @@ UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
 
-static void ul_fileeq_init_debug(void)
+ಸ್ಥಿರ ಶೂನ್ಯ ul_fileeq_init_debug(ಶೂನ್ಯ)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	ಯದಿ (ulfileeq_debug_mask)
+		ಪ್ರತ್ಯಾಗಮ;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+ಗಣನಾ {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
 	UL_FILEEQ_CRC32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
+ಸಂರಚನಾ ul_fileeq_method {
+	ಧ್ರುವ ವರ್ಣ *name;	/* name used by applications */
+	ಧ್ರುವ ವರ್ಣ *kname;	/* name used by kernel crypto */
+	ಪೂರ್ಣಾಙ್ಕ id;
 	short digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+ಸ್ಥಿರ ಧ್ರುವ ಸಂರಚನಾ ul_fileeq_method ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
@@ -105,93 +105,93 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 };
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+ಸ್ಥಿರ ಶೂನ್ಯ deinit_crypto_api(ಸಂರಚನಾ ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	ಯದಿ (!eq)
+		ಪ್ರತ್ಯಾಗಮ;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	ಯದಿ (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	ಯದಿ (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ init_crypto_api(ಸಂರಚನಾ ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	ಸಂರಚನಾ sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
 
-	assert(eq->method);
-	assert(eq->method->kname);
-	assert(eq->fd_api == -1);
-	assert(eq->fd_cip == -1);
+	ಪ್ರತಿಜ್ಞಾ(eq->method);
+	ಪ್ರತಿಜ್ಞಾ(eq->method->kname);
+	ಪ್ರತಿಜ್ಞಾ(eq->fd_api == -1);
+	ಪ್ರತಿಜ್ಞಾ(eq->fd_cip == -1);
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
+	ಪ್ರತಿಜ್ಞಾ(ಪರಿಮಾಣ(sa.salg_name) > strlen(eq->method->kname) + 1);
 	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
-		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
-		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
-		goto fail;
-	return 0;
+	ಯದಿ ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+		ಗಚ್ಛ fail;
+	ಯದಿ (bind(eq->fd_api, (ಸಂರಚನಾ sockaddr *) &sa, ಪರಿಮಾಣ(sa)) != 0)
+		ಗಚ್ಛ fail;
+	ಯದಿ ((eq->fd_cip = accept(eq->fd_api, ರಿಕ್ತ, 0)) < 0)
+		ಗಚ್ಛ fail;
+	ಪ್ರತ್ಯಾಗಮ 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	ಪ್ರತ್ಯಾಗಮ -1;
 }
 #endif
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+ಪೂರ್ಣಾಙ್ಕ ul_fileeq_init(ಸಂರಚನಾ ul_fileeq *eq, ಧ್ರುವ ವರ್ಣ *method)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
 	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
 
-	memset(eq, 0, sizeof(*eq));
+	memset(eq, 0, ಪರಿಮಾಣ(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	ಪ್ರತಿ (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
+		ಧ್ರುವ ಸಂರಚನಾ ul_fileeq_method *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
+		ಯದಿ (strcmp(m->name, method) == 0) {
 			eq->method = m;
-			break;
+			ಭಙ್ಗ;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
+	ಯದಿ (!eq->method)
+		ಪ್ರತ್ಯಾಗಮ -1;
 #ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	ಯದಿ (eq->method->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
+		ಪ್ರತ್ಯಾಗಮ -1;
 #endif
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+ಸ್ಥಿರ ಶೂನ್ಯ reset_fileeq_bufs(ಸಂರಚನಾ ul_fileeq *eq)
 {
-	free(eq->buf_a);
-	free(eq->buf_b);
-	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
+	ಮುಕ್ತ(eq->buf_a);
+	ಮುಕ್ತ(eq->buf_b);
+	eq->buf_last = eq->buf_a = eq->buf_b = ರಿಕ್ತ;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+ಶೂನ್ಯ ul_fileeq_deinit(ಸಂರಚನಾ ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	ಯದಿ (!eq)
+		ಪ್ರತ್ಯಾಗಮ;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
 #ifdef USE_FILEEQ_CRYPTOAPI
@@ -200,97 +200,97 @@ void ul_fileeq_deinit(struct ul_fileeq *eq)
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+ಶೂನ್ಯ ul_fileeq_data_close_file(ಸಂರಚನಾ ul_fileeq_data *data)
 {
-	assert(data);
+	ಪ್ರತಿಜ್ಞಾ(data);
 
-	if (data->fd >= 0) {
+	ಯದಿ (data->fd >= 0) {
 		DBG_OBJ(DATA, data, ul_debug("close"));
 		close(data->fd);
 	}
 	data->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+ಶೂನ್ಯ ul_fileeq_data_init(ಸಂರಚನಾ ul_fileeq_data *data)
 {
 	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
+	memset(data, 0, ಪರಿಮಾಣ(*data));
 	data->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+ಶೂನ್ಯ ul_fileeq_data_deinit(ಸಂರಚನಾ ul_fileeq_data *data)
 {
-	assert(data);
+	ಪ್ರತಿಜ್ಞಾ(data);
 
 	DBG_OBJ(DATA, data, ul_debug("deinit"));
-	free(data->blocks);
-	data->blocks = NULL;
+	ಮುಕ್ತ(data->blocks);
+	data->blocks = ರಿಕ್ತ;
 	data->nblocks = 0;
 	data->maxblocks = 0;
 	data->is_eof = 0;
-	data->name = NULL;
+	data->name = ರಿಕ್ತ;
 
 	ul_fileeq_data_close_file(data);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+ಪೂರ್ಣಾಙ್ಕ ul_fileeq_data_associated(ಸಂರಚನಾ ul_fileeq_data *data)
 {
-	return data->name != NULL;
+	ಪ್ರತ್ಯಾಗಮ data->name != ರಿಕ್ತ;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+ಶೂನ್ಯ ul_fileeq_data_set_file(ಸಂರಚನಾ ul_fileeq_data *data, ಧ್ರುವ ವರ್ಣ *name)
 {
-	assert(data);
-	assert(name);
+	ಪ್ರತಿಜ್ಞಾ(data);
+	ಪ್ರತಿಜ್ಞಾ(name);
 
 	DBG_OBJ(DATA, data, ul_debug("set file: %s", name));
 	ul_fileeq_data_init(data);
 	data->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_set_size(ಸಂರಚನಾ ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
 	size_t digsiz;
 
-	assert(eq);
-	assert(st_size >= 0);
-	assert(readsiz);
+	ಪ್ರತಿಜ್ಞಾ(eq);
+	ಪ್ರತಿಜ್ಞಾ(st_size >= 0);
+	ಪ್ರತಿಜ್ಞಾ(readsiz);
 
 	filesiz = (uint64_t) st_size;
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	ಯದಿ (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	ವಿಕಲ್ಪ (eq->method->id) {
+	ಪಕ್ಷ UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
-	default:
+		ಭಙ್ಗ;
+	ಸ್ವಭಾವ:
 		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		ಯದಿ (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		ಯದಿ (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		ಅನ್ಯಥಾ ಯದಿ (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		ಯದಿ (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			ಯದಿ (ceiling / maxdigs > SIZE_MAX)
+				ಪ್ರತ್ಯಾಗಮ false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		ಭಙ್ಗ;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,25 +301,25 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	ಪ್ರತ್ಯಾಗಮ true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+ಸ್ಥಿರ unsigned ವರ್ಣ *get_buffer(ಸಂರಚನಾ ul_fileeq *eq)
 {
-	if (!eq->buf_a)
+	ಯದಿ (!eq->buf_a)
 		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
+	ಯದಿ (!eq->buf_b)
 		eq->buf_b = malloc(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	ಯದಿ (!eq->buf_a || !eq->buf_b)
+		ಪ್ರತ್ಯಾಗಮ ರಿಕ್ತ;
 
-	if (eq->buf_last == eq->buf_b)
+	ಯದಿ (eq->buf_last == eq->buf_b)
 		eq->buf_last = eq->buf_a;
-	else
+	ಅನ್ಯಥಾ
 		eq->buf_last = eq->buf_b;
 
-	return eq->buf_last;
+	ಪ್ರತ್ಯಾಗಮ eq->buf_last;
 }
 
 #define get_cached_nblocks(_d) \
@@ -327,321 +327,321 @@ static unsigned char *get_buffer(struct ul_fileeq *eq)
 
 #define get_cached_offset(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				ಪರಿಮಾಣ((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+ಸ್ಥಿರ ಪೂರ್ಣಾಙ್ಕ get_fd(ಸಂರಚನಾ ul_fileeq *eq, ಸಂರಚನಾ ul_fileeq_data *data, off_t *off)
 {
 	off_t o = get_cached_offset(eq, data);
 
-	assert(eq);
-	assert(data);
+	ಪ್ರತಿಜ್ಞಾ(eq);
+	ಪ್ರತಿಜ್ಞಾ(data);
 
 
-	if (data->fd < 0) {
+	ಯದಿ (data->fd < 0) {
 		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
 		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+		ಯದಿ (data->fd < 0)
+			ಪ್ರತ್ಯಾಗಮ data->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+#ಯದಿ defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
 		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
 #endif
-		if (o) {
+		ಯದಿ (o) {
 			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
 			lseek(data->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	ಯದಿ (off)
 		*off = o;
 
-	return data->fd;
+	ಪ್ರತ್ಯಾಗಮ data->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+ಸ್ಥಿರ ಶೂನ್ಯ memcmp_reset(ಸಂರಚನಾ ul_fileeq *eq, ಸಂರಚನಾ ul_fileeq_data *data)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
+	ಯದಿ (data->nblocks)
 		data->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
+	ಯದಿ (data->fd >= 0)
 		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
 	data->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+ಸ್ಥಿರ ssize_t read_block(ಸಂರಚನಾ ul_fileeq *eq, ಸಂರಚನಾ ul_fileeq_data *data,
+				uint64_t n, unsigned ವರ್ಣ **block)
 {
-	int fd;
+	ಪೂರ್ಣಾಙ್ಕ fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	ಯದಿ (data->is_eof)
+		ಪ್ರತ್ಯಾಗಮ 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	ಯದಿ (n >= eq->blocksmax)
+		ಪ್ರತ್ಯಾಗಮ -EINVAL;
 
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	ಯದಿ (fd < 0)
+		ಪ್ರತ್ಯಾಗಮ fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
 
 	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	ಯದಿ (!*block)
+		ಪ್ರತ್ಯಾಗಮ -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
+	rsz = ul_read_all(data->fd, (ವರ್ಣ *) *block, eq->readsiz);
+	ಯದಿ (rsz < 0) {
 		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+		ಪ್ರತ್ಯಾಗಮ rsz;
 	}
 	off += rsz;
 	data->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	ಯದಿ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 
 	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	ಪ್ರತ್ಯಾಗಮ rsz;
 }
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+ಸ್ಥಿರ ssize_t get_digest(ಸಂರಚನಾ ul_fileeq *eq, ಸಂರಚನಾ ul_fileeq_data *data,
+				uint64_t n, unsigned ವರ್ಣ **block)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	ಪೂರ್ಣಾಙ್ಕ fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
+	ಯದಿ (n < get_cached_nblocks(data)) {
 		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
-		assert(data->blocks);
+		ಪ್ರತಿಜ್ಞಾ(data->blocks);
 		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+		ಪ್ರತ್ಯಾಗಮ eq->method->digsiz;
 	}
 
-	if (data->is_eof) {
+	ಯದಿ (data->is_eof) {
 		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+		ಪ್ರತ್ಯಾಗಮ 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	ಯದಿ (n >= eq->blocksmax)
+		ಪ್ರತ್ಯಾಗಮ -EINVAL;
 
 	/* read new block */
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	ಯದಿ (fd < 0)
+		ಪ್ರತ್ಯಾಗಮ fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
 	sz = eq->method->digsiz;
 
-	if (!data->blocks) {
+	ಯದಿ (!data->blocks) {
 		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
 		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+		ಯದಿ (!data->blocks)
+			ಪ್ರತ್ಯಾಗಮ -ENOMEM;
 	}
 
-	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
+	rsz = sendfile(eq->fd_cip, data->fd, ರಿಕ್ತ, eq->readsiz);
 	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	ಯದಿ (rsz < 0)
+		ಪ್ರತ್ಯಾಗಮ rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
 	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	rsz = ul_read_all(eq->fd_cip, (ವರ್ಣ *) *block, sz);
 
-	if (rsz > 0)
+	ಯದಿ (rsz > 0)
 		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	ಯದಿ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	ಪ್ರತ್ಯಾಗಮ rsz;
 }
 #endif
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+ಸ್ಥಿರ ssize_t get_intro(ಸಂರಚನಾ ul_fileeq *eq, ಸಂರಚನಾ ul_fileeq_data *data,
+				unsigned ವರ್ಣ **block)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	ಯದಿ (data->nblocks == 0) {
+		ಪೂರ್ಣಾಙ್ಕ fd = get_fd(eq, data, ರಿಕ್ತ);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
+		ಯದಿ (fd < 0)
+			ಪ್ರತ್ಯಾಗಮ -1;
+		rsz = ul_read_all(fd, (ವರ್ಣ *) data->intro, ಪರಿಮಾಣ(data->intro));
+		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, ಪರಿಮಾಣ(data->intro)));
+		ಯದಿ (rsz < 0)
+			ಪ್ರತ್ಯಾಗಮ -1;
 		data->nblocks = 1;
 	}
 
 	DBG_OBJ(DATA, data, ul_debug(" return intro"));
 	*block = data->intro;
-	return sizeof(data->intro);
+	ಪ್ರತ್ಯಾಗಮ ಪರಿಮಾಣ(data->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+ಸ್ಥಿರ ssize_t get_cmp_data(ಸಂರಚನಾ ul_fileeq *eq, ಸಂರಚನಾ ul_fileeq_data *data,
+				uint64_t blockno, unsigned ವರ್ಣ **block)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	ಯದಿ (blockno == 0)
+		ಪ್ರತ್ಯಾಗಮ get_intro(eq, data, block);
 
 	blockno--;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
-	default:
-		break;
+	ವಿಕಲ್ಪ (eq->method->id) {
+	ಪಕ್ಷ UL_FILEEQ_MEMCMP:
+		ಪ್ರತ್ಯಾಗಮ read_block(eq, data, blockno, block);
+	ಸ್ವಭಾವ:
+		ಭಙ್ಗ;
 	}
 #ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
+	ಪ್ರತ್ಯಾಗಮ get_digest(eq, data, blockno, block);
+#ಅನ್ಯಥಾ
+	ಪ್ರತ್ಯಾಗಮ -1;
 #endif
 }
 
 #define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+ಪೂರ್ಣಾಙ್ಕ ul_fileeq(ಸಂರಚನಾ ul_fileeq *eq,
+	      ಸಂರಚನಾ ul_fileeq_data *a, ಸಂರಚನಾ ul_fileeq_data *b)
 {
-	int cmp;
+	ಪೂರ್ಣಾಙ್ಕ cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	ಯದಿ (eq->method->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
-	do {
-		unsigned char *da, *db;
+	ಕುರು {
+		unsigned ವರ್ಣ *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
 		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
-			goto done;
+		ಯದಿ (ca < 0)
+			ಗಚ್ಛ done;
 		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
-			goto done;
-		if (ca != cb || ca == 0) {
+		ಯದಿ (cb < 0)
+			ಗಚ್ಛ done;
+		ಯದಿ (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			ಭಙ್ಗ;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} ಯಾವತ್ (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
-			goto done; /* filesize changed? */
+	ಯದಿ (cmp == 0) {
+		ಯದಿ (!a->is_eof || !b->is_eof)
+			ಗಚ್ಛ done; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		ಪ್ರತ್ಯಾಗಮ 1;
 	}
 done:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	ಪ್ರತ್ಯಾಗಮ 0;
 }
 
 #ifdef TEST_PROGRAM_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+ಪೂರ್ಣಾಙ್ಕ main(ಪೂರ್ಣಾಙ್ಕ argc, ವರ್ಣ *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
-		{ "method", required_argument, NULL, 'm' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	ಸಂರಚನಾ ul_fileeq eq;
+	ಸಂರಚನಾ ul_fileeq_data a, b, c;
+	ಧ್ರುವ ವರ್ಣ *method = "sha1";
+	ಸ್ಥಿರ ಧ್ರುವ ಸಂರಚನಾ option longopts[] = {
+		{ "method", required_argument, ರಿಕ್ತ, 'm' },
+		{ "help", no_argument, ರಿಕ್ತ, 'h' },
+		{ ರಿಕ್ತ, 0, ರಿಕ್ತ, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	ಪೂರ್ಣಾಙ್ಕ ch, rc;
+	ಧ್ರುವ ವರ್ಣ *file_a = ರಿಕ್ತ, *file_b = ರಿಕ್ತ, *file_c = ರಿಕ್ತ;
+	ಸಂರಚನಾ stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'm':
+	ಯಾವತ್ ((ch = getopt_long(argc, argv, "m:", longopts, ರಿಕ್ತ)) != -1) {
+		ವಿಕಲ್ಪ (ch) {
+		ಪಕ್ಷ 'm':
 			method = optarg;
-			break;
-		case 'h':
+			ಭಙ್ಗ;
+		ಪಕ್ಷ 'h':
 			printf("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
 				program_invocation_short_name);
-			return EXIT_FAILURE;
+			ಪ್ರತ್ಯಾಗಮ EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	ಯದಿ (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	ಯದಿ (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	ಯದಿ (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	ಯದಿ (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	ಯದಿ (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	ಯದಿ (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	ಯದಿ (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	ಯದಿ (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
 	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
+	ಯದಿ (rc != 0 && strcmp(method, "memcmp") != 0) {
 		method = "memcmp";
 		rc = ul_fileeq_init(&eq, method);
 	}
-	if (rc < 0)
+	ಯದಿ (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
 	ul_fileeq_data_set_file(&a, file_a);
 	ul_fileeq_data_set_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
+	ಯದಿ (file_c)
 		ul_fileeq_data_set_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	ಯದಿ (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
 	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	ಯದಿ (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
 		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
@@ -652,10 +652,10 @@ int main(int argc, char *argv[])
 	ul_fileeq_data_deinit(&a);
 	ul_fileeq_data_deinit(&b);
 
-	if (file_c)
+	ಯದಿ (file_c)
 		ul_fileeq_data_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	ಪ್ರತ್ಯಾಗಮ EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_FILEEQ */
