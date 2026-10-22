@@ -5,77 +5,77 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <time.h>
-#include <signal.h>
-#ifdef HAVE_SYSINFO
-#include <sys/sysinfo.h>
-#endif
-#include <sys/time.h>
+#अन्तर्भाव <time.h>
+#अन्तर्भाव <signal.h>
+#यदि_परिभाषितम् HAVE_SYSINFO
+#अन्तर्भाव <sys/sysinfo.h>
+#यदि_अन्तः
+#अन्तर्भाव <sys/time.h>
 
-#include "c.h"
-#include "monotonic.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "monotonic.h"
 
-int get_boot_time(struct timeval *boot_time __attribute__((__unused__)))
+पूर्णाङ्क get_boot_time(संरचना timeval *boot_time __attribute__((__unused__)))
 {
-#ifdef CLOCK_BOOTTIME
-	struct timespec hires_uptime = { 0 };
-	struct timeval lores_uptime = { 0 };
-#endif
-	struct timeval now = { 0 };
-#ifdef HAVE_SYSINFO
-	struct sysinfo info;
-#endif
+#यदि_परिभाषितम् CLOCK_BOOTTIME
+	संरचना timespec hires_uptime = { 0 };
+	संरचना timeval lores_uptime = { 0 };
+#यदि_अन्तः
+	संरचना timeval now = { 0 };
+#यदि_परिभाषितम् HAVE_SYSINFO
+	संरचना sysinfo info;
+#यदि_अन्तः
 
-	if (gettimeofday(&now, NULL) != 0)
-		return -errno;
-#ifdef CLOCK_BOOTTIME
-	if (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
-		TIMESPEC_TO_TIMEVAL(&lores_uptime, &hires_uptime);
+	यदि (gettimeofday(&now, रिक्त) != 0)
+		प्रत्यागम -errno;
+#यदि_परिभाषितम् CLOCK_BOOTTIME
+	यदि (clock_gettime(CLOCK_BOOTTIME, &hires_uptime) == 0) {
+		TIMESPEC_गन्तव्यम्_TIMEVAL(&lores_uptime, &hires_uptime);
 		timersub(&now, &lores_uptime, boot_time);
-		return 0;
+		प्रत्यागम 0;
 	}
-#endif
-#ifdef HAVE_SYSINFO
+#यदि_अन्तः
+#यदि_परिभाषितम् HAVE_SYSINFO
 	/* fallback */
-	if (sysinfo(&info) != 0)
-		return -errno;
+	यदि (sysinfo(&info) != 0)
+		प्रत्यागम -errno;
 
 	boot_time->tv_sec = now.tv_sec - info.uptime;
 	boot_time->tv_usec = 0;
-	return 0;
-#else
-	return -ENOSYS;
-#endif
+	प्रत्यागम 0;
+#अन्यथा
+	प्रत्यागम -ENOSYS;
+#यदि_अन्तः
 }
 
-usec_t get_suspended_time(void)
+usec_t get_suspended_time(शून्य)
 {
-#if defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
-	struct timespec boot, mono;
+#यदि defined(CLOCK_BOOTTIME) && defined(CLOCK_MONOTONIC)
+	संरचना timespec boot, mono;
 
-	if (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
+	यदि (clock_gettime(CLOCK_BOOTTIME, &boot) == 0 &&
 	    clock_gettime(CLOCK_MONOTONIC, &mono) == 0)
-		return timespec_to_usec(&boot) - timespec_to_usec(&mono);
-#endif
-	return 0;
+		प्रत्यागम timespec_गन्तव्यम्_usec(&boot) - timespec_गन्तव्यम्_usec(&mono);
+#यदि_अन्तः
+	प्रत्यागम 0;
 }
 
-int gettime_monotonic(struct timeval *tv)
+पूर्णाङ्क gettime_monotonic(संरचना timeval *tv)
 {
-#ifdef CLOCK_MONOTONIC
+#यदि_परिभाषितम् CLOCK_MONOTONIC
 	/* Can slew only by ntp and adjtime */
-	int ret;
-	struct timespec ts;
+	पूर्णाङ्क ret;
+	संरचना timespec ts;
 
 	/* Linux specific, can't slew */
-	if (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
+	यदि (!(ret = clock_gettime(UL_CLOCK_MONOTONIC, &ts))) {
 		tv->tv_sec = ts.tv_sec;
-		tv->tv_usec = ts.tv_nsec / NSEC_PER_USEC;
+		tv->tv_usec = ts.tv_nsec / NSEC_प्रत्येकम्_USEC;
 	}
-	return ret;
-#else
-	return gettimeofday(tv, NULL);
-#endif
+	प्रत्यागम ret;
+#अन्यथा
+	प्रत्यागम gettimeofday(tv, रिक्त);
+#यदि_अन्तः
 }
 
 

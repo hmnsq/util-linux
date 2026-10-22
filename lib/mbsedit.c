@@ -9,224 +9,224 @@
  *
  * Copyright (C) 2017 Karel Zak <kzak@redhat.com>
  */
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <string.h>
+#अन्तर्भाव <errno.h>
+#अन्तर्भाव <stdio.h>
 
-#include "mbsalign.h"
-#include "mbsedit.h"
+#अन्तर्भाव "mbsalign.h"
+#अन्तर्भाव "mbsedit.h"
 
-struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
+संरचना mbs_editor *mbs_new_edit(वर्ण *buf, size_t bufsz, size_t ncells)
 {
-	struct mbs_editor *edit = calloc(1, sizeof(*edit));
+	संरचना mbs_editor *edit = शून्यस्मृतिं_देहि(1, परिमाण(*edit));
 
-	if (edit) {
+	यदि (edit) {
 		edit->buf = buf;
-		edit->max_bytes = bufsz;
+		edit->max_अष्टकानि = bufsz;
 		edit->max_cells = ncells;
-		edit->cur_cells = mbs_safe_width(buf);
-		edit->cur_bytes = strlen(buf);
+		edit->cur_cells = mbs_safe_विस्तारः(buf);
+		edit->cur_अष्टकानि = वाक्यदैर्घ्यम्(buf);
 	}
-	return edit;
+	प्रत्यागम edit;
 }
 
-char *mbs_free_edit(struct mbs_editor *edit)
+वर्ण *mbs_free_edit(संरचना mbs_editor *edit)
 {
-	char *ret = edit ? edit->buf : NULL;
+	वर्ण *ret = edit ? edit->buf : रिक्त;
 
-	free(edit);
-	return ret;
+	मुक्त(edit);
+	प्रत्यागम ret;
 }
 
-static size_t mbs_next(const char *str, size_t *ncells)
+स्थिर size_t mbs_अग्र(ध्रुव वर्ण *str, size_t *ncells)
 {
-#ifdef HAVE_WIDECHAR
+#यदि_परिभाषितम् HAVE_WIDECHAR
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	यदि (!str || !*str)
+		प्रत्यागम 0;
 
-	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
+	n = mbrtowc(&wc, str, MB_CUR_MAX, रिक्त);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	प्रत्यागम n;
+#अन्यथा
+	यदि (!str || !*str)
+		प्रत्यागम 0;
 	*ncells = 1;
-	return 1;
-#endif
+	प्रत्यागम 1;
+#यदि_अन्तः
 }
 
-static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
+स्थिर size_t mbs_पूर्व(ध्रुव वर्ण *start, ध्रुव वर्ण *अन्तः, size_t *ncells)
 {
-#ifdef HAVE_WIDECHAR
+#यदि_परिभाषितम् HAVE_WIDECHAR
 	wchar_t wc = 0;
-	const char *p, *prev;
+	ध्रुव वर्ण *p, *पूर्व;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	यदि (!start || !अन्तः || start == अन्तः || !*start)
+		प्रत्यागम 0;
 
-	prev = p = start;
-	while (p < end) {
-		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
-		prev = p;
+	पूर्व = p = start;
+	यावत् (p < अन्तः) {
+		n = mbrtowc(&wc, p, MB_CUR_MAX, रिक्त);
+		पूर्व = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		यदि (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		अन्यथा
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	यदि (पूर्व == अन्तः)
+		प्रत्यागम 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	प्रत्यागम n;
+#अन्यथा
+	यदि (!start || !अन्तः || start == अन्तः || !*start)
+		प्रत्यागम 0;
 	*ncells = 1;
-	return 1;
-#endif
+	प्रत्यागम 1;
+#यदि_अन्तः
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+पूर्णाङ्क mbs_edit_goto(संरचना mbs_editor *edit, पूर्णाङ्क where)
 {
-	switch (where) {
-	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+	विकल्प (where) {
+	पक्ष MBS_EDIT_वामः:
+		यदि (edit->cursor == 0)
+			प्रत्यागम 1;
+		अन्यथा {
 			size_t n, cells;
-			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			n = mbs_पूर्व(edit->buf, edit->buf + edit->cursor, &cells);
+			यदि (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
-		break;
-	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		भङ्ग;
+	पक्ष MBS_EDIT_दक्षिणः:
+		यदि (edit->cursor_cells >= edit->cur_cells)
+			प्रत्यागम 1;
+		अन्यथा {
 			size_t n, cells;
-			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			n = mbs_अग्र(edit->buf + edit->cursor, &cells);
+			यदि (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
 		}
-		break;
-	case MBS_EDIT_HOME:
+		भङ्ग;
+	पक्ष MBS_EDIT_HOME:
 		edit->cursor = 0;
 		edit->cursor_cells = 0;
-		break;
-	case MBS_EDIT_END:
-		edit->cursor = edit->cur_bytes;
+		भङ्ग;
+	पक्ष MBS_EDIT_अन्तः:
+		edit->cursor = edit->cur_अष्टकानि;
 		edit->cursor_cells = edit->cur_cells;
-		break;
-	default:
-		return -EINVAL;
+		भङ्ग;
+	स्वभाव:
+		प्रत्यागम -EINVAL;
 	}
 
-	return 0;
+	प्रत्यागम 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
-static size_t remove_next(char *str, size_t *ncells)
+स्थिर size_t remove_अग्र(वर्ण *str, size_t *ncells)
 {
 	/* all in bytes! */
-	size_t bytes, move_bytes, n;
+	size_t अष्टकानि, move_अष्टकानि, n;
 
-	n          = mbs_next(str, ncells);
-	bytes      = strlen(str);
-	move_bytes = bytes - n;
+	n          = mbs_अग्र(str, ncells);
+	अष्टकानि      = वाक्यदैर्घ्यम्(str);
+	move_अष्टकानि = अष्टकानि - n;
 
-	memmove(str, str + n, move_bytes);
-	str[bytes - n] = '\0';
-	return n;
+	memmove(str, str + n, move_अष्टकानि);
+	str[अष्टकानि - n] = '\0';
+	प्रत्यागम n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+स्थिर size_t mbs_निवेशय(वर्ण *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
-	size_t n = 1, bytes;
-	char *in;
+	size_t n = 1, अष्टकानि;
+	वर्ण *अन्तर्;
 
-#ifdef HAVE_WIDECHAR
+#यदि_परिभाषितम् HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
-	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	अन्तर् = स्मृतिं_देहि(MB_CUR_MAX);
+	यदि (!अन्तर्)
+		प्रत्यागम -1;
 
-	n = wctomb(in, wc);
-	if (n == (size_t) -1)
-		goto out;
+	n = wctomb(अन्तर्, wc);
+	यदि (n == (size_t) -1)
+		गच्छ बहिर्गमनम्;
 	*ncells = wcwidth(wc);
-#else
+#अन्यथा
 	*ncells = 1;
-	in = (char *) &c;
-#endif
-	bytes       = strlen(str);
+	अन्तर् = (वर्ण *) &c;
+#यदि_अन्तः
+	अष्टकानि       = वाक्यदैर्घ्यम्(str);
 
-	memmove(str + n, str, bytes);
-	memcpy(str, in, n);
-	str[bytes + n] = '\0';
-#ifdef HAVE_WIDECHAR
-out:
-	free(in);
-#endif
-	return n;
+	memmove(str + n, str, अष्टकानि);
+	स्मृतिं_प्रतिलिख(str, अन्तर्, n);
+	str[अष्टकानि + n] = '\0';
+#यदि_परिभाषितम् HAVE_WIDECHAR
+बहिर्गमनम्:
+	मुक्त(अन्तर्);
+#यदि_अन्तः
+	प्रत्यागम n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+स्थिर पूर्णाङ्क mbs_edit_remove(संरचना mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	यदि (edit->cur_cells == 0 || edit->cursor >= edit->cur_अष्टकानि)
+		प्रत्यागम 1;
 
-	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = remove_अग्र(edit->buf + edit->cursor, &ncells);
+	यदि (n == (size_t)-1)
+		प्रत्यागम 1;
 
-	edit->cur_bytes -= n;
-	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	edit->cur_अष्टकानि -= n;
+	edit->cur_cells = mbs_safe_विस्तारः(edit->buf);
+	प्रत्यागम 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+पूर्णाङ्क mbs_edit_delete(संरचना mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
-	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+	यदि (edit->cursor >= edit->cur_अष्टकानि
+	    && mbs_edit_goto(edit, MBS_EDIT_वामः) == 1)
+		प्रत्यागम 1;
 
-	return mbs_edit_remove(edit);
+	प्रत्यागम mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+पूर्णाङ्क mbs_edit_backspace(संरचना mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	यदि (mbs_edit_goto(edit, MBS_EDIT_वामः) == 0)
+		प्रत्यागम mbs_edit_remove(edit);
+	प्रत्यागम 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+पूर्णाङ्क mbs_edit_निवेशय(संरचना mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	यदि (edit->cur_अष्टकानि + MB_CUR_MAX > edit->max_अष्टकानि)
+		प्रत्यागम 1;
 
-	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = mbs_निवेशय(edit->buf + edit->cursor, c, &ncells);
+	यदि (n == (size_t)-1)
+		प्रत्यागम 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
-	edit->cur_bytes += n;
-	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	edit->cur_अष्टकानि += n;
+	edit->cur_cells = mbs_safe_विस्तारः(edit->buf);
+	प्रत्यागम 0;
 }

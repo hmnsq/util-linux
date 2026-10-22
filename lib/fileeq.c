@@ -31,63 +31,63 @@
  * Written by Karel Zak <kzak@redhat.com> [October 2021]
  */
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#अन्तर्भाव <inttypes.h>
+#अन्तर्भाव <stdio.h>
+#अन्तर्भाव <sys/types.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <unistd.h>
 
 /* Linux crypto */
-#ifdef HAVE_LINUX_IF_ALG_H
+#यदि_परिभाषितम् HAVE_LINUX_IF_ALG_H
 # include <sys/socket.h>
 # include <linux/if_alg.h>
 # include <sys/param.h>
 # include <sys/sendfile.h>
-#endif
+#यदि_अन्तः
 
-#include "c.h"
-#include "all-io.h"
-#include "fileeq.h"
-#include "debug.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "all-io.h"
+#अन्तर्भाव "fileeq.h"
+#अन्तर्भाव "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulfileeq);
-UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
+स्थिर UL_DEBUG_DEFINE_आवरणम्(ulfileeq);
+UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_रिक्तानि_MASKNAMES;
 
-#define ULFILEEQ_DEBUG_INIT	(1 << 1)
-#define ULFILEEQ_DEBUG_CRYPTO	(1 << 2)
-#define ULFILEEQ_DEBUG_DATA	(1 << 3)
-#define ULFILEEQ_DEBUG_EQ	(1 << 4)
+#परिभाषय ULFILEEQ_DEBUG_INIT	(1 << 1)
+#परिभाषय ULFILEEQ_DEBUG_CRYPTO	(1 << 2)
+#परिभाषय ULFILEEQ_DEBUG_दत्त	(1 << 3)
+#परिभाषय ULFILEEQ_DEBUG_EQ	(1 << 4)
 
-#define DBG(m, x)		__UL_DBG(ulfileeq, ULFILEEQ_DEBUG_, m, x)
-#define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
-#define ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
+#परिभाषय DBG(m, x)		__UL_DBG(ulfileeq, ULFILEEQ_DEBUG_, m, x)
+#परिभाषय DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
+#परिभाषय ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
 
-static void ul_fileeq_init_debug(void)
+स्थिर शून्य ul_fileeq_init_debug(शून्य)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	यदि (ulfileeq_debug_आवरणम्)
+		प्रत्यागम;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+गणना {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
-	UL_FILEEQ_CRC32
+	UL_FILEEQ_चक्रीयपरीक्षा_32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
-	short digsiz;
+संरचना ul_fileeq_विधानम् {
+	ध्रुव वर्ण *name;	/* name used by applications */
+	ध्रुव वर्ण *kname;	/* name used by kernel crypto */
+	पूर्णाङ्क id;
+	ह्रस्व digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+स्थिर ध्रुव संरचना ul_fileeq_विधानम् ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
-#ifdef USE_FILEEQ_CRYPTOAPI
+#यदि_परिभाषितम् USE_FILEEQ_CRYPTOAPI
 	[UL_FILEEQ_SHA1] = {
 		.id = UL_FILEEQ_SHA1, .name = "sha1",
 		.digsiz = 20, .kname = "sha1"
@@ -97,200 +97,200 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 		.digsiz = 32, .kname = "sha256"
 	},
 
-	[UL_FILEEQ_CRC32] = {
-		.id = UL_FILEEQ_CRC32, .name = "crc32",
+	[UL_FILEEQ_चक्रीयपरीक्षा_32] = {
+		.id = UL_FILEEQ_चक्रीयपरीक्षा_32, .name = "crc32",
 		.digsiz = 4, .kname = "crc32c"
 	}
-#endif
+#यदि_अन्तः
 };
 
-#ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+#यदि_परिभाषितम् USE_FILEEQ_CRYPTOAPI
+स्थिर शून्य deinit_crypto_api(संरचना ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	यदि (!eq)
+		प्रत्यागम;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	यदि (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	यदि (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+स्थिर पूर्णाङ्क init_crypto_api(संरचना ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	संरचना sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
 
-	assert(eq->method);
-	assert(eq->method->kname);
-	assert(eq->fd_api == -1);
-	assert(eq->fd_cip == -1);
+	प्रतिज्ञा(eq->विधानम्);
+	प्रतिज्ञा(eq->विधानम्->kname);
+	प्रतिज्ञा(eq->fd_api == -1);
+	प्रतिज्ञा(eq->fd_cip == -1);
 
-	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
+	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->विधानम्->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
-	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
+	प्रतिज्ञा(परिमाण(sa.salg_name) > वाक्यदैर्घ्यम्(eq->विधानम्->kname) + 1);
+	स्मृतिं_प्रतिलिख(&sa.salg_name, eq->विधानम्->kname, वाक्यदैर्घ्यम्(eq->विधानम्->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
-		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
-		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
-		goto fail;
-	return 0;
+	यदि ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+		गच्छ fail;
+	यदि (bind(eq->fd_api, (संरचना sockaddr *) &sa, परिमाण(sa)) != 0)
+		गच्छ fail;
+	यदि ((eq->fd_cip = accept(eq->fd_api, रिक्त, 0)) < 0)
+		गच्छ fail;
+	प्रत्यागम 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	प्रत्यागम -1;
 }
-#endif
+#यदि_अन्तः
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+पूर्णाङ्क ul_fileeq_init(संरचना ul_fileeq *eq, ध्रुव वर्ण *विधानम्)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
-	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
+	DBG_OBJ(EQ, eq, ul_debug("init [%s]", विधानम्));
 
-	memset(eq, 0, sizeof(*eq));
+	स्मृतिं_पूरय(eq, 0, परिमाण(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	प्रति (i = 0; i < ARRAY_आकार(ul_eq_methods); i++) {
+		ध्रुव संरचना ul_fileeq_विधानम् *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
-			eq->method = m;
-			break;
+		यदि (वाक्यं_तुलय(m->name, विधानम्) == 0) {
+			eq->विधानम् = m;
+			भङ्ग;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
-#ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	यदि (!eq->विधानम्)
+		प्रत्यागम -1;
+#यदि_परिभाषितम् USE_FILEEQ_CRYPTOAPI
+	यदि (eq->विधानम्->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
-#endif
-	return 0;
+		प्रत्यागम -1;
+#यदि_अन्तः
+	प्रत्यागम 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+स्थिर शून्य reset_fileeq_bufs(संरचना ul_fileeq *eq)
 {
-	free(eq->buf_a);
-	free(eq->buf_b);
-	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
+	मुक्त(eq->buf_a);
+	मुक्त(eq->buf_b);
+	eq->buf_चरमः = eq->buf_a = eq->buf_b = रिक्त;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+शून्य ul_fileeq_deinit(संरचना ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	यदि (!eq)
+		प्रत्यागम;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
-#ifdef USE_FILEEQ_CRYPTOAPI
+#यदि_परिभाषितम् USE_FILEEQ_CRYPTOAPI
 	deinit_crypto_api(eq);
-#endif
+#यदि_अन्तः
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+शून्य ul_fileeq_दत्त_close_file(संरचना ul_fileeq_दत्त *दत्त)
 {
-	assert(data);
+	प्रतिज्ञा(दत्त);
 
-	if (data->fd >= 0) {
-		DBG_OBJ(DATA, data, ul_debug("close"));
-		close(data->fd);
+	यदि (दत्त->fd >= 0) {
+		DBG_OBJ(दत्त_2, दत्त, ul_debug("close"));
+		close(दत्त->fd);
 	}
-	data->fd = -1;
+	दत्त->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+शून्य ul_fileeq_दत्त_init(संरचना ul_fileeq_दत्त *दत्त)
 {
-	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
-	data->fd = -1;
+	DBG_OBJ(दत्त_2, दत्त, ul_debug("init"));
+	स्मृतिं_पूरय(दत्त, 0, परिमाण(*दत्त));
+	दत्त->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+शून्य ul_fileeq_दत्त_deinit(संरचना ul_fileeq_दत्त *दत्त)
 {
-	assert(data);
+	प्रतिज्ञा(दत्त);
 
-	DBG_OBJ(DATA, data, ul_debug("deinit"));
-	free(data->blocks);
-	data->blocks = NULL;
-	data->nblocks = 0;
-	data->maxblocks = 0;
-	data->is_eof = 0;
-	data->name = NULL;
+	DBG_OBJ(दत्त_2, दत्त, ul_debug("deinit"));
+	मुक्त(दत्त->खण्डानि);
+	दत्त->खण्डानि = रिक्त;
+	दत्त->nblocks = 0;
+	दत्त->maxblocks = 0;
+	दत्त->is_eof = 0;
+	दत्त->name = रिक्त;
 
-	ul_fileeq_data_close_file(data);
+	ul_fileeq_दत्त_close_file(दत्त);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+पूर्णाङ्क ul_fileeq_दत्त_associated(संरचना ul_fileeq_दत्त *दत्त)
 {
-	return data->name != NULL;
+	प्रत्यागम दत्त->name != रिक्त;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+शून्य ul_fileeq_दत्त_समुच्चयः_file(संरचना ul_fileeq_दत्त *दत्त, ध्रुव वर्ण *name)
 {
-	assert(data);
-	assert(name);
+	प्रतिज्ञा(दत्त);
+	प्रतिज्ञा(name);
 
-	DBG_OBJ(DATA, data, ul_debug("set file: %s", name));
-	ul_fileeq_data_init(data);
-	data->name = name;
+	DBG_OBJ(दत्त_2, दत्त, ul_debug("set file: %s", name));
+	ul_fileeq_दत्त_init(दत्त);
+	दत्त->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_समुच्चयः_आकार(संरचना ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
 	size_t digsiz;
 
-	assert(eq);
-	assert(st_size >= 0);
-	assert(readsiz);
+	प्रतिज्ञा(eq);
+	प्रतिज्ञा(st_size >= 0);
+	प्रतिज्ञा(readsiz);
 
 	filesiz = (uint64_t) st_size;
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	यदि (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	विकल्प (eq->विधानम्->id) {
+	पक्ष UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
-	default:
-		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		भङ्ग;
+	स्वभाव:
+		digsiz = eq->विधानम्->digsiz;
+		यदि (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		यदि (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		अन्यथा यदि (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		यदि (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			यदि (ceiling / maxdigs > SIZE_MAX)
+				प्रत्यागम false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		भङ्ग;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,361 +301,361 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	प्रत्यागम true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+स्थिर अचिह्नित वर्ण *get_बफर(संरचना ul_fileeq *eq)
 {
-	if (!eq->buf_a)
-		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
-		eq->buf_b = malloc(eq->readsiz);
+	यदि (!eq->buf_a)
+		eq->buf_a = स्मृतिं_देहि(eq->readsiz);
+	यदि (!eq->buf_b)
+		eq->buf_b = स्मृतिं_देहि(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	यदि (!eq->buf_a || !eq->buf_b)
+		प्रत्यागम रिक्त;
 
-	if (eq->buf_last == eq->buf_b)
-		eq->buf_last = eq->buf_a;
-	else
-		eq->buf_last = eq->buf_b;
+	यदि (eq->buf_चरमः == eq->buf_b)
+		eq->buf_चरमः = eq->buf_a;
+	अन्यथा
+		eq->buf_चरमः = eq->buf_b;
 
-	return eq->buf_last;
+	प्रत्यागम eq->buf_चरमः;
 }
 
-#define get_cached_nblocks(_d) \
+#परिभाषय get_cached_nblocks(_d) \
 			((_d)->nblocks ? (_d)->nblocks - 1 : 0)
 
-#define get_cached_offset(_e, _d) \
+#परिभाषय get_cached_विस्थापनम्(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				परिमाण((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+स्थिर पूर्णाङ्क get_fd(संरचना ul_fileeq *eq, संरचना ul_fileeq_दत्त *दत्त, off_t *off)
 {
-	off_t o = get_cached_offset(eq, data);
+	off_t o = get_cached_विस्थापनम्(eq, दत्त);
 
-	assert(eq);
-	assert(data);
+	प्रतिज्ञा(eq);
+	प्रतिज्ञा(दत्त);
 
 
-	if (data->fd < 0) {
-		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
-		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+	यदि (दत्त->fd < 0) {
+		DBG_OBJ(दत्त_2, दत्त, ul_debug("open: %s", दत्त->name));
+		दत्त->fd = उद्घाटय(दत्त->name, O_RDONLY | O_CLOEXEC);
+		यदि (दत्त->fd < 0)
+			प्रत्यागम दत्त->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
-		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
-#endif
-		if (o) {
-			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
-			lseek(data->fd, o, SEEK_SET);
+#यदि defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+		ignore_परिणाम( posix_fadvise(दत्त->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
+#यदि_अन्तः
+		यदि (o) {
+			DBG_OBJ(दत्त_2, दत्त, ul_debug("lseek off=%ju", (uintmax_t) o));
+			lseek(दत्त->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	यदि (off)
 		*off = o;
 
-	return data->fd;
+	प्रत्यागम दत्त->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+स्थिर शून्य memcmp_reset(संरचना ul_fileeq *eq, संरचना ul_fileeq_दत्त *दत्त)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
-		data->nblocks = 1;
+	यदि (दत्त->nblocks)
+		दत्त->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
-		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
-	data->is_eof = 0;
+	यदि (दत्त->fd >= 0)
+		lseek(दत्त->fd, get_cached_विस्थापनम्(eq, दत्त), SEEK_SET);
+	दत्त->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+स्थिर ssize_t read_खण्डम्(संरचना ul_fileeq *eq, संरचना ul_fileeq_दत्त *दत्त,
+				uint64_t n, अचिह्नित वर्ण **खण्डम्)
 {
-	int fd;
+	पूर्णाङ्क fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	यदि (दत्त->is_eof)
+		प्रत्यागम 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	यदि (n >= eq->blocksmax)
+		प्रत्यागम -EINVAL;
 
-	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	fd = get_fd(eq, दत्त, &off);
+	यदि (fd < 0)
+		प्रत्यागम fd;
 
-	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
+	DBG_OBJ(दत्त_2, दत्त, ul_debug(" read block off=%ju", (uintmax_t) off));
 
-	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	*खण्डम् = get_बफर(eq);
+	यदि (!*खण्डम्)
+		प्रत्यागम -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
-		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+	rsz = ul_read_all(दत्त->fd, (वर्ण *) *खण्डम्, eq->readsiz);
+	यदि (rsz < 0) {
+		DBG_OBJ(दत्त_2, दत्त, ul_debug("  read failed"));
+		प्रत्यागम rsz;
 	}
 	off += rsz;
-	data->nblocks++;
+	दत्त->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
-		data->is_eof = 1;
-		ul_fileeq_data_close_file(data);
+	यदि (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+		दत्त->is_eof = 1;
+		ul_fileeq_दत्त_close_file(दत्त);
 	}
 
-	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	DBG_OBJ(दत्त_2, दत्त, ul_debug("  read sz=%zd", rsz));
+	प्रत्यागम rsz;
 }
 
-#ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+#यदि_परिभाषितम् USE_FILEEQ_CRYPTOAPI
+स्थिर ssize_t get_digest(संरचना ul_fileeq *eq, संरचना ul_fileeq_दत्त *दत्त,
+				uint64_t n, अचिह्नित वर्ण **खण्डम्)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	पूर्णाङ्क fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
-		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
-		assert(data->blocks);
-		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+	यदि (n < get_cached_nblocks(दत्त)) {
+		DBG_OBJ(दत्त_2, दत्त, ul_debug(" digest cached"));
+		प्रतिज्ञा(दत्त->खण्डानि);
+		*खण्डम् = दत्त->खण्डानि + (n * eq->विधानम्->digsiz);
+		प्रत्यागम eq->विधानम्->digsiz;
 	}
 
-	if (data->is_eof) {
-		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+	यदि (दत्त->is_eof) {
+		DBG_OBJ(दत्त_2, दत्त, ul_debug(" file EOF"));
+		प्रत्यागम 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	यदि (n >= eq->blocksmax)
+		प्रत्यागम -EINVAL;
 
 	/* read new block */
-	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	fd = get_fd(eq, दत्त, &off);
+	यदि (fd < 0)
+		प्रत्यागम fd;
 
-	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
+	DBG_OBJ(दत्त_2, दत्त, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
-	sz = eq->method->digsiz;
+	sz = eq->विधानम्->digsiz;
 
-	if (!data->blocks) {
-		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
-		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+	यदि (!दत्त->खण्डानि) {
+		DBG_OBJ(दत्त_2, दत्त, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
+		दत्त->खण्डानि = स्मृतिं_देहि(eq->blocksmax * sz);
+		यदि (!दत्त->खण्डानि)
+			प्रत्यागम -ENOMEM;
 	}
 
-	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
-	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
+	rsz = sendfile(eq->fd_cip, दत्त->fd, रिक्त, eq->readsiz);
+	DBG_OBJ(दत्त_2, दत्त, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	यदि (rsz < 0)
+		प्रत्यागम rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
-	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	*खण्डम् = दत्त->खण्डानि + (n * eq->विधानम्->digsiz);
+	rsz = ul_read_all(eq->fd_cip, (वर्ण *) *खण्डम्, sz);
 
-	if (rsz > 0)
-		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
-		data->is_eof = 1;
-		ul_fileeq_data_close_file(data);
+	यदि (rsz > 0)
+		दत्त->nblocks++;
+	यदि (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+		दत्त->is_eof = 1;
+		ul_fileeq_दत्त_close_file(दत्त);
 	}
-	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	DBG_OBJ(दत्त_2, दत्त, ul_debug("  get %zdB digest", rsz));
+	प्रत्यागम rsz;
 }
-#endif
+#यदि_अन्तः
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+स्थिर ssize_t get_intro(संरचना ul_fileeq *eq, संरचना ul_fileeq_दत्त *दत्त,
+				अचिह्नित वर्ण **खण्डम्)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	यदि (दत्त->nblocks == 0) {
+		पूर्णाङ्क fd = get_fd(eq, दत्त, रिक्त);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
-		data->nblocks = 1;
+		यदि (fd < 0)
+			प्रत्यागम -1;
+		rsz = ul_read_all(fd, (वर्ण *) दत्त->intro, परिमाण(दत्त->intro));
+		DBG_OBJ(दत्त_2, दत्त, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, परिमाण(दत्त->intro)));
+		यदि (rsz < 0)
+			प्रत्यागम -1;
+		दत्त->nblocks = 1;
 	}
 
-	DBG_OBJ(DATA, data, ul_debug(" return intro"));
-	*block = data->intro;
-	return sizeof(data->intro);
+	DBG_OBJ(दत्त_2, दत्त, ul_debug(" return intro"));
+	*खण्डम् = दत्त->intro;
+	प्रत्यागम परिमाण(दत्त->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+स्थिर ssize_t get_cmp_दत्त(संरचना ul_fileeq *eq, संरचना ul_fileeq_दत्त *दत्त,
+				uint64_t blockno, अचिह्नित वर्ण **खण्डम्)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	यदि (blockno == 0)
+		प्रत्यागम get_intro(eq, दत्त, खण्डम्);
 
 	blockno--;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
-	default:
-		break;
+	विकल्प (eq->विधानम्->id) {
+	पक्ष UL_FILEEQ_MEMCMP:
+		प्रत्यागम read_खण्डम्(eq, दत्त, blockno, खण्डम्);
+	स्वभाव:
+		भङ्ग;
 	}
-#ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
-#endif
+#यदि_परिभाषितम् USE_FILEEQ_CRYPTOAPI
+	प्रत्यागम get_digest(eq, दत्त, blockno, खण्डम्);
+#अन्यथा
+	प्रत्यागम -1;
+#यदि_अन्तः
 }
 
-#define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
+#परिभाषय CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+पूर्णाङ्क ul_fileeq(संरचना ul_fileeq *eq,
+	      संरचना ul_fileeq_दत्त *a, संरचना ul_fileeq_दत्त *b)
 {
-	int cmp;
+	पूर्णाङ्क cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	यदि (eq->विधानम्->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
-	do {
-		unsigned char *da, *db;
+	कुरु {
+		अचिह्नित वर्ण *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
-		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
-			goto done;
-		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
-			goto done;
-		if (ca != cb || ca == 0) {
+		ca = get_cmp_दत्त(eq, a, n, &da);
+		यदि (ca < 0)
+			गच्छ समाप्तम्;
+		cb = get_cmp_दत्त(eq, b, n, &db);
+		यदि (cb < 0)
+			गच्छ समाप्तम्;
+		यदि (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			भङ्ग;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} यावत् (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
-			goto done; /* filesize changed? */
+	यदि (cmp == 0) {
+		यदि (!a->is_eof || !b->is_eof)
+			गच्छ समाप्तम्; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		प्रत्यागम 1;
 	}
-done:
+समाप्तम्:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	प्रत्यागम 0;
 }
 
-#ifdef TEST_PROGRAM_FILEEQ
+#यदि_परिभाषितम् TEST_क्रमादेशः_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+पूर्णाङ्क मुख्यम्(पूर्णाङ्क argc, वर्ण *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
-		{ "method", required_argument, NULL, 'm' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	संरचना ul_fileeq eq;
+	संरचना ul_fileeq_दत्त a, b, c;
+	ध्रुव वर्ण *विधानम् = "sha1";
+	स्थिर ध्रुव संरचना option longopts[] = {
+		{ "method", required_argument, रिक्त, 'm' },
+		{ "help", no_argument, रिक्त, 'h' },
+		{ रिक्त, 0, रिक्त, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	पूर्णाङ्क ch, rc;
+	ध्रुव वर्ण *file_a = रिक्त, *file_b = रिक्त, *file_c = रिक्त;
+	संरचना stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'm':
-			method = optarg;
-			break;
-		case 'h':
-			printf("usage: %s [options] <file> <file>\n"
+	यावत् ((ch = getopt_long(argc, argv, "m:", longopts, रिक्त)) != -1) {
+		विकल्प (ch) {
+		पक्ष 'm':
+			विधानम् = optarg;
+			भङ्ग;
+		पक्ष 'h':
+			प्रारूप_लिख("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
-				program_invocation_short_name);
-			return EXIT_FAILURE;
+				क्रमादेशः_invocation_short_name);
+			प्रत्यागम EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	यदि (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	यदि (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	यदि (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	यदि (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	यदि (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	यदि (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	यदि (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	यदि (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
-	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
-		method = "memcmp";
-		rc = ul_fileeq_init(&eq, method);
+	rc = ul_fileeq_init(&eq, विधानम्);
+	यदि (rc != 0 && वाक्यं_तुलय(विधानम्, "memcmp") != 0) {
+		विधानम् = "memcmp";
+		rc = ul_fileeq_init(&eq, विधानम्);
 	}
-	if (rc < 0)
+	यदि (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
-	ul_fileeq_data_set_file(&a, file_a);
-	ul_fileeq_data_set_file(&b, file_b);
+	ul_fileeq_दत्त_समुच्चयः_file(&a, file_a);
+	ul_fileeq_दत्त_समुच्चयः_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
-		ul_fileeq_data_set_file(&c, file_c);
+	यदि (file_c)
+		ul_fileeq_दत्त_समुच्चयः_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	यदि (!ul_fileeq_समुच्चयः_आकार(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
-	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	प्रारूप_लिख("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+	यदि (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
-		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+		प्रारूप_लिख("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
 		rc = ul_fileeq(&eq, &b, &c);
-		printf("2nd vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
+		प्रारूप_लिख("2nd vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 	}
 
-	ul_fileeq_data_deinit(&a);
-	ul_fileeq_data_deinit(&b);
+	ul_fileeq_दत्त_deinit(&a);
+	ul_fileeq_दत्त_deinit(&b);
 
-	if (file_c)
-		ul_fileeq_data_deinit(&c);
+	यदि (file_c)
+		ul_fileeq_दत्त_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	प्रत्यागम EXIT_FAILURE;
 }
-#endif /* TEST_PROGRAM_FILEEQ */
+#यदि_अन्तः /* TEST_PROGRAM_FILEEQ */
