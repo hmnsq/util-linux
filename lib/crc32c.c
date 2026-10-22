@@ -10,10 +10,10 @@
  *  code or tables extracted from it, as desired without restriction.
  */
 
-#include <assert.h>
-#include "crc32c.h"
+#ضمن <assert.h>
+#ضمن "crc32c.h"
 
-static const uint32_t crc32Table[256] = {
+ساكن ثابت uint32_t دوراني_ازموینه_32_جدول[256] = {
 	0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
 	0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
 	0x8AD958CFL, 0x78B2DBCCL, 0x6BE22838L, 0x9989AB3BL,
@@ -92,30 +92,30 @@ static const uint32_t crc32Table[256] = {
  *
  */
 uint32_t
-crc32c(uint32_t crc, const void *buf, size_t size)
+crc32c(uint32_t دوراني_ازموینه, ثابت فراغ *buf, size_t اندازه)
 {
-	const uint8_t *p = buf;
+	ثابت uint8_t *p = buf;
 
-	while (size--)
-		crc = crc32Table[(crc ^ *p++) & 0xff] ^ (crc >> 8);
+	طالما (اندازه--)
+		دوراني_ازموینه = دوراني_ازموینه_32_جدول[(دوراني_ازموینه ^ *p++) & 0xff] ^ (دوراني_ازموینه >> 8);
 
-	return crc;
+	أرجع دوراني_ازموینه;
 }
 
 uint32_t
-ul_crc32c_exclude_offset(uint32_t crc, const unsigned char *buf, size_t size,
+ul_crc32c_exclude_دننه_واټن(uint32_t دوراني_ازموینه, ثابت بینښه حرف *buf, size_t اندازه,
 			 size_t exclude_off, size_t exclude_len)
 {
 	size_t i;
 
-	assert((exclude_off + exclude_len) <= size);
+	أكد((exclude_off + exclude_len) <= اندازه);
 
-	crc = crc32c(crc, buf, exclude_off);
-	for (i = 0; i < exclude_len; i++) {
+	دوراني_ازموینه = crc32c(دوراني_ازموینه, buf, exclude_off);
+	لكل (i = 0; i < exclude_len; i++) {
 		uint8_t zero = 0;
-		crc = crc32c(crc, &zero, 1);
+		دوراني_ازموینه = crc32c(دوراني_ازموینه, &zero, 1);
 	}
-	crc = crc32c(crc, &buf[exclude_off + exclude_len],
-		     size - (exclude_off + exclude_len));
-	return crc;
+	دوراني_ازموینه = crc32c(دوراني_ازموینه, &buf[exclude_off + exclude_len],
+		     اندازه - (exclude_off + exclude_len));
+	أرجع دوراني_ازموینه;
 }

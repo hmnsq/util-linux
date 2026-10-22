@@ -2,74 +2,74 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <sys/utsname.h>
+#ضمن <stdio.h>
+#ضمن <sys/utsname.h>
 
-#include "c.h"
-#include "linux_version.h"
+#ضمن "c.h"
+#ضمن "linux_version.h"
 
-int get_linux_version (void)
+صحيح get_linux_نسخه (فراغ)
 {
-	static int kver = -1;
-	struct utsname uts;
-	int x = 0, y = 0, z = 0;
-	int n;
+	ساكن صحيح kver = -1;
+	بنية utsname uts;
+	صحيح x = 0, y = 0, z = 0;
+	صحيح n;
 
-	if (kver != -1)
-		return kver;
-	if (uname(&uts))
-		return kver = 0;
+	إذا (kver != -1)
+		أرجع kver;
+	إذا (uname(&uts))
+		أرجع kver = 0;
 
-	n = sscanf(uts.release, "%d.%d.%d", &x, &y, &z);
-	if (n < 1 || n > 3)
-		return kver = 0;
+	n = له_مزي_ولوله(uts.release, "%d.%d.%d", &x, &y, &z);
+	إذا (n < 1 || n > 3)
+		أرجع kver = 0;
 
-	return kver = KERNEL_VERSION(x, y, z);
+	أرجع kver = KERNEL_نسخه(x, y, z);
 }
 
-#ifdef TEST_PROGRAM_LINUXVERSION
+#که_تعریف_شوی TEST_پروګرام_LINUXVERSION
 # include <stdlib.h>
-int main(int argc, char *argv[])
+صحيح اصلي(صحيح argc, حرف *argv[])
 {
-	int rc = EXIT_FAILURE;
+	صحيح rc = EXIT_FAILURE;
 
-	if (argc == 1) {
-		printf("Linux version: %d\n", get_linux_version());
+	إذا (argc == 1) {
+		چاپ_کړه("Linux version: %d\n", get_linux_نسخه());
 		rc = EXIT_SUCCESS;
 
-	} else if (argc == 5) {
-		const char *oper = argv[1];
+	} وإلا إذا (argc == 5) {
+		ثابت حرف *oper = argv[1];
 
-		int x = atoi(argv[2]),
+		صحيح x = atoi(argv[2]),
 		    y = atoi(argv[3]),
 		    z = atoi(argv[4]);
-		int kver = get_linux_version();
-		int uver = KERNEL_VERSION(x, y, z);
+		صحيح kver = get_linux_نسخه();
+		صحيح uver = KERNEL_نسخه(x, y, z);
 
-		if (strcmp(oper, "==") == 0)
+		إذا (strcmp(oper, "==") == 0)
 			rc = kver == uver;
-		else if (strcmp(oper, "<=") == 0)
+		وإلا إذا (strcmp(oper, "<=") == 0)
 			rc = kver <= uver;
-		else if (strcmp(oper, ">=") == 0)
+		وإلا إذا (strcmp(oper, ">=") == 0)
 			rc = kver >= uver;
-		else
+		وإلا
 			errx(EXIT_FAILURE, "unsupported operator");
 
-		if (rc)
-			printf("match\n");
-		else
-			printf("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
+		إذا (rc)
+			چاپ_کړه("match\n");
+		وإلا
+			چاپ_کړه("not-match [%d %s %d, x.y.z: %d.%d.%d]\n",
 					kver, oper, uver, x, y, z);
 
 		rc = rc ? EXIT_SUCCESS : EXIT_FAILURE;
 
-	} else
+	} وإلا
 		 fprintf(stderr, "Usage:\n"
 				 "   %s [<oper> <x> <y> <z>]\n"
 				 "supported operators:\n"
 				 "   ==, <=, >=\n",
-				 program_invocation_short_name);
+				 پروګرام_invocation_short_name);
 
-	return rc;
+	أرجع rc;
 }
-#endif
+#د_که_پای

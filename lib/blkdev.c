@@ -4,135 +4,135 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/file.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <unistd.h>
-#include <stdint.h>
+#ضمن <sys/types.h>
+#ضمن <sys/stat.h>
+#ضمن <sys/file.h>
+#ضمن <sys/ioctl.h>
+#ضمن <errno.h>
+#ضمن <unistd.h>
+#ضمن <stdint.h>
 
-#ifdef HAVE_LINUX_FD_H
-#include <linux/fd.h>
-#endif
+#که_تعریف_شوی HAVE_LINUX_FD_H
+#ضمن <linux/fd.h>
+#د_که_پای
 
-#ifdef HAVE_LINUX_BLKZONED_H
-#include <linux/blkzoned.h>
-#endif
+#که_تعریف_شوی HAVE_LINUX_BLKZONED_H
+#ضمن <linux/blkzoned.h>
+#د_که_پای
 
-#ifdef HAVE_SYS_DISKLABEL_H
-#include <sys/disklabel.h>
-#endif
+#که_تعریف_شوی HAVE_SYS_DISKLABEL_H
+#ضمن <sys/disklabel.h>
+#د_که_پای
 
-#ifdef HAVE_SYS_DISK_H
+#که_تعریف_شوی HAVE_SYS_DISK_H
 # include <sys/disk.h>
-#endif
+#د_که_پای
 
-#ifndef EBADFD
+#که_نه_تعریف_شوی EBADFD
 # define EBADFD 77		/* File descriptor in bad state */
-#endif
+#د_که_پای
 
-#include "all-io.h"
-#include "blkdev.h"
-#include "c.h"
-#include "cctype.h"
-#include "linux_version.h"
-#include "fileutils.h"
-#include "nls.h"
+#ضمن "all-io.h"
+#ضمن "blkdev.h"
+#ضمن "c.h"
+#ضمن "cctype.h"
+#ضمن "linux_version.h"
+#ضمن "fileutils.h"
+#ضمن "nls.h"
 
-static long blkdev_valid_offset(int fd, off_t offset)
+ساكن اوږد blkdev_valid_دننه_واټن(صحيح fd, off_t دننه_واټن)
 {
-	char ch;
+	حرف ch;
 
-	if (lseek (fd, offset, 0) < 0)
-		return 0;
-	if (ul_read_all (fd, &ch, 1) < 1)
-		return 0;
-	return 1;
+	إذا (lseek (fd, دننه_واټن, 0) < 0)
+		أرجع 0;
+	إذا (ul_read_all (fd, &ch, 1) < 1)
+		أرجع 0;
+	أرجع 1;
 }
 
-int is_blkdev(int fd)
+صحيح is_blkdev(صحيح fd)
 {
-	struct stat st;
-	return (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
+	بنية stat st;
+	أرجع (fstat(fd, &st) == 0 && S_ISBLK(st.st_mode));
 }
 
-off_t blkdev_find_size (int fd)
+off_t blkdev_پیدا_کړه_اندازه (صحيح fd)
 {
-	off_t high, low = 0;
+	off_t high, ټیټ = 0;
 
-	for (high = 1024; blkdev_valid_offset(fd, high); ) {
-		if (high == SINT_MAX(off_t)) {
+	لكل (high = 1024; blkdev_valid_دننه_واټن(fd, high); ) {
+		إذا (high == SINT_MAX(off_t)) {
 			errno = EFBIG;
-			return -1;
+			أرجع -1;
 		}
 
-		low = high;
+		ټیټ = high;
 
-		if (high >= SINT_MAX(off_t)/2)
+		إذا (high >= SINT_MAX(off_t)/2)
 			high = SINT_MAX(off_t);
-		else
+		وإلا
 			high *= 2;
 	}
 
-	while (low < high - 1) {
-		off_t mid = (low + high) / 2;
+	طالما (ټیټ < high - 1) {
+		off_t mid = (ټیټ + high) / 2;
 
-		if (blkdev_valid_offset (fd, mid))
-			low = mid;
-		else
+		إذا (blkdev_valid_دننه_واټن (fd, mid))
+			ټیټ = mid;
+		وإلا
 			high = mid;
 	}
-	blkdev_valid_offset (fd, 0);
-	return (low + 1);
+	blkdev_valid_دننه_واټن (fd, 0);
+	أرجع (ټیټ + 1);
 }
 
 /* get size in bytes */
-int blkdev_get_size(int fd, uint64_t *bytes)
+صحيح blkdev_get_اندازه(صحيح fd, uint64_t *بایټونه)
 {
-#ifdef DKIOCGETBLOCKCOUNT
+#که_تعریف_شوی DKIOCGETBLOCKCOUNT
 	/* Apple Darwin */
-	if (ioctl(fd, DKIOCGETBLOCKCOUNT, bytes) >= 0) {
-		*bytes <<= 9;
-		return 0;
+	إذا (ioctl(fd, DKIOCGETBLOCKCOUNT, بایټونه) >= 0) {
+		*بایټونه <<= 9;
+		أرجع 0;
 	}
-#endif
+#د_که_پای
 
-#ifdef BLKGETSIZE64
-	if (ioctl(fd, BLKGETSIZE64, bytes) >= 0)
-		return 0;
-#endif
+#که_تعریف_شوی BLKGETSIZE64
+	إذا (ioctl(fd, BLKGETSIZE64, بایټونه) >= 0)
+		أرجع 0;
+#د_که_پای
 
-#ifdef BLKGETSIZE
+#که_تعریف_شوی BLKGETSIZE
 	{
-		unsigned long size;
+		بینښه اوږد اندازه;
 
-		if (ioctl(fd, BLKGETSIZE, &size) >= 0) {
-			*bytes = ((uint64_t) size) << 9;
-			return 0;
+		إذا (ioctl(fd, BLKGETSIZE, &اندازه) >= 0) {
+			*بایټونه = ((uint64_t) اندازه) << 9;
+			أرجع 0;
 		}
 	}
 
-#endif /* BLKGETSIZE */
+#د_که_پای /* BLKGETSIZE */
 
-#ifdef DIOCGMEDIASIZE
+#که_تعریف_شوی DIOCGMEDIASIZE
 	/* FreeBSD */
-	if (ioctl(fd, DIOCGMEDIASIZE, bytes) >= 0)
-		return 0;
-#endif
+	إذا (ioctl(fd, DIOCGMEDIASIZE, بایټونه) >= 0)
+		أرجع 0;
+#د_که_پای
 
-#ifdef FDGETPRM
+#که_تعریف_شوی FDGETPRM
 	{
-		struct floppy_struct this_floppy;
+		بنية floppy_struct this_floppy;
 
-		if (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
-			*bytes = ((uint64_t) this_floppy.size) << 9;
-			return 0;
+		إذا (ioctl(fd, FDGETPRM, &this_floppy) >= 0) {
+			*بایټونه = ((uint64_t) this_floppy.اندازه) << 9;
+			أرجع 0;
 		}
 	}
-#endif /* FDGETPRM */
+#د_که_پای /* FDGETPRM */
 
-#if defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
+#إذا defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO)
 	{
 		/*
 		 * This code works for FreeBSD 4.11 i386, except for the full device
@@ -143,63 +143,63 @@ int blkdev_get_size(int fd, uint64_t *bytes)
 		 * Note that FreeBSD >= 4.0 has disk devices as unbuffered (raw,
 		 * character) devices, so we need to check for S_ISCHR, too.
 		 */
-		int part = -1;
-		struct disklabel lab;
-		struct partition *pp;
-		struct stat st;
+		صحيح part = -1;
+		بنية disklabel lab;
+		بنية برخه_کول *pp;
+		بنية stat st;
 
-		if ((fstat(fd, &st) >= 0) &&
+		إذا ((fstat(fd, &st) >= 0) &&
 		    (S_ISBLK(st.st_mode) || S_ISCHR(st.st_mode)))
 			part = st.st_rdev & 7;
 
-		if (part >= 0 && (ioctl(fd, DIOCGDINFO, (char *)&lab) >= 0)) {
+		إذا (part >= 0 && (ioctl(fd, DIOCGDINFO, (حرف *)&lab) >= 0)) {
 			pp = &lab.d_partitions[part];
-			if (pp->p_size) {
-				 *bytes = ((uint64_t) pp->p_size) << 9;
-				 return 0;
+			إذا (pp->p_اندازه) {
+				 *بایټونه = ((uint64_t) pp->p_اندازه) << 9;
+				 أرجع 0;
 			}
 		}
 	}
-#endif /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
+#د_که_پای /* defined(HAVE_SYS_DISKLABEL_H) && defined(DIOCGDINFO) */
 
 	{
-		struct stat st;
+		بنية stat st;
 
-		if (fstat(fd, &st) != 0)
-			return -1;
-		if (S_ISREG(st.st_mode)) {
-			*bytes = (uint64_t) st.st_size;
-			return 0;
+		إذا (fstat(fd, &st) != 0)
+			أرجع -1;
+		إذا (S_ISREG(st.st_mode)) {
+			*بایټونه = (uint64_t) st.st_size;
+			أرجع 0;
 		}
-		if (!S_ISBLK(st.st_mode)) {
+		إذا (!S_ISBLK(st.st_mode)) {
 			errno = ENOTBLK;
-			return -1;
+			أرجع -1;
 		}
 	}
 
 	{
-		off_t size = blkdev_find_size(fd);
+		off_t اندازه = blkdev_پیدا_کړه_اندازه(fd);
 
-		if (size < 0)
-			return -1;
+		إذا (اندازه < 0)
+			أرجع -1;
 
-		*bytes = (uint64_t) size;
+		*بایټونه = (uint64_t) اندازه;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
 /* get 512-byte sector count */
-int blkdev_get_sectors(int fd, uint64_t *sectors)
+صحيح blkdev_get_sectors(صحيح fd, uint64_t *sectors)
 {
-	uint64_t bytes;
+	uint64_t بایټونه;
 
-	if (blkdev_get_size(fd, &bytes) == 0) {
-		*sectors = (bytes >> 9);
-		return 0;
+	إذا (blkdev_get_اندازه(fd, &بایټونه) == 0) {
+		*sectors = (بایټونه >> 9);
+		أرجع 0;
 	}
 
-	return -1;
+	أرجع -1;
 }
 
 /*
@@ -208,20 +208,20 @@ int blkdev_get_sectors(int fd, uint64_t *sectors)
  * This is the smallest unit the storage device can
  * address. It is typically 512 bytes.
  */
-#ifdef BLKSSZGET
-int blkdev_get_sector_size(int fd, int *sector_size)
+#که_تعریف_شوی BLKSSZGET
+صحيح blkdev_get_sector_اندازه(صحيح fd, صحيح *sector_اندازه)
 {
-	if (ioctl(fd, BLKSSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	إذا (ioctl(fd, BLKSSZGET, sector_اندازه) >= 0)
+		أرجع 0;
+	أرجع -1;
 }
-#else
-int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
+#وإلا
+صحيح blkdev_get_sector_اندازه(صحيح fd __attribute__((__unused__)), صحيح *sector_اندازه)
 {
-	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	*sector_اندازه = DEFAULT_SECTOR_اندازه;
+	أرجع 0;
 }
-#endif
+#د_که_پای
 
 /*
  * Get physical block device size. The BLKPBSZGET is supported since Linux
@@ -237,74 +237,74 @@ int blkdev_get_sector_size(int fd __attribute__((__unused__)), int *sector_size)
  *		physec = DEFAULT_SECTOR_SIZE;
  * }
  */
-#ifdef BLKPBSZGET
-int blkdev_get_physector_size(int fd, int *sector_size)
+#که_تعریف_شوی BLKPBSZGET
+صحيح blkdev_get_physector_اندازه(صحيح fd, صحيح *sector_اندازه)
 {
-	if (ioctl(fd, BLKPBSZGET, sector_size) >= 0)
-		return 0;
-	return -1;
+	إذا (ioctl(fd, BLKPBSZGET, sector_اندازه) >= 0)
+		أرجع 0;
+	أرجع -1;
 }
-#else
-int blkdev_get_physector_size(int fd __attribute__((__unused__)), int *sector_size)
+#وإلا
+صحيح blkdev_get_physector_اندازه(صحيح fd __attribute__((__unused__)), صحيح *sector_اندازه)
 {
-	*sector_size = DEFAULT_SECTOR_SIZE;
-	return 0;
+	*sector_اندازه = DEFAULT_SECTOR_اندازه;
+	أرجع 0;
 }
-#endif
+#د_که_پای
 
 /*
  * Return the alignment status of a device
  */
-#ifdef BLKALIGNOFF
-int blkdev_is_misaligned(int fd)
+#که_تعریف_شوی BLKALIGNOFF
+صحيح blkdev_is_misaligned(صحيح fd)
 {
-	int aligned;
+	صحيح aligned;
 
-	if (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
-		return 0; /* probably kernel < 2.6.32 */
+	إذا (ioctl(fd, BLKALIGNOFF, &aligned) < 0)
+		أرجع 0; /* probably kernel < 2.6.32 */
 	/*
 	 * Note that kernel returns -1 as alignment offset if no compatible
 	 * sizes and alignments exist for stacked devices
 	 */
-	return aligned != 0 ? 1 : 0;
+	أرجع aligned != 0 ? 1 : 0;
 }
-#else
-int blkdev_is_misaligned(int fd __attribute__((__unused__)))
+#وإلا
+صحيح blkdev_is_misaligned(صحيح fd __attribute__((__unused__)))
 {
-	return 0;
+	أرجع 0;
 }
-#endif
+#د_که_پای
 
-int open_blkdev_or_file(const struct stat *st, const char *name, const int oflag)
+صحيح open_blkdev_or_file(ثابت بنية stat *st, ثابت حرف *name, ثابت صحيح oflag)
 {
-	int fd;
+	صحيح fd;
 
-	if (S_ISBLK(st->st_mode)) {
+	إذا (S_ISBLK(st->st_mode)) {
 		fd = open(name, oflag | O_EXCL | O_CLOEXEC);
-	} else
+	} وإلا
 		fd = open(name, oflag);
-	if (-1 < fd && !is_same_inode(fd, st)) {
+	إذا (-1 < fd && !is_same_inode(fd, st)) {
 		close(fd);
 		errno = EBADFD;
-		return -1;
+		أرجع -1;
 	}
-	if (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
+	إذا (-1 < fd && S_ISBLK(st->st_mode) && blkdev_is_misaligned(fd))
 		warnx(_("warning: %s is misaligned"), name);
-	return fd;
+	أرجع fd;
 }
 
-#ifdef CDROM_GET_CAPABILITY
-int blkdev_is_cdrom(int fd)
+#که_تعریف_شوی CDROM_GET_CAPABILITY
+صحيح blkdev_is_cdrom(صحيح fd)
 {
-	int ret = ioctl(fd, CDROM_GET_CAPABILITY, NULL);
-	return ret < 0 ? 0 : ret;
+	صحيح ret = ioctl(fd, CDROM_GET_CAPABILITY, عدم);
+	أرجع ret < 0 ? 0 : ret;
 }
-#else
-int blkdev_is_cdrom(int fd __attribute__((__unused__)))
+#وإلا
+صحيح blkdev_is_cdrom(صحيح fd __attribute__((__unused__)))
 {
-	return 0;
+	أرجع 0;
 }
-#endif
+#د_که_پای
 
 /*
  * Get kernel's interpretation of the device's geometry.
@@ -314,177 +314,177 @@ int blkdev_is_cdrom(int fd __attribute__((__unused__)))
  *
  * Note that this is deprecated in favor of LBA addressing.
  */
-#ifdef HDIO_GETGEO
-int blkdev_get_geometry(int fd, unsigned int *h, unsigned int *s)
+#که_تعریف_شوی HDIO_GETGEO
+صحيح blkdev_get_geometry(صحيح fd, بینښه صحيح *h, بینښه صحيح *s)
 {
-	struct hd_geometry geometry;
+	بنية hd_geometry geometry;
 
-	if (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
+	إذا (ioctl(fd, HDIO_GETGEO, &geometry) == 0) {
 		*h = geometry.heads;
 		*s = geometry.sectors;
-		return 0;
+		أرجع 0;
 	}
-#else
-int blkdev_get_geometry(int fd __attribute__((__unused__)),
-		unsigned int *h, unsigned int *s)
+#وإلا
+صحيح blkdev_get_geometry(صحيح fd __attribute__((__unused__)),
+		بینښه صحيح *h, بینښه صحيح *s)
 {
 	*h = 0;
 	*s = 0;
-#endif
-	return -1;
+#د_که_پای
+	أرجع -1;
 }
 
 /*
  * Convert scsi type to human readable string.
  */
-const char *blkdev_scsi_type_to_name(int type)
+ثابت حرف *blkdev_scsi_type_منزل_name(صحيح type)
 {
-	switch (type) {
-	case SCSI_TYPE_DISK:
-		return "disk";
-	case SCSI_TYPE_TAPE:
-		return "tape";
-	case SCSI_TYPE_PRINTER:
-		return "printer";
-	case SCSI_TYPE_PROCESSOR:
-		return "processor";
-	case SCSI_TYPE_WORM:
-		return "worm";
-	case SCSI_TYPE_ROM:
-		return "rom";
-	case SCSI_TYPE_SCANNER:
-		return "scanner";
-	case SCSI_TYPE_MOD:
-		return "mo-disk";
-	case SCSI_TYPE_MEDIUM_CHANGER:
-		return "changer";
-	case SCSI_TYPE_COMM:
-		return "comm";
-	case SCSI_TYPE_RAID:
-		return "raid";
-	case SCSI_TYPE_ENCLOSURE:
-		return "enclosure";
-	case SCSI_TYPE_RBC:
-		return "rbc";
-	case SCSI_TYPE_OSD:
-		return "osd";
-	case SCSI_TYPE_NO_LUN:
-		return "no-lun";
-	default:
-		break;
+	بدل (type) {
+	حالة SCSI_TYPE_DISK:
+		أرجع "disk";
+	حالة SCSI_TYPE_فیته:
+		أرجع "tape";
+	حالة SCSI_TYPE_PRINTER:
+		أرجع "printer";
+	حالة SCSI_TYPE_PROCESSOR:
+		أرجع "processor";
+	حالة SCSI_TYPE_WORM:
+		أرجع "worm";
+	حالة SCSI_TYPE_ROM:
+		أرجع "rom";
+	حالة SCSI_TYPE_SCANNER:
+		أرجع "scanner";
+	حالة SCSI_TYPE_MOD:
+		أرجع "mo-disk";
+	حالة SCSI_TYPE_MEDIUM_CHANGER:
+		أرجع "changer";
+	حالة SCSI_TYPE_COMM:
+		أرجع "comm";
+	حالة SCSI_TYPE_RAID:
+		أرجع "raid";
+	حالة SCSI_TYPE_ENCLOSURE:
+		أرجع "enclosure";
+	حالة SCSI_TYPE_RBC:
+		أرجع "rbc";
+	حالة SCSI_TYPE_OSD:
+		أرجع "osd";
+	حالة SCSI_TYPE_NO_LUN:
+		أرجع "no-lun";
+	افتراضي:
+		اكسر;
 	}
-	return NULL;
+	أرجع عدم;
 }
 
 /* return 0 on success */
-int blkdev_lock(int fd, const char *devname, const char *lockmode)
+صحيح blkdev_قلف(صحيح fd, ثابت حرف *devname, ثابت حرف *lockmode)
 {
-	int oper, rc, msg = 0;
+	صحيح oper, rc, پیغام = 0;
 
-	if (!lockmode)
+	إذا (!lockmode)
 		lockmode = getenv("LOCK_BLOCK_DEVICE");
-	if (!lockmode)
-		return 0;
+	إذا (!lockmode)
+		أرجع 0;
 
-	if (c_strcasecmp(lockmode, "yes") == 0 ||
+	إذا (c_strcasecmp(lockmode, "yes") == 0 ||
 	    strcmp(lockmode, "1") == 0)
 		oper = LOCK_EX;
 
-	else if (c_strcasecmp(lockmode, "nonblock") == 0)
+	وإلا إذا (c_strcasecmp(lockmode, "nonblock") == 0)
 		oper = LOCK_EX | LOCK_NB;
 
-	else if (c_strcasecmp(lockmode, "no") == 0 ||
+	وإلا إذا (c_strcasecmp(lockmode, "no") == 0 ||
 		 strcmp(lockmode, "0") == 0)
-		return 0;
-	else {
+		أرجع 0;
+	وإلا {
 		warnx(_("unsupported lock mode: %s"), lockmode);
-		return -EINVAL;
+		أرجع -EINVAL;
 	}
 
-	if (!(oper & LOCK_NB)) {
+	إذا (!(oper & LOCK_NB)) {
 		/* Try non-block first to provide message */
 		rc = flock(fd, oper | LOCK_NB);
-		if (rc == 0)
-			return 0;
-		if (rc != 0 && errno == EWOULDBLOCK) {
+		إذا (rc == 0)
+			أرجع 0;
+		إذا (rc != 0 && errno == EWOULDBLOCK) {
 			fprintf(stderr, _("%s: %s: device already locked, waiting to get lock ... "),
-					program_invocation_short_name, devname);
-			msg = 1;
+					پروګرام_invocation_short_name, devname);
+			پیغام = 1;
 		}
 	}
 	rc = flock(fd, oper);
-	if (rc != 0) {
-		switch (errno) {
-		case EWOULDBLOCK: /* LOCK_NB */
+	إذا (rc != 0) {
+		بدل (errno) {
+		حالة EWOULDBLOCK: /* LOCK_NB */
 			warnx(_("%s: device already locked"), devname);
-			break;
-		default:
+			اكسر;
+		افتراضي:
 			warn(_("%s: failed to get lock"), devname);
 		}
-	} else if (msg)
+	} وإلا إذا (پیغام)
 		fprintf(stderr, _("OK\n"));
-	return rc;
+	أرجع rc;
 }
 
-#ifdef HAVE_LINUX_BLKZONED_H
-struct blk_zone_report *blkdev_get_zonereport(int fd, uint64_t sector, uint32_t nzones)
+#که_تعریف_شوی HAVE_LINUX_BLKZONED_H
+بنية blk_zone_report *blkdev_get_zonereport(صحيح fd, uint64_t sector, uint32_t nzones)
 {
-	struct blk_zone_report *rep;
-	size_t rep_size;
-	int ret;
+	بنية blk_zone_report *rep;
+	size_t rep_اندازه;
+	صحيح ret;
 
-	rep_size = sizeof(struct blk_zone_report) + sizeof(struct blk_zone) * nzones;
-	rep = calloc(1, rep_size);
-	if (!rep)
-		return NULL;
+	rep_اندازه = حجم(بنية blk_zone_report) + حجم(بنية blk_zone) * nzones;
+	rep = حافظه_صفر_ورکړه(1, rep_اندازه);
+	إذا (!rep)
+		أرجع عدم;
 
 	rep->sector = sector;
 	rep->nr_zones = nzones;
 
 	ret = ioctl(fd, BLKREPORTZONE, rep);
-	if (ret || rep->nr_zones != nzones) {
-		free(rep);
-		return NULL;
+	إذا (ret || rep->nr_zones != nzones) {
+		حرر(rep);
+		أرجع عدم;
 	}
 
-	return rep;
+	أرجع rep;
 }
-#endif
+#د_که_پای
 
 
-#ifdef TEST_PROGRAM_BLKDEV
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
+#که_تعریف_شوی TEST_پروګرام_BLKDEV
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <fcntl.h>
 
-int main(int argc, char **argv)
+صحيح اصلي(صحيح argc, حرف **argv)
 {
-	uint64_t bytes, sectors;
-	int sector_size, phy_sector_size;
-	int fd;
+	uint64_t بایټونه, sectors;
+	صحيح sector_اندازه, phy_sector_اندازه;
+	صحيح fd;
 
-	if (argc != 2) {
+	إذا (argc != 2) {
 		fprintf(stderr, "usage: %s device\n", argv[0]);
-		exit(EXIT_FAILURE);
+		وتل(EXIT_FAILURE);
 	}
 
-	if ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
+	إذا ((fd = open(argv[1], O_RDONLY|O_CLOEXEC)) < 0)
 		err(EXIT_FAILURE, "open %s failed", argv[1]);
 
-	if (blkdev_get_size(fd, &bytes) < 0)
+	إذا (blkdev_get_اندازه(fd, &بایټونه) < 0)
 		err(EXIT_FAILURE, "blkdev_get_size() failed");
-	if (blkdev_get_sectors(fd, &sectors) < 0)
+	إذا (blkdev_get_sectors(fd, &sectors) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sectors() failed");
-	if (blkdev_get_sector_size(fd, &sector_size) < 0)
+	إذا (blkdev_get_sector_اندازه(fd, &sector_اندازه) < 0)
 		err(EXIT_FAILURE, "blkdev_get_sector_size() failed");
-	if (blkdev_get_physector_size(fd, &phy_sector_size) < 0)
+	إذا (blkdev_get_physector_اندازه(fd, &phy_sector_اندازه) < 0)
 		err(EXIT_FAILURE, "blkdev_get_physector_size() failed");
 
-	printf("          bytes: %" PRIu64 "\n", bytes);
-	printf("        sectors: %" PRIu64 "\n", sectors);
-	printf("    sector size: %d\n", sector_size);
-	printf("phy-sector size: %d\n", phy_sector_size);
+	چاپ_کړه("          bytes: %" PRIu64 "\n", بایټونه);
+	چاپ_کړه("        sectors: %" PRIu64 "\n", sectors);
+	چاپ_کړه("    sector size: %d\n", sector_اندازه);
+	چاپ_کړه("phy-sector size: %d\n", phy_sector_اندازه);
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_BLKDEV */
+#د_که_پای /* TEST_PROGRAM_BLKDEV */

@@ -6,67 +6,67 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <ctype.h>
 
-#include "mangle.h"
-#include "c.h"
+#ضمن "mangle.h"
+#ضمن "c.h"
 
-#define isoctal(a)		(((a) & ~7) == '0')
+#تعریف_کړه isoctal(a)		(((a) & ~7) == '0')
 
-#define from_hex(c)		(isdigit(c) ? c - '0' : tolower(c) - 'a' + 10)
+#تعریف_کړه from_hex(c)		(که_عدد(c) ? c - '0' : tolower(c) - 'a' + 10)
 
-static inline int is_unwanted_char(unsigned char c)
+ساكن مضمن صحيح is_unwanted_char(بینښه حرف c)
 {
-	return c <= 0x20 || c == 0x7f || c == '\\';
+	أرجع c <= 0x20 || c == 0x7f || c == '\\';
 }
 
 
-char *mangle(const char *s)
+حرف *mangle(ثابت حرف *s)
 {
-	char *ss, *sp;
+	حرف *ss, *sp;
 
-	if (!s)
-		return NULL;
+	إذا (!s)
+		أرجع عدم;
 
-	ss = sp = malloc(4 * strlen(s) + 1);
-	if (!sp)
-		return NULL;
-	while(1) {
-		if (!*s) {
+	ss = sp = حافظه_ورکړه(4 * مزي_اوږدوالی(s) + 1);
+	إذا (!sp)
+		أرجع عدم;
+	طالما(1) {
+		إذا (!*s) {
 			*sp = '\0';
-			break;
+			اكسر;
 		}
-		if (is_unwanted_char(*s)) {
+		إذا (is_unwanted_char(*s)) {
 			*sp++ = '\\';
 			*sp++ = '0' + ((*s & 0300) >> 6);
 			*sp++ = '0' + ((*s & 070) >> 3);
 			*sp++ = '0' + (*s & 07);
-		} else
+		} وإلا
 			*sp++ = *s;
 		s++;
 	}
-	return ss;
+	أرجع ss;
 }
 
 
-void unmangle_to_buffer(const char *s, char *buf, size_t len)
+فراغ unmangle_منزل_بفر(ثابت حرف *s, حرف *buf, size_t len)
 {
 	size_t sz = 0;
 
-	if (!s)
-		return;
+	إذا (!s)
+		أرجع;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
+	طالما(*s && sz < len - 1) {
+		إذا (*s == '\\' && sz + 3 < len - 1 && isoctal(s[1]) &&
 		    isoctal(s[2]) && isoctal(s[3])) {
 
 			*buf++ = 64*(s[1] & 7) + 8*(s[2] & 7) + (s[3] & 7);
 			s += 4;
 			sz += 4;
-		} else {
+		} وإلا {
 			*buf++ = *s++;
 			sz++;
 		}
@@ -74,128 +74,128 @@ void unmangle_to_buffer(const char *s, char *buf, size_t len)
 	*buf = '\0';
 }
 
-size_t unhexmangle_to_buffer(const char *s, char *buf, size_t len)
+size_t unhexmangle_منزل_بفر(ثابت حرف *s, حرف *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	ثابت حرف *buf0 = buf;
 
-	if (!s)
-		return 0;
+	إذا (!s)
+		أرجع 0;
 
-	while(*s && sz < len - 1) {
-		if (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
+	طالما(*s && sz < len - 1) {
+		إذا (*s == '\\' && sz + 3 < len - 1 && s[1] == 'x' &&
 		    isxdigit(s[2]) && isxdigit(s[3])) {
 
 			*buf++ = from_hex(s[2]) << 4 | from_hex(s[3]);
 			s += 4;
 			sz += 4;
-		} else {
+		} وإلا {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	أرجع buf - buf0 + 1;
 }
 
-size_t unescape_to_buffer(const char *s, const char *wanted, char *buf, size_t len)
+size_t unescape_منزل_بفر(ثابت حرف *s, ثابت حرف *wanted, حرف *buf, size_t len)
 {
 	size_t sz = 0;
-	const char *buf0 = buf;
+	ثابت حرف *buf0 = buf;
 
-	while (*s && sz < len - 1) {
-		if (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
+	طالما (*s && sz < len - 1) {
+		إذا (*s == '\\' && sz + 1 < len - 1 && strchr(wanted, s[1])) {
 			*buf++ = s[1];
 			s += 2;
 			sz += 2;
-		} else {
+		} وإلا {
 			*buf++ = *s++;
 			sz++;
 		}
 	}
 	*buf = '\0';
-	return buf - buf0 + 1;
+	أرجع buf - buf0 + 1;
 }
 
-static inline const char *skip_nonspaces(const char *s)
+ساكن مضمن ثابت حرف *skip_nonspaces(ثابت حرف *s)
 {
-	while (s && *s && !(*s == ' ' || *s == '\t'))
+	طالما (s && *s && !(*s == ' ' || *s == '\t'))
 		s++;
-	return s;
+	أرجع s;
 }
 
 /*
  * Returns mallocated buffer or NULL in case of error.
  */
-char *unmangle(const char *s, const char **end)
+حرف *unmangle(ثابت حرف *s, ثابت حرف **پای_ټکی)
 {
-	char *buf;
-	const char *e;
+	حرف *buf;
+	ثابت حرف *e;
 	size_t sz;
 
-	if (!s)
-		return NULL;
+	إذا (!s)
+		أرجع عدم;
 
 	e = skip_nonspaces(s);
 	sz = e - s + 1;
 
-	if (end)
-		*end = e;
-	if (e == s)
-		return NULL;	/* empty string */
+	إذا (پای_ټکی)
+		*پای_ټکی = e;
+	إذا (e == s)
+		أرجع عدم;	/* empty string */
 
-	buf = malloc(sz);
-	if (!buf)
-		return NULL;
+	buf = حافظه_ورکړه(sz);
+	إذا (!buf)
+		أرجع عدم;
 
-	unmangle_to_buffer(s, buf, sz);
-	return buf;
+	unmangle_منزل_بفر(s, buf, sz);
+	أرجع buf;
 }
 
-#ifdef TEST_PROGRAM_MANGLE
-#include <errno.h>
-int main(int argc, char *argv[])
+#که_تعریف_شوی TEST_پروګرام_MANGLE
+#ضمن <errno.h>
+صحيح اصلي(صحيح argc, حرف *argv[])
 {
-	char *p = NULL;
-	if (argc < 3) {
+	حرف *p = عدم;
+	إذا (argc < 3) {
 		fprintf(stderr, "usage: %s --mangle|unmangle|unescape <string>\n",
-						program_invocation_short_name);
-		return EXIT_FAILURE;
+						پروګرام_invocation_short_name);
+		أرجع EXIT_FAILURE;
 	}
 
-	if (!strcmp(argv[1], "--mangle")) {
+	إذا (!strcmp(argv[1], "--mangle")) {
 		p = mangle(argv[2]);
-		printf("mangled: '%s'\n", p);
-		free(p);
+		چاپ_کړه("mangled: '%s'\n", p);
+		حرر(p);
 	}
 
-	else if (!strcmp(argv[1], "--unmangle")) {
-		char *x = unmangle(argv[2], NULL);
+	وإلا إذا (!strcmp(argv[1], "--unmangle")) {
+		حرف *x = unmangle(argv[2], عدم);
 
-		if (x) {
-			printf("unmangled: '%s'\n", x);
-			free(x);
+		إذا (x) {
+			چاپ_کړه("unmangled: '%s'\n", x);
+			حرر(x);
 		}
 
 		x = strdup(argv[2]);
-		if (x) {
-			unmangle_to_buffer(x, x, strlen(x) + 1);
+		إذا (x) {
+			unmangle_منزل_بفر(x, x, مزي_اوږدوالی(x) + 1);
 
-			printf("self-unmangled: '%s'\n", x);
-			free(x);
+			چاپ_کړه("self-unmangled: '%s'\n", x);
+			حرر(x);
 		}
 	}
 
-	else if (!strcmp(argv[1], "--unescape")) {
-		char *x = strdup(argv[2]);
-		if (x) {
-			unescape_to_buffer(x, ",\"", x, strlen(x) + 1);
+	وإلا إذا (!strcmp(argv[1], "--unescape")) {
+		حرف *x = strdup(argv[2]);
+		إذا (x) {
+			unescape_منزل_بفر(x, ",\"", x, مزي_اوږدوالی(x) + 1);
 
-			printf("self-unescaped: '%s'\n", x);
-			free(x);
+			چاپ_کړه("self-unescaped: '%s'\n", x);
+			حرر(x);
 		}
 	}
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_MANGLE */
+#د_که_پای /* TEST_PROGRAM_MANGLE */

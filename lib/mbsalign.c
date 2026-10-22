@@ -11,46 +11,46 @@
  *
  * Written by Pádraig Brady.
  */
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <limits.h>
-#include <ctype.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <stdio.h>
+#ضمن <stdbool.h>
+#ضمن <limits.h>
+#ضمن <ctype.h>
 
-#include "c.h"
-#include "mbsalign.h"
-#include "strutils.h"
-#include "widechar.h"
+#ضمن "c.h"
+#ضمن "mbsalign.h"
+#ضمن "strutils.h"
+#ضمن "widechar.h"
 
 /* Return the byte after a complete ANSI escape sequence, or NULL. */
-static const char *skip_ansi_escape(const char *p, const char *end)
+ساكن ثابت حرف *skip_ansi_escape(ثابت حرف *p, ثابت حرف *پای_ټکی)
 {
-	const char *q;
+	ثابت حرف *q;
 
-	if (p >= end || (unsigned char) *p != '\033' || p + 1 >= end)
-		return NULL;
+	إذا (p >= پای_ټکی || (بینښه حرف) *p != '\033' || p + 1 >= پای_ټکی)
+		أرجع عدم;
 
 	q = p + 1;
-	if (*q == '[') {
+	إذا (*q == '[') {
 		q++;
 		/* CSI parameter bytes (0x30-0x3f) are followed by intermediate
 		 * bytes (0x20-0x2f) and a final byte (0x40-0x7e). None of them
 		 * occupies a cell.
 		 */
-		while (q < end && (unsigned char) *q >= 0x30
-				&& (unsigned char) *q <= 0x3f)
+		طالما (q < پای_ټکی && (بینښه حرف) *q >= 0x30
+				&& (بینښه حرف) *q <= 0x3f)
 			q++;
-		while (q < end && (unsigned char) *q >= 0x20
-				&& (unsigned char) *q <= 0x2f)
+		طالما (q < پای_ټکی && (بینښه حرف) *q >= 0x20
+				&& (بینښه حرف) *q <= 0x2f)
 			q++;
-		if (q < end && (unsigned char) *q >= 0x40
-				&& (unsigned char) *q <= 0x7e)
-			return q + 1;
-	} else if (*q && strchr("()*+", *q) && q + 1 < end)
-		return q + 2;
+		إذا (q < پای_ټکی && (بینښه حرف) *q >= 0x40
+				&& (بینښه حرف) *q <= 0x7e)
+			أرجع q + 1;
+	} وإلا إذا (*q && strchr("()*+", *q) && q + 1 < پای_ټکی)
+		أرجع q + 2;
 
-	return NULL;
+	أرجع عدم;
 }
 
 /*
@@ -59,57 +59,57 @@ static const char *skip_ansi_escape(const char *p, const char *end)
  *
  * Returns: number of cells.
  */
-size_t mbs_nwidth(const char *buf, size_t bufsz)
+size_t mbs_nwidth(ثابت حرف *buf, size_t bufsz)
 {
-	const char *p = buf, *last = buf;
-	size_t width = 0;
+	ثابت حرف *p = buf, *وروستی = buf;
+	size_t پلنوالی = 0;
 
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
-#endif
-	if (p && *p && bufsz)
-		last = p + (bufsz - 1);
+	memset(&st, 0, حجم(st));
+#د_که_پای
+	إذا (p && *p && bufsz)
+		وروستی = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if (*p == '\033') {
-			const char *e = skip_ansi_escape(p, last + 1);
+	طالما (p && *p && p <= وروستی) {
+		إذا (*p == '\033') {
+			ثابت حرف *e = skip_ansi_escape(p, وروستی + 1);
 
 			p = e ? e : p + 1;
-			continue;
+			استمر;
 		}
-		if (iscntrl((unsigned char) *p)) {
+		إذا (iscntrl((بینښه حرف) *p)) {
 			p++;
-			continue;
+			استمر;
 		}
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-		if (len == 0)
-			break;
-		if (len > 0 && iswprint(wc)) {
-			int x = wcwidth(wc);
-			if (x > 0)
-				width += x;
-		} else if (len == (size_t) -1 || len == (size_t) -2)
+		إذا (len == 0)
+			اكسر;
+		إذا (len > 0 && iswprint(wc)) {
+			صحيح x = wcwidth(wc);
+			إذا (x > 0)
+				پلنوالی += x;
+		} وإلا إذا (len == (size_t) -1 || len == (size_t) -2)
 			len = 1;
 		p += len;
-#else
-		if (isprint((unsigned char) *p))
-			width++;
+#وإلا
+		إذا (isprint((بینښه حرف) *p))
+			پلنوالی++;
 		p++;
-#endif
+#د_که_پای
 	}
 
-	return width;
+	أرجع پلنوالی;
 }
 
-size_t mbs_width(const char *s)
+size_t mbs_پلنوالی(ثابت حرف *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_nwidth(s, strlen(s));
+	إذا (!s || !*s)
+		أرجع 0;
+	أرجع mbs_nwidth(s, مزي_اوږدوالی(s));
 }
 
 /*
@@ -119,69 +119,69 @@ size_t mbs_width(const char *s)
  *
  * Returns: number of cells, @sz returns number of bytes.
  */
-size_t mbs_safe_nwidth(const char *buf, size_t bufsz, size_t *sz)
+size_t mbs_خوندي_nwidth(ثابت حرف *buf, size_t bufsz, size_t *sz)
 {
-	const char *p = buf, *last = buf;
-	size_t width = 0, bytes = 0;
+	ثابت حرف *p = buf, *وروستی = buf;
+	size_t پلنوالی = 0, بایټونه = 0;
 
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
-#endif
-	if (p && *p && bufsz)
-		last = p + (bufsz - 1);
+	memset(&st, 0, حجم(st));
+#د_که_پای
+	إذا (p && *p && bufsz)
+		وروستی = p + (bufsz - 1);
 
-	while (p && *p && p <= last) {
-		if ((p < last && *p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
-			width += 4, bytes += 4;		/* *p encoded to \x?? */
+	طالما (p && *p && p <= وروستی) {
+		إذا ((p < وروستی && *p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((بینښه حرف) *p)) {
+			پلنوالی += 4, بایټونه += 4;		/* *p encoded to \x?? */
 			p++;
 		}
-#ifdef HAVE_WIDECHAR
-		else {
+#که_تعریف_شوی HAVE_WIDECHAR
+		وإلا {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;
+			إذا (len == 0)
+				اكسر;
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			إذا (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
-				if (isprint((unsigned char) *p))
-					width += 1, bytes += 1;
-				else
-					width += 4, bytes += 4;
+				إذا (isprint((بینښه حرف) *p))
+					پلنوالی += 1, بایټونه += 1;
+				وإلا
+					پلنوالی += 4, بایټونه += 4;
 
-			} else if (!iswprint(wc)) {
-				width += len * 4;	/* hex encode whole sequence */
-				bytes += len * 4;
-			} else {
-				width += wcwidth(wc);	/* number of cells */
-				bytes += len;		/* number of bytes */
+			} وإلا إذا (!iswprint(wc)) {
+				پلنوالی += len * 4;	/* hex encode whole sequence */
+				بایټونه += len * 4;
+			} وإلا {
+				پلنوالی += wcwidth(wc);	/* number of cells */
+				بایټونه += len;		/* number of bytes */
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
-			width += 4, bytes += 4;		/* *p encoded to \x?? */
+#وإلا
+		وإلا إذا (!isprint((بینښه حرف) *p)) {
+			پلنوالی += 4, بایټونه += 4;		/* *p encoded to \x?? */
 			p++;
-		} else {
-			width++, bytes++;
+		} وإلا {
+			پلنوالی++, بایټونه++;
 			p++;
 		}
-#endif
+#د_که_پای
 	}
 
-	if (sz)
-		*sz = bytes;
-	return width;
+	إذا (sz)
+		*sz = بایټونه;
+	أرجع پلنوالی;
 }
 
-size_t mbs_safe_width(const char *s)
+size_t mbs_خوندي_پلنوالی(ثابت حرف *s)
 {
-	if (!s || !*s)
-		return 0;
-	return mbs_safe_nwidth(s, strlen(s), NULL);
+	إذا (!s || !*s)
+		أرجع 0;
+	أرجع mbs_خوندي_nwidth(s, مزي_اوږدوالی(s), عدم);
 }
 
 /*
@@ -192,114 +192,114 @@ size_t mbs_safe_width(const char *s)
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz, const char *safechars)
+حرف *mbs_خوندي_encode_منزل_بفر(ثابت حرف *s, size_t *پلنوالی, حرف *buf, size_t bufsiz, ثابت حرف *safechars)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
-	size_t sz = s ? strlen(s) : 0;
+	ثابت حرف *p = s;
+	حرف *r;
+	صحيح rsz;
+	size_t sz = s ? مزي_اوږدوالی(s) : 0;
 
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
-#endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	memset(&st, 0, حجم(st));
+#د_که_پای
+	إذا (!sz || !buf || !bufsiz)
+		أرجع عدم;
 
 	r = buf;
-	rsz = (int) bufsiz;
-	*width = 0;
+	rsz = (صحيح) bufsiz;
+	*پلنوالی = 0;
 
-	while (p && *p) {
-		if (safechars && strchr(safechars, *p)) {
-			if (rsz < 2)
-				break;
+	طالما (p && *p) {
+		إذا (safechars && strchr(safechars, *p)) {
+			إذا (rsz < 2)
+				اكسر;
 			*r++ = *p++;
 			rsz--;
-			continue;
+			استمر;
 		}
 
-		if ((*p == '\\' && *(p + 1) == 'x')
-		    || iscntrl((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		إذا ((*p == '\\' && *(p + 1) == 'x')
+		    || iscntrl((بینښه حرف) *p)) {
+			إذا (rsz < 5)
+				اكسر;
+			snprintf(r, rsz, "\\x%02x", (بینښه حرف) *p);
 			r += 4;
 			rsz -= 4;
-			*width += 4;
+			*پلنوالی += 4;
 			p++;
 		}
-#ifdef HAVE_WIDECHAR
-		else {
+#که_تعریف_شوی HAVE_WIDECHAR
+		وإلا {
 			wchar_t wc;
 			size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
 
-			if (len == 0)
-				break;		/* end of string */
+			إذا (len == 0)
+				اكسر;		/* end of string */
 
-			if (len == (size_t) -1 || len == (size_t) -2) {
+			إذا (len == (size_t) -1 || len == (size_t) -2) {
 				len = 1;
 				/*
 				 * Not valid multibyte sequence -- maybe it's
 				 * printable char according to the current locales.
 				 */
-				if (!isprint((unsigned char) *p)) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+				إذا (!isprint((بینښه حرف) *p)) {
+					إذا (rsz < 5)
+						اكسر;
+					snprintf(r, rsz, "\\x%02x", (بینښه حرف) *p);
 					r += 4;
 					rsz -= 4;
-					*width += 4;
-				} else {
-					if (rsz < 2)
-						break;
-					(*width)++;
+					*پلنوالی += 4;
+				} وإلا {
+					إذا (rsz < 2)
+						اكسر;
+					(*پلنوالی)++;
 					*r++ = *p;
 					rsz--;
 				}
-			} else if (!iswprint(wc)) {
+			} وإلا إذا (!iswprint(wc)) {
 				size_t i;
-				for (i = 0; i < len; i++) {
-					if (rsz < 5)
-						break;
-					snprintf(r, rsz, "\\x%02x", (unsigned char) p[i]);
+				لكل (i = 0; i < len; i++) {
+					إذا (rsz < 5)
+						اكسر;
+					snprintf(r, rsz, "\\x%02x", (بینښه حرف) p[i]);
 					r += 4;
 					rsz -= 4;
-					*width += 4;
+					*پلنوالی += 4;
 				}
-				if (i < len)
-					break;
-			} else {
-				if (rsz < (int)len + 1)
-					break;
-				memcpy(r, p, len);
+				إذا (i < len)
+					اكسر;
+			} وإلا {
+				إذا (rsz < (صحيح)len + 1)
+					اكسر;
+				حافظه_نقل(r, p, len);
 				r += len;
 				rsz -= len;
-				*width += wcwidth(wc);
+				*پلنوالی += wcwidth(wc);
 			}
 			p += len;
 		}
-#else
-		else if (!isprint((unsigned char) *p)) {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+#وإلا
+		وإلا إذا (!isprint((بینښه حرف) *p)) {
+			إذا (rsz < 5)
+				اكسر;
+			snprintf(r, rsz, "\\x%02x", (بینښه حرف) *p);
 			p++;
 			r += 4;
 			rsz -= 4;
-			*width += 4;
-		} else {
-			if (rsz < 2)
-				break;
+			*پلنوالی += 4;
+		} وإلا {
+			إذا (rsz < 2)
+				اكسر;
 			*r++ = *p++;
 			rsz--;
-			(*width)++;
+			(*پلنوالی)++;
 		}
-#endif
+#د_که_پای
 	}
 
 	*r = '\0';
-	return buf;
+	أرجع buf;
 }
 
 /*
@@ -309,291 +309,291 @@ char *mbs_safe_encode_to_buffer(const char *s, size_t *width, char *buf, size_t 
  * The @buf has to be big enough to store mbs_safe_encode_size(strlen(s)))
  * bytes.
  */
-char *mbs_invalid_encode_to_buffer(const char *s, size_t *width, char *buf, size_t bufsiz)
+حرف *mbs_invalid_encode_منزل_بفر(ثابت حرف *s, size_t *پلنوالی, حرف *buf, size_t bufsiz)
 {
-	const char *p = s;
-	char *r;
-	int rsz;
-	size_t sz = s ? strlen(s) : 0;
+	ثابت حرف *p = s;
+	حرف *r;
+	صحيح rsz;
+	size_t sz = s ? مزي_اوږدوالی(s) : 0;
 
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 	mbstate_t st;
-	memset(&st, 0, sizeof(st));
-#endif
-	if (!sz || !buf || !bufsiz)
-		return NULL;
+	memset(&st, 0, حجم(st));
+#د_که_پای
+	إذا (!sz || !buf || !bufsiz)
+		أرجع عدم;
 
 	r = buf;
-	rsz = (int) bufsiz;
-	*width = 0;
+	rsz = (صحيح) bufsiz;
+	*پلنوالی = 0;
 
-	while (p && *p) {
-#ifdef HAVE_WIDECHAR
+	طالما (p && *p) {
+#که_تعریف_شوی HAVE_WIDECHAR
 		wchar_t wc;
 		size_t len = mbrtowc(&wc, p, MB_CUR_MAX, &st);
-#else
+#وإلا
 		size_t len = 1;
-#endif
+#د_که_پای
 
-		if (len == 0)
-			break;		/* end of string */
+		إذا (len == 0)
+			اكسر;		/* end of string */
 
-		if (len == (size_t) -1 || len == (size_t) -2) {
+		إذا (len == (size_t) -1 || len == (size_t) -2) {
 			len = 1;
 			/*
 			 * Not valid multibyte sequence -- maybe it's
 			 * printable char according to the current locales.
 			 */
-			if (!isprint((unsigned char) *p)) {
-				if (rsz < 5)
-					break;
-				snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+			إذا (!isprint((بینښه حرف) *p)) {
+				إذا (rsz < 5)
+					اكسر;
+				snprintf(r, rsz, "\\x%02x", (بینښه حرف) *p);
 				r += 4;
 				rsz -= 4;
-				*width += 4;
-			} else {
-				if (rsz < 2)
-					break;
-				(*width)++;
+				*پلنوالی += 4;
+			} وإلا {
+				إذا (rsz < 2)
+					اكسر;
+				(*پلنوالی)++;
 				*r++ = *p;
 				rsz--;
 			}
-		} else if (*p == '\\' && *(p + 1) == 'x') {
-			if (rsz < 5)
-				break;
-			snprintf(r, rsz, "\\x%02x", (unsigned char) *p);
+		} وإلا إذا (*p == '\\' && *(p + 1) == 'x') {
+			إذا (rsz < 5)
+				اكسر;
+			snprintf(r, rsz, "\\x%02x", (بینښه حرف) *p);
 			r += 4;
 			rsz -= 4;
-			*width += 4;
-		} else {
-			if (rsz < (int)len + 1)
-				break;
+			*پلنوالی += 4;
+		} وإلا {
+			إذا (rsz < (صحيح)len + 1)
+				اكسر;
 			r = mempcpy(r, p, len);
 			rsz -= len;
-			*width += wcwidth(wc);
+			*پلنوالی += wcwidth(wc);
 		}
 		p += len;
 	}
 
 	*r = '\0';
-	return buf;
+	أرجع buf;
 }
 
 /*
  * Guess size
  */
-size_t mbs_safe_encode_size(size_t bytes)
+size_t mbs_خوندي_encode_اندازه(size_t بایټونه)
 {
-	return (bytes * 4) + 1;
+	أرجع (بایټونه * 4) + 1;
 }
 
 /*
  * Count size of the original string in bytes (count \x?? as one byte)
  */
-size_t mbs_safe_decode_size(const char *p)
+size_t mbs_خوندي_decode_اندازه(ثابت حرف *p)
 {
-	size_t bytes = 0;
+	size_t بایټونه = 0;
 
-	while (p && *p) {
-		if (*p == '\\' && *(p + 1) == 'x' &&
+	طالما (p && *p) {
+		إذا (*p == '\\' && *(p + 1) == 'x' &&
 		    isxdigit(*(p + 2)) && isxdigit(*(p + 3)))
 			p += 4;
-		else
+		وإلا
 			p++;
-		bytes++;
+		بایټونه++;
 	}
-	return bytes;
+	أرجع بایټونه;
 }
 
 /*
  * Returns allocated string where all control and non-printable chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_safe_encode(const char *s, size_t *width)
+حرف *mbs_خوندي_encode(ثابت حرف *s, size_t *پلنوالی)
 {
-	size_t sz = s ? strlen(s) : 0;
+	size_t sz = s ? مزي_اوږدوالی(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	حرف *buf, *ret = عدم;
 
-	if (!sz)
-		return NULL;
-	bufsz = mbs_safe_encode_size(sz);
-	buf = malloc(bufsz);
-	if (buf)
-		ret = mbs_safe_encode_to_buffer(s, width, buf, bufsz, NULL);
-	if (!ret)
-		free(buf);
-	return ret;
+	إذا (!sz)
+		أرجع عدم;
+	bufsz = mbs_خوندي_encode_اندازه(sz);
+	buf = حافظه_ورکړه(bufsz);
+	إذا (buf)
+		ret = mbs_خوندي_encode_منزل_بفر(s, پلنوالی, buf, bufsz, عدم);
+	إذا (!ret)
+		حرر(buf);
+	أرجع ret;
 }
 
 /*
  * Returns allocated string where all broken widechars chars are
  * replaced with \x?? hex sequence.
  */
-char *mbs_invalid_encode(const char *s, size_t *width)
+حرف *mbs_invalid_encode(ثابت حرف *s, size_t *پلنوالی)
 {
-	size_t sz = s ? strlen(s) : 0;
+	size_t sz = s ? مزي_اوږدوالی(s) : 0;
 	size_t bufsz;
-	char *buf, *ret = NULL;
+	حرف *buf, *ret = عدم;
 
-	if (!sz)
-		return NULL;
-	bufsz = mbs_safe_encode_size(sz);
-	buf = malloc(bufsz);
-	if (buf)
-		ret = mbs_invalid_encode_to_buffer(s, width, buf, bufsz);
-	if (!ret)
-		free(buf);
-	return ret;
+	إذا (!sz)
+		أرجع عدم;
+	bufsz = mbs_خوندي_encode_اندازه(sz);
+	buf = حافظه_ورکړه(bufsz);
+	إذا (buf)
+		ret = mbs_invalid_encode_منزل_بفر(s, پلنوالی, buf, bufsz);
+	إذا (!ret)
+		حرر(buf);
+	أرجع ret;
 }
 
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 
-static bool
+ساكن bool
 wc_ensure_printable (wchar_t *wchars)
 {
   bool replaced = false;
   wchar_t *wc = wchars;
-  while (*wc)
+  طالما (*wc)
     {
-      if (!iswprint ((wint_t) *wc))
+      إذا (!iswprint ((wint_t) *wc))
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
           replaced = true;
         }
       wc++;
     }
-  return replaced;
+  أرجع replaced;
 }
 
 /* Return the wchar after a complete ANSI escape sequence, or NULL. */
-static wchar_t *
+ساكن wchar_t *
 wc_skip_ansi_escape (wchar_t *wc)
 {
   wchar_t *p = wc + 1;
 
-  if (*wc != L'\033' || !*p)
-    return NULL;
+  إذا (*wc != L'\033' || !*p)
+    أرجع عدم;
 
-  if (*p == L'[')
+  إذا (*p == L'[')
     {
       p++;
-      while (*p >= 0x30 && *p <= 0x3f)
+      طالما (*p >= 0x30 && *p <= 0x3f)
         p++;
-      while (*p >= 0x20 && *p <= 0x2f)
+      طالما (*p >= 0x20 && *p <= 0x2f)
         p++;
-      if (*p >= 0x40 && *p <= 0x7e)
-        return p + 1;
+      إذا (*p >= 0x40 && *p <= 0x7e)
+        أرجع p + 1;
     }
-  else if ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
-    return p + 2;
+  وإلا إذا ((*p == L'(' || *p == L')' || *p == L'*' || *p == L'+') && p[1])
+    أرجع p + 2;
 
-  return NULL;
+  أرجع عدم;
 }
 
 /* Truncate wchar string to width cells.
  * Returns number of cells used.  */
 
-static size_t
-wc_truncate (wchar_t *wc, size_t width)
+ساكن size_t
+wc_truncate (wchar_t *wc, size_t پلنوالی)
 {
   size_t cells = 0;
-  int next_cells = 0;
+  صحيح بل_cells = 0;
 
-  while (*wc)
+  طالما (*wc)
     {
       wchar_t *after_escape = wc_skip_ansi_escape (wc);
-      if (after_escape)
+      إذا (after_escape)
         {
           wc = after_escape;
-          continue;
+          استمر;
         }
 
-      next_cells = wcwidth (*wc);
-      if (next_cells == -1) /* non printable */
+      بل_cells = wcwidth (*wc);
+      إذا (بل_cells == -1) /* non printable */
         {
           *wc = 0xFFFD; /* L'\uFFFD' (replacement char) */
-          next_cells = 1;
+          بل_cells = 1;
         }
-      if (cells + next_cells > width)
-        break;
+      إذا (cells + بل_cells > پلنوالی)
+        اكسر;
 
-      cells += next_cells;
+      cells += بل_cells;
       wc++;
     }
   *wc = L'\0';
-  return cells;
+  أرجع cells;
 }
 
-static int
-rpl_wcswidth (const wchar_t *s, size_t n)
+ساكن صحيح
+rpl_wcswidth (ثابت wchar_t *s, size_t n)
 {
-  int ret = 0;
+  صحيح ret = 0;
 
-  while (n-- > 0 && *s != L'\0')
+  طالما (n-- > 0 && *s != L'\0')
     {
-      int nwidth = wcwidth (*s++);
-      if (nwidth == -1)             /* non printable */
-        return -1;
-      if (ret > (INT_MAX - nwidth)) /* overflow */
-        return -1;
+      صحيح nwidth = wcwidth (*s++);
+      إذا (nwidth == -1)             /* non printable */
+        أرجع -1;
+      إذا (ret > (لوی_عدد - nwidth)) /*ډکېدنه*/
+        أرجع -1;
       ret += nwidth;
     }
 
-  return ret;
+  أرجع ret;
 }
-#endif /* HAVE_WIDECHAR */
+#د_که_پای /* HAVE_WIDECHAR */
 
 /* Truncate multi-byte string to @width and returns number of
  * bytes of the new string @str, and in @width returns number
  * of cells.
  */
 size_t
-mbs_truncate(char *str, size_t *width)
+mbs_truncate(حرف *str, size_t *پلنوالی)
 {
-	ssize_t bytes = strlen(str);
-#ifdef HAVE_WIDECHAR
-	ssize_t sz = mbstowcs(NULL, str, 0);
-	wchar_t *wcs = NULL;
+	ssize_t بایټونه = مزي_اوږدوالی(str);
+#که_تعریف_شوی HAVE_WIDECHAR
+	ssize_t sz = mbstowcs(عدم, str, 0);
+	wchar_t *wcs = عدم;
 
-	if (sz == (ssize_t) -1)
-		goto done;
+	إذا (sz == (ssize_t) -1)
+		اذهب بشپړ;
 
-	wcs = calloc(1, (sz + 1) * sizeof(wchar_t));
-	if (!wcs)
-		goto done;
+	wcs = حافظه_صفر_ورکړه(1, (sz + 1) * حجم(wchar_t));
+	إذا (!wcs)
+		اذهب بشپړ;
 
-	if (!mbstowcs(wcs, str, sz))
-		goto done;
-	*width = wc_truncate(wcs, *width);
-	bytes = wcstombs(str, wcs, bytes);
-done:
-	free(wcs);
-#else
+	إذا (!mbstowcs(wcs, str, sz))
+		اذهب بشپړ;
+	*پلنوالی = wc_truncate(wcs, *پلنوالی);
+	بایټونه = wcstombs(str, wcs, بایټونه);
+بشپړ:
+	حرر(wcs);
+#وإلا
 	{
-		const char *p = str;
-		const char *end = str + bytes;
+		ثابت حرف *p = str;
+		ثابت حرف *پای_ټکی = str + بایټونه;
 		size_t cells = 0;
 
-		while (p < end) {
-			const char *after_escape = skip_ansi_escape(p, end);
+		طالما (p < پای_ټکی) {
+			ثابت حرف *after_escape = skip_ansi_escape(p, پای_ټکی);
 
-			if (after_escape) {
+			إذا (after_escape) {
 				p = after_escape;
-				continue;
+				استمر;
 			}
-			if (cells >= *width)
-				break;
+			إذا (cells >= *پلنوالی)
+				اكسر;
 			p++;
 			cells++;
 		}
-		bytes = p - str;
-		*width = cells;
+		بایټونه = p - str;
+		*پلنوالی = cells;
 	}
-#endif
-	if (bytes >= 0)
-		str[bytes] = '\0';
-	return bytes;
+#د_که_پای
+	إذا (بایټونه >= 0)
+		str[بایټونه] = '\0';
+	أرجع بایټونه;
 }
 
 /* Write N_SPACES space characters to DEST while ensuring
@@ -601,20 +601,20 @@ done:
    is always added to DEST.
    A pointer to the terminating NUL is returned.  */
 
-static char*
-mbs_align_pad (char *dest, const char* dest_end, size_t n_spaces, int padchar)
+ساكن حرف*
+mbs_align_pad (حرف *dest, ثابت حرف* dest_پای_ټکی, size_t n_spaces, صحيح padchar)
 {
-  for (/* nothing */; n_spaces && (dest < dest_end); n_spaces--)
+  لكل (/* nothing */; n_spaces && (dest < dest_پای_ټکی); n_spaces--)
     *dest++ = padchar;
   *dest = '\0';
-  return dest;
+  أرجع dest;
 }
 
 size_t
-mbsalign (const char *src, char *dest, size_t dest_size,
-          size_t *width, mbs_align_t align, int flags)
+mbsalign (ثابت حرف *src, حرف *dest, size_t dest_اندازه,
+          size_t *پلنوالی, mbs_align_t align, صحيح flags)
 {
-	return mbsalign_with_padding(src, dest, dest_size, width, align, flags, ' ');
+	أرجع mbsalign_with_padding(src, dest, dest_اندازه, پلنوالی, align, flags, ' ');
 }
 
 /* Align a string, SRC, in a field of *WIDTH columns, handling multi-byte
@@ -631,135 +631,135 @@ mbsalign (const char *src, char *dest, size_t dest_size,
    Update *WIDTH to indicate how many columns were used before padding.  */
 
 size_t
-mbsalign_with_padding (const char *src, char *dest, size_t dest_size,
-	               size_t *width, mbs_align_t align,
-#ifdef HAVE_WIDECHAR
-		       int flags,
-#else
-		       int flags __attribute__((__unused__)),
-#endif
-		       int padchar)
+mbsalign_with_padding (ثابت حرف *src, حرف *dest, size_t dest_اندازه,
+	               size_t *پلنوالی, mbs_align_t align,
+#که_تعریف_شوی HAVE_WIDECHAR
+		       صحيح flags,
+#وإلا
+		       صحيح flags __attribute__((__unused__)),
+#د_که_پای
+		       صحيح padchar)
 {
   size_t ret = -1;
-  size_t src_size = strlen (src) + 1;
-  char *newstr = NULL;
-  wchar_t *str_wc = NULL;
-  const char *str_to_print = src;
-  size_t n_cols = src_size - 1;
-  size_t n_used_bytes = n_cols; /* Not including NUL */
-  size_t n_spaces = 0, space_left;
+  size_t src_اندازه = مزي_اوږدوالی (src) + 1;
+  حرف *newstr = عدم;
+  wchar_t *str_wc = عدم;
+  ثابت حرف *str_منزل_print = src;
+  size_t n_ستون_شمېر = src_اندازه - 1;
+  size_t n_کارول_شوی_بایټونه = n_ستون_شمېر; /* Not including NUL */
+  size_t n_spaces = 0, space_کیڼ;
 
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
   bool conversion = false;
   bool wc_enabled = false;
 
   /* In multi-byte locales convert to wide characters
      to allow easy truncation. Also determine number
      of screen columns used.  */
-  if (MB_CUR_MAX > 1)
+  إذا (MB_CUR_MAX > 1)
     {
-      size_t src_chars = mbstowcs (NULL, src, 0);
-      if (src_chars == (size_t) -1)
+      size_t src_chars = mbstowcs (عدم, src, 0);
+      إذا (src_chars == (size_t) -1)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          إذا (flags & MBA_UNIBYTE_FALLBACK)
+            اذهب mbsalign_unibyte;
+          وإلا
+            اذهب mbsalign_cleanup;
         }
       src_chars += 1; /* make space for NUL */
-      str_wc = malloc (src_chars * sizeof (wchar_t));
-      if (str_wc == NULL)
+      str_wc = حافظه_ورکړه (src_chars * حجم (wchar_t));
+      إذا (str_wc == عدم)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          إذا (flags & MBA_UNIBYTE_FALLBACK)
+            اذهب mbsalign_unibyte;
+          وإلا
+            اذهب mbsalign_cleanup;
         }
-      if (mbstowcs (str_wc, src, src_chars) != 0)
+      إذا (mbstowcs (str_wc, src, src_chars) != 0)
         {
           str_wc[src_chars - 1] = L'\0';
           wc_enabled = true;
           conversion = wc_ensure_printable (str_wc);
-          n_cols = rpl_wcswidth (str_wc, src_chars);
+          n_ستون_شمېر = rpl_wcswidth (str_wc, src_chars);
         }
     }
 
   /* If we transformed or need to truncate the source string
      then create a modified copy of it.  */
-  if (wc_enabled && (conversion || (n_cols > *width)))
+  إذا (wc_enabled && (conversion || (n_ستون_شمېر > *پلنوالی)))
     {
-        if (conversion)
+        إذا (conversion)
           {
              /* May have increased the size by converting
                 \t to \uFFFD for example.  */
-            src_size = wcstombs(NULL, str_wc, 0) + 1;
+            src_اندازه = wcstombs(عدم, str_wc, 0) + 1;
           }
-        newstr = malloc (src_size);
-        if (newstr == NULL)
+        newstr = حافظه_ورکړه (src_اندازه);
+        إذا (newstr == عدم)
         {
-          if (flags & MBA_UNIBYTE_FALLBACK)
-            goto mbsalign_unibyte;
-          else
-            goto mbsalign_cleanup;
+          إذا (flags & MBA_UNIBYTE_FALLBACK)
+            اذهب mbsalign_unibyte;
+          وإلا
+            اذهب mbsalign_cleanup;
         }
-        str_to_print = newstr;
-        n_cols = wc_truncate (str_wc, *width);
-        n_used_bytes = wcstombs (newstr, str_wc, src_size);
+        str_منزل_print = newstr;
+        n_ستون_شمېر = wc_truncate (str_wc, *پلنوالی);
+        n_کارول_شوی_بایټونه = wcstombs (newstr, str_wc, src_اندازه);
     }
 
 mbsalign_unibyte:
-#endif
+#د_که_پای
 
-  if (n_cols > *width) /* Unibyte truncation required.  */
+  إذا (n_ستون_شمېر > *پلنوالی) /* Unibyte truncation required.  */
     {
-      n_cols = *width;
-      n_used_bytes = n_cols;
+      n_ستون_شمېر = *پلنوالی;
+      n_کارول_شوی_بایټونه = n_ستون_شمېر;
     }
 
-  if (*width > n_cols) /* Padding required.  */
-    n_spaces = *width - n_cols;
+  إذا (*پلنوالی > n_ستون_شمېر) /* Padding required.  */
+    n_spaces = *پلنوالی - n_ستون_شمېر;
 
   /* indicate to caller how many cells needed (not including padding).  */
-  *width = n_cols;
+  *پلنوالی = n_ستون_شمېر;
 
   /* indicate to caller how many bytes needed (not including NUL).  */
-  ret = n_used_bytes + (n_spaces * 1);
+  ret = n_کارول_شوی_بایټونه + (n_spaces * 1);
 
   /* Write as much NUL terminated output to DEST as possible.  */
-  if (dest_size != 0)
+  إذا (dest_اندازه != 0)
     {
-      char *dest_end = dest + dest_size - 1;
-      size_t start_spaces;
-      size_t end_spaces;
+      حرف *dest_پای_ټکی = dest + dest_اندازه - 1;
+      size_t پیل_spaces;
+      size_t پای_ټکی_spaces;
 
-      switch (align)
+      بدل (align)
         {
-        case MBS_ALIGN_CENTER:
-          start_spaces = n_spaces / 2 + n_spaces % 2;
-          end_spaces = n_spaces / 2;
-          break;
-        case MBS_ALIGN_LEFT:
-          start_spaces = 0;
-          end_spaces = n_spaces;
-          break;
-        case MBS_ALIGN_RIGHT:
-          start_spaces = n_spaces;
-          end_spaces = 0;
-          break;
-	default:
+        حالة MBS_ALIGN_CENTER:
+          پیل_spaces = n_spaces / 2 + n_spaces % 2;
+          پای_ټکی_spaces = n_spaces / 2;
+          اكسر;
+        حالة MBS_ALIGN_کیڼ:
+          پیل_spaces = 0;
+          پای_ټکی_spaces = n_spaces;
+          اكسر;
+        حالة MBS_ALIGN_ښی:
+          پیل_spaces = n_spaces;
+          پای_ټکی_spaces = 0;
+          اكسر;
+	افتراضي:
 	  abort();
         }
 
-      dest = mbs_align_pad (dest, dest_end, start_spaces, padchar);
-      space_left = dest_end - dest;
-      dest = mempcpy (dest, str_to_print, min (n_used_bytes, space_left));
-      mbs_align_pad (dest, dest_end, end_spaces, padchar);
+      dest = mbs_align_pad (dest, dest_پای_ټکی, پیل_spaces, padchar);
+      space_کیڼ = dest_پای_ټکی - dest;
+      dest = mempcpy (dest, str_منزل_print, min (n_کارول_شوی_بایټونه, space_کیڼ));
+      mbs_align_pad (dest, dest_پای_ټکی, پای_ټکی_spaces, padchar);
     }
-#ifdef HAVE_WIDECHAR
+#که_تعریف_شوی HAVE_WIDECHAR
 mbsalign_cleanup:
-#endif
-  free (str_wc);
-  free (newstr);
+#د_که_پای
+  حرر (str_wc);
+  حرر (newstr);
 
-  return ret;
+  أرجع ret;
 }

@@ -4,21 +4,21 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <ctype.h>
-#include <unistd.h>
+#ضمن <ctype.h>
+#ضمن <unistd.h>
 
-#ifdef HAVE_GETTTYNAM
+#که_تعریف_شوی HAVE_GETTTYNAM
 # include <ttyent.h>
-#endif
+#د_که_پای
 
-#include "c.h"
-#include "ttyutils.h"
+#ضمن "c.h"
+#ضمن "ttyutils.h"
 
-#ifdef __linux__
+#که_تعریف_شوی __linux__
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  إذا defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -26,195 +26,195 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#elif defined(__GNU__)
+#وإلاإذا defined(__GNU__)
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "hurd"
 #  endif
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#وإلا
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt100"
 #  endif
-#endif
+#د_که_پای
 
-static int get_env_int(const char *name)
+ساكن صحيح get_env_int(ثابت حرف *name)
 {
-	const char *cp = getenv(name);
+	ثابت حرف *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
-		long x;
+	إذا (cp) {
+		حرف *پای_ټکی = عدم;
+		اوږد x;
 
 		errno = 0;
-		x = strtol(cp, &end, 10);
+		x = strtol(cp, &پای_ټکی, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
-		    x > 0 && x <= INT_MAX)
-			return x;
+		إذا (errno == 0 && پای_ټکی && *پای_ټکی == '\0' && پای_ټکی > cp &&
+		    x > 0 && x <= لوی_عدد)
+			أرجع x;
 	}
 
-	return -1;
+	أرجع -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+صحيح get_terminal_dimension(صحيح *ستون_شمېر, صحيح *کرښې)
 {
-	int c = 0, l = 0;
+	صحيح c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#إذا defined(TIOCGWINSZ)
+	بنية winsize	w_win;
+	إذا (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
-#elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
-		c = t_win.ts_cols;
-		l = t_win.ts_lines;
+#وإلاإذا defined(TIOCGSIZE)
+	بنية ttysize	t_win;
+	إذا (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+		c = t_win.ts_ستون_شمېر;
+		l = t_win.ts_کرښې;
 	}
-#endif
-	if (cols) {
-		if (c <= 0)
+#د_که_پای
+	إذا (ستون_شمېر) {
+		إذا (c <= 0)
 			c = get_env_int("COLUMNS");
-		*cols = c;
+		*ستون_شمېر = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	إذا (کرښې) {
+		إذا (l <= 0)
 			l = get_env_int("LINES");
-		*lines = l;
+		*کرښې = l;
 	}
-	return 0;
+	أرجع 0;
 }
 
-int get_terminal_width(int default_width)
+صحيح get_terminal_پلنوالی(صحيح default_پلنوالی)
 {
-	int width = 0;
+	صحيح پلنوالی = 0;
 
-	get_terminal_dimension(&width, NULL);
+	get_terminal_dimension(&پلنوالی, عدم);
 
-	return width > 0 ? width : default_width;
+	أرجع پلنوالی > 0 ? پلنوالی : default_پلنوالی;
 }
 
-int get_terminal_stdfd(void)
+صحيح get_terminal_stdfd(فراغ)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	إذا (isatty(STDIN_FILENO))
+		أرجع STDIN_FILENO;
+	إذا (isatty(STDOUT_FILENO))
+		أرجع STDOUT_FILENO;
+	إذا (isatty(STDERR_FILENO))
+		أرجع STDERR_FILENO;
 
-	return -EINVAL;
+	أرجع -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+صحيح get_terminal_name(ثابت حرف **لار,
+		      ثابت حرف **name,
+		      ثابت حرف **شمېره)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	ثابت حرف *tty;
+	ثابت حرف *p;
+	صحيح fd;
 
 
-	if (name)
-		*name = NULL;
-	if (path)
-		*path = NULL;
-	if (number)
-		*number = NULL;
+	إذا (name)
+		*name = عدم;
+	إذا (لار)
+		*لار = عدم;
+	إذا (شمېره)
+		*شمېره = عدم;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	إذا (fd < 0)
+		أرجع fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	إذا (!tty)
+		أرجع -1;
 
-	if (path)
-		*path = tty;
-	if (name || number)
-		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	إذا (لار)
+		*لار = tty;
+	إذا (name || شمېره)
+		tty = مزي_پرتله(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
+	إذا (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
-				*number = p;
-				break;
+	إذا (شمېره) {
+		لكل (p = tty; p && *p; p++) {
+			إذا (که_عدد(*p)) {
+				*شمېره = p;
+				اكسر;
 			}
 		}
 	}
-	return 0;
+	أرجع 0;
 }
 
-int get_terminal_type(const char **type)
+صحيح get_terminal_type(ثابت حرف **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	إذا (*type)
+		أرجع -EINVAL;
+	أرجع 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+حرف *get_terminal_default_type(ثابت حرف *ttyname, صحيح is_serial)
 {
-	if (ttyname) {
-#ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+	إذا (ttyname) {
+#که_تعریف_شوی HAVE_GETTTYNAM
+		بنية ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
-#endif
+		إذا (ent && ent->ty_type)
+			أرجع strdup(ent->ty_type);
+#د_که_پای
 
-#if defined (__s390__) || defined (__s390x__)
+#إذا defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
-#endif
+		إذا (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			أرجع strdup(DEFAULT_TTYS0);
+		وإلا إذا (مزي_پرتله(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			أرجع strdup(DEFAULT_TTY32);
+		وإلا إذا (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			أرجع strdup(DEFAULT_TTYS1);
+#د_که_پای
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	أرجع strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
-#ifdef TEST_PROGRAM_TTYUTILS
+#که_تعریف_شوی TEST_پروګرام_TTYUTILS
 # include <stdlib.h>
-int main(void)
+صحيح اصلي(فراغ)
 {
-	const char *path, *name, *num;
-	int c, l;
+	ثابت حرف *لار, *name, *عدد;
+	صحيح c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	إذا (get_terminal_name(&لار, &name, &عدد) == 0) {
+		حرف *غړی;
 
-		fprintf(stderr, "tty path:      %s\n", path);
+		fprintf(stderr, "tty path:      %s\n", لار);
 		fprintf(stderr, "tty name:      %s\n", name);
-		fprintf(stderr, "tty number:    %s\n", num);
+		fprintf(stderr, "tty number:    %s\n", عدد);
 
 		fprintf(stderr, "tty term:      %s\n", getenv("TERM"));
 
-		term = get_terminal_default_type(name, 0);
-		fprintf(stderr, "tty dflt term: %s\n", term);
-		free(term);
+		غړی = get_terminal_default_type(name, 0);
+		fprintf(stderr, "tty dflt term: %s\n", غړی);
+		حرر(غړی);
 	}
 	get_terminal_dimension(&c, &l);
 	fprintf(stderr,         "tty cols:      %d\n", c);
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
-#endif /* TEST_PROGRAM_TTYUTILS */
+#د_که_پای /* TEST_PROGRAM_TTYUTILS */
