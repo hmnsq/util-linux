@@ -10,17 +10,17 @@
 #include "swapheader.h"
 #include "swapprober.h"
 
-blkid_probe get_swap_prober(const char *devname)
+blkid_probe get_swap_prober(const var_na *devname)
 {
 	blkid_probe pr;
-	int rc;
-	const char *version = NULL;
-	char *swap_filter[] = { "swap", NULL };
+	puur_naa_nka rc;
+	const var_na *version = NULL;
+	var_na *swap_filter[] = { "swap", NULL };
 
 	pr = blkid_new_probe_from_filename(devname);
-	if (!pr) {
+	ᮚᮦᮔ᮪ (!pr) {
 		warn(_("%s: unable to probe device"), devname);
-		return NULL;
+		ᮝᮜᮤ NULL;
 	}
 
 	blkid_probe_enable_superblocks(pr, TRUE);
@@ -31,24 +31,24 @@ blkid_probe get_swap_prober(const char *devname)
 	blkid_probe_filter_superblocks_type(pr, BLKID_FLTR_ONLYIN, swap_filter);
 
 	rc = blkid_do_safeprobe(pr);
-	if (rc == -1)
+	ᮚᮦᮔ᮪ (rc == -1)
 		warn(_("%s: unable to probe device"), devname);
-	else if (rc == -2)
+	ᮜᮤᮚ ᮚᮦᮔ᮪ (rc == -2)
 		warnx(_("%s: ambiguous probing result; use wipefs(8)"), devname);
-	else if (rc == 1)
+	ᮜᮤᮚ ᮚᮦᮔ᮪ (rc == 1)
 		warnx(_("%s: not a valid swap partition"), devname);
 
-	if (rc == 0) {
+	ᮚᮦᮔ᮪ (rc == 0) {
 		/* Only the SWAPSPACE2 is supported. */
-		if (blkid_probe_lookup_value(pr, "VERSION", &version, NULL) == 0
+		ᮚᮦᮔ᮪ (blkid_probe_lookup_value(pr, "VERSION", &version, NULL) == 0
 		    && version
 		    && strcmp(version, stringify_value(SWAP_VERSION)) != 0)
 			warnx(_("%s: unsupported swap version '%s'"),
 						devname, version);
-		else
-			return pr;
+		ᮜᮤᮚ
+			ᮝᮜᮤ pr;
 	}
 
 	blkid_free_probe(pr);
-	return NULL;
+	ᮝᮜᮤ NULL;
 }
