@@ -31,11 +31,11 @@
  * Written by Karel Zak <kzak@redhat.com> [October 2021]
  */
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#ضمن <inttypes.h>
+#ضمن <stdio.h>
+#ضمن <sys/types.h>
+#ضمن <sys/stat.h>
+#ضمن <unistd.h>
 
 /* Linux crypto */
 #ifdef HAVE_LINUX_IF_ALG_H
@@ -45,12 +45,12 @@
 # include <sys/sendfile.h>
 #endif
 
-#include "c.h"
-#include "all-io.h"
-#include "fileeq.h"
-#include "debug.h"
+#ضمن "c.h"
+#ضمن "all-io.h"
+#ضمن "fileeq.h"
+#ضمن "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulfileeq);
+ساكن UL_DEBUG_DEFINE_MASK(ulfileeq);
 UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULFILEEQ_DEBUG_INIT	(1 << 1)
@@ -62,28 +62,28 @@ UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
 
-static void ul_fileeq_init_debug(void)
+ساكن فراغ ul_fileeq_init_debug(فراغ)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	ܐܢ (ulfileeq_debug_mask)
+		ܦܢܐ;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+تعداد {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
 	UL_FILEEQ_CRC32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
+بنية ul_fileeq_method {
+	ثابت حرف *name;	/* name used by applications */
+	ثابت حرف *kname;	/* name used by kernel crypto */
+	صحيح id;
 	short digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+ساكن ثابت بنية ul_fileeq_method ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
@@ -105,93 +105,93 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 };
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+ساكن فراغ deinit_crypto_api(بنية ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	ܐܢ (!eq)
+		ܦܢܐ;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	ܐܢ (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	ܐܢ (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+ساكن صحيح init_crypto_api(بنية ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	بنية sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
 
-	assert(eq->method);
-	assert(eq->method->kname);
-	assert(eq->fd_api == -1);
-	assert(eq->fd_cip == -1);
+	أكد(eq->method);
+	أكد(eq->method->kname);
+	أكد(eq->fd_api == -1);
+	أكد(eq->fd_cip == -1);
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
+	أكد(حجم(sa.salg_name) > strlen(eq->method->kname) + 1);
 	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
-		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
-		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
-		goto fail;
-	return 0;
+	ܐܢ ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+		اذهب fail;
+	ܐܢ (bind(eq->fd_api, (بنية sockaddr *) &sa, حجم(sa)) != 0)
+		اذهب fail;
+	ܐܢ ((eq->fd_cip = accept(eq->fd_api, عدم, 0)) < 0)
+		اذهب fail;
+	ܦܢܐ 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	ܦܢܐ -1;
 }
 #endif
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+صحيح ul_fileeq_init(بنية ul_fileeq *eq, ثابت حرف *method)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
 	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
 
-	memset(eq, 0, sizeof(*eq));
+	memset(eq, 0, حجم(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	لكل (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
+		ثابت بنية ul_fileeq_method *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
+		ܐܢ (strcmp(m->name, method) == 0) {
 			eq->method = m;
-			break;
+			اكسر;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
+	ܐܢ (!eq->method)
+		ܦܢܐ -1;
 #ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	ܐܢ (eq->method->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
+		ܦܢܐ -1;
 #endif
-	return 0;
+	ܦܢܐ 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+ساكن فراغ reset_fileeq_bufs(بنية ul_fileeq *eq)
 {
-	free(eq->buf_a);
-	free(eq->buf_b);
-	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
+	حرر(eq->buf_a);
+	حرر(eq->buf_b);
+	eq->buf_last = eq->buf_a = eq->buf_b = عدم;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+فراغ ul_fileeq_deinit(بنية ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	ܐܢ (!eq)
+		ܦܢܐ;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
 #ifdef USE_FILEEQ_CRYPTOAPI
@@ -200,97 +200,97 @@ void ul_fileeq_deinit(struct ul_fileeq *eq)
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+فراغ ul_fileeq_data_close_file(بنية ul_fileeq_data *data)
 {
-	assert(data);
+	أكد(data);
 
-	if (data->fd >= 0) {
+	ܐܢ (data->fd >= 0) {
 		DBG_OBJ(DATA, data, ul_debug("close"));
 		close(data->fd);
 	}
 	data->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+فراغ ul_fileeq_data_init(بنية ul_fileeq_data *data)
 {
 	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
+	memset(data, 0, حجم(*data));
 	data->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+فراغ ul_fileeq_data_deinit(بنية ul_fileeq_data *data)
 {
-	assert(data);
+	أكد(data);
 
 	DBG_OBJ(DATA, data, ul_debug("deinit"));
-	free(data->blocks);
-	data->blocks = NULL;
+	حرر(data->blocks);
+	data->blocks = عدم;
 	data->nblocks = 0;
 	data->maxblocks = 0;
 	data->is_eof = 0;
-	data->name = NULL;
+	data->name = عدم;
 
 	ul_fileeq_data_close_file(data);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+صحيح ul_fileeq_data_associated(بنية ul_fileeq_data *data)
 {
-	return data->name != NULL;
+	ܦܢܐ data->name != عدم;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+فراغ ul_fileeq_data_set_file(بنية ul_fileeq_data *data, ثابت حرف *name)
 {
-	assert(data);
-	assert(name);
+	أكد(data);
+	أكد(name);
 
 	DBG_OBJ(DATA, data, ul_debug("set file: %s", name));
 	ul_fileeq_data_init(data);
 	data->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_set_size(بنية ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
 	size_t digsiz;
 
-	assert(eq);
-	assert(st_size >= 0);
-	assert(readsiz);
+	أكد(eq);
+	أكد(st_size >= 0);
+	أكد(readsiz);
 
 	filesiz = (uint64_t) st_size;
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	ܐܢ (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	بدل (eq->method->id) {
+	حالة UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		ܐܢ (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		ܐܢ (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		ܐܚܪܢܐ ܐܢ (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		ܐܢ (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			ܐܢ (ceiling / maxdigs > SIZE_MAX)
+				ܦܢܐ false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		اكسر;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,25 +301,25 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	ܦܢܐ true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+ساكن unsigned حرف *get_buffer(بنية ul_fileeq *eq)
 {
-	if (!eq->buf_a)
+	ܐܢ (!eq->buf_a)
 		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
+	ܐܢ (!eq->buf_b)
 		eq->buf_b = malloc(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	ܐܢ (!eq->buf_a || !eq->buf_b)
+		ܦܢܐ عدم;
 
-	if (eq->buf_last == eq->buf_b)
+	ܐܢ (eq->buf_last == eq->buf_b)
 		eq->buf_last = eq->buf_a;
-	else
+	ܐܚܪܢܐ
 		eq->buf_last = eq->buf_b;
 
-	return eq->buf_last;
+	ܦܢܐ eq->buf_last;
 }
 
 #define get_cached_nblocks(_d) \
@@ -327,321 +327,321 @@ static unsigned char *get_buffer(struct ul_fileeq *eq)
 
 #define get_cached_offset(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				حجم((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+ساكن صحيح get_fd(بنية ul_fileeq *eq, بنية ul_fileeq_data *data, off_t *off)
 {
 	off_t o = get_cached_offset(eq, data);
 
-	assert(eq);
-	assert(data);
+	أكد(eq);
+	أكد(data);
 
 
-	if (data->fd < 0) {
+	ܐܢ (data->fd < 0) {
 		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
 		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+		ܐܢ (data->fd < 0)
+			ܦܢܐ data->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+#ܐܢ defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
 		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
 #endif
-		if (o) {
+		ܐܢ (o) {
 			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
 			lseek(data->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	ܐܢ (off)
 		*off = o;
 
-	return data->fd;
+	ܦܢܐ data->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+ساكن فراغ memcmp_reset(بنية ul_fileeq *eq, بنية ul_fileeq_data *data)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
+	ܐܢ (data->nblocks)
 		data->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
+	ܐܢ (data->fd >= 0)
 		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
 	data->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+ساكن ssize_t read_block(بنية ul_fileeq *eq, بنية ul_fileeq_data *data,
+				uint64_t n, unsigned حرف **block)
 {
-	int fd;
+	صحيح fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	ܐܢ (data->is_eof)
+		ܦܢܐ 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	ܐܢ (n >= eq->blocksmax)
+		ܦܢܐ -EINVAL;
 
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	ܐܢ (fd < 0)
+		ܦܢܐ fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
 
 	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	ܐܢ (!*block)
+		ܦܢܐ -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
+	rsz = ul_read_all(data->fd, (حرف *) *block, eq->readsiz);
+	ܐܢ (rsz < 0) {
 		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+		ܦܢܐ rsz;
 	}
 	off += rsz;
 	data->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	ܐܢ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 
 	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	ܦܢܐ rsz;
 }
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+ساكن ssize_t get_digest(بنية ul_fileeq *eq, بنية ul_fileeq_data *data,
+				uint64_t n, unsigned حرف **block)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	صحيح fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
+	ܐܢ (n < get_cached_nblocks(data)) {
 		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
-		assert(data->blocks);
+		أكد(data->blocks);
 		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+		ܦܢܐ eq->method->digsiz;
 	}
 
-	if (data->is_eof) {
+	ܐܢ (data->is_eof) {
 		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+		ܦܢܐ 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	ܐܢ (n >= eq->blocksmax)
+		ܦܢܐ -EINVAL;
 
 	/* read new block */
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	ܐܢ (fd < 0)
+		ܦܢܐ fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
 	sz = eq->method->digsiz;
 
-	if (!data->blocks) {
+	ܐܢ (!data->blocks) {
 		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
 		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+		ܐܢ (!data->blocks)
+			ܦܢܐ -ENOMEM;
 	}
 
-	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
+	rsz = sendfile(eq->fd_cip, data->fd, عدم, eq->readsiz);
 	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	ܐܢ (rsz < 0)
+		ܦܢܐ rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
 	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	rsz = ul_read_all(eq->fd_cip, (حرف *) *block, sz);
 
-	if (rsz > 0)
+	ܐܢ (rsz > 0)
 		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	ܐܢ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	ܦܢܐ rsz;
 }
 #endif
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+ساكن ssize_t get_intro(بنية ul_fileeq *eq, بنية ul_fileeq_data *data,
+				unsigned حرف **block)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	ܐܢ (data->nblocks == 0) {
+		صحيح fd = get_fd(eq, data, عدم);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
+		ܐܢ (fd < 0)
+			ܦܢܐ -1;
+		rsz = ul_read_all(fd, (حرف *) data->intro, حجم(data->intro));
+		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, حجم(data->intro)));
+		ܐܢ (rsz < 0)
+			ܦܢܐ -1;
 		data->nblocks = 1;
 	}
 
 	DBG_OBJ(DATA, data, ul_debug(" return intro"));
 	*block = data->intro;
-	return sizeof(data->intro);
+	ܦܢܐ حجم(data->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+ساكن ssize_t get_cmp_data(بنية ul_fileeq *eq, بنية ul_fileeq_data *data,
+				uint64_t blockno, unsigned حرف **block)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	ܐܢ (blockno == 0)
+		ܦܢܐ get_intro(eq, data, block);
 
 	blockno--;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
-	default:
-		break;
+	بدل (eq->method->id) {
+	حالة UL_FILEEQ_MEMCMP:
+		ܦܢܐ read_block(eq, data, blockno, block);
+	افتراضي:
+		اكسر;
 	}
 #ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
+	ܦܢܐ get_digest(eq, data, blockno, block);
+#ܐܚܪܢܐ
+	ܦܢܐ -1;
 #endif
 }
 
 #define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+صحيح ul_fileeq(بنية ul_fileeq *eq,
+	      بنية ul_fileeq_data *a, بنية ul_fileeq_data *b)
 {
-	int cmp;
+	صحيح cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	ܐܢ (eq->method->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
-	do {
-		unsigned char *da, *db;
+	ܥܒܕ {
+		unsigned حرف *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
 		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
-			goto done;
+		ܐܢ (ca < 0)
+			اذهب done;
 		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
-			goto done;
-		if (ca != cb || ca == 0) {
+		ܐܢ (cb < 0)
+			اذهب done;
+		ܐܢ (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			اكسر;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} ܟܡܐ (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
-			goto done; /* filesize changed? */
+	ܐܢ (cmp == 0) {
+		ܐܢ (!a->is_eof || !b->is_eof)
+			اذهب done; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		ܦܢܐ 1;
 	}
 done:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	ܦܢܐ 0;
 }
 
 #ifdef TEST_PROGRAM_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+صحيح main(صحيح argc, حرف *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
-		{ "method", required_argument, NULL, 'm' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	بنية ul_fileeq eq;
+	بنية ul_fileeq_data a, b, c;
+	ثابت حرف *method = "sha1";
+	ساكن ثابت بنية option longopts[] = {
+		{ "method", required_argument, عدم, 'm' },
+		{ "help", no_argument, عدم, 'h' },
+		{ عدم, 0, عدم, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	صحيح ch, rc;
+	ثابت حرف *file_a = عدم, *file_b = عدم, *file_c = عدم;
+	بنية stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'm':
+	ܟܡܐ ((ch = getopt_long(argc, argv, "m:", longopts, عدم)) != -1) {
+		بدل (ch) {
+		حالة 'm':
 			method = optarg;
-			break;
-		case 'h':
+			اكسر;
+		حالة 'h':
 			printf("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
 				program_invocation_short_name);
-			return EXIT_FAILURE;
+			ܦܢܐ EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	ܐܢ (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	ܐܢ (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	ܐܢ (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	ܐܢ (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	ܐܢ (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	ܐܢ (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	ܐܢ (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	ܐܢ (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
 	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
+	ܐܢ (rc != 0 && strcmp(method, "memcmp") != 0) {
 		method = "memcmp";
 		rc = ul_fileeq_init(&eq, method);
 	}
-	if (rc < 0)
+	ܐܢ (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
 	ul_fileeq_data_set_file(&a, file_a);
 	ul_fileeq_data_set_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
+	ܐܢ (file_c)
 		ul_fileeq_data_set_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	ܐܢ (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
 	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	ܐܢ (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
 		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
@@ -652,10 +652,10 @@ int main(int argc, char *argv[])
 	ul_fileeq_data_deinit(&a);
 	ul_fileeq_data_deinit(&b);
 
-	if (file_c)
+	ܐܢ (file_c)
 		ul_fileeq_data_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	ܦܢܐ EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_FILEEQ */

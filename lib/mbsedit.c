@@ -9,133 +9,133 @@
  *
  * Copyright (C) 2017 Karel Zak <kzak@redhat.com>
  */
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <errno.h>
+#ضمن <stdio.h>
 
-#include "mbsalign.h"
-#include "mbsedit.h"
+#ضمن "mbsalign.h"
+#ضمن "mbsedit.h"
 
-struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
+بنية mbs_editor *mbs_new_edit(حرف *buf, size_t bufsz, size_t ncells)
 {
-	struct mbs_editor *edit = calloc(1, sizeof(*edit));
+	بنية mbs_editor *edit = calloc(1, حجم(*edit));
 
-	if (edit) {
+	ܐܢ (edit) {
 		edit->buf = buf;
 		edit->max_bytes = bufsz;
 		edit->max_cells = ncells;
 		edit->cur_cells = mbs_safe_width(buf);
 		edit->cur_bytes = strlen(buf);
 	}
-	return edit;
+	ܦܢܐ edit;
 }
 
-char *mbs_free_edit(struct mbs_editor *edit)
+حرف *mbs_free_edit(بنية mbs_editor *edit)
 {
-	char *ret = edit ? edit->buf : NULL;
+	حرف *ret = edit ? edit->buf : عدم;
 
-	free(edit);
-	return ret;
+	حرر(edit);
+	ܦܢܐ ret;
 }
 
-static size_t mbs_next(const char *str, size_t *ncells)
+ساكن size_t mbs_next(ثابت حرف *str, size_t *ncells)
 {
 #ifdef HAVE_WIDECHAR
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	ܐܢ (!str || !*str)
+		ܦܢܐ 0;
 
-	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
+	n = mbrtowc(&wc, str, MB_CUR_MAX, عدم);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	ܦܢܐ n;
+#ܐܚܪܢܐ
+	ܐܢ (!str || !*str)
+		ܦܢܐ 0;
 	*ncells = 1;
-	return 1;
+	ܦܢܐ 1;
 #endif
 }
 
-static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
+ساكن size_t mbs_prev(ثابت حرف *start, ثابت حرف *end, size_t *ncells)
 {
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = 0;
-	const char *p, *prev;
+	ثابت حرف *p, *prev;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	ܐܢ (!start || !end || start == end || !*start)
+		ܦܢܐ 0;
 
 	prev = p = start;
-	while (p < end) {
-		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
+	ܟܡܐ (p < end) {
+		n = mbrtowc(&wc, p, MB_CUR_MAX, عدم);
 		prev = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		ܐܢ (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		ܐܚܪܢܐ
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	ܐܢ (prev == end)
+		ܦܢܐ 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	ܦܢܐ n;
+#ܐܚܪܢܐ
+	ܐܢ (!start || !end || start == end || !*start)
+		ܦܢܐ 0;
 	*ncells = 1;
-	return 1;
+	ܦܢܐ 1;
 #endif
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+صحيح mbs_edit_goto(بنية mbs_editor *edit, صحيح where)
 {
-	switch (where) {
-	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+	بدل (where) {
+	حالة MBS_EDIT_LEFT:
+		ܐܢ (edit->cursor == 0)
+			ܦܢܐ 1;
+		ܐܚܪܢܐ {
 			size_t n, cells;
 			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			ܐܢ (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
-		break;
-	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		اكسر;
+	حالة MBS_EDIT_RIGHT:
+		ܐܢ (edit->cursor_cells >= edit->cur_cells)
+			ܦܢܐ 1;
+		ܐܚܪܢܐ {
 			size_t n, cells;
 			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			ܐܢ (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
 		}
-		break;
-	case MBS_EDIT_HOME:
+		اكسر;
+	حالة MBS_EDIT_HOME:
 		edit->cursor = 0;
 		edit->cursor_cells = 0;
-		break;
-	case MBS_EDIT_END:
+		اكسر;
+	حالة MBS_EDIT_END:
 		edit->cursor = edit->cur_bytes;
 		edit->cursor_cells = edit->cur_cells;
-		break;
-	default:
-		return -EINVAL;
+		اكسر;
+	افتراضي:
+		ܦܢܐ -EINVAL;
 	}
 
-	return 0;
+	ܦܢܐ 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
-static size_t remove_next(char *str, size_t *ncells)
+ساكن size_t remove_next(حرف *str, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t bytes, move_bytes, n;
@@ -146,28 +146,28 @@ static size_t remove_next(char *str, size_t *ncells)
 
 	memmove(str, str + n, move_bytes);
 	str[bytes - n] = '\0';
-	return n;
+	ܦܢܐ n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+ساكن size_t mbs_insert(حرف *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t n = 1, bytes;
-	char *in;
+	حرف *in;
 
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
 	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	ܐܢ (!in)
+		ܦܢܐ -1;
 
 	n = wctomb(in, wc);
-	if (n == (size_t) -1)
-		goto out;
+	ܐܢ (n == (size_t) -1)
+		اذهب out;
 	*ncells = wcwidth(wc);
-#else
+#ܐܚܪܢܐ
 	*ncells = 1;
-	in = (char *) &c;
+	in = (حرف *) &c;
 #endif
 	bytes       = strlen(str);
 
@@ -176,57 +176,57 @@ static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
 	str[bytes + n] = '\0';
 #ifdef HAVE_WIDECHAR
 out:
-	free(in);
+	حرر(in);
 #endif
-	return n;
+	ܦܢܐ n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+ساكن صحيح mbs_edit_remove(بنية mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	ܐܢ (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
+		ܦܢܐ 1;
 
 	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	ܐܢ (n == (size_t)-1)
+		ܦܢܐ 1;
 
 	edit->cur_bytes -= n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	ܦܢܐ 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+صحيح mbs_edit_delete(بنية mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
+	ܐܢ (edit->cursor >= edit->cur_bytes
 	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+		ܦܢܐ 1;
 
-	return mbs_edit_remove(edit);
+	ܦܢܐ mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+صحيح mbs_edit_backspace(بنية mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	ܐܢ (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
+		ܦܢܐ mbs_edit_remove(edit);
+	ܦܢܐ 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+صحيح mbs_edit_insert(بنية mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	ܐܢ (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
+		ܦܢܐ 1;
 
 	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	ܐܢ (n == (size_t)-1)
+		ܦܢܐ 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
 	edit->cur_bytes += n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	ܦܢܐ 0;
 }

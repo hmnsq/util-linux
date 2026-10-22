@@ -4,21 +4,21 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <ctype.h>
-#include <unistd.h>
+#ضمن <ctype.h>
+#ضمن <unistd.h>
 
 #ifdef HAVE_GETTTYNAM
 # include <ttyent.h>
 #endif
 
-#include "c.h"
-#include "ttyutils.h"
+#ضمن "c.h"
+#ضمن "ttyutils.h"
 
 #ifdef __linux__
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "linux"
 #  endif
-#  if defined (__s390__) || defined (__s390x__)
+#  ܐܢ defined (__s390__) || defined (__s390x__)
 #    define DEFAULT_TTYS0  "dumb"
 #    define DEFAULT_TTY32  "ibm327x"
 #    define DEFAULT_TTYS1  "vt220"
@@ -26,14 +26,14 @@
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#elif defined(__GNU__)
+#وإلاإذا defined(__GNU__)
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "hurd"
 #  endif
 #  ifndef DEFAULT_STERM
 #    define DEFAULT_STERM  "vt102"
 #  endif
-#else
+#ܐܚܪܢܐ
 #  ifndef DEFAULT_VCTERM
 #    define DEFAULT_VCTERM "vt100"
 #  endif
@@ -42,163 +42,163 @@
 #  endif
 #endif
 
-static int get_env_int(const char *name)
+ساكن صحيح get_env_int(ثابت حرف *name)
 {
-	const char *cp = getenv(name);
+	ثابت حرف *cp = getenv(name);
 
-	if (cp) {
-		char *end = NULL;
+	ܐܢ (cp) {
+		حرف *end = عدم;
 		long x;
 
 		errno = 0;
 		x = strtol(cp, &end, 10);
 
-		if (errno == 0 && end && *end == '\0' && end > cp &&
+		ܐܢ (errno == 0 && end && *end == '\0' && end > cp &&
 		    x > 0 && x <= INT_MAX)
-			return x;
+			ܦܢܐ x;
 	}
 
-	return -1;
+	ܦܢܐ -1;
 }
 
-int get_terminal_dimension(int *cols, int *lines)
+صحيح get_terminal_dimension(صحيح *cols, صحيح *lines)
 {
-	int c = 0, l = 0;
+	صحيح c = 0, l = 0;
 
-#if defined(TIOCGWINSZ)
-	struct winsize	w_win;
-	if (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
+#ܐܢ defined(TIOCGWINSZ)
+	بنية winsize	w_win;
+	ܐܢ (ioctl (STDOUT_FILENO, TIOCGWINSZ, &w_win) == 0) {
 		c = w_win.ws_col;
 		l = w_win.ws_row;
 	}
-#elif defined(TIOCGSIZE)
-	struct ttysize	t_win;
-	if (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
+#وإلاإذا defined(TIOCGSIZE)
+	بنية ttysize	t_win;
+	ܐܢ (ioctl (STDOUT_FILENO, TIOCGSIZE, &t_win) == 0) {
 		c = t_win.ts_cols;
 		l = t_win.ts_lines;
 	}
 #endif
-	if (cols) {
-		if (c <= 0)
+	ܐܢ (cols) {
+		ܐܢ (c <= 0)
 			c = get_env_int("COLUMNS");
 		*cols = c;
 	}
-	if (lines) {
-		if (l <= 0)
+	ܐܢ (lines) {
+		ܐܢ (l <= 0)
 			l = get_env_int("LINES");
 		*lines = l;
 	}
-	return 0;
+	ܦܢܐ 0;
 }
 
-int get_terminal_width(int default_width)
+صحيح get_terminal_width(صحيح default_width)
 {
-	int width = 0;
+	صحيح width = 0;
 
-	get_terminal_dimension(&width, NULL);
+	get_terminal_dimension(&width, عدم);
 
-	return width > 0 ? width : default_width;
+	ܦܢܐ width > 0 ? width : default_width;
 }
 
-int get_terminal_stdfd(void)
+صحيح get_terminal_stdfd(فراغ)
 {
-	if (isatty(STDIN_FILENO))
-		return STDIN_FILENO;
-	if (isatty(STDOUT_FILENO))
-		return STDOUT_FILENO;
-	if (isatty(STDERR_FILENO))
-		return STDERR_FILENO;
+	ܐܢ (isatty(STDIN_FILENO))
+		ܦܢܐ STDIN_FILENO;
+	ܐܢ (isatty(STDOUT_FILENO))
+		ܦܢܐ STDOUT_FILENO;
+	ܐܢ (isatty(STDERR_FILENO))
+		ܦܢܐ STDERR_FILENO;
 
-	return -EINVAL;
+	ܦܢܐ -EINVAL;
 }
 
-int get_terminal_name(const char **path,
-		      const char **name,
-		      const char **number)
+صحيح get_terminal_name(ثابت حرف **path,
+		      ثابت حرف **name,
+		      ثابت حرف **number)
 {
-	const char *tty;
-	const char *p;
-	int fd;
+	ثابت حرف *tty;
+	ثابت حرف *p;
+	صحيح fd;
 
 
-	if (name)
-		*name = NULL;
-	if (path)
-		*path = NULL;
-	if (number)
-		*number = NULL;
+	ܐܢ (name)
+		*name = عدم;
+	ܐܢ (path)
+		*path = عدم;
+	ܐܢ (number)
+		*number = عدم;
 
 	fd = get_terminal_stdfd();
-	if (fd < 0)
-		return fd;	/* error */
+	ܐܢ (fd < 0)
+		ܦܢܐ fd;	/* error */
 
 	tty = ttyname(fd);
-	if (!tty)
-		return -1;
+	ܐܢ (!tty)
+		ܦܢܐ -1;
 
-	if (path)
+	ܐܢ (path)
 		*path = tty;
-	if (name || number)
+	ܐܢ (name || number)
 		tty = strncmp(tty, "/dev/", 5) == 0 ? tty + 5 : tty;
-	if (name)
+	ܐܢ (name)
 		*name = tty;
-	if (number) {
-		for (p = tty; p && *p; p++) {
-			if (isdigit(*p)) {
+	ܐܢ (number) {
+		لكل (p = tty; p && *p; p++) {
+			ܐܢ (isdigit(*p)) {
 				*number = p;
-				break;
+				اكسر;
 			}
 		}
 	}
-	return 0;
+	ܦܢܐ 0;
 }
 
-int get_terminal_type(const char **type)
+صحيح get_terminal_type(ثابت حرف **type)
 {
 	*type = getenv("TERM");
-	if (*type)
-		return -EINVAL;
-	return 0;
+	ܐܢ (*type)
+		ܦܢܐ -EINVAL;
+	ܦܢܐ 0;
 }
 
-char *get_terminal_default_type(const char *ttyname, int is_serial)
+حرف *get_terminal_default_type(ثابت حرف *ttyname, صحيح is_serial)
 {
-	if (ttyname) {
+	ܐܢ (ttyname) {
 #ifdef HAVE_GETTTYNAM
-		struct ttyent *ent = getttynam(ttyname);
+		بنية ttyent *ent = getttynam(ttyname);
 
-		if (ent && ent->ty_type)
-			return strdup(ent->ty_type);
+		ܐܢ (ent && ent->ty_type)
+			ܦܢܐ strdup(ent->ty_type);
 #endif
 
-#if defined (__s390__) || defined (__s390x__)
+#ܐܢ defined (__s390__) || defined (__s390x__)
 		/*
 		 * Special terminal on first serial line on a S/390(x) which
 		 * is due legacy reasons a block terminal of type 3270 or
 		 * higher.  Whereas the second serial line on a S/390(x) is
 		 * a real character terminal which is compatible with VT220.
 		 */
-		if (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
-			return strdup(DEFAULT_TTYS0);
-		else if (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
-			return strdup(DEFAULT_TTY32);
-		else if (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
-			return strdup(DEFAULT_TTYS1);
+		ܐܢ (strcmp(ttyname, "ttyS0") == 0)		/* linux/drivers/s390/char/con3215.c */
+			ܦܢܐ strdup(DEFAULT_TTYS0);
+		ܐܚܪܢܐ ܐܢ (strncmp(ttyname, "3270/tty", 8) == 0)	/* linux/drivers/s390/char/con3270.c */
+			ܦܢܐ strdup(DEFAULT_TTY32);
+		ܐܚܪܢܐ ܐܢ (strcmp(ttyname, "ttyS1") == 0)		/* linux/drivers/s390/char/sclp_vt220.c */
+			ܦܢܐ strdup(DEFAULT_TTYS1);
 #endif
 	}
 
-	return strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
+	ܦܢܐ strdup(is_serial ? DEFAULT_STERM : DEFAULT_VCTERM);
 }
 
 #ifdef TEST_PROGRAM_TTYUTILS
 # include <stdlib.h>
-int main(void)
+صحيح main(فراغ)
 {
-	const char *path, *name, *num;
-	int c, l;
+	ثابت حرف *path, *name, *num;
+	صحيح c, l;
 
-	if (get_terminal_name(&path, &name, &num) == 0) {
-		char *term;
+	ܐܢ (get_terminal_name(&path, &name, &num) == 0) {
+		حرف *term;
 
 		fprintf(stderr, "tty path:      %s\n", path);
 		fprintf(stderr, "tty name:      %s\n", name);
@@ -208,13 +208,13 @@ int main(void)
 
 		term = get_terminal_default_type(name, 0);
 		fprintf(stderr, "tty dflt term: %s\n", term);
-		free(term);
+		حرر(term);
 	}
 	get_terminal_dimension(&c, &l);
 	fprintf(stderr,         "tty cols:      %d\n", c);
 	fprintf(stderr,         "tty lines:     %d\n", l);
 
 
-	return EXIT_SUCCESS;
+	ܦܢܐ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_TTYUTILS */

@@ -14,73 +14,73 @@
  *    Modified the original version from systemd project for util-linux.
  */
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <assert.h>
+#ضمن <stdlib.h>
+#ضمن <stdarg.h>
+#ضمن <string.h>
+#ضمن <errno.h>
+#ضمن <stdbool.h>
+#ضمن <assert.h>
 
-#include "strutils.h"
-#include "strv.h"
+#ضمن "strutils.h"
+#ضمن "strv.h"
 
-static void ul_strv_clear(char **l)
+ساكن فراغ ul_strv_clear(حرف **l)
 {
-        char **k;
+        حرف **k;
 
-        if (!l)
-                return;
+        ܐܢ (!l)
+                ܦܢܐ;
 
-        for (k = l; *k; k++)
-                free(*k);
+        لكل (k = l; *k; k++)
+                حرر(*k);
 
-        *l = NULL;
+        *l = عدم;
 }
 
-char **ul_strv_free(char **l)
+حرف **ul_strv_free(حرف **l)
 {
         ul_strv_clear(l);
-        free(l);
-        return NULL;
+        حرر(l);
+        ܦܢܐ عدم;
 }
 
-char **ul_strv_copy(char * const *l)
+حرف **ul_strv_copy(حرف * ثابت *l)
 {
-        char **r, **k;
+        حرف **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = malloc(حجم(حرف *) * (ul_strv_length(l) + 1));
+        ܐܢ (!r)
+                ܦܢܐ عدم;
 
-        if (l)
-                for (; *l; k++, l++) {
+        ܐܢ (l)
+                لكل (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        ܐܢ (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                ܦܢܐ عدم;
                         }
                 }
 
-        *k = NULL;
-        return r;
+        *k = عدم;
+        ܦܢܐ r;
 }
 
-unsigned ul_strv_length(char * const *l) {
+unsigned ul_strv_length(حرف * ثابت *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        ܐܢ (!l)
+                ܦܢܐ 0;
 
-        for (; *l; l++)
+        لكل (; *l; l++)
                 n++;
 
-        return n;
+        ܦܢܐ n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+ساكن حرف **ul_strv_new_ap(ثابت حرف *x, va_list ap)
 {
-        const char *s;
-        char **a;
+        ثابت حرف *s;
+        حرف **a;
         unsigned n = 0, i = 0;
         va_list aq;
 
@@ -89,13 +89,13 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        ܐܢ (x) {
+                n = x == (ثابت حرف*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
-                                continue;
+                ܟܡܐ ((s = va_arg(aq, ثابت حرف*))) {
+                        ܐܢ (s == (ثابت حرف*) -1)
+                                استمر;
 
                         n++;
                 }
@@ -103,153 +103,153 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = malloc(حجم(حرف *) * (n + 1));
+        ܐܢ (!a)
+                ܦܢܐ عدم;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        ܐܢ (x) {
+                ܐܢ (x != (ثابت حرف*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
-                                goto fail;
+                        ܐܢ (!a[i])
+                                اذهب fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                ܟܡܐ ((s = va_arg(ap, ثابت حرف*))) {
 
-                        if (s == (const char*) -1)
-                                continue;
+                        ܐܢ (s == (ثابت حرف*) -1)
+                                استمر;
 
                         a[i] = strdup(s);
-                        if (!a[i])
-                                goto fail;
+                        ܐܢ (!a[i])
+                                اذهب fail;
 
                         i++;
                 }
         }
 
-        a[i] = NULL;
+        a[i] = عدم;
 
-        return a;
+        ܦܢܐ a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        ܦܢܐ عدم;
 }
 
-char **ul_strv_new(const char *x, ...)
+حرف **ul_strv_new(ثابت حرف *x, ...)
 {
-        char **r;
+        حرف **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        ܦܢܐ r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+صحيح ul_strv_extend_strv(حرف ***a, حرف **b)
 {
-        int r;
-        char **s;
+        صحيح r;
+        حرف **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                ܐܢ (r < 0)
+                        ܦܢܐ r;
         }
 
-        return 0;
+        ܦܢܐ 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+صحيح ul_strv_extend_strv_concat(حرف ***a, حرف **b, ثابت حرف *suffix)
 {
-        int r;
-        char **s;
+        صحيح r;
+        حرف **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                حرف *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                ܐܢ (!v)
+                        ܦܢܐ -ENOMEM;
 
                 r = ul_strv_push(a, v);
-                if (r < 0) {
-                        free(v);
-                        return r;
+                ܐܢ (r < 0) {
+                        حرر(v);
+                        ܦܢܐ r;
                 }
         }
 
-        return 0;
+        ܦܢܐ 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        لكل ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+حرف **ul_strv_split(ثابت حرف *s, ثابت حرف *separator)
 {
-        const char *word, *state;
+        ثابت حرف *word, *state;
         size_t l;
         unsigned n, i;
-        char **r;
+        حرف **r;
 
-        assert(s);
+        أكد(s);
 
         n = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = malloc(حجم(حرف *) * (n + 1));
+        ܐܢ (!r)
+                ܦܢܐ عدم;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                ܐܢ (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        ܦܢܐ عدم;
                 }
 
                 i++;
         }
 
-        r[i] = NULL;
-        return r;
+        r[i] = عدم;
+        ܦܢܐ r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+حرف *ul_strv_join(حرف **l, ثابت حرف *separator)
 {
-        char *r, *e;
-        char **s;
+        حرف *r, *e;
+        حرف **s;
         size_t n, k;
 
-        if (!separator)
+        ܐܢ (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                ܐܢ (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        ܐܢ (!r)
+                ܦܢܐ عدم;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                ܐܢ (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,167 +257,167 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        ܦܢܐ r;
 }
 
-int ul_strv_push(char ***l, char *value)
+صحيح ul_strv_push(حرف ***l, حرف *value)
 {
-        char **c;
+        حرف **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        ܐܢ (!value)
+                ܦܢܐ 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ܐܢ (m < n)
+                ܦܢܐ -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, حجم(حرف *));
+        ܐܢ (!c)
+                ܦܢܐ -ENOMEM;
 
         c[n] = value;
-        c[n+1] = NULL;
+        c[n+1] = عدم;
 
         *l = c;
-        return 0;
+        ܦܢܐ 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+صحيح ul_strv_push_prepend(حرف ***l, حرف *value)
 {
-        char **c;
+        حرف **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        ܐܢ (!value)
+                ܦܢܐ 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        ܐܢ (m < n)
+                ܦܢܐ -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = malloc(حجم(حرف *) * m);
+        ܐܢ (!c)
+                ܦܢܐ -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        لكل (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
         c[0] = value;
-        c[n+1] = NULL;
+        c[n+1] = عدم;
 
-        free(*l);
+        حرر(*l);
         *l = c;
 
-        return 0;
+        ܦܢܐ 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+صحيح ul_strv_consume(حرف ***l, حرف *value)
 {
-        int r;
+        صحيح r;
 
         r = ul_strv_push(l, value);
-        if (r < 0)
-                free(value);
+        ܐܢ (r < 0)
+                حرر(value);
 
-        return r;
+        ܦܢܐ r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+صحيح ul_strv_consume_prepend(حرف ***l, حرف *value)
 {
-        int r;
+        صحيح r;
 
         r = ul_strv_push_prepend(l, value);
-        if (r < 0)
-                free(value);
+        ܐܢ (r < 0)
+                حرر(value);
 
-        return r;
+        ܦܢܐ r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+صحيح ul_strv_extend(حرف ***l, ثابت حرف *value)
 {
-        char *v;
+        حرف *v;
 
-        if (!value)
-                return 0;
+        ܐܢ (!value)
+                ܦܢܐ 0;
 
         v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        ܐܢ (!v)
+                ܦܢܐ -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        ܦܢܐ ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+حرف **ul_strv_remove(حرف **l, ثابت حرف *s)
 {
-        char **f, **t;
+        حرف **f, **t;
 
-        if (!l)
-                return NULL;
+        ܐܢ (!l)
+                ܦܢܐ عدم;
 
-        assert(s);
+        أكد(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
-                        free(*f);
-                else
+        لكل (f = t = l; *f; f++)
+                ܐܢ (strcmp(*f, s) == 0)
+                        حرر(*f);
+                ܐܚܪܢܐ
                         *(t++) = *f;
 
-        *t = NULL;
-        return l;
+        *t = عدم;
+        ܦܢܐ l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+صحيح ul_strv_extendf(حرف ***l, ثابت حرف *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        حرف *x;
+        صحيح r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        ܐܢ (r < 0)
+                ܦܢܐ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ܦܢܐ ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+صحيح ul_strv_extendv(حرف ***l, ثابت حرف *format, va_list ap)
 {
-        char *x;
-        int r;
+        حرف *x;
+        صحيح r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        ܐܢ (r < 0)
+                ܦܢܐ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        ܦܢܐ ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+حرف **ul_strv_reverse(حرف **l)
 {
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        ܐܢ (n <= 1)
+                ܦܢܐ l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        لكل (i = 0; i < n / 2; i++) {
+                حرف *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        ܦܢܐ l;
 }

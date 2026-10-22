@@ -7,37 +7,37 @@
  * the terms of the Modified BSD License. The complete text of the license is
  * available in the Documentation/licenses/COPYING.BSD-3-Clause file.
  */
-#include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/time.h>
+#ضمن <stdio.h>
+#ضمن <unistd.h>
+#ضمن <fcntl.h>
+#ضمن <stdlib.h>
+#ضمن <string.h>
+#ضمن <sys/time.h>
 #ifdef HAVE_SYS_SYSCALL_H
-#include <sys/syscall.h>
+#ضمن <sys/syscall.h>
 #endif
-#include "c.h"
-#include "timeutils.h"
-#include "randutils.h"
-#include "nls.h"
+#ضمن "c.h"
+#ضمن "timeutils.h"
+#ضمن "randutils.h"
+#ضمن "nls.h"
 
 
 #ifdef HAVE_GETRANDOM
 # include <sys/random.h>
-#elif defined (__linux__)
-# if !defined(SYS_getrandom) && defined(__NR_getrandom)
+#وإلاإذا defined (__linux__)
+# ܐܢ !defined(SYS_getrandom) && defined(__NR_getrandom)
    /* usable kernel-headers, but old glibc-headers */
 #  define SYS_getrandom __NR_getrandom
 # endif
 #endif
 
-#if !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
+#ܐܢ !defined(HAVE_GETRANDOM) && defined(SYS_getrandom)
 /* libc without function, but we have syscall */
 #define GRND_NONBLOCK 0x01
 #define GRND_RANDOM 0x02
-static int getrandom(void *buf, size_t buflen, unsigned int flags)
+ساكن صحيح getrandom(فراغ *buf, size_t buflen, unsigned صحيح flags)
 {
-	return (syscall(SYS_getrandom, buf, buflen, flags));
+	ܦܢܐ (syscall(SYS_getrandom, buf, buflen, flags));
 }
 # define HAVE_GETRANDOM
 #endif
@@ -47,18 +47,18 @@ static int getrandom(void *buf, size_t buflen, unsigned int flags)
 #define rand()		random()
 #endif
 
-#if defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
+#ܐܢ defined(__linux__) && defined(__NR_gettid) && defined(HAVE_JRAND48)
 #define DO_JRAND_MIX
 THREAD_LOCAL unsigned short ul_jrand_seed[3];
 #endif
 
-static void crank_random(void)
+ساكن فراغ crank_random(فراغ)
 {
-	int i;
-	struct timeval tv;
-	unsigned int n_pid, n_uid;
+	صحيح i;
+	بنية timeval tv;
+	unsigned صحيح n_pid, n_uid;
 
-	gettimeofday(&tv, NULL);
+	gettimeofday(&tv, عدم);
 	n_pid = getpid();
 	n_uid = getuid();
 	srand((n_pid << 16) ^ n_uid ^ tv.tv_sec ^ tv.tv_usec);
@@ -69,23 +69,23 @@ static void crank_random(void)
 	ul_jrand_seed[2] = (tv.tv_sec ^ tv.tv_usec) >> 16;
 #endif
 	/* Crank the random number generator a few times */
-	gettimeofday(&tv, NULL);
-	for (i = (tv.tv_sec ^ tv.tv_usec) & 0x1F; i > 0; i--)
+	gettimeofday(&tv, عدم);
+	لكل (i = (tv.tv_sec ^ tv.tv_usec) & 0x1F; i > 0; i--)
 		rand();
 }
 
-static int random_get_fd(ul_random_src_t *src)
+ساكن صحيح random_get_fd(ul_random_src_t *src)
 {
-	int fd;
+	صحيح fd;
 
 	*src = UL_RAND_URANDOM;
 	fd = open("/dev/urandom", O_RDONLY | O_CLOEXEC);
-	if (fd == -1) {
+	ܐܢ (fd == -1) {
 		*src = UL_RAND_RANDOM;
 		fd = open("/dev/random", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
 	}
 	crank_random();
-	return fd;
+	ܦܢܐ fd;
 }
 
 /*
@@ -101,37 +101,37 @@ static int random_get_fd(ul_random_src_t *src)
  *
  * Returns source of random bytes (0 for weak quality).
  */
-ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
+ul_random_src_t ul_random_get_bytes(فراغ *buf, size_t nbytes)
 {
-	unsigned char *cp = (unsigned char *)buf;
+	unsigned حرف *cp = (unsigned حرف *)buf;
 	size_t i, n = nbytes;
 	ul_random_src_t src;
-	int lose_counter = 0;
+	صحيح lose_counter = 0;
 
 #ifdef HAVE_GETRANDOM
-	while (n > 0) {
-		int x;
+	ܟܡܐ (n > 0) {
+		صحيح x;
 
 		errno = 0;
 		x = getrandom(cp, n, GRND_NONBLOCK);
-		if (x > 0) {			/* success */
+		ܐܢ (x > 0) {			/* success */
 		       n -= x;
 		       cp += x;
 		       lose_counter = 0;
 		       errno = 0;
-		} else if (errno == ENOSYS) {	/* kernel without getrandom() */
-			break;
+		} ܐܚܪܢܐ ܐܢ (errno == ENOSYS) {	/* kernel without getrandom() */
+			اكسر;
 
-		} else if (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
+		} ܐܚܪܢܐ ܐܢ (errno == EAGAIN && lose_counter < UL_RAND_READ_ATTEMPTS) {
 			xusleep(UL_RAND_READ_DELAY);	/* no entropy, wait and try again */
 			lose_counter++;
-		} else
-			break;
+		} ܐܚܪܢܐ
+			اكسر;
 	}
-	if (n == 0)
-		return UL_RAND_GETRANDOM;
+	ܐܢ (n == 0)
+		ܦܢܐ UL_RAND_GETRANDOM;
 
-	if (errno == ENOSYS)
+	ܐܢ (errno == ENOSYS)
 	/*
 	 * We've been built against headers that support getrandom, but the
 	 * running kernel does not.  Fallback to reading from /dev/{u,}random
@@ -139,17 +139,17 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 	 */
 #endif
 	{
-		int fd = random_get_fd(&src);
+		صحيح fd = random_get_fd(&src);
 
 		lose_counter = 0;
-		if (fd >= 0) {
-			while (n > 0) {
-				ssize_t x = read(fd, cp, n);
-				if (x <= 0) {
-					if (lose_counter++ > UL_RAND_READ_ATTEMPTS)
-						break;
+		ܐܢ (fd >= 0) {
+			ܟܡܐ (n > 0) {
+				ssize_t x = اقرأ(fd, cp, n);
+				ܐܢ (x <= 0) {
+					ܐܢ (lose_counter++ > UL_RAND_READ_ATTEMPTS)
+						اكسر;
 					xusleep(UL_RAND_READ_DELAY);
-					continue;
+					استمر;
 				}
 				n -= x;
 				cp += x;
@@ -158,90 +158,90 @@ ul_random_src_t ul_random_get_bytes(void *buf, size_t nbytes)
 
 			close(fd);
 		}
-		if (n == 0)
-			return src;
+		ܐܢ (n == 0)
+			ܦܢܐ src;
 	}
 	/*
 	 * We do this all the time, but this is the only source of
 	 * randomness if /dev/random/urandom is out to lunch.
 	 */
 	crank_random();
-	for (cp = buf, i = 0; i < nbytes; i++)
+	لكل (cp = buf, i = 0; i < nbytes; i++)
 		*cp++ ^= (rand() >> 7) & 0xFF;
 
 #ifdef DO_JRAND_MIX
 	{
 		unsigned short tmp_seed[3];
 
-		memcpy(tmp_seed, ul_jrand_seed, sizeof(tmp_seed));
+		memcpy(tmp_seed, ul_jrand_seed, حجم(tmp_seed));
 		ul_jrand_seed[2] = ul_jrand_seed[2] ^ syscall(__NR_gettid);
-		for (cp = buf, i = 0; i < nbytes; i++)
+		لكل (cp = buf, i = 0; i < nbytes; i++)
 			*cp++ ^= (jrand48(tmp_seed) >> 7) & 0xFF;
 		memcpy(ul_jrand_seed, tmp_seed,
-		       sizeof(ul_jrand_seed)-sizeof(unsigned short));
+		       حجم(ul_jrand_seed)-حجم(unsigned short));
 	}
 #endif
 
-	return UL_RAND_WEAK;
+	ܦܢܐ UL_RAND_WEAK;
 }
 
 
 /*
  * Tell source of randomness.
  */
-const char *ul_random_tell_source(ul_random_src_t src)
+ثابت حرف *ul_random_tell_source(ul_random_src_t src)
 {
-	const char *s;
+	ثابت حرف *s;
 
-	switch (src) {
-	case UL_RAND_GETRANDOM:
+	بدل (src) {
+	حالة UL_RAND_GETRANDOM:
 		s = _("getrandom() function");
-		break;
-	case UL_RAND_RANDOM:
+		اكسر;
+	حالة UL_RAND_RANDOM:
 		s = "/dev/random";
-		break;
-	case UL_RAND_URANDOM:
+		اكسر;
+	حالة UL_RAND_URANDOM:
 		s = "/dev/urandom";
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		s = _("libc pseudo-random functions");
-		break;
+		اكسر;
 	}
 
-	return s;
+	ܦܢܐ s;
 }
 
 #ifdef TEST_PROGRAM_RANDUTILS
-#include <inttypes.h>
+#ضمن <inttypes.h>
 
-int main(int argc, char *argv[])
+صحيح main(صحيح argc, حرف *argv[])
 {
 	size_t i, n;
 	int64_t *vp, v;
-	char *buf;
+	حرف *buf;
 	size_t bufsz;
 
 	n = argc == 1 ? 16 : atoi(argv[1]);
 
 	printf("Multiple random calls:\n");
-	for (i = 0; i < n; i++) {
-		ul_random_get_bytes(&v, sizeof(v));
+	لكل (i = 0; i < n; i++) {
+		ul_random_get_bytes(&v, حجم(v));
 		printf("#%02zu: %25"PRId64"\n", i, v);
 	}
 
 
 	printf("One random call:\n");
-	bufsz = n * sizeof(*vp);
+	bufsz = n * حجم(*vp);
 	buf = malloc(bufsz);
-	if (!buf)
+	ܐܢ (!buf)
 		err(EXIT_FAILURE, "failed to allocate buffer");
 
 	ul_random_get_bytes(buf, bufsz);
-	for (i = 0; i < n; i++) {
-		vp = (int64_t *) (buf + (i * sizeof(*vp)));
+	لكل (i = 0; i < n; i++) {
+		vp = (int64_t *) (buf + (i * حجم(*vp)));
 		printf("#%02zu: %25"PRId64"\n", i, *vp);
 	}
 
-	return EXIT_SUCCESS;
+	ܦܢܐ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_RANDUTILS */

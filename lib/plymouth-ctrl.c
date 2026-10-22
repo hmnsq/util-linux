@@ -23,82 +23,82 @@
  * Author: Werner Fink <werner@suse.de>
  */
 
-#include <errno.h>
-#include <limits.h>
-#include <poll.h>
-#include <signal.h>
-#include <stdarg.h>
-#include <stdlib.h>
-#include <sys/mman.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <unistd.h>
+#ضمن <errno.h>
+#ضمن <limits.h>
+#ضمن <poll.h>
+#ضمن <signal.h>
+#ضمن <stdarg.h>
+#ضمن <stdlib.h>
+#ضمن <sys/mman.h>
+#ضمن <sys/socket.h>
+#ضمن <sys/types.h>
+#ضمن <sys/un.h>
+#ضمن <unistd.h>
 
-#include "all-io.h"
-#include "c.h"
-#include "nls.h"
-#include "plymouth-ctrl.h"
+#ضمن "all-io.h"
+#ضمن "c.h"
+#ضمن "nls.h"
+#ضمن "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+ساكن صحيح can_read(صحيح fd, ثابت long timeout)
 {
-	struct pollfd fds = {
+	بنية pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	صحيح ret;
 
-	do {
+	ܥܒܕ {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} ܟܡܐ ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	ܦܢܐ (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+ساكن صحيح open_un_socket_and_connect(فراغ)
 {
 	/* The abstract UNIX socket of plymouth */
-	struct sockaddr_un su = {
+	بنية sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	ثابت صحيح one = 1;
+	صحيح fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	ܐܢ (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
-		goto err;
+		اذهب err;
 	}
 
-	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, حجم(one));
+	ܐܢ (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		اذهب err;
 	}
 
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
-	ret = connect(fd, (struct sockaddr *) &su,
-		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ret = connect(fd, (بنية sockaddr *) &su,
+		offsetof(بنية sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
+	ܐܢ (ret < 0) {
+		ܐܢ (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
-		goto err;
+		اذهب err;
 	}
 err:
-	return fd;
+	ܦܢܐ fd;
 }
 
-int plymouth_command(int cmd, ...)
+صحيح plymouth_command(صحيح cmd, ...)
 {
 	uint8_t answer[2], command[2];
-	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	بنية sigaction sp, op;
+	صحيح fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -107,36 +107,36 @@ int plymouth_command(int cmd, ...)
 
 	/* The plymouthd does read at least two bytes. */
 	command[1] = '\0';
-	switch (cmd) {
-	case MAGIC_PING:
+	بدل (cmd) {
+	حالة MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ܐܢ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, حجم(command));
 		}
-		break;
-	case MAGIC_QUIT:
+		اكسر;
+	حالة MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ܐܢ (fdsock >= 0) {
 			command[0] = cmd;
-			ul_write_all(fdsock, command, sizeof(command));
+			ul_write_all(fdsock, command, حجم(command));
 		}
-		break;
-	default:
+		اكسر;
+	افتراضي:
 		warnx(_("the plymouth request %c is not implemented"), cmd);
-	case '?':
-		goto err;
+	حالة '?':
+		اذهب err;
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
-			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
+	ܐܢ (fdsock >= 0) {
+		ܐܢ (can_read(fdsock, 1000))
+			ul_read_all(fdsock, (حرف *) &answer[0], حجم(answer));
 		close(fdsock);
 	}
-	sigaction(SIGPIPE, &op, NULL);
+	sigaction(SIGPIPE, &op, عدم);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	ܦܢܐ ret;
 }
 
