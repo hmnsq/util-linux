@@ -13,18 +13,18 @@
 
 #define UL_SHA1HANDSOFF
 
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <stdint.h>
 
-#include "sha1.h"
+#അന്തര്ഭാവ "sha1.h"
 
-#define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
+#define rol(മൂല്യം, bits) (((മൂല്യം) << (bits)) | ((മൂല്യം) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#എങ്കിൽ __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 # define blk0(i) block->l[i]
-#else
+#അല്ലെങ്കിൽ
 # define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
     |(rol(block->l[i],8)&0x00FF00FF))
 #endif
@@ -41,12 +41,12 @@
 
 /* Hash a single 512-bit block. This is the core of the algorithm. */
 
-void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
+ശൂന്യം ul_SHA1Transform(uint32_t state[5], സ്ഥിരം unsigned അക്ഷരം buffer[64])
 {
 	uint32_t a, b, c, d, e;
 
-	typedef union {
-		unsigned char c[64];
+	തരനിർവചനം സംഘം {
+		unsigned അക്ഷരം c[64];
 		uint32_t l[16];
 	} CHAR64LONG16;
 
@@ -54,13 +54,13 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	CHAR64LONG16 block[1];	/* use array to appear as a pointer */
 
 	memcpy(block, buffer, 64);
-#else
+#അല്ലെങ്കിൽ
 	/* The following had better never be used because it causes the
 	 * pointer-to-const buffer to be cast into a pointer to non-const.
 	 * And the result is written through.  I threw a "const" in, hoping
 	 * this will cause a diagnostic.
 	 */
-	CHAR64LONG16 *block = (const CHAR64LONG16 *)buffer;
+	CHAR64LONG16 *block = (സ്ഥിരം CHAR64LONG16 *)buffer;
 #endif
 	/* Copy context->state[] to working vars */
 	a = state[0];
@@ -157,22 +157,22 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	state[4] += e;
 	/* Wipe variables */
 #ifdef HAVE_EXPLICIT_BZERO
-	explicit_bzero(&a, sizeof(a));
-	explicit_bzero(&b, sizeof(b));
-	explicit_bzero(&c, sizeof(c));
-	explicit_bzero(&d, sizeof(d));
-	explicit_bzero(&e, sizeof(e));
-#else
+	explicit_bzero(&a, വലുപ്പം(a));
+	explicit_bzero(&b, വലുപ്പം(b));
+	explicit_bzero(&c, വലുപ്പം(c));
+	explicit_bzero(&d, വലുപ്പം(d));
+	explicit_bzero(&e, വലുപ്പം(e));
+#അല്ലെങ്കിൽ
 	a = b = c = d = e = 0;
 #endif
 #ifdef UL_SHA1HANDSOFF
-	memset(block, '\0', sizeof(block));
+	memset(block, '\0', വലുപ്പം(block));
 #endif
 }
 
 /* SHA1Init - Initialize new context */
 
-void ul_SHA1Init(UL_SHA1_CTX *context)
+ശൂന്യം ul_SHA1Init(UL_SHA1_CTX *context)
 {
 	/* SHA1 initialization constants */
 	context->state[0] = 0x67452301;
@@ -180,88 +180,88 @@ void ul_SHA1Init(UL_SHA1_CTX *context)
 	context->state[2] = 0x98BADCFE;
 	context->state[3] = 0x10325476;
 	context->state[4] = 0xC3D2E1F0;
-	context->count[0] = context->count[1] = 0;
+	context->എണ്ണം[0] = context->എണ്ണം[1] = 0;
 }
 
 /* Run your data through this. */
 
-void ul_SHA1Update(UL_SHA1_CTX *context, const unsigned char *data, uint32_t len)
+ശൂന്യം ul_SHA1Update(UL_SHA1_CTX *context, സ്ഥിരം unsigned അക്ഷരം *data, uint32_t len)
 {
 	uint32_t i;
 
 	uint32_t j;
 
-	j = context->count[0];
-	if ((context->count[0] += len << 3) < j)
-		context->count[1]++;
-	context->count[1] += (len >> 29);
+	j = context->എണ്ണം[0];
+	എങ്കിൽ ((context->എണ്ണം[0] += len << 3) < j)
+		context->എണ്ണം[1]++;
+	context->എണ്ണം[1] += (len >> 29);
 	j = (j >> 3) & 63;
-	if ((j + len) > 63) {
+	എങ്കിൽ ((j + len) > 63) {
 		memcpy(&context->buffer[j], data, (i = 64 - j));
 		ul_SHA1Transform(context->state, context->buffer);
-		for (; i + 63 < len; i += 64) {
+		വേണ്ടി (; i + 63 < len; i += 64) {
 			ul_SHA1Transform(context->state, &data[i]);
 		}
 		j = 0;
-	} else
+	} അല്ലെങ്കിൽ
 		i = 0;
 	memcpy(&context->buffer[j], &data[i], len - i);
 }
 
 /* Add padding and return the message digest. */
 
-void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
+ശൂന്യം ul_SHA1Final(unsigned അക്ഷരം digest[20], UL_SHA1_CTX *context)
 {
 	unsigned i;
 
-	unsigned char finalcount[8];
+	unsigned അക്ഷരം finalcount[8];
 
-	unsigned char c;
+	unsigned അക്ഷരം c;
 
-#if 0				/* untested "improvement" by DHR */
+#എങ്കിൽ 0				/* untested "improvement" by DHR */
 	/* Convert context->count to a sequence of bytes
 	 * in finalcount.  Second element first, but
 	 * big-endian order within element.
 	 * But we do it all backwards.
 	 */
-	unsigned char *fcp = &finalcount[8];
+	unsigned അക്ഷരം *fcp = &finalcount[8];
 
-	for (i = 0; i < 2; i++) {
-		uint32_t t = context->count[i];
+	വേണ്ടി (i = 0; i < 2; i++) {
+		uint32_t t = context->എണ്ണം[i];
 
-		int j;
+		പൂർണ്ണസംഖ്യ j;
 
-		for (j = 0; j < 4; t >>= 8, j++)
-			*--fcp = (unsigned char)t}
-#else
-	for (i = 0; i < 8; i++) {
-		finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
+		വേണ്ടി (j = 0; j < 4; t >>= 8, j++)
+			*--fcp = (unsigned അക്ഷരം)t}
+#അല്ലെങ്കിൽ
+	വേണ്ടി (i = 0; i < 8; i++) {
+		finalcount[i] = (unsigned അക്ഷരം)((context->എണ്ണം[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
 	}
 #endif
 	c = 0200;
 	ul_SHA1Update(context, &c, 1);
-	while ((context->count[0] & 504) != 448) {
+	ആകുമ്പോൾ ((context->എണ്ണം[0] & 504) != 448) {
 		c = 0000;
 		ul_SHA1Update(context, &c, 1);
 	}
 	ul_SHA1Update(context, finalcount, 8);	/* Should cause a SHA1Transform() */
-	for (i = 0; i < 20; i++) {
-		digest[i] = (unsigned char)
+	വേണ്ടി (i = 0; i < 20; i++) {
+		digest[i] = (unsigned അക്ഷരം)
 		    ((context->state[i >> 2] >> ((3 - (i & 3)) * 8)) & 255);
 	}
 	/* Wipe variables */
-	memset(context, '\0', sizeof(*context));
-	memset(&finalcount, '\0', sizeof(finalcount));
+	memset(context, '\0', വലുപ്പം(*context));
+	memset(&finalcount, '\0', വലുപ്പം(finalcount));
 }
 
-void ul_SHA1(char *hash_out, const char *str, unsigned len)
+ശൂന്യം ul_SHA1(അക്ഷരം *hash_out, സ്ഥിരം അക്ഷരം *str, unsigned len)
 {
 	UL_SHA1_CTX ctx;
-	unsigned int ii;
+	unsigned പൂർണ്ണസംഖ്യ ii;
 
 	ul_SHA1Init(&ctx);
-	for (ii = 0; ii < len; ii += 1)
-		ul_SHA1Update(&ctx, (const unsigned char *)str + ii, 1);
-	ul_SHA1Final((unsigned char *)hash_out, &ctx);
+	വേണ്ടി (ii = 0; ii < len; ii += 1)
+		ul_SHA1Update(&ctx, (സ്ഥിരം unsigned അക്ഷരം *)str + ii, 1);
+	ul_SHA1Final((unsigned അക്ഷരം *)hash_out, &ctx);
 	hash_out[20] = '\0';
 }

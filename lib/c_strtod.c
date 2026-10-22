@@ -6,104 +6,104 @@
  *
  * Copyright (C) 2021 Karel Zak <kzak@redhat.com>
  */
-#include "c.h"
+#അന്തര്ഭാവ "c.h"
 
-#include <locale.h>
-#include <stdlib.h>
-#include <string.h>
+#അന്തര്ഭാവ <locale.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
 
-#include "c_strtod.h"
+#അന്തര്ഭാവ "c_strtod.h"
 
 #ifdef __APPLE__
 # include <xlocale.h>
 #endif
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#എങ്കിൽ defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
 #endif
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#എങ്കിൽ defined(USE_CLOCALE)
+സ്ഥിതം അസ്ഥിര locale_t c_locale;
 
-static locale_t get_c_locale(void)
+സ്ഥിതം locale_t get_c_locale(ശൂന്യം)
 {
-	if (!c_locale)
+	എങ്കിൽ (!c_locale)
 		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	തിരികെ c_locale;
 }
 #endif
 
 
-double c_strtod(char const *str, char **end)
+ഇരട്ട c_strtod(അക്ഷരം സ്ഥിരം *str, അക്ഷരം **end)
 {
-	double res;
-	int errsv;
+	ഇരട്ട res;
+	പൂർണ്ണസംഖ്യ errsv;
 
-#if defined(USE_CLOCALE)
+#എങ്കിൽ defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#എങ്കിൽ defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
-#elif defined(HAVE_USELOCALE)
+	എങ്കിൽ (cl)
+		തിരികെ strtod_l(str, end, cl);
+#അല്ലെങ്കിലെങ്കിൽ defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	എങ്കിൽ (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		എങ്കിൽ (!org_cl)
+			തിരികെ 0;
 
 		res = strtod(str, end);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		തിരികെ res;
 	}
 #endif /* HAVE_USELOCALE */
 #endif /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	അക്ഷരം *org_locale = setlocale(LC_NUMERIC, ശൂന്യ);
 
-	if (org_locale) {
+	എങ്കിൽ (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		എങ്കിൽ (!org_locale)
+			തിരികെ 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
 	res = strtod(str, end);
 	errsv = errno;
 
-	if (org_locale) {
+	എങ്കിൽ (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
-		free(org_locale);
+		സ്വതന്ത്രം(org_locale);
 	}
 	errno = errsv;
-	return res;
+	തിരികെ res;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	double res;
-	char *end;
+	ഇരട്ട res;
+	അക്ഷരം *end;
 
-	if (argc < 2) {
+	എങ്കിൽ (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		തിരികെ EXIT_FAILURE;
 	}
 
 	res = c_strtod(argv[1], &end);
 	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	തിരികെ errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif

@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#അന്തര്ഭാവ "nls.h"
+#അന്തര്ഭാവ "strutils.h"
+#അന്തര്ഭാവ "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+പൂർണ്ണസംഖ്യ ul_parse_pid_str(അക്ഷരം *pidstr, pid_t *pid_അക്കം, uint64_t *pfd_ino, പൂർണ്ണസംഖ്യ flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	പൂർണ്ണസംഖ്യ rc;
+	അക്ഷരം *end = ശൂന്യ;
+	int64_t അക്കം = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	എങ്കിൽ (!pidstr || !*pidstr || !pid_അക്കം)
+		തിരികെ -(errno = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	അക്കം = strtoimax(pidstr, &end, 10);
+	എങ്കിൽ (അക്കം == 0 && end == pidstr)
+		തിരികെ -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	എങ്കിൽ (errno == ERANGE || അക്കം < SINT_MIN(pid_t) || അക്കം > SINT_MAX(pid_t))
+		തിരികെ -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	എങ്കിൽ (അക്കം == 0 && !(flags & UL_PID_ZERO))
+		തിരികെ -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	എങ്കിൽ (അക്കം < 0 && !(flags & UL_PID_NEGATIVE))
+		തിരികെ -(errno = ERANGE);
 
-	*pid_num = (pid_t) num;
+	*pid_അക്കം = (pid_t) അക്കം;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	എങ്കിൽ (*end == ':' && pfd_ino && അക്കം > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		എങ്കിൽ (rc < 0)
+			തിരികെ rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		എങ്കിൽ (*pfd_ino == 0)
+			തിരികെ -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	എങ്കിൽ (end && *end != '\0')
+		തിരികെ -(errno = EINVAL);
+	തിരികെ 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+ശൂന്യം ul_parse_pid_str_or_err(അക്ഷരം *pidstr, pid_t *pid_അക്കം, uint64_t *pfd_ino, പൂർണ്ണസംഖ്യ flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	എങ്കിൽ (ul_parse_pid_str(pidstr, pid_അക്കം, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -92,9 +92,9 @@ void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, in
 
 #ifdef TEST_PROGRAM_PARSEPID
 
-#include <getopt.h>
+#അന്തര്ഭാവ <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+സ്ഥിതം ശൂന്യം __attribute__((__noreturn__)) usage(ശൂന്യം)
 {
 	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
 	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം **argv)
 {
-	int c, flags = 0, rc = 0;
+	പൂർണ്ണസംഖ്യ c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_അക്കം = 0;
+	അക്ഷരം *str = ശൂന്യ;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	സ്ഥിതം സ്ഥിരം ഘടന option longopts[] = {
+		{ "zero",	0, ശൂന്യ, 'z' },
+		{ "negative",	0, ശൂന്യ, 'n' },
+		{ "help",       0, ശൂന്യ, 'h' },
+		{ ശൂന്യ, 0, ശൂന്യ, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	ആകുമ്പോൾ((c = getopt_long(argc, argv, "nhz", longopts, ശൂന്യ)) != -1) {
+		തിരഞ്ഞെടുപ്പ്(c) {
+		അവസ്ഥ 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			നിർത്തുക;
+		അവസ്ഥ 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			നിർത്തുക;
+		അവസ്ഥ 'h':
 			usage();
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	എങ്കിൽ (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	rc = ul_parse_pid_str(str, &pid_അക്കം, &pidfd_ino, flags);
+	എങ്കിൽ (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	printf("PID: %d\n", pid_അക്കം);
+	എങ്കിൽ (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */

@@ -32,15 +32,15 @@
  * calculate a 64 bit CRC value of a sequence of bytes.
  */
 
-#include <stdbool.h>
-#include <stdlib.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stdlib.h>
 
-#include "crc64.h"
+#അന്തര്ഭാവ "crc64.h"
 
 #define		CRC_START_64_ECMA	0x0000000000000000ull
 #define		CRC_START_64_WE		0xFFFFFFFFFFFFFFFFull
 
-const uint64_t crc_tab64[256] = {
+സ്ഥിരം uint64_t crc_tab64[256] = {
 	0x0000000000000000ull,
 	0x42F0E1EBA9EA3693ull,
 	0x85E1C3D753D46D26ull,
@@ -308,22 +308,22 @@ const uint64_t crc_tab64[256] = {
  * indicating the length.
  */
 
-uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_ecma( സ്ഥിരം unsigned അക്ഷരം *നിവേശം_str, size_t അക്കം_bytes )
 {
 
 	uint64_t crc;
-	const unsigned char *ptr;
+	സ്ഥിരം unsigned അക്ഷരം *ptr;
 	size_t a;
 
 	crc = CRC_START_64_ECMA;
-	ptr = input_str;
+	ptr = നിവേശം_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	എങ്കിൽ ( ptr != ശൂന്യ ) വേണ്ടി (a=0; a<അക്കം_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc;
+	തിരികെ crc;
 
 }  /* crc_64_ecma */
 
@@ -335,22 +335,22 @@ uint64_t ul_crc64_ecma( const unsigned char *input_str, size_t num_bytes )
  * parameter indicating the length.
  */
 
-uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
+uint64_t ul_crc64_we( സ്ഥിരം unsigned അക്ഷരം *നിവേശം_str, size_t അക്കം_bytes )
 {
 
 	uint64_t crc;
-	const unsigned char *ptr;
+	സ്ഥിരം unsigned അക്ഷരം *ptr;
 	size_t a;
 
 	crc = CRC_START_64_WE;
-	ptr = input_str;
+	ptr = നിവേശം_str;
 
-	if ( ptr != NULL ) for (a=0; a<num_bytes; a++) {
+	എങ്കിൽ ( ptr != ശൂന്യ ) വേണ്ടി (a=0; a<അക്കം_bytes; a++) {
 
 		crc = (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) *ptr++) & 0x00000000000000FFull ];
 	}
 
-	return crc ^ 0xFFFFFFFFFFFFFFFFull;
+	തിരികെ crc ^ 0xFFFFFFFFFFFFFFFFull;
 
 }  /* crc_64_we */
 
@@ -361,9 +361,9 @@ uint64_t ul_crc64_we( const unsigned char *input_str, size_t num_bytes )
  * previous value of the CRC and the next byte of the data to be checked.
  */
 
-uint64_t ul_update_crc64( uint64_t crc, unsigned char c )
+uint64_t ul_update_crc64( uint64_t crc, unsigned അക്ഷരം c )
 {
 
-	return (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
+	തിരികെ (crc << 8) ^ crc_tab64[ ((crc >> 56) ^ (uint64_t) c) & 0x00000000000000FFull ];
 
 }  /* update_crc_64 */

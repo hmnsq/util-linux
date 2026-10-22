@@ -2,141 +2,141 @@
  * No copyright is claimed. This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdlib.h>
-#include <assert.h>
-#include <unistd.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <assert.h>
+#അന്തര്ഭാവ <unistd.h>
 
-#include "c.h"
-#include "pwdutils.h"
-#include "xalloc.h"
-#include "strutils.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "pwdutils.h"
+#അന്തര്ഭാവ "xalloc.h"
+#അന്തര്ഭാവ "strutils.h"
 
-struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
+ഘടന passwd *xgetpwuid(uid_t uid, അക്ഷരം **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	ഘടന passwd *pwd = ശൂന്യ, *res = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ rc;
 
-	assert(pwdbuf);
+	പ്രതിജ്ഞാ(pwdbuf);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, വലുപ്പം(ഘടന passwd));
 
 	errno = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
+	എങ്കിൽ (rc != 0) {
 		errno = rc;
-		goto failed;
+		പോകുക failed;
 	}
-	if (!res) {
+	എങ്കിൽ (!res) {
 		errno = EINVAL;
-		goto failed;
+		പോകുക failed;
 	}
-	return pwd;
+	തിരികെ pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	സ്വതന്ത്രം(pwd);
+	സ്വതന്ത്രം(*pwdbuf);
+	തിരികെ ശൂന്യ;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
  * as @str. In case of error returns NULL and sets errno, for unknown user it
  * sets errno to EINVAL.
  */
-struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
+ഘടന passwd *xgetuserpw(സ്ഥിരം അക്ഷരം *str ,അക്ഷരം **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	ഘടന passwd *pwd = ശൂന്യ, *res = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ rc;
 	uint64_t uid;
 
-	assert(pwdbuf);
-	assert(str);
+	പ്രതിജ്ഞാ(pwdbuf);
+	പ്രതിജ്ഞാ(str);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, വലുപ്പം(ഘടന passwd));
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
+	എങ്കിൽ (rc == -ERANGE) {
 		errno = ERANGE;
-		goto failed;
+		പോകുക failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	എങ്കിൽ (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (uid > MAX_OF_UINT_TYPE(uid_t)) {
 			errno = ERANGE;
-			goto failed;
+			പോകുക failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	എങ്കിൽ (rc != 0) {
 		errno = rc;
-		goto failed;
+		പോകുക failed;
 	}
-	if (!res) {
+	എങ്കിൽ (!res) {
 		errno = EINVAL;
-		goto failed;
+		പോകുക failed;
 	}
-	return pwd;
+	തിരികെ pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	സ്വതന്ത്രം(pwd);
+	സ്വതന്ത്രം(*pwdbuf);
+	തിരികെ ശൂന്യ;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
  * as @str. In case of error returns NULL and sets errno, for unknown group it
  * sets errno to EINVAL.
  */
-struct group *xgetgroup(const char *str, char **grpbuf)
+ഘടന group *xgetgroup(സ്ഥിരം അക്ഷരം *str, അക്ഷരം **grpbuf)
 {
-	struct group *grp = NULL, *res = NULL;
-	int rc;
+	ഘടന group *grp = ശൂന്യ, *res = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ rc;
 	uint64_t gid;
 
-	assert(grpbuf);
-	assert(str);
+	പ്രതിജ്ഞാ(grpbuf);
+	പ്രതിജ്ഞാ(str);
 
 	*grpbuf = xmalloc(UL_GETPW_BUFSIZ);
-	grp = xcalloc(1, sizeof(struct group));
+	grp = xcalloc(1, വലുപ്പം(ഘടന group));
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
+	എങ്കിൽ (rc == -ERANGE) {
 		errno = ERANGE;
-		goto failed;
+		പോകുക failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	എങ്കിൽ (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (gid > MAX_OF_UINT_TYPE(gid_t)) {
 			errno = ERANGE;
-			goto failed;
+			പോകുക failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
+	എങ്കിൽ (rc != 0) {
 		errno = rc;
-		goto failed;
+		പോകുക failed;
 	}
-	if (!res) {
+	എങ്കിൽ (!res) {
 		errno = EINVAL;
-		goto failed;
+		പോകുക failed;
 	}
-	return grp;
+	തിരികെ grp;
 failed:
-	free(grp);
-	free(*grpbuf);
-	return NULL;
+	സ്വതന്ത്രം(grp);
+	സ്വതന്ത്രം(*grpbuf);
+	തിരികെ ശൂന്യ;
 }
 
-char *xgetlogin(void)
+അക്ഷരം *xgetlogin(ശൂന്യം)
 {
-	struct passwd *pw = NULL;
+	ഘടന passwd *pw = ശൂന്യ;
 	uid_t ruid;
 
 	/* GNU Hurd implementation has an extension where a process can exist in a
@@ -153,12 +153,12 @@ char *xgetlogin(void)
 	errno = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	എങ്കിൽ (errno == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	എങ്കിൽ (pw && pw->pw_name && *pw->pw_name)
+		തിരികെ xstrdup(pw->pw_name);
 
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
 /*
@@ -169,41 +169,41 @@ char *xgetlogin(void)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct group *ul_getgrp_str(const char *str, gid_t *result)
+ഘടന group *ul_getgrp_str(സ്ഥിരം അക്ഷരം *str, gid_t *result)
 {
-	int rc;
-	uint64_t num = 0;
-	struct group *gr;
+	പൂർണ്ണസംഖ്യ rc;
+	uint64_t അക്കം = 0;
+	ഘടന group *gr;
 
-	if (result)
+	എങ്കിൽ (result)
 		*result = (gid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
+	rc = ul_strtou64(str, &അക്കം, 10);
+	എങ്കിൽ (rc == -ERANGE || അക്കം > MAX_OF_UINT_TYPE(gid_t)) {
 		errno = ERANGE;
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	എങ്കിൽ (rc == -EINVAL) {
 		errno = 0;
 		gr = getgrnam(str);
-		if (gr && result)
+		എങ്കിൽ (gr && result)
 			*result = gr->gr_gid;
-		else if (!gr && !errno)
+		അല്ലെങ്കിൽ എങ്കിൽ (!gr && !errno)
 			errno = EINVAL;
-		return gr;
+		തിരികെ gr;
 	}
 
-	if (result)
-		*result = (gid_t) num;
+	എങ്കിൽ (result)
+		*result = (gid_t) അക്കം;
 
 	errno = 0;
-	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
+	gr = getgrgid((gid_t) അക്കം);
+	എങ്കിൽ (!gr && !errno)
 		errno = EINVAL;
 
-	return gr;
+	തിരികെ gr;
 }
 
 /*
@@ -214,56 +214,56 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
+ഘടന passwd *ul_getuserpw_str(സ്ഥിരം അക്ഷരം *str, uid_t *result)
 {
-	int rc;
-	uint64_t num = 0;
-	struct passwd *pw;
+	പൂർണ്ണസംഖ്യ rc;
+	uint64_t അക്കം = 0;
+	ഘടന passwd *pw;
 
-	if (result)
+	എങ്കിൽ (result)
 		*result = (uid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
+	rc = ul_strtou64(str, &അക്കം, 10);
+	എങ്കിൽ (rc == -ERANGE || അക്കം > MAX_OF_UINT_TYPE(uid_t)) {
 		errno = ERANGE;
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
+	എങ്കിൽ (rc == -EINVAL) {
 		errno = 0;
 		pw = getpwnam(str);
-		if (pw && result)
+		എങ്കിൽ (pw && result)
 			*result = pw->pw_uid;
-		else if (!pw && !errno)
+		അല്ലെങ്കിൽ എങ്കിൽ (!pw && !errno)
 			errno = EINVAL;
-		return pw;
+		തിരികെ pw;
 	}
 
-	if (result)
-		*result = (uid_t) num;
+	എങ്കിൽ (result)
+		*result = (uid_t) അക്കം;
 
 	errno = 0;
-	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
+	pw = getpwuid((uid_t) അക്കം);
+	എങ്കിൽ (!pw && !errno)
 		errno = EINVAL;
 
-	return pw;
+	തിരികെ pw;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	char *buf = NULL;
-	struct passwd *pwd = NULL;
+	അക്ഷരം *buf = ശൂന്യ;
+	ഘടന passwd *pwd = ശൂന്യ;
 
-	if (argc != 2) {
+	എങ്കിൽ (argc != 2) {
 		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+		തിരികെ EXIT_FAILURE;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
+	എങ്കിൽ (!pwd)
 		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
 
 	printf("Username: %s\n", pwd->pw_name);
@@ -271,12 +271,12 @@ int main(int argc, char *argv[])
 	printf("HOME:     %s\n", pwd->pw_dir);
 	printf("GECO:     %s\n", pwd->pw_gecos);
 
-	free(pwd);
-	free(buf);
+	സ്വതന്ത്രം(pwd);
+	സ്വതന്ത്രം(buf);
 
 	printf("Current:  %s\n", (buf = xgetlogin()));
-	free(buf);
+	സ്വതന്ത്രം(buf);
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM */

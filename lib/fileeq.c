@@ -31,11 +31,11 @@
  * Written by Karel Zak <kzak@redhat.com> [October 2021]
  */
 
-#include <inttypes.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#അന്തര്ഭാവ <inttypes.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <unistd.h>
 
 /* Linux crypto */
 #ifdef HAVE_LINUX_IF_ALG_H
@@ -45,12 +45,12 @@
 # include <sys/sendfile.h>
 #endif
 
-#include "c.h"
-#include "all-io.h"
-#include "fileeq.h"
-#include "debug.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "all-io.h"
+#അന്തര്ഭാവ "fileeq.h"
+#അന്തര്ഭാവ "debug.h"
 
-static UL_DEBUG_DEFINE_MASK(ulfileeq);
+സ്ഥിതം UL_DEBUG_DEFINE_MASK(ulfileeq);
 UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULFILEEQ_DEBUG_INIT	(1 << 1)
@@ -62,28 +62,28 @@ UL_DEBUG_DEFINE_MASKNAMES(ulfileeq) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulfileeq, ULFILEEQ_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulfileeq, ULFILEEQ_DEBUG_, m, x)
 
-static void ul_fileeq_init_debug(void)
+സ്ഥിതം ശൂന്യം ul_fileeq_init_debug(ശൂന്യം)
 {
-	if (ulfileeq_debug_mask)
-		return;
+	എങ്കിൽ (ulfileeq_debug_mask)
+		തിരികെ;
 	__UL_INIT_DEBUG_FROM_ENV(ulfileeq, ULFILEEQ_DEBUG_, 0, ULFILEEQ_DEBUG);
 }
 
-enum {
+എണ്ണൽ {
 	UL_FILEEQ_MEMCMP,
 	UL_FILEEQ_SHA1,
 	UL_FILEEQ_SHA256,
 	UL_FILEEQ_CRC32
 };
 
-struct ul_fileeq_method {
-	const char *name;	/* name used by applications */
-	const char *kname;	/* name used by kernel crypto */
-	int id;
+ഘടന ul_fileeq_method {
+	സ്ഥിരം അക്ഷരം *name;	/* name used by applications */
+	സ്ഥിരം അക്ഷരം *kname;	/* name used by kernel crypto */
+	പൂർണ്ണസംഖ്യ id;
 	short digsiz;
 };
 
-static const struct ul_fileeq_method ul_eq_methods[] = {
+സ്ഥിതം സ്ഥിരം ഘടന ul_fileeq_method ul_eq_methods[] = {
 	[UL_FILEEQ_MEMCMP] = {
 		.id = UL_FILEEQ_MEMCMP, .name = "memcmp"
 	},
@@ -105,93 +105,93 @@ static const struct ul_fileeq_method ul_eq_methods[] = {
 };
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static void deinit_crypto_api(struct ul_fileeq *eq)
+സ്ഥിതം ശൂന്യം deinit_crypto_api(ഘടന ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	എങ്കിൽ (!eq)
+		തിരികെ;
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("deinit"));
 
-	if (eq->fd_cip >= 0)
+	എങ്കിൽ (eq->fd_cip >= 0)
 		close(eq->fd_cip);
-	if (eq->fd_api >= 0)
+	എങ്കിൽ (eq->fd_api >= 0)
 		close(eq->fd_api);
 
 	eq->fd_cip = eq->fd_api = -1;
 
 }
 
-static int init_crypto_api(struct ul_fileeq *eq)
+സ്ഥിതം പൂർണ്ണസംഖ്യ init_crypto_api(ഘടന ul_fileeq *eq)
 {
-	struct sockaddr_alg sa = {
+	ഘടന sockaddr_alg sa = {
 		.salg_family = AF_ALG,
 		.salg_type   = "hash",
 	};
 
-	assert(eq->method);
-	assert(eq->method->kname);
-	assert(eq->fd_api == -1);
-	assert(eq->fd_cip == -1);
+	പ്രതിജ്ഞാ(eq->method);
+	പ്രതിജ്ഞാ(eq->method->kname);
+	പ്രതിജ്ഞാ(eq->fd_api == -1);
+	പ്രതിജ്ഞാ(eq->fd_cip == -1);
 
 	DBG_OBJ(CRYPTO, eq, ul_debug("init [%s]", eq->method->kname));
 
-	assert(sizeof(sa.salg_name) > strlen(eq->method->kname) + 1);
+	പ്രതിജ്ഞാ(വലുപ്പം(sa.salg_name) > strlen(eq->method->kname) + 1);
 	memcpy(&sa.salg_name, eq->method->kname, strlen(eq->method->kname) + 1);
 
-	if ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
-		goto fail;
-	if (bind(eq->fd_api, (struct sockaddr *) &sa, sizeof(sa)) != 0)
-		goto fail;
-	if ((eq->fd_cip = accept(eq->fd_api, NULL, 0)) < 0)
-		goto fail;
-	return 0;
+	എങ്കിൽ ((eq->fd_api = socket(AF_ALG, SOCK_SEQPACKET | SOCK_CLOEXEC, 0)) < 0)
+		പോകുക fail;
+	എങ്കിൽ (bind(eq->fd_api, (ഘടന sockaddr *) &sa, വലുപ്പം(sa)) != 0)
+		പോകുക fail;
+	എങ്കിൽ ((eq->fd_cip = accept(eq->fd_api, ശൂന്യ, 0)) < 0)
+		പോകുക fail;
+	തിരികെ 0;
 fail:
 	deinit_crypto_api(eq);
-	return -1;
+	തിരികെ -1;
 }
 #endif
 
-int ul_fileeq_init(struct ul_fileeq *eq, const char *method)
+പൂർണ്ണസംഖ്യ ul_fileeq_init(ഘടന ul_fileeq *eq, സ്ഥിരം അക്ഷരം *method)
 {
 	size_t i;
 
 	ul_fileeq_init_debug();
 	DBG_OBJ(EQ, eq, ul_debug("init [%s]", method));
 
-	memset(eq, 0, sizeof(*eq));
+	memset(eq, 0, വലുപ്പം(*eq));
 	eq->fd_api = -1;
 	eq->fd_cip = -1;
 
-	for (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
-		const struct ul_fileeq_method *m = &ul_eq_methods[i];
+	വേണ്ടി (i = 0; i < ARRAY_SIZE(ul_eq_methods); i++) {
+		സ്ഥിരം ഘടന ul_fileeq_method *m = &ul_eq_methods[i];
 
-		if (strcmp(m->name, method) == 0) {
+		എങ്കിൽ (strcmp(m->name, method) == 0) {
 			eq->method = m;
-			break;
+			നിർത്തുക;
 		}
 	}
 
-	if (!eq->method)
-		return -1;
+	എങ്കിൽ (!eq->method)
+		തിരികെ -1;
 #ifdef USE_FILEEQ_CRYPTOAPI
-	if (eq->method->id != UL_FILEEQ_MEMCMP
+	എങ്കിൽ (eq->method->id != UL_FILEEQ_MEMCMP
 	    && init_crypto_api(eq) != 0)
-		return -1;
+		തിരികെ -1;
 #endif
-	return 0;
+	തിരികെ 0;
 }
 
-static void reset_fileeq_bufs(struct ul_fileeq *eq)
+സ്ഥിതം ശൂന്യം reset_fileeq_bufs(ഘടന ul_fileeq *eq)
 {
-	free(eq->buf_a);
-	free(eq->buf_b);
-	eq->buf_last = eq->buf_a = eq->buf_b = NULL;
+	സ്വതന്ത്രം(eq->buf_a);
+	സ്വതന്ത്രം(eq->buf_b);
+	eq->buf_last = eq->buf_a = eq->buf_b = ശൂന്യ;
 }
 
-void ul_fileeq_deinit(struct ul_fileeq *eq)
+ശൂന്യം ul_fileeq_deinit(ഘടന ul_fileeq *eq)
 {
-	if (!eq)
-		return;
+	എങ്കിൽ (!eq)
+		തിരികെ;
 
 	DBG_OBJ(EQ, eq, ul_debug("deinit"));
 #ifdef USE_FILEEQ_CRYPTOAPI
@@ -200,97 +200,97 @@ void ul_fileeq_deinit(struct ul_fileeq *eq)
 	reset_fileeq_bufs(eq);
 }
 
-void ul_fileeq_data_close_file(struct ul_fileeq_data *data)
+ശൂന്യം ul_fileeq_data_close_file(ഘടന ul_fileeq_data *data)
 {
-	assert(data);
+	പ്രതിജ്ഞാ(data);
 
-	if (data->fd >= 0) {
+	എങ്കിൽ (data->fd >= 0) {
 		DBG_OBJ(DATA, data, ul_debug("close"));
 		close(data->fd);
 	}
 	data->fd = -1;
 }
 
-void ul_fileeq_data_init(struct ul_fileeq_data *data)
+ശൂന്യം ul_fileeq_data_init(ഘടന ul_fileeq_data *data)
 {
 	DBG_OBJ(DATA, data, ul_debug("init"));
-	memset(data, 0, sizeof(*data));
+	memset(data, 0, വലുപ്പം(*data));
 	data->fd = -1;
 }
 
-void ul_fileeq_data_deinit(struct ul_fileeq_data *data)
+ശൂന്യം ul_fileeq_data_deinit(ഘടന ul_fileeq_data *data)
 {
-	assert(data);
+	പ്രതിജ്ഞാ(data);
 
 	DBG_OBJ(DATA, data, ul_debug("deinit"));
-	free(data->blocks);
-	data->blocks = NULL;
+	സ്വതന്ത്രം(data->blocks);
+	data->blocks = ശൂന്യ;
 	data->nblocks = 0;
 	data->maxblocks = 0;
 	data->is_eof = 0;
-	data->name = NULL;
+	data->name = ശൂന്യ;
 
 	ul_fileeq_data_close_file(data);
 }
 
-int ul_fileeq_data_associated(struct ul_fileeq_data *data)
+പൂർണ്ണസംഖ്യ ul_fileeq_data_associated(ഘടന ul_fileeq_data *data)
 {
-	return data->name != NULL;
+	തിരികെ data->name != ശൂന്യ;
 }
 
-void ul_fileeq_data_set_file(struct ul_fileeq_data *data, const char *name)
+ശൂന്യം ul_fileeq_data_set_file(ഘടന ul_fileeq_data *data, സ്ഥിരം അക്ഷരം *name)
 {
-	assert(data);
-	assert(name);
+	പ്രതിജ്ഞാ(data);
+	പ്രതിജ്ഞാ(name);
 
 	DBG_OBJ(DATA, data, ul_debug("set file: %s", name));
 	ul_fileeq_data_init(data);
 	data->name = name;
 }
 
-bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
+bool ul_fileeq_set_size(ഘടന ul_fileeq *eq, int64_t st_size,
 			size_t readsiz, size_t memsiz)
 {
 	uint64_t filesiz, nreads, maxdigs;
 	size_t digsiz;
 
-	assert(eq);
-	assert(st_size >= 0);
-	assert(readsiz);
+	പ്രതിജ്ഞാ(eq);
+	പ്രതിജ്ഞാ(st_size >= 0);
+	പ്രതിജ്ഞാ(readsiz);
 
 	filesiz = (uint64_t) st_size;
 
 	eq->filesiz = filesiz;
 
-	if (filesiz != 0 && readsiz > filesiz)
+	എങ്കിൽ (filesiz != 0 && readsiz > filesiz)
 		readsiz = filesiz;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
+	തിരഞ്ഞെടുപ്പ് (eq->method->id) {
+	അവസ്ഥ UL_FILEEQ_MEMCMP:
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
-		break;
-	default:
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
 		digsiz = eq->method->digsiz;
-		if (readsiz < digsiz)
+		എങ്കിൽ (readsiz < digsiz)
 			readsiz = digsiz;
 		/* align file size */
 		filesiz = (filesiz + readsiz) / readsiz * readsiz;
 		/* calculate limits */
 		maxdigs = memsiz / digsiz;
-		if (maxdigs == 0)
+		എങ്കിൽ (maxdigs == 0)
 			maxdigs = 1;
-		else if (maxdigs > filesiz)
+		അല്ലെങ്കിൽ എങ്കിൽ (maxdigs > filesiz)
 			maxdigs = filesiz;
 		nreads = filesiz / readsiz;
 		/* enlarge readsize for large files */
-		if (nreads > maxdigs) {
+		എങ്കിൽ (nreads > maxdigs) {
 			uint64_t ceiling = filesiz + maxdigs - 1;
-			if (ceiling / maxdigs > SIZE_MAX)
-				return false;
+			എങ്കിൽ (ceiling / maxdigs > SIZE_MAX)
+				തിരികെ false;
 			readsiz = ceiling / maxdigs;
 		}
-		break;
+		നിർത്തുക;
 	}
 
 	eq->readsiz = readsiz;
@@ -301,25 +301,25 @@ bool ul_fileeq_set_size(struct ul_fileeq *eq, int64_t st_size,
 
 	reset_fileeq_bufs(eq);
 
-	return true;
+	തിരികെ true;
 }
 
-static unsigned char *get_buffer(struct ul_fileeq *eq)
+സ്ഥിതം unsigned അക്ഷരം *get_buffer(ഘടന ul_fileeq *eq)
 {
-	if (!eq->buf_a)
+	എങ്കിൽ (!eq->buf_a)
 		eq->buf_a = malloc(eq->readsiz);
-	if (!eq->buf_b)
+	എങ്കിൽ (!eq->buf_b)
 		eq->buf_b = malloc(eq->readsiz);
 
-	if (!eq->buf_a || !eq->buf_b)
-		return NULL;
+	എങ്കിൽ (!eq->buf_a || !eq->buf_b)
+		തിരികെ ശൂന്യ;
 
-	if (eq->buf_last == eq->buf_b)
+	എങ്കിൽ (eq->buf_last == eq->buf_b)
 		eq->buf_last = eq->buf_a;
-	else
+	അല്ലെങ്കിൽ
 		eq->buf_last = eq->buf_b;
 
-	return eq->buf_last;
+	തിരികെ eq->buf_last;
 }
 
 #define get_cached_nblocks(_d) \
@@ -327,321 +327,321 @@ static unsigned char *get_buffer(struct ul_fileeq *eq)
 
 #define get_cached_offset(_e, _d) \
 			((_d)->nblocks == 0 ? 0 : \
-				sizeof((_d)->intro) \
+				വലുപ്പം((_d)->intro) \
 				+ (get_cached_nblocks(_d) * (_e)->readsiz))
 
 
-static int get_fd(struct ul_fileeq *eq, struct ul_fileeq_data *data, off_t *off)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_fd(ഘടന ul_fileeq *eq, ഘടന ul_fileeq_data *data, off_t *off)
 {
 	off_t o = get_cached_offset(eq, data);
 
-	assert(eq);
-	assert(data);
+	പ്രതിജ്ഞാ(eq);
+	പ്രതിജ്ഞാ(data);
 
 
-	if (data->fd < 0) {
+	എങ്കിൽ (data->fd < 0) {
 		DBG_OBJ(DATA, data, ul_debug("open: %s", data->name));
 		data->fd = open(data->name, O_RDONLY | O_CLOEXEC);
-		if (data->fd < 0)
-			return data->fd;
+		എങ്കിൽ (data->fd < 0)
+			തിരികെ data->fd;
 
-#if defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
+#എങ്കിൽ defined(POSIX_FADV_SEQUENTIAL) && defined(HAVE_POSIX_FADVISE)
 		ignore_result( posix_fadvise(data->fd, o, 0, POSIX_FADV_SEQUENTIAL) );
 #endif
-		if (o) {
+		എങ്കിൽ (o) {
 			DBG_OBJ(DATA, data, ul_debug("lseek off=%ju", (uintmax_t) o));
 			lseek(data->fd, o, SEEK_SET);
 		}
 	}
 
-	if (off)
+	എങ്കിൽ (off)
 		*off = o;
 
-	return data->fd;
+	തിരികെ data->fd;
 }
 
-static void memcmp_reset(struct ul_fileeq *eq, struct ul_fileeq_data *data)
+സ്ഥിതം ശൂന്യം memcmp_reset(ഘടന ul_fileeq *eq, ഘടന ul_fileeq_data *data)
 {
 	/* only intro[] is cached */
-	if (data->nblocks)
+	എങ്കിൽ (data->nblocks)
 		data->nblocks = 1;
 	/* reset file position */
-	if (data->fd >= 0)
+	എങ്കിൽ (data->fd >= 0)
 		lseek(data->fd, get_cached_offset(eq, data), SEEK_SET);
 	data->is_eof = 0;
 }
 
-static ssize_t read_block(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+സ്ഥിതം ssize_t read_block(ഘടന ul_fileeq *eq, ഘടന ul_fileeq_data *data,
+				uint64_t n, unsigned അക്ഷരം **block)
 {
-	int fd;
+	പൂർണ്ണസംഖ്യ fd;
 	off_t off = 0;
 	ssize_t rsz;
 
-	if (data->is_eof)
-		return 0;
+	എങ്കിൽ (data->is_eof)
+		തിരികെ 0;
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	എങ്കിൽ (n >= eq->blocksmax)
+		തിരികെ -EINVAL;
 
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	എങ്കിൽ (fd < 0)
+		തിരികെ fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read block off=%ju", (uintmax_t) off));
 
 	*block = get_buffer(eq);
-	if (!*block)
-		return -ENOMEM;
+	എങ്കിൽ (!*block)
+		തിരികെ -ENOMEM;
 
-	rsz = ul_read_all(data->fd, (char *) *block, eq->readsiz);
-	if (rsz < 0) {
+	rsz = ul_read_all(data->fd, (അക്ഷരം *) *block, eq->readsiz);
+	എങ്കിൽ (rsz < 0) {
 		DBG_OBJ(DATA, data, ul_debug("  read failed"));
-		return rsz;
+		തിരികെ rsz;
 	}
 	off += rsz;
 	data->nblocks++;
 
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	എങ്കിൽ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 
 	DBG_OBJ(DATA, data, ul_debug("  read sz=%zd", rsz));
-	return rsz;
+	തിരികെ rsz;
 }
 
 #ifdef USE_FILEEQ_CRYPTOAPI
-static ssize_t get_digest(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t n, unsigned char **block)
+സ്ഥിതം ssize_t get_digest(ഘടന ul_fileeq *eq, ഘടന ul_fileeq_data *data,
+				uint64_t n, unsigned അക്ഷരം **block)
 {
 	off_t off = 0;
 	ssize_t rsz;
 	size_t sz;
-	int fd;
+	പൂർണ്ണസംഖ്യ fd;
 
 	/* return already cached if available */
-	if (n < get_cached_nblocks(data)) {
+	എങ്കിൽ (n < get_cached_nblocks(data)) {
 		DBG_OBJ(DATA, data, ul_debug(" digest cached"));
-		assert(data->blocks);
+		പ്രതിജ്ഞാ(data->blocks);
 		*block = data->blocks + (n * eq->method->digsiz);
-		return eq->method->digsiz;
+		തിരികെ eq->method->digsiz;
 	}
 
-	if (data->is_eof) {
+	എങ്കിൽ (data->is_eof) {
 		DBG_OBJ(DATA, data, ul_debug(" file EOF"));
-		return 0;
+		തിരികെ 0;
 	}
 
-	if (n >= eq->blocksmax)
-		return -EINVAL;
+	എങ്കിൽ (n >= eq->blocksmax)
+		തിരികെ -EINVAL;
 
 	/* read new block */
 	fd = get_fd(eq, data, &off);
-	if (fd < 0)
-		return fd;
+	എങ്കിൽ (fd < 0)
+		തിരികെ fd;
 
 	DBG_OBJ(DATA, data, ul_debug(" read digest off=%ju", (uintmax_t) off));
 
 	sz = eq->method->digsiz;
 
-	if (!data->blocks) {
+	എങ്കിൽ (!data->blocks) {
 		DBG_OBJ(DATA, data, ul_debug("  alloc cache %" PRIu64, eq->blocksmax * sz));
 		data->blocks = malloc(eq->blocksmax * sz);
-		if (!data->blocks)
-			return -ENOMEM;
+		എങ്കിൽ (!data->blocks)
+			തിരികെ -ENOMEM;
 	}
 
-	rsz = sendfile(eq->fd_cip, data->fd, NULL, eq->readsiz);
+	rsz = sendfile(eq->fd_cip, data->fd, ശൂന്യ, eq->readsiz);
 	DBG_OBJ(DATA, data, ul_debug("  sent %zd [%zu wanted] to cipher", rsz, eq->readsiz));
 
-	if (rsz < 0)
-		return rsz;
+	എങ്കിൽ (rsz < 0)
+		തിരികെ rsz;
 
 	off += rsz;
 
 	/* get block digest (note 1st block is data->intro) */
 	*block = data->blocks + (n * eq->method->digsiz);
-	rsz = ul_read_all(eq->fd_cip, (char *) *block, sz);
+	rsz = ul_read_all(eq->fd_cip, (അക്ഷരം *) *block, sz);
 
-	if (rsz > 0)
+	എങ്കിൽ (rsz > 0)
 		data->nblocks++;
-	if (rsz == 0 || (uint64_t) off >= eq->filesiz) {
+	എങ്കിൽ (rsz == 0 || (uint64_t) off >= eq->filesiz) {
 		data->is_eof = 1;
 		ul_fileeq_data_close_file(data);
 	}
 	DBG_OBJ(DATA, data, ul_debug("  get %zdB digest", rsz));
-	return rsz;
+	തിരികെ rsz;
 }
 #endif
 
-static ssize_t get_intro(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				unsigned char **block)
+സ്ഥിതം ssize_t get_intro(ഘടന ul_fileeq *eq, ഘടന ul_fileeq_data *data,
+				unsigned അക്ഷരം **block)
 {
-	if (data->nblocks == 0) {
-		int fd = get_fd(eq, data, NULL);
+	എങ്കിൽ (data->nblocks == 0) {
+		പൂർണ്ണസംഖ്യ fd = get_fd(eq, data, ശൂന്യ);
 		ssize_t rsz;
 
-		if (fd < 0)
-			return -1;
-		rsz = ul_read_all(fd, (char *) data->intro, sizeof(data->intro));
-		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, sizeof(data->intro)));
-		if (rsz < 0)
-			return -1;
+		എങ്കിൽ (fd < 0)
+			തിരികെ -1;
+		rsz = ul_read_all(fd, (അക്ഷരം *) data->intro, വലുപ്പം(data->intro));
+		DBG_OBJ(DATA, data, ul_debug(" read %zd bytes [%zu wanted] intro", rsz, വലുപ്പം(data->intro)));
+		എങ്കിൽ (rsz < 0)
+			തിരികെ -1;
 		data->nblocks = 1;
 	}
 
 	DBG_OBJ(DATA, data, ul_debug(" return intro"));
 	*block = data->intro;
-	return sizeof(data->intro);
+	തിരികെ വലുപ്പം(data->intro);
 }
 
-static ssize_t get_cmp_data(struct ul_fileeq *eq, struct ul_fileeq_data *data,
-				uint64_t blockno, unsigned char **block)
+സ്ഥിതം ssize_t get_cmp_data(ഘടന ul_fileeq *eq, ഘടന ul_fileeq_data *data,
+				uint64_t blockno, unsigned അക്ഷരം **block)
 {
-	if (blockno == 0)
-		return get_intro(eq, data, block);
+	എങ്കിൽ (blockno == 0)
+		തിരികെ get_intro(eq, data, block);
 
 	blockno--;
 
-	switch (eq->method->id) {
-	case UL_FILEEQ_MEMCMP:
-		return read_block(eq, data, blockno, block);
-	default:
-		break;
+	തിരഞ്ഞെടുപ്പ് (eq->method->id) {
+	അവസ്ഥ UL_FILEEQ_MEMCMP:
+		തിരികെ read_block(eq, data, blockno, block);
+	സ്ഥിരസ്ഥിതി:
+		നിർത്തുക;
 	}
 #ifdef USE_FILEEQ_CRYPTOAPI
-	return get_digest(eq, data, blockno, block);
-#else
-	return -1;
+	തിരികെ get_digest(eq, data, blockno, block);
+#അല്ലെങ്കിൽ
+	തിരികെ -1;
 #endif
 }
 
 #define CMP(a, b) ((a) > (b) ? 1 : ((a) < (b) ? -1 : 0))
 
-int ul_fileeq(struct ul_fileeq *eq,
-	      struct ul_fileeq_data *a, struct ul_fileeq_data *b)
+പൂർണ്ണസംഖ്യ ul_fileeq(ഘടന ul_fileeq *eq,
+	      ഘടന ul_fileeq_data *a, ഘടന ul_fileeq_data *b)
 {
-	int cmp;
+	പൂർണ്ണസംഖ്യ cmp;
 	uint64_t n = 0;
 
 	DBG_OBJ(EQ, eq, ul_debug("--> compare %s %s", a->name, b->name));
 
-	if (eq->method->id == UL_FILEEQ_MEMCMP) {
+	എങ്കിൽ (eq->method->id == UL_FILEEQ_MEMCMP) {
 		memcmp_reset(eq, a);
 		memcmp_reset(eq, b);
 	}
 
-	do {
-		unsigned char *da, *db;
+	ചെയ്യുക {
+		unsigned അക്ഷരം *da, *db;
 		ssize_t ca, cb;
 
 		DBG_OBJ(EQ, eq, ul_debug("compare block #%" PRIu64, n));
 
 		ca = get_cmp_data(eq, a, n, &da);
-		if (ca < 0)
-			goto done;
+		എങ്കിൽ (ca < 0)
+			പോകുക done;
 		cb = get_cmp_data(eq, b, n, &db);
-		if (cb < 0)
-			goto done;
-		if (ca != cb || ca == 0) {
+		എങ്കിൽ (cb < 0)
+			പോകുക done;
+		എങ്കിൽ (ca != cb || ca == 0) {
 			cmp = CMP(ca, cb);
-			break;
+			നിർത്തുക;
 
 		}
 		cmp = memcmp(da, db, ca);
 		DBG_OBJ(EQ, eq, ul_debug("#%" PRIu64 "=%s", n, cmp == 0 ? "match" : "not-match"));
 		n++;
-	} while (cmp == 0);
+	} ആകുമ്പോൾ (cmp == 0);
 
-	if (cmp == 0) {
-		if (!a->is_eof || !b->is_eof)
-			goto done; /* filesize changed? */
+	എങ്കിൽ (cmp == 0) {
+		എങ്കിൽ (!a->is_eof || !b->is_eof)
+			പോകുക done; /* filesize changed? */
 
 		DBG_OBJ(EQ, eq, ul_debug("<-- MATCH"));
-		return 1;
+		തിരികെ 1;
 	}
 done:
 	DBG_OBJ(EQ, eq, ul_debug(" <-- NOT-MATCH"));
-	return 0;
+	തിരികെ 0;
 }
 
 #ifdef TEST_PROGRAM_FILEEQ
 # include <getopt.h>
 
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	struct ul_fileeq eq;
-	struct ul_fileeq_data a, b, c;
-	const char *method = "sha1";
-	static const struct option longopts[] = {
-		{ "method", required_argument, NULL, 'm' },
-		{ "help", no_argument, NULL, 'h' },
-		{ NULL, 0, NULL, 0 }
+	ഘടന ul_fileeq eq;
+	ഘടന ul_fileeq_data a, b, c;
+	സ്ഥിരം അക്ഷരം *method = "sha1";
+	സ്ഥിതം സ്ഥിരം ഘടന option longopts[] = {
+		{ "method", required_argument, ശൂന്യ, 'm' },
+		{ "help", no_argument, ശൂന്യ, 'h' },
+		{ ശൂന്യ, 0, ശൂന്യ, 0 }
 	};
-	int ch, rc;
-	const char *file_a = NULL, *file_b = NULL, *file_c = NULL;
-	struct stat st_a, st_b, st_c;
+	പൂർണ്ണസംഖ്യ ch, rc;
+	സ്ഥിരം അക്ഷരം *file_a = ശൂന്യ, *file_b = ശൂന്യ, *file_c = ശൂന്യ;
+	ഘടന stat st_a, st_b, st_c;
 
-	while ((ch = getopt_long(argc, argv, "m:", longopts, NULL)) != -1) {
-		switch (ch) {
-		case 'm':
+	ആകുമ്പോൾ ((ch = getopt_long(argc, argv, "m:", longopts, ശൂന്യ)) != -1) {
+		തിരഞ്ഞെടുപ്പ് (ch) {
+		അവസ്ഥ 'm':
 			method = optarg;
-			break;
-		case 'h':
+			നിർത്തുക;
+		അവസ്ഥ 'h':
 			printf("usage: %s [options] <file> <file>\n"
 				" -m, --method <memcmp|sha1|crc32>    compare method\n",
 				program_invocation_short_name);
-			return EXIT_FAILURE;
+			തിരികെ EXIT_FAILURE;
 		}
 	}
 
-	if (optind < argc)
+	എങ്കിൽ (optind < argc)
 		file_a = argv[optind++];
-	if (optind < argc)
+	എങ്കിൽ (optind < argc)
 		file_b = argv[optind++];
-	if (optind < argc)
+	എങ്കിൽ (optind < argc)
 		file_c = argv[optind++];
 
-	if (!file_a || !file_b)
+	എങ്കിൽ (!file_a || !file_b)
 		errx(EXIT_FAILURE, "no files specified, see --help");
 
-	if (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
+	എങ്കിൽ (stat(file_a, &st_a) != 0 || !S_ISREG(st_a.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_a);
-	if (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
+	എങ്കിൽ (stat(file_b, &st_b) != 0 || !S_ISREG(st_b.st_mode))
 		errx(EXIT_FAILURE, "%s: wrong file", file_b);
-	if (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
+	എങ്കിൽ (file_c && (stat(file_c, &st_c) != 0 || !S_ISREG(st_c.st_mode)))
 		errx(EXIT_FAILURE, "%s: wrong file", file_c);
 
 
-	if (st_a.st_size != st_b.st_size ||
+	എങ്കിൽ (st_a.st_size != st_b.st_size ||
 	    (file_c && st_a.st_size != st_c.st_size))
 		errx(EXIT_FAILURE, "size of the files does not match");
 
 
 	rc = ul_fileeq_init(&eq, method);
-	if (rc != 0 && strcmp(method, "memcmp") != 0) {
+	എങ്കിൽ (rc != 0 && strcmp(method, "memcmp") != 0) {
 		method = "memcmp";
 		rc = ul_fileeq_init(&eq, method);
 	}
-	if (rc < 0)
+	എങ്കിൽ (rc < 0)
 		err(EXIT_FAILURE, "failed to initialize files comparior");
 
 	ul_fileeq_data_set_file(&a, file_a);
 	ul_fileeq_data_set_file(&b, file_b);
 
 	/* 3rd is optional */
-	if (file_c)
+	എങ്കിൽ (file_c)
 		ul_fileeq_data_set_file(&c, file_c);
 
 	/*                           st_size,      readsiz,   memsiz */
-	if (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
+	എങ്കിൽ (!ul_fileeq_set_size(&eq, st_a.st_size, 1024*1024, 4*1024))
 		err(EXIT_FAILURE, "failed to set sizes");
 
 	rc = ul_fileeq(&eq, &a, &b);
 
 	printf("1st vs. 2nd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
-	if (file_c) {
+	എങ്കിൽ (file_c) {
 		rc = ul_fileeq(&eq, &a, &c);
 		printf("1st vs. 3rd: %s\n", rc == 1 ? "MATCH" : "NOT-MATCH");
 
@@ -652,10 +652,10 @@ int main(int argc, char *argv[])
 	ul_fileeq_data_deinit(&a);
 	ul_fileeq_data_deinit(&b);
 
-	if (file_c)
+	എങ്കിൽ (file_c)
 		ul_fileeq_data_deinit(&c);
 
 	ul_fileeq_deinit(&eq);
-	return EXIT_FAILURE;
+	തിരികെ EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_FILEEQ */

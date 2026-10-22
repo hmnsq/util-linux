@@ -4,122 +4,122 @@
  *
  * Written by Karel Zak <kzak@redhat.com>
  */
-#include <pwd.h>
-#include <grp.h>
-#include <sys/types.h>
+#അന്തര്ഭാവ <pwd.h>
+#അന്തര്ഭാവ <grp.h>
+#അന്തര്ഭാവ <sys/types.h>
 
-#include "c.h"
-#include "widechar.h"
-#include "idcache.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "widechar.h"
+#അന്തര്ഭാവ "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+ഘടന identry *get_id(ഘടന idcache *ic, unsigned long പൂർണ്ണസംഖ്യ id)
 {
-	struct identry *ent;
+	ഘടന identry *ent;
 
-	if (!ic)
-		return NULL;
+	എങ്കിൽ (!ic)
+		തിരികെ ശൂന്യ;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	വേണ്ടി (ent = ic->ent; ent; ent = ent->next) {
+		എങ്കിൽ (ent->id == id)
+			തിരികെ ent;
 	}
 
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-struct idcache *new_idcache(void)
+ഘടന idcache *new_idcache(ശൂന്യം)
 {
-	return calloc(1, sizeof(struct idcache));
+	തിരികെ calloc(1, വലുപ്പം(ഘടന idcache));
 }
 
-void free_idcache(struct idcache *ic)
+ശൂന്യം free_idcache(ഘടന idcache *ic)
 {
-	struct identry *ent;
+	ഘടന identry *ent;
 
-	if (!ic)
-		return;
+	എങ്കിൽ (!ic)
+		തിരികെ;
 
 	ent = ic->ent;
 
-	while (ent) {
-		struct identry *next = ent->next;
-		free(ent->name);
-		free(ent);
+	ആകുമ്പോൾ (ent) {
+		ഘടന identry *next = ent->next;
+		സ്വതന്ത്രം(ent->name);
+		സ്വതന്ത്രം(ent);
 		ent = next;
 	}
 
-	free(ic);
+	സ്വതന്ത്രം(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+സ്ഥിതം ശൂന്യം add_id(ഘടന idcache *ic, അക്ഷരം *name, unsigned long പൂർണ്ണസംഖ്യ id)
 {
-	struct identry *ent, *x;
-	int w = 0;
+	ഘടന identry *ent, *x;
+	പൂർണ്ണസംഖ്യ w = 0;
 
-	if (!ic)
-		return;
+	എങ്കിൽ (!ic)
+		തിരികെ;
 
-	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ent = calloc(1, വലുപ്പം(ഘടന identry));
+	എങ്കിൽ (!ent)
+		തിരികെ;
 	ent->id = id;
 
-	if (name) {
+	എങ്കിൽ (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		എങ്കിൽ (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		അല്ലെങ്കിൽ
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	എങ്കിൽ (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
-			free(ent);
-			return;
+		എങ്കിൽ (!ent->name) {
+			സ്വതന്ത്രം(ent);
+			തിരികെ;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
-			free(ent);
-			return;
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (asprintf(&ent->name, "%lu", id) < 0) {
+			സ്വതന്ത്രം(ent);
+			തിരികെ;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	വേണ്ടി (x = ic->ent; x && x->next; x = x->next);
 
-	if (x)
+	എങ്കിൽ (x)
 		x->next = ent;
-	else
+	അല്ലെങ്കിൽ
 		ic->ent = ent;
 
-	if (w <= 0)
+	എങ്കിൽ (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+ശൂന്യം add_uid(ഘടന idcache *cache, unsigned long പൂർണ്ണസംഖ്യ id)
 {
-	struct identry *ent = get_id(cache, id);
+	ഘടന identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct passwd *pw = getpwuid((uid_t) id);
-		add_id(cache, pw ? pw->pw_name : NULL, id);
+	എങ്കിൽ (!ent) {
+		ഘടന passwd *pw = getpwuid((uid_t) id);
+		add_id(cache, pw ? pw->pw_name : ശൂന്യ, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+ശൂന്യം add_gid(ഘടന idcache *cache, unsigned long പൂർണ്ണസംഖ്യ id)
 {
-	struct identry *ent = get_id(cache, id);
+	ഘടന identry *ent = get_id(cache, id);
 
-	if (!ent) {
-		struct group *gr = getgrgid((gid_t) id);
-		add_id(cache, gr ? gr->gr_name : NULL, id);
+	എങ്കിൽ (!ent) {
+		ഘടന group *gr = getgrgid((gid_t) id);
+		add_id(cache, gr ? gr->gr_name : ശൂന്യ, id);
 	}
 }
 

@@ -4,29 +4,29 @@
  * No copyright is claimed.  This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
 #ifdef HAVE_SYS_PRCTL_H
-#include <sys/prctl.h>
-#else
+#അന്തര്ഭാവ <sys/prctl.h>
+#അല്ലെങ്കിൽ
 #define PR_GET_DUMPABLE 3
 #endif
-#if (!defined(HAVE_PRCTL) && defined(linux))
-#include <sys/syscall.h>
+#എങ്കിൽ (!defined(HAVE_PRCTL) && defined(linux))
+#അന്തര്ഭാവ <sys/syscall.h>
 #endif
-#include <unistd.h>
-#include <sys/types.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <sys/types.h>
 
-#include "env.h"
-#include "strv.h"
-#include "all-io.h"
+#അന്തര്ഭാവ "env.h"
+#അന്തര്ഭാവ "strv.h"
+#അന്തര്ഭാവ "all-io.h"
 
 #ifndef HAVE_ENVIRON_DECL
-extern char **environ;
+ബാഹ്യ അക്ഷരം **environ;
 #endif
 
-static char * const forbid[] = {
+സ്ഥിതം അക്ഷരം * സ്ഥിരം forbid[] = {
 	"BASH_ENV=",    /* GNU creeping featurism strikes again... */
 	"ENV=",
 	"HOME=",
@@ -39,126 +39,126 @@ static char * const forbid[] = {
 	"PATH=",
 	"SHELL=",
 	"SHLIB_PATH=",
-	(char *) 0
+	(അക്ഷരം *) 0
 };
 
 /* these are allowed, but with no slashes inside
    (to work around security problems in GNU gettext) */
-static char * const noslash[] = {
+സ്ഥിതം അക്ഷരം * സ്ഥിരം noslash[] = {
 	"LANG=",
 	"LANGUAGE=",
 	"LC_",	  /* anything with the LC_ prefix */
-	(char *) 0
+	(അക്ഷരം *) 0
 };
 
 
-struct ul_env_list {
-	char	*name;
-	char	*value;
+ഘടന ul_env_list {
+	അക്ഷരം	*name;
+	അക്ഷരം	*മൂല്യം;
 
-	struct ul_env_list *next;
+	ഘടന ul_env_list *next;
 };
 
 /*
  * Saves to the list and returns a pointer to the new head of the list.
  */
-static struct ul_env_list *env_list_add( struct ul_env_list *ls0,
-					 const char *name, size_t namesz,
-					 const char *value, size_t valsz)
+സ്ഥിതം ഘടന ul_env_list *env_list_add( ഘടന ul_env_list *ls0,
+					 സ്ഥിരം അക്ഷരം *name, size_t namesz,
+					 സ്ഥിരം അക്ഷരം *മൂല്യം, size_t valsz)
 {
-	struct ul_env_list *ls;
+	ഘടന ul_env_list *ls;
 
-	ls = calloc(1, sizeof(struct ul_env_list) + namesz + valsz + 2);
-	if (!ls)
-		return ls0;
+	ls = calloc(1, വലുപ്പം(ഘടന ul_env_list) + namesz + valsz + 2);
+	എങ്കിൽ (!ls)
+		തിരികെ ls0;
 
-	ls->name = ((char *) ls) + sizeof(struct ul_env_list);
-	ls->value = ls->name + namesz + 1;
+	ls->name = ((അക്ഷരം *) ls) + വലുപ്പം(ഘടന ul_env_list);
+	ls->മൂല്യം = ls->name + namesz + 1;
 
 	memcpy(ls->name, name, namesz);
-	memcpy(ls->value, value, valsz);
+	memcpy(ls->മൂല്യം, മൂല്യം, valsz);
 
 	ls->next = ls0;
-	return ls;
+	തിരികെ ls;
 }
 
 /*
  * Saves the @str (with the name=value string) to the @ls and returns a pointer
  * to the new head of the list.
  */
-static struct ul_env_list *env_list_add_from_string(struct ul_env_list *ls,
-						    const char *str)
+സ്ഥിതം ഘടന ul_env_list *env_list_add_from_string(ഘടന ul_env_list *ls,
+						    സ്ഥിരം അക്ഷരം *str)
 {
 	size_t namesz = 0, valsz = 0;
-	const char *val;
+	സ്ഥിരം അക്ഷരം *val;
 
-	if (!str || !*str)
-		return ls;
+	എങ്കിൽ (!str || !*str)
+		തിരികെ ls;
 
 	val = strchr(str, '=');
-	if (!val)
-		return ls;
+	എങ്കിൽ (!val)
+		തിരികെ ls;
 	namesz = val - str;
 
 	val++;
 	valsz = strlen(val);
 
-	return env_list_add(ls, str, namesz, val, valsz);
+	തിരികെ env_list_add(ls, str, namesz, val, valsz);
 }
 
 /*
  * Saves the @name and @value to @ls0 and returns a pointer to the new head of
  * the list.
  */
-struct ul_env_list *env_list_add_variable(
-				struct ul_env_list *ls,
-				const char *name, const char *value)
+ഘടന ul_env_list *env_list_add_variable(
+				ഘടന ul_env_list *ls,
+				സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-	if (!name || !*name)
-		return ls;
+	എങ്കിൽ (!name || !*name)
+		തിരികെ ls;
 
-	return env_list_add(ls, name, strlen(name), value, value ? strlen(value) : 0);
+	തിരികെ env_list_add(ls, name, strlen(name), മൂല്യം, മൂല്യം ? strlen(മൂല്യം) : 0);
 }
 
 /*
  * Calls getenv() and adds the result to the list.
  */
-struct ul_env_list *env_list_add_getenv(struct ul_env_list *ls,
-				const char *name, const char *dflt)
+ഘടന ul_env_list *env_list_add_getenv(ഘടന ul_env_list *ls,
+				സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *dflt)
 {
-	const char *val;
+	സ്ഥിരം അക്ഷരം *val;
 
-	if (!name)
-		return ls;
+	എങ്കിൽ (!name)
+		തിരികെ ls;
 
 	val = getenv(name);
-	if (!val)
+	എങ്കിൽ (!val)
 		val= dflt;
-	if (val)
+	എങ്കിൽ (val)
 		ls = env_list_add_variable(ls, name, val);
-	return ls;
+	തിരികെ ls;
 }
 
 /*
  * Calls getenv() for each name (comma-separated) in @str and adds the results
  * to the list.
  */
-struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str)
+ഘടന ul_env_list *env_list_add_getenvs(ഘടന ul_env_list *ls, സ്ഥിരം അക്ഷരം *str)
 {
-	char **all, **name;
+	അക്ഷരം **all, **name;
 
-	if (!str)
-		return ls;
+	എങ്കിൽ (!str)
+		തിരികെ ls;
 
 	all = ul_strv_split(str, ",");
-	if (!all)
-		return ls;
+	എങ്കിൽ (!all)
+		തിരികെ ls;
 
 	UL_STRV_FOREACH(name, all)
-		ls = env_list_add_getenv(ls, *name, NULL);
+		ls = env_list_add_getenv(ls, *name, ശൂന്യ);
 
 	ul_strv_free(all);
-	return ls;
+	തിരികെ ls;
 }
 
 /*
@@ -166,49 +166,49 @@ struct ul_env_list *env_list_add_getenvs(struct ul_env_list *ls, const char *str
  *
  * @fd must be /proc/<pid>/environ file.
 */
-struct ul_env_list *env_list_from_fd(int fd)
+ഘടന ul_env_list *env_list_from_fd(പൂർണ്ണസംഖ്യ fd)
 {
-	char *buf = NULL, *p;
+	അക്ഷരം *buf = ശൂന്യ, *p;
 	ssize_t rc = 0;
-	struct ul_env_list *ls = NULL;
+	ഘടന ul_env_list *ls = ശൂന്യ;
 
 	errno = 0;
-	if ((rc = ul_read_all_alloc(fd, &buf)) < 1)
-		return NULL;
+	എങ്കിൽ ((rc = ul_read_all_alloc(fd, &buf)) < 1)
+		തിരികെ ശൂന്യ;
 	buf[rc] = '\0';
 	p = buf;
 
-	while (rc > 0) {
+	ആകുമ്പോൾ (rc > 0) {
 		ls = env_list_add_from_string(ls, p);
 		p += strlen(p) + 1;
 		rc -= strlen(p) + 1;
 	}
 
-	free(buf);
-	return ls;
+	സ്വതന്ത്രം(buf);
+	തിരികെ ls;
 }
 
 /*
  * Use setenv() for all stuff in @ls.
  */
-int env_list_setenv(struct ul_env_list *ls, int overwrite)
+പൂർണ്ണസംഖ്യ env_list_setenv(ഘടന ul_env_list *ls, പൂർണ്ണസംഖ്യ overwrite)
 {
-	int rc = 0;
+	പൂർണ്ണസംഖ്യ rc = 0;
 
-	while (ls && rc == 0) {
-		if (ls->name && ls->value)
-			rc = setenv(ls->name, ls->value, overwrite);
+	ആകുമ്പോൾ (ls && rc == 0) {
+		എങ്കിൽ (ls->name && ls->മൂല്യം)
+			rc = setenv(ls->name, ls->മൂല്യം, overwrite);
 		ls = ls->next;
 	}
-	return rc;
+	തിരികെ rc;
 }
 
-void env_list_free(struct ul_env_list *ls)
+ശൂന്യം env_list_free(ഘടന ul_env_list *ls)
 {
-	while (ls) {
-		struct ul_env_list *x = ls;
+	ആകുമ്പോൾ (ls) {
+		ഘടന ul_env_list *x = ls;
 		ls = ls->next;
-		free(x);
+		സ്വതന്ത്രം(x);
 	}
 }
 
@@ -216,84 +216,84 @@ void env_list_free(struct ul_env_list *ls)
  * Removes unwanted variables from environ[]. If @org is not NULL than stores
  * unwnated variables to the list.
  */
-void __sanitize_env(struct ul_env_list **org)
+ശൂന്യം __sanitize_env(ഘടന ul_env_list **org)
 {
-	char **envp = environ;
-	char * const *bad;
-	char **cur;
-	int last = 0;
+	അക്ഷരം **envp = environ;
+	അക്ഷരം * സ്ഥിരം *bad;
+	അക്ഷരം **cur;
+	പൂർണ്ണസംഖ്യ last = 0;
 
-	for (cur = envp; *cur; cur++)
+	വേണ്ടി (cur = envp; *cur; cur++)
 		last++;
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = forbid; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) == 0) {
-				if (org)
+	വേണ്ടി (cur = envp; *cur; cur++) {
+		വേണ്ടി (bad = forbid; *bad; bad++) {
+			എങ്കിൽ (strncmp(*cur, *bad, strlen(*bad)) == 0) {
+				എങ്കിൽ (org)
 					*org = env_list_add_from_string(*org, *cur);
 				last = ul_remove_entry(envp, cur - envp, last);
 				cur--;
-				break;
+				നിർത്തുക;
 			}
 		}
 	}
 
-	for (cur = envp; *cur; cur++) {
-		for (bad = noslash; *bad; bad++) {
-			if (strncmp(*cur, *bad, strlen(*bad)) != 0)
-				continue;
-			if (!strchr(*cur, '/'))
-				continue;  /* OK */
-			if (org)
+	വേണ്ടി (cur = envp; *cur; cur++) {
+		വേണ്ടി (bad = noslash; *bad; bad++) {
+			എങ്കിൽ (strncmp(*cur, *bad, strlen(*bad)) != 0)
+				തുടരുക;
+			എങ്കിൽ (!strchr(*cur, '/'))
+				തുടരുക;  /* OK */
+			എങ്കിൽ (org)
 				*org = env_list_add_from_string(*org, *cur);
 			last = ul_remove_entry(envp, cur - envp, last);
 			cur--;
-			break;
+			നിർത്തുക;
 		}
 	}
 }
 
-void sanitize_env(void)
+ശൂന്യം sanitize_env(ശൂന്യം)
 {
-	__sanitize_env(NULL);
+	__sanitize_env(ശൂന്യ);
 }
 
-char *safe_getenv(const char *arg)
+അക്ഷരം *safe_getenv(സ്ഥിരം അക്ഷരം *arg)
 {
-	if (is_privileged_execution())
-		return NULL;
+	എങ്കിൽ (is_privileged_execution())
+		തിരികെ ശൂന്യ;
 #ifdef HAVE_PRCTL
-	if (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
-#else
-#if (defined(linux) && defined(SYS_prctl))
-	if (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
-		return NULL;
+	എങ്കിൽ (prctl(PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		തിരികെ ശൂന്യ;
+#അല്ലെങ്കിൽ
+#എങ്കിൽ (defined(linux) && defined(SYS_prctl))
+	എങ്കിൽ (syscall(SYS_prctl, PR_GET_DUMPABLE, 0, 0, 0, 0) == 0)
+		തിരികെ ശൂന്യ;
 #endif
 #endif
 #ifdef HAVE_SECURE_GETENV
-return secure_getenv(arg);
-#elif HAVE___SECURE_GETENV
-	return __secure_getenv(arg);
-#else
-	return getenv(arg);
+തിരികെ secure_getenv(arg);
+#അല്ലെങ്കിലെങ്കിൽ HAVE___SECURE_GETENV
+	തിരികെ __secure_getenv(arg);
+#അല്ലെങ്കിൽ
+	തിരികെ getenv(arg);
 #endif
 }
 
 #ifdef TEST_PROGRAM_ENV
-int main(void)
+പൂർണ്ണസംഖ്യ പ്രധാന(ശൂന്യം)
 {
-	char *const *bad;
-	char copy[32];
-	char *p;
-	int retval = EXIT_SUCCESS;
-	struct ul_env_list *removed = NULL;
+	അക്ഷരം *സ്ഥിരം *bad;
+	അക്ഷരം copy[32];
+	അക്ഷരം *p;
+	പൂർണ്ണസംഖ്യ retval = EXIT_SUCCESS;
+	ഘടന ul_env_list *removed = ശൂന്യ;
 
 	/* define env. */
-	for (bad = forbid; *bad; bad++) {
+	വേണ്ടി (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		എങ്കിൽ (p)
 			*p = '\0';
 		setenv(copy, "abc", 1);
 	}
@@ -302,13 +302,13 @@ int main(void)
 	__sanitize_env(&removed);
 
 	/* check removal */
-	for (bad = forbid; *bad; bad++) {
+	വേണ്ടി (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		എങ്കിൽ (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (p) {
+		എങ്കിൽ (p) {
 			warnx("%s was not removed", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -318,13 +318,13 @@ int main(void)
 	env_list_setenv(removed, 0);
 
 	/* check restore */
-	for (bad = forbid; *bad; bad++) {
+	വേണ്ടി (bad = forbid; *bad; bad++) {
 		strcpy(copy, *bad);
 		p = strchr(copy, '=');
-		if (p)
+		എങ്കിൽ (p)
 			*p = '\0';
 		p = getenv(copy);
-		if (!p) {
+		എങ്കിൽ (!p) {
 			warnx("%s was not restored", copy);
 			retval = EXIT_FAILURE;
 		}
@@ -332,6 +332,6 @@ int main(void)
 
 	env_list_free(removed);
 
-	return retval;
+	തിരികെ retval;
 }
 #endif

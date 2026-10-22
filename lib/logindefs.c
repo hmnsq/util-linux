@@ -19,31 +19,31 @@
  *    products derived from this software without their specific prior
  *   written permission.
  */
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/syslog.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <pwd.h>
+#അന്തര്ഭാവ <assert.h>
+#അന്തര്ഭാവ <ctype.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <limits.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <sys/syslog.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <pwd.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "closestream.h"
-#include "logindefs.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "xalloc.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "cctype.h"
+#അന്തര്ഭാവ "closestream.h"
+#അന്തര്ഭാവ "logindefs.h"
+#അന്തര്ഭാവ "nls.h"
+#അന്തര്ഭാവ "pathnames.h"
+#അന്തര്ഭാവ "xalloc.h"
 
 
-static void (*logindefs_loader)(void *) = NULL;
-static void *logindefs_loader_data = NULL;
+സ്ഥിതം ശൂന്യം (*logindefs_loader)(ശൂന്യം *) = ശൂന്യ;
+സ്ഥിതം ശൂന്യം *logindefs_loader_data = ശൂന്യ;
 
-void logindefs_set_loader(void (*loader)(void *data), void *data)
+ശൂന്യം logindefs_set_loader(ശൂന്യം (*loader)(ശൂന്യം *data), ശൂന്യം *data)
 {
 	logindefs_loader = loader;
 	logindefs_loader_data = data;
@@ -51,102 +51,102 @@ void logindefs_set_loader(void (*loader)(void *data), void *data)
 
 #ifndef HAVE_LIBECONF
 
-struct item {
-	char *name;		/* name of the option.  */
-	char *value;		/* value of the option.  */
-	char *path;		/* name of config file for this option.  */
+ഘടന item {
+	അക്ഷരം *name;		/* name of the option.  */
+	അക്ഷരം *മൂല്യം;		/* value of the option.  */
+	അക്ഷരം *path;		/* name of config file for this option.  */
 
-	struct item *next;	/* pointer to next option.  */
+	ഘടന item *next;	/* pointer to next option.  */
 };
 
-static struct item *list = NULL;
+സ്ഥിതം ഘടന item *list = ശൂന്യ;
 
-void free_getlogindefs_data(void)
+ശൂന്യം free_getlogindefs_data(ശൂന്യം)
 {
-	struct item *ptr;
+	ഘടന item *ptr;
 
 	ptr = list;
-	while (ptr) {
-		struct item *tmp = ptr->next;
+	ആകുമ്പോൾ (ptr) {
+		ഘടന item *tmp = ptr->next;
 
-		free(ptr->path);
-		free(ptr->name);
-		free(ptr->value);
-		free(ptr);
+		സ്വതന്ത്രം(ptr->path);
+		സ്വതന്ത്രം(ptr->name);
+		സ്വതന്ത്രം(ptr->മൂല്യം);
+		സ്വതന്ത്രം(ptr);
 		ptr = tmp;
 	}
 
-	list = NULL;
+	list = ശൂന്യ;
 }
 
-static void store(const char *name, const char *value, const char *path)
+സ്ഥിതം ശൂന്യം store(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *മൂല്യം, സ്ഥിരം അക്ഷരം *path)
 {
-	struct item *new = xmalloc(sizeof(struct item));
+	ഘടന item *new = xmalloc(വലുപ്പം(ഘടന item));
 
-	if (!name)
+	എങ്കിൽ (!name)
 		abort();
 
 	new->name = xstrdup(name);
-	new->value = value && *value ? xstrdup(value) : NULL;
+	new->മൂല്യം = മൂല്യം && *മൂല്യം ? xstrdup(മൂല്യം) : ശൂന്യ;
 	new->path = xstrdup(path);
 	new->next = list;
 	list = new;
 }
 
-void logindefs_load_file(const char *filename)
+ശൂന്യം logindefs_load_file(സ്ഥിരം അക്ഷരം *filename)
 {
 	FILE *f;
-	char buf[BUFSIZ];
+	അക്ഷരം buf[BUFSIZ];
 
 	f = fopen(filename, "r" UL_CLOEXECSTR);
-	if (!f)
-		return;
+	എങ്കിൽ (!f)
+		തിരികെ;
 
-	while (fgets(buf, sizeof(buf), f)) {
+	ആകുമ്പോൾ (fgets(buf, വലുപ്പം(buf), f)) {
 
-		char *p, *name, *data = NULL;
+		അക്ഷരം *p, *name, *data = ശൂന്യ;
 
-		if (*buf == '#' || *buf == '\n')
-			continue;	/* only comment or empty line */
+		എങ്കിൽ (*buf == '#' || *buf == '\n')
+			തുടരുക;	/* only comment or empty line */
 
 		p = strchr(buf, '#');
-		if (p)
+		എങ്കിൽ (p)
 			*p = '\0';
-		else {
+		അല്ലെങ്കിൽ {
 			size_t n = strlen(buf);
-			if (n && *(buf + n - 1) == '\n')
+			എങ്കിൽ (n && *(buf + n - 1) == '\n')
 				*(buf + n - 1) = '\0';
 		}
 
-		if (!*buf)
-			continue;	/* empty line */
+		എങ്കിൽ (!*buf)
+			തുടരുക;	/* empty line */
 
 		/* ignore space at begin of the line */
 		name = buf;
-		while (*name && isspace((unsigned)*name))
+		ആകുമ്പോൾ (*name && isspace((unsigned)*name))
 			name++;
 
 		/* go to the end of the name */
 		data = name;
-		while (*data && !(isspace((unsigned)*data) || *data == '='))
+		ആകുമ്പോൾ (*data && !(isspace((unsigned)*data) || *data == '='))
 			data++;
-		if (data > name && *data)
+		എങ്കിൽ (data > name && *data)
 			*data++ = '\0';
 
-		if (!*name || data == name)
-			continue;
+		എങ്കിൽ (!*name || data == name)
+			തുടരുക;
 
 		/* go to the begin of the value */
-		while (*data
+		ആകുമ്പോൾ (*data
 		       && (isspace((unsigned)*data) || *data == '='
 			   || *data == '"'))
 			data++;
 
 		/* remove space at the end of the value */
 		p = data + strlen(data);
-		if (p > data)
+		എങ്കിൽ (p > data)
 			p--;
-		while (p > data && (isspace((unsigned)*p) || *p == '"'))
+		ആകുമ്പോൾ (p > data && (isspace((unsigned)*p) || *p == '"'))
 			*p-- = '\0';
 
 		store(name, data, filename);
@@ -155,68 +155,68 @@ void logindefs_load_file(const char *filename)
 	fclose(f);
 }
 
-static void load_defaults(void)
+സ്ഥിതം ശൂന്യം load_defaults(ശൂന്യം)
 {
-	if (logindefs_loader)
+	എങ്കിൽ (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
-	else
+	അല്ലെങ്കിൽ
 		logindefs_load_file(_PATH_LOGINDEFS);
 }
 
-static struct item *search(const char *name)
+സ്ഥിതം ഘടന item *തിരയൽ(സ്ഥിരം അക്ഷരം *name)
 {
-	struct item *ptr;
+	ഘടന item *ptr;
 
-	if (!list)
+	എങ്കിൽ (!list)
 		load_defaults();
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr;
+	ആകുമ്പോൾ (ptr != ശൂന്യ) {
+		എങ്കിൽ (c_strcasecmp(name, ptr->name) == 0)
+			തിരികെ ptr;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-static const char *search_config(const char *name)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *തിരയൽ_config(സ്ഥിരം അക്ഷരം *name)
 {
-	struct item *ptr;
+	ഘടന item *ptr;
 
 	ptr = list;
-	while (ptr != NULL) {
-		if (c_strcasecmp(name, ptr->name) == 0)
-			return ptr->path;
+	ആകുമ്പോൾ (ptr != ശൂന്യ) {
+		എങ്കിൽ (c_strcasecmp(name, ptr->name) == 0)
+			തിരികെ ptr->path;
 		ptr = ptr->next;
 	}
 
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+പൂർണ്ണസംഖ്യ getlogindefs_bool(സ്ഥിരം അക്ഷരം *name, പൂർണ്ണസംഖ്യ dflt)
 {
-	struct item *ptr = search(name);
-	return ptr && ptr->value ? (c_strcasecmp(ptr->value, "yes") == 0) : dflt;
+	ഘടന item *ptr = തിരയൽ(name);
+	തിരികെ ptr && ptr->മൂല്യം ? (c_strcasecmp(ptr->മൂല്യം, "yes") == 0) : dflt;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_അക്കം(സ്ഥിരം അക്ഷരം *name, unsigned long dflt)
 {
-	struct item *ptr = search(name);
-	char *end = NULL;
+	ഘടന item *ptr = തിരയൽ(name);
+	അക്ഷരം *end = ശൂന്യ;
 	unsigned long retval;
 
-	if (!ptr || !ptr->value)
-		return dflt;
+	എങ്കിൽ (!ptr || !ptr->മൂല്യം)
+		തിരികെ dflt;
 
 	errno = 0;
-	retval = strtoul(ptr->value, &end, 0);
-	if (end && *end == '\0' && !errno)
-		return retval;
+	retval = strtoul(ptr->മൂല്യം, &end, 0);
+	എങ്കിൽ (end && *end == '\0' && !errno)
+		തിരികെ retval;
 
 	syslog(LOG_NOTICE, _("%s: %s contains invalid numerical value: %s"),
-	       search_config(name), name, ptr->value);
-	return dflt;
+	       തിരയൽ_config(name), name, ptr->മൂല്യം);
+	തിരികെ dflt;
 }
 
 /*
@@ -225,142 +225,142 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+സ്ഥിരം അക്ഷരം *getlogindefs_str(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *dflt)
 {
-	struct item *ptr = search(name);
+	ഘടന item *ptr = തിരയൽ(name);
 
-	if (!ptr)
-		return dflt;
-	if (!ptr->value)
-		return "";
-	return ptr->value;
+	എങ്കിൽ (!ptr)
+		തിരികെ dflt;
+	എങ്കിൽ (!ptr->മൂല്യം)
+		തിരികെ "";
+	തിരികെ ptr->മൂല്യം;
 }
 
-#else /* !HAVE_LIBECONF */
+#അല്ലെങ്കിൽ /* !HAVE_LIBECONF */
 
-#include "dl-econf.h"
+#അന്തര്ഭാവ "dl-econf.h"
 
-static econf_file *file = NULL;
+സ്ഥിതം econf_file *file = ശൂന്യ;
 
-void free_getlogindefs_data(void)
+ശൂന്യം free_getlogindefs_data(ശൂന്യം)
 {
-	if (file)
+	എങ്കിൽ (file)
 		econf_call(econf_freeFile)(file);
-	file = NULL;
+	file = ശൂന്യ;
 }
 
-static void load_defaults(void)
+സ്ഥിതം ശൂന്യം load_defaults(ശൂന്യം)
 {
 	econf_err error;
 
-	if (file != NULL)
+	എങ്കിൽ (file != ശൂന്യ)
 		free_getlogindefs_data();
 
-	if (ul_dlopen_libeconf() == 0) {
+	എങ്കിൽ (ul_dlopen_libeconf() == 0) {
 #ifdef HAVE_ECONF_READCONFIG
-		error = econf_call(econf_readConfig)(&file, NULL,
+		error = econf_call(econf_readConfig)(&file, ശൂന്യ,
 				UL_VENDORDIR_PATH, "login", "defs", "= \t", "#");
-#else
+#അല്ലെങ്കിൽ
 		error = econf_call(econf_readDirs)(&file,
 				UL_VENDORDIR_PATH, "/etc", "login", "defs", "= \t", "#");
 #endif
-		if (error)
+		എങ്കിൽ (error)
 			syslog(LOG_NOTICE, _("Error reading login.defs: %s"),
 			       econf_call(econf_errString)(error));
 	}
 
-	if (logindefs_loader)
+	എങ്കിൽ (logindefs_loader)
 		logindefs_loader(logindefs_loader_data);
 
 }
 
-void logindefs_load_file(const char *filename)
+ശൂന്യം logindefs_load_file(സ്ഥിരം അക്ഷരം *filename)
 {
-	econf_file *file_l = NULL, *file_m = NULL;
-	char *path;
+	econf_file *file_l = ശൂന്യ, *file_m = ശൂന്യ;
+	അക്ഷരം *path;
 
-	logindefs_loader = NULL; /* No recursion */
+	logindefs_loader = ശൂന്യ; /* No recursion */
 
-	if (ul_dlopen_libeconf() != 0)
-		return;
+	എങ്കിൽ (ul_dlopen_libeconf() != 0)
+		തിരികെ;
 
-#if USE_VENDORDIR
+#എങ്കിൽ USE_VENDORDIR
 	xasprintf(&path, _PATH_VENDORDIR"/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	എങ്കിൽ (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		എങ്കിൽ (file == ശൂന്യ)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		അല്ലെങ്കിൽ എങ്കിൽ (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	സ്വതന്ത്രം (path);
 #endif
 
 	xasprintf(&path, "/etc/%s", filename);
 
-	if (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
-		if (file == NULL)
+	എങ്കിൽ (!econf_call(econf_readFile)(&file_l, path, "= \t", "#")) {
+		എങ്കിൽ (file == ശൂന്യ)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		അല്ലെങ്കിൽ എങ്കിൽ (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 
 	/* Try original filename, could be relative */
-	} else if (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
-		if (file == NULL)
+	} അല്ലെങ്കിൽ എങ്കിൽ (!econf_call(econf_readFile)(&file_l, filename, "= \t", "#")) {
+		എങ്കിൽ (file == ശൂന്യ)
 			file = file_l;
-		else if (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
+		അല്ലെങ്കിൽ എങ്കിൽ (!econf_call(econf_mergeFiles)(&file_m, file, file_l)) {
 			econf_call(econf_freeFile)(file);
 			file = file_m;
 			econf_call(econf_freeFile)(file_l);
 		}
 	}
-	free (path);
+	സ്വതന്ത്രം (path);
 }
 
-int getlogindefs_bool(const char *name, int dflt)
+പൂർണ്ണസംഖ്യ getlogindefs_bool(സ്ഥിരം അക്ഷരം *name, പൂർണ്ണസംഖ്യ dflt)
 {
-	bool value;
+	bool മൂല്യം;
 	econf_err error;
 
-	if (!file)
+	എങ്കിൽ (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	എങ്കിൽ (!file)
+		തിരികെ dflt;
 
-	if ((error = econf_call(econf_getBoolValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	എങ്കിൽ ((error = econf_call(econf_get_Bool_മൂല്യം)(file, ശൂന്യ, name, &മൂല്യം))) {
+		എങ്കിൽ (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		തിരികെ dflt;
 	}
-	return value;
+	തിരികെ മൂല്യം;
 }
 
-unsigned long getlogindefs_num(const char *name, unsigned long dflt)
+unsigned long getlogindefs_അക്കം(സ്ഥിരം അക്ഷരം *name, unsigned long dflt)
 {
-	uint64_t value;
+	uint64_t മൂല്യം;
 	econf_err error;
 
-	if (!file)
+	എങ്കിൽ (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	എങ്കിൽ (!file)
+		തിരികെ dflt;
 
-	if ((error = econf_call(econf_getUInt64Value)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	എങ്കിൽ ((error = econf_call(econf_get_UInt64_മൂല്യം)(file, ശൂന്യ, name, &മൂല്യം))) {
+		എങ്കിൽ (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		തിരികെ dflt;
 	}
-	return value;
+	തിരികെ മൂല്യം;
 }
 
 /*
@@ -369,27 +369,27 @@ unsigned long getlogindefs_num(const char *name, unsigned long dflt)
  *	""		(empty string) if found, but value not defined
  *	"string"	if found
  */
-const char *getlogindefs_str(const char *name, const char *dflt)
+സ്ഥിരം അക്ഷരം *getlogindefs_str(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *dflt)
 {
-	char *value;
+	അക്ഷരം *മൂല്യം;
 	econf_err error;
 
-	if (!file)
+	എങ്കിൽ (!file)
 		load_defaults();
 
-	if (!file)
-		return dflt;
+	എങ്കിൽ (!file)
+		തിരികെ dflt;
 
-	if ((error = econf_call(econf_getStringValue)(file, NULL, name, &value))) {
-		if (error != ECONF_NOKEY)
+	എങ്കിൽ ((error = econf_call(econf_get_String_മൂല്യം)(file, ശൂന്യ, name, &മൂല്യം))) {
+		എങ്കിൽ (error != ECONF_NOKEY)
 			syslog(LOG_NOTICE, _("couldn't fetch %s: %s"), name,
 			       econf_call(econf_errString)(error));
-		return dflt;
+		തിരികെ dflt;
 	}
-	if (value)
-		return value;
+	എങ്കിൽ (മൂല്യം)
+		തിരികെ മൂല്യം;
 
-	return xstrdup("");
+	തിരികെ xstrdup("");
 }
 #endif /* !HAVE_LIBECONF */
 
@@ -406,44 +406,44 @@ const char *getlogindefs_str(const char *name, const char *dflt)
  *
  * the FOO= prefix has to be remove before we call setenv().
  */
-int logindefs_setenv(const char *name, const char *conf, const char *dflt)
+പൂർണ്ണസംഖ്യ logindefs_setenv(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *conf, സ്ഥിരം അക്ഷരം *dflt)
 {
-	const char *val = getlogindefs_str(conf, dflt);
-	const char *p;
+	സ്ഥിരം അക്ഷരം *val = getlogindefs_str(conf, dflt);
+	സ്ഥിരം അക്ഷരം *p;
 
-	if (!val)
-		return -1;
+	എങ്കിൽ (!val)
+		തിരികെ -1;
 
 	p = strchr(val, '=');
-	if (p) {
+	എങ്കിൽ (p) {
 		size_t sz = strlen(name);
 
-		if (strncmp(val, name, sz) == 0 && *(p + 1)) {
+		എങ്കിൽ (strncmp(val, name, sz) == 0 && *(p + 1)) {
 			val = p + 1;
-			if (*val == '"')
+			എങ്കിൽ (*val == '"')
 				val++;
-			if (!*val)
+			എങ്കിൽ (!*val)
 				val = dflt;
 		}
 	}
 
-	return val ? setenv(name, val, 1) : -1;
+	തിരികെ val ? setenv(name, val, 1) : -1;
 }
 
 /*
  * logindefs based setenv("PATH")
  */
-int logindefs_setenv_path(uid_t uid)
+പൂർണ്ണസംഖ്യ logindefs_setenv_path(uid_t uid)
 {
-	int rc = 0;
+	പൂർണ്ണസംഖ്യ rc = 0;
 
-	if (uid)
+	എങ്കിൽ (uid)
 		rc = logindefs_setenv("PATH", "ENV_PATH", _PATH_DEFPATH);
 
-	else if ((rc = logindefs_setenv("PATH", "ENV_SUPATH", NULL)) != 0)
-		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", _PATH_DEFPATH_ROOT);
+	അല്ലെങ്കിൽ എങ്കിൽ ((rc = logindefs_setenv("PATH", "ENV_SUPATH", ശൂന്യ)) != 0)
+		rc = logindefs_setenv("PATH", "ENV_ROOTPATH", PATH_DEFPATH_വേര്);
 
-	return rc;
+	തിരികെ rc;
 }
 
 /*
@@ -452,12 +452,12 @@ int logindefs_setenv_path(uid_t uid)
  * real UID/GID.  Then open(2) seems as the surest solution.
  * -- kzak@redhat.com (10-Apr-2009)
  */
-int effective_access(const char *path, int mode)
+പൂർണ്ണസംഖ്യ effective_access(സ്ഥിരം അക്ഷരം *path, പൂർണ്ണസംഖ്യ mode)
 {
-	int fd = open(path, mode);
-	if (fd != -1)
+	പൂർണ്ണസംഖ്യ fd = open(path, mode);
+	എങ്കിൽ (fd != -1)
 		close(fd);
-	return fd == -1 ? -1 : 0;
+	തിരികെ fd == -1 ? -1 : 0;
 }
 
 /*
@@ -490,143 +490,143 @@ int effective_access(const char *path, int mode)
  * BSD setreuid().
  */
 
-int get_hushlogin_status(struct passwd *pwd, const char *override_home, int force_check)
+പൂർണ്ണസംഖ്യ get_hushlogin_status(ഘടന passwd *pwd, സ്ഥിരം അക്ഷരം *override_home, പൂർണ്ണസംഖ്യ force_check)
 {
-	const char *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, NULL };
-	const char *file;
-	char buf[BUFSIZ];
-	int i;
+	സ്ഥിരം അക്ഷരം *files[] = { _PATH_HUSHLOGINS, _PATH_HUSHLOGIN, ശൂന്യ };
+	സ്ഥിരം അക്ഷരം *file;
+	അക്ഷരം buf[BUFSIZ];
+	പൂർണ്ണസംഖ്യ i;
 
-	file = getlogindefs_str("HUSHLOGIN_FILE", NULL);
-	if (file) {
-		if (!*file)
-			return 0;	/* empty HUSHLOGIN_FILE defined */
+	file = getlogindefs_str("HUSHLOGIN_FILE", ശൂന്യ);
+	എങ്കിൽ (file) {
+		എങ്കിൽ (!*file)
+			തിരികെ 0;	/* empty HUSHLOGIN_FILE defined */
 
 		files[0] = file;
-		files[1] = NULL;
+		files[1] = ശൂന്യ;
 	}
 
-	for (i = 0; files[i]; i++) {
-		int ok = 0;
+	വേണ്ടി (i = 0; files[i]; i++) {
+		പൂർണ്ണസംഖ്യ ok = 0;
 
 		file = files[i];
 
 		/* global hush-file */
-		if (*file == '/') {
-			struct stat st;
+		എങ്കിൽ (*file == '/') {
+			ഘടന stat st;
 			FILE *f;
 
-			if (stat(file, &st) != 0)
-				continue;	/* file does not exist */
+			എങ്കിൽ (stat(file, &st) != 0)
+				തുടരുക;	/* file does not exist */
 
-			if (st.st_size == 0)
-				return 1;	/* for all accounts */
+			എങ്കിൽ (st.st_size == 0)
+				തിരികെ 1;	/* for all accounts */
 
 			f = fopen(file, "r" UL_CLOEXECSTR);
-			if (!f)
-				continue;	/* ignore errors... */
+			എങ്കിൽ (!f)
+				തുടരുക;	/* ignore errors... */
 
-			while (ok == 0 && fgets(buf, sizeof(buf), f)) {
-				if (buf[0] != '\0')
+			ആകുമ്പോൾ (ok == 0 && fgets(buf, വലുപ്പം(buf), f)) {
+				എങ്കിൽ (buf[0] != '\0')
 					buf[strlen(buf) - 1] = '\0';
 				ok = !strcmp(buf, *buf == '/' ? pwd->pw_shell :
 								pwd->pw_name);
 			}
 			fclose(f);
-			if (ok)
-				return 1;	/* found username/shell */
+			എങ്കിൽ (ok)
+				തിരികെ 1;	/* found username/shell */
 
-			return 0;		/* ignore per-account files */
+			തിരികെ 0;		/* ignore per-account files */
 		}
 
 		/* per-account setting */
-		if (strlen(pwd->pw_dir) + strlen(file) + 2 > sizeof(buf))
-			continue;
+		എങ്കിൽ (strlen(pwd->pw_dir) + strlen(file) + 2 > വലുപ്പം(buf))
+			തുടരുക;
 
-		if (snprintf(buf, sizeof(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
-			continue;
+		എങ്കിൽ (snprintf(buf, വലുപ്പം(buf), "%s/%s", override_home ?: pwd->pw_dir, file) < 0)
+			തുടരുക;
 
-		if (force_check) {
+		എങ്കിൽ (force_check) {
 			uid_t ruid = getuid();
 			gid_t egid = getegid();
 
-			if (setregid(-1, pwd->pw_gid) == 0 &&
+			എങ്കിൽ (setregid(-1, pwd->pw_gid) == 0 &&
 			    setreuid(0, pwd->pw_uid) == 0)
 				ok = effective_access(buf, O_RDONLY) == 0;
 
-			if (setuid(0) != 0 ||
+			എങ്കിൽ (setuid(0) != 0 ||
 			    setreuid(ruid, 0) != 0 ||
 			    setregid(-1, egid) != 0) {
 				syslog(LOG_ALERT, _("hush login status: restore original IDs failed"));
 				exit(EXIT_FAILURE);
 			}
-			if (ok)
-				return 1;	/* enabled by user */
+			എങ്കിൽ (ok)
+				തിരികെ 1;	/* enabled by user */
 		}
-		else {
-			int rc;
+		അല്ലെങ്കിൽ {
+			പൂർണ്ണസംഖ്യ rc;
 			rc = effective_access(buf, O_RDONLY);
-			if (rc == 0)
-				return 1;
+			എങ്കിൽ (rc == 0)
+				തിരികെ 1;
 
-			if (rc == -1 && errno == EACCES)
-				return -1;
+			എങ്കിൽ (rc == -1 && errno == EACCES)
+				തിരികെ -1;
 		}
 
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	char *name, *type;
+	അക്ഷരം *name, *type;
 	close_stdout_atexit();
 
-	if (argc <= 1)
+	എങ്കിൽ (argc <= 1)
 		errx(EXIT_FAILURE, "usage: %s <filename> "
 		     "[<str|num|bool> <valname>]", argv[0]);
 
 	logindefs_load_file(argv[1]);
 
-	if (argc != 4) {	/* list all */
+	എങ്കിൽ (argc != 4) {	/* list all */
 #ifdef HAVE_LIBECONF
-		int i;
-		char *keys[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
+		പൂർണ്ണസംഖ്യ i;
+		അക്ഷരം *താക്കോലുകൾ[] = {"END", "EMPTY", "CRAZY3", "CRAZY2", "CRAZY1",
 				"BOOLEAN", "NUMBER", "STRING", "HELLO_WORLD",
-				NULL};
+				ശൂന്യ};
 
-		for (i = 0; file && keys[i] != NULL; i++) {
-			char *value = NULL;
+		വേണ്ടി (i = 0; file && താക്കോലുകൾ[i] != ശൂന്യ; i++) {
+			അക്ഷരം *മൂല്യം = ശൂന്യ;
 
-			econf_call(econf_getStringValue)(file, NULL, keys[i], &value);
-			printf ("%s: $%s: '%s'\n", argv[1], keys[i], value);
+			econf_call(econf_get_String_മൂല്യം)(file, ശൂന്യ, താക്കോലുകൾ[i], &മൂല്യം);
+			printf ("%s: $%s: '%s'\n", argv[1], താക്കോലുകൾ[i], മൂല്യം);
 		}
 
-		if (file)
+		എങ്കിൽ (file)
 			econf_call(econf_freeFile)(file);
 
-#else
-		struct item *ptr;
+#അല്ലെങ്കിൽ
+		ഘടന item *ptr;
 
-		for (ptr = list; ptr; ptr = ptr->next)
+		വേണ്ടി (ptr = list; ptr; ptr = ptr->next)
 			printf("%s: $%s: '%s'\n", ptr->path, ptr->name,
-			       ptr->value);
+			       ptr->മൂല്യം);
 #endif
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 	}
 
 	type = argv[2];
 	name = argv[3];
 
-	if (strcmp(type, "str") == 0)
+	എങ്കിൽ (strcmp(type, "str") == 0)
 		printf("$%s: '%s'\n", name, getlogindefs_str(name, "DEFAULT"));
-	else if (strcmp(type, "num") == 0)
-		printf("$%s: '%lu'\n", name, getlogindefs_num(name, 0));
-	else if (strcmp(type, "bool") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(type, "num") == 0)
+		printf("$%s: '%lu'\n", name, getlogindefs_അക്കം(name, 0));
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(type, "bool") == 0)
 		printf("$%s: '%s'\n", name,
 		       getlogindefs_bool(name, 0) ? "Y" : "N");
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 #endif

@@ -14,25 +14,25 @@
  * The ul_path_read_* API is possible to use without path_cxt handler. In this
  * case is not possible to use global prefix and printf-like formatting.
  */
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <inttypes.h>
-#include <errno.h>
+#അന്തര്ഭാവ <stdarg.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <inttypes.h>
+#അന്തര്ഭാവ <errno.h>
 
-#include "c.h"
-#include "fileutils.h"
-#include "all-io.h"
-#include "vfs.h"
-#include "path.h"
-#include "debug.h"
-#include "strutils.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "fileutils.h"
+#അന്തര്ഭാവ "all-io.h"
+#അന്തര്ഭാവ "vfs.h"
+#അന്തര്ഭാവ "path.h"
+#അന്തര്ഭാവ "debug.h"
+#അന്തര്ഭാവ "strutils.h"
 
 /*
  * Debug stuff (based on include/debug.h)
  */
-static UL_DEBUG_DEFINE_MASK(ulpath);
+സ്ഥിതം UL_DEBUG_DEFINE_MASK(ulpath);
 UL_DEBUG_DEFINE_MASKNAMES(ulpath) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define ULPATH_DEBUG_INIT	(1 << 1)
@@ -42,248 +42,248 @@ UL_DEBUG_DEFINE_MASKNAMES(ulpath) = UL_DEBUG_EMPTY_MASKNAMES;
 #define DBG_OBJ(m, h, x)	__UL_DBG_OBJ(ulpath, ULPATH_DEBUG_, m, h, x)
 #define ON_DBG(m, x)		__UL_DBG_CALL(ulpath, ULPATH_DEBUG_, m, x)
 
-void ul_path_init_debug(void)
+ശൂന്യം ul_path_init_debug(ശൂന്യം)
 {
-	if (ulpath_debug_mask)
-		return;
+	എങ്കിൽ (ulpath_debug_mask)
+		തിരികെ;
 	__UL_INIT_DEBUG_FROM_ENV(ulpath, ULPATH_DEBUG_, 0, ULPATH_DEBUG);
 }
 
-struct path_cxt *ul_new_path(const char *dir, ...)
+ഘടന path_cxt *ul_new_path(സ്ഥിരം അക്ഷരം *dir, ...)
 {
-	struct path_cxt *pc = calloc(1, sizeof(*pc));
+	ഘടന path_cxt *pc = calloc(1, വലുപ്പം(*pc));
 
-	if (!pc)
-		return NULL;
+	എങ്കിൽ (!pc)
+		തിരികെ ശൂന്യ;
 
 	DBG_OBJ(CXT, pc, ul_debug("alloc"));
 
 	pc->refcount = 1;
 	pc->dir_fd = -1;
 
-	if (dir) {
-		int rc;
+	എങ്കിൽ (dir) {
+		പൂർണ്ണസംഖ്യ rc;
 		va_list ap;
 
 		va_start(ap, dir);
 		rc = vasprintf(&pc->dir_path, dir, ap);
 		va_end(ap);
 
-		if (rc < 0 || !pc->dir_path)
-			goto fail;
+		എങ്കിൽ (rc < 0 || !pc->dir_path)
+			പോകുക fail;
 	}
-	return pc;
+	തിരികെ pc;
 fail:
 	ul_unref_path(pc);
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
-void ul_ref_path(struct path_cxt *pc)
+ശൂന്യം ul_ref_path(ഘടന path_cxt *pc)
 {
-	if (pc)
+	എങ്കിൽ (pc)
 		pc->refcount++;
 }
 
-void ul_unref_path(struct path_cxt *pc)
+ശൂന്യം ul_unref_path(ഘടന path_cxt *pc)
 {
-	if (!pc)
-		return;
+	എങ്കിൽ (!pc)
+		തിരികെ;
 
 	pc->refcount--;
 
-	if (pc->refcount <= 0) {
+	എങ്കിൽ (pc->refcount <= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("dealloc"));
-		if (pc->dialect)
+		എങ്കിൽ (pc->dialect)
 			pc->free_dialect(pc);
 		ul_path_close_dirfd(pc);
-		free(pc->dir_path);
-		free(pc->prefix);
-		free(pc);
+		സ്വതന്ത്രം(pc->dir_path);
+		സ്വതന്ത്രം(pc->prefix);
+		സ്വതന്ത്രം(pc);
 	}
 }
 
-void ul_path_refer_vfs(struct path_cxt *pc, const struct ul_vfs_ops *vfs)
+ശൂന്യം ul_path_refer_vfs(ഘടന path_cxt *pc, സ്ഥിരം ഘടന ul_vfs_ops *vfs)
 {
-	if (pc)
+	എങ്കിൽ (pc)
 		pc->vfs = vfs;
 }
 
-int ul_path_set_prefix(struct path_cxt *pc, const char *prefix)
+പൂർണ്ണസംഖ്യ ul_path_set_prefix(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *prefix)
 {
-	char *p = NULL;
+	അക്ഷരം *p = ശൂന്യ;
 
-	assert(pc->dir_fd < 0);
+	പ്രതിജ്ഞാ(pc->dir_fd < 0);
 
-	if (prefix) {
+	എങ്കിൽ (prefix) {
 		p = strdup(prefix);
-		if (!p)
-			return -ENOMEM;
+		എങ്കിൽ (!p)
+			തിരികെ -ENOMEM;
 	}
 
-	free(pc->prefix);
+	സ്വതന്ത്രം(pc->prefix);
 	pc->prefix = p;
 	DBG_OBJ(CXT, pc, ul_debug("new prefix: '%s'", p));
-	return 0;
+	തിരികെ 0;
 }
 
-const char *ul_path_get_prefix(struct path_cxt *pc)
+സ്ഥിരം അക്ഷരം *ul_path_get_prefix(ഘടന path_cxt *pc)
 {
-	return pc ? pc->prefix : NULL;
+	തിരികെ pc ? pc->prefix : ശൂന്യ;
 }
 
-int ul_path_set_dir(struct path_cxt *pc, const char *dir)
+പൂർണ്ണസംഖ്യ ul_path_set_dir(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *dir)
 {
-	char *p = NULL;
+	അക്ഷരം *p = ശൂന്യ;
 
-	if (dir) {
+	എങ്കിൽ (dir) {
 		p = strdup(dir);
-		if (!p)
-			return -ENOMEM;
+		എങ്കിൽ (!p)
+			തിരികെ -ENOMEM;
 	}
 
-	if (pc->dir_fd >= 0) {
+	എങ്കിൽ (pc->dir_fd >= 0) {
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
 
-	free(pc->dir_path);
+	സ്വതന്ത്രം(pc->dir_path);
 	pc->dir_path = p;
 	DBG_OBJ(CXT, pc, ul_debug("new dir: '%s'", p));
-	return 0;
+	തിരികെ 0;
 }
 
-const char *ul_path_get_dir(struct path_cxt *pc)
+സ്ഥിരം അക്ഷരം *ul_path_get_dir(ഘടന path_cxt *pc)
 {
-	return pc ? pc->dir_path : NULL;
+	തിരികെ pc ? pc->dir_path : ശൂന്യ;
 }
 
-int ul_path_set_dialect(struct path_cxt *pc, void *data, void free_data(struct path_cxt *))
+പൂർണ്ണസംഖ്യ ul_path_set_dialect(ഘടന path_cxt *pc, ശൂന്യം *data, ശൂന്യം free_data(ഘടന path_cxt *))
 {
 	pc->dialect = data;
 	pc->free_dialect = free_data;
 	DBG_OBJ(CXT, pc, ul_debug("(re)set dialect"));
-	return 0;
+	തിരികെ 0;
 }
 
-void *ul_path_get_dialect(struct path_cxt *pc)
+ശൂന്യം *ul_path_get_dialect(ഘടന path_cxt *pc)
 {
-	return pc ? pc->dialect : NULL;
+	തിരികെ pc ? pc->dialect : ശൂന്യ;
 }
 
-int ul_path_set_enoent_redirect(struct path_cxt *pc, int (*func)(struct path_cxt *, const char *, int *))
+പൂർണ്ണസംഖ്യ ul_path_set_enoent_redirect(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ (*func)(ഘടന path_cxt *, സ്ഥിരം അക്ഷരം *, പൂർണ്ണസംഖ്യ *))
 {
 	pc->redirect_on_enoent = func;
-	return 0;
+	തിരികെ 0;
 }
 
-static const char *get_absdir(struct path_cxt *pc)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *get_absdir(ഘടന path_cxt *pc)
 {
-	int rc;
-	const char *dirpath;
+	പൂർണ്ണസംഖ്യ rc;
+	സ്ഥിരം അക്ഷരം *dirpath;
 
-	if (!pc->prefix)
-		return pc->dir_path;
+	എങ്കിൽ (!pc->prefix)
+		തിരികെ pc->dir_path;
 
 	dirpath = pc->dir_path;
-	if (!dirpath)
-		return pc->prefix;
-	if (*dirpath == '/')
+	എങ്കിൽ (!dirpath)
+		തിരികെ pc->prefix;
+	എങ്കിൽ (*dirpath == '/')
 		dirpath++;
 
-	rc = snprintf(pc->path_buffer, sizeof(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
-	if (rc < 0)
-		return NULL;
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	rc = snprintf(pc->path_buffer, വലുപ്പം(pc->path_buffer), "%s/%s", pc->prefix, dirpath);
+	എങ്കിൽ (rc < 0)
+		തിരികെ ശൂന്യ;
+	എങ്കിൽ ((size_t)rc >= വലുപ്പം(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
-	return pc->path_buffer;
+	തിരികെ pc->path_buffer;
 }
 
-int ul_path_is_accessible(struct path_cxt *pc)
+പൂർണ്ണസംഖ്യ ul_path_is_accessible(ഘടന path_cxt *pc)
 {
-	const char *path;
-	assert(pc);
+	സ്ഥിരം അക്ഷരം *path;
+	പ്രതിജ്ഞാ(pc);
 
-	if (pc->dir_fd >= 0)
-		return 1;
+	എങ്കിൽ (pc->dir_fd >= 0)
+		തിരികെ 1;
 
 	path = get_absdir(pc);
-	if (!path)
-		return 0;
-	return access(path, F_OK) == 0;
+	എങ്കിൽ (!path)
+		തിരികെ 0;
+	തിരികെ access(path, F_OK) == 0;
 }
 
-int ul_path_get_dirfd(struct path_cxt *pc)
+പൂർണ്ണസംഖ്യ ul_path_get_dirfd(ഘടന path_cxt *pc)
 {
-	assert(pc);
-	assert(pc->dir_path);
+	പ്രതിജ്ഞാ(pc);
+	പ്രതിജ്ഞാ(pc->dir_path);
 
-	if (pc->dir_fd < 0) {
-		const char *path = get_absdir(pc);
-		if (!path)
-			return -errno;
+	എങ്കിൽ (pc->dir_fd < 0) {
+		സ്ഥിരം അക്ഷരം *path = get_absdir(pc);
+		എങ്കിൽ (!path)
+			തിരികെ -errno;
 
 		DBG_OBJ(CXT, pc, ul_debug("opening dir: '%s'", path));
 		pc->dir_fd = open(path, O_RDONLY|O_CLOEXEC);
 	}
 
-	return pc->dir_fd;
+	തിരികെ pc->dir_fd;
 }
 
 /* Note that next ul_path_get_dirfd() will reopen the directory */
-void ul_path_close_dirfd(struct path_cxt *pc)
+ശൂന്യം ul_path_close_dirfd(ഘടന path_cxt *pc)
 {
-	assert(pc);
+	പ്രതിജ്ഞാ(pc);
 
-	if (pc->dir_fd >= 0) {
+	എങ്കിൽ (pc->dir_fd >= 0) {
 		DBG_OBJ(CXT, pc, ul_debug("closing dir"));
 		close(pc->dir_fd);
 		pc->dir_fd = -1;
 	}
 }
 
-int ul_path_isopen_dirfd(struct path_cxt *pc)
+പൂർണ്ണസംഖ്യ ul_path_isopen_dirfd(ഘടന path_cxt *pc)
 {
-	return pc && pc->dir_fd >= 0;
+	തിരികെ pc && pc->dir_fd >= 0;
 }
 
-static const char *ul_path_mkpath(struct path_cxt *pc, const char *path, va_list ap)
+സ്ഥിതം സ്ഥിരം അക്ഷരം *ul_path_mkpath(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	errno = 0;
 
-	rc = vsnprintf(pc->path_buffer, sizeof(pc->path_buffer), path, ap);
-	if (rc < 0) {
-		if (!errno)
+	rc = vsnprintf(pc->path_buffer, വലുപ്പം(pc->path_buffer), path, ap);
+	എങ്കിൽ (rc < 0) {
+		എങ്കിൽ (!errno)
 			errno = EINVAL;
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
-	if ((size_t)rc >= sizeof(pc->path_buffer)) {
+	എങ്കിൽ ((size_t)rc >= വലുപ്പം(pc->path_buffer)) {
 		errno = ENAMETOOLONG;
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
-	return pc->path_buffer;
+	തിരികെ pc->path_buffer;
 }
 
-char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+അക്ഷരം *ul_path_get_abspath(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t bufsz, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	if (path) {
-		int rc;
+	എങ്കിൽ (path) {
+		പൂർണ്ണസംഖ്യ rc;
 		va_list ap;
-		const char *tail = NULL, *dirpath = pc->dir_path;
+		സ്ഥിരം അക്ഷരം *tail = ശൂന്യ, *dirpath = pc->dir_path;
 
 		va_start(ap, path);
 		tail = ul_path_mkpath(pc, path, ap);
 		va_end(ap);
 
-		if (dirpath && *dirpath == '/')
+		എങ്കിൽ (dirpath && *dirpath == '/')
 			dirpath++;
-		if (tail && *tail == '/')
+		എങ്കിൽ (tail && *tail == '/')
 			tail++;
 
 		rc = snprintf(buf, bufsz, "%s/%s/%s",
@@ -291,85 +291,85 @@ char *ul_path_get_abspath(struct path_cxt *pc, char *buf, size_t bufsz, const ch
 				dirpath ? dirpath : "",
 				tail ? tail : "");
 
-		if ((size_t)rc >= bufsz) {
+		എങ്കിൽ ((size_t)rc >= bufsz) {
 			errno = ENAMETOOLONG;
-			return NULL;
+			തിരികെ ശൂന്യ;
 		}
-	} else {
-		const char *tmp = get_absdir(pc);
+	} അല്ലെങ്കിൽ {
+		സ്ഥിരം അക്ഷരം *tmp = get_absdir(pc);
 
-		if (!tmp)
-			return NULL;
+		എങ്കിൽ (!tmp)
+			തിരികെ ശൂന്യ;
 		xstrncpy(buf, tmp, bufsz);
 	}
 
-	return buf;
+	തിരികെ buf;
 }
 
 
-int ul_path_access(struct path_cxt *pc, int mode, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_access(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ mode, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	എങ്കിൽ (!path)
+		തിരികെ -EINVAL;
+	എങ്കിൽ (!pc) {
 		rc = access(path, mode);
 		DBG(CXT, ul_debug("access '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	} അല്ലെങ്കിൽ {
+		പൂർണ്ണസംഖ്യ dir = ul_path_get_dirfd(pc);
+		എങ്കിൽ (dir < 0)
+			തിരികെ dir;
+		എങ്കിൽ (*path == '/')
 			path++;
 
 		rc = faccessat(dir, path, mode, 0);
 
-		if (rc && errno == ENOENT
+		എങ്കിൽ (rc && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			rc = faccessat(dir, path, mode, 0);
 
 		DBG_OBJ(CXT, pc, ul_debug("access: '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_accessf(struct path_cxt *pc, int mode, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_accessf(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ mode, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_access(pc, mode, p);
+	തിരികെ !p ? -errno : ul_path_access(pc, mode, p);
 }
 
 /*
  * If @path is NULL, then stat() is called for the directory itself addressed by @pc.
  */
-int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_stat(ഘടന path_cxt *pc, ഘടന stat *sb, പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
-	if (!pc) {
+	എങ്കിൽ (!pc) {
 		rc = path ? stat(path, sb) : -EINVAL;
 		DBG(CXT, ul_debug("stat '%s' [no context, rc=%d]", path, rc));
-	} else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (path) {
-			if  (*path == '/')
+	} അല്ലെങ്കിൽ {
+		പൂർണ്ണസംഖ്യ dir = ul_path_get_dirfd(pc);
+		എങ്കിൽ (dir < 0)
+			തിരികെ dir;
+		എങ്കിൽ (path) {
+			എങ്കിൽ  (*path == '/')
 				path++;
 			rc = fstatat(dir, path, sb, flags);
 
-		} else
+		} അല്ലെങ്കിൽ
 			rc = fstat(dir, sb);	/* dir itself */
 
-		if (rc && errno == ENOENT
+		എങ്കിൽ (rc && errno == ENOENT
 		    && path
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
@@ -377,158 +377,158 @@ int ul_path_stat(struct path_cxt *pc, struct stat *sb, int flags, const char *pa
 
 		DBG_OBJ(CXT, pc, ul_debug("stat '%s' [rc=%d]", path, rc));
 	}
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_vstatf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, va_list ap)
+പൂർണ്ണസംഖ്യ ul_path_vstatf(ഘടന path_cxt *pc, ഘടന stat *sb, പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	സ്ഥിരം അക്ഷരം *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_stat(pc, sb, flags, p);
+	തിരികെ !p ? -errno : ul_path_stat(pc, sb, flags, p);
 }
 
-int ul_path_statf(struct path_cxt *pc, struct stat *sb, int flags, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_statf(ഘടന path_cxt *pc, ഘടന stat *sb, പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatf(pc, sb, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 #ifdef HAVE_STATX
 /*
 * This function follows the semantics of statx(). To call statx() for the directory
 * itself addressed by @pc, use an empty string and the AT_EMPTY_PATH @flag.
 */
-int ul_path_statx(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		  const char *path)
+പൂർണ്ണസംഖ്യ ul_path_statx(ഘടന path_cxt *pc, ഘടന statx *stx, പൂർണ്ണസംഖ്യ flags, unsigned പൂർണ്ണസംഖ്യ mask,
+		  സ്ഥിരം അക്ഷരം *path)
 {
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc)
+	എങ്കിൽ (!path)
+		തിരികെ -EINVAL;
+	എങ്കിൽ (!pc)
 		rc = path ? statx(AT_FDCWD, path, flags, mask, stx) : - EINVAL;
-	else {
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
-		if (*path == '/')
+	അല്ലെങ്കിൽ {
+		പൂർണ്ണസംഖ്യ dir = ul_path_get_dirfd(pc);
+		എങ്കിൽ (dir < 0)
+			തിരികെ dir;
+		എങ്കിൽ (*path == '/')
 			path++;
 
 		rc = statx(dir, path, flags, mask, stx);
 	}
 
-	return rc;
+	തിരികെ rc;
 }
-#else
-int ul_path_statx(struct path_cxt *pc __attribute__((__unused__)),
-		  struct statx *stx __attribute__((__unused__)),
-		  int flags __attribute__((__unused__)),
-		  unsigned int mask __attribute__((__unused__)),
-		  const char *path __attribute__((__unused__)))
+#അല്ലെങ്കിൽ
+പൂർണ്ണസംഖ്യ ul_path_statx(ഘടന path_cxt *pc __attribute__((__unused__)),
+		  ഘടന statx *stx __attribute__((__unused__)),
+		  പൂർണ്ണസംഖ്യ flags __attribute__((__unused__)),
+		  unsigned പൂർണ്ണസംഖ്യ mask __attribute__((__unused__)),
+		  സ്ഥിരം അക്ഷരം *path __attribute__((__unused__)))
 {
 	errno = ENOSYS;
-	return -1;
+	തിരികെ -1;
 }
 #endif /* HAVE_STATX */
 
-int ul_path_vstatxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		    const char *path, va_list ap)
+പൂർണ്ണസംഖ്യ ul_path_vstatxf(ഘടന path_cxt *pc, ഘടന statx *stx, പൂർണ്ണസംഖ്യ flags, unsigned പൂർണ്ണസംഖ്യ mask,
+		    സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	സ്ഥിരം അക്ഷരം *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
+	തിരികെ !p ? -errno : ul_path_statx(pc, stx, flags, mask, p);
 }
 
-int ul_path_statxf(struct path_cxt *pc, struct statx *stx, int flags, unsigned int mask,
-		   const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_statxf(ഘടന path_cxt *pc, ഘടന statx *stx, പൂർണ്ണസംഖ്യ flags, unsigned പൂർണ്ണസംഖ്യ mask,
+		   സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vstatxf(pc, stx, flags, mask, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_open(struct path_cxt *pc, int flags, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_open(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *path)
 {
-	int fd;
+	പൂർണ്ണസംഖ്യ fd;
 
-	if (!path)
-		return -EINVAL;
-	if (!pc) {
+	എങ്കിൽ (!path)
+		തിരികെ -EINVAL;
+	എങ്കിൽ (!pc) {
 		fd = open(path, flags);
 		DBG(CXT, ul_debug("opening '%s' [no context]", path));
-	} else {
-		int fdx;
-		int dir = ul_path_get_dirfd(pc);
-		if (dir < 0)
-			return dir;
+	} അല്ലെങ്കിൽ {
+		പൂർണ്ണസംഖ്യ fdx;
+		പൂർണ്ണസംഖ്യ dir = ul_path_get_dirfd(pc);
+		എങ്കിൽ (dir < 0)
+			തിരികെ dir;
 
-		if (*path == '/')
+		എങ്കിൽ (*path == '/')
 			path++;
 
 		fdx = fd = openat(dir, path, flags);
 
-		if (fd < 0 && errno == ENOENT
+		എങ്കിൽ (fd < 0 && errno == ENOENT
 		    && pc->redirect_on_enoent
 		    && pc->redirect_on_enoent(pc, path, &dir) == 0)
 			fd = openat(dir, path, flags);
 
 		DBG_OBJ(CXT, pc, ul_debug("opening '%s'%s", path, fdx != fd ? " [redirected]" : ""));
 	}
-	return fd;
+	തിരികെ fd;
 }
 
-int ul_path_vopenf(struct path_cxt *pc, int flags, const char *path, va_list ap)
+പൂർണ്ണസംഖ്യ ul_path_vopenf(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	സ്ഥിരം അക്ഷരം *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_open(pc, flags, p);
+	തിരികെ !p ? -errno : ul_path_open(pc, flags, p);
 }
 
-int ul_path_openf(struct path_cxt *pc, int flags, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_openf(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ flags, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vopenf(pc, flags, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 
 /*
  * Maybe stupid, but good enough ;-)
  */
-FILE *ul_path_fopen(struct path_cxt *pc, const char *mode, const char *path)
+FILE *ul_path_fopen(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *mode, സ്ഥിരം അക്ഷരം *path)
 {
-	int flags = ul_mode_to_flags(mode);
-	int fd = ul_path_open(pc, flags, path);
+	പൂർണ്ണസംഖ്യ flags = ul_mode_to_flags(mode);
+	പൂർണ്ണസംഖ്യ fd = ul_path_open(pc, flags, path);
 
-	if (fd < 0)
-		return NULL;
+	എങ്കിൽ (fd < 0)
+		തിരികെ ശൂന്യ;
 
-	return ul_vfs_fdopen(pc ? pc->vfs : NULL, fd, mode);
+	തിരികെ ul_vfs_fdopen(pc ? pc->vfs : ശൂന്യ, fd, mode);
 }
 
 
-FILE *ul_path_vfopenf(struct path_cxt *pc, const char *mode, const char *path, va_list ap)
+FILE *ul_path_vfopenf(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *mode, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	സ്ഥിരം അക്ഷരം *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_fopen(pc, mode, p);
+	തിരികെ !p ? ശൂന്യ : ul_path_fopen(pc, mode, p);
 }
 
-FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ...)
+FILE *ul_path_fopenf(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *mode, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	FILE *f;
 	va_list ap;
@@ -537,40 +537,40 @@ FILE *ul_path_fopenf(struct path_cxt *pc, const char *mode, const char *path, ..
 	f = ul_path_vfopenf(pc, mode, path, ap);
 	va_end(ap);
 
-	return f;
+	തിരികെ f;
 }
 
 /*
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
+DIR *ul_path_opendir(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path)
 {
 	DIR *dir;
-	int fd = -1;
+	പൂർണ്ണസംഖ്യ fd = -1;
 
-	if (path)
+	എങ്കിൽ (path)
 		fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	else if (pc->dir_path) {
-		int dirfd;
+	അല്ലെങ്കിൽ എങ്കിൽ (pc->dir_path) {
+		പൂർണ്ണസംഖ്യ dirfd;
 
 		DBG_OBJ(CXT, pc, ul_debug("duplicate dir path"));
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd >= 0)
+		എങ്കിൽ (dirfd >= 0)
 			fd = dup_fd_cloexec(dirfd, STDERR_FILENO + 1);
 	}
 
-	if (fd < 0)
-		return NULL;
+	എങ്കിൽ (fd < 0)
+		തിരികെ ശൂന്യ;
 
 	dir = fdopendir(fd);
-	if (!dir) {
+	എങ്കിൽ (!dir) {
 		close(fd);
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
-	if (!path)
+	എങ്കിൽ (!path)
 		 rewinddir(dir);
-	return dir;
+	തിരികെ dir;
 }
 
 
@@ -578,18 +578,18 @@ DIR *ul_path_opendir(struct path_cxt *pc, const char *path)
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_vopendirf(struct path_cxt *pc, const char *path, va_list ap)
+DIR *ul_path_vopendirf(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	സ്ഥിരം അക്ഷരം *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? NULL : ul_path_opendir(pc, p);
+	തിരികെ !p ? ശൂന്യ : ul_path_opendir(pc, p);
 }
 
 /*
  * Open directory @path in read-only mode. If the path is NULL then duplicate FD
  * to the directory addressed by @pc.
  */
-DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
+DIR *ul_path_opendirf(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
 	DIR *dir;
@@ -598,88 +598,88 @@ DIR *ul_path_opendirf(struct path_cxt *pc, const char *path, ...)
 	dir = ul_path_vopendirf(pc, path, ap);
 	va_end(ap);
 
-	return dir;
+	തിരികെ dir;
 }
 
 /*
  * If @path is NULL then readlink is called on @pc directory.
  */
-ssize_t ul_path_readlink(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path)
+ssize_t ul_path_readlink(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t bufsiz, സ്ഥിരം അക്ഷരം *path)
 {
-	int dirfd;
+	പൂർണ്ണസംഖ്യ dirfd;
 	ssize_t ssz;
 
-	if (!path) {
-		const char *p = get_absdir(pc);
-		if (!p)
-			return -errno;
+	എങ്കിൽ (!path) {
+		സ്ഥിരം അക്ഷരം *p = get_absdir(pc);
+		എങ്കിൽ (!p)
+			തിരികെ -errno;
 		ssz = readlink(p, buf, bufsiz - 1);
-	} else {
+	} അല്ലെങ്കിൽ {
 		dirfd = ul_path_get_dirfd(pc);
-		if (dirfd < 0)
-			return dirfd;
+		എങ്കിൽ (dirfd < 0)
+			തിരികെ dirfd;
 
-		if (*path == '/')
+		എങ്കിൽ (*path == '/')
 			path++;
 
 		ssz = readlinkat(dirfd, path, buf, bufsiz - 1);
 	}
 
-	if (ssz >= 0)
+	എങ്കിൽ (ssz >= 0)
 		buf[ssz] = '\0';
-	return ssz;
+	തിരികെ ssz;
 }
 
 /*
  * If @path is NULL then readlink is called on @pc directory.
  */
-ssize_t ul_path_readlinkf(struct path_cxt *pc, char *buf, size_t bufsiz, const char *path, ...)
+ssize_t ul_path_readlinkf(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t bufsiz, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
+	തിരികെ !p ? -errno : ul_path_readlink(pc, buf, bufsiz, p);
 }
 
-int ul_path_read(struct path_cxt *pc, char *buf, size_t len, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t len, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc, errsv;
-	int fd;
+	പൂർണ്ണസംഖ്യ rc, errsv;
+	പൂർണ്ണസംഖ്യ fd;
 
 	fd = ul_path_open(pc, O_RDONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	എങ്കിൽ (fd < 0)
+		തിരികെ -errno;
 
 	DBG(CXT, ul_debug(" reading '%s'", path));
-	rc = ul_vfs_read_all(pc ? pc->vfs : NULL, fd, buf, len);
+	rc = ul_vfs_read_all(pc ? pc->vfs : ശൂന്യ, fd, buf, len);
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ശൂന്യ, fd);
 	errno = errsv;
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_vreadf(struct path_cxt *pc, char *buf, size_t len, const char *path, va_list ap)
+പൂർണ്ണസംഖ്യ ul_path_vreadf(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t len, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p = ul_path_mkpath(pc, path, ap);
+	സ്ഥിരം അക്ഷരം *p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read(pc, buf, len, p);
+	തിരികെ !p ? -errno : ul_path_read(pc, buf, len, p);
 }
 
-int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t len, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf(pc, buf, len, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 
 
@@ -689,87 +689,87 @@ int ul_path_readf(struct path_cxt *pc, char *buf, size_t len, const char *path, 
  *
  * Returns size of the string without \0, nothing is allocated if returns <= 0.
  */
-int ul_path_read_string(struct path_cxt *pc, char **str, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_string(ഘടന path_cxt *pc, അക്ഷരം **str, സ്ഥിരം അക്ഷരം *path)
 {
-	char buf[BUFSIZ];
-	int rc;
+	അക്ഷരം buf[BUFSIZ];
+	പൂർണ്ണസംഖ്യ rc;
 
-	if (!str)
-		return -EINVAL;
+	എങ്കിൽ (!str)
+		തിരികെ -EINVAL;
 
-	*str = NULL;
+	*str = ശൂന്യ;
 
-	rc = ul_path_read_buffer(pc, buf, sizeof(buf), path);
-	if (rc < 0)
-		return rc;
+	rc = ul_path_read_buffer(pc, buf, വലുപ്പം(buf), path);
+	എങ്കിൽ (rc < 0)
+		തിരികെ rc;
 
 	*str = strdup(buf);
-	if (!*str)
+	എങ്കിൽ (!*str)
 		rc = -ENOMEM;
 
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_readf_string(struct path_cxt *pc, char **str, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_string(ഘടന path_cxt *pc, അക്ഷരം **str, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_string(pc, str, p);
+	തിരികെ !p ? -errno : ul_path_read_string(pc, str, p);
 }
 
-int ul_path_read_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_buffer(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t bufsz, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc = ul_path_read(pc, buf, bufsz - 1, path);
+	പൂർണ്ണസംഖ്യ rc = ul_path_read(pc, buf, bufsz - 1, path);
 
-	if (rc == 0)
+	എങ്കിൽ (rc == 0)
 		buf[0] = '\0';
 
-	else if (rc > 0) {
+	അല്ലെങ്കിൽ എങ്കിൽ (rc > 0) {
 		/* Remove trailing newline (usual in sysfs) */
-		if (*(buf + rc - 1) == '\n')
+		എങ്കിൽ (*(buf + rc - 1) == '\n')
 			buf[--rc] = '\0';
-		else
+		അല്ലെങ്കിൽ
 			buf[rc] = '\0';
 	}
 
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_vreadf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, va_list ap)
+പൂർണ്ണസംഖ്യ ul_path_vreadf_buffer(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t bufsz, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 
 	p = ul_path_mkpath(pc, path, ap);
 
-	return !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
+	തിരികെ !p ? -errno : ul_path_read_buffer(pc, buf, bufsz, p);
 }
 
-int ul_path_readf_buffer(struct path_cxt *pc, char *buf, size_t bufsz, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_buffer(ഘടന path_cxt *pc, അക്ഷരം *buf, size_t bufsz, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	va_start(ap, path);
 	rc = ul_path_vreadf_buffer(pc, buf, bufsz, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
+പൂർണ്ണസംഖ്യ ul_path_scanf(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	f = ul_path_fopen(pc, "r" UL_CLOEXECSTR, path);
-	if (!f)
-		return -EINVAL;
+	എങ്കിൽ (!f)
+		തിരികെ -EINVAL;
 
 	DBG(CXT, ul_debug(" fscanf [%s] '%s'", fmt, path));
 
@@ -778,363 +778,363 @@ int ul_path_scanf(struct path_cxt *pc, const char *path, const char *fmt, ...)
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_scanff(struct path_cxt *pc, const char *path, va_list ap, const char *fmt, ...)
+പൂർണ്ണസംഖ്യ ul_path_scanff(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path, va_list ap, സ്ഥിരം അക്ഷരം *fmt, ...)
 {
 	FILE *f;
 	va_list fmt_ap;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	f = ul_path_vfopenf(pc, "r" UL_CLOEXECSTR, path, ap);
-	if (!f)
-		return -EINVAL;
+	എങ്കിൽ (!f)
+		തിരികെ -EINVAL;
 
 	va_start(fmt_ap, fmt);
 	rc = vfscanf(f, fmt, fmt_ap);
 	va_end(fmt_ap);
 
 	fclose(f);
-	return rc;
+	തിരികെ rc;
 }
 
 
-int ul_path_read_s64(struct path_cxt *pc, int64_t *res, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_s64(ഘടന path_cxt *pc, int64_t *res, സ്ഥിരം അക്ഷരം *path)
 {
 	int64_t x = 0;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNd64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	എങ്കിൽ (rc != 1)
+		തിരികെ -1;
+	എങ്കിൽ (res)
 		*res = x;
-	return 0;
+	തിരികെ 0;
 }
 
-int ul_path_readf_s64(struct path_cxt *pc, int64_t *res, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_s64(ഘടന path_cxt *pc, int64_t *res, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s64(pc, res, p);
+	തിരികെ !p ? -errno : ul_path_read_s64(pc, res, p);
 }
 
-int ul_path_read_u64(struct path_cxt *pc, uint64_t *res, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_u64(ഘടന path_cxt *pc, uint64_t *res, സ്ഥിരം അക്ഷരം *path)
 {
 	uint64_t x = 0;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	rc = ul_path_scanf(pc, path, "%"SCNu64, &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	എങ്കിൽ (rc != 1)
+		തിരികെ -1;
+	എങ്കിൽ (res)
 		*res = x;
-	return 0;
+	തിരികെ 0;
 }
 
-int ul_path_readf_u64(struct path_cxt *pc, uint64_t *res, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_u64(ഘടന path_cxt *pc, uint64_t *res, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u64(pc, res, p);
+	തിരികെ !p ? -errno : ul_path_read_u64(pc, res, p);
 }
 
-int ul_path_read_s32(struct path_cxt *pc, int *res, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_s32(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ *res, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc, x = 0;
+	പൂർണ്ണസംഖ്യ rc, x = 0;
 
 	rc = ul_path_scanf(pc, path, "%d", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	എങ്കിൽ (rc != 1)
+		തിരികെ -1;
+	എങ്കിൽ (res)
 		*res = x;
-	return 0;
+	തിരികെ 0;
 }
 
-int ul_path_readf_s32(struct path_cxt *pc, int *res, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_s32(ഘടന path_cxt *pc, പൂർണ്ണസംഖ്യ *res, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_s32(pc, res, p);
+	തിരികെ !p ? -errno : ul_path_read_s32(pc, res, p);
 }
 
-int ul_path_read_u32(struct path_cxt *pc, unsigned int *res, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_u32(ഘടന path_cxt *pc, unsigned പൂർണ്ണസംഖ്യ *res, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc;
-	unsigned int x = 0;
+	പൂർണ്ണസംഖ്യ rc;
+	unsigned പൂർണ്ണസംഖ്യ x = 0;
 
 	rc = ul_path_scanf(pc, path, "%u", &x);
-	if (rc != 1)
-		return -1;
-	if (res)
+	എങ്കിൽ (rc != 1)
+		തിരികെ -1;
+	എങ്കിൽ (res)
 		*res = x;
-	return 0;
+	തിരികെ 0;
 }
 
-int ul_path_readf_u32(struct path_cxt *pc, unsigned int *res, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_u32(ഘടന path_cxt *pc, unsigned പൂർണ്ണസംഖ്യ *res, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_u32(pc, res, p);
+	തിരികെ !p ? -errno : ul_path_read_u32(pc, res, p);
 }
 
-int ul_path_read_majmin(struct path_cxt *pc, dev_t *res, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_read_majmin(ഘടന path_cxt *pc, dev_t *res, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc, maj = 0, min = 0;
+	പൂർണ്ണസംഖ്യ rc, maj = 0, min = 0;
 
 	rc = ul_path_scanf(pc, path, "%d:%d", &maj, &min);
-	if (rc != 2)
-		return -1;
-	if (res)
+	എങ്കിൽ (rc != 2)
+		തിരികെ -1;
+	എങ്കിൽ (res)
 		*res = makedev(maj, min);
-	return 0;
+	തിരികെ 0;
 }
 
-int ul_path_readf_majmin(struct path_cxt *pc, dev_t *res, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_majmin(ഘടന path_cxt *pc, dev_t *res, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_read_majmin(pc, res, p);
+	തിരികെ !p ? -errno : ul_path_read_majmin(pc, res, p);
 }
 
-int ul_path_write_string(struct path_cxt *pc, const char *str, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_write_string(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *path)
 {
-	int rc, errsv;
-	int fd;
+	പൂർണ്ണസംഖ്യ rc, errsv;
+	പൂർണ്ണസംഖ്യ fd;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	എങ്കിൽ (fd < 0)
+		തിരികെ -errno;
 
-	rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, str, strlen(str));
+	rc = ul_vfs_write_all(pc ? pc->vfs : ശൂന്യ, fd, str, strlen(str));
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ശൂന്യ, fd);
 	errno = errsv;
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_writef_string(struct path_cxt *pc, const char *str, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_writef_string(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_string(pc, str, p);
+	തിരികെ !p ? -errno : ul_path_write_string(pc, str, p);
 }
 
-int ul_path_write_s64(struct path_cxt *pc, int64_t num, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_write_s64(ഘടന path_cxt *pc, int64_t അക്കം, സ്ഥിരം അക്ഷരം *path)
 {
-	char buf[sizeof(stringify_value(LLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	അക്ഷരം buf[വലുപ്പം(stringify_മൂല്യം(LLONG_MAX))];
+	പൂർണ്ണസംഖ്യ rc, errsv;
+	പൂർണ്ണസംഖ്യ fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	എങ്കിൽ (fd < 0)
+		തിരികെ -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRId64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	len = snprintf(buf, വലുപ്പം(buf), "%" PRId64, അക്കം);
+	എങ്കിൽ (len < 0 || (size_t) len >= വലുപ്പം(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
-		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
+	അല്ലെങ്കിൽ
+		rc = ul_vfs_write_all(pc ? pc->vfs : ശൂന്യ, fd, buf, len);
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ശൂന്യ, fd);
 	errno = errsv;
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_write_u64(struct path_cxt *pc, uint64_t num, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_write_u64(ഘടന path_cxt *pc, uint64_t അക്കം, സ്ഥിരം അക്ഷരം *path)
 {
-	char buf[sizeof(stringify_value(ULLONG_MAX))];
-	int rc, errsv;
-	int fd, len;
+	അക്ഷരം buf[വലുപ്പം(stringify_മൂല്യം(ULLONG_MAX))];
+	പൂർണ്ണസംഖ്യ rc, errsv;
+	പൂർണ്ണസംഖ്യ fd, len;
 
 	fd = ul_path_open(pc, O_WRONLY|O_CLOEXEC, path);
-	if (fd < 0)
-		return -errno;
+	എങ്കിൽ (fd < 0)
+		തിരികെ -errno;
 
-	len = snprintf(buf, sizeof(buf), "%" PRIu64, num);
-	if (len < 0 || (size_t) len >= sizeof(buf))
+	len = snprintf(buf, വലുപ്പം(buf), "%" PRIu64, അക്കം);
+	എങ്കിൽ (len < 0 || (size_t) len >= വലുപ്പം(buf))
 		rc = len < 0 ? -errno : -E2BIG;
-	else
-		rc = ul_vfs_write_all(pc ? pc->vfs : NULL, fd, buf, len);
+	അല്ലെങ്കിൽ
+		rc = ul_vfs_write_all(pc ? pc->vfs : ശൂന്യ, fd, buf, len);
 
 	errsv = errno;
-	ul_vfs_close(pc ? pc->vfs : NULL, fd);
+	ul_vfs_close(pc ? pc->vfs : ശൂന്യ, fd);
 	errno = errsv;
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_writef_u64(struct path_cxt *pc, uint64_t num, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_writef_u64(ഘടന path_cxt *pc, uint64_t അക്കം, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_write_u64(pc, num, p);
+	തിരികെ !p ? -errno : ul_path_write_u64(pc, അക്കം, p);
 
 }
 
-int ul_path_count_dirents(struct path_cxt *pc, const char *path)
+പൂർണ്ണസംഖ്യ ul_path_എണ്ണം_dirents(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path)
 {
 	DIR *dir;
-	int r = 0;
+	പൂർണ്ണസംഖ്യ r = 0;
 
 	dir = ul_path_opendir(pc, path);
-	if (!dir)
-		return 0;
+	എങ്കിൽ (!dir)
+		തിരികെ 0;
 
-	while (xreaddir(dir)) r++;
+	ആകുമ്പോൾ (xreaddir(dir)) r++;
 
 	closedir(dir);
-	return r;
+	തിരികെ r;
 }
 
-int ul_path_countf_dirents(struct path_cxt *pc, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_countf_dirents(ഘടന path_cxt *pc, സ്ഥിരം അക്ഷരം *path, ...)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 	va_list ap;
 
 	va_start(ap, path);
 	p = ul_path_mkpath(pc, path, ap);
 	va_end(ap);
 
-	return !p ? -errno : ul_path_count_dirents(pc, p);
+	തിരികെ !p ? -errno : ul_path_എണ്ണം_dirents(pc, p);
 }
 
 /* first call (when @sub is NULL) opens the directory, last call closes the directory */
-int ul_path_next_dirent(struct path_cxt *pc, DIR **sub, const char *dirname, struct dirent **d)
+പൂർണ്ണസംഖ്യ ul_path_next_dirent(ഘടന path_cxt *pc, DIR **sub, സ്ഥിരം അക്ഷരം *dirname, ഘടന dirent **d)
 {
-	if (!pc || !sub || !d)
-		return -EINVAL;
+	എങ്കിൽ (!pc || !sub || !d)
+		തിരികെ -EINVAL;
 
-	if (!*sub) {
+	എങ്കിൽ (!*sub) {
 		*sub = ul_path_opendir(pc, dirname);
-		if (!*sub)
-			return -errno;
+		എങ്കിൽ (!*sub)
+			തിരികെ -errno;
 	}
 
 	*d = xreaddir(*sub);
-	if (*d)
-		return 0;
+	എങ്കിൽ (*d)
+		തിരികെ 0;
 
 	closedir(*sub);
-	*sub = NULL;
-	return 1;
+	*sub = ശൂന്യ;
+	തിരികെ 1;
 }
 
 #ifdef HAVE_CPU_SET_T
-static int ul_path_cpuparse(struct path_cxt *pc, cpu_set_t **set, int maxcpus, int islist, const char *path, va_list ap)
+സ്ഥിതം പൂർണ്ണസംഖ്യ ul_path_cpuparse(ഘടന path_cxt *pc, cpu_set_t **set, പൂർണ്ണസംഖ്യ maxcpus, പൂർണ്ണസംഖ്യ islist, സ്ഥിരം അക്ഷരം *path, va_list ap)
 {
 	size_t setsize, len = maxcpus * 7;
-	char *buf;
-	int rc;
+	അക്ഷരം *buf;
+	പൂർണ്ണസംഖ്യ rc;
 
-	*set = NULL;
+	*set = ശൂന്യ;
 
 	buf = malloc(len);
-	if (!buf)
-		return -ENOMEM;
+	എങ്കിൽ (!buf)
+		തിരികെ -ENOMEM;
 
 	rc = ul_path_vreadf_buffer(pc, buf, len, path, ap);
-	if (rc < 0)
-		goto out;
+	എങ്കിൽ (rc < 0)
+		പോകുക out;
 
-	*set = cpuset_alloc(maxcpus, &setsize, NULL);
-	if (!*set) {
+	*set = cpuset_alloc(maxcpus, &setsize, ശൂന്യ);
+	എങ്കിൽ (!*set) {
 		rc = -EINVAL;
-		goto out;
+		പോകുക out;
 	}
 
-	if (islist) {
-		if (cpulist_parse(buf, *set, setsize, 0)) {
+	എങ്കിൽ (islist) {
+		എങ്കിൽ (cpulist_parse(buf, *set, setsize, 0)) {
 			errno = EINVAL;
 			rc = -errno;
-			goto out;
+			പോകുക out;
 		}
-	} else {
-		if (cpumask_parse(buf, *set, setsize)) {
+	} അല്ലെങ്കിൽ {
+		എങ്കിൽ (cpumask_parse(buf, *set, setsize)) {
 			errno = EINVAL;
 			rc = -errno;
-			goto out;
+			പോകുക out;
 		}
 	}
 	rc = 0;
 
 out:
-	if (rc) {
+	എങ്കിൽ (rc) {
 		cpuset_free(*set);
-		*set = NULL;
+		*set = ശൂന്യ;
 	}
-	free(buf);
-	return rc;
+	സ്വതന്ത്രം(buf);
+	തിരികെ rc;
 }
 
-int ul_path_readf_cpuset(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_cpuset(ഘടന path_cxt *pc, cpu_set_t **set, പൂർണ്ണസംഖ്യ maxcpus, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	പൂർണ്ണസംഖ്യ rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 0, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 
-int ul_path_readf_cpulist(struct path_cxt *pc, cpu_set_t **set, int maxcpus, const char *path, ...)
+പൂർണ്ണസംഖ്യ ul_path_readf_cpulist(ഘടന path_cxt *pc, cpu_set_t **set, പൂർണ്ണസംഖ്യ maxcpus, സ്ഥിരം അക്ഷരം *path, ...)
 {
 	va_list ap;
-	int rc = 0;
+	പൂർണ്ണസംഖ്യ rc = 0;
 
 	va_start(ap, path);
 	rc = ul_path_cpuparse(pc, set, maxcpus, 1, path, ap);
 	va_end(ap);
 
-	return rc;
+	തിരികെ rc;
 }
 
 #endif /* HAVE_CPU_SET_T */
 
 
 #ifdef TEST_PROGRAM_PATH
-#include <getopt.h>
+#അന്തര്ഭാവ <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+സ്ഥിതം ശൂന്യം __attribute__((__noreturn__)) usage(ശൂന്യം)
 {
 	fprintf(stdout, " %s [options] <dir> <command>\n\n", program_invocation_short_name);
 	fputs(" -p, --prefix <dir>      redirect hardcoded paths to <dir>\n", stdout);
@@ -1153,180 +1153,180 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	int c;
-	const char *prefix = NULL, *dir, *file, *command;
-	struct path_cxt *pc = NULL;
+	പൂർണ്ണസംഖ്യ c;
+	സ്ഥിരം അക്ഷരം *prefix = ശൂന്യ, *dir, *file, *command;
+	ഘടന path_cxt *pc = ശൂന്യ;
 
-	static const struct option longopts[] = {
-		{ "prefix",	1, NULL, 'p' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	സ്ഥിതം സ്ഥിരം ഘടന option longopts[] = {
+		{ "prefix",	1, ശൂന്യ, 'p' },
+		{ "help",       0, ശൂന്യ, 'h' },
+		{ ശൂന്യ, 0, ശൂന്യ, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "p:h", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'p':
+	ആകുമ്പോൾ((c = getopt_long(argc, argv, "p:h", longopts, ശൂന്യ)) != -1) {
+		തിരഞ്ഞെടുപ്പ്(c) {
+		അവസ്ഥ 'p':
 			prefix = optarg;
-			break;
-		case 'h':
+			നിർത്തുക;
+		അവസ്ഥ 'h':
 			usage();
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	എങ്കിൽ (optind == argc)
 		errx(EXIT_FAILURE, "<dir> not defined");
 	dir = argv[optind++];
 
 	ul_path_init_debug();
 
 	pc = ul_new_path("%s", dir);
-	if (!pc)
+	എങ്കിൽ (!pc)
 		err(EXIT_FAILURE, "failed to initialize path context");
-	if (prefix)
+	എങ്കിൽ (prefix)
 		ul_path_set_prefix(pc, prefix);
 
-	if (optind == argc)
+	എങ്കിൽ (optind == argc)
 		errx(EXIT_FAILURE, "<command> not defined");
 	command = argv[optind++];
 
-	if (strcmp(command, "read-u32") == 0) {
+	എങ്കിൽ (strcmp(command, "read-u32") == 0) {
 		uint32_t res;
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u32(pc, &res, file) != 0)
+		എങ്കിൽ (ul_path_read_u32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %u\n", file, res);
 
-		if (ul_path_readf_u32(pc, &res, "%s", file) != 0)
+		എങ്കിൽ (ul_path_readf_u32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %u\n", file, res);
 
-	} else if (strcmp(command, "read-s32") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "read-s32") == 0) {
 		int32_t res;
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s32(pc, &res, file) != 0)
+		എങ്കിൽ (ul_path_read_s32(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %d\n", file, res);
 
-		if (ul_path_readf_s32(pc, &res, "%s", file) != 0)
+		എങ്കിൽ (ul_path_readf_s32(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %d\n", file, res);
 
-	} else if (strcmp(command, "read-u64") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "read-u64") == 0) {
 		uint64_t res;
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_u64(pc, &res, file) != 0)
+		എങ്കിൽ (ul_path_read_u64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRIu64 "\n", file, res);
 
-		if (ul_path_readf_u64(pc, &res, "%s", file) != 0)
+		എങ്കിൽ (ul_path_readf_u64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRIu64 "\n", file, res);
 
-	} else if (strcmp(command, "read-s64") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "read-s64") == 0) {
 		int64_t res;
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_s64(pc, &res, file) != 0)
+		എങ്കിൽ (ul_path_read_s64(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read u64 failed");
 		printf("read:  %s: %" PRId64 "\n", file, res);
 
-		if (ul_path_readf_s64(pc, &res, "%s", file) != 0)
+		എങ്കിൽ (ul_path_readf_s64(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf u64 failed");
 		printf("readf: %s: %" PRId64 "\n", file, res);
 
-	} else if (strcmp(command, "read-majmin") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "read-majmin") == 0) {
 		dev_t res;
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_majmin(pc, &res, file) != 0)
+		എങ്കിൽ (ul_path_read_majmin(pc, &res, file) != 0)
 			err(EXIT_FAILURE, "read maj:min failed");
-		printf("read:  %s: %d\n", file, (int) res);
+		printf("read:  %s: %d\n", file, (പൂർണ്ണസംഖ്യ) res);
 
-		if (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
+		എങ്കിൽ (ul_path_readf_majmin(pc, &res, "%s", file) != 0)
 			err(EXIT_FAILURE, "readf maj:min failed");
-		printf("readf: %s: %d\n", file, (int) res);
+		printf("readf: %s: %d\n", file, (പൂർണ്ണസംഖ്യ) res);
 
-	} else if (strcmp(command, "read-string") == 0) {
-		char *res;
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "read-string") == 0) {
+		അക്ഷരം *res;
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_read_string(pc, &res, file) <= 0)
+		എങ്കിൽ (ul_path_read_string(pc, &res, file) <= 0)
 			err(EXIT_FAILURE, "read string failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readf_string(pc, &res, "%s", file) <= 0)
+		എങ്കിൽ (ul_path_readf_string(pc, &res, "%s", file) <= 0)
 			err(EXIT_FAILURE, "readf string failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "read-link") == 0) {
-		char res[PATH_MAX];
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "read-link") == 0) {
+		അക്ഷരം res[PATH_MAX];
 
-		if (optind == argc)
+		എങ്കിൽ (optind == argc)
 			errx(EXIT_FAILURE, "<file> not defined");
 		file = argv[optind++];
 
-		if (ul_path_readlink(pc, res, sizeof(res), file) < 0)
+		എങ്കിൽ (ul_path_readlink(pc, res, വലുപ്പം(res), file) < 0)
 			err(EXIT_FAILURE, "read symlink failed");
 		printf("read:  %s: %s\n", file, res);
 
-		if (ul_path_readlinkf(pc, res, sizeof(res), "%s", file) < 0)
+		എങ്കിൽ (ul_path_readlinkf(pc, res, വലുപ്പം(res), "%s", file) < 0)
 			err(EXIT_FAILURE, "readf symlink failed");
 		printf("readf: %s: %s\n", file, res);
 
-	} else if (strcmp(command, "write-string") == 0) {
-		char *str;
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "write-string") == 0) {
+		അക്ഷരം *str;
 
-		if (optind + 1 == argc)
+		എങ്കിൽ (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <string> not defined");
 		file = argv[optind++];
 		str = argv[optind++];
 
-		if (ul_path_write_string(pc, str, file) != 0)
+		എങ്കിൽ (ul_path_write_string(pc, str, file) != 0)
 			err(EXIT_FAILURE, "write string failed");
-		if (ul_path_writef_string(pc, str, "%s", file) != 0)
+		എങ്കിൽ (ul_path_writef_string(pc, str, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef string failed");
 
-	} else if (strcmp(command, "write-u64") == 0) {
-		uint64_t num;
+	} അല്ലെങ്കിൽ എങ്കിൽ (strcmp(command, "write-u64") == 0) {
+		uint64_t അക്കം;
 
-		if (optind + 1 == argc)
+		എങ്കിൽ (optind + 1 == argc)
 			errx(EXIT_FAILURE, "<file> <num> not defined");
 		file = argv[optind++];
-		num = strtoumax(argv[optind++], NULL, 0);
+		അക്കം = strtoumax(argv[optind++], ശൂന്യ, 0);
 
-		if (ul_path_write_u64(pc, num, file) != 0)
+		എങ്കിൽ (ul_path_write_u64(pc, അക്കം, file) != 0)
 			err(EXIT_FAILURE, "write u64 failed");
-		if (ul_path_writef_u64(pc, num, "%s", file) != 0)
+		എങ്കിൽ (ul_path_writef_u64(pc, അക്കം, "%s", file) != 0)
 			err(EXIT_FAILURE, "writef u64 failed");
 	}
 
 	ul_unref_path(pc);
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PATH */

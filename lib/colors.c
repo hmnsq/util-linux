@@ -5,21 +5,21 @@
  * Authors: 2012 Ondrej Oprala <ooprala@redhat.com>
  *          2012-2025 Karel Zak <kzak@redhat.com>
  */
-#include <assert.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <ctype.h>
+#അന്തര്ഭാവ <assert.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <dirent.h>
+#അന്തര്ഭാവ <ctype.h>
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
-# if defined(HAVE_NCURSESW_NCURSES_H)
+#എങ്കിൽ defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+# എങ്കിൽ defined(HAVE_NCURSESW_NCURSES_H)
 #  include <ncursesw/ncurses.h>
 # elif defined(HAVE_NCURSES_NCURSES_H)
 #  include <ncurses/ncurses.h>
 # elif defined(HAVE_NCURSES_H)
 #  include <ncurses.h>
 # endif
-# if defined(HAVE_NCURSESW_TERM_H)
+# എങ്കിൽ defined(HAVE_NCURSESW_TERM_H)
 #  include <ncursesw/term.h>
 # elif defined(HAVE_NCURSES_TERM_H)
 #  include <ncurses/term.h>
@@ -28,28 +28,28 @@
 # endif
 #endif
 
-#include "c.h"
-#include "cctype.h"
-#include "colors.h"
-#include "nls.h"
-#include "pathnames.h"
-#include "strutils.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "cctype.h"
+#അന്തര്ഭാവ "colors.h"
+#അന്തര്ഭാവ "nls.h"
+#അന്തര്ഭാവ "pathnames.h"
+#അന്തര്ഭാവ "strutils.h"
 
-#include "debug.h"
+#അന്തര്ഭാവ "debug.h"
 
 /*
  * Default behavior, may be overridden by terminal-colors.d/{enable,disable}.
  */
 #ifdef USE_COLORS_BY_DEFAULT
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_AUTO	/* check isatty() */
-#else
+#അല്ലെങ്കിൽ
 # define UL_COLORMODE_DEFAULT	UL_COLORMODE_NEVER	/* no colors by default */
 #endif
 
 /*
  * terminal-colors.d debug stuff
  */
-static UL_DEBUG_DEFINE_MASK(termcolors);
+സ്ഥിതം UL_DEBUG_DEFINE_MASK(termcolors);
 UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 
 #define TERMCOLORS_DEBUG_INIT	(1 << 1)
@@ -62,7 +62,7 @@ UL_DEBUG_DEFINE_MASKNAMES(termcolors) = UL_DEBUG_EMPTY_MASKNAMES;
 /*
  * terminal-colors.d file types
  */
-enum {
+എണ്ണൽ {
 	UL_COLORFILE_DISABLE,		/* .disable */
 	UL_COLORFILE_ENABLE,		/* .enable */
 	UL_COLORFILE_SCHEME,		/* .scheme */
@@ -70,9 +70,9 @@ enum {
 	__UL_COLORFILE_COUNT
 };
 
-struct ul_color_scheme {
-	char *name;
-	char *seq;
+ഘടന ul_color_scheme {
+	അക്ഷരം *name;
+	അക്ഷരം *seq;
 };
 
 /*
@@ -89,69 +89,69 @@ struct ul_color_scheme {
  *
  * the match with higher score wins. The score is per type.
  */
-struct ul_color_ctl {
-	const char	*utilname;	/* util name */
-	const char	*termname;	/* terminal name ($TERM) */
+ഘടന ul_color_ctl {
+	സ്ഥിരം അക്ഷരം	*utilname;	/* util name */
+	സ്ഥിരം അക്ഷരം	*termname;	/* terminal name ($TERM) */
 
-	char		*sfile;	/* path to scheme */
+	അക്ഷരം		*sfile;	/* path to scheme */
 
-	struct ul_color_scheme	*schemes;	/* array with color schemes */
+	ഘടന ul_color_scheme	*schemes;	/* array with color schemes */
 	size_t			nschemes;	/* number of the items */
 	size_t			schemes_sz;	/* number of the allocated items */
 
-	int		mode;		/* UL_COLORMODE_* */
-	unsigned int	has_colors : 1,	/* based on mode and scores[] */
+	പൂർണ്ണസംഖ്യ		mode;		/* UL_COLORMODE_* */
+	unsigned പൂർണ്ണസംഖ്യ	has_colors : 1,	/* based on mode and scores[] */
 			disabled   : 1, /* disable colors */
 			cs_configured : 1, /* color schemes read */
 			configured : 1; /* terminal-colors.d parsed */
 
-	int		scores[__UL_COLORFILE_COUNT];	/* the best match */
+	പൂർണ്ണസംഖ്യ		scores[__UL_COLORFILE_COUNT];	/* the best match */
 };
 
 /*
  * Control struct, globally shared.
  */
-static struct ul_color_ctl ul_colors;
+സ്ഥിതം ഘടന ul_color_ctl ul_colors;
 
-static void colors_free_schemes(struct ul_color_ctl *cc);
-static int colors_read_schemes(struct ul_color_ctl *cc);
+സ്ഥിതം ശൂന്യം colors_free_schemes(ഘടന ul_color_ctl *cc);
+സ്ഥിതം പൂർണ്ണസംഖ്യ colors_read_schemes(ഘടന ul_color_ctl *cc);
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_scheme_name(const void *a0, const void *b0)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmp_scheme_name(സ്ഥിരം ശൂന്യം *a0, സ്ഥിരം ശൂന്യം *b0)
 {
-	const struct ul_color_scheme *a = (const struct ul_color_scheme *) a0,
-				     *b = (const struct ul_color_scheme *) b0;
-	return strcmp(a->name, b->name);
+	സ്ഥിരം ഘടന ul_color_scheme *a = (സ്ഥിരം ഘടന ul_color_scheme *) a0,
+				     *b = (സ്ഥിരം ഘടന ul_color_scheme *) b0;
+	തിരികെ strcmp(a->name, b->name);
 }
 
 /*
  * Resets control struct (note that we don't allocate the struct)
  */
-static void colors_reset(struct ul_color_ctl *cc)
+സ്ഥിതം ശൂന്യം colors_reset(ഘടന ul_color_ctl *cc)
 {
-	if (!cc)
-		return;
+	എങ്കിൽ (!cc)
+		തിരികെ;
 
 	colors_free_schemes(cc);
 
-	free(cc->sfile);
+	സ്വതന്ത്രം(cc->sfile);
 
-	cc->sfile = NULL;
-	cc->utilname = NULL;
-	cc->termname = NULL;
+	cc->sfile = ശൂന്യ;
+	cc->utilname = ശൂന്യ;
+	cc->termname = ശൂന്യ;
 	cc->mode = UL_COLORMODE_UNDEF;
 
-	memset(cc->scores, 0, sizeof(cc->scores));
+	memset(cc->scores, 0, വലുപ്പം(cc->scores));
 }
 
-static void colors_debug(struct ul_color_ctl *cc)
+സ്ഥിതം ശൂന്യം colors_debug(ഘടന ul_color_ctl *cc)
 {
 	size_t i;
 
-	if (!cc)
-		return;
+	എങ്കിൽ (!cc)
+		തിരികെ;
 
 	printf("Colors:\n");
 	printf("\tutilname = '%s'\n", cc->utilname);
@@ -169,7 +169,7 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < ARRAY_SIZE(cc->scores); i++)
+	വേണ്ടി (i = 0; i < ARRAY_SIZE(cc->scores); i++)
 		printf("\tscore %s = %d\n",
 				i == UL_COLORFILE_DISABLE ? "disable" :
 				i == UL_COLORFILE_ENABLE ? "enable" :
@@ -178,9 +178,9 @@ static void colors_debug(struct ul_color_ctl *cc)
 
 	fputc('\n', stdout);
 
-	for (i = 0; i < cc->nschemes; i++) {
+	വേണ്ടി (i = 0; i < cc->nschemes; i++) {
 		printf("\tscheme #%02zu ", i);
-		color_scheme_enable(cc->schemes[i].name, NULL);
+		color_scheme_enable(cc->schemes[i].name, ശൂന്യ);
 		fputs(cc->schemes[i].name, stdout);
 		color_disable();
 		fputc('\n', stdout);
@@ -191,42 +191,42 @@ static void colors_debug(struct ul_color_ctl *cc)
 /*
  * Parses [[<utilname>][@<termname>].]<type>
  */
-static int filename_to_tokens(const char *str,
-			      const char **name, size_t *namesz,
-			      const char **term, size_t *termsz,
-			      int  *filetype)
+സ്ഥിതം പൂർണ്ണസംഖ്യ filename_to_tokens(സ്ഥിരം അക്ഷരം *str,
+			      സ്ഥിരം അക്ഷരം **name, size_t *namesz,
+			      സ്ഥിരം അക്ഷരം **term, size_t *termsz,
+			      പൂർണ്ണസംഖ്യ  *filetype)
 {
-	const char *type_start, *term_start, *p;
+	സ്ഥിരം അക്ഷരം *type_start, *term_start, *p;
 
-	if (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
-		return -EINVAL;
+	എങ്കിൽ (!str || !*str || *str == '.' || strlen(str) > PATH_MAX)
+		തിരികെ -EINVAL;
 
 	/* parse .type */
 	p = strrchr(str, '.');
 	type_start = p ? p + 1 : str;
 
-	if (strcmp(type_start, "disable") == 0)
+	എങ്കിൽ (strcmp(type_start, "disable") == 0)
 		*filetype = UL_COLORFILE_DISABLE;
-	else if (strcmp(type_start, "enable") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(type_start, "enable") == 0)
 		*filetype = UL_COLORFILE_ENABLE;
-	else if (strcmp(type_start, "scheme") == 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (strcmp(type_start, "scheme") == 0)
 		*filetype = UL_COLORFILE_SCHEME;
-	else {
+	അല്ലെങ്കിൽ {
 		DBG(CONF, ul_debug("unknown type '%s'", type_start));
-		return 1;				/* unknown type */
+		തിരികെ 1;				/* unknown type */
 	}
 
-	if (type_start == str)
-		return 0;				/* "type" only */
+	എങ്കിൽ (type_start == str)
+		തിരികെ 0;				/* "type" only */
 
 	/* parse @termname */
 	p = strchr(str, '@');
-	term_start = p ? p + 1 : NULL;
-	if (term_start) {
+	term_start = p ? p + 1 : ശൂന്യ;
+	എങ്കിൽ (term_start) {
 		*term = term_start;
 		*termsz = type_start - term_start - 1;
-		if (term_start - 1 == str)
-			return 0;			/* "@termname.type" */
+		എങ്കിൽ (term_start - 1 == str)
+			തിരികെ 0;			/* "@termname.type" */
 	}
 
 	/* parse utilname */
@@ -234,7 +234,7 @@ static int filename_to_tokens(const char *str,
 	*name = str;
 	*namesz = p - str - 1;
 
-	return 0;
+	തിരികെ 0;
 }
 
 /*
@@ -242,48 +242,48 @@ static int filename_to_tokens(const char *str,
  * The result is stored to cc->scores. The path to the best "scheme"
  * file is stored to cc->scheme.
  */
-static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
+സ്ഥിതം പൂർണ്ണസംഖ്യ colors_readdir(ഘടന ul_color_ctl *cc, സ്ഥിരം അക്ഷരം *dirname)
 {
 	DIR *dir;
-	int rc = -ENOENT;
-	struct dirent *d;
-	char sfile[PATH_MAX] = { '\0' };
+	പൂർണ്ണസംഖ്യ rc = -ENOENT;
+	ഘടന dirent *d;
+	അക്ഷരം sfile[PATH_MAX] = { '\0' };
 	size_t namesz, termsz;
 
-	if (!dirname || !cc || !cc->utilname || !*cc->utilname)
-		return -EINVAL;
+	എങ്കിൽ (!dirname || !cc || !cc->utilname || !*cc->utilname)
+		തിരികെ -EINVAL;
 
 	DBG(CONF, ul_debug("reading dir: '%s'", dirname));
 
 	dir = opendir(dirname);
-	if (!dir)
-		return -errno;
+	എങ്കിൽ (!dir)
+		തിരികെ -errno;
 
 	namesz = strlen(cc->utilname);
 	termsz = cc->termname ? strlen(cc->termname) : 0;
 
-	while ((d = readdir(dir))) {
-		int type, score = 1;
-		const char *tk_name = NULL, *tk_term = NULL;
+	ആകുമ്പോൾ ((d = readdir(dir))) {
+		പൂർണ്ണസംഖ്യ type, score = 1;
+		സ്ഥിരം അക്ഷരം *tk_name = ശൂന്യ, *tk_term = ശൂന്യ;
 		size_t tk_namesz = 0, tk_termsz = 0;
 
-		if (*d->d_name == '.')
-			continue;
+		എങ്കിൽ (*d->d_name == '.')
+			തുടരുക;
 #ifdef _DIRENT_HAVE_D_TYPE
-		if (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
+		എങ്കിൽ (d->d_type != DT_UNKNOWN && d->d_type != DT_LNK &&
 		    d->d_type != DT_REG)
-			continue;
+			തുടരുക;
 #endif
-		if (filename_to_tokens(d->d_name,
+		എങ്കിൽ (filename_to_tokens(d->d_name,
 				       &tk_name, &tk_namesz,
 				       &tk_term, &tk_termsz, &type) != 0)
-			continue;
+			തുടരുക;
 
 		/* count theoretical score before we check names to avoid
 		 * unnecessary strcmp() */
-		if (tk_name)
+		എങ്കിൽ (tk_name)
 			score += 20;
-		if (tk_term)
+		എങ്കിൽ (tk_term)
 			score += 10;
 
 		DBG(CONF, ul_debug("item '%s': score=%d "
@@ -293,17 +293,17 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 			tk_termsz, tk_term));
 
 
-		if (score < cc->scores[type])
-			continue;
+		എങ്കിൽ (score < cc->scores[type])
+			തുടരുക;
 
 		/* filter out by names */
-		if (tk_namesz && (tk_namesz != namesz ||
+		എങ്കിൽ (tk_namesz && (tk_namesz != namesz ||
 				 strncmp(tk_name, cc->utilname, namesz) != 0))
-			continue;
+			തുടരുക;
 
-		if (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
+		എങ്കിൽ (tk_termsz && (termsz == 0 || tk_termsz != termsz ||
 				  strncmp(tk_term, cc->termname, termsz) != 0))
-			continue;
+			തുടരുക;
 
 		DBG(CONF, ul_debug("setting '%s' from %d -to-> %d",
 					type == UL_COLORFILE_SCHEME ? "scheme" :
@@ -312,22 +312,22 @@ static int colors_readdir(struct ul_color_ctl *cc, const char *dirname)
 					cc->scores[type], score));
 		cc->scores[type] = score;
 		rc = 0;
-		if (type == UL_COLORFILE_SCHEME)
-			strncpy(sfile, d->d_name, sizeof(sfile));
+		എങ്കിൽ (type == UL_COLORFILE_SCHEME)
+			strncpy(sfile, d->d_name, വലുപ്പം(sfile));
 	}
 
-	if (*sfile) {
-		sfile[sizeof(sfile) - 1] = '\0';
-		if (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
+	എങ്കിൽ (*sfile) {
+		sfile[വലുപ്പം(sfile) - 1] = '\0';
+		എങ്കിൽ (asprintf(&cc->sfile, "%s/%s", dirname, sfile) <= 0)
 			rc = -ENOMEM;
 	}
 
 	closedir(dir);
-	return rc;
+	തിരികെ rc;
 }
 
 /* atexit() wrapper */
-static void colors_deinit(void)
+സ്ഥിതം ശൂന്യം colors_deinit(ശൂന്യം)
 {
 	colors_reset(&ul_colors);
 }
@@ -335,51 +335,51 @@ static void colors_deinit(void)
 /*
  * Returns path to $XDG_CONFIG_HOME/terminal-colors.d
  */
-static char *colors_get_homedir(char *buf, size_t bufsz)
+സ്ഥിതം അക്ഷരം *colors_get_homedir(അക്ഷരം *buf, size_t bufsz)
 {
-	char *p = getenv("XDG_CONFIG_HOME");
+	അക്ഷരം *p = getenv("XDG_CONFIG_HOME");
 
-	if (p) {
+	എങ്കിൽ (p) {
 		snprintf(buf, bufsz, "%s/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		തിരികെ buf;
 	}
 
 	p = getenv("HOME");
-	if (p) {
+	എങ്കിൽ (p) {
 		snprintf(buf, bufsz, "%s/.config/" _PATH_TERMCOLORS_DIRNAME, p);
-		return buf;
+		തിരികെ buf;
 	}
 
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
 /*
  * Adds one color sequence to array with color scheme.
  */
-static int colors_add_scheme(struct ul_color_ctl *cc,
-			     const char *name,
-			     const char *seq0)
+സ്ഥിതം പൂർണ്ണസംഖ്യ colors_add_scheme(ഘടന ul_color_ctl *cc,
+			     സ്ഥിരം അക്ഷരം *name,
+			     സ്ഥിരം അക്ഷരം *seq0)
 {
-	struct ul_color_scheme *cs = NULL;
-	char *seq = NULL;
-	int rc;
+	ഘടന ul_color_scheme *cs = ശൂന്യ;
+	അക്ഷരം *seq = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ rc;
 
-	if (!cc || !name || !*name || !seq0 || !*seq0)
-		return -EINVAL;
+	എങ്കിൽ (!cc || !name || !*name || !seq0 || !*seq0)
+		തിരികെ -EINVAL;
 
 	DBG(SCHEME, ul_debug("add '%s'", name));
 
 	seq = color_get_sequence(seq0);
-	if (!seq)
-		return -EINVAL;
+	എങ്കിൽ (!seq)
+		തിരികെ -EINVAL;
 	rc = -ENOMEM;
 
 	/* enlarge the array */
-	if (cc->nschemes == cc->schemes_sz) {
-		void *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
-					 sizeof(struct ul_color_scheme));
-		if (!tmp)
-			goto err;
+	എങ്കിൽ (cc->nschemes == cc->schemes_sz) {
+		ശൂന്യം *tmp = reallocarray(cc->schemes, cc->nschemes + 10,
+					 വലുപ്പം(ഘടന ul_color_scheme));
+		എങ്കിൽ (!tmp)
+			പോകുക err;
 		cc->schemes = tmp;
 		cc->schemes_sz = cc->nschemes + 10;
 	}
@@ -388,37 +388,37 @@ static int colors_add_scheme(struct ul_color_ctl *cc,
 	cs = &cc->schemes[cc->nschemes];
 	cs->seq = seq;
 	cs->name = strdup(name);
-	if (!cs->name)
-		goto err;
+	എങ്കിൽ (!cs->name)
+		പോകുക err;
 
 	cc->nschemes++;
-	return 0;
+	തിരികെ 0;
 err:
-	if (cs) {
-		free(cs->seq);
-		free(cs->name);
-		cs->seq = cs->name = NULL;
-	} else
-		free(seq);
-	return rc;
+	എങ്കിൽ (cs) {
+		സ്വതന്ത്രം(cs->seq);
+		സ്വതന്ത്രം(cs->name);
+		cs->seq = cs->name = ശൂന്യ;
+	} അല്ലെങ്കിൽ
+		സ്വതന്ത്രം(seq);
+	തിരികെ rc;
 }
 
 /*
  * Deallocates all regards to color schemes
  */
-static void colors_free_schemes(struct ul_color_ctl *cc)
+സ്ഥിതം ശൂന്യം colors_free_schemes(ഘടന ul_color_ctl *cc)
 {
 	size_t i;
 
 	DBG(SCHEME, ul_debug("free scheme"));
 
-	for (i = 0; i < cc->nschemes; i++) {
-		free(cc->schemes[i].name);
-		free(cc->schemes[i].seq);
+	വേണ്ടി (i = 0; i < cc->nschemes; i++) {
+		സ്വതന്ത്രം(cc->schemes[i].name);
+		സ്വതന്ത്രം(cc->schemes[i].seq);
 	}
 
-	free(cc->schemes);
-	cc->schemes = NULL;
+	സ്വതന്ത്രം(cc->schemes);
+	cc->schemes = ശൂന്യ;
 	cc->nschemes = 0;
 	cc->schemes_sz = 0;
 }
@@ -426,152 +426,152 @@ static void colors_free_schemes(struct ul_color_ctl *cc)
 /*
  * The scheme configuration has to be sorted for bsearch
  */
-static void colors_sort_schemes(struct ul_color_ctl *cc)
+സ്ഥിതം ശൂന്യം colors_sort_schemes(ഘടന ul_color_ctl *cc)
 {
-	if (!cc->nschemes)
-		return;
+	എങ്കിൽ (!cc->nschemes)
+		തിരികെ;
 
 	DBG(SCHEME, ul_debug("sort scheme"));
 
 	qsort(cc->schemes, cc->nschemes,
-	      sizeof(struct ul_color_scheme), cmp_scheme_name);
+	      വലുപ്പം(ഘടന ul_color_scheme), cmp_scheme_name);
 }
 
 /*
  * Returns just one color scheme
  */
-static struct ul_color_scheme *colors_get_scheme(struct ul_color_ctl *cc,
-						 const char *name)
+സ്ഥിതം ഘടന ul_color_scheme *colors_get_scheme(ഘടന ul_color_ctl *cc,
+						 സ്ഥിരം അക്ഷരം *name)
 {
-	struct ul_color_scheme key = { .name = (char *) name}, *res;
+	ഘടന ul_color_scheme താക്കോൽ = { .name = (അക്ഷരം *) name}, *res;
 
-	if (!cc || !name || !*name)
-		return NULL;
+	എങ്കിൽ (!cc || !name || !*name)
+		തിരികെ ശൂന്യ;
 
-	if (!cc->cs_configured) {
-		int rc = colors_read_schemes(cc);
-		if (rc)
-			return NULL;
+	എങ്കിൽ (!cc->cs_configured) {
+		പൂർണ്ണസംഖ്യ rc = colors_read_schemes(cc);
+		എങ്കിൽ (rc)
+			തിരികെ ശൂന്യ;
 	}
-	if (!cc->nschemes)
-		return NULL;
+	എങ്കിൽ (!cc->nschemes)
+		തിരികെ ശൂന്യ;
 
 	DBG(SCHEME, ul_debug("search '%s'", name));
 
-	res = bsearch(&key, cc->schemes, cc->nschemes,
-				sizeof(struct ul_color_scheme),
+	res = bsearch(&താക്കോൽ, cc->schemes, cc->nschemes,
+				വലുപ്പം(ഘടന ul_color_scheme),
 				cmp_scheme_name);
 
-	return res && res->seq ? res  : NULL;
+	തിരികെ res && res->seq ? res  : ശൂന്യ;
 }
 
 /*
  * Parses filenames in terminal-colors.d
  */
-static int colors_read_configuration(struct ul_color_ctl *cc)
+സ്ഥിതം പൂർണ്ണസംഖ്യ colors_read_configuration(ഘടന ul_color_ctl *cc)
 {
-	int rc = -ENOENT;
-	char *dirname, buf[PATH_MAX];
+	പൂർണ്ണസംഖ്യ rc = -ENOENT;
+	അക്ഷരം *dirname, buf[PATH_MAX];
 
 	cc->termname = getenv("TERM");
 
-	dirname = colors_get_homedir(buf, sizeof(buf));
-	if (dirname)
+	dirname = colors_get_homedir(buf, വലുപ്പം(buf));
+	എങ്കിൽ (dirname)
 		rc = colors_readdir(cc, dirname);		/* ~/.config */
-	if (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
+	എങ്കിൽ (rc == -EPERM || rc == -EACCES || rc == -ENOENT)
 		rc = colors_readdir(cc, _PATH_TERMCOLORS_DIR);	/* /etc */
 
 	cc->configured = 1;
-	return rc;
+	തിരികെ rc;
 }
 
 /*
  * Reads terminal-colors.d/ scheme file into array schemes
  */
-static int colors_read_schemes(struct ul_color_ctl *cc)
+സ്ഥിതം പൂർണ്ണസംഖ്യ colors_read_schemes(ഘടന ul_color_ctl *cc)
 {
-	int rc = 0;
-	FILE *f = NULL;
-	char buf[BUFSIZ],
+	പൂർണ്ണസംഖ്യ rc = 0;
+	FILE *f = ശൂന്യ;
+	അക്ഷരം buf[BUFSIZ],
 	     cn[129], seq[129];
 
-	if (!cc->configured)
+	എങ്കിൽ (!cc->configured)
 		rc = colors_read_configuration(cc);
 
 	cc->cs_configured = 1;
 
-	if (rc || !cc->sfile)
-		goto done;
+	എങ്കിൽ (rc || !cc->sfile)
+		പോകുക done;
 
 	DBG(SCHEME, ul_debug("reading file '%s'", cc->sfile));
 
 	f = fopen(cc->sfile, "r" UL_CLOEXECSTR);
-	if (!f) {
+	എങ്കിൽ (!f) {
 		rc = -errno;
-		goto done;
+		പോകുക done;
 	}
 
-	while (fgets(buf, sizeof(buf), f)) {
-		char *p = strchr(buf, '\n');
+	ആകുമ്പോൾ (fgets(buf, വലുപ്പം(buf), f)) {
+		അക്ഷരം *p = strchr(buf, '\n');
 
-		if (!p) {
-			if (feof(f))
+		എങ്കിൽ (!p) {
+			എങ്കിൽ (feof(f))
 				p = strchr(buf, '\0');
-			else {
+			അല്ലെങ്കിൽ {
 				rc = -errno;
-				goto done;
+				പോകുക done;
 			}
 		}
 		*p = '\0';
-		p = (char *) skip_blank(buf);
-		if (*p == '\0' || *p == '#')
-			continue;
+		p = (അക്ഷരം *) skip_blank(buf);
+		എങ്കിൽ (*p == '\0' || *p == '#')
+			തുടരുക;
 
 		rc = sscanf(p, "%128[^ ] %128[^\n ]", cn, seq);
-		if (rc == 2 && *cn && *seq) {
+		എങ്കിൽ (rc == 2 && *cn && *seq) {
 			rc = colors_add_scheme(cc, cn, seq);	/* set rc=0 on success */
-			if (rc)
-				goto done;
+			എങ്കിൽ (rc)
+				പോകുക done;
 		}
 	}
 	rc = 0;
 
 done:
-	if (f)
+	എങ്കിൽ (f)
 		fclose(f);
 	colors_sort_schemes(cc);
 
-	return rc;
+	തിരികെ rc;
 }
 
 
-static void termcolors_init_debug(void)
+സ്ഥിതം ശൂന്യം termcolors_init_debug(ശൂന്യം)
 {
 	__UL_INIT_DEBUG_FROM_ENV(termcolors, TERMCOLORS_DEBUG_, 0, TERMINAL_COLORS_DEBUG);
 }
 
-static int colors_terminal_is_ready(void)
+സ്ഥിതം പൂർണ്ണസംഖ്യ colors_terminal_is_ready(ശൂന്യം)
 {
-	int ncolors = -1;
+	പൂർണ്ണസംഖ്യ ncolors = -1;
 
-#if defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
+#എങ്കിൽ defined(HAVE_LIBNCURSES) || defined(HAVE_LIBNCURSESW)
 	{
-		int ret;
+		പൂർണ്ണസംഖ്യ ret;
 
 		/* setupterm() allocates memory, del_curterm() deallocates it */
-		if (setupterm(NULL, STDOUT_FILENO, &ret) == 0 && ret == 1) {
+		എങ്കിൽ (setupterm(ശൂന്യ, STDOUT_FILENO, &ret) == 0 && ret == 1) {
 			ncolors = tigetnum("colors");
 			del_curterm(cur_term);
 		}
 	}
 #endif
-	if (1 < ncolors) {
+	എങ്കിൽ (1 < ncolors) {
 		DBG(CONF, ul_debug("terminal is ready (supports %d colors)", ncolors));
-		return 1;
+		തിരികെ 1;
 	}
 
 	DBG(CONF, ul_debug("terminal is NOT ready (no colors)"));
-	return 0;
+	തിരികെ 0;
 }
 
 /**
@@ -584,61 +584,61 @@ static int colors_terminal_is_ready(void)
  *
  * Returns: >0 on success.
  */
-int colors_init(int mode, const char *name)
+പൂർണ്ണസംഖ്യ colors_init(പൂർണ്ണസംഖ്യ mode, സ്ഥിരം അക്ഷരം *name)
 {
-	int ready = -1;
-	struct ul_color_ctl *cc = &ul_colors;
+	പൂർണ്ണസംഖ്യ ready = -1;
+	ഘടന ul_color_ctl *cc = &ul_colors;
 
 	cc->utilname = name;
 
 	termcolors_init_debug();
 
-	if (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
+	എങ്കിൽ (mode != UL_COLORMODE_ALWAYS && !isatty(STDOUT_FILENO))
 		cc->mode = UL_COLORMODE_NEVER;
-	else
+	അല്ലെങ്കിൽ
 		cc->mode = mode;
 
-	if (cc->mode == UL_COLORMODE_UNDEF
-	    && getenv("NO_COLOR") == NULL
+	എങ്കിൽ (cc->mode == UL_COLORMODE_UNDEF
+	    && getenv("NO_COLOR") == ശൂന്യ
 	    && (ready = colors_terminal_is_ready())) {
 
-		int rc = colors_read_configuration(cc);
-		if (rc)
+		പൂർണ്ണസംഖ്യ rc = colors_read_configuration(cc);
+		എങ്കിൽ (rc)
 			cc->mode = UL_COLORMODE_DEFAULT;
-		else {
+		അല്ലെങ്കിൽ {
 
 			/* evaluate scores */
-			if (cc->scores[UL_COLORFILE_DISABLE] >
+			എങ്കിൽ (cc->scores[UL_COLORFILE_DISABLE] >
 			    cc->scores[UL_COLORFILE_ENABLE])
 				cc->mode = UL_COLORMODE_NEVER;
-			else
+			അല്ലെങ്കിൽ
 				cc->mode = UL_COLORMODE_DEFAULT;
 
 			atexit(colors_deinit);
 		}
 	}
 
-	switch (cc->mode) {
-	case UL_COLORMODE_AUTO:
+	തിരഞ്ഞെടുപ്പ് (cc->mode) {
+	അവസ്ഥ UL_COLORMODE_AUTO:
 		cc->has_colors = ready == -1 ? colors_terminal_is_ready() : ready;
-		break;
-	case UL_COLORMODE_ALWAYS:
+		നിർത്തുക;
+	അവസ്ഥ UL_COLORMODE_ALWAYS:
 		cc->has_colors = 1;
-		break;
-	case UL_COLORMODE_NEVER:
-	default:
+		നിർത്തുക;
+	അവസ്ഥ UL_COLORMODE_NEVER:
+	സ്ഥിരസ്ഥിതി:
 		cc->has_colors = 0;
 	}
 
 	ON_DBG(CONF, colors_debug(cc));
 
-	return cc->has_colors;
+	തിരികെ cc->has_colors;
 }
 
 /*
  * Temporary disable colors (this setting is independent on terminal-colors.d/)
  */
-void colors_off(void)
+ശൂന്യം colors_off(ശൂന്യം)
 {
 	ul_colors.disabled = 1;
 }
@@ -646,7 +646,7 @@ void colors_off(void)
 /*
  * Enable colors
  */
-void colors_on(void)
+ശൂന്യം colors_on(ശൂന്യം)
 {
 	ul_colors.disabled = 0;
 }
@@ -654,51 +654,51 @@ void colors_on(void)
 /*
  * Is terminal-colors.d/ configured to use colors?
  */
-int colors_wanted(void)
+പൂർണ്ണസംഖ്യ colors_wanted(ശൂന്യം)
 {
-	return ul_colors.has_colors;
+	തിരികെ ul_colors.has_colors;
 }
 
 /*
  * Returns mode
  */
-int colors_mode(void)
+പൂർണ്ണസംഖ്യ colors_mode(ശൂന്യം)
 {
-	return ul_colors.mode;
+	തിരികെ ul_colors.mode;
 }
 
 /*
  * Enable @seq color
  */
-void color_fenable(const char *seq, FILE *f)
+ശൂന്യം color_fenable(സ്ഥിരം അക്ഷരം *seq, FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors && seq)
+	എങ്കിൽ (!ul_colors.disabled && ul_colors.has_colors && seq)
 		fputs(seq, f);
 }
 
 /*
  * Returns escape sequence by logical @name, if undefined then returns @dflt.
  */
-const char *color_scheme_get_sequence(const char *name, const char *dflt)
+സ്ഥിരം അക്ഷരം *color_scheme_get_sequence(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *dflt)
 {
-	struct ul_color_scheme *cs;
+	ഘടന ul_color_scheme *cs;
 
-	if (ul_colors.disabled || !ul_colors.has_colors)
-		return NULL;
+	എങ്കിൽ (ul_colors.disabled || !ul_colors.has_colors)
+		തിരികെ ശൂന്യ;
 
 	cs = colors_get_scheme(&ul_colors, name);
-	return cs && cs->seq ? cs->seq : dflt;
+	തിരികെ cs && cs->seq ? cs->seq : dflt;
 }
 
 /*
  * Enable color by logical @name, if undefined enable @dflt.
  */
-void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
+ശൂന്യം color_scheme_fenable(സ്ഥിരം അക്ഷരം *name, സ്ഥിരം അക്ഷരം *dflt, FILE *f)
 {
-	const char *seq = color_scheme_get_sequence(name, dflt);
+	സ്ഥിരം അക്ഷരം *seq = color_scheme_get_sequence(name, dflt);
 
-	if (!seq)
-		return;
+	എങ്കിൽ (!seq)
+		തിരികെ;
 	color_fenable(seq, f);
 }
 
@@ -706,122 +706,122 @@ void color_scheme_fenable(const char *name, const char *dflt, FILE *f)
 /*
  * Disable previously enabled color
  */
-void color_fdisable(FILE *f)
+ശൂന്യം color_fdisable(FILE *f)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
+	എങ്കിൽ (!ul_colors.disabled && ul_colors.has_colors)
 		fputs(UL_COLOR_RESET, f);
 }
 
 /*
  * Get reset sequence
  */
-const char *color_get_disable_sequence(void)
+സ്ഥിരം അക്ഷരം *color_get_disable_sequence(ശൂന്യം)
 {
-	if (!ul_colors.disabled && ul_colors.has_colors)
-		return UL_COLOR_RESET;
-	else
-		return "";
+	എങ്കിൽ (!ul_colors.disabled && ul_colors.has_colors)
+		തിരികെ UL_COLOR_RESET;
+	അല്ലെങ്കിൽ
+		തിരികെ "";
 }
 
 /*
  * Parses @str to return UL_COLORMODE_*
  */
-int colormode_from_string(const char *str)
+പൂർണ്ണസംഖ്യ colormode_from_string(സ്ഥിരം അക്ഷരം *str)
 {
 	size_t i;
-	static const char *const modes[] = {
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *സ്ഥിരം modes[] = {
 		[UL_COLORMODE_AUTO]   = "auto",
 		[UL_COLORMODE_NEVER]  = "never",
 		[UL_COLORMODE_ALWAYS] = "always",
 		[UL_COLORMODE_UNDEF] = ""
 	};
 
-	if (!str || !*str)
-		return -EINVAL;
+	എങ്കിൽ (!str || !*str)
+		തിരികെ -EINVAL;
 
-	assert(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
+	പ്രതിജ്ഞാ(ARRAY_SIZE(modes) == __UL_NCOLORMODES);
 
-	for (i = 0; i < ARRAY_SIZE(modes); i++) {
-		if (c_strcasecmp(str, modes[i]) == 0)
-			return i;
+	വേണ്ടി (i = 0; i < ARRAY_SIZE(modes); i++) {
+		എങ്കിൽ (c_strcasecmp(str, modes[i]) == 0)
+			തിരികെ i;
 	}
 
-	return -EINVAL;
+	തിരികെ -EINVAL;
 }
 
 /*
  * Parses @str and exit(EXIT_FAILURE) on error
  */
-int colormode_or_err(const char *str)
+പൂർണ്ണസംഖ്യ colormode_or_err(സ്ഥിരം അക്ഷരം *str)
 {
-	const char *p = str && *str == '=' ? str + 1 : str;
-	int colormode;
+	സ്ഥിരം അക്ഷരം *p = str && *str == '=' ? str + 1 : str;
+	പൂർണ്ണസംഖ്യ colormode;
 
 	colormode = colormode_from_string(p);
-	if (colormode < 0)
+	എങ്കിൽ (colormode < 0)
 		errx(EXIT_FAILURE, _("unsupported color mode: %s"), p);
 
-	return colormode;
+	തിരികെ colormode;
 }
 
 #ifdef TEST_PROGRAM_COLORS
 # include <getopt.h>
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	static const struct option longopts[] = {
-		{ "mode",	required_argument, NULL, 'm' },
-		{ "color",	required_argument, NULL, 'c' },
-		{ "color-scheme", required_argument, NULL, 'C' },
-		{ "name",	required_argument, NULL, 'n' },
-		{ NULL, 0, NULL, 0 }
+	സ്ഥിതം സ്ഥിരം ഘടന option longopts[] = {
+		{ "mode",	required_argument, ശൂന്യ, 'm' },
+		{ "color",	required_argument, ശൂന്യ, 'c' },
+		{ "color-scheme", required_argument, ശൂന്യ, 'C' },
+		{ "name",	required_argument, ശൂന്യ, 'n' },
+		{ ശൂന്യ, 0, ശൂന്യ, 0 }
 	};
-	int c, mode = UL_COLORMODE_UNDEF;	/* default */
-	const char *color = "red", *name = NULL, *color_scheme = NULL;
-	char *seq = NULL;
+	പൂർണ്ണസംഖ്യ c, mode = UL_COLORMODE_UNDEF;	/* default */
+	സ്ഥിരം അക്ഷരം *color = "red", *name = ശൂന്യ, *color_scheme = ശൂന്യ;
+	അക്ഷരം *seq = ശൂന്യ;
 
-	while ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, NULL)) != -1) {
-		switch (c) {
-		case 'c':
+	ആകുമ്പോൾ ((c = getopt_long(argc, argv, "C:c:m:n:", longopts, ശൂന്യ)) != -1) {
+		തിരഞ്ഞെടുപ്പ് (c) {
+		അവസ്ഥ 'c':
 			color = optarg;
-			break;
-		case 'C':
+			നിർത്തുക;
+		അവസ്ഥ 'C':
 			color_scheme = optarg;
-			break;
-		case 'm':
+			നിർത്തുക;
+		അവസ്ഥ 'm':
 			mode = colormode_or_err(optarg);
-			break;
-		case 'n':
+			നിർത്തുക;
+		അവസ്ഥ 'n':
 			name = optarg;
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			fprintf(stderr, "usage: %s [options]\n"
 			" -m, --mode <auto|never|always>  default is undefined\n"
 			" -c, --color <red|blue|...>      color for the test message\n"
 			" -C, --color-scheme <name>       color for the test message\n"
 			" -n, --name <utilname>           util name\n",
 			program_invocation_short_name);
-			return EXIT_FAILURE;
+			തിരികെ EXIT_FAILURE;
 		}
 	}
 
 	colors_init(mode, name ? name : program_invocation_short_name);
 
-	if (color_is_sequence(color))
+	എങ്കിൽ (color_is_sequence(color))
 		seq = strdup(color);
-	else
+	അല്ലെങ്കിൽ
 		seq = color_get_sequence(color);
 
-	if (color_scheme)
+	എങ്കിൽ (color_scheme)
 		color_scheme_enable(color_scheme, seq);
-	else
+	അല്ലെങ്കിൽ
 		color_enable(seq);
 	printf("Hello World!");
 	color_disable();
 	fputc('\n', stdout);
 
-	free(seq);
+	സ്വതന്ത്രം(seq);
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_COLORS */
 

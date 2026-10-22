@@ -10,240 +10,240 @@
  * by Davidlohr Bueso <dave@xxxxxxx> - March 2012.
  */
 
-#include <unistd.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <signal.h>
+#അന്തര്ഭാവ <unistd.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <sys/types.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <sys/wait.h>
+#അന്തര്ഭാവ <signal.h>
 
-#include "c.h"
-#include "xalloc.h"
-#include "nls.h"
-#include "strutils.h"
-#include "ttyutils.h"
-#include "pager.h"
-#include "env.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "xalloc.h"
+#അന്തര്ഭാവ "nls.h"
+#അന്തര്ഭാവ "strutils.h"
+#അന്തര്ഭാവ "ttyutils.h"
+#അന്തര്ഭാവ "pager.h"
+#അന്തര്ഭാവ "env.h"
 
-static const char *pager_argv[] = { "sh", "-c", NULL, NULL };
+സ്ഥിതം സ്ഥിരം അക്ഷരം *pager_argv[] = { "sh", "-c", ശൂന്യ, ശൂന്യ };
 
-struct child_process {
-	const char **argv;
+ഘടന child_process {
+	സ്ഥിരം അക്ഷരം **argv;
 	pid_t pid;
-	int in;
+	പൂർണ്ണസംഖ്യ in;
 
-	int header_lines;
-	int header_width;
+	പൂർണ്ണസംഖ്യ header_വരികൾ;
+	പൂർണ്ണസംഖ്യ header_width;
 
-	int org_err;
-	int org_out;
-	struct sigaction orig_sigchld;
-	struct sigaction orig_sigint;
-	struct sigaction orig_sighup;
-	struct sigaction orig_sigterm;
-	struct sigaction orig_sigquit;
-	struct sigaction orig_sigpipe;
+	പൂർണ്ണസംഖ്യ org_err;
+	പൂർണ്ണസംഖ്യ org_out;
+	ഘടന sigaction orig_sigchld;
+	ഘടന sigaction orig_sigint;
+	ഘടന sigaction orig_sighup;
+	ഘടന sigaction orig_sigterm;
+	ഘടന sigaction orig_sigquit;
+	ഘടന sigaction orig_sigpipe;
 };
-static struct child_process pager_process;
+സ്ഥിതം ഘടന child_process pager_process;
 
-static volatile sig_atomic_t pager_caught_signal;
-static volatile sig_atomic_t pager_caught_sigpipe;
+സ്ഥിതം അസ്ഥിര sig_atomic_t pager_caught_signal;
+സ്ഥിതം അസ്ഥിര sig_atomic_t pager_caught_sigpipe;
 
-static inline void close_pair(int fd[2])
+സ്ഥിതം വരിയിൽ ശൂന്യം close_pair(പൂർണ്ണസംഖ്യ fd[2])
 {
 	close(fd[0]);
 	close(fd[1]);
 }
 
-static void pager_preexec(void)
+സ്ഥിതം ശൂന്യം pager_preexec(ശൂന്യം)
 {
-	const char *less_env = getenv("LESS");
-	const char *base = less_env ? less_env : "FRSX";
-	int header_lines = pager_process.header_lines;
-	int header_width = pager_process.header_width;
-	char *less_val = NULL;
+	സ്ഥിരം അക്ഷരം *less_env = getenv("LESS");
+	സ്ഥിരം അക്ഷരം *base = less_env ? less_env : "FRSX";
+	പൂർണ്ണസംഖ്യ header_വരികൾ = pager_process.header_വരികൾ;
+	പൂർണ്ണസംഖ്യ header_width = pager_process.header_width;
+	അക്ഷരം *less_val = ശൂന്യ;
 
-	if (header_lines > 0 && header_width > 0)
+	എങ്കിൽ (header_വരികൾ > 0 && header_width > 0)
 		less_val = ul_strfconcat(base, " --header %d,%d",
-					 header_lines, header_width);
-	else if (header_width > 0)
+					 header_വരികൾ, header_width);
+	അല്ലെങ്കിൽ എങ്കിൽ (header_width > 0)
 		less_val = ul_strfconcat(base, " --header 0,%d",
 					 header_width);
-	else if (header_lines > 0)
+	അല്ലെങ്കിൽ എങ്കിൽ (header_വരികൾ > 0)
 		less_val = ul_strfconcat(base, " --header %d",
-					 header_lines);
+					 header_വരികൾ);
 
-	if (less_val) {
-		if (setenv("LESS", less_val, 1) != 0)
+	എങ്കിൽ (less_val) {
+		എങ്കിൽ (setenv("LESS", less_val, 1) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
-		free(less_val);
-	} else if (less_env == NULL) {
-		if (setenv("LESS", "FRSX", 0) != 0)
+		സ്വതന്ത്രം(less_val);
+	} അല്ലെങ്കിൽ എങ്കിൽ (less_env == ശൂന്യ) {
+		എങ്കിൽ (setenv("LESS", "FRSX", 0) != 0)
 			warn(_("failed to set the %s environment variable"), "LESS");
 	}
 
-	if (getenv("LV") == NULL && setenv("LV", "-c", 0) != 0)
+	എങ്കിൽ (getenv("LV") == ശൂന്യ && setenv("LV", "-c", 0) != 0)
 		warn(_("failed to set the %s environment variable"), "LV");
 }
 
-static int start_command(struct child_process *cmd)
+സ്ഥിതം പൂർണ്ണസംഖ്യ start_command(ഘടന child_process *cmd)
 {
-	int fdin[2];
+	പൂർണ്ണസംഖ്യ fdin[2];
 
-	if (pipe(fdin) < 0)
-		return -1;
+	എങ്കിൽ (pipe(fdin) < 0)
+		തിരികെ -1;
 	cmd->in = fdin[1];
 
-	fflush(NULL);
+	fflush(ശൂന്യ);
 	cmd->pid = fork();
-	if (!cmd->pid) {
+	എങ്കിൽ (!cmd->pid) {
 		dup2(fdin[0], STDIN_FILENO);
 		close_pair(fdin);
 
 		pager_preexec();
-		execvp(cmd->argv[0], (char *const*) cmd->argv);
+		execvp(cmd->argv[0], (അക്ഷരം *സ്ഥിരം*) cmd->argv);
 		errexec(cmd->argv[0]);
 	}
 
-	if (cmd->pid < 0) {
+	എങ്കിൽ (cmd->pid < 0) {
 		cmd->pid = 0;
 		close_pair(fdin);
-		return -1;
+		തിരികെ -1;
 	}
 
 	close(fdin[0]);
-	return 0;
+	തിരികെ 0;
 }
 
-static int wait_for_pager(void)
+സ്ഥിതം പൂർണ്ണസംഖ്യ wait_for_pager(ശൂന്യം)
 {
 	pid_t waiting;
-	int ret, status;
+	പൂർണ്ണസംഖ്യ ret, status;
 
-	do {
+	ചെയ്യുക {
 		waiting = waitpid(pager_process.pid, &status, 0);
-	} while (waiting == -1 && errno == EINTR);
+	} ആകുമ്പോൾ (waiting == -1 && errno == EINTR);
 
-	if (waiting == -1)
+	എങ്കിൽ (waiting == -1)
 		ret = -1;
-	else if (waiting == pager_process.pid && WIFEXITED(status))
+	അല്ലെങ്കിൽ എങ്കിൽ (waiting == pager_process.pid && WIFEXITED(status))
 		ret = WEXITSTATUS(status);
-	else
+	അല്ലെങ്കിൽ
 		ret = 1;
 
 	pager_process.pid = 0;
 
-	return ret;
+	തിരികെ ret;
 }
 
-static void catch_signal(int signo)
+സ്ഥിതം ശൂന്യം catch_signal(പൂർണ്ണസംഖ്യ signo)
 {
 	pager_caught_signal = signo;
 }
 
-static void catch_sigpipe(int signo)
+സ്ഥിതം ശൂന്യം catch_sigpipe(പൂർണ്ണസംഖ്യ signo)
 {
 	pager_caught_sigpipe = signo;
 }
 
-static void wait_for_pager_signal(int signo __attribute__ ((__unused__)))
+സ്ഥിതം ശൂന്യം wait_for_pager_signal(പൂർണ്ണസംഖ്യ signo __attribute__ ((__unused__)))
 {
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
 	close(STDERR_FILENO);
 
 	/* async-signal safe: wait for all children, including pager */
-	while (wait(NULL) != -1 || errno == EINTR)
+	ആകുമ്പോൾ (wait(ശൂന്യ) != -1 || errno == EINTR)
 		;
 
 	_exit(EXIT_FAILURE);
 }
 
-static int has_command(const char *cmd)
+സ്ഥിതം പൂർണ്ണസംഖ്യ has_command(സ്ഥിരം അക്ഷരം *cmd)
 {
-	const char *path;
-	char *b, *c, *p, *s;
-	int rc = 0;
+	സ്ഥിരം അക്ഷരം *path;
+	അക്ഷരം *b, *c, *p, *s;
+	പൂർണ്ണസംഖ്യ rc = 0;
 
-	if (!cmd)
-		goto done;
+	എങ്കിൽ (!cmd)
+		പോകുക done;
 
 	c = xstrdup(cmd);
-	if (!c)
-		goto done;
+	എങ്കിൽ (!c)
+		പോകുക done;
 	b = strtok(c, " ");	/* cmd may contain options */
-	if (!b)
-		goto cleanup;
+	എങ്കിൽ (!b)
+		പോകുക cleanup;
 
-	if (strchr(b, '/')) {
+	എങ്കിൽ (strchr(b, '/')) {
 		rc = access(b, X_OK) == 0;
-		goto cleanup;
+		പോകുക cleanup;
 	}
 
 	path = getenv("PATH");
-	if (!path)
-		goto cleanup;
+	എങ്കിൽ (!path)
+		പോകുക cleanup;
 	p = xstrdup(path);
-	if (!p)
-		goto cleanup;
+	എങ്കിൽ (!p)
+		പോകുക cleanup;
 
-	for (s = strtok(p, ":"); s; s = strtok(NULL, ":")) {
-		int fd = open(s, O_RDONLY|O_CLOEXEC);
-		if (fd < 0)
-			continue;
+	വേണ്ടി (s = strtok(p, ":"); s; s = strtok(ശൂന്യ, ":")) {
+		പൂർണ്ണസംഖ്യ fd = open(s, O_RDONLY|O_CLOEXEC);
+		എങ്കിൽ (fd < 0)
+			തുടരുക;
 		rc = faccessat(fd, b, X_OK, 0) == 0;
 		close(fd);
-		if (rc)
-			break;
+		എങ്കിൽ (rc)
+			നിർത്തുക;
 	}
-	free(p);
+	സ്വതന്ത്രം(p);
 cleanup:
-	free(c);
+	സ്വതന്ത്രം(c);
 done:
 	/*fprintf(stderr, "has PAGER '%s': rc=%d\n", cmd, rc);*/
-	return rc;
+	തിരികെ rc;
 }
 
-static void __setup_pager(void)
+സ്ഥിതം ശൂന്യം __setup_pager(ശൂന്യം)
 {
-	const char *pager = getenv("PAGER");
-	struct sigaction sa;
+	സ്ഥിരം അക്ഷരം *pager = getenv("PAGER");
+	ഘടന sigaction sa;
 
-	if (!isatty(STDOUT_FILENO))
-		return;
+	എങ്കിൽ (!isatty(STDOUT_FILENO))
+		തിരികെ;
 
-	if (!pager)
+	എങ്കിൽ (!pager)
 		pager = "less";
-	else if (!*pager || !strcmp(pager, "cat"))
-		return;
+	അല്ലെങ്കിൽ എങ്കിൽ (!*pager || !strcmp(pager, "cat"))
+		തിരികെ;
 
-	if (!has_command(pager))
-		return;
+	എങ്കിൽ (!has_command(pager))
+		തിരികെ;
 
 	/* spawn the pager */
 	pager_argv[2] = pager;
 	pager_process.argv = pager_argv;
 	pager_process.in = -1;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, വലുപ്പം(sa));
 	sa.sa_handler = SIG_DFL;
 
 	/* this makes sure that waitpid works as expected */
 	sigaction(SIGCHLD, &sa, &pager_process.orig_sigchld);
 
-	if (start_command(&pager_process)) {
-		sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-		return;
+	എങ്കിൽ (start_command(&pager_process)) {
+		sigaction(SIGCHLD, &pager_process.orig_sigchld, ശൂന്യ);
+		തിരികെ;
 	}
 
 	/* original process continues, but writes to the pipe */
 	dup2(pager_process.in, STDOUT_FILENO);
-	setvbuf(stdout, NULL, _IOLBF, 0);
-	if (isatty(STDERR_FILENO)) {
+	setvbuf(stdout, ശൂന്യ, _IOLBF, 0);
+	എങ്കിൽ (isatty(STDERR_FILENO)) {
 		dup2(pager_process.in, STDERR_FILENO);
-		setvbuf(stderr, NULL, _IOLBF, 0);
+		setvbuf(stderr, ശൂന്യ, _IOLBF, 0);
 	}
 	close(pager_process.in);
 
@@ -263,7 +263,7 @@ static void __setup_pager(void)
 
 /* Setup pager and redirect output, the pager may be closed by pager_close().
  */
-void pager_open(void)
+ശൂന്യം pager_open(ശൂന്യം)
 {
 	pager_open_header(0, 0);
 }
@@ -276,49 +276,49 @@ void pager_open(void)
  * freeze any column. Either parameter can be 0 independently;
  * less supports --header 0,M to freeze columns without header lines.
  */
-void pager_open_header(int header_lines, int first_col_width)
+ശൂന്യം pager_open_header(പൂർണ്ണസംഖ്യ header_വരികൾ, പൂർണ്ണസംഖ്യ first_col_width)
 {
-	if (pager_process.pid)
-		return;		/* already running */
+	എങ്കിൽ (pager_process.pid)
+		തിരികെ;		/* already running */
 
-	pager_process.header_lines = header_lines;
+	pager_process.header_വരികൾ = header_വരികൾ;
 	pager_process.header_width = first_col_width;
 
 	pager_process.org_out = dup(STDOUT_FILENO);
 	pager_process.org_err = dup(STDERR_FILENO);
 
-	if (pager_process.org_out != -1 && pager_process.org_err != -1)
+	എങ്കിൽ (pager_process.org_out != -1 && pager_process.org_err != -1)
 		__setup_pager();
 
-	if (!pager_process.pid) {
-		if (pager_process.org_out != -1)
+	എങ്കിൽ (!pager_process.pid) {
+		എങ്കിൽ (pager_process.org_out != -1)
 			close(pager_process.org_out);
-		if (pager_process.org_err != -1)
+		എങ്കിൽ (pager_process.org_err != -1)
 			close(pager_process.org_err);
-		memset(&pager_process, 0, sizeof(pager_process));
+		memset(&pager_process, 0, വലുപ്പം(pager_process));
 	}
 }
 
 /* Close pager and restore original std{out,err}.
  */
-void pager_close(void)
+ശൂന്യം pager_close(ശൂന്യം)
 {
-	struct sigaction sa;
-	int ret, safe_errno;
+	ഘടന sigaction sa;
+	പൂർണ്ണസംഖ്യ ret, safe_errno;
 
-	if (pager_process.pid == 0)
-		return;
+	എങ്കിൽ (pager_process.pid == 0)
+		തിരികെ;
 
-	memset(&sa, 0, sizeof(sa));
+	memset(&sa, 0, വലുപ്പം(sa));
 	sa.sa_handler = catch_signal;
 
 	/* set flag instead of calling wait_for_pager again */
-	sigaction(SIGINT,  &sa, NULL);
-	sigaction(SIGHUP,  &sa, NULL);
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGQUIT, &sa, NULL);
+	sigaction(SIGINT,  &sa, ശൂന്യ);
+	sigaction(SIGHUP,  &sa, ശൂന്യ);
+	sigaction(SIGTERM, &sa, ശൂന്യ);
+	sigaction(SIGQUIT, &sa, ശൂന്യ);
 
-	fflush(NULL);
+	fflush(ശൂന്യ);
 
 	/* signal EOF to pager */
 	close(STDOUT_FILENO);
@@ -337,21 +337,21 @@ void pager_close(void)
 
 	/* restore original signal settings */
 	safe_errno = errno;
-	sigaction(SIGCHLD, &pager_process.orig_sigchld, NULL);
-	sigaction(SIGINT,  &pager_process.orig_sigint, NULL);
-	sigaction(SIGHUP,  &pager_process.orig_sighup, NULL);
-	sigaction(SIGTERM, &pager_process.orig_sigterm, NULL);
-	sigaction(SIGQUIT, &pager_process.orig_sigquit, NULL);
-	sigaction(SIGPIPE, &pager_process.orig_sigpipe, NULL);
+	sigaction(SIGCHLD, &pager_process.orig_sigchld, ശൂന്യ);
+	sigaction(SIGINT,  &pager_process.orig_sigint, ശൂന്യ);
+	sigaction(SIGHUP,  &pager_process.orig_sighup, ശൂന്യ);
+	sigaction(SIGTERM, &pager_process.orig_sigterm, ശൂന്യ);
+	sigaction(SIGQUIT, &pager_process.orig_sigquit, ശൂന്യ);
+	sigaction(SIGPIPE, &pager_process.orig_sigpipe, ശൂന്യ);
 	errno = safe_errno;
 
-	if (ret == -1)
+	എങ്കിൽ (ret == -1)
 		err(EXIT_FAILURE, _("waitpid failed"));
 
-	if (pager_caught_signal || (pager_caught_sigpipe && ret))
+	എങ്കിൽ (pager_caught_signal || (pager_caught_sigpipe && ret))
 		exit(EXIT_FAILURE);
 
-	memset(&pager_process, 0, sizeof(pager_process));
+	memset(&pager_process, 0, വലുപ്പം(pager_process));
 	pager_caught_signal = 0;
 	pager_caught_sigpipe = 0;
 }
@@ -367,26 +367,26 @@ void pager_close(void)
  * a pager. The variable is also suppressed in privileged (SUID/SGID)
  * contexts via safe_getenv().
  */
-bool pager_is_enabled(enum ul_pagermode mode)
+bool pager_is_enabled(എണ്ണൽ ul_pagermode mode)
 {
-	switch (mode) {
-	case UL_PAGER_ALWAYS:
-		return true;
-	case UL_PAGER_NEVER:
-		return false;
-	case UL_PAGER_AUTO: {
-		const char *s;
+	തിരഞ്ഞെടുപ്പ് (mode) {
+	അവസ്ഥ UL_PAGER_ALWAYS:
+		തിരികെ true;
+	അവസ്ഥ UL_PAGER_NEVER:
+		തിരികെ false;
+	അവസ്ഥ UL_PAGER_AUTO: {
+		സ്ഥിരം അക്ഷരം *s;
 		bool val;
 
-		if (!isatty(STDOUT_FILENO))
-			return false;
+		എങ്കിൽ (!isatty(STDOUT_FILENO))
+			തിരികെ false;
 		s = safe_getenv("PAGER_ENABLE");
-		if (!s || ul_strtobool(s, &val) != 0)
-			return false;
-		return val;
+		എങ്കിൽ (!s || ul_strtobool(s, &val) != 0)
+			തിരികെ false;
+		തിരികെ val;
 	}
-	default:
-		return false;
+	സ്ഥിരസ്ഥിതി:
+		തിരികെ false;
 	}
 }
 
@@ -394,15 +394,15 @@ bool pager_is_enabled(enum ul_pagermode mode)
 
 #define MAX 255
 
-int main(int argc __attribute__ ((__unused__)),
-	 char *argv[] __attribute__ ((__unused__)))
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc __attribute__ ((__unused__)),
+	 അക്ഷരം *argv[] __attribute__ ((__unused__)))
 {
-	int i;
+	പൂർണ്ണസംഖ്യ i;
 
 	pager_open();
-	for (i = 0; i < MAX; i++)
+	വേണ്ടി (i = 0; i < MAX; i++)
 		printf("%d\n", i);
 	pager_close();
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_PAGER */

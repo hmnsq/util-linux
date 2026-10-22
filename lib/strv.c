@@ -14,73 +14,73 @@
  *    Modified the original version from systemd project for util-linux.
  */
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <errno.h>
-#include <stdbool.h>
-#include <assert.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <stdarg.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <stdbool.h>
+#അന്തര്ഭാവ <assert.h>
 
-#include "strutils.h"
-#include "strv.h"
+#അന്തര്ഭാവ "strutils.h"
+#അന്തര്ഭാവ "strv.h"
 
-static void ul_strv_clear(char **l)
+സ്ഥിതം ശൂന്യം ul_strv_clear(അക്ഷരം **l)
 {
-        char **k;
+        അക്ഷരം **k;
 
-        if (!l)
-                return;
+        എങ്കിൽ (!l)
+                തിരികെ;
 
-        for (k = l; *k; k++)
-                free(*k);
+        വേണ്ടി (k = l; *k; k++)
+                സ്വതന്ത്രം(*k);
 
-        *l = NULL;
+        *l = ശൂന്യ;
 }
 
-char **ul_strv_free(char **l)
+അക്ഷരം **ul_strv_free(അക്ഷരം **l)
 {
         ul_strv_clear(l);
-        free(l);
-        return NULL;
+        സ്വതന്ത്രം(l);
+        തിരികെ ശൂന്യ;
 }
 
-char **ul_strv_copy(char * const *l)
+അക്ഷരം **ul_strv_copy(അക്ഷരം * സ്ഥിരം *l)
 {
-        char **r, **k;
+        അക്ഷരം **r, **k;
 
-        k = r = malloc(sizeof(char *) * (ul_strv_length(l) + 1));
-        if (!r)
-                return NULL;
+        k = r = malloc(വലുപ്പം(അക്ഷരം *) * (ul_strv_length(l) + 1));
+        എങ്കിൽ (!r)
+                തിരികെ ശൂന്യ;
 
-        if (l)
-                for (; *l; k++, l++) {
+        എങ്കിൽ (l)
+                വേണ്ടി (; *l; k++, l++) {
                         *k = strdup(*l);
-                        if (!*k) {
+                        എങ്കിൽ (!*k) {
                                 ul_strv_free(r);
-                                return NULL;
+                                തിരികെ ശൂന്യ;
                         }
                 }
 
-        *k = NULL;
-        return r;
+        *k = ശൂന്യ;
+        തിരികെ r;
 }
 
-unsigned ul_strv_length(char * const *l) {
+unsigned ul_strv_length(അക്ഷരം * സ്ഥിരം *l) {
         unsigned n = 0;
 
-        if (!l)
-                return 0;
+        എങ്കിൽ (!l)
+                തിരികെ 0;
 
-        for (; *l; l++)
+        വേണ്ടി (; *l; l++)
                 n++;
 
-        return n;
+        തിരികെ n;
 }
 
-static char **ul_strv_new_ap(const char *x, va_list ap)
+സ്ഥിതം അക്ഷരം **ul_strv_new_ap(സ്ഥിരം അക്ഷരം *x, va_list ap)
 {
-        const char *s;
-        char **a;
+        സ്ഥിരം അക്ഷരം *s;
+        അക്ഷരം **a;
         unsigned n = 0, i = 0;
         va_list aq;
 
@@ -89,13 +89,13 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
          * UL_STRV_IFNOTNULL() macro to include possibly NULL strings in
          * the string list. */
 
-        if (x) {
-                n = x == (const char*) -1 ? 0 : 1;
+        എങ്കിൽ (x) {
+                n = x == (സ്ഥിരം അക്ഷരം*) -1 ? 0 : 1;
 
                 va_copy(aq, ap);
-                while ((s = va_arg(aq, const char*))) {
-                        if (s == (const char*) -1)
-                                continue;
+                ആകുമ്പോൾ ((s = va_arg(aq, സ്ഥിരം അക്ഷരം*))) {
+                        എങ്കിൽ (s == (സ്ഥിരം അക്ഷരം*) -1)
+                                തുടരുക;
 
                         n++;
                 }
@@ -103,153 +103,153 @@ static char **ul_strv_new_ap(const char *x, va_list ap)
                 va_end(aq);
         }
 
-        a = malloc(sizeof(char *) * (n + 1));
-        if (!a)
-                return NULL;
+        a = malloc(വലുപ്പം(അക്ഷരം *) * (n + 1));
+        എങ്കിൽ (!a)
+                തിരികെ ശൂന്യ;
 
-        if (x) {
-                if (x != (const char*) -1) {
+        എങ്കിൽ (x) {
+                എങ്കിൽ (x != (സ്ഥിരം അക്ഷരം*) -1) {
                         a[i] = strdup(x);
-                        if (!a[i])
-                                goto fail;
+                        എങ്കിൽ (!a[i])
+                                പോകുക fail;
                         i++;
                 }
 
-                while ((s = va_arg(ap, const char*))) {
+                ആകുമ്പോൾ ((s = va_arg(ap, സ്ഥിരം അക്ഷരം*))) {
 
-                        if (s == (const char*) -1)
-                                continue;
+                        എങ്കിൽ (s == (സ്ഥിരം അക്ഷരം*) -1)
+                                തുടരുക;
 
                         a[i] = strdup(s);
-                        if (!a[i])
-                                goto fail;
+                        എങ്കിൽ (!a[i])
+                                പോകുക fail;
 
                         i++;
                 }
         }
 
-        a[i] = NULL;
+        a[i] = ശൂന്യ;
 
-        return a;
+        തിരികെ a;
 
 fail:
         ul_strv_free(a);
-        return NULL;
+        തിരികെ ശൂന്യ;
 }
 
-char **ul_strv_new(const char *x, ...)
+അക്ഷരം **ul_strv_new(സ്ഥിരം അക്ഷരം *x, ...)
 {
-        char **r;
+        അക്ഷരം **r;
         va_list ap;
 
         va_start(ap, x);
         r = ul_strv_new_ap(x, ap);
         va_end(ap);
 
-        return r;
+        തിരികെ r;
 }
 
-int ul_strv_extend_strv(char ***a, char **b)
+പൂർണ്ണസംഖ്യ ul_strv_extend_strv(അക്ഷരം ***a, അക്ഷരം **b)
 {
-        int r;
-        char **s;
+        പൂർണ്ണസംഖ്യ r;
+        അക്ഷരം **s;
 
         UL_STRV_FOREACH(s, b) {
                 r = ul_strv_extend(a, *s);
-                if (r < 0)
-                        return r;
+                എങ്കിൽ (r < 0)
+                        തിരികെ r;
         }
 
-        return 0;
+        തിരികെ 0;
 }
 
-int ul_strv_extend_strv_concat(char ***a, char **b, const char *suffix)
+പൂർണ്ണസംഖ്യ ul_strv_extend_strv_concat(അക്ഷരം ***a, അക്ഷരം **b, സ്ഥിരം അക്ഷരം *suffix)
 {
-        int r;
-        char **s;
+        പൂർണ്ണസംഖ്യ r;
+        അക്ഷരം **s;
 
         UL_STRV_FOREACH(s, b) {
-                char *v;
+                അക്ഷരം *v;
 
                 v = ul_strconcat(*s, suffix);
-                if (!v)
-                        return -ENOMEM;
+                എങ്കിൽ (!v)
+                        തിരികെ -ENOMEM;
 
-                r = ul_strv_push(a, v);
-                if (r < 0) {
-                        free(v);
-                        return r;
+                r = ul_strv_തള്ളുക(a, v);
+                എങ്കിൽ (r < 0) {
+                        സ്വതന്ത്രം(v);
+                        തിരികെ r;
                 }
         }
 
-        return 0;
+        തിരികെ 0;
 }
 
 
 #define _FOREACH_WORD(word, length, s, separator, quoted, state)        \
-        for ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
+        വേണ്ടി ((state) = (s), (word) = ul_split(&(state), &(length), (separator), (quoted)); (word); (word) = ul_split(&(state), &(length), (separator), (quoted)))
 
 #define FOREACH_WORD_SEPARATOR(word, length, s, separator, state)       \
         _FOREACH_WORD(word, length, s, separator, false, state)
 
 
-char **ul_strv_split(const char *s, const char *separator)
+അക്ഷരം **ul_strv_split(സ്ഥിരം അക്ഷരം *s, സ്ഥിരം അക്ഷരം *separator)
 {
-        const char *word, *state;
+        സ്ഥിരം അക്ഷരം *word, *state;
         size_t l;
         unsigned n, i;
-        char **r;
+        അക്ഷരം **r;
 
-        assert(s);
+        പ്രതിജ്ഞാ(s);
 
         n = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state)
                 n++;
 
-        r = malloc(sizeof(char *) * (n + 1));
-        if (!r)
-                return NULL;
+        r = malloc(വലുപ്പം(അക്ഷരം *) * (n + 1));
+        എങ്കിൽ (!r)
+                തിരികെ ശൂന്യ;
 
         i = 0;
         FOREACH_WORD_SEPARATOR(word, l, s, separator, state) {
                 r[i] = strndup(word, l);
-                if (!r[i]) {
+                എങ്കിൽ (!r[i]) {
                         ul_strv_free(r);
-                        return NULL;
+                        തിരികെ ശൂന്യ;
                 }
 
                 i++;
         }
 
-        r[i] = NULL;
-        return r;
+        r[i] = ശൂന്യ;
+        തിരികെ r;
 }
 
-char *ul_strv_join(char **l, const char *separator)
+അക്ഷരം *ul_strv_join(അക്ഷരം **l, സ്ഥിരം അക്ഷരം *separator)
 {
-        char *r, *e;
-        char **s;
+        അക്ഷരം *r, *e;
+        അക്ഷരം **s;
         size_t n, k;
 
-        if (!separator)
+        എങ്കിൽ (!separator)
                 separator = " ";
 
         k = strlen(separator);
 
         n = 0;
         UL_STRV_FOREACH(s, l) {
-                if (n != 0)
+                എങ്കിൽ (n != 0)
                         n += k;
                 n += strlen(*s);
         }
 
         r = malloc(n + 1);
-        if (!r)
-                return NULL;
+        എങ്കിൽ (!r)
+                തിരികെ ശൂന്യ;
 
         e = r;
         UL_STRV_FOREACH(s, l) {
-                if (e != r)
+                എങ്കിൽ (e != r)
                         e = stpcpy(e, separator);
 
                 e = stpcpy(e, *s);
@@ -257,167 +257,167 @@ char *ul_strv_join(char **l, const char *separator)
 
         *e = 0;
 
-        return r;
+        തിരികെ r;
 }
 
-int ul_strv_push(char ***l, char *value)
+പൂർണ്ണസംഖ്യ ul_strv_തള്ളുക(അക്ഷരം ***l, അക്ഷരം *മൂല്യം)
 {
-        char **c;
+        അക്ഷരം **c;
         unsigned n, m;
 
-        if (!value)
-                return 0;
+        എങ്കിൽ (!മൂല്യം)
+                തിരികെ 0;
 
         n = ul_strv_length(*l);
 
         /* Increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        എങ്കിൽ (m < n)
+                തിരികെ -ENOMEM;
 
-        c = reallocarray(*l, m, sizeof(char *));
-        if (!c)
-                return -ENOMEM;
+        c = reallocarray(*l, m, വലുപ്പം(അക്ഷരം *));
+        എങ്കിൽ (!c)
+                തിരികെ -ENOMEM;
 
-        c[n] = value;
-        c[n+1] = NULL;
+        c[n] = മൂല്യം;
+        c[n+1] = ശൂന്യ;
 
         *l = c;
-        return 0;
+        തിരികെ 0;
 }
 
-int ul_strv_push_prepend(char ***l, char *value)
+പൂർണ്ണസംഖ്യ ul_strv_തള്ളുക_prepend(അക്ഷരം ***l, അക്ഷരം *മൂല്യം)
 {
-        char **c;
+        അക്ഷരം **c;
         unsigned n, m, i;
 
-        if (!value)
-                return 0;
+        എങ്കിൽ (!മൂല്യം)
+                തിരികെ 0;
 
         n = ul_strv_length(*l);
 
         /* increase and check for overflow */
         m = n + 2;
-        if (m < n)
-                return -ENOMEM;
+        എങ്കിൽ (m < n)
+                തിരികെ -ENOMEM;
 
-        c = malloc(sizeof(char *) * m);
-        if (!c)
-                return -ENOMEM;
+        c = malloc(വലുപ്പം(അക്ഷരം *) * m);
+        എങ്കിൽ (!c)
+                തിരികെ -ENOMEM;
 
-        for (i = 0; i < n; i++)
+        വേണ്ടി (i = 0; i < n; i++)
                 c[i+1] = (*l)[i];
 
-        c[0] = value;
-        c[n+1] = NULL;
+        c[0] = മൂല്യം;
+        c[n+1] = ശൂന്യ;
 
-        free(*l);
+        സ്വതന്ത്രം(*l);
         *l = c;
 
-        return 0;
+        തിരികെ 0;
 }
 
-int ul_strv_consume(char ***l, char *value)
+പൂർണ്ണസംഖ്യ ul_strv_consume(അക്ഷരം ***l, അക്ഷരം *മൂല്യം)
 {
-        int r;
+        പൂർണ്ണസംഖ്യ r;
 
-        r = ul_strv_push(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_തള്ളുക(l, മൂല്യം);
+        എങ്കിൽ (r < 0)
+                സ്വതന്ത്രം(മൂല്യം);
 
-        return r;
+        തിരികെ r;
 }
 
-int ul_strv_consume_prepend(char ***l, char *value)
+പൂർണ്ണസംഖ്യ ul_strv_consume_prepend(അക്ഷരം ***l, അക്ഷരം *മൂല്യം)
 {
-        int r;
+        പൂർണ്ണസംഖ്യ r;
 
-        r = ul_strv_push_prepend(l, value);
-        if (r < 0)
-                free(value);
+        r = ul_strv_തള്ളുക_prepend(l, മൂല്യം);
+        എങ്കിൽ (r < 0)
+                സ്വതന്ത്രം(മൂല്യം);
 
-        return r;
+        തിരികെ r;
 }
 
-int ul_strv_extend(char ***l, const char *value)
+പൂർണ്ണസംഖ്യ ul_strv_extend(അക്ഷരം ***l, സ്ഥിരം അക്ഷരം *മൂല്യം)
 {
-        char *v;
+        അക്ഷരം *v;
 
-        if (!value)
-                return 0;
+        എങ്കിൽ (!മൂല്യം)
+                തിരികെ 0;
 
-        v = strdup(value);
-        if (!v)
-                return -ENOMEM;
+        v = strdup(മൂല്യം);
+        എങ്കിൽ (!v)
+                തിരികെ -ENOMEM;
 
-        return ul_strv_consume(l, v);
+        തിരികെ ul_strv_consume(l, v);
 }
 
-char **ul_strv_remove(char **l, const char *s)
+അക്ഷരം **ul_strv_remove(അക്ഷരം **l, സ്ഥിരം അക്ഷരം *s)
 {
-        char **f, **t;
+        അക്ഷരം **f, **t;
 
-        if (!l)
-                return NULL;
+        എങ്കിൽ (!l)
+                തിരികെ ശൂന്യ;
 
-        assert(s);
+        പ്രതിജ്ഞാ(s);
 
         /* Drops every occurrence of s in the string list, edits
          * in-place. */
 
-        for (f = t = l; *f; f++)
-                if (strcmp(*f, s) == 0)
-                        free(*f);
-                else
+        വേണ്ടി (f = t = l; *f; f++)
+                എങ്കിൽ (strcmp(*f, s) == 0)
+                        സ്വതന്ത്രം(*f);
+                അല്ലെങ്കിൽ
                         *(t++) = *f;
 
-        *t = NULL;
-        return l;
+        *t = ശൂന്യ;
+        തിരികെ l;
 }
 
-int ul_strv_extendf(char ***l, const char *format, ...)
+പൂർണ്ണസംഖ്യ ul_strv_extendf(അക്ഷരം ***l, സ്ഥിരം അക്ഷരം *format, ...)
 {
         va_list ap;
-        char *x;
-        int r;
+        അക്ഷരം *x;
+        പൂർണ്ണസംഖ്യ r;
 
         va_start(ap, format);
         r = vasprintf(&x, format, ap);
         va_end(ap);
 
-        if (r < 0)
-                return -ENOMEM;
+        എങ്കിൽ (r < 0)
+                തിരികെ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        തിരികെ ul_strv_consume(l, x);
 }
 
-int ul_strv_extendv(char ***l, const char *format, va_list ap)
+പൂർണ്ണസംഖ്യ ul_strv_extendv(അക്ഷരം ***l, സ്ഥിരം അക്ഷരം *format, va_list ap)
 {
-        char *x;
-        int r;
+        അക്ഷരം *x;
+        പൂർണ്ണസംഖ്യ r;
 
         r = vasprintf(&x, format, ap);
-        if (r < 0)
-                return -ENOMEM;
+        എങ്കിൽ (r < 0)
+                തിരികെ -ENOMEM;
 
-        return ul_strv_consume(l, x);
+        തിരികെ ul_strv_consume(l, x);
 }
 
-char **ul_strv_reverse(char **l)
+അക്ഷരം **ul_strv_reverse(അക്ഷരം **l)
 {
         unsigned n, i;
 
         n = ul_strv_length(l);
-        if (n <= 1)
-                return l;
+        എങ്കിൽ (n <= 1)
+                തിരികെ l;
 
-        for (i = 0; i < n / 2; i++) {
-                char *t;
+        വേണ്ടി (i = 0; i < n / 2; i++) {
+                അക്ഷരം *t;
 
                 t = l[i];
                 l[i] = l[n-1-i];
                 l[n-1-i] = t;
         }
 
-        return l;
+        തിരികെ l;
 }

@@ -9,133 +9,133 @@
  *
  * Copyright (C) 2017 Karel Zak <kzak@redhat.com>
  */
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <stdio.h>
 
-#include "mbsalign.h"
-#include "mbsedit.h"
+#അന്തര്ഭാവ "mbsalign.h"
+#അന്തര്ഭാവ "mbsedit.h"
 
-struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
+ഘടന mbs_editor *mbs_new_edit(അക്ഷരം *buf, size_t bufsz, size_t ncells)
 {
-	struct mbs_editor *edit = calloc(1, sizeof(*edit));
+	ഘടന mbs_editor *edit = calloc(1, വലുപ്പം(*edit));
 
-	if (edit) {
+	എങ്കിൽ (edit) {
 		edit->buf = buf;
 		edit->max_bytes = bufsz;
 		edit->max_cells = ncells;
 		edit->cur_cells = mbs_safe_width(buf);
 		edit->cur_bytes = strlen(buf);
 	}
-	return edit;
+	തിരികെ edit;
 }
 
-char *mbs_free_edit(struct mbs_editor *edit)
+അക്ഷരം *mbs_free_edit(ഘടന mbs_editor *edit)
 {
-	char *ret = edit ? edit->buf : NULL;
+	അക്ഷരം *ret = edit ? edit->buf : ശൂന്യ;
 
-	free(edit);
-	return ret;
+	സ്വതന്ത്രം(edit);
+	തിരികെ ret;
 }
 
-static size_t mbs_next(const char *str, size_t *ncells)
+സ്ഥിതം size_t mbs_next(സ്ഥിരം അക്ഷരം *str, size_t *ncells)
 {
 #ifdef HAVE_WIDECHAR
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	എങ്കിൽ (!str || !*str)
+		തിരികെ 0;
 
-	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
+	n = mbrtowc(&wc, str, MB_CUR_MAX, ശൂന്യ);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	തിരികെ n;
+#അല്ലെങ്കിൽ
+	എങ്കിൽ (!str || !*str)
+		തിരികെ 0;
 	*ncells = 1;
-	return 1;
+	തിരികെ 1;
 #endif
 }
 
-static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
+സ്ഥിതം size_t mbs_prev(സ്ഥിരം അക്ഷരം *start, സ്ഥിരം അക്ഷരം *end, size_t *ncells)
 {
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = 0;
-	const char *p, *prev;
+	സ്ഥിരം അക്ഷരം *p, *prev;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	എങ്കിൽ (!start || !end || start == end || !*start)
+		തിരികെ 0;
 
 	prev = p = start;
-	while (p < end) {
-		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
+	ആകുമ്പോൾ (p < end) {
+		n = mbrtowc(&wc, p, MB_CUR_MAX, ശൂന്യ);
 		prev = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		എങ്കിൽ (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		അല്ലെങ്കിൽ
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	എങ്കിൽ (prev == end)
+		തിരികെ 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	തിരികെ n;
+#അല്ലെങ്കിൽ
+	എങ്കിൽ (!start || !end || start == end || !*start)
+		തിരികെ 0;
 	*ncells = 1;
-	return 1;
+	തിരികെ 1;
 #endif
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+പൂർണ്ണസംഖ്യ mbs_edit_goto(ഘടന mbs_editor *edit, പൂർണ്ണസംഖ്യ where)
 {
-	switch (where) {
-	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+	തിരഞ്ഞെടുപ്പ് (where) {
+	അവസ്ഥ MBS_EDIT_ഇടത്:
+		എങ്കിൽ (edit->cursor == 0)
+			തിരികെ 1;
+		അല്ലെങ്കിൽ {
 			size_t n, cells;
 			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			എങ്കിൽ (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
-		break;
-	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		നിർത്തുക;
+	അവസ്ഥ MBS_EDIT_വലത്:
+		എങ്കിൽ (edit->cursor_cells >= edit->cur_cells)
+			തിരികെ 1;
+		അല്ലെങ്കിൽ {
 			size_t n, cells;
 			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			എങ്കിൽ (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
 		}
-		break;
-	case MBS_EDIT_HOME:
+		നിർത്തുക;
+	അവസ്ഥ MBS_EDIT_HOME:
 		edit->cursor = 0;
 		edit->cursor_cells = 0;
-		break;
-	case MBS_EDIT_END:
+		നിർത്തുക;
+	അവസ്ഥ MBS_EDIT_END:
 		edit->cursor = edit->cur_bytes;
 		edit->cursor_cells = edit->cur_cells;
-		break;
-	default:
-		return -EINVAL;
+		നിർത്തുക;
+	സ്ഥിരസ്ഥിതി:
+		തിരികെ -EINVAL;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
-static size_t remove_next(char *str, size_t *ncells)
+സ്ഥിതം size_t remove_next(അക്ഷരം *str, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t bytes, move_bytes, n;
@@ -146,28 +146,28 @@ static size_t remove_next(char *str, size_t *ncells)
 
 	memmove(str, str + n, move_bytes);
 	str[bytes - n] = '\0';
-	return n;
+	തിരികെ n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+സ്ഥിതം size_t mbs_തിരുകുക(അക്ഷരം *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t n = 1, bytes;
-	char *in;
+	അക്ഷരം *in;
 
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
 	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	എങ്കിൽ (!in)
+		തിരികെ -1;
 
 	n = wctomb(in, wc);
-	if (n == (size_t) -1)
-		goto out;
+	എങ്കിൽ (n == (size_t) -1)
+		പോകുക out;
 	*ncells = wcwidth(wc);
-#else
+#അല്ലെങ്കിൽ
 	*ncells = 1;
-	in = (char *) &c;
+	in = (അക്ഷരം *) &c;
 #endif
 	bytes       = strlen(str);
 
@@ -176,57 +176,57 @@ static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
 	str[bytes + n] = '\0';
 #ifdef HAVE_WIDECHAR
 out:
-	free(in);
+	സ്വതന്ത്രം(in);
 #endif
-	return n;
+	തിരികെ n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+സ്ഥിതം പൂർണ്ണസംഖ്യ mbs_edit_remove(ഘടന mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	എങ്കിൽ (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
+		തിരികെ 1;
 
 	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	എങ്കിൽ (n == (size_t)-1)
+		തിരികെ 1;
 
 	edit->cur_bytes -= n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	തിരികെ 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+പൂർണ്ണസംഖ്യ mbs_edit_delete(ഘടന mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
-	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+	എങ്കിൽ (edit->cursor >= edit->cur_bytes
+	    && mbs_edit_goto(edit, MBS_EDIT_ഇടത്) == 1)
+		തിരികെ 1;
 
-	return mbs_edit_remove(edit);
+	തിരികെ mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+പൂർണ്ണസംഖ്യ mbs_edit_backspace(ഘടന mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	എങ്കിൽ (mbs_edit_goto(edit, MBS_EDIT_ഇടത്) == 0)
+		തിരികെ mbs_edit_remove(edit);
+	തിരികെ 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+പൂർണ്ണസംഖ്യ mbs_edit_തിരുകുക(ഘടന mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	എങ്കിൽ (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
+		തിരികെ 1;
 
-	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	n = mbs_തിരുകുക(edit->buf + edit->cursor, c, &ncells);
+	എങ്കിൽ (n == (size_t)-1)
+		തിരികെ 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
 	edit->cur_bytes += n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	തിരികെ 0;
 }

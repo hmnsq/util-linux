@@ -4,33 +4,33 @@
  *
  * Written by Karel Zak <kzak@redhat.com> [2012]
  */
-#include "c.h"
-#include "color-names.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "color-names.h"
 
-#include <ctype.h>
+#അന്തര്ഭാവ <ctype.h>
 
-struct ul_color_name {
-	const char *name;
-	const char *seq;
+ഘടന ul_color_name {
+	സ്ഥിരം അക്ഷരം *name;
+	സ്ഥിരം അക്ഷരം *seq;
 };
 
 /*
  * qsort/bsearch buddy
  */
-static int cmp_color_name(const void *a0, const void *b0)
+സ്ഥിതം പൂർണ്ണസംഖ്യ cmp_color_name(സ്ഥിരം ശൂന്യം *a0, സ്ഥിരം ശൂന്യം *b0)
 {
-	const struct ul_color_name
-		*a = (const struct ul_color_name *) a0,
-		*b = (const struct ul_color_name *) b0;
-	return strcmp(a->name, b->name);
+	സ്ഥിരം ഘടന ul_color_name
+		*a = (സ്ഥിരം ഘടന ul_color_name *) a0,
+		*b = (സ്ഥിരം ഘടന ul_color_name *) b0;
+	തിരികെ strcmp(a->name, b->name);
 }
 
 /*
  * Maintains human readable color names
  */
-const char *color_sequence_from_colorname(const char *str)
+സ്ഥിരം അക്ഷരം *color_sequence_from_colorname(സ്ഥിരം അക്ഷരം *str)
 {
-	static const struct ul_color_name basic_schemes[] = {
+	സ്ഥിതം സ്ഥിരം ഘടന ul_color_name basic_schemes[] = {
 		{ "black",	UL_COLOR_BLACK           },
 		{ "blink",      UL_COLOR_BLINK           },
 		{ "blue",	UL_COLOR_BLUE            },
@@ -54,122 +54,122 @@ const char *color_sequence_from_colorname(const char *str)
 		{ "white",      UL_COLOR_WHITE           },
 		{ "yellow",	UL_COLOR_BOLD_YELLOW     }
 	};
-	struct ul_color_name key = { .name = str };
-	const struct ul_color_name *res;
+	ഘടന ul_color_name താക്കോൽ = { .name = str };
+	സ്ഥിരം ഘടന ul_color_name *res;
 
-	if (!str)
-		return NULL;
+	എങ്കിൽ (!str)
+		തിരികെ ശൂന്യ;
 
-	res = bsearch(&key, basic_schemes, ARRAY_SIZE(basic_schemes),
-				sizeof(struct ul_color_name),
+	res = bsearch(&താക്കോൽ, basic_schemes, ARRAY_SIZE(basic_schemes),
+				വലുപ്പം(ഘടന ul_color_name),
 				cmp_color_name);
-	return res ? res->seq : NULL;
+	തിരികെ res ? res->seq : ശൂന്യ;
 }
 
 
-int color_is_sequence(const char *color)
+പൂർണ്ണസംഖ്യ color_is_sequence(സ്ഥിരം അക്ഷരം *color)
 {
-	if (color && *color == 0x1B) {
+	എങ്കിൽ (color && *color == 0x1B) {
 		size_t len = strlen(color);
 
-		if (len >= 4 &&
+		എങ്കിൽ (len >= 4 &&
 		    *(color + 1) == '[' &&
 		    isdigit(*(color + 2)) &&
 		    *(color + len - 1) == 'm')
-		return 1;
+		തിരികെ 1;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
 /* canonicalize sequence */
-static int __color_canonicalize(const char *str, char **seq)
+സ്ഥിതം പൂർണ്ണസംഖ്യ __color_canonicalize(സ്ഥിരം അക്ഷരം *str, അക്ഷരം **seq)
 {
-	char *in, *out;
-	int len;
+	അക്ഷരം *in, *out;
+	പൂർണ്ണസംഖ്യ len;
 
-	if (!str)
-		return -EINVAL;
+	എങ്കിൽ (!str)
+		തിരികെ -EINVAL;
 
-	*seq = NULL;
+	*seq = ശൂന്യ;
 
 	/* convert color names like "red" to the real sequence */
-	if (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
-		const char *s = color_sequence_from_colorname(str);
+	എങ്കിൽ (*str != '\\' && !strchr(str, ';') && isalpha(*str)) {
+		സ്ഥിരം അക്ഷരം *s = color_sequence_from_colorname(str);
 
-		if (s) {
+		എങ്കിൽ (s) {
 			*seq = strdup(s);
-			return *seq ? 0 : -ENOMEM;
+			തിരികെ *seq ? 0 : -ENOMEM;
 		}
-		return 1;
+		തിരികെ 1;
 	}
 
 	/* convert xx;yy sequences to "\033[xx;yy" */
-	if ((len = asprintf(seq, "\033[%sm", str)) < 1)
-		return -ENOMEM;
+	എങ്കിൽ ((len = asprintf(seq, "\033[%sm", str)) < 1)
+		തിരികെ -ENOMEM;
 
-	for (in = *seq, out = *seq; in && *in; in++) {
-		if (*in != '\\') {
+	വേണ്ടി (in = *seq, out = *seq; in && *in; in++) {
+		എങ്കിൽ (*in != '\\') {
 			*out++ = *in;
-			continue;
+			തുടരുക;
 		}
-		switch(*(in + 1)) {
-		case 'a':
+		തിരഞ്ഞെടുപ്പ്(*(in + 1)) {
+		അവസ്ഥ 'a':
 			*out++ = '\a';	/* Bell */
-			break;
-		case 'b':
+			നിർത്തുക;
+		അവസ്ഥ 'b':
 			*out++ = '\b';	/* Backspace */
-			break;
-		case 'e':
+			നിർത്തുക;
+		അവസ്ഥ 'e':
 			*out++ = '\033';	/* Escape */
-			break;
-		case 'f':
+			നിർത്തുക;
+		അവസ്ഥ 'f':
 			*out++ = '\f';	/* Form Feed */
-			break;
-		case 'n':
+			നിർത്തുക;
+		അവസ്ഥ 'n':
 			*out++ = '\n';	/* Newline */
-			break;
-		case 'r':
+			നിർത്തുക;
+		അവസ്ഥ 'r':
 			*out++ = '\r';	/* Carriage Return */
-			break;
-		case 't':
+			നിർത്തുക;
+		അവസ്ഥ 't':
 			*out++ = '\t';	/* Tab */
-			break;
-		case 'v':
+			നിർത്തുക;
+		അവസ്ഥ 'v':
 			*out++ = '\v';	/* Vertical Tab */
-			break;
-		case '\\':
+			നിർത്തുക;
+		അവസ്ഥ '\\':
 			*out++ = '\\';	/* Backslash */
-			break;
-		case '_':
+			നിർത്തുക;
+		അവസ്ഥ '_':
 			*out++ = ' ';	/* Space */
-			break;
-		case '#':
+			നിർത്തുക;
+		അവസ്ഥ '#':
 			*out++ = '#';	/* Hash mark */
-			break;
-		case '?':
+			നിർത്തുക;
+		അവസ്ഥ '?':
 			*out++ = '?';	/* Question mark */
-			break;
-		default:
+			നിർത്തുക;
+		സ്ഥിരസ്ഥിതി:
 			*out++ = *in;
 			*out++ = *(in + 1);
-			break;
+			നിർത്തുക;
 		}
 		in++;
 	}
 
-	if (out) {
-		assert ((out - *seq) <= len);
+	എങ്കിൽ (out) {
+		പ്രതിജ്ഞാ ((out - *seq) <= len);
 		*out = '\0';
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
-char *color_get_sequence(const char *color)
+അക്ഷരം *color_get_sequence(സ്ഥിരം അക്ഷരം *color)
 {
-	char *seq = NULL;
-	int rc = __color_canonicalize(color, &seq);
+	അക്ഷരം *seq = ശൂന്യ;
+	പൂർണ്ണസംഖ്യ rc = __color_canonicalize(color, &seq);
 
-	return rc ? NULL : seq;
+	തിരികെ rc ? ശൂന്യ : seq;
 }

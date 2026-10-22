@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#അന്തര്ഭാവ <stdio.h>
+#അന്തര്ഭാവ <stdlib.h>
+#അന്തര്ഭാവ <inttypes.h>
+#അന്തര്ഭാവ <ctype.h>
+#അന്തര്ഭാവ <errno.h>
+#അന്തര്ഭാവ <sys/stat.h>
+#അന്തര്ഭാവ <string.h>
+#അന്തര്ഭാവ <strings.h>
+#അന്തര്ഭാവ <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#അന്തര്ഭാവ "c.h"
+#അന്തര്ഭാവ "cctype.h"
+#അന്തര്ഭാവ "nls.h"
+#അന്തര്ഭാവ "strutils.h"
+#അന്തര്ഭാവ "timeutils.h"
+#അന്തര്ഭാവ "bitops.h"
+#അന്തര്ഭാവ "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+സ്ഥിതം പൂർണ്ണസംഖ്യ STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+ശൂന്യം strutils_set_exitcode(പൂർണ്ണസംഖ്യ ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+സ്ഥിതം പൂർണ്ണസംഖ്യ do_scale_by_power (uintmax_t *x, പൂർണ്ണസംഖ്യ base, പൂർണ്ണസംഖ്യ power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	ആകുമ്പോൾ (power--) {
+		എങ്കിൽ (UINTMAX_MAX / base < *x)
+			തിരികെ -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+പൂർണ്ണസംഖ്യ ul_parse_size(സ്ഥിരം അക്ഷരം *str, uintmax_t *res, പൂർണ്ണസംഖ്യ *power)
 {
-	const char *p;
-	char *end;
+	സ്ഥിരം അക്ഷരം *p;
+	അക്ഷരം *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	പൂർണ്ണസംഖ്യ base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *suf  = "KMGTPEZY";
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *suf2 = "kmgtpezy";
+	സ്ഥിരം അക്ഷരം *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	എങ്കിൽ (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		പോകുക err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	ആകുമ്പോൾ (isspace((unsigned അക്ഷരം) *p))
 		p++;
-	if (*p == '-') {
+	എങ്കിൽ (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		പോകുക err;
 	}
 
-	errno = 0, end = NULL;
+	errno = 0, end = ശൂന്യ;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	എങ്കിൽ (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		പോകുക err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
+	എങ്കിൽ (!end || !*end)
+		പോകുക done;			/* without suffix */
 	p = end;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	എങ്കിൽ (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	അല്ലെങ്കിൽ എങ്കിൽ ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
+	അല്ലെങ്കിൽ എങ്കിൽ (*(p + 1)) {
+		ഘടന lconv സ്ഥിരം *l = localeconv();
+		സ്ഥിരം അക്ഷരം *dp = l ? l->decimal_point : ശൂന്യ;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		എങ്കിൽ (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+			സ്ഥിരം അക്ഷരം *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			വേണ്ടി (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
+			എങ്കിൽ (isdigit(*fstr)) {
+				errno = 0, end = ശൂന്യ;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				എങ്കിൽ (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					പോകുക err;
 				}
-			} else
-				end = (char *) p;
+			} അല്ലെങ്കിൽ
+				end = (അക്ഷരം *) p;
 
-			if (!end || !*end) {
+			എങ്കിൽ (!end || !*end) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				പോകുക err;	/* without suffix, but with fractions */
 			}
 			p = end;
-			goto check_suffix;
+			പോകുക check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		പോകുക err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	എങ്കിൽ (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	അല്ലെങ്കിൽ {
 		sp = strchr(suf2, *p);
-		if (sp)
+		എങ്കിൽ (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		അല്ലെങ്കിൽ {
 			rc = -EINVAL;
-			goto err;
+			പോകുക err;
 		}
 	}
 
-	if (power)
+	എങ്കിൽ (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	എങ്കിൽ (rc)
+		പോകുക err;
 
-	if (frac && pwr) {
-		int i;
+	എങ്കിൽ (frac && pwr) {
+		പൂർണ്ണസംഖ്യ i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		എങ്കിൽ (rc)
+			പോകുക err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
+		ചെയ്യുക {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} ആകുമ്പോൾ (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		വേണ്ടി (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		എങ്കിൽ (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			പോകുക err;
 		}
 		x += frac_val;
 	}
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	എങ്കിൽ (rc < 0)
 		errno = -rc;
-	return rc;
+	തിരികെ rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+പൂർണ്ണസംഖ്യ strtosize(സ്ഥിരം അക്ഷരം *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	തിരികെ ul_parse_size(str, res, ശൂന്യ);
 }
 
-int isdigit_strend(const char *str, const char **end)
+പൂർണ്ണസംഖ്യ isdigit_strend(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം **end)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	വേണ്ടി (p = str; p && *p && isdigit((unsigned അക്ഷരം) *p); p++);
 
-	if (end)
+	എങ്കിൽ (end)
 		*end = p;
-	return p && p > str && !*p;
+	തിരികെ p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+പൂർണ്ണസംഖ്യ isxdigit_strend(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം **end)
 {
-	const char *p;
+	സ്ഥിരം അക്ഷരം *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	വേണ്ടി (p = str; p && *p && isxdigit((unsigned അക്ഷരം) *p); p++);
 
-	if (end)
+	എങ്കിൽ (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	തിരികെ p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+പൂർണ്ണസംഖ്യ ul_strtobool(സ്ഥിരം അക്ഷരം *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	സ്ഥിതം സ്ഥിരം അക്ഷരം *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	എങ്കിൽ (!str || !result)
+		തിരികെ -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	വേണ്ടി (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		എങ്കിൽ (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			തിരികെ 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	വേണ്ടി (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		എങ്കിൽ (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			തിരികെ 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	തിരികെ -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+പൂർണ്ണസംഖ്യ ul_parse_switch(സ്ഥിരം അക്ഷരം *arg, ...)
 {
-	const char *a, *b;
+	സ്ഥിരം അക്ഷരം *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	ചെയ്യുക {
+		a = va_arg(ap, അക്ഷരം *);
+		എങ്കിൽ (!a)
+			നിർത്തുക;
+		b = va_arg(ap, അക്ഷരം *);
+		എങ്കിൽ (!b)
+			നിർത്തുക;
 
-		if (strcmp(arg, a) == 0) {
+		എങ്കിൽ (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			തിരികെ 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		എങ്കിൽ (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			തിരികെ 0;
 		}
-	} while (1);
+	} ആകുമ്പോൾ (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
 }
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+ശൂന്യം *mempcpy(ശൂന്യം *restrict dest, സ്ഥിരം ശൂന്യം *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	തിരികെ ((അക്ഷരം *)memcpy(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+size_t strnlen(സ്ഥിരം അക്ഷരം *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	വേണ്ടി (i = 0; i < maxlen; i++) {
+		എങ്കിൽ (s[i] == '\0')
+			തിരികെ i;
 	}
-	return maxlen;
+	തിരികെ maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+അക്ഷരം *strnchr(സ്ഥിരം അക്ഷരം *s, size_t maxlen, പൂർണ്ണസംഖ്യ c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	വേണ്ടി (; maxlen-- && *s != '\0'; ++s)
+		എങ്കിൽ (*s == (അക്ഷരം)c)
+			തിരികെ (അക്ഷരം *)s;
+	തിരികെ ശൂന്യ;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+അക്ഷരം *strndup(സ്ഥിരം അക്ഷരം *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	അക്ഷരം *new = malloc((len + 1) * വലുപ്പം(അക്ഷരം));
+	എങ്കിൽ (!new)
+		തിരികെ ശൂന്യ;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	തിരികെ (അക്ഷരം *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+പൂർണ്ണസംഖ്യ ul_strtos64(സ്ഥിരം അക്ഷരം *str, int64_t *അക്കം, പൂർണ്ണസംഖ്യ base)
 {
-	char *end = NULL;
+	അക്ഷരം *end = ശൂന്യ;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	എങ്കിൽ (str == ശൂന്യ || *str == '\0')
+		തിരികെ -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*അക്കം = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	എങ്കിൽ (errno != 0)
+		തിരികെ -errno;
+	എങ്കിൽ (str == end || (end && *end))
+		തിരികെ -(errno = EINVAL);
+	തിരികെ 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+പൂർണ്ണസംഖ്യ ul_strtou64(സ്ഥിരം അക്ഷരം *str, uint64_t *അക്കം, പൂർണ്ണസംഖ്യ base)
 {
-	char *end = NULL;
+	അക്ഷരം *end = ശൂന്യ;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	എങ്കിൽ (str == ശൂന്യ || *str == '\0')
+		തിരികെ -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	എങ്കിൽ (tmp < 0)
 		errno = ERANGE;
-	else {
+	അല്ലെങ്കിൽ {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*അക്കം = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	എങ്കിൽ (errno != 0)
+		തിരികെ -errno;
+	എങ്കിൽ (str == end || (end && *end))
+		തിരികെ -(errno = EINVAL);
+	തിരികെ 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+പൂർണ്ണസംഖ്യ ul_strtos32(സ്ഥിരം അക്ഷരം *str, int32_t *അക്കം, പൂർണ്ണസംഖ്യ base)
 {
 	int64_t tmp;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	എങ്കിൽ (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	എങ്കിൽ (rc == 0)
+		*അക്കം = (int32_t) tmp;
+	തിരികെ rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+പൂർണ്ണസംഖ്യ ul_strtou32(സ്ഥിരം അക്ഷരം *str, uint32_t *അക്കം, പൂർണ്ണസംഖ്യ base)
 {
 	uint64_t tmp;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	എങ്കിൽ (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	എങ്കിൽ (rc == 0)
+		*അക്കം = (uint32_t) tmp;
+	തിരികെ rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+പൂർണ്ണസംഖ്യ ul_strtou16(സ്ഥിരം അക്ഷരം *str, uint16_t *അക്കം, പൂർണ്ണസംഖ്യ base)
 {
 	uint64_t tmp;
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	എങ്കിൽ (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	എങ്കിൽ (rc == 0)
+		*അക്കം = (uint16_t) tmp;
+	തിരികെ rc;
 }
 
 /*
@@ -432,154 +432,154 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(സ്ഥിരം അക്ഷരം *str, പൂർണ്ണസംഖ്യ base, സ്ഥിരം അക്ഷരം *errmesg,
+			     int64_t താഴെയുള്ള, int64_t up)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t അക്കം = 0;
+	പൂർണ്ണസംഖ്യ rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &അക്കം, base);
+	എങ്കിൽ (rc == 0 && ((താഴെയുള്ള && അക്കം < താഴെയുള്ള) || (up && അക്കം > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	എങ്കിൽ (rc) {
+		എങ്കിൽ (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	തിരികെ അക്കം;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(സ്ഥിരം അക്ഷരം *str, പൂർണ്ണസംഖ്യ base, സ്ഥിരം അക്ഷരം *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t അക്കം = 0;
+	പൂർണ്ണസംഖ്യ rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &അക്കം, base);
+	എങ്കിൽ (rc == 0 && (up && അക്കം > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	എങ്കിൽ (rc) {
+		എങ്കിൽ (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	തിരികെ അക്കം;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+ഇരട്ട strtod_or_err(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *errmesg)
 {
-	double num;
-	char *end = NULL;
+	ഇരട്ട അക്കം;
+	അക്ഷരം *end = ശൂന്യ;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	എങ്കിൽ (str == ശൂന്യ || *str == '\0')
+		പോകുക err;
+	അക്കം = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	എങ്കിൽ (errno || str == end || (end && *end))
+		പോകുക err;
 
-	return num;
+	തിരികെ അക്കം;
 err:
-	if (errno == ERANGE)
+	എങ്കിൽ (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+പൂർണ്ണസംഖ്യ ul_strtold(സ്ഥിരം അക്ഷരം *str, long ഇരട്ട *അക്കം)
 {
-	char *end = NULL;
+	അക്ഷരം *end = ശൂന്യ;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	എങ്കിൽ (str == ശൂന്യ || *str == '\0')
+		തിരികെ -(errno = EINVAL);
+	*അക്കം = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	എങ്കിൽ (errno != 0)
+		തിരികെ -errno;
+	എങ്കിൽ (str == end || (end && *end))
+		തിരികെ -(errno = EINVAL);
+	തിരികെ 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+long ഇരട്ട strtold_or_err(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *errmesg)
 {
-	long double num = 0;
+	long ഇരട്ട അക്കം = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	എങ്കിൽ (ul_strtold(str, &അക്കം) == 0)
+		തിരികെ അക്കം;
+	എങ്കിൽ (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *errmesg)
 {
-	uintmax_t num;
+	uintmax_t അക്കം;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	എങ്കിൽ (strtosize(str, &അക്കം) == 0)
+		തിരികെ അക്കം;
 
-	if (errno)
+	എങ്കിൽ (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+ശൂന്യം strtotimeval_or_err(സ്ഥിരം അക്ഷരം *str, ഘടന timeval *tv, സ്ഥിരം അക്ഷരം *errmesg)
 {
-	long double user_input;
+	long ഇരട്ട user_നിവേശം;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_നിവേശം = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_നിവേശം;
+	tv->tv_usec = (suseconds_t)((user_നിവേശം - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+ശൂന്യം strtotimespec_or_err(സ്ഥിരം അക്ഷരം *str, ഘടന timespec *ts, സ്ഥിരം അക്ഷരം *errmesg)
 {
-	long double user_input;
+	long ഇരട്ട user_നിവേശം;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_നിവേശം = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_നിവേശം;
+	ts->tv_nsec = (long)((user_നിവേശം - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(സ്ഥിരം അക്ഷരം *str, സ്ഥിരം അക്ഷരം *errmesg)
 {
-	int64_t user_input;
+	int64_t user_നിവേശം;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_നിവേശം = strtos64_or_err(str, errmesg);
+	തിരികെ (time_t) user_നിവേശം;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(സ്ഥിരം അക്ഷരം *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	എങ്കിൽ (mode && strcmp(mode, "never") == 0)
+		തിരികെ false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	എങ്കിൽ (mode && strcmp(mode, "always") == 0)
+		തിരികെ true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	എങ്കിൽ (!mode || strcmp(mode, "auto") == 0)
+		തിരികെ isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(സ്ഥിരം അക്ഷരം *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	എങ്കിൽ (mode && strcmp(mode, "never") == 0)
+		തിരികെ false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	എങ്കിൽ (mode && strcmp(mode, "always") == 0)
+		തിരികെ true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	എങ്കിൽ (!mode || strcmp(mode, "auto") == 0)
+		തിരികെ isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -588,23 +588,23 @@ bool annotationwanted(const char *mode)
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+അക്ഷരം *xstrmode(mode_t mode, അക്ഷരം *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	എങ്കിൽ (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	അല്ലെങ്കിൽ എങ്കിൽ (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	അല്ലെങ്കിൽ എങ്കിൽ (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	അല്ലെങ്കിൽ എങ്കിൽ (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	അല്ലെങ്കിൽ എങ്കിൽ (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	അല്ലെങ്കിൽ എങ്കിൽ (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	അല്ലെങ്കിൽ എങ്കിൽ (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	തിരികെ str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+സ്ഥിതം പൂർണ്ണസംഖ്യ get_exp(uint64_t n)
 {
-	int shft;
+	പൂർണ്ണസംഖ്യ shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	വേണ്ടി (shft = 10; shft <= 60; shft += 10) {
+		എങ്കിൽ (n < (1ULL << shft))
+			നിർത്തുക;
 	}
-	return shft - 10;
+	തിരികെ shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+അക്ഷരം *size_to_human_string(പൂർണ്ണസംഖ്യ options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	അക്ഷരം buf[32];
+	പൂർണ്ണസംഖ്യ dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	സ്ഥിരം അക്ഷരം *letters = "BKMGTPE";
+	അക്ഷരം suffix[വലുപ്പം(" KiB")], *psuf = suffix;
+	അക്ഷരം c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	എങ്കിൽ (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	എങ്കിൽ ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	എങ്കിൽ (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		എങ്കിൽ (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		അല്ലെങ്കിൽ
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		എങ്കിൽ (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} അല്ലെങ്കിൽ {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		എങ്കിൽ (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	എങ്കിൽ (frac) {
+		ഘടന lconv സ്ഥിരം *l = localeconv();
+		അക്ഷരം *dp = l ? l->decimal_point : ശൂന്യ;
+		പൂർണ്ണസംഖ്യ len;
 
-		if (!dp || !*dp)
+		എങ്കിൽ (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, വലുപ്പം(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		എങ്കിൽ (len > 0 && (size_t) len < വലുപ്പം(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			എങ്കിൽ (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, വലുപ്പം(buf) - len);
+		} അല്ലെങ്കിൽ
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} അല്ലെങ്കിൽ
+		snprintf(buf, വലുപ്പം(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	തിരികെ strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+പൂർണ്ണസംഖ്യ string_to_idarray(സ്ഥിരം അക്ഷരം *list, പൂർണ്ണസംഖ്യ ary[], size_t arysz,
+			പൂർണ്ണസംഖ്യ (name2id)(സ്ഥിരം അക്ഷരം *, size_t))
 {
-	const char *begin = NULL, *p;
+	സ്ഥിരം അക്ഷരം *begin = ശൂന്യ, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	എങ്കിൽ (!list || !*list || !ary || !arysz || !name2id)
+		തിരികെ -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	വേണ്ടി (p = list; p && *p; p++) {
+		സ്ഥിരം അക്ഷരം *end = ശൂന്യ;
+		പൂർണ്ണസംഖ്യ id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		എങ്കിൽ (n >= arysz)
+			തിരികെ -2;
+		എങ്കിൽ (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		എങ്കിൽ (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		എങ്കിൽ (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		എങ്കിൽ (!begin || !end)
+			തുടരുക;
+		എങ്കിൽ (end <= begin)
+			തിരികെ -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		എങ്കിൽ (id == -1)
+			തിരികെ -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ശൂന്യ;
+		എങ്കിൽ (end && !*end)
+			നിർത്തുക;
 	}
-	return n;
+	തിരികെ n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+പൂർണ്ണസംഖ്യ string_add_to_idarray(സ്ഥിരം അക്ഷരം *list, പൂർണ്ണസംഖ്യ ary[], size_t arysz,
+			size_t *ary_pos, പൂർണ്ണസംഖ്യ (name2id)(സ്ഥിരം അക്ഷരം *, size_t))
 {
-	const char *list_add;
-	int r;
+	സ്ഥിരം അക്ഷരം *list_add;
+	പൂർണ്ണസംഖ്യ r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	എങ്കിൽ (!list || !*list || !ary_pos || *ary_pos > arysz)
+		തിരികെ -1;
 
-	if (list[0] == '+')
+	എങ്കിൽ (list[0] == '+')
 		list_add = &list[1];
-	else {
+	അല്ലെങ്കിൽ {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	എങ്കിൽ (r > 0)
 		*ary_pos += r;
-	return r;
+	തിരികെ r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+പൂർണ്ണസംഖ്യ string_to_bitarray(സ്ഥിരം അക്ഷരം *list,
+		     അക്ഷരം *ary,
+		     പൂർണ്ണസംഖ്യ (*name2bit)(സ്ഥിരം അക്ഷരം *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	സ്ഥിരം അക്ഷരം *begin = ശൂന്യ, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	എങ്കിൽ (!list || !name2bit || !ary)
+		തിരികെ -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	വേണ്ടി (p = list; p && *p; p++) {
+		സ്ഥിരം അക്ഷരം *end = ശൂന്യ;
+		പൂർണ്ണസംഖ്യ bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		എങ്കിൽ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		എങ്കിൽ (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		എങ്കിൽ (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		എങ്കിൽ (!begin || !end)
+			തുടരുക;
+		എങ്കിൽ (end <= begin)
+			തിരികെ -1;
+		എങ്കിൽ (allow_range) {
+			എങ്കിൽ (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} അല്ലെങ്കിൽ എങ്കിൽ (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		എങ്കിൽ (bit < 0)
+			തിരികെ bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		എങ്കിൽ (set_lower)
+			ആകുമ്പോൾ (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		അല്ലെങ്കിൽ എങ്കിൽ (set_higher)
+			ആകുമ്പോൾ (++bit < (പൂർണ്ണസംഖ്യ) allow_range)
 				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ശൂന്യ;
+		എങ്കിൽ (end && !*end)
+			നിർത്തുക;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+പൂർണ്ണസംഖ്യ string_to_bitmask(സ്ഥിരം അക്ഷരം *list,
 		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+		     long (*name2flag)(സ്ഥിരം അക്ഷരം *, size_t))
 {
-	const char *begin = NULL, *p;
+	സ്ഥിരം അക്ഷരം *begin = ശൂന്യ, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	എങ്കിൽ (!list || !name2flag || !mask)
+		തിരികെ -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
+	വേണ്ടി (p = list; p && *p; p++) {
+		സ്ഥിരം അക്ഷരം *end = ശൂന്യ;
 		long flag;
 
-		if (!begin)
+		എങ്കിൽ (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		എങ്കിൽ (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		എങ്കിൽ (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		എങ്കിൽ (!begin || !end)
+			തുടരുക;
+		എങ്കിൽ (end <= begin)
+			തിരികെ -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		എങ്കിൽ (flag < 0)
+			തിരികെ flag;	/* error */
 		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = ശൂന്യ;
+		എങ്കിൽ (end && !*end)
+			നിർത്തുക;
 	}
-	return 0;
+	തിരികെ 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+പൂർണ്ണസംഖ്യ ul_parse_range(സ്ഥിരം അക്ഷരം *str, പൂർണ്ണസംഖ്യ *lower, പൂർണ്ണസംഖ്യ *upper, പൂർണ്ണസംഖ്യ def)
 {
-	char *end = NULL;
+	അക്ഷരം *end = ശൂന്യ;
 
-	if (!str)
-		return 0;
+	എങ്കിൽ (!str)
+		തിരികെ 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	എങ്കിൽ (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		എങ്കിൽ (errno || !end || *end || end == str)
+			തിരികെ -1;
+	} അല്ലെങ്കിൽ {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		എങ്കിൽ (errno || !end || end == str)
+			തിരികെ -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		എങ്കിൽ (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		അല്ലെങ്കിൽ എങ്കിൽ (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
-			end = NULL;
+			end = ശൂന്യ;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			എങ്കിൽ (errno || !end || *end || end == str)
+				തിരികെ -1;
 		}
 	}
-	return 0;
+	തിരികെ 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+സ്ഥിരം അക്ഷരം *ul_path_next_segment(സ്ഥിരം അക്ഷരം *str, size_t *sz)
 {
-	const char *start, *p;
+	സ്ഥിരം അക്ഷരം *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	ആകുമ്പോൾ (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	എങ്കിൽ (!start || !*start)
+		തിരികെ ശൂന്യ;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	വേണ്ടി (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	തിരികെ start;
 }
 
-int streq_paths(const char *a, const char *b)
+പൂർണ്ണസംഖ്യ streq_paths(സ്ഥിരം അക്ഷരം *a, സ്ഥിരം അക്ഷരം *b)
 {
-	while (a && b) {
+	ആകുമ്പോൾ (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		സ്ഥിരം അക്ഷരം *a_seg = ul_path_next_segment(a, &a_sz);
+		സ്ഥിരം അക്ഷരം *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		എങ്കിൽ (a_sz + b_sz == 0)
+			തിരികെ 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		എങ്കിൽ (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			തിരികെ 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		എങ്കിൽ (!a_seg || !b_seg)
+			നിർത്തുക;
+		എങ്കിൽ (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+			നിർത്തുക;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	തിരികെ 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+പൂർണ്ണസംഖ്യ ul_path_is_within(സ്ഥിരം അക്ഷരം *path, സ്ഥിരം അക്ഷരം *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	എങ്കിൽ (!path || !dir || !*path || !*dir)
+		തിരികെ 0;
 
-	while (path && dir) {
+	ആകുമ്പോൾ (path && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		സ്ഥിരം അക്ഷരം *p_seg = ul_path_next_segment(path, &p_sz);
+		സ്ഥിരം അക്ഷരം *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		എങ്കിൽ (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			തിരികെ 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		എങ്കിൽ (!p_seg || !d_seg)
+			നിർത്തുക;
+		എങ്കിൽ (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+			നിർത്തുക;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	തിരികെ 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+അക്ഷരം *ul_strnconcat(സ്ഥിരം അക്ഷരം *s, സ്ഥിരം അക്ഷരം *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	അക്ഷരം *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	എങ്കിൽ (!s && !suffix)
+		തിരികെ strdup("");
+	എങ്കിൽ (!s)
+		തിരികെ strndup(suffix, b);
+	എങ്കിൽ (!suffix)
+		തിരികെ strdup(s);
 
-	assert(s);
-	assert(suffix);
+	പ്രതിജ്ഞാ(s);
+	പ്രതിജ്ഞാ(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	എങ്കിൽ (b > ((size_t) -1) - a)
+		തിരികെ ശൂന്യ;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	എങ്കിൽ (!r)
+		തിരികെ ശൂന്യ;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	തിരികെ r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+അക്ഷരം *ul_strconcat(സ്ഥിരം അക്ഷരം *s, സ്ഥിരം അക്ഷരം *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	തിരികെ ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+അക്ഷരം *ul_strfconcat(സ്ഥിരം അക്ഷരം *s, സ്ഥിരം അക്ഷരം *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	അക്ഷരം *val, *res;
+	പൂർണ്ണസംഖ്യ sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	എങ്കിൽ (sz < 0)
+		തിരികെ ശൂന്യ;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	സ്വതന്ത്രം(val);
+	തിരികെ res;
 }
 
-int ul_strappend(char **a, const char *b)
+പൂർണ്ണസംഖ്യ ul_strappend(അക്ഷരം **a, സ്ഥിരം അക്ഷരം *b)
 {
 	size_t al, bl;
-	char *tmp;
+	അക്ഷരം *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	എങ്കിൽ (!a)
+		തിരികെ -EINVAL;
+	എങ്കിൽ (!b || !*b)
+		തിരികെ 0;
+	എങ്കിൽ (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		തിരികെ !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	എങ്കിൽ (!tmp)
+		തിരികെ -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	തിരികെ 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+പൂർണ്ണസംഖ്യ strfappend(അക്ഷരം **a, സ്ഥിരം അക്ഷരം *format, ...)
 {
 	va_list ap;
-	int res;
+	പൂർണ്ണസംഖ്യ res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	തിരികെ res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+ബാഹ്യ പൂർണ്ണസംഖ്യ ul_strvfappend(അക്ഷരം **a, സ്ഥിരം അക്ഷരം *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	അക്ഷരം *val;
+	പൂർണ്ണസംഖ്യ sz;
+	പൂർണ്ണസംഖ്യ res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	എങ്കിൽ (sz < 0)
+		തിരികെ -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	സ്വതന്ത്രം(val);
+	തിരികെ res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+സ്ഥിതം size_t strcspn_escaped(സ്ഥിരം അക്ഷരം *s, സ്ഥിരം അക്ഷരം *reject)
 {
-	int escaped = 0;
-	int n;
+	പൂർണ്ണസംഖ്യ escaped = 0;
+	പൂർണ്ണസംഖ്യ n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	വേണ്ടി (n=0; s[n]; n++) {
+		എങ്കിൽ (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		അല്ലെങ്കിൽ എങ്കിൽ (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		അല്ലെങ്കിൽ എങ്കിൽ (strchr(reject, s[n]))
+			നിർത്തുക;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	തിരികെ n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+അക്ഷരം *ul_strchr_escaped(സ്ഥിരം അക്ഷരം *s, പൂർണ്ണസംഖ്യ c)
 {
-	char *p;
-	int esc = 0;
+	അക്ഷരം *p;
+	പൂർണ്ണസംഖ്യ esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	വേണ്ടി (p = (അക്ഷരം *) s; p && *p; p++) {
+		എങ്കിൽ (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			തുടരുക;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		എങ്കിൽ (*p == c && (!esc || c == '\\'))
+			തിരികെ p;
 		esc = 0;
 	}
 
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+സ്ഥിരം അക്ഷരം *ul_split(സ്ഥിരം അക്ഷരം **state, size_t *l, സ്ഥിരം അക്ഷരം *separator, പൂർണ്ണസംഖ്യ quoted)
 {
-	const char *current;
+	സ്ഥിരം അക്ഷരം *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	എങ്കിൽ (!*current) {
+		പ്രതിജ്ഞാ(**state == '\0');
+		തിരികെ ശൂന്യ;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	എങ്കിൽ (!*current) {
 		*state = current;
-		return NULL;
+		തിരികെ ശൂന്യ;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	എങ്കിൽ (quoted && strchr("\'\"", *current)) {
+		അക്ഷരം quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		എങ്കിൽ (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			തിരികെ ശൂന്യ;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		എങ്കിൽ (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			തിരികെ ശൂന്യ;
 		}
 		*state = current + *l;
-	} else {
+	} അല്ലെങ്കിൽ {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	തിരികെ current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+പൂർണ്ണസംഖ്യ skip_fline(FILE *fp)
 {
-	int ch;
+	പൂർണ്ണസംഖ്യ ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	ചെയ്യുക {
+		എങ്കിൽ ((ch = fgetc(fp)) == EOF)
+			തിരികെ 1;
+		എങ്കിൽ (ch == '\n')
+			തിരികെ 0;
+	} ആകുമ്പോൾ (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+പൂർണ്ണസംഖ്യ ul_stralnumcmp(സ്ഥിരം അക്ഷരം *p1, സ്ഥിരം അക്ഷരം *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	സ്ഥിരം unsigned അക്ഷരം *s1 = (സ്ഥിരം unsigned അക്ഷരം *) p1;
+	സ്ഥിരം unsigned അക്ഷരം *s2 = (സ്ഥിരം unsigned അക്ഷരം *) p2;
+	unsigned അക്ഷരം c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	ചെയ്യുക {
+		ചെയ്യുക {
+			c1 = (unsigned അക്ഷരം) *s1++;
+		} ആകുമ്പോൾ (c1 != '\0' && !isalnum((unsigned പൂർണ്ണസംഖ്യ) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		ചെയ്യുക {
+			c2 = (unsigned അക്ഷരം) *s2++;
+		} ആകുമ്പോൾ (c2 != '\0' && !isalnum((unsigned പൂർണ്ണസംഖ്യ) c2));
 
-		if (c1 != '\0')
+		എങ്കിൽ (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		എങ്കിൽ (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		എങ്കിൽ (c1 == '\0')
+			തിരികെ c1 - c2;
+	} ആകുമ്പോൾ (c1 == c2);
 
-	return c1 - c2;
+	തിരികെ c1 - c2;
 }
 
 /*
@@ -1277,163 +1277,163 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+പൂർണ്ണസംഖ്യ ul_optstr_next(അക്ഷരം **optstr, അക്ഷരം **name, size_t *namesz,
+		   അക്ഷരം **മൂല്യം, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	പൂർണ്ണസംഖ്യ open_quote = 0;
+	അക്ഷരം *start = ശൂന്യ, *stop = ശൂന്യ, *p, *sep = ശൂന്യ;
+	അക്ഷരം *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	പ്രതിജ്ഞാ(optstr);
+	പ്രതിജ്ഞാ(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	എങ്കിൽ (name)
+		*name = ശൂന്യ;
+	എങ്കിൽ (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	എങ്കിൽ (മൂല്യം)
+		*മൂല്യം = ശൂന്യ;
+	എങ്കിൽ (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	ആകുമ്പോൾ (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	വേണ്ടി (p = optstr0; p && *p; p++) {
+		എങ്കിൽ (!start && *p == '=')
+			തിരികെ -EINVAL;
+		എങ്കിൽ (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		എങ്കിൽ (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		എങ്കിൽ (open_quote)
+			തുടരുക;		/* still in quoted block */
+		എങ്കിൽ (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		എങ്കിൽ (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		അല്ലെങ്കിൽ എങ്കിൽ (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		എങ്കിൽ (!start || !stop)
+			തുടരുക;
+		എങ്കിൽ (stop <= start)
+			തിരികെ -EINVAL;
 
-		if (name)
+		എങ്കിൽ (name)
 			*name = start;
-		if (namesz)
+		എങ്കിൽ (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		എങ്കിൽ (sep) {
+			എങ്കിൽ (മൂല്യം)
+				*മൂല്യം = sep + 1;
+			എങ്കിൽ (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		തിരികെ 0;
 	}
 
-	return 1;				/* end of optstr */
+	തിരികെ 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+പൂർണ്ണസംഖ്യ ul_optstr_is_valid(സ്ഥിരം അക്ഷരം *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	പൂർണ്ണസംഖ്യ rc;
+	അക്ഷരം *p = (അക്ഷരം *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	ആകുമ്പോൾ ((rc = ul_optstr_next(&p, ശൂന്യ, ശൂന്യ, ശൂന്യ, ശൂന്യ)) == 0);
+	തിരികെ rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+അക്ഷരം *ul_optstr_get_മൂല്യം(സ്ഥിരം അക്ഷരം *optstr, സ്ഥിരം അക്ഷരം *താക്കോൽ)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	അക്ഷരം *name = ശൂന്യ, *മൂല്യം = ശൂന്യ;
+	അക്ഷരം *p = (അക്ഷരം *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	എങ്കിൽ (!optstr || !താക്കോൽ || !*താക്കോൽ)
+		തിരികെ ശൂന്യ;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = strlen(താക്കോൽ);
+	ആകുമ്പോൾ (ul_optstr_next(&p, &name, &namesz, &മൂല്യം, &valsz) == 0) {
+		എങ്കിൽ (namesz != sz || !valsz)
+			തുടരുക;
+		എങ്കിൽ (strncmp(name, താക്കോൽ, namesz) == 0)
+			തിരികെ strndup(മൂല്യം, valsz);
 	}
-	return NULL;
+	തിരികെ ശൂന്യ;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(അക്ഷരം *str)
 {
 	size_t len;
-	char q;
+	അക്ഷരം q;
 
-	if (!str || !*str)
-		return 0;
+	എങ്കിൽ (!str || !*str)
+		തിരികെ 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	എങ്കിൽ ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		തിരികെ len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	തിരികെ len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+ഘടന testS {
+	അക്ഷരം *name;
+	അക്ഷരം *മൂല്യം;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_strdup_to_member(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	struct testS *xx;
+	ഘടന testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 3)
+		തിരികെ EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = calloc(1, വലുപ്പം(*xx));
+	എങ്കിൽ (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, മൂല്യം, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	എങ്കിൽ (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->മൂല്യം, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	printf("1: '%s', 2: '%s'\n", xx->name, xx->മൂല്യം);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	സ്വതന്ത്രം(xx->name);
+	സ്വതന്ത്രം(xx->മൂല്യം);
+	സ്വതന്ത്രം(xx);
+	തിരികെ EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_strutils_sizes(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	അക്ഷരം *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 2)
+		തിരികെ EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	എങ്കിൽ (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1444,52 +1444,52 @@ static int test_strutils_sizes(int argc, char *argv[])
 				    SIZE_DECIMAL_2DIGITS, size);
 
 	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	സ്വതന്ത്രം(hum1);
+	സ്വതന്ത്രം(hum2);
+	സ്വതന്ത്രം(hum3);
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_strutils_cmp_paths(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	പൂർണ്ണസംഖ്യ rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 3)
+		തിരികെ EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_strutils_path_is_within(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	int rc;
+	പൂർണ്ണസംഖ്യ rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 3)
+		തിരികെ EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_strutils_normalize(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	unsigned char *src, *dst, *org;
+	unsigned അക്ഷരം *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 2)
+		തിരികെ EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
+	org = (unsigned അക്ഷരം *) strdup(argv[1]);
+	src = (unsigned അക്ഷരം *) strdup((അക്ഷരം *) org);
+	len = strlen((അക്ഷരം *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	എങ്കിൽ (!org || !src || !dst)
+		പോകുക done;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
@@ -1500,136 +1500,136 @@ static int test_strutils_normalize(int argc, char *argv[])
 	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
 done:
-	free(src);
-	free(dst);
-	free(org);
+	സ്വതന്ത്രം(src);
+	സ്വതന്ത്രം(dst);
+	സ്വതന്ത്രം(org);
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+സ്ഥിതം പൂർണ്ണസംഖ്യ test_strutils_cstrcasecmp(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	char *a, *b;
+	അക്ഷരം *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	എങ്കിൽ (argc < 3)
+		തിരികെ EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	എങ്കിൽ (!a || !b)
+		തിരികെ EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	തിരികെ EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+പൂർണ്ണസംഖ്യ പ്രധാന(പൂർണ്ണസംഖ്യ argc, അക്ഷരം *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	എങ്കിൽ (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		തിരികെ test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						ശൂന്യ));
+		തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		എങ്കിൽ (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		തിരികെ test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		തിരികെ test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		തിരികെ test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		തിരികെ test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		തിരികെ test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		അക്ഷരം *buf = "abc\0Y\0\0xyz\0X";
+		അക്ഷരം *end = buf + 12;
+		അക്ഷരം *p = buf;
 
-		do {
+		ചെയ്യുക {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} ആകുമ്പോൾ ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		തിരികെ EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		അക്ഷരം *name = ശൂന്യ, *val = ശൂന്യ;
+		അക്ഷരം *p = argv[2];
+		പൂർണ്ണസംഖ്യ rc;
 
-		if (!ul_optstr_is_valid(p))
+		എങ്കിൽ (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		ആകുമ്പോൾ ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (പൂർണ്ണസംഖ്യ) namesz, name,
+						   (പൂർണ്ണസംഖ്യ) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		എങ്കിൽ (rc == 1)
+			തിരികെ EXIT_SUCCESS;
+	} അല്ലെങ്കിൽ എങ്കിൽ (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		അക്ഷരം *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		എങ്കിൽ (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		സ്വതന്ത്രം(unquoted);
+		തിരികെ EXIT_SUCCESS;
 
-	} else {
+	} അല്ലെങ്കിൽ {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	തിരികെ EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */
