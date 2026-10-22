@@ -2,141 +2,141 @@
  * No copyright is claimed. This code is in the public domain; do with
  * it what you wish.
  */
-#include <stdlib.h>
-#include <assert.h>
-#include <unistd.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <assert.h>
+#अन्तर्भाव <unistd.h>
 
-#include "c.h"
-#include "pwdutils.h"
-#include "xalloc.h"
-#include "strutils.h"
+#अन्तर्भाव "c.h"
+#अन्तर्भाव "pwdutils.h"
+#अन्तर्भाव "xalloc.h"
+#अन्तर्भाव "strutils.h"
 
-struct passwd *xgetpwuid(uid_t uid, char **pwdbuf)
+संरचना passwd *xgetpwuid(uid_t uid, वर्ण **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	संरचना passwd *pwd = रिक्त, *res = रिक्त;
+	पूर्णाङ्क rc;
 
-	assert(pwdbuf);
+	प्रतिज्ञा(pwdbuf);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, परिमाण(संरचना passwd));
 
-	errno = 0;
+	त्रुटि_सं = 0;
 	rc = getpwuid_r(uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	if (rc != 0) {
-		errno = rc;
-		goto failed;
+	यदि (rc != 0) {
+		त्रुटि_सं = rc;
+		गच्छ failed;
 	}
-	if (!res) {
-		errno = EINVAL;
-		goto failed;
+	यदि (!res) {
+		त्रुटि_सं = EINVAL;
+		गच्छ failed;
 	}
-	return pwd;
+	फर्काऊ pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	मुक्त(pwd);
+	मुक्त(*pwdbuf);
+	फर्काऊ रिक्त;
 }
 
 /* Returns allocated passwd and allocated pwdbuf for the username or UID passed
  * as @str. In case of error returns NULL and sets errno, for unknown user it
  * sets errno to EINVAL.
  */
-struct passwd *xgetuserpw(const char *str ,char **pwdbuf)
+संरचना passwd *xgetuserpw(अचर वर्ण *str ,वर्ण **pwdbuf)
 {
-	struct passwd *pwd = NULL, *res = NULL;
-	int rc;
+	संरचना passwd *pwd = रिक्त, *res = रिक्त;
+	पूर्णाङ्क rc;
 	uint64_t uid;
 
-	assert(pwdbuf);
-	assert(str);
+	प्रतिज्ञा(pwdbuf);
+	प्रतिज्ञा(str);
 
 	*pwdbuf = xmalloc(UL_GETPW_BUFSIZ);
-	pwd = xcalloc(1, sizeof(struct passwd));
+	pwd = xcalloc(1, परिमाण(संरचना passwd));
 
 	/* is @str a UID ? */
 	rc = ul_strtou64(str, &uid, 10);
-	if (rc == -ERANGE) {
-		errno = ERANGE;
-		goto failed;
+	यदि (rc == -दुस्फल) {
+		त्रुटि_सं = दुस्फल;
+		गच्छ failed;
 	}
 	/* @str is an invalid number, let's assume it is the username */
-	if (rc == -EINVAL) {
+	यदि (rc == -EINVAL) {
 		rc = getpwnam_r(str, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (uid > MAX_OF_UINT_TYPE(uid_t)) {
-			errno = ERANGE;
-			goto failed;
+	} अन्यथा {
+		यदि (uid > MAX_OF_UINT_TYPE(uid_t)) {
+			त्रुटि_सं = दुस्फल;
+			गच्छ failed;
 		}
 		rc = getpwuid_r((uid_t)uid, pwd, *pwdbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
-		errno = rc;
-		goto failed;
+	यदि (rc != 0) {
+		त्रुटि_सं = rc;
+		गच्छ failed;
 	}
-	if (!res) {
-		errno = EINVAL;
-		goto failed;
+	यदि (!res) {
+		त्रुटि_सं = EINVAL;
+		गच्छ failed;
 	}
-	return pwd;
+	फर्काऊ pwd;
 failed:
-	free(pwd);
-	free(*pwdbuf);
-	return NULL;
+	मुक्त(pwd);
+	मुक्त(*pwdbuf);
+	फर्काऊ रिक्त;
 }
 
 /* Returns allocated group and allocated grpbuf for the group name or GID passed
  * as @str. In case of error returns NULL and sets errno, for unknown group it
  * sets errno to EINVAL.
  */
-struct group *xgetgroup(const char *str, char **grpbuf)
+संरचना group *xgetgroup(अचर वर्ण *str, वर्ण **grpbuf)
 {
-	struct group *grp = NULL, *res = NULL;
-	int rc;
+	संरचना group *grp = रिक्त, *res = रिक्त;
+	पूर्णाङ्क rc;
 	uint64_t gid;
 
-	assert(grpbuf);
-	assert(str);
+	प्रतिज्ञा(grpbuf);
+	प्रतिज्ञा(str);
 
 	*grpbuf = xmalloc(UL_GETPW_BUFSIZ);
-	grp = xcalloc(1, sizeof(struct group));
+	grp = xcalloc(1, परिमाण(संरचना group));
 
 	/* is @str a GID ? */
 	rc = ul_strtou64(str, &gid, 10);
-	if (rc == -ERANGE) {
-		errno = ERANGE;
-		goto failed;
+	यदि (rc == -दुस्फल) {
+		त्रुटि_सं = दुस्फल;
+		गच्छ failed;
 	}
 	/* @str is an invalid number, let's assume it is the group name */
-	if (rc == -EINVAL) {
+	यदि (rc == -EINVAL) {
 		rc = getgrnam_r(str, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
-	} else {
-		if (gid > MAX_OF_UINT_TYPE(gid_t)) {
-			errno = ERANGE;
-			goto failed;
+	} अन्यथा {
+		यदि (gid > MAX_OF_UINT_TYPE(gid_t)) {
+			त्रुटि_सं = दुस्फल;
+			गच्छ failed;
 		}
 		rc = getgrgid_r((gid_t)gid, grp, *grpbuf, UL_GETPW_BUFSIZ, &res);
 	}
 
-	if (rc != 0) {
-		errno = rc;
-		goto failed;
+	यदि (rc != 0) {
+		त्रुटि_सं = rc;
+		गच्छ failed;
 	}
-	if (!res) {
-		errno = EINVAL;
-		goto failed;
+	यदि (!res) {
+		त्रुटि_सं = EINVAL;
+		गच्छ failed;
 	}
-	return grp;
+	फर्काऊ grp;
 failed:
-	free(grp);
-	free(*grpbuf);
-	return NULL;
+	मुक्त(grp);
+	मुक्त(*grpbuf);
+	फर्काऊ रिक्त;
 }
 
-char *xgetlogin(void)
+वर्ण *xgetlogin(शून्य)
 {
-	struct passwd *pw = NULL;
+	संरचना passwd *pw = रिक्त;
 	uid_t ruid;
 
 	/* GNU Hurd implementation has an extension where a process can exist in a
@@ -150,15 +150,15 @@ char *xgetlogin(void)
 	 * The same implementation is useful for other systems, since getlogin(3)
 	 * shouldn't be used as actual identification.
 	 */
-	errno = 0;
+	त्रुटि_सं = 0;
 	ruid = getuid();
 
-	if (errno == 0)
+	यदि (त्रुटि_सं == 0)
 		pw = getpwuid(ruid);
-	if (pw && pw->pw_name && *pw->pw_name)
-		return xstrdup(pw->pw_name);
+	यदि (pw && pw->pw_name && *pw->pw_name)
+		फर्काऊ xstrdup(pw->pw_name);
 
-	return NULL;
+	फर्काऊ रिक्त;
 }
 
 /*
@@ -169,41 +169,41 @@ char *xgetlogin(void)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct group *ul_getgrp_str(const char *str, gid_t *result)
+संरचना group *ul_getgrp_str(अचर वर्ण *str, gid_t *result)
 {
-	int rc;
-	uint64_t num = 0;
-	struct group *gr;
+	पूर्णाङ्क rc;
+	uint64_t अङ्क = 0;
+	संरचना group *gr;
 
-	if (result)
+	यदि (result)
 		*result = (gid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(gid_t)) {
-		errno = ERANGE;
-		return NULL;
+	rc = ul_strtou64(str, &अङ्क, 10);
+	यदि (rc == -दुस्फल || अङ्क > MAX_OF_UINT_TYPE(gid_t)) {
+		त्रुटि_सं = दुस्फल;
+		फर्काऊ रिक्त;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
-		errno = 0;
+	यदि (rc == -EINVAL) {
+		त्रुटि_सं = 0;
 		gr = getgrnam(str);
-		if (gr && result)
+		यदि (gr && result)
 			*result = gr->gr_gid;
-		else if (!gr && !errno)
-			errno = EINVAL;
-		return gr;
+		अन्यथा यदि (!gr && !त्रुटि_सं)
+			त्रुटि_सं = EINVAL;
+		फर्काऊ gr;
 	}
 
-	if (result)
-		*result = (gid_t) num;
+	यदि (result)
+		*result = (gid_t) अङ्क;
 
-	errno = 0;
-	gr = getgrgid((gid_t) num);
-	if (!gr && !errno)
-		errno = EINVAL;
+	त्रुटि_सं = 0;
+	gr = getgrgid((gid_t) अङ्क);
+	यदि (!gr && !त्रुटि_सं)
+		त्रुटि_सं = EINVAL;
 
-	return gr;
+	फर्काऊ gr;
 }
 
 /*
@@ -214,69 +214,69 @@ struct group *ul_getgrp_str(const char *str, gid_t *result)
  *
  * On failure NULL is returned and errno is set to indicate the error.
  */
-struct passwd *ul_getuserpw_str(const char *str, uid_t *result)
+संरचना passwd *ul_getuserpw_str(अचर वर्ण *str, uid_t *result)
 {
-	int rc;
-	uint64_t num = 0;
-	struct passwd *pw;
+	पूर्णाङ्क rc;
+	uint64_t अङ्क = 0;
+	संरचना passwd *pw;
 
-	if (result)
+	यदि (result)
 		*result = (uid_t) -1;
 
-	rc = ul_strtou64(str, &num, 10);
-	if (rc == -ERANGE || num > MAX_OF_UINT_TYPE(uid_t)) {
-		errno = ERANGE;
-		return NULL;
+	rc = ul_strtou64(str, &अङ्क, 10);
+	यदि (rc == -दुस्फल || अङ्क > MAX_OF_UINT_TYPE(uid_t)) {
+		त्रुटि_सं = दुस्फल;
+		फर्काऊ रिक्त;
 	}
 
 	/* maybe an actual name */
-	if (rc == -EINVAL) {
-		errno = 0;
+	यदि (rc == -EINVAL) {
+		त्रुटि_सं = 0;
 		pw = getpwnam(str);
-		if (pw && result)
+		यदि (pw && result)
 			*result = pw->pw_uid;
-		else if (!pw && !errno)
-			errno = EINVAL;
-		return pw;
+		अन्यथा यदि (!pw && !त्रुटि_सं)
+			त्रुटि_सं = EINVAL;
+		फर्काऊ pw;
 	}
 
-	if (result)
-		*result = (uid_t) num;
+	यदि (result)
+		*result = (uid_t) अङ्क;
 
-	errno = 0;
-	pw = getpwuid((uid_t) num);
-	if (!pw && !errno)
-		errno = EINVAL;
+	त्रुटि_सं = 0;
+	pw = getpwuid((uid_t) अङ्क);
+	यदि (!pw && !त्रुटि_सं)
+		त्रुटि_सं = EINVAL;
 
-	return pw;
+	फर्काऊ pw;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण *argv[])
 {
-	char *buf = NULL;
-	struct passwd *pwd = NULL;
+	वर्ण *buf = रिक्त;
+	संरचना passwd *pwd = रिक्त;
 
-	if (argc != 2) {
-		fprintf(stderr, "usage: %s <username>\n", argv[0]);
-		return EXIT_FAILURE;
+	यदि (argc != 2) {
+		ख_लिखो(मानक_त्रुटि, "usage: %s <username>\n", argv[0]);
+		फर्काऊ निकास_त्रुटि;
 	}
 
 	pwd = xgetuserpw(argv[1], &buf);
-	if (!pwd)
-		err(EXIT_FAILURE, "failed to get %s pwd entry", argv[1]);
+	यदि (!pwd)
+		err(निकास_त्रुटि, "failed to get %s pwd entry", argv[1]);
 
-	printf("Username: %s\n", pwd->pw_name);
-	printf("UID:      %u\n", pwd->pw_uid);
-	printf("HOME:     %s\n", pwd->pw_dir);
-	printf("GECO:     %s\n", pwd->pw_gecos);
+	म_लिखो("Username: %s\n", pwd->pw_name);
+	म_लिखो("UID:      %u\n", pwd->pw_uid);
+	म_लिखो("HOME:     %s\n", pwd->pw_dir);
+	म_लिखो("GECO:     %s\n", pwd->pw_gecos);
 
-	free(pwd);
-	free(buf);
+	मुक्त(pwd);
+	मुक्त(buf);
 
-	printf("Current:  %s\n", (buf = xgetlogin()));
-	free(buf);
+	म_लिखो("Current:  %s\n", (buf = xgetlogin()));
+	मुक्त(buf);
 
-	return EXIT_SUCCESS;
+	फर्काऊ निकास_सफल;
 }
 #endif /* TEST_PROGRAM */

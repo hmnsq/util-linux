@@ -4,13 +4,13 @@
  *
  * Authors: Christian Goeschel Ndjomouo <cgoesc2@wgu.edu> [2025]
  */
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <errno.h>
+#अन्तर्भाव <stdlib.h>
+#अन्तर्भाव <sys/stat.h>
+#अन्तर्भाव <errno.h>
 
-#include "nls.h"
-#include "strutils.h"
-#include "pidutils.h"
+#अन्तर्भाव "nls.h"
+#अन्तर्भाव "strutils.h"
+#अन्तर्भाव "pidutils.h"
 
 /*
  * ul_parse_pid_str() - Parse a string and store the found pid and pidfd inode.
@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+पूर्णाङ्क ul_parse_pid_str(वर्ण *pidstr, pid_t *pid_अङ्क, uint64_t *pfd_ino, पूर्णाङ्क flags)
 {
-	int rc;
-	char *end = NULL;
-	int64_t num = 0;
+	पूर्णाङ्क rc;
+	वर्ण *end = रिक्त;
+	int64_t अङ्क = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	यदि (!pidstr || !*pidstr || !pid_अङ्क)
+		फर्काऊ -(त्रुटि_सं = EINVAL);
 
-	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	अङ्क = strtoimax(pidstr, &end, 10);
+	यदि (अङ्क == 0 && end == pidstr)
+		फर्काऊ -(त्रुटि_सं = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	यदि (त्रुटि_सं == दुस्फल || अङ्क < SINT_MIN(pid_t) || अङ्क > SINT_MAX(pid_t))
+		फर्काऊ -(त्रुटि_सं = दुस्फल);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	यदि (अङ्क == 0 && !(flags & UL_PID_ZERO))
+		फर्काऊ -(त्रुटि_सं = दुस्फल);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	यदि (अङ्क < 0 && !(flags & UL_PID_NEGATIVE))
+		फर्काऊ -(त्रुटि_सं = दुस्फल);
 
-	*pid_num = (pid_t) num;
+	*pid_अङ्क = (pid_t) अङ्क;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	यदि (*end == ':' && pfd_ino && अङ्क > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		यदि (rc < 0)
+			फर्काऊ rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		यदि (*pfd_ino == 0)
+			फर्काऊ -(त्रुटि_सं = दुस्फल);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	यदि (end && *end != '\0')
+		फर्काऊ -(त्रुटि_सं = EINVAL);
+	फर्काऊ 0;
 }
 
 /*
@@ -82,70 +82,70 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+शून्य ul_parse_pid_str_or_err(वर्ण *pidstr, pid_t *pid_अङ्क, uint64_t *pfd_ino, पूर्णाङ्क flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
-		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
+	यदि (ul_parse_pid_str(pidstr, pid_अङ्क, pfd_ino, flags) < 0) {
+		err(निकास_त्रुटि, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
 
 
 #ifdef TEST_PROGRAM_PARSEPID
 
-#include <getopt.h>
+#अन्तर्भाव <getopt.h>
 
-static void __attribute__((__noreturn__)) usage(void)
+स्थिर शून्य __attribute__((__noreturn__)) usage(शून्य)
 {
-	fprintf(stdout, " %s [options] <pidstr>\n\n", program_invocation_short_name);
-	fputs(" -z, --zero         allow zero (0) as value for <pidstr>\n", stdout);
-	fputs(" -n, --negative     allow negative number as value for <pidstr>\n", stdout);
+	ख_लिखो(मानक_निकास, " %s [options] <pidstr>\n\n", program_invocation_short_name);
+	ख_माला_दो(" -z, --zero         allow zero (0) as value for <pidstr>\n", मानक_निकास);
+	ख_माला_दो(" -n, --negative     allow negative number as value for <pidstr>\n", मानक_निकास);
 
-	exit(EXIT_SUCCESS);
+	निकास(निकास_सफल);
 }
 
-int main(int argc, char **argv)
+पूर्णाङ्क main(पूर्णाङ्क argc, वर्ण **argv)
 {
-	int c, flags = 0, rc = 0;
+	पूर्णाङ्क c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
-	pid_t pid_num = 0;
-	char *str = NULL;
+	pid_t pid_अङ्क = 0;
+	वर्ण *str = रिक्त;
 
-	static const struct option longopts[] = {
-		{ "zero",	0, NULL, 'z' },
-		{ "negative",	0, NULL, 'n' },
-		{ "help",       0, NULL, 'h' },
-		{ NULL, 0, NULL, 0 },
+	स्थिर अचर संरचना option longopts[] = {
+		{ "zero",	0, रिक्त, 'z' },
+		{ "negative",	0, रिक्त, 'n' },
+		{ "help",       0, रिक्त, 'h' },
+		{ रिक्त, 0, रिक्त, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
-		switch(c) {
-		case 'n':
+	जबसम्म((c = getopt_long(argc, argv, "nhz", longopts, रिक्त)) != -1) {
+		विकल्प(c) {
+		पक्ष 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			रोक;
+		पक्ष 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			रोक;
+		पक्ष 'h':
 			usage();
-			break;
-		default:
-			err(EXIT_FAILURE, "try --help");
+			रोक;
+		स्वभाव:
+			err(निकास_त्रुटि, "try --help");
 		}
 	}
 
-	if (optind == argc)
-		errx(EXIT_FAILURE, "missing <pidstr> argument");
+	यदि (optind == argc)
+		errx(निकास_त्रुटि, "missing <pidstr> argument");
 	str = argv[optind];
 
-	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
-		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
+	rc = ul_parse_pid_str(str, &pid_अङ्क, &pidfd_ino, flags);
+	यदि (rc)
+		err(निकास_त्रुटि, "failed to parse PID '%s'", str);
 
-	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
-		printf("inode: %"PRIu64"\n", pidfd_ino);
+	म_लिखो("PID: %d\n", pid_अङ्क);
+	यदि (pidfd_ino)
+		म_लिखो("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	फर्काऊ निकास_सफल;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */
