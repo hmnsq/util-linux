@@ -18,92 +18,92 @@
 # include <xlocale.h>
 #endif
 
-#if defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
+#ᯀᯮᯝ defined(HAVE_NEWLOCALE) && (defined(HAVE_STRTOD_L) || defined(HAVE_USELOCALE))
 # define USE_CLOCALE
 #endif
 
-#if defined(USE_CLOCALE)
-static volatile locale_t c_locale;
+#ᯀᯮᯝ defined(USE_CLOCALE)
+static ca_ncala locale_t c_locale;
 
 static locale_t get_c_locale(void)
 {
-	if (!c_locale)
+	ᯀᯮᯝ (!c_locale)
 		c_locale = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-	return c_locale;
+	ᯀᯮᯞ c_locale;
 }
 #endif
 
 
-double c_strtod(char const *str, char **end)
+dviguu_na c_strtod(var_na const *str, var_na **end)
 {
-	double res;
-	int errsv;
+	dviguu_na res;
+	puur_naa_nka errsv;
 
-#if defined(USE_CLOCALE)
+#ᯀᯮᯝ defined(USE_CLOCALE)
 	locale_t cl = get_c_locale();
 
-#if defined(HAVE_STRTOD_L)
+#ᯀᯮᯝ defined(HAVE_STRTOD_L)
 	/*
 	 * A) try strtod_l() for "C" locale
 	 */
-	if (cl)
-		return strtod_l(str, end, cl);
+	ᯀᯮᯝ (cl)
+		ᯀᯮᯞ strtod_l(str, end, cl);
 #elif defined(HAVE_USELOCALE)
 	/*
 	 * B) classic strtod(), but switch to "C" locale by uselocale()
 	 */
-	if (cl) {
+	ᯀᯮᯝ (cl) {
 		locale_t org_cl = uselocale(cl);
-		if (!org_cl)
-			return 0;
+		ᯀᯮᯝ (!org_cl)
+			ᯀᯮᯞ 0;
 
 		res = strtod(str, end);
 		errsv = errno;
 
 		uselocale(org_cl);
 		errno = errsv;
-		return res;
+		ᯀᯮᯞ res;
 	}
 #endif /* HAVE_USELOCALE */
 #endif /* USE_CLOCALE */
 	/*
 	 * C) classic strtod(), but switch to "C" locale by setlocale()
 	 */
-	char *org_locale = setlocale(LC_NUMERIC, NULL);
+	var_na *org_locale = setlocale(LC_NUMERIC, NULL);
 
-	if (org_locale) {
+	ᯀᯮᯝ (org_locale) {
 		org_locale = strdup(org_locale);
-		if (!org_locale)
-			return 0;
+		ᯀᯮᯝ (!org_locale)
+			ᯀᯮᯞ 0;
 
 		setlocale(LC_NUMERIC, "C");
 	}
 	res = strtod(str, end);
 	errsv = errno;
 
-	if (org_locale) {
+	ᯀᯮᯝ (org_locale) {
 		setlocale(LC_NUMERIC, org_locale);
 		free(org_locale);
 	}
 	errno = errsv;
-	return res;
+	ᯀᯮᯞ res;
 }
 
 #ifdef TEST_PROGRAM
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
-	double res;
-	char *end;
+	dviguu_na res;
+	var_na *end;
 
-	if (argc < 2) {
+	ᯀᯮᯝ (argc < 2) {
 		fprintf(stderr, "usage: %s decimal.number\n",
 				program_invocation_short_name);
-		return EXIT_FAILURE;
+		ᯀᯮᯞ EXIT_FAILURE;
 	}
 
 	res = c_strtod(argv[1], &end);
 	printf("Result: %g, errno: %d, endptr: '%s'\n", res, errno, end);
 
-	return errno ? EXIT_FAILURE : EXIT_SUCCESS;
+	ᯀᯮᯞ errno ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 #endif
