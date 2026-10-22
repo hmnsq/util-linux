@@ -12,36 +12,36 @@
 #include "widechar.h"
 #include "idcache.h"
 
-struct identry *get_id(struct idcache *ic, unsigned long int id)
+struct identry *get_id(struct idcache *ic, unsigned long цяло id)
 {
 	struct identry *ent;
 
-	if (!ic)
-		return NULL;
+	ако (!ic)
+		върни NULL;
 
-	for (ent = ic->ent; ent; ent = ent->next) {
-		if (ent->id == id)
-			return ent;
+	за (ent = ic->ent; ent; ent = ent->next) {
+		ако (ent->id == id)
+			върни ent;
 	}
 
-	return NULL;
+	върни NULL;
 }
 
 struct idcache *new_idcache(void)
 {
-	return calloc(1, sizeof(struct idcache));
+	върни calloc(1, sizeof(struct idcache));
 }
 
 void free_idcache(struct idcache *ic)
 {
 	struct identry *ent;
 
-	if (!ic)
-		return;
+	ако (!ic)
+		върни;
 
 	ent = ic->ent;
 
-	while (ent) {
+	докато (ent) {
 		struct identry *next = ent->next;
 		free(ent->name);
 		free(ent);
@@ -51,73 +51,73 @@ void free_idcache(struct idcache *ic)
 	free(ic);
 }
 
-static void add_id(struct idcache *ic, char *name, unsigned long int id)
+static void add_id(struct idcache *ic, char *name, unsigned long цяло id)
 {
 	struct identry *ent, *x;
-	int w = 0;
+	цяло w = 0;
 
-	if (!ic)
-		return;
+	ако (!ic)
+		върни;
 
 	ent = calloc(1, sizeof(struct identry));
-	if (!ent)
-		return;
+	ако (!ent)
+		върни;
 	ent->id = id;
 
-	if (name) {
+	ако (name) {
 #ifdef HAVE_WIDECHAR
 		wchar_t wc[LOGIN_NAME_MAX + 1];
 
-		if (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
+		ако (mbstowcs(wc, name, LOGIN_NAME_MAX) > 0) {
 			wc[LOGIN_NAME_MAX] = '\0';
 			w = wcswidth(wc, LOGIN_NAME_MAX);
 		}
-		else
+		иначе
 #endif
 			w = strlen(name);
 	}
 
 	/* note, we ignore names with non-printable widechars */
-	if (w > 0) {
+	ако (w > 0) {
 		ent->name = strdup(name);
-		if (!ent->name) {
+		ако (!ent->name) {
 			free(ent);
-			return;
+			върни;
 		}
-	} else {
-		if (asprintf(&ent->name, "%lu", id) < 0) {
+	} иначе {
+		ако (asprintf(&ent->name, "%lu", id) < 0) {
 			free(ent);
-			return;
+			върни;
 		}
 	}
 
-	for (x = ic->ent; x && x->next; x = x->next);
+	за (x = ic->ent; x && x->next; x = x->next);
 
-	if (x)
+	ако (x)
 		x->next = ent;
-	else
+	иначе
 		ic->ent = ent;
 
-	if (w <= 0)
+	ако (w <= 0)
 		w = ent->name ? strlen(ent->name) : 0;
 	ic->width = ic->width < w ? w : ic->width;
 }
 
-void add_uid(struct idcache *cache, unsigned long int id)
+void add_uid(struct idcache *cache, unsigned long цяло id)
 {
 	struct identry *ent = get_id(cache, id);
 
-	if (!ent) {
+	ако (!ent) {
 		struct passwd *pw = getpwuid((uid_t) id);
 		add_id(cache, pw ? pw->pw_name : NULL, id);
 	}
 }
 
-void add_gid(struct idcache *cache, unsigned long int id)
+void add_gid(struct idcache *cache, unsigned long цяло id)
 {
 	struct identry *ent = get_id(cache, id);
 
-	if (!ent) {
+	ако (!ent) {
 		struct group *gr = getgrgid((gid_t) id);
 		add_id(cache, gr ? gr->gr_name : NULL, id);
 	}

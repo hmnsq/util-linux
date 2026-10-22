@@ -26,14 +26,14 @@
  *	}
  * }
  */
-static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t size)
+static void fputs_quoted_case_json(const char *data, FILE *out, цяло dir, size_t size)
 {
 	const char *p;
 
 	fputc('"', out);
-	for (p = data; p && *p && (!size || p < data + size); p++) {
+	за (p = data; p && *p && (!size || p < data + size); p++) {
 
-		const unsigned int c = (unsigned int) *p;
+		const unsigned цяло c = (unsigned цяло) *p;
 
 		/* From http://www.json.org
 		 *
@@ -43,23 +43,23 @@ static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t 
 		 * Note that single-quotes and forward slashes, while they're
 		 * in the JSON spec, don't break double-quoted strings.
 		 */
-		if (c == '"' || c == '\\') {
+		ако (c == '"' || c == '\\') {
 			fputc('\\', out);
 			fputc(c, out);
 			continue;
 		}
 
 		/* All non-control characters OK; do the case swap as required. */
-		if (c >= 0x20) {
+		ако (c >= 0x20) {
 			/*
 			 * Don't use locale sensitive ctype.h functions for regular
 			 * ASCII chars, because for example with Turkish locale
 			 * (aka LANG=tr_TR.UTF-8) toupper('I') returns 'I'.
 			 */
-			if (c <= 127)
+			ако (c <= 127)
 				fputc(dir ==  1 ? c_toupper(c) :
 				      dir == -1 ? c_tolower(c) : *p, out);
-			else
+			иначе
 				fputc(dir ==  1 ? toupper(c) :
 				      dir == -1 ? tolower(c) : *p, out);
 			continue;
@@ -102,7 +102,7 @@ static void fputs_quoted_case_json(const char *data, FILE *out, int dir, size_t 
 #define fputs_quoted_json_upper(_d, _o) fputs_quoted_case_json(_d, _o, 1, 0)
 #define fputs_quoted_json_lower(_d, _o) fputs_quoted_case_json(_d, _o, -1, 0)
 
-void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json_format json_format)
+void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, цяло indent, enum ul_json_format json_format)
 {
 	fmt->out = out;
 	fmt->indent = indent;
@@ -110,16 +110,16 @@ void ul_jsonwrt_init(struct ul_jsonwrt *fmt, FILE *out, int indent, enum ul_json
 	fmt->after_close = 0;
 }
 
-int ul_jsonwrt_is_ready(struct ul_jsonwrt *fmt)
+цяло ul_jsonwrt_is_ready(struct ul_jsonwrt *fmt)
 {
-	return fmt->out == NULL ? 0 : 1;
+	върни fmt->out == NULL ? 0 : 1;
 }
 
 void ul_jsonwrt_indent(struct ul_jsonwrt *fmt)
 {
-	int i;
+	цяло i;
 
-	for (i = 0; i < fmt->indent; i++)
+	за (i = 0; i < fmt->indent; i++)
 		fputs("   ", fmt->out);
 }
 
@@ -128,11 +128,11 @@ static void print_name(struct ul_jsonwrt *fmt, const char *name)
 	/* Values on the top level are not members of an array or object, so
 	 * they are never comma separated; ul_jsonwrt_close() has already
 	 * terminated the previous one by a newline. */
-	if (fmt->after_close && (fmt->indent > 0 || name)) {
-		if (fmt->json_format == UL_JSON_LINE
+	ако (fmt->after_close && (fmt->indent > 0 || name)) {
+		ако (fmt->json_format == UL_JSON_LINE
 		    || fmt->json_format == UL_JSON_COMPACT)
 			fputs(",", fmt->out);
-		else
+		иначе
 			fputs(name ? ",\n" : ",", fmt->out);
 	}
 
@@ -142,15 +142,15 @@ static void print_name(struct ul_jsonwrt *fmt, const char *name)
 		break;
 	case UL_JSON_PRETTY:
 	default:
-		if (name || !fmt->after_close)
+		ако (name || !fmt->after_close)
 			ul_jsonwrt_indent(fmt);
 		break;
 	}
-	if (name)
+	ако (name)
 		fputs_quoted_json_lower(name, fmt->out);
 }
 
-void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
+void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, цяло type)
 {
 	const char *s = "";
 
@@ -158,34 +158,34 @@ void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
 
 	switch (type) {
 	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_LINE)
+		ако (fmt->json_format == UL_JSON_LINE)
 			s = "{";
-		else if (fmt->json_format == UL_JSON_COMPACT) {
+		иначе ако (fmt->json_format == UL_JSON_COMPACT) {
 			/* At nesting depth 2, put the object opens on a new line
 			 * for readability; otherwise keep fully compact (no newline). */
-			if (fmt->indent == 2)
+			ако (fmt->indent == 2)
 				s = name ? ":{" : "\n{";
-			else
+			иначе
 				s = "{";
-		} else
+		} иначе
 			s = name ? ": {\n" : "{\n";
 		fmt->indent++;
 		break;
 	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_LINE)
+		ако (fmt->json_format == UL_JSON_LINE)
 			s = "[";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		иначе ако (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":[" : "[";
-		else
+		иначе
 			s = name ? ": [\n" : "[\n";
 		fmt->indent++;
 		break;
 	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_LINE)
+		ако (fmt->json_format == UL_JSON_LINE)
 			s = name ? ":" : "";
-		else if (fmt->json_format == UL_JSON_COMPACT)
+		иначе ако (fmt->json_format == UL_JSON_COMPACT)
 			s = name ? ":" : "";
-		else
+		иначе
 			s = name ? ": " : " ";
 		break;
 	}
@@ -193,7 +193,7 @@ void ul_jsonwrt_open(struct ul_jsonwrt *fmt, const char *name, int type)
 	fmt->after_close = 0;
 }
 
-void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
+void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, цяло type)
 {
 	const char *s = "";
 
@@ -201,21 +201,21 @@ void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
 
 	switch (type) {
 	case UL_JSON_OBJECT:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		ако (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": {}" : "{}";
-		else
+		иначе
 			s = name ? ":{}" : "{}";
 		break;
 	case UL_JSON_ARRAY:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		ако (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": []" : "[]";
-		else
+		иначе
 			s = name ? ":[]" : "[]";
 		break;
 	case UL_JSON_VALUE:
-		if (fmt->json_format == UL_JSON_PRETTY)
+		ако (fmt->json_format == UL_JSON_PRETTY)
 			s = name ? ": null" : "null";
-		else
+		иначе
 			s = name ? ":null" : "null";
 		break;
 	}
@@ -223,7 +223,7 @@ void ul_jsonwrt_empty(struct ul_jsonwrt *fmt, const char *name, int type)
 	fmt->after_close = 1;
 }
 
-void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
+void ul_jsonwrt_close(struct ul_jsonwrt *fmt, цяло type)
 {
 	char endchr;
 
@@ -240,15 +240,15 @@ void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
 		break;
 	case UL_JSON_VALUE:
 		fmt->after_close = 1;
-		return;
+		върни;
 	default:
 		fmt->after_close = 1;
-		return;
+		върни;
 	}
 
 	/* In COMPACT, when closing a direct child of root (indent==1),
 	 * insert a newline so the closing bracket starts on its own line. */
-	if (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
+	ако (fmt->json_format == UL_JSON_COMPACT && fmt->indent == 1)
 		fputc('\n', fmt->out);
 
 	switch (fmt->json_format) {
@@ -268,7 +268,7 @@ void ul_jsonwrt_close(struct ul_jsonwrt *fmt, int type)
 	 * between the values (for example libsmartcols does it for every
 	 * scols_table_print_range() call), so the terminator has to be printed
 	 * by the value itself rather than by the next one (see print_name()). */
-	if (fmt->indent == 0)
+	ако (fmt->indent == 0)
 		fputc('\n', fmt->out);
 
 	fmt->after_close = 1;
@@ -284,9 +284,9 @@ void ul_jsonwrt_value_raw(struct ul_jsonwrt *fmt,
 			const char *name, const char *data)
 {
 	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ако (data && *data)
 		fputs(data, fmt->out);
-	else
+	иначе
 		fputs("null", fmt->out);
 	ul_jsonwrt_value_close(fmt);
 }
@@ -295,9 +295,9 @@ void ul_jsonwrt_value_s(struct ul_jsonwrt *fmt,
 			const char *name, const char *data)
 {
 	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ако (data && *data)
 		fputs_quoted_json(data, fmt->out);
-	else
+	иначе
 		fputs("null", fmt->out);
 	ul_jsonwrt_value_close(fmt);
 }
@@ -306,9 +306,9 @@ void ul_jsonwrt_value_s_sized(struct ul_jsonwrt *fmt,
 			      const char *name, const char *data, size_t size)
 {
 	ul_jsonwrt_value_open(fmt, name);
-	if (data && *data)
+	ако (data && *data)
 		fputs_quoted_case_json(data, fmt->out, 0, size);
-	else
+	иначе
 		fputs("null", fmt->out);
 	ul_jsonwrt_value_close(fmt);
 }
@@ -330,7 +330,7 @@ void ul_jsonwrt_value_double(struct ul_jsonwrt *fmt,
 }
 
 void ul_jsonwrt_value_boolean(struct ul_jsonwrt *fmt,
-			const char *name, int data)
+			const char *name, цяло data)
 {
 	ul_jsonwrt_value_open(fmt, name);
 	fputs(data ? "true" : "false", fmt->out);

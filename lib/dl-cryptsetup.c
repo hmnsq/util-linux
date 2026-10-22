@@ -7,7 +7,7 @@
 #include "c.h"
 #include "dl-cryptsetup.h"
 
-#if defined(HAVE_CRYPTSETUP) && defined(USE_DLOPEN_CRYPTSETUP)
+#ако defined(HAVE_CRYPTSETUP) && defined(USE_DLOPEN_CRYPTSETUP)
 
 UL_ELF_NOTE_DLOPEN("cryptsetup",
 		    "Support for dm-verity devices",
@@ -35,15 +35,15 @@ static const struct ul_dlsym ul_cryptsetup_symbols[] =
 	UL_DLSYM( ul_cryptsetup_opers, crypt_deactivate_by_name ),
 };
 
-int ul_dlopen_libcryptsetup(void)
+цяло ul_dlopen_libcryptsetup(void)
 {
 	/* 0 = not tried, 1 = loaded, -1 = failed */
-	static int status = 0;
+	static цяло status = 0;
 	static void *dl = NULL;
-	int flags = RTLD_LAZY | RTLD_LOCAL;
+	цяло flags = RTLD_LAZY | RTLD_LOCAL;
 
-	if (status)
-		return status > 0 ? 0 : -ENOSYS;
+	ако (status)
+		върни status > 0 ? 0 : -ENOSYS;
 
 #ifdef RTLD_NODELETE
 	flags |= RTLD_NODELETE;
@@ -56,7 +56,7 @@ int ul_dlopen_libcryptsetup(void)
 				   ARRAY_SIZE(ul_cryptsetup_symbols),
 				   &ul_cryptsetup, &dl) == 0 ? 1 : -1;
 
-	return status > 0 ? 0 : -ENOSYS;
+	върни status > 0 ? 0 : -ENOSYS;
 }
 
 #endif /* HAVE_CRYPTSETUP && USE_DLOPEN_CRYPTSETUP */

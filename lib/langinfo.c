@@ -15,110 +15,110 @@ char *langinfo_fallback(nl_item item)
 {
 	switch (item) {
 	case CODESET:
-		return "ISO-8859-1";
+		върни "ISO-8859-1";
 	case THOUSEP:
-		return ",";
+		върни ",";
 	case D_T_FMT:
 	case ERA_D_T_FMT:
-		return "%a %b %e %H:%M:%S %Y";
+		върни "%a %b %e %H:%M:%S %Y";
 	case D_FMT:
 	case ERA_D_FMT:
-		return "%m/%d/%y";
+		върни "%m/%d/%y";
 	case T_FMT:
 	case ERA_T_FMT:
-		return "%H:%M:%S";
+		върни "%H:%M:%S";
 	case T_FMT_AMPM:
-		return "%I:%M:%S %p";
+		върни "%I:%M:%S %p";
 	case AM_STR:
-		return "AM";
+		върни "AM";
 	case PM_STR:
-		return "PM";
+		върни "PM";
 	case DAY_1:
-		return "Sunday";
+		върни "Sunday";
 	case DAY_2:
-		return "Monday";
+		върни "Monday";
 	case DAY_3:
-		return "Tuesday";
+		върни "Tuesday";
 	case DAY_4:
-		return "Wednesday";
+		върни "Wednesday";
 	case DAY_5:
-		return "Thursday";
+		върни "Thursday";
 	case DAY_6:
-		return "Friday";
+		върни "Friday";
 	case DAY_7:
-		return "Saturday";
+		върни "Saturday";
 	case ABDAY_1:
-		return "Sun";
+		върни "Sun";
 	case ABDAY_2:
-		return "Mon";
+		върни "Mon";
 	case ABDAY_3:
-		return "Tue";
+		върни "Tue";
 	case ABDAY_4:
-		return "Wed";
+		върни "Wed";
 	case ABDAY_5:
-		return "Thu";
+		върни "Thu";
 	case ABDAY_6:
-		return "Fri";
+		върни "Fri";
 	case ABDAY_7:
-		return "Sat";
+		върни "Sat";
 	case MON_1:
-		return "January";
+		върни "January";
 	case MON_2:
-		return "February";
+		върни "February";
 	case MON_3:
-		return "March";
+		върни "March";
 	case MON_4:
-		return "April";
+		върни "April";
 	case MON_5:
-		return "May";
+		върни "May";
 	case MON_6:
-		return "June";
+		върни "June";
 	case MON_7:
-		return "July";
+		върни "July";
 	case MON_8:
-		return "August";
+		върни "August";
 	case MON_9:
-		return "September";
+		върни "September";
 	case MON_10:
-		return "October";
+		върни "October";
 	case MON_11:
-		return "November";
+		върни "November";
 	case MON_12:
-		return "December";
+		върни "December";
 	case ABMON_1:
-		return "Jan";
+		върни "Jan";
 	case ABMON_2:
-		return "Feb";
+		върни "Feb";
 	case ABMON_3:
-		return "Mar";
+		върни "Mar";
 	case ABMON_4:
-		return "Apr";
+		върни "Apr";
 	case ABMON_5:
-		return "May";
+		върни "May";
 	case ABMON_6:
-		return "Jun";
+		върни "Jun";
 	case ABMON_7:
-		return "Jul";
+		върни "Jul";
 	case ABMON_8:
-		return "Aug";
+		върни "Aug";
 	case ABMON_9:
-		return "Sep";
+		върни "Sep";
 	case ABMON_10:
-		return "Oct";
+		върни "Oct";
 	case ABMON_11:
-		return "Nov";
+		върни "Nov";
 	case ABMON_12:
-		return "Dec";
+		върни "Dec";
 	case ALT_DIGITS:
-		return "\0\0\0\0\0\0\0\0\0\0";
+		върни "\0\0\0\0\0\0\0\0\0\0";
 	case CRNCYSTR:
-		return "-";
+		върни "-";
 	case YESEXPR:
-		return "^[yY]";
+		върни "^[yY]";
 	case NOEXPR:
-		return "^[nN]";
+		върни "^[nN]";
 	default:
-		return "";
+		върни "";
 	}
 }
 

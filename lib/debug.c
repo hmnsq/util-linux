@@ -24,7 +24,7 @@ void ul_debug_prefix(const char *lib, const char *flag,
 		     const void *handle, unsigned mask)
 {
 	fprintf(stderr, "%d: %s: %8s: ", getpid(), lib, flag);
-	if (handle && !(mask & __UL_DEBUG_FL_NOADDR))
+	ако (handle && !(mask & __UL_DEBUG_FL_NOADDR))
 		fprintf(stderr, "[%p]: ", handle);
 }
 
@@ -38,33 +38,33 @@ unsigned ul_debug_parse_mask(const struct ul_debug_maskname flagnames[],
 	res = strtoul(mask, &ptr, 0);
 
 	/* perhaps it's a comma-separated string? */
-	if (ptr && *ptr && flagnames && flagnames[0].name) {
+	ако (ptr && *ptr && flagnames && flagnames[0].name) {
 		char *msbuf, *ms, *name;
 		res = 0;
 
 		ms = msbuf = strdup(mask);
-		if (!ms)
-			return res;
+		ако (!ms)
+			върни res;
 
-		while ((name = strtok_r(ms, ",", &ptr))) {
+		докато ((name = strtok_r(ms, ",", &ptr))) {
 			const struct ul_debug_maskname *d;
 			ms = ptr;
 
-			for (d = flagnames; d && d->name; d++) {
-				if (strcmp(name, d->name) == 0) {
+			за (d = flagnames; d && d->name; d++) {
+				ако (strcmp(name, d->name) == 0) {
 					res |= d->mask;
 					break;
 				}
 			}
 			/* nothing else we can do by OR-ing the mask */
-			if (res == UL_DEBUG_ALL)
+			ако (res == UL_DEBUG_ALL)
 				break;
 		}
 		free(msbuf);
-	} else if (ptr && strcmp(ptr, "all") == 0)
+	} иначе ако (ptr && strcmp(ptr, "all") == 0)
 		res = UL_DEBUG_ALL;
 
-	return res;
+	върни res;
 }
 
 void ul_debug_print_masks(const char *env,
@@ -72,13 +72,13 @@ void ul_debug_print_masks(const char *env,
 {
 	const struct ul_debug_maskname *d;
 
-	if (!flagnames)
-		return;
+	ако (!flagnames)
+		върни;
 
 	fprintf(stderr, "Available \"%s=<name>[,...]|<mask>\" debug masks:\n",
 			env);
-	for (d = flagnames; d && d->name; d++) {
-		if (!d->help)
+	за (d = flagnames; d && d->name; d++) {
+		ако (!d->help)
 			continue;
 		fprintf(stderr, "   %-8s [0x%06x] : %s\n",
 				d->name, d->mask, d->help);

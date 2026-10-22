@@ -40,40 +40,40 @@
 #include "nls.h"
 #include "plymouth-ctrl.h"
 
-static int can_read(int fd, const long timeout)
+static цяло can_read(цяло fd, const long timeout)
 {
 	struct pollfd fds = {
 		.fd = fd,
 		.events = POLLIN|POLLPRI,
 		.revents = 0,
 	};
-	int ret;
+	цяло ret;
 
 	do {
 		ret = poll(&fds, 1, timeout);
-	} while ((ret < 0) && (errno == EINTR));
+	} докато ((ret < 0) && (errno == EINTR));
 
-	return (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
+	върни (ret == 1) && (fds.revents & (POLLIN|POLLPRI));
 }
 
-static int open_un_socket_and_connect(void)
+static цяло open_un_socket_and_connect(void)
 {
 	/* The abstract UNIX socket of plymouth */
 	struct sockaddr_un su = {
 		.sun_family = AF_UNIX,
 		.sun_path = PLYMOUTH_SOCKET_PATH,
 	};
-	const int one = 1;
-	int fd, ret;
+	const цяло one = 1;
+	цяло fd, ret;
 
 	fd = socket(PF_UNIX, SOCK_STREAM|SOCK_CLOEXEC|SOCK_NONBLOCK, 0);
-	if (fd < 0) {
+	ако (fd < 0) {
 		warnx(_("cannot open UNIX socket"));
 		goto err;
 	}
 
 	ret = setsockopt(fd, SOL_SOCKET, SO_PASSCRED, &one, sizeof(one));
-	if (ret < 0) {
+	ако (ret < 0) {
 		warnx(_("cannot set option for UNIX socket"));
 		close(fd);
 		fd = -1;
@@ -83,22 +83,22 @@ static int open_un_socket_and_connect(void)
 	/* Note, the abstract PLYMOUTH_SOCKET_PATH has a leading NULL byte */
 	ret = connect(fd, (struct sockaddr *) &su,
 		offsetof(struct sockaddr_un, sun_path) + 1 + strlen(su.sun_path+1));
-	if (ret < 0) {
-		if (errno != ECONNREFUSED)
+	ако (ret < 0) {
+		ако (errno != ECONNREFUSED)
 			warnx(_("cannot connect on UNIX socket"));
 		close(fd);
 		fd = -1;
 		goto err;
 	}
 err:
-	return fd;
+	върни fd;
 }
 
-int plymouth_command(int cmd, ...)
+цяло plymouth_command(цяло cmd, ...)
 {
 	uint8_t answer[2], command[2];
 	struct sigaction sp, op;
-	int fdsock = -1, ret = 0;
+	цяло fdsock = -1, ret = 0;
 
 	sigemptyset (&sp.sa_mask);
 	sp.sa_handler = SIG_IGN;
@@ -110,14 +110,14 @@ int plymouth_command(int cmd, ...)
 	switch (cmd) {
 	case MAGIC_PING:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ако (fdsock >= 0) {
 			command[0] = cmd;
 			ul_write_all(fdsock, command, sizeof(command));
 		}
 		break;
 	case MAGIC_QUIT:
 		fdsock = open_un_socket_and_connect();
-		if (fdsock >= 0) {
+		ако (fdsock >= 0) {
 			command[0] = cmd;
 			ul_write_all(fdsock, command, sizeof(command));
 		}
@@ -129,14 +129,14 @@ int plymouth_command(int cmd, ...)
 	}
 
 	answer[0] = '\0';
-	if (fdsock >= 0) {
-		if (can_read(fdsock, 1000))
+	ако (fdsock >= 0) {
+		ако (can_read(fdsock, 1000))
 			ul_read_all(fdsock, (char *) &answer[0], sizeof(answer));
 		close(fdsock);
 	}
 	sigaction(SIGPIPE, &op, NULL);
 	ret = (answer[0] == ANSWER_ACK) ? 1 : 0;
 err:
-	return ret;
+	върни ret;
 }
 
