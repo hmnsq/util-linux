@@ -5,39 +5,39 @@
  * Authors: Karel Zak <kzak@redhat.com> [2010]
  *          Davidlohr Bueso <dave@gnu.org> [2010]
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <inttypes.h>
-#include <ctype.h>
-#include <errno.h>
-#include <sys/stat.h>
-#include <string.h>
-#include <strings.h>
-#include <assert.h>
+#ضمن <stdio.h>
+#ضمن <stdlib.h>
+#ضمن <inttypes.h>
+#ضمن <ctype.h>
+#ضمن <errno.h>
+#ضمن <sys/stat.h>
+#ضمن <string.h>
+#ضمن <strings.h>
+#ضمن <assert.h>
 
-#include "c.h"
-#include "cctype.h"
-#include "nls.h"
-#include "strutils.h"
-#include "timeutils.h"
-#include "bitops.h"
-#include "pathnames.h"
+#ضمن "c.h"
+#ضمن "cctype.h"
+#ضمن "nls.h"
+#ضمن "strutils.h"
+#ضمن "timeutils.h"
+#ضمن "bitops.h"
+#ضمن "pathnames.h"
 
-static int STRTOXX_EXIT_CODE = EXIT_FAILURE;
+ساكن صحيح STRTOXX_EXIT_CODE = EXIT_FAILURE;
 
-void strutils_set_exitcode(int ex)
+فراغ strutils_set_exitcode(صحيح ex)
 {
 	STRTOXX_EXIT_CODE = ex;
 }
 
-static int do_scale_by_power (uintmax_t *x, int base, int power)
+ساكن صحيح do_scale_by_power (uintmax_t *x, صحيح base, صحيح power)
 {
-	while (power--) {
-		if (UINTMAX_MAX / base < *x)
-			return -ERANGE;
+	طالما (power--) {
+		إذا (UINTMAX_MAX / base < *x)
+			أرجع -ERANGE;
 		*x *= base;
 	}
-	return 0;
+	أرجع 0;
 }
 
 /*
@@ -67,22 +67,22 @@ static int do_scale_by_power (uintmax_t *x, int base, int power)
  * Note that the function does not accept numbers with '-' (negative sign)
  * prefix.
  */
-int ul_parse_size(const char *str, uintmax_t *res, int *power)
+صحيح ul_parse_size(ثابت حرف *str, uintmax_t *res, صحيح *power)
 {
-	const char *p;
-	char *end;
+	ثابت حرف *p;
+	حرف *end;
 	uintmax_t x, frac = 0;
-	int base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
+	صحيح base = 1024, rc = 0, pwr = 0, frac_zeros = 0;
 
-	static const char *suf  = "KMGTPEZY";
-	static const char *suf2 = "kmgtpezy";
-	const char *sp;
+	ساكن ثابت حرف *suf  = "KMGTPEZY";
+	ساكن ثابت حرف *suf2 = "kmgtpezy";
+	ثابت حرف *sp;
 
 	*res = 0;
 
-	if (!str || !*str) {
+	إذا (!str || !*str) {
 		rc = -EINVAL;
-		goto err;
+		اذهب err;
 	}
 
 	/* Only positive numbers are acceptable
@@ -92,337 +92,337 @@ int ul_parse_size(const char *str, uintmax_t *res, int *power)
 	 * so it's probably good enough...
 	 */
 	p = str;
-	while (isspace((unsigned char) *p))
+	طالما (isspace((unsigned حرف) *p))
 		p++;
-	if (*p == '-') {
+	إذا (*p == '-') {
 		rc = -EINVAL;
-		goto err;
+		اذهب err;
 	}
 
-	errno = 0, end = NULL;
+	errno = 0, end = عدم;
 	x = strtoumax(str, &end, 0);
 
-	if (end == str ||
+	إذا (end == str ||
 	    (errno != 0 && (x == UINTMAX_MAX || x == 0))) {
 		rc = errno ? -errno : -EINVAL;
-		goto err;
+		اذهب err;
 	}
-	if (!end || !*end)
-		goto done;			/* without suffix */
+	إذا (!end || !*end)
+		اذهب done;			/* without suffix */
 	p = end;
 
 	/*
 	 * Check size suffixes
 	 */
 check_suffix:
-	if (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
+	إذا (*(p + 1) == 'i' && (*(p + 2) == 'B' || *(p + 2) == 'b') && !*(p + 3))
 		base = 1024;			/* XiB, 2^N */
-	else if ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
+	وإلا إذا ((*(p + 1) == 'B' || *(p + 1) == 'b') && !*(p + 2))
 		base = 1000;			/* XB, 10^N */
-	else if (*(p + 1)) {
-		struct lconv const *l = localeconv();
-		const char *dp = l ? l->decimal_point : NULL;
+	وإلا إذا (*(p + 1)) {
+		بنية lconv ثابت *l = localeconv();
+		ثابت حرف *dp = l ? l->decimal_point : عدم;
 		size_t dpsz = dp ? strlen(dp) : 0;
 
-		if (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
-			const char *fstr = p + dpsz;
+		إذا (frac == 0 && *p && dp && strncmp(dp, p, dpsz) == 0) {
+			ثابت حرف *fstr = p + dpsz;
 
-			for (p = fstr; *p == '0'; p++)
+			لكل (p = fstr; *p == '0'; p++)
 				frac_zeros++;
 			fstr = p;
-			if (isdigit(*fstr)) {
-				errno = 0, end = NULL;
+			إذا (isdigit(*fstr)) {
+				errno = 0, end = عدم;
 				frac = strtoumax(fstr, &end, 0);
-				if (end == fstr ||
+				إذا (end == fstr ||
 				    (errno != 0 && (frac == UINTMAX_MAX || frac == 0))) {
 					rc = errno ? -errno : -EINVAL;
-					goto err;
+					اذهب err;
 				}
-			} else
-				end = (char *) p;
+			} وإلا
+				end = (حرف *) p;
 
-			if (!end || !*end) {
+			إذا (!end || !*end) {
 				rc = -EINVAL;
-				goto err;	/* without suffix, but with fractions */
+				اذهب err;	/* without suffix, but with fractions */
 			}
 			p = end;
-			goto check_suffix;
+			اذهب check_suffix;
 		}
 		rc = -EINVAL;
-		goto err;			/* unexpected suffix */
+		اذهب err;			/* unexpected suffix */
 	}
 
 	sp = strchr(suf, *p);
-	if (sp)
+	إذا (sp)
 		pwr = (sp - suf) + 1;
-	else {
+	وإلا {
 		sp = strchr(suf2, *p);
-		if (sp)
+		إذا (sp)
 			pwr = (sp - suf2) + 1;
-		else {
+		وإلا {
 			rc = -EINVAL;
-			goto err;
+			اذهب err;
 		}
 	}
 
-	if (power)
+	إذا (power)
 		*power = pwr;
 
 	rc = do_scale_by_power(&x, base, pwr);
-	if (rc)
-		goto err;
+	إذا (rc)
+		اذهب err;
 
-	if (frac && pwr) {
-		int i;
+	إذا (frac && pwr) {
+		صحيح i;
 		uintmax_t frac_base = 1, frac_val = 0;
 
 		/* mega, giga, ... */
 		rc = do_scale_by_power(&frac_base, base, pwr);
-		if (rc)
-			goto err;
+		إذا (rc)
+			اذهب err;
 
 		/*
 		 * Go backwardly from last digit and compute frac_base * 0.<frac>
 		 * rounded down. For example 0.25G is (5G / 10 + 2G) / 10.
 		 * The intermediate value is always smaller than 10 * frac_base.
 		 */
-		do {
+		افعل {
 			frac_val = ((frac % 10) * frac_base + frac_val) / 10;
 			frac /= 10;
-		} while (frac);
+		} طالما (frac);
 
 		/* 'frac' is without zeros (5 means 0.5 as well as 0.05) */
-		for (i = 0; i < frac_zeros && frac_val; i++)
+		لكل (i = 0; i < frac_zeros && frac_val; i++)
 			frac_val /= 10;
 
-		if (UINTMAX_MAX - x < frac_val) {
+		إذا (UINTMAX_MAX - x < frac_val) {
 			rc = -ERANGE;
-			goto err;
+			اذهب err;
 		}
 		x += frac_val;
 	}
 done:
 	*res = x;
 err:
-	if (rc < 0)
+	إذا (rc < 0)
 		errno = -rc;
-	return rc;
+	أرجع rc;
 }
 
-int strtosize(const char *str, uintmax_t *res)
+صحيح strtosize(ثابت حرف *str, uintmax_t *res)
 {
-	return ul_parse_size(str, res, NULL);
+	أرجع ul_parse_size(str, res, عدم);
 }
 
-int isdigit_strend(const char *str, const char **end)
+صحيح isdigit_strend(ثابت حرف *str, ثابت حرف **end)
 {
-	const char *p;
+	ثابت حرف *p;
 
-	for (p = str; p && *p && isdigit((unsigned char) *p); p++);
+	لكل (p = str; p && *p && isdigit((unsigned حرف) *p); p++);
 
-	if (end)
+	إذا (end)
 		*end = p;
-	return p && p > str && !*p;
+	أرجع p && p > str && !*p;
 }
 
-int isxdigit_strend(const char *str, const char **end)
+صحيح isxdigit_strend(ثابت حرف *str, ثابت حرف **end)
 {
-	const char *p;
+	ثابت حرف *p;
 
-	for (p = str; p && *p && isxdigit((unsigned char) *p); p++);
+	لكل (p = str; p && *p && isxdigit((unsigned حرف) *p); p++);
 
-	if (end)
+	إذا (end)
 		*end = p;
 
-	return p && p > str && !*p;
+	أرجع p && p > str && !*p;
 }
 
 /*
  *  For example: ul_parse_switch(argv[i], "on", "off",  "yes", "no",  NULL);
  */
-int ul_strtobool(const char *str, bool *result)
+صحيح ul_strtobool(ثابت حرف *str, bool *result)
 {
-	static const char *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
-	static const char *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
+	ساكن ثابت حرف *bool_true[]  = { "1", "y", "t", "yes", "true", "on", "enable" };
+	ساكن ثابت حرف *bool_false[] = { "0", "n", "f", "no", "false", "off", "disable", "not", };
 	size_t i;
 
-	if (!str || !result)
-		return -(errno = EINVAL);
+	إذا (!str || !result)
+		أرجع -(errno = EINVAL);
 
 	errno = 0;
 
-	for (i = 0; i < ARRAY_SIZE(bool_true); i++) {
-		if (c_strcasecmp(str, bool_true[i]) == 0) {
+	لكل (i = 0; i < ARRAY_SIZE(bool_true); i++) {
+		إذا (c_strcasecmp(str, bool_true[i]) == 0) {
 			*result = true;
-			return 0;
+			أرجع 0;
 		}
 	}
 
-	for (i = 0; i < ARRAY_SIZE(bool_false); i++) {
-		if (c_strcasecmp(str, bool_false[i]) == 0) {
+	لكل (i = 0; i < ARRAY_SIZE(bool_false); i++) {
+		إذا (c_strcasecmp(str, bool_false[i]) == 0) {
 			*result = false;
-			return 0;
+			أرجع 0;
 		}
 	}
 
-	return -(errno = EINVAL);
+	أرجع -(errno = EINVAL);
 }
 
-int ul_parse_switch(const char *arg, ...)
+صحيح ul_parse_switch(ثابت حرف *arg, ...)
 {
-	const char *a, *b;
+	ثابت حرف *a, *b;
 	va_list ap;
 
 	va_start(ap, arg);
-	do {
-		a = va_arg(ap, char *);
-		if (!a)
-			break;
-		b = va_arg(ap, char *);
-		if (!b)
-			break;
+	افعل {
+		a = va_arg(ap, حرف *);
+		إذا (!a)
+			اكسر;
+		b = va_arg(ap, حرف *);
+		إذا (!b)
+			اكسر;
 
-		if (strcmp(arg, a) == 0) {
+		إذا (strcmp(arg, a) == 0) {
 			va_end(ap);
-			return 1;
+			أرجع 1;
 		}
 
-		if (strcmp(arg, b) == 0) {
+		إذا (strcmp(arg, b) == 0) {
 			va_end(ap);
-			return 0;
+			أرجع 0;
 		}
-	} while (1);
+	} طالما (1);
 	va_end(ap);
 
 	errx(STRTOXX_EXIT_CODE, _("unsupported argument: %s"), arg);
 }
 
 #ifndef HAVE_MEMPCPY
-void *mempcpy(void *restrict dest, const void *restrict src, size_t n)
+فراغ *mempcpy(فراغ *restrict dest, ثابت فراغ *restrict src, size_t n)
 {
-	return ((char *)memcpy(dest, src, n)) + n;
+	أرجع ((حرف *)memcpy(dest, src, n)) + n;
 }
 #endif
 
 #ifndef HAVE_STRNLEN
-size_t strnlen(const char *s, size_t maxlen)
+size_t strnlen(ثابت حرف *s, size_t maxlen)
 {
 	size_t i;
 
-	for (i = 0; i < maxlen; i++) {
-		if (s[i] == '\0')
-			return i;
+	لكل (i = 0; i < maxlen; i++) {
+		إذا (s[i] == '\0')
+			أرجع i;
 	}
-	return maxlen;
+	أرجع maxlen;
 }
 #endif
 
 #ifndef HAVE_STRNCHR
-char *strnchr(const char *s, size_t maxlen, int c)
+حرف *strnchr(ثابت حرف *s, size_t maxlen, صحيح c)
 {
-	for (; maxlen-- && *s != '\0'; ++s)
-		if (*s == (char)c)
-			return (char *)s;
-	return NULL;
+	لكل (; maxlen-- && *s != '\0'; ++s)
+		إذا (*s == (حرف)c)
+			أرجع (حرف *)s;
+	أرجع عدم;
 }
 #endif
 
 #ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n)
+حرف *strndup(ثابت حرف *s, size_t n)
 {
 	size_t len = strnlen(s, n);
-	char *new = malloc((len + 1) * sizeof(char));
-	if (!new)
-		return NULL;
+	حرف *new = malloc((len + 1) * حجم(حرف));
+	إذا (!new)
+		أرجع عدم;
 	new[len] = '\0';
-	return (char *) memcpy(new, s, len);
+	أرجع (حرف *) memcpy(new, s, len);
 }
 #endif
 
 /*
  * convert strings to numbers; returns <0 on error, and 0 on success
  */
-int ul_strtos64(const char *str, int64_t *num, int base)
+صحيح ul_strtos64(ثابت حرف *str, int64_t *اڠک, صحيح base)
 {
-	char *end = NULL;
+	حرف *end = عدم;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	إذا (str == عدم || *str == '\0')
+		أرجع -(errno = EINVAL);
 
 	errno = 0;
-	*num = (int64_t) strtoimax(str, &end, base);
+	*اڠک = (int64_t) strtoimax(str, &end, base);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	إذا (errno != 0)
+		أرجع -errno;
+	إذا (str == end || (end && *end))
+		أرجع -(errno = EINVAL);
+	أرجع 0;
 }
 
-int ul_strtou64(const char *str, uint64_t *num, int base)
+صحيح ul_strtou64(ثابت حرف *str, uint64_t *اڠک, صحيح base)
 {
-	char *end = NULL;
+	حرف *end = عدم;
 	int64_t tmp;
 
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
+	إذا (str == عدم || *str == '\0')
+		أرجع -(errno = EINVAL);
 
 	/* we need to ignore negative numbers, note that for invalid negative
 	 * number strtoimax() returns negative number too, so we do not
 	 * need to check errno here */
 	errno = 0;
 	tmp = (int64_t) strtoimax(str, &end, base);
-	if (tmp < 0)
+	إذا (tmp < 0)
 		errno = ERANGE;
-	else {
+	وإلا {
 		errno = 0;
-		*num = strtoumax(str, &end, base);
+		*اڠک = strtoumax(str, &end, base);
 	}
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	إذا (errno != 0)
+		أرجع -errno;
+	إذا (str == end || (end && *end))
+		أرجع -(errno = EINVAL);
+	أرجع 0;
 }
 
-int ul_strtos32(const char *str, int32_t *num, int base)
+صحيح ul_strtos32(ثابت حرف *str, int32_t *اڠک, صحيح base)
 {
 	int64_t tmp;
-	int rc;
+	صحيح rc;
 
 	rc = ul_strtos64(str, &tmp, base);
-	if (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
+	إذا (rc == 0 && (tmp < INT32_MIN || tmp > INT32_MAX))
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (int32_t) tmp;
-	return rc;
+	إذا (rc == 0)
+		*اڠک = (int32_t) tmp;
+	أرجع rc;
 }
 
-int ul_strtou32(const char *str, uint32_t *num, int base)
+صحيح ul_strtou32(ثابت حرف *str, uint32_t *اڠک, صحيح base)
 {
 	uint64_t tmp;
-	int rc;
+	صحيح rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT32_MAX)
+	إذا (rc == 0 && tmp > UINT32_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint32_t) tmp;
-	return rc;
+	إذا (rc == 0)
+		*اڠک = (uint32_t) tmp;
+	أرجع rc;
 }
 
-int ul_strtou16(const char *str, uint16_t *num, int base)
+صحيح ul_strtou16(ثابت حرف *str, uint16_t *اڠک, صحيح base)
 {
 	uint64_t tmp;
-	int rc;
+	صحيح rc;
 
 	rc = ul_strtou64(str, &tmp, base);
-	if (rc == 0 && tmp > UINT16_MAX)
+	إذا (rc == 0 && tmp > UINT16_MAX)
 		rc = -(errno = ERANGE);
-	if (rc == 0)
-		*num = (uint16_t) tmp;
-	return rc;
+	إذا (rc == 0)
+		*اڠک = (uint16_t) tmp;
+	أرجع rc;
 }
 
 /*
@@ -432,154 +432,154 @@ int ul_strtou16(const char *str, uint16_t *num, int base)
  * better to consolidate the code and keep it all based on 64-bit numbers than
  * implement it for 32 and 16-bit numbers too.
  */
-int64_t str2num_or_err(const char *str, int base, const char *errmesg,
-			     int64_t low, int64_t up)
+int64_t str2num_or_err(ثابت حرف *str, صحيح base, ثابت حرف *errmesg,
+			     int64_t رنده, int64_t up)
 {
-	int64_t num = 0;
-	int rc;
+	int64_t اڠک = 0;
+	صحيح rc;
 
-	rc = ul_strtos64(str, &num, base);
-	if (rc == 0 && ((low && num < low) || (up && num > up)))
+	rc = ul_strtos64(str, &اڠک, base);
+	إذا (rc == 0 && ((رنده && اڠک < رنده) || (up && اڠک > up)))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	إذا (rc) {
+		إذا (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	أرجع اڠک;
 }
 
-uint64_t str2unum_or_err(const char *str, int base, const char *errmesg, uint64_t up)
+uint64_t str2unum_or_err(ثابت حرف *str, صحيح base, ثابت حرف *errmesg, uint64_t up)
 {
-	uint64_t num = 0;
-	int rc;
+	uint64_t اڠک = 0;
+	صحيح rc;
 
-	rc = ul_strtou64(str, &num, base);
-	if (rc == 0 && (up && num > up))
+	rc = ul_strtou64(str, &اڠک, base);
+	إذا (rc == 0 && (up && اڠک > up))
 		rc = -(errno = ERANGE);
 
-	if (rc) {
-		if (errno == ERANGE)
+	إذا (rc) {
+		إذا (errno == ERANGE)
 			err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 		errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 	}
-	return num;
+	أرجع اڠک;
 }
 
-double strtod_or_err(const char *str, const char *errmesg)
+مزدوج strtod_or_err(ثابت حرف *str, ثابت حرف *errmesg)
 {
-	double num;
-	char *end = NULL;
+	مزدوج اڠک;
+	حرف *end = عدم;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		goto err;
-	num = strtod(str, &end);
+	إذا (str == عدم || *str == '\0')
+		اذهب err;
+	اڠک = strtod(str, &end);
 
-	if (errno || str == end || (end && *end))
-		goto err;
+	إذا (errno || str == end || (end && *end))
+		اذهب err;
 
-	return num;
+	أرجع اڠک;
 err:
-	if (errno == ERANGE)
+	إذا (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-int ul_strtold(const char *str, long double *num)
+صحيح ul_strtold(ثابت حرف *str, long مزدوج *اڠک)
 {
-	char *end = NULL;
+	حرف *end = عدم;
 
 	errno = 0;
-	if (str == NULL || *str == '\0')
-		return -(errno = EINVAL);
-	*num = strtold(str, &end);
+	إذا (str == عدم || *str == '\0')
+		أرجع -(errno = EINVAL);
+	*اڠک = strtold(str, &end);
 
-	if (errno != 0)
-		return -errno;
-	if (str == end || (end && *end))
-		return -(errno = EINVAL);
-	return 0;
+	إذا (errno != 0)
+		أرجع -errno;
+	إذا (str == end || (end && *end))
+		أرجع -(errno = EINVAL);
+	أرجع 0;
 }
 
-long double strtold_or_err(const char *str, const char *errmesg)
+long مزدوج strtold_or_err(ثابت حرف *str, ثابت حرف *errmesg)
 {
-	long double num = 0;
+	long مزدوج اڠک = 0;
 
-	if (ul_strtold(str, &num) == 0)
-		return num;
-	if (errno == ERANGE)
+	إذا (ul_strtold(str, &اڠک) == 0)
+		أرجع اڠک;
+	إذا (errno == ERANGE)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
-uintmax_t strtosize_or_err(const char *str, const char *errmesg)
+uintmax_t strtosize_or_err(ثابت حرف *str, ثابت حرف *errmesg)
 {
-	uintmax_t num;
+	uintmax_t اڠک;
 
-	if (strtosize(str, &num) == 0)
-		return num;
+	إذا (strtosize(str, &اڠک) == 0)
+		أرجع اڠک;
 
-	if (errno)
+	إذا (errno)
 		err(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 
 	errx(STRTOXX_EXIT_CODE, "%s: '%s'", errmesg, str);
 }
 
 
-void strtotimeval_or_err(const char *str, struct timeval *tv, const char *errmesg)
+فراغ strtotimeval_or_err(ثابت حرف *str, بنية timeval *tv, ثابت حرف *errmesg)
 {
-	long double user_input;
+	long مزدوج user_ماسوقن;
 
-	user_input = strtold_or_err(str, errmesg);
-	tv->tv_sec = (time_t) user_input;
-	tv->tv_usec = (suseconds_t)((user_input - tv->tv_sec) * USEC_PER_SEC);
+	user_ماسوقن = strtold_or_err(str, errmesg);
+	tv->tv_sec = (time_t) user_ماسوقن;
+	tv->tv_usec = (suseconds_t)((user_ماسوقن - tv->tv_sec) * USEC_PER_SEC);
 }
 
-void strtotimespec_or_err(const char *str, struct timespec *ts, const char *errmesg)
+فراغ strtotimespec_or_err(ثابت حرف *str, بنية timespec *ts, ثابت حرف *errmesg)
 {
-	long double user_input;
+	long مزدوج user_ماسوقن;
 
-	user_input = strtold_or_err(str, errmesg);
-	ts->tv_sec = (time_t) user_input;
-	ts->tv_nsec = (long)((user_input - ts->tv_sec) * NSEC_PER_SEC);
+	user_ماسوقن = strtold_or_err(str, errmesg);
+	ts->tv_sec = (time_t) user_ماسوقن;
+	ts->tv_nsec = (long)((user_ماسوقن - ts->tv_sec) * NSEC_PER_SEC);
 }
 
-time_t strtotime_or_err(const char *str, const char *errmesg)
+time_t strtotime_or_err(ثابت حرف *str, ثابت حرف *errmesg)
 {
-	int64_t user_input;
+	int64_t user_ماسوقن;
 
-	user_input = strtos64_or_err(str, errmesg);
-	return (time_t) user_input;
+	user_ماسوقن = strtos64_or_err(str, errmesg);
+	أرجع (time_t) user_ماسوقن;
 }
 
-bool hyperlinkwanted(const char *mode)
+bool hyperlinkwanted(ثابت حرف *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	إذا (mode && strcmp(mode, "never") == 0)
+		أرجع false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	إذا (mode && strcmp(mode, "always") == 0)
+		أرجع true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	إذا (!mode || strcmp(mode, "auto") == 0)
+		أرجع isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --hyperlink: %s"), mode);
 }
 
-bool annotationwanted(const char *mode)
+bool annotationwanted(ثابت حرف *mode)
 {
-	if (mode && strcmp(mode, "never") == 0)
-		return false;
+	إذا (mode && strcmp(mode, "never") == 0)
+		أرجع false;
 
-	if (mode && strcmp(mode, "always") == 0)
-		return true;
+	إذا (mode && strcmp(mode, "always") == 0)
+		أرجع true;
 
-	if (!mode || strcmp(mode, "auto") == 0)
-		return isatty(STDOUT_FILENO) ? true : false;
+	إذا (!mode || strcmp(mode, "auto") == 0)
+		أرجع isatty(STDOUT_FILENO) ? true : false;
 
 	errx(EXIT_FAILURE, _("invalid argument of --annotate: %s"), mode);
 }
@@ -588,23 +588,23 @@ bool annotationwanted(const char *mode)
  * Converts stat->st_mode to ls(1)-like mode string. The size of "str" must
  * be 11 bytes.
  */
-char *xstrmode(mode_t mode, char *str)
+حرف *xstrmode(mode_t mode, حرف *str)
 {
 	unsigned short i = 0;
 
-	if (S_ISDIR(mode))
+	إذا (S_ISDIR(mode))
 		str[i++] = 'd';
-	else if (S_ISLNK(mode))
+	وإلا إذا (S_ISLNK(mode))
 		str[i++] = 'l';
-	else if (S_ISCHR(mode))
+	وإلا إذا (S_ISCHR(mode))
 		str[i++] = 'c';
-	else if (S_ISBLK(mode))
+	وإلا إذا (S_ISBLK(mode))
 		str[i++] = 'b';
-	else if (S_ISSOCK(mode))
+	وإلا إذا (S_ISSOCK(mode))
 		str[i++] = 's';
-	else if (S_ISFIFO(mode))
+	وإلا إذا (S_ISFIFO(mode))
 		str[i++] = 'p';
-	else if (S_ISREG(mode))
+	وإلا إذا (S_ISREG(mode))
 		str[i++] = '-';
 
 	str[i++] = mode & S_IRUSR ? 'r' : '-';
@@ -624,33 +624,33 @@ char *xstrmode(mode_t mode, char *str)
 		: (mode & S_IXOTH ? 'x' : '-'));
 	str[i] = '\0';
 
-	return str;
+	أرجع str;
 }
 
 /*
  * returns exponent (2^x=n) in range KiB..EiB (2^10..2^60)
  */
-static int get_exp(uint64_t n)
+ساكن صحيح get_exp(uint64_t n)
 {
-	int shft;
+	صحيح shft;
 
-	for (shft = 10; shft <= 60; shft += 10) {
-		if (n < (1ULL << shft))
-			break;
+	لكل (shft = 10; shft <= 60; shft += 10) {
+		إذا (n < (1ULL << shft))
+			اكسر;
 	}
-	return shft - 10;
+	أرجع shft - 10;
 }
 
-char *size_to_human_string(int options, uint64_t bytes)
+حرف *size_to_human_string(صحيح options, uint64_t bytes)
 {
-	char buf[32];
-	int dec, exp;
+	حرف buf[32];
+	صحيح dec, exp;
 	uint64_t frac;
-	const char *letters = "BKMGTPE";
-	char suffix[sizeof(" KiB")], *psuf = suffix;
-	char c;
+	ثابت حرف *letters = "BKMGTPE";
+	حرف suffix[حجم(" KiB")], *psuf = suffix;
+	حرف c;
 
-	if (options & SIZE_SUFFIX_SPACE)
+	إذا (options & SIZE_SUFFIX_SPACE)
 		*psuf++ = ' ';
 
 
@@ -661,7 +661,7 @@ char *size_to_human_string(int options, uint64_t bytes)
 
 	*psuf++ = c;
 
-	if ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
+	إذا ((options & SIZE_SUFFIX_3LETTER) && (c != 'B')) {
 		*psuf++ = 'i';
 		*psuf++ = 'B';
 	}
@@ -673,49 +673,49 @@ char *size_to_human_string(int options, uint64_t bytes)
 	 */
 
 	/* round */
-	if (frac) {
+	إذا (frac) {
 		/* get 3 digits after decimal point */
-		if (frac >= UINT64_MAX / 1000)
+		إذا (frac >= UINT64_MAX / 1000)
 			frac = ((frac / 1024) * 1000) / (1ULL << (exp - 10)) ;
-		else
+		وإلا
 			frac = (frac * 1000) / (1ULL << (exp)) ;
 
-		if (options & SIZE_DECIMAL_2DIGITS) {
+		إذا (options & SIZE_DECIMAL_2DIGITS) {
 			/* round 4/5 and keep 2 digits after decimal point */
 			frac = (frac + 5) / 10 ;
-		} else {
+		} وإلا {
 			/* round 4/5 and keep 1 digit after decimal point */
 			frac = ((frac + 50) / 100) * 10 ;
 		}
 
 		/* rounding could have overflowed */
-		if (frac == 100) {
+		إذا (frac == 100) {
 			dec++;
 			frac = 0;
 		}
 	}
 
-	if (frac) {
-		struct lconv const *l = localeconv();
-		char *dp = l ? l->decimal_point : NULL;
-		int len;
+	إذا (frac) {
+		بنية lconv ثابت *l = localeconv();
+		حرف *dp = l ? l->decimal_point : عدم;
+		صحيح len;
 
-		if (!dp || !*dp)
+		إذا (!dp || !*dp)
 			dp = ".";
 
-		len = snprintf(buf, sizeof(buf), "%d%s%02" PRIu64, dec, dp, frac);
-		if (len > 0 && (size_t) len < sizeof(buf)) {
+		len = snprintf(buf, حجم(buf), "%d%s%02" PRIu64, dec, dp, frac);
+		إذا (len > 0 && (size_t) len < حجم(buf)) {
 			/* remove potential extraneous zero */
-			if (buf[len - 1] == '0')
+			إذا (buf[len - 1] == '0')
 				buf[len--] = '\0';
 			/* append suffix */
-			xstrncpy(buf+len, suffix, sizeof(buf) - len);
-		} else
+			xstrncpy(buf+len, suffix, حجم(buf) - len);
+		} وإلا
 			*buf = '\0';	/* snprintf error */
-	} else
-		snprintf(buf, sizeof(buf), "%d%s", dec, suffix);
+	} وإلا
+		snprintf(buf, حجم(buf), "%d%s", dec, suffix);
 
-	return strdup(buf);
+	أرجع strdup(buf);
 }
 
 /*
@@ -731,67 +731,67 @@ char *size_to_human_string(int options, uint64_t bytes)
  *            -1  : parse error or unknown item
  *            -2  : arysz reached
  */
-int string_to_idarray(const char *list, int ary[], size_t arysz,
-			int (name2id)(const char *, size_t))
+صحيح string_to_idarray(ثابت حرف *list, صحيح ary[], size_t arysz,
+			صحيح (name2id)(ثابت حرف *, size_t))
 {
-	const char *begin = NULL, *p;
+	ثابت حرف *begin = عدم, *p;
 	size_t n = 0;
 
-	if (!list || !*list || !ary || !arysz || !name2id)
-		return -1;
+	إذا (!list || !*list || !ary || !arysz || !name2id)
+		أرجع -1;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int id;
+	لكل (p = list; p && *p; p++) {
+		ثابت حرف *end = عدم;
+		صحيح id;
 
-		if (n >= arysz)
-			return -2;
-		if (!begin)
+		إذا (n >= arysz)
+			أرجع -2;
+		إذا (!begin)
 			begin = p;		/* begin of the column name */
-		if (*p == ',')
+		إذا (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		إذا (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		إذا (!begin || !end)
+			استمر;
+		إذا (end <= begin)
+			أرجع -1;
 
 		id = name2id(begin, end - begin);
-		if (id == -1)
-			return -1;
+		إذا (id == -1)
+			أرجع -1;
 		ary[ n++ ] = id;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = عدم;
+		إذا (end && !*end)
+			اكسر;
 	}
-	return n;
+	أرجع n;
 }
 
 /*
  * Parses the array like string_to_idarray but if format is "+aaa,bbb"
  * it adds fields to array instead of replacing them.
  */
-int string_add_to_idarray(const char *list, int ary[], size_t arysz,
-			size_t *ary_pos, int (name2id)(const char *, size_t))
+صحيح string_add_to_idarray(ثابت حرف *list, صحيح ary[], size_t arysz,
+			size_t *ary_pos, صحيح (name2id)(ثابت حرف *, size_t))
 {
-	const char *list_add;
-	int r;
+	ثابت حرف *list_add;
+	صحيح r;
 
-	if (!list || !*list || !ary_pos || *ary_pos > arysz)
-		return -1;
+	إذا (!list || !*list || !ary_pos || *ary_pos > arysz)
+		أرجع -1;
 
-	if (list[0] == '+')
+	إذا (list[0] == '+')
 		list_add = &list[1];
-	else {
+	وإلا {
 		list_add = list;
 		*ary_pos = 0;
 	}
 
 	r = string_to_idarray(list_add, &ary[*ary_pos], arysz - *ary_pos, name2id);
-	if (r > 0)
+	إذا (r > 0)
 		*ary_pos += r;
-	return r;
+	أرجع r;
 }
 
 /*
@@ -807,55 +807,55 @@ int string_add_to_idarray(const char *list, int ary[], size_t arysz,
  *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitarray(const char *list,
-		     char *ary,
-		     int (*name2bit)(const char *, size_t),
+صحيح string_to_bitarray(ثابت حرف *list,
+		     حرف *ary,
+		     صحيح (*name2bit)(ثابت حرف *, size_t),
 		     size_t allow_range)
 {
-	const char *begin = NULL, *p;
+	ثابت حرف *begin = عدم, *p;
 
-	if (!list || !name2bit || !ary)
-		return -EINVAL;
+	إذا (!list || !name2bit || !ary)
+		أرجع -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
-		int bit, set_lower = 0, set_higher = 0;
+	لكل (p = list; p && *p; p++) {
+		ثابت حرف *end = عدم;
+		صحيح bit, set_lower = 0, set_higher = 0;
 
-		if (!begin)
+		إذا (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		إذا (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		إذا (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
-		if (allow_range) {
-			if (*(end - 1) == '+') {
+		إذا (!begin || !end)
+			استمر;
+		إذا (end <= begin)
+			أرجع -1;
+		إذا (allow_range) {
+			إذا (*(end - 1) == '+') {
 				end--;
 				set_lower = 1;
-			} else if (*begin == '+') {
+			} وإلا إذا (*begin == '+') {
 				begin++;
 				set_higher = 1;
 			}
 		}
 
 		bit = name2bit(begin, end - begin);
-		if (bit < 0)
-			return bit;
+		إذا (bit < 0)
+			أرجع bit;
 		setbit(ary, bit);
-		if (set_lower)
-			while (--bit >= 0)
+		إذا (set_lower)
+			طالما (--bit >= 0)
 				setbit(ary, bit);
-		else if (set_higher)
-			while (++bit < (int) allow_range)
+		وإلا إذا (set_higher)
+			طالما (++bit < (صحيح) allow_range)
 				setbit(ary, bit);
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = عدم;
+		إذا (end && !*end)
+			اكسر;
 	}
-	return 0;
+	أرجع 0;
 }
 
 /*
@@ -866,39 +866,39 @@ int string_to_bitarray(const char *list,
 *
  * Returns: 0 on success, <0 on error.
  */
-int string_to_bitmask(const char *list,
+صحيح string_to_bitmask(ثابت حرف *list,
 		     unsigned long *mask,
-		     long (*name2flag)(const char *, size_t))
+		     long (*name2flag)(ثابت حرف *, size_t))
 {
-	const char *begin = NULL, *p;
+	ثابت حرف *begin = عدم, *p;
 
-	if (!list || !name2flag || !mask)
-		return -EINVAL;
+	إذا (!list || !name2flag || !mask)
+		أرجع -EINVAL;
 
-	for (p = list; p && *p; p++) {
-		const char *end = NULL;
+	لكل (p = list; p && *p; p++) {
+		ثابت حرف *end = عدم;
 		long flag;
 
-		if (!begin)
+		إذا (!begin)
 			begin = p;		/* begin of the level name */
-		if (*p == ',')
+		إذا (*p == ',')
 			end = p;		/* terminate the name */
-		if (*(p + 1) == '\0')
+		إذا (*(p + 1) == '\0')
 			end = p + 1;		/* end of string */
-		if (!begin || !end)
-			continue;
-		if (end <= begin)
-			return -1;
+		إذا (!begin || !end)
+			استمر;
+		إذا (end <= begin)
+			أرجع -1;
 
 		flag = name2flag(begin, end - begin);
-		if (flag < 0)
-			return flag;	/* error */
+		إذا (flag < 0)
+			أرجع flag;	/* error */
 		*mask |= flag;
-		begin = NULL;
-		if (end && !*end)
-			break;
+		begin = عدم;
+		إذا (end && !*end)
+			اكسر;
 	}
-	return 0;
+	أرجع 0;
 }
 
 /*
@@ -909,66 +909,66 @@ int string_to_bitmask(const char *list,
  *
  * Returns: 0 on success, <0 on error.
  */
-int ul_parse_range(const char *str, int *lower, int *upper, int def)
+صحيح ul_parse_range(ثابت حرف *str, صحيح *lower, صحيح *upper, صحيح def)
 {
-	char *end = NULL;
+	حرف *end = عدم;
 
-	if (!str)
-		return 0;
+	إذا (!str)
+		أرجع 0;
 
 	*upper = *lower = def;
 	errno = 0;
 
-	if (*str == ':') {				/* <:N> */
+	إذا (*str == ':') {				/* <:N> */
 		str++;
 		*upper = strtol(str, &end, 10);
-		if (errno || !end || *end || end == str)
-			return -1;
-	} else {
+		إذا (errno || !end || *end || end == str)
+			أرجع -1;
+	} وإلا {
 		*upper = *lower = strtol(str, &end, 10);
-		if (errno || !end || end == str)
-			return -1;
+		إذا (errno || !end || end == str)
+			أرجع -1;
 
-		if (*end == ':' && !*(end + 1))		/* <M:> */
+		إذا (*end == ':' && !*(end + 1))		/* <M:> */
 			*upper = def;
-		else if (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
+		وإلا إذا (*end == '-' || *end == ':') {	/* <M:N> <M-N> */
 			str = end + 1;
-			end = NULL;
+			end = عدم;
 			errno = 0;
 			*upper = strtol(str, &end, 10);
 
-			if (errno || !end || *end || end == str)
-				return -1;
+			إذا (errno || !end || *end || end == str)
+				أرجع -1;
 		}
 	}
-	return 0;
+	أرجع 0;
 }
 
-const char *ul_path_next_segment(const char *str, size_t *sz)
+ثابت حرف *ul_path_next_segment(ثابت حرف *str, size_t *sz)
 {
-	const char *start, *p;
+	ثابت حرف *start, *p;
 
 	start = str;
 	*sz = 0;
-	while (start && *start == '/' && *(start + 1) == '/')
+	طالما (start && *start == '/' && *(start + 1) == '/')
 		start++;
 
-	if (!start || !*start)
-		return NULL;
+	إذا (!start || !*start)
+		أرجع عدم;
 
-	for (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
+	لكل (*sz = 1, p = start + 1; *p && *p != '/'; p++) {
 		(*sz)++;
 	}
 
-	return start;
+	أرجع start;
 }
 
-int streq_paths(const char *a, const char *b)
+صحيح streq_paths(ثابت حرف *a, ثابت حرف *b)
 {
-	while (a && b) {
+	طالما (a && b) {
 		size_t a_sz, b_sz;
-		const char *a_seg = ul_path_next_segment(a, &a_sz);
-		const char *b_seg = ul_path_next_segment(b, &b_sz);
+		ثابت حرف *a_seg = ul_path_next_segment(a, &a_sz);
+		ثابت حرف *b_seg = ul_path_next_segment(b, &b_sz);
 
 		/*
 		fprintf(stderr, "A>>>(%zu) '%s'\n", a_sz, a_seg);
@@ -976,178 +976,178 @@ int streq_paths(const char *a, const char *b)
 		*/
 
 		/* end of the path */
-		if (a_sz + b_sz == 0)
-			return 1;
+		إذا (a_sz + b_sz == 0)
+			أرجع 1;
 
 		/* ignore trailing slash */
-		if (a_sz + b_sz == 1 &&
+		إذا (a_sz + b_sz == 1 &&
 		    ((a_seg && *a_seg == '/') || (b_seg && *b_seg == '/')))
-			return 1;
+			أرجع 1;
 
-		if (!a_seg || !b_seg)
-			break;
-		if (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
-			break;
+		إذا (!a_seg || !b_seg)
+			اكسر;
+		إذا (a_sz != b_sz || strncmp(a_seg, b_seg, a_sz) != 0)
+			اكسر;
 
 		a = a_seg + a_sz;
 		b = b_seg + b_sz;
 	};
 
-	return 0;
+	أرجع 0;
 }
 
 /* Returns 1 if @path is @dir or a path below @dir, compared like streq_paths() */
-int ul_path_is_within(const char *path, const char *dir)
+صحيح ul_path_is_within(ثابت حرف *path, ثابت حرف *dir)
 {
-	if (!path || !dir || !*path || !*dir)
-		return 0;
+	إذا (!path || !dir || !*path || !*dir)
+		أرجع 0;
 
-	while (path && dir) {
+	طالما (path && dir) {
 		size_t p_sz, d_sz;
-		const char *p_seg = ul_path_next_segment(path, &p_sz);
-		const char *d_seg = ul_path_next_segment(dir, &d_sz);
+		ثابت حرف *p_seg = ul_path_next_segment(path, &p_sz);
+		ثابت حرف *d_seg = ul_path_next_segment(dir, &d_sz);
 
 		/* all @dir segments matched */
-		if (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
-			return 1;
+		إذا (d_sz == 0 || (d_sz == 1 && d_seg && *d_seg == '/'))
+			أرجع 1;
 
-		if (!p_seg || !d_seg)
-			break;
-		if (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
-			break;
+		إذا (!p_seg || !d_seg)
+			اكسر;
+		إذا (p_sz != d_sz || strncmp(p_seg, d_seg, p_sz) != 0)
+			اكسر;
 
 		path = p_seg + p_sz;
 		dir = d_seg + d_sz;
 	}
 
-	return 0;
+	أرجع 0;
 }
 
 /* concatenate two strings to a new string, the size of the second string is limited by @b */
-char *ul_strnconcat(const char *s, const char *suffix, size_t b)
+حرف *ul_strnconcat(ثابت حرف *s, ثابت حرف *suffix, size_t b)
 {
 	size_t a;
-	char *r;
+	حرف *r;
 
-	if (!s && !suffix)
-		return strdup("");
-	if (!s)
-		return strndup(suffix, b);
-	if (!suffix)
-		return strdup(s);
+	إذا (!s && !suffix)
+		أرجع strdup("");
+	إذا (!s)
+		أرجع strndup(suffix, b);
+	إذا (!suffix)
+		أرجع strdup(s);
 
-	assert(s);
-	assert(suffix);
+	أكد(s);
+	أكد(suffix);
 
 	a = strlen(s);
-	if (b > ((size_t) -1) - a)
-		return NULL;
+	إذا (b > ((size_t) -1) - a)
+		أرجع عدم;
 
 	r = malloc(a + b + 1);
-	if (!r)
-		return NULL;
+	إذا (!r)
+		أرجع عدم;
 
 	memcpy(r, s, a);
 	memcpy(r + a, suffix, b);
 	r[a+b] = 0;
 
-	return r;
+	أرجع r;
 }
 
 /* concatenate two strings to a new string */
-char *ul_strconcat(const char *s, const char *suffix)
+حرف *ul_strconcat(ثابت حرف *s, ثابت حرف *suffix)
 {
-	return ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
+	أرجع ul_strnconcat(s, suffix, suffix ? strlen(suffix) : 0);
 }
 
 /* concatenate @s and string defined by @format to a new string */
-char *ul_strfconcat(const char *s, const char *format, ...)
+حرف *ul_strfconcat(ثابت حرف *s, ثابت حرف *format, ...)
 {
 	va_list ap;
-	char *val, *res;
-	int sz;
+	حرف *val, *res;
+	صحيح sz;
 
 	va_start(ap, format);
 	sz = vasprintf(&val, format, ap);
 	va_end(ap);
 
-	if (sz < 0)
-		return NULL;
+	إذا (sz < 0)
+		أرجع عدم;
 
 	res = ul_strnconcat(s, val, sz);
-	free(val);
-	return res;
+	حرر(val);
+	أرجع res;
 }
 
-int ul_strappend(char **a, const char *b)
+صحيح ul_strappend(حرف **a, ثابت حرف *b)
 {
 	size_t al, bl;
-	char *tmp;
+	حرف *tmp;
 
-	if (!a)
-		return -EINVAL;
-	if (!b || !*b)
-		return 0;
-	if (!*a) {
+	إذا (!a)
+		أرجع -EINVAL;
+	إذا (!b || !*b)
+		أرجع 0;
+	إذا (!*a) {
 		*a = strdup(b);
-		return !*a ? -ENOMEM : 0;
+		أرجع !*a ? -ENOMEM : 0;
 	}
 
 	al = strlen(*a);
 	bl = strlen(b);
 
 	tmp = realloc(*a, al + bl + 1);
-	if (!tmp)
-		return -ENOMEM;
+	إذا (!tmp)
+		أرجع -ENOMEM;
 	*a = tmp;
 	memcpy((*a) + al, b, bl + 1);
-	return 0;
+	أرجع 0;
 }
 
 /* the hybrid version of strfconcat and strappend. */
-int strfappend(char **a, const char *format, ...)
+صحيح strfappend(حرف **a, ثابت حرف *format, ...)
 {
 	va_list ap;
-	int res;
+	صحيح res;
 
 	va_start(ap, format);
 	res = ul_strvfappend(a, format, ap);
 	va_end(ap);
 
-	return res;
+	أرجع res;
 }
 
-extern int ul_strvfappend(char **a, const char *format, va_list ap)
+خارجي صحيح ul_strvfappend(حرف **a, ثابت حرف *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	حرف *val;
+	صحيح sz;
+	صحيح res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	إذا (sz < 0)
+		أرجع -errno;
 
 	res = ul_strappend(a, val);
-	free(val);
-	return res;
+	حرر(val);
+	أرجع res;
 }
 
-static size_t strcspn_escaped(const char *s, const char *reject)
+ساكن size_t strcspn_escaped(ثابت حرف *s, ثابت حرف *reject)
 {
-	int escaped = 0;
-	int n;
+	صحيح escaped = 0;
+	صحيح n;
 
-	for (n=0; s[n]; n++) {
-		if (escaped)
+	لكل (n=0; s[n]; n++) {
+		إذا (escaped)
 			escaped = 0;
-		else if (s[n] == '\\')
+		وإلا إذا (s[n] == '\\')
 			escaped = 1;
-		else if (strchr(reject, s[n]))
-			break;
+		وإلا إذا (strchr(reject, s[n]))
+			اكسر;
 	}
 
 	/* if s ends in \, return index of previous char */
-	return n - escaped;
+	أرجع n - escaped;
 }
 
 /*
@@ -1163,110 +1163,110 @@ static size_t strcspn_escaped(const char *s, const char *reject)
  *
  *	"abcd\\XefgXh"  --> "\XefgXh"   for @c='\\'
  */
-char *ul_strchr_escaped(const char *s, int c)
+حرف *ul_strchr_escaped(ثابت حرف *s, صحيح c)
 {
-	char *p;
-	int esc = 0;
+	حرف *p;
+	صحيح esc = 0;
 
-	for (p = (char *) s; p && *p; p++) {
-		if (!esc && *p == '\\') {
+	لكل (p = (حرف *) s; p && *p; p++) {
+		إذا (!esc && *p == '\\') {
 			esc = 1;
-			continue;
+			استمر;
 		}
-		if (*p == c && (!esc || c == '\\'))
-			return p;
+		إذا (*p == c && (!esc || c == '\\'))
+			أرجع p;
 		esc = 0;
 	}
 
-	return NULL;
+	أرجع عدم;
 }
 
 /* Split a string into words. */
-const char *ul_split(const char **state, size_t *l, const char *separator, int quoted)
+ثابت حرف *ul_split(ثابت حرف **state, size_t *l, ثابت حرف *separator, صحيح quoted)
 {
-	const char *current;
+	ثابت حرف *current;
 
 	current = *state;
 
-	if (!*current) {
-		assert(**state == '\0');
-		return NULL;
+	إذا (!*current) {
+		أكد(**state == '\0');
+		أرجع عدم;
 	}
 
 	current += strspn(current, separator);
-	if (!*current) {
+	إذا (!*current) {
 		*state = current;
-		return NULL;
+		أرجع عدم;
 	}
 
-	if (quoted && strchr("\'\"", *current)) {
-		char quotechars[2] = {*current, '\0'};
+	إذا (quoted && strchr("\'\"", *current)) {
+		حرف quotechars[2] = {*current, '\0'};
 
 		*l = strcspn_escaped(current + 1, quotechars);
-		if (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
+		إذا (current[*l + 1] == '\0' || current[*l + 1] != quotechars[0] ||
 		    (current[*l + 2] && !strchr(separator, current[*l + 2]))) {
 			/* right quote missing or garbage at the end */
 			*state = current;
-			return NULL;
+			أرجع عدم;
 		}
 		*state = current++ + *l + 2;
-	} else if (quoted) {
+	} وإلا إذا (quoted) {
 		*l = strcspn_escaped(current, separator);
-		if (current[*l] && !strchr(separator, current[*l])) {
+		إذا (current[*l] && !strchr(separator, current[*l])) {
 			/* unfinished escape */
 			*state = current;
-			return NULL;
+			أرجع عدم;
 		}
 		*state = current + *l;
-	} else {
+	} وإلا {
 		*l = strcspn(current, separator);
 		*state = current + *l;
 	}
 
-	return current;
+	أرجع current;
 }
 
 /* Rewind file pointer forward to new line.  */
-int skip_fline(FILE *fp)
+صحيح skip_fline(FILE *fp)
 {
-	int ch;
+	صحيح ch;
 
-	do {
-		if ((ch = fgetc(fp)) == EOF)
-			return 1;
-		if (ch == '\n')
-			return 0;
-	} while (1);
+	افعل {
+		إذا ((ch = fgetc(fp)) == EOF)
+			أرجع 1;
+		إذا (ch == '\n')
+			أرجع 0;
+	} طالما (1);
 }
 
 
 /* compare two strings, but ignoring non-alnum and case of the characters, for example
  * "Hello (123)!" is the same as "hello123".
  */
-int ul_stralnumcmp(const char *p1, const char *p2)
+صحيح ul_stralnumcmp(ثابت حرف *p1, ثابت حرف *p2)
 {
-	const unsigned char *s1 = (const unsigned char *) p1;
-	const unsigned char *s2 = (const unsigned char *) p2;
-	unsigned char c1, c2;
+	ثابت unsigned حرف *s1 = (ثابت unsigned حرف *) p1;
+	ثابت unsigned حرف *s2 = (ثابت unsigned حرف *) p2;
+	unsigned حرف c1, c2;
 
-	do {
-		do {
-			c1 = (unsigned char) *s1++;
-		} while (c1 != '\0' && !isalnum((unsigned int) c1));
+	افعل {
+		افعل {
+			c1 = (unsigned حرف) *s1++;
+		} طالما (c1 != '\0' && !isalnum((unsigned صحيح) c1));
 
-		do {
-			c2 = (unsigned char) *s2++;
-		} while (c2 != '\0' && !isalnum((unsigned int) c2));
+		افعل {
+			c2 = (unsigned حرف) *s2++;
+		} طالما (c2 != '\0' && !isalnum((unsigned صحيح) c2));
 
-		if (c1 != '\0')
+		إذا (c1 != '\0')
 			c1 = tolower(c1);
-		if (c2 != '\0')
+		إذا (c2 != '\0')
 			c2 = tolower(c2);
-		if (c1 == '\0')
-			return c1 - c2;
-	} while (c1 == c2);
+		إذا (c1 == '\0')
+			أرجع c1 - c2;
+	} طالما (c1 == c2);
 
-	return c1 - c2;
+	أرجع c1 - c2;
 }
 
 /*
@@ -1277,163 +1277,163 @@ int ul_stralnumcmp(const char *p1, const char *p2)
  *
  * Returns -EINVAL on parse error, 1 at the end of optstr and 0 on success.
  */
-int ul_optstr_next(char **optstr, char **name, size_t *namesz,
-		   char **value, size_t *valsz)
+صحيح ul_optstr_next(حرف **optstr, حرف **name, size_t *namesz,
+		   حرف **نيلاي, size_t *valsz)
 {
-	int open_quote = 0;
-	char *start = NULL, *stop = NULL, *p, *sep = NULL;
-	char *optstr0;
+	صحيح open_quote = 0;
+	حرف *start = عدم, *stop = عدم, *p, *sep = عدم;
+	حرف *optstr0;
 
-	assert(optstr);
-	assert(*optstr);
+	أكد(optstr);
+	أكد(*optstr);
 
 	optstr0 = *optstr;
 
-	if (name)
-		*name = NULL;
-	if (namesz)
+	إذا (name)
+		*name = عدم;
+	إذا (namesz)
 		*namesz = 0;
-	if (value)
-		*value = NULL;
-	if (valsz)
+	إذا (نيلاي)
+		*نيلاي = عدم;
+	إذا (valsz)
 		*valsz = 0;
 
 	/* trim leading commas as to not invalidate option
 	 * strings with multiple consecutive commas */
-	while (optstr0 && *optstr0 == ',')
+	طالما (optstr0 && *optstr0 == ',')
 		optstr0++;
 
-	for (p = optstr0; p && *p; p++) {
-		if (!start && *p == '=')
-			return -EINVAL;
-		if (!start)
+	لكل (p = optstr0; p && *p; p++) {
+		إذا (!start && *p == '=')
+			أرجع -EINVAL;
+		إذا (!start)
 			start = p;		/* beginning of the option item */
-		if (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
+		إذا (*p == '"' && (p == optstr0 || *(p - 1) != '\\'))
 			open_quote ^= 1;	/* reverse the status */
-		if (open_quote)
-			continue;		/* still in quoted block */
-		if (!sep && p > start && *p == '=')
+		إذا (open_quote)
+			استمر;		/* still in quoted block */
+		إذا (!sep && p > start && *p == '=')
 			sep = p;		/* name and value separator */
-		if (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
+		إذا (*p == ',' && (p == optstr0 || *(p - 1) != '\\'))
 			stop = p;		/* terminate the option item */
-		else if (*(p + 1) == '\0')
+		وإلا إذا (*(p + 1) == '\0')
 			stop = p + 1;		/* end of optstr */
-		if (!start || !stop)
-			continue;
-		if (stop <= start)
-			return -EINVAL;
+		إذا (!start || !stop)
+			استمر;
+		إذا (stop <= start)
+			أرجع -EINVAL;
 
-		if (name)
+		إذا (name)
 			*name = start;
-		if (namesz)
+		إذا (namesz)
 			*namesz = sep ? sep - start : stop - start;
 		*optstr = *stop ? stop + 1 : stop;
 
-		if (sep) {
-			if (value)
-				*value = sep + 1;
-			if (valsz)
+		إذا (sep) {
+			إذا (نيلاي)
+				*نيلاي = sep + 1;
+			إذا (valsz)
 				*valsz = stop - sep - 1;
 		}
-		return 0;
+		أرجع 0;
 	}
 
-	return 1;				/* end of optstr */
+	أرجع 1;				/* end of optstr */
 }
 
-int ul_optstr_is_valid(const char *optstr)
+صحيح ul_optstr_is_valid(ثابت حرف *optstr)
 {
-	int rc;
-	char *p = (char *) optstr;
+	صحيح rc;
+	حرف *p = (حرف *) optstr;
 
-	while ((rc = ul_optstr_next(&p, NULL, NULL, NULL, NULL)) == 0);
-	return rc < 0 ? 0 : 1;
+	طالما ((rc = ul_optstr_next(&p, عدم, عدم, عدم, عدم)) == 0);
+	أرجع rc < 0 ? 0 : 1;
 }
 
-char *ul_optstr_get_value(const char *optstr, const char *key)
+حرف *ul_optstr_get_نيلاي(ثابت حرف *optstr, ثابت حرف *کونچي)
 {
 	size_t sz, namesz = 0, valsz = 0;
-	char *name = NULL, *value = NULL;
-	char *p = (char *) optstr;
+	حرف *name = عدم, *نيلاي = عدم;
+	حرف *p = (حرف *) optstr;
 
-	if (!optstr || !key || !*key)
-		return NULL;
+	إذا (!optstr || !کونچي || !*کونچي)
+		أرجع عدم;
 
-	sz = strlen(key);
-	while (ul_optstr_next(&p, &name, &namesz, &value, &valsz) == 0) {
-		if (namesz != sz || !valsz)
-			continue;
-		if (strncmp(name, key, namesz) == 0)
-			return strndup(value, valsz);
+	sz = strlen(کونچي);
+	طالما (ul_optstr_next(&p, &name, &namesz, &نيلاي, &valsz) == 0) {
+		إذا (namesz != sz || !valsz)
+			استمر;
+		إذا (strncmp(name, کونچي, namesz) == 0)
+			أرجع strndup(نيلاي, valsz);
 	}
-	return NULL;
+	أرجع عدم;
 }
 
 /* Removes one pair of matching surrounding quotes ('' or "") from @str.
  *
  * Returns size of the new string (without \0).
  */
-size_t ul_unquote(char *str)
+size_t ul_unquote(حرف *str)
 {
 	size_t len;
-	char q;
+	حرف q;
 
-	if (!str || !*str)
-		return 0;
+	إذا (!str || !*str)
+		أرجع 0;
 
 	len = strlen(str);
 	q = *str;
 
-	if ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
-		return len;
+	إذا ((q != '"' && q != '\'') || len < 2 || str[len - 1] != q)
+		أرجع len;
 
 	memmove(str, str + 1, len - 2);
 	str[len - 2] = '\0';
-	return len - 2;
+	أرجع len - 2;
 }
 
 #ifdef TEST_PROGRAM_STRUTILS
 
-struct testS {
-	char *name;
-	char *value;
+بنية testS {
+	حرف *name;
+	حرف *نيلاي;
 };
 
-static int test_strdup_to_member(int argc, char *argv[])
+ساكن صحيح test_strdup_to_member(صحيح argc, حرف *argv[])
 {
-	struct testS *xx;
+	بنية testS *xx;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	إذا (argc < 3)
+		أرجع EXIT_FAILURE;
 
-	xx = calloc(1, sizeof(*xx));
-	if (!xx)
+	xx = calloc(1, حجم(*xx));
+	إذا (!xx)
 		err(EXIT_FAILURE, "calloc() failed");
 
 	strdup_to_struct_member(xx, name, argv[1]);
-	strdup_to_struct_member(xx, value, argv[2]);
+	strdup_to_struct_member(xx, نيلاي, argv[2]);
 
-	if (strcmp(xx->name, argv[1]) != 0 &&
-	    strcmp(xx->value, argv[2]) != 0)
+	إذا (strcmp(xx->name, argv[1]) != 0 &&
+	    strcmp(xx->نيلاي, argv[2]) != 0)
 		errx(EXIT_FAILURE, "strdup_to_struct_member() failed");
 
-	printf("1: '%s', 2: '%s'\n", xx->name, xx->value);
+	printf("1: '%s', 2: '%s'\n", xx->name, xx->نيلاي);
 
-	free(xx->name);
-	free(xx->value);
-	free(xx);
-	return EXIT_SUCCESS;
+	حرر(xx->name);
+	حرر(xx->نيلاي);
+	حرر(xx);
+	أرجع EXIT_SUCCESS;
 }
 
-static int test_strutils_sizes(int argc, char *argv[])
+ساكن صحيح test_strutils_sizes(صحيح argc, حرف *argv[])
 {
 	uintmax_t size = 0;
-	char *hum1, *hum2, *hum3;
+	حرف *hum1, *hum2, *hum3;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	إذا (argc < 2)
+		أرجع EXIT_FAILURE;
 
-	if (strtosize(argv[1], &size))
+	إذا (strtosize(argv[1], &size))
 		errx(EXIT_FAILURE, "invalid size '%s' value", argv[1]);
 
 	hum1 = size_to_human_string(SIZE_SUFFIX_1LETTER, size);
@@ -1444,52 +1444,52 @@ static int test_strutils_sizes(int argc, char *argv[])
 				    SIZE_DECIMAL_2DIGITS, size);
 
 	printf("%25s : %20ju : %8s : %12s : %13s\n", argv[1], size, hum1, hum2, hum3);
-	free(hum1);
-	free(hum2);
-	free(hum3);
+	حرر(hum1);
+	حرر(hum2);
+	حرر(hum3);
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
 
-static int test_strutils_cmp_paths(int argc, char *argv[])
+ساكن صحيح test_strutils_cmp_paths(صحيح argc, حرف *argv[])
 {
-	int rc = streq_paths(argv[1], argv[2]);
+	صحيح rc = streq_paths(argv[1], argv[2]);
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	إذا (argc < 3)
+		أرجع EXIT_FAILURE;
 
 	printf("%s: '%s' '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
 
-static int test_strutils_path_is_within(int argc, char *argv[])
+ساكن صحيح test_strutils_path_is_within(صحيح argc, حرف *argv[])
 {
-	int rc;
+	صحيح rc;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	إذا (argc < 3)
+		أرجع EXIT_FAILURE;
 
 	rc = ul_path_is_within(argv[1], argv[2]);
 
 	printf("%s: '%s' within '%s'\n", rc == 1 ? "YES" : "NOT", argv[1], argv[2]);
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
 
-static int test_strutils_normalize(int argc, char *argv[])
+ساكن صحيح test_strutils_normalize(صحيح argc, حرف *argv[])
 {
-	unsigned char *src, *dst, *org;
+	unsigned حرف *src, *dst, *org;
 	size_t sz, len;
 
-	if (argc < 2)
-		return EXIT_FAILURE;
+	إذا (argc < 2)
+		أرجع EXIT_FAILURE;
 
-	org = (unsigned char *) strdup(argv[1]);
-	src = (unsigned char *) strdup((char *) org);
-	len = strlen((char *) src);
+	org = (unsigned حرف *) strdup(argv[1]);
+	src = (unsigned حرف *) strdup((حرف *) org);
+	len = strlen((حرف *) src);
 	dst = malloc(len + 1);
 
-	if (!org || !src || !dst)
-		goto done;
+	إذا (!org || !src || !dst)
+		اذهب done;
 
 	/* two buffers */
 	sz = __normalize_whitespace(src, len, dst, len + 1);
@@ -1500,136 +1500,136 @@ static int test_strutils_normalize(int argc, char *argv[])
 	printf("2: '%s' --> '%s' [sz=%zu]\n", org, src, sz);
 
 done:
-	free(src);
-	free(dst);
-	free(org);
+	حرر(src);
+	حرر(dst);
+	حرر(org);
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
 
-static int test_strutils_cstrcasecmp(int argc, char *argv[])
+ساكن صحيح test_strutils_cstrcasecmp(صحيح argc, حرف *argv[])
 {
-	char *a, *b;
+	حرف *a, *b;
 
-	if (argc < 3)
-		return EXIT_FAILURE;
+	إذا (argc < 3)
+		أرجع EXIT_FAILURE;
 
 	a = argv[1];
 	b = argv[2];
 
-	if (!a || !b)
-		return EXIT_FAILURE;
+	إذا (!a || !b)
+		أرجع EXIT_FAILURE;
 
 	printf("cmp    '%s' '%s' = %d\n", a, b, strcasecmp(a, b));
 	printf("c_cmp  '%s' '%s' = %d\n", a, b, c_strcasecmp(a, b));
 	printf("c_ncmp '%s' '%s' = %d\n", a, b, c_strncasecmp(a, b, strlen(a)));
 
-	return EXIT_SUCCESS;
+	أرجع EXIT_SUCCESS;
 }
 
-int main(int argc, char *argv[])
+صحيح main(صحيح argc, حرف *argv[])
 {
-	if (argc == 3 && strcmp(argv[1], "--size") == 0) {
-		return test_strutils_sizes(argc - 1, argv + 1);
+	إذا (argc == 3 && strcmp(argv[1], "--size") == 0) {
+		أرجع test_strutils_sizes(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--parse-switch") == 0) {
 		printf("'%s'-->%d\n", argv[2], ul_parse_switch(argv[2],
 						"on", "off",
 						"enable", "disable",
 						"yes", "no",
 						"1", "0",
-						NULL));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
+						عدم));
+		أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtobool") == 0) {
 		bool val;
-		if (ul_strtobool(argv[2], &val))
+		إذا (ul_strtobool(argv[2], &val))
 			err(EXIT_FAILURE, "could not parse '%s'", argv[2]);
 		printf("'%s'-->%s\n", argv[2], val ? "true" : "false");
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
-		return test_strutils_cmp_paths(argc - 1, argv + 1);
+	} وإلا إذا (argc == 4 && strcmp(argv[1], "--cmp-paths") == 0) {
+		أرجع test_strutils_cmp_paths(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
-		return test_strutils_path_is_within(argc - 1, argv + 1);
+	} وإلا إذا (argc == 4 && strcmp(argv[1], "--path-is-within") == 0) {
+		أرجع test_strutils_path_is_within(argc - 1, argv + 1);
 
-	} else if (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
-		return test_strdup_to_member(argc - 1, argv + 1);
+	} وإلا إذا (argc == 4 && strcmp(argv[1], "--strdup-member") == 0) {
+		أرجع test_strdup_to_member(argc - 1, argv + 1);
 
-	} else if  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
+	} وإلا إذا  (argc == 4 && strcmp(argv[1], "--stralnumcmp") == 0) {
 		printf("%s\n", ul_stralnumcmp(argv[2], argv[3]) == 0 ?
 				"match" : "mismatch");
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
-		return test_strutils_cstrcasecmp(argc - 1, argv + 1);
+	} وإلا إذا (argc == 4 && strcmp(argv[1], "--cstrcasecmp") == 0) {
+		أرجع test_strutils_cstrcasecmp(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
-		return test_strutils_normalize(argc - 1, argv + 1);
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--normalize") == 0) {
+		أرجع test_strutils_normalize(argc - 1, argv + 1);
 
-	} else if (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtos64") == 0) {
 		printf("'%s'-->%"PRId64"\n", argv[2], strtos64_or_err(argv[2], "strtos64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
+		أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtou64") == 0) {
 		printf("'%s'-->%"PRIu64"\n", argv[2], strtou64_or_err(argv[2], "strtou64 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
+		أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtos32") == 0) {
 		printf("'%s'-->%d\n", argv[2], strtos32_or_err(argv[2], "strtos32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
+		أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtou32") == 0) {
 		printf("'%s'-->%u\n", argv[2], strtou32_or_err(argv[2], "strtou32 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
+		أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtos16") == 0) {
 		printf("'%s'-->%hd\n", argv[2], strtos16_or_err(argv[2], "strtos16 failed"));
-		return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
+		أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--strtou16") == 0) {
 		printf("'%s'-->%hu\n", argv[2], strtou16_or_err(argv[2], "strtou16 failed"));
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 
-	} else if (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
+	} وإلا إذا (argc == 4 && strcmp(argv[1], "--strchr-escaped") == 0) {
 		printf("\"%s\" --> \"%s\"\n", argv[2], ul_strchr_escaped(argv[2], *argv[3]));
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 
-	} else if (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
-		char *buf = "abc\0Y\0\0xyz\0X";
-		char *end = buf + 12;
-		char *p = buf;
+	} وإلا إذا (argc == 2 && strcmp(argv[1], "--next-string") == 0) {
+		حرف *buf = "abc\0Y\0\0xyz\0X";
+		حرف *end = buf + 12;
+		حرف *p = buf;
 
-		do {
+		افعل {
 			printf("str: '%s'\n", p);
-		} while ((p = ul_next_string(p, end)));
+		} طالما ((p = ul_next_string(p, end)));
 
-		return EXIT_SUCCESS;
+		أرجع EXIT_SUCCESS;
 
-	} else if (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--optstr") == 0) {
 
 		size_t namesz, valsz;
-		char *name = NULL, *val = NULL;
-		char *p = argv[2];
-		int rc;
+		حرف *name = عدم, *val = عدم;
+		حرف *p = argv[2];
+		صحيح rc;
 
-		if (!ul_optstr_is_valid(p))
+		إذا (!ul_optstr_is_valid(p))
 			errx(EXIT_FAILURE, _("unsupported option format: %s"), p);
 
-		while ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
-			printf("'%.*s' : '%.*s'\n", (int) namesz, name,
-						   (int) valsz, val);
+		طالما ((rc = ul_optstr_next(&p, &name, &namesz, &val, &valsz)) == 0) {
+			printf("'%.*s' : '%.*s'\n", (صحيح) namesz, name,
+						   (صحيح) valsz, val);
 		}
-		if (rc == 1)
-			return EXIT_SUCCESS;
-	} else if (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
+		إذا (rc == 1)
+			أرجع EXIT_SUCCESS;
+	} وإلا إذا (argc == 3 && strcmp(argv[1], "--unquote") == 0) {
 
-		char *unquoted = strdup(argv[2]);
+		حرف *unquoted = strdup(argv[2]);
 
-		if (!unquoted)
+		إذا (!unquoted)
 			err(EXIT_FAILURE, "strdup() failed");
 
 		ul_unquote(unquoted);
 		printf("%s-->%s\n", argv[2], unquoted);
-		free(unquoted);
-		return EXIT_SUCCESS;
+		حرر(unquoted);
+		أرجع EXIT_SUCCESS;
 
-	} else {
+	} وإلا {
 		fprintf(stderr, "usage: %1$s --size <number>[suffix]\n"
 				"       %1$s --strtobool <str>\n"
 				"       %1$s --parse-switch <str>\n"
@@ -1646,6 +1646,6 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	return EXIT_FAILURE;
+	أرجع EXIT_FAILURE;
 }
 #endif /* TEST_PROGRAM_STRUTILS */
