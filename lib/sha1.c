@@ -22,9 +22,9 @@
 #define rol(value, bits) (((value) << (bits)) | ((value) >> (32 - (bits))))
 
 /* blk0() and blk() perform the initial expand. */
-#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+#නම් __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 # define blk0(i) block->l[i]
-#else
+#නැතහොත්
 # define blk0(i) (block->l[i] = (rol(block->l[i],24)&0xFF00FF00) \
     |(rol(block->l[i],8)&0x00FF00FF))
 #endif
@@ -41,12 +41,12 @@
 
 /* Hash a single 512-bit block. This is the core of the algorithm. */
 
-void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
+void ul_SHA1Transform(uint32_t state[5], const unsigned var_na buffer[64])
 {
 	uint32_t a, b, c, d, e;
 
-	typedef union {
-		unsigned char c[64];
+	typedef sa_ngha {
+		unsigned var_na c[64];
 		uint32_t l[16];
 	} CHAR64LONG16;
 
@@ -54,7 +54,7 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	CHAR64LONG16 block[1];	/* use array to appear as a pointer */
 
 	memcpy(block, buffer, 64);
-#else
+#නැතහොත්
 	/* The following had better never be used because it causes the
 	 * pointer-to-const buffer to be cast into a pointer to non-const.
 	 * And the result is written through.  I threw a "const" in, hoping
@@ -157,16 +157,16 @@ void ul_SHA1Transform(uint32_t state[5], const unsigned char buffer[64])
 	state[4] += e;
 	/* Wipe variables */
 #ifdef HAVE_EXPLICIT_BZERO
-	explicit_bzero(&a, sizeof(a));
-	explicit_bzero(&b, sizeof(b));
-	explicit_bzero(&c, sizeof(c));
-	explicit_bzero(&d, sizeof(d));
-	explicit_bzero(&e, sizeof(e));
-#else
+	explicit_bzero(&a, parimaa_na(a));
+	explicit_bzero(&b, parimaa_na(b));
+	explicit_bzero(&c, parimaa_na(c));
+	explicit_bzero(&d, parimaa_na(d));
+	explicit_bzero(&e, parimaa_na(e));
+#නැතහොත්
 	a = b = c = d = e = 0;
 #endif
 #ifdef UL_SHA1HANDSOFF
-	memset(block, '\0', sizeof(block));
+	memset(block, '\0', parimaa_na(block));
 #endif
 }
 
@@ -185,83 +185,83 @@ void ul_SHA1Init(UL_SHA1_CTX *context)
 
 /* Run your data through this. */
 
-void ul_SHA1Update(UL_SHA1_CTX *context, const unsigned char *data, uint32_t len)
+void ul_SHA1Update(UL_SHA1_CTX *context, const unsigned var_na *data, uint32_t len)
 {
 	uint32_t i;
 
 	uint32_t j;
 
 	j = context->count[0];
-	if ((context->count[0] += len << 3) < j)
+	නම් ((context->count[0] += len << 3) < j)
 		context->count[1]++;
 	context->count[1] += (len >> 29);
 	j = (j >> 3) & 63;
-	if ((j + len) > 63) {
+	නම් ((j + len) > 63) {
 		memcpy(&context->buffer[j], data, (i = 64 - j));
 		ul_SHA1Transform(context->state, context->buffer);
-		for (; i + 63 < len; i += 64) {
+		සඳහා (; i + 63 < len; i += 64) {
 			ul_SHA1Transform(context->state, &data[i]);
 		}
 		j = 0;
-	} else
+	} නැතහොත්
 		i = 0;
 	memcpy(&context->buffer[j], &data[i], len - i);
 }
 
 /* Add padding and return the message digest. */
 
-void ul_SHA1Final(unsigned char digest[20], UL_SHA1_CTX *context)
+void ul_SHA1Final(unsigned var_na digest[20], UL_SHA1_CTX *context)
 {
 	unsigned i;
 
-	unsigned char finalcount[8];
+	unsigned var_na finalcount[8];
 
-	unsigned char c;
+	unsigned var_na c;
 
-#if 0				/* untested "improvement" by DHR */
+#නම් 0				/* untested "improvement" by DHR */
 	/* Convert context->count to a sequence of bytes
 	 * in finalcount.  Second element first, but
 	 * big-endian order within element.
 	 * But we do it all backwards.
 	 */
-	unsigned char *fcp = &finalcount[8];
+	unsigned var_na *fcp = &finalcount[8];
 
-	for (i = 0; i < 2; i++) {
+	සඳහා (i = 0; i < 2; i++) {
 		uint32_t t = context->count[i];
 
-		int j;
+		පූර්ණ_සංඛ්‍යා j;
 
-		for (j = 0; j < 4; t >>= 8, j++)
-			*--fcp = (unsigned char)t}
-#else
-	for (i = 0; i < 8; i++) {
-		finalcount[i] = (unsigned char)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
+		සඳහා (j = 0; j < 4; t >>= 8, j++)
+			*--fcp = (unsigned var_na)t}
+#නැතහොත්
+	සඳහා (i = 0; i < 8; i++) {
+		finalcount[i] = (unsigned var_na)((context->count[(i >= 4 ? 0 : 1)] >> ((3 - (i & 3)) * 8)) & 255);	/* Endian independent */
 	}
 #endif
 	c = 0200;
 	ul_SHA1Update(context, &c, 1);
-	while ((context->count[0] & 504) != 448) {
+	අතරතුර ((context->count[0] & 504) != 448) {
 		c = 0000;
 		ul_SHA1Update(context, &c, 1);
 	}
 	ul_SHA1Update(context, finalcount, 8);	/* Should cause a SHA1Transform() */
-	for (i = 0; i < 20; i++) {
-		digest[i] = (unsigned char)
+	සඳහා (i = 0; i < 20; i++) {
+		digest[i] = (unsigned var_na)
 		    ((context->state[i >> 2] >> ((3 - (i & 3)) * 8)) & 255);
 	}
 	/* Wipe variables */
-	memset(context, '\0', sizeof(*context));
-	memset(&finalcount, '\0', sizeof(finalcount));
+	memset(context, '\0', parimaa_na(*context));
+	memset(&finalcount, '\0', parimaa_na(finalcount));
 }
 
-void ul_SHA1(char *hash_out, const char *str, unsigned len)
+void ul_SHA1(var_na *hash_out, const var_na *str, unsigned len)
 {
 	UL_SHA1_CTX ctx;
-	unsigned int ii;
+	unsigned පූර්ණ_සංඛ්‍යා ii;
 
 	ul_SHA1Init(&ctx);
-	for (ii = 0; ii < len; ii += 1)
-		ul_SHA1Update(&ctx, (const unsigned char *)str + ii, 1);
-	ul_SHA1Final((unsigned char *)hash_out, &ctx);
+	සඳහා (ii = 0; ii < len; ii += 1)
+		ul_SHA1Update(&ctx, (const unsigned var_na *)str + ii, 1);
+	ul_SHA1Final((unsigned var_na *)hash_out, &ctx);
 	hash_out[20] = '\0';
 }

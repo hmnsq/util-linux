@@ -6,23 +6,23 @@
 #include "c.h"
 #include "default_shell.h"
 
-const char *ul_default_shell(int flags, const struct passwd *pw)
+const var_na *ul_default_shell(පූර්ණ_සංඛ්‍යා flags, const sa_nracanaa passwd *pw)
 {
-	const char *shell = NULL;
+	const var_na *shell = NULL;
 
-	if (!(flags & UL_SHELL_NOENV)) {
+	නම් (!(flags & UL_SHELL_NOENV)) {
 		shell = getenv("SHELL");
-		if (shell && *shell)
-			return shell;
+		නම් (shell && *shell)
+			ආපසු shell;
 	}
-	if (!(flags & UL_SHELL_NOPWD)) {
-		if (!pw)
+	නම් (!(flags & UL_SHELL_NOPWD)) {
+		නම් (!pw)
 			pw = getpwuid(getuid());
-		if (pw)
+		නම් (pw)
 			shell = pw->pw_shell;
-		if (shell && *shell)
-			return shell;
+		නම් (shell && *shell)
+			ආපසු shell;
 	}
 
-	return _PATH_BSHELL;
+	ආපසු _PATH_BSHELL;
 }

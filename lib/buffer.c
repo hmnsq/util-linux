@@ -8,25 +8,25 @@
 #include "mbsalign.h"
 #include "strutils.h"
 
-void ul_buffer_reset_data(struct ul_buffer *buf)
+void ul_buffer_reset_data(sa_nracanaa ul_buffer *buf)
 {
-	if (buf->begin)
+	නම් (buf->begin)
 		memset(buf->begin, 0, buf->sz);
 	buf->end = buf->begin;
 
-	if (buf->ptrs && buf->nptrs)
-		memset(buf->ptrs, 0, buf->nptrs * sizeof(char *));
+	නම් (buf->ptrs && buf->nptrs)
+		memset(buf->ptrs, 0, buf->nptrs * parimaa_na(var_na *));
 }
 
-static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal)
+static anta_hstha var_na *ul_buffer_free_data_common(sa_nracanaa ul_buffer *buf, bool steal)
 {
-	char *t = NULL;
+	var_na *t = NULL;
 
 	assert(buf);
 
-	if (steal)
+	නම් (steal)
 		t = buf->begin;
-	else
+	නැතහොත්
 		free(buf->begin);
 	buf->begin = NULL;
 	buf->end = NULL;
@@ -40,106 +40,106 @@ static inline char *ul_buffer_free_data_common(struct ul_buffer *buf, bool steal
 	buf->encoded = NULL;
 	buf->encoded_sz = 0;
 
-	return t;
+	ආපසු t;
 }
 
-void ul_buffer_free_data(struct ul_buffer *buf)
+void ul_buffer_free_data(sa_nracanaa ul_buffer *buf)
 {
 	ul_buffer_free_data_common(buf, false);
 }
 
-char *ul_buffer_steal_string(struct ul_buffer *buf)
+var_na *ul_buffer_steal_string(sa_nracanaa ul_buffer *buf)
 {
-	if (ul_buffer_is_empty(buf)) {
+	නම් (ul_buffer_is_empty(buf)) {
 		ul_buffer_free_data(buf);
-		return NULL;
+		ආපසු NULL;
 	}
 
-	return ul_buffer_free_data_common(buf, true);
+	ආපසු ul_buffer_free_data_common(buf, true);
 }
 
-void ul_buffer_set_chunksize(struct ul_buffer *buf, size_t sz)
+void ul_buffer_set_chunksize(sa_nracanaa ul_buffer *buf, size_t sz)
 {
 	buf->chunksize = sz;
 }
 
-int ul_buffer_is_empty(struct ul_buffer *buf)
+පූර්ණ_සංඛ්‍යා ul_buffer_is_empty(sa_nracanaa ul_buffer *buf)
 {
-	return buf->begin == buf->end;
+	ආපසු buf->begin == buf->end;
 }
 
-int ul_buffer_save_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+පූර්ණ_සංඛ්‍යා ul_buffer_save_pointer(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx >= buf->nptrs) {
-		char **tmp = reallocarray(buf->ptrs, ptr_idx + 1, sizeof(char *));
+	නම් (ptr_idx >= buf->nptrs) {
+		var_na **tmp = reallocarray(buf->ptrs, ptr_idx + 1, parimaa_na(var_na *));
 
-		if (!tmp)
-			return -EINVAL;
+		නම් (!tmp)
+			ආපසු -EINVAL;
 		buf->ptrs = tmp;
 		buf->nptrs = ptr_idx + 1;
 	}
 
 	buf->ptrs[ptr_idx] = buf->end;
-	return 0;
+	ආපසු 0;
 }
 
 
-char *ul_buffer_get_pointer(struct ul_buffer *buf, unsigned short ptr_idx)
+var_na *ul_buffer_get_pointer(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
-	if (ptr_idx < buf->nptrs)
-		return buf->ptrs[ptr_idx];
-	return NULL;
+	නම් (ptr_idx < buf->nptrs)
+		ආපසු buf->ptrs[ptr_idx];
+	ආපසු NULL;
 }
 
 /* returns length from begin to the pointer */
-size_t ul_buffer_get_pointer_length(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_pointer_length(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
-	char *ptr = ul_buffer_get_pointer(buf, ptr_idx);
+	var_na *ptr = ul_buffer_get_pointer(buf, ptr_idx);
 
-	if (ptr && ptr > buf->begin)
-		return ptr - buf->begin;
-	return 0;
+	නම් (ptr && ptr > buf->begin)
+		ආපසු ptr - buf->begin;
+	ආපසු 0;
 }
 
 /* returns width of data in safe encoding (from the begin to the pointer) */
-size_t ul_buffer_get_safe_pointer_width(struct ul_buffer *buf, unsigned short ptr_idx)
+size_t ul_buffer_get_safe_pointer_width(sa_nracanaa ul_buffer *buf, unsigned short ptr_idx)
 {
 	size_t len = ul_buffer_get_pointer_length(buf, ptr_idx);
 
-	if (!len)
-		return 0;
+	නම් (!len)
+		ආපසු 0;
 
-	return mbs_safe_nwidth(buf->begin, len, NULL);
+	ආපසු mbs_safe_nwidth(buf->begin, len, NULL);
 }
 
-void ul_buffer_refer_string(struct ul_buffer *buf, char *str)
+void ul_buffer_refer_string(sa_nracanaa ul_buffer *buf, var_na *str)
 {
-	if (buf->sz)
+	නම් (buf->sz)
 		ul_buffer_free_data(buf);
 	buf->begin = str;
 	buf->sz = str ? strlen(str) : 0;
 	buf->end = buf->begin ? buf->begin + buf->sz : buf->begin;
 }
 
-int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
+පූර්ණ_සංඛ්‍යා ul_buffer_alloc_data(sa_nracanaa ul_buffer *buf, size_t sz)
 {
-	char *tmp;
+	var_na *tmp;
 	size_t len = 0;
 
 	assert(buf);
 
-	if (sz <= buf->sz)
-		return 0;
+	නම් (sz <= buf->sz)
+		ආපසු 0;
 
-	if (buf->end && buf->begin)
+	නම් (buf->end && buf->begin)
 		len = buf->end - buf->begin;
 
-	if (buf->chunksize)
+	නම් (buf->chunksize)
 		sz = ((sz + buf->chunksize) / buf->chunksize) * buf->chunksize + 1;
 
 	tmp = realloc(buf->begin, sz);
-	if (!tmp)
-		return -ENOMEM;
+	නම් (!tmp)
+		ආපසු -ENOMEM;
 
 	buf->begin = tmp;
 	buf->end = buf->begin + len;
@@ -147,175 +147,175 @@ int ul_buffer_alloc_data(struct ul_buffer *buf, size_t sz)
 
 	memset(buf->end, '\0', sz - len);
 
-	return 0;
+	ආපසු 0;
 }
 
-int ul_buffer_append_data(struct ul_buffer *buf, const char *data, size_t sz)
+පූර්ණ_සංඛ්‍යා ul_buffer_append_data(sa_nracanaa ul_buffer *buf, const var_na *data, size_t sz)
 {
 	size_t maxsz = 0;
 
-	if (!buf)
-		return -EINVAL;
-	if (!data)
-		return 0;
+	නම් (!buf)
+		ආපසු -EINVAL;
+	නම් (!data)
+		ආපසු 0;
 
-	if (buf->begin && buf->end)
+	නම් (buf->begin && buf->end)
 		maxsz = buf->sz - (buf->end - buf->begin);
-	if (maxsz <= sz + 1) {
-		int rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
-		if (rc)
-			return rc;
+	නම් (maxsz <= sz + 1) {
+		පූර්ණ_සංඛ්‍යා rc = ul_buffer_alloc_data(buf, buf->sz + sz + 1);
+		නම් (rc)
+			ආපසු rc;
 	}
-	if (!buf->end)
-		return -EINVAL;	/* make static analyzers happy */
+	නම් (!buf->end)
+		ආපසු -EINVAL;	/* make static analyzers happy */
 
 	buf->end = mempcpy(buf->end, data, sz);
 	*buf->end = '\0';	/* make sure it's terminated */
-	return 0;
+	ආපසු 0;
 }
 
-int ul_buffer_append_char(struct ul_buffer *buf, const char c)
+පූර්ණ_සංඛ්‍යා ul_buffer_append_char(sa_nracanaa ul_buffer *buf, const var_na c)
 {
-	return ul_buffer_append_data(buf, &c, 1);
+	ආපසු ul_buffer_append_data(buf, &c, 1);
 }
 
-int ul_buffer_append_string(struct ul_buffer *buf, const char *str)
+පූර්ණ_සංඛ්‍යා ul_buffer_append_string(sa_nracanaa ul_buffer *buf, const var_na *str)
 {
-	if (!str)
-		return 0;
+	නම් (!str)
+		ආපසු 0;
 
-	return ul_buffer_append_data(buf, str, strlen(str));
+	ආපසු ul_buffer_append_data(buf, str, strlen(str));
 }
 
-int ul_buffer_append_ntimes(struct ul_buffer *buf, size_t n, const char *str)
+පූර්ණ_සංඛ්‍යා ul_buffer_append_ntimes(sa_nracanaa ul_buffer *buf, size_t n, const var_na *str)
 {
 	size_t i;
 	size_t len = strlen(str);
 
-	for (i = 0; len && i < n; i++) {
-		int rc = ul_buffer_append_data(buf, str, len);
-		if (rc)
-			return rc;
+	සඳහා (i = 0; len && i < n; i++) {
+		පූර්ණ_සංඛ්‍යා rc = ul_buffer_append_data(buf, str, len);
+		නම් (rc)
+			ආපසු rc;
 	}
-	return 0;
+	ආපසු 0;
 }
 
-int ul_buffer_appendf(struct ul_buffer *buf, const char *format, ...)
+පූර්ණ_සංඛ්‍යා ul_buffer_appendf(sa_nracanaa ul_buffer *buf, const var_na *format, ...)
 {
 	va_list ap;
-	int res;
+	පූර්ණ_සංඛ්‍යා res;
 
 	va_start(ap, format);
 	res = ul_buffer_appendvf(buf, format, ap);
 	va_end(ap);
 
-	return res;
+	ආපසු res;
 }
 
-int ul_buffer_appendvf(struct ul_buffer *buf, const char *format, va_list ap)
+පූර්ණ_සංඛ්‍යා ul_buffer_appendvf(sa_nracanaa ul_buffer *buf, const var_na *format, va_list ap)
 {
-	char *val;
-	int sz;
-	int res;
+	var_na *val;
+	පූර්ණ_සංඛ්‍යා sz;
+	පූර්ණ_සංඛ්‍යා res;
 
 	sz = vasprintf(&val, format, ap);
-	if (sz < 0)
-		return -errno;
+	නම් (sz < 0)
+		ආපසු -errno;
 
 	/* Like strlen(), sz doesn't include the last null byte. */
 	res = ul_buffer_append_data(buf, val, sz);
 	free(val);
 
-	return res;
+	ආපසු res;
 }
 
-int ul_buffer_set_data(struct ul_buffer *buf, const char *data, size_t sz)
+පූර්ණ_සංඛ්‍යා ul_buffer_set_data(sa_nracanaa ul_buffer *buf, const var_na *data, size_t sz)
 {
 	ul_buffer_reset_data(buf);
-	return ul_buffer_append_data(buf, data, sz);
+	ආපසු ul_buffer_append_data(buf, data, sz);
 }
 
-char *ul_buffer_get_data(struct ul_buffer *buf, size_t *sz, size_t *width)
+var_na *ul_buffer_get_data(sa_nracanaa ul_buffer *buf, size_t *sz, size_t *width)
 {
-	if (sz)
+	නම් (sz)
 		*sz = buf->end - buf->begin;
-	if (width)
+	නම් (width)
 		*width = buf->begin && *buf->begin ? mbs_width(buf->begin) : 0;
-	return buf->begin;
+	ආපසු buf->begin;
 }
 
-char *ul_buffer_get_string(struct ul_buffer *buf, size_t *sz, size_t *width)
+var_na *ul_buffer_get_string(sa_nracanaa ul_buffer *buf, size_t *sz, size_t *width)
 {
-	char *ret;
+	var_na *ret;
 
 	ret = ul_buffer_get_data(buf, sz, width);
 
 	/* data in buffer is already zero-terminated */
-	if (sz)
+	නම් (sz)
 		*sz = *sz + 1;
 
-	return ret;
+	ආපසු ret;
 }
 
 /* size of allocated area (!= size of stored data */
-size_t ul_buffer_get_bufsiz(struct ul_buffer *buf)
+size_t ul_buffer_get_bufsiz(sa_nracanaa ul_buffer *buf)
 {
-	return buf->sz;
+	ආපසු buf->sz;
 }
 
-size_t ul_buffer_get_datasiz(struct ul_buffer *buf)
+size_t ul_buffer_get_datasiz(sa_nracanaa ul_buffer *buf)
 {
-	return buf->end - buf->begin;
+	ආපසු buf->end - buf->begin;
 }
 
 /* encode data by mbs_safe_encode() to avoid control and non-printable chars */
-char *ul_buffer_get_safe_data(struct ul_buffer *buf, size_t *sz, size_t *width, const char *safechars)
+var_na *ul_buffer_get_safe_data(sa_nracanaa ul_buffer *buf, size_t *sz, size_t *width, const var_na *safechars)
 {
-	char *data = ul_buffer_get_data(buf, NULL, NULL);
+	var_na *data = ul_buffer_get_data(buf, NULL, NULL);
 	size_t encsz, wsz = 0;
-	char *res = NULL;
+	var_na *res = NULL;
 
-	if (!data)
+	නම් (!data)
 		goto nothing;
 
 	encsz = mbs_safe_encode_size(buf->sz) + 1;
-	if (encsz > buf->encoded_sz) {
-		char *tmp = realloc(buf->encoded, encsz);
-		if (!tmp)
+	නම් (encsz > buf->encoded_sz) {
+		var_na *tmp = realloc(buf->encoded, encsz);
+		නම් (!tmp)
 			goto nothing;
 		buf->encoded = tmp;
 		buf->encoded_sz = encsz;
 	}
 
 	res = mbs_safe_encode_to_buffer(data, &wsz, buf->encoded, buf->encoded_sz, safechars);
-	if (!res || !wsz || wsz == (size_t) -1)
+	නම් (!res || !wsz || wsz == (size_t) -1)
 		goto nothing;
 
-	if (width)
+	නම් (width)
 		*width = wsz;
-	if (sz)
+	නම් (sz)
 		*sz = strlen(res);
-	return res;
+	ආපසු res;
 nothing:
-	if (width)
+	නම් (width)
 		*width = 0;
-	if (sz)
+	නම් (sz)
 		*sz = 0;
-	return NULL;
+	ආපසු NULL;
 }
 
 
 #ifdef TEST_PROGRAM_BUFFER
 
-enum {
+ga_nanaa {
 	PTR_AAA  = 0,
 	PTR_BBB,
 };
 
-int main(void)
+පූර්ණ_සංඛ්‍යා main(void)
 {
-	struct ul_buffer buf = UL_INIT_BUFFER;
-	char *str;
+	sa_nracanaa ul_buffer buf = UL_INIT_BUFFER;
+	var_na *str;
 	size_t sz = 0;
 
 	ul_buffer_set_chunksize(&buf, 16);
@@ -365,11 +365,11 @@ int main(void)
 	ul_buffer_free_data(&buf);
 	ul_buffer_append_char(&buf, 'x');
 	{
-		char c = 'y';
+		var_na c = 'y';
 		ul_buffer_append_char(&buf, c);
 	}
 	{
-		const char c = 'z';
+		const var_na c = 'z';
 		ul_buffer_append_char(&buf, c);
 	}
 	str = ul_buffer_get_data(&buf, &sz, NULL);
@@ -377,6 +377,6 @@ int main(void)
 
 	ul_buffer_free_data(&buf);
 
-	return EXIT_SUCCESS;
+	ආපසු EXIT_SUCCESS;
 }
 #endif /* TEST_PROGRAM_BUFFER */
