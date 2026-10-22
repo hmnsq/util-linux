@@ -10,10 +10,10 @@
  *  code or tables extracted from it, as desired without restriction.
  */
 
-#include <assert.h>
-#include "crc32c.h"
+#ضمن <assert.h>
+#ضمن "crc32c.h"
 
-static const uint32_t crc32Table[256] = {
+ساكن ثابت uint32_t چڪري_جاچ_32_جدول[256] = {
 	0x00000000L, 0xF26B8303L, 0xE13B70F7L, 0x1350F3F4L,
 	0xC79A971FL, 0x35F1141CL, 0x26A1E7E8L, 0xD4CA64EBL,
 	0x8AD958CFL, 0x78B2DBCCL, 0x6BE22838L, 0x9989AB3BL,
@@ -92,30 +92,30 @@ static const uint32_t crc32Table[256] = {
  *
  */
 uint32_t
-crc32c(uint32_t crc, const void *buf, size_t size)
+crc32c(uint32_t چڪري_جاچ, ثابت فراغ *buf, size_t سائيز)
 {
-	const uint8_t *p = buf;
+	ثابت uint8_t *p = buf;
 
-	while (size--)
-		crc = crc32Table[(crc ^ *p++) & 0xff] ^ (crc >> 8);
+	طالما (سائيز--)
+		چڪري_جاچ = چڪري_جاچ_32_جدول[(چڪري_جاچ ^ *p++) & 0xff] ^ (چڪري_جاچ >> 8);
 
-	return crc;
+	أرجع چڪري_جاچ;
 }
 
 uint32_t
-ul_crc32c_exclude_offset(uint32_t crc, const unsigned char *buf, size_t size,
+ul_crc32c_exclude_وٿي(uint32_t چڪري_جاچ, ثابت بنانشان حرف *buf, size_t سائيز,
 			 size_t exclude_off, size_t exclude_len)
 {
 	size_t i;
 
-	assert((exclude_off + exclude_len) <= size);
+	أكد((exclude_off + exclude_len) <= سائيز);
 
-	crc = crc32c(crc, buf, exclude_off);
-	for (i = 0; i < exclude_len; i++) {
+	چڪري_جاچ = crc32c(چڪري_جاچ, buf, exclude_off);
+	لكل (i = 0; i < exclude_len; i++) {
 		uint8_t zero = 0;
-		crc = crc32c(crc, &zero, 1);
+		چڪري_جاچ = crc32c(چڪري_جاچ, &zero, 1);
 	}
-	crc = crc32c(crc, &buf[exclude_off + exclude_len],
-		     size - (exclude_off + exclude_len));
-	return crc;
+	چڪري_جاچ = crc32c(چڪري_جاچ, &buf[exclude_off + exclude_len],
+		     سائيز - (exclude_off + exclude_len));
+	أرجع چڪري_جاچ;
 }
