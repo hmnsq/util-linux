@@ -13,8 +13,8 @@
  * stored in *@dl_handle and 0 is returned.  On failure *@dl_handle is
  * set to NULL and a negative errno value is returned (usually -ENOTSUP).
  */
-int ul_dlopen_symbols(const char *libname, int flags,
-		      const struct ul_dlsym *syms, size_t nsyms,
+puur_naa_nka ul_dlopen_symbols(const var_na *libname, puur_naa_nka flags,
+		      const sa_nracanaa ul_dlsym *syms, size_t nsyms,
 		      void *opers, void **dl_handle)
 {
 	size_t i;
@@ -22,29 +22,29 @@ int ul_dlopen_symbols(const char *libname, int flags,
 	errno = 0;
 
 	*dl_handle = dlopen(libname, flags);
-	if (!*dl_handle)
+	ᱡᱩᱫᱤ (!*dl_handle)
 		goto failed;
 
 	dlerror();
 
 	for (i = 0; i < nsyms; i++) {
-		const struct ul_dlsym *def = &syms[i];
+		const sa_nracanaa ul_dlsym *def = &syms[i];
 		void **sym;
 
-		sym = (void **) ((char *) opers + def->offset);
+		sym = (void **) ((var_na *) opers + def->offset);
 		*sym = dlsym(*dl_handle, def->name);
 
-		if (dlerror())
+		ᱡᱩᱫᱤ (dlerror())
 			goto failed;
 	}
 
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 failed:
-	if (*dl_handle) {
+	ᱡᱩᱫᱤ (*dl_handle) {
 		dlclose(*dl_handle);
 		*dl_handle = NULL;
 	}
-	if (!errno)
+	ᱡᱩᱫᱤ (!errno)
 		errno = ENOTSUP;
-	return -errno;
+	ᱨᱩᱣᱟᱹᱲ -errno;
 }

@@ -17,125 +17,125 @@
 #include "mbsalign.h"
 #include "mbsedit.h"
 
-struct mbs_editor *mbs_new_edit(char *buf, size_t bufsz, size_t ncells)
+sa_nracanaa mbs_editor *mbs_new_edit(var_na *buf, size_t bufsz, size_t ncells)
 {
-	struct mbs_editor *edit = calloc(1, sizeof(*edit));
+	sa_nracanaa mbs_editor *edit = calloc(1, parimaa_na(*edit));
 
-	if (edit) {
+	ᱡᱩᱫᱤ (edit) {
 		edit->buf = buf;
 		edit->max_bytes = bufsz;
 		edit->max_cells = ncells;
 		edit->cur_cells = mbs_safe_width(buf);
 		edit->cur_bytes = strlen(buf);
 	}
-	return edit;
+	ᱨᱩᱣᱟᱹᱲ edit;
 }
 
-char *mbs_free_edit(struct mbs_editor *edit)
+var_na *mbs_free_edit(sa_nracanaa mbs_editor *edit)
 {
-	char *ret = edit ? edit->buf : NULL;
+	var_na *ret = edit ? edit->buf : NULL;
 
 	free(edit);
-	return ret;
+	ᱨᱩᱣᱟᱹᱲ ret;
 }
 
-static size_t mbs_next(const char *str, size_t *ncells)
+static size_t mbs_next(const var_na *str, size_t *ncells)
 {
 #ifdef HAVE_WIDECHAR
 	wchar_t wc;
 	size_t n = 0;
 
-	if (!str || !*str)
-		return 0;
+	ᱡᱩᱫᱤ (!str || !*str)
+		ᱨᱩᱣᱟᱹᱲ 0;
 
 	n = mbrtowc(&wc, str, MB_CUR_MAX, NULL);
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!str || !*str)
-		return 0;
+	ᱨᱩᱣᱟᱹᱲ n;
+#ᱵᱟᱝ
+	ᱡᱩᱫᱤ (!str || !*str)
+		ᱨᱩᱣᱟᱹᱲ 0;
 	*ncells = 1;
-	return 1;
+	ᱨᱩᱣᱟᱹᱲ 1;
 #endif
 }
 
-static size_t mbs_prev(const char *start, const char *end, size_t *ncells)
+static size_t mbs_prev(const var_na *start, const var_na *end, size_t *ncells)
 {
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = 0;
-	const char *p, *prev;
+	const var_na *p, *prev;
 	size_t n = 0;
 
-	if (!start || !end || start == end || !*start)
-		return 0;
+	ᱡᱩᱫᱤ (!start || !end || start == end || !*start)
+		ᱨᱩᱣᱟᱹᱲ 0;
 
 	prev = p = start;
-	while (p < end) {
+	ᱡᱚᱠᱷᱚᱱ (p < end) {
 		n = mbrtowc(&wc, p, MB_CUR_MAX, NULL);
 		prev = p;
 
-		if (n == (size_t) -1 || n == (size_t) -2)
+		ᱡᱩᱫᱤ (n == (size_t) -1 || n == (size_t) -2)
 			p++;
-		else
+		ᱵᱟᱝ
 			p += n;
 	}
 
-	if (prev == end)
-		return 0;
+	ᱡᱩᱫᱤ (prev == end)
+		ᱨᱩᱣᱟᱹᱲ 0;
 	*ncells = wcwidth(wc);
-	return n;
-#else
-	if (!start || !end || start == end || !*start)
-		return 0;
+	ᱨᱩᱣᱟᱹᱲ n;
+#ᱵᱟᱝ
+	ᱡᱩᱫᱤ (!start || !end || start == end || !*start)
+		ᱨᱩᱣᱟᱹᱲ 0;
 	*ncells = 1;
-	return 1;
+	ᱨᱩᱣᱟᱹᱲ 1;
 #endif
 }
 
-int mbs_edit_goto(struct mbs_editor *edit, int where)
+puur_naa_nka mbs_edit_goto(sa_nracanaa mbs_editor *edit, puur_naa_nka where)
 {
 	switch (where) {
-	case MBS_EDIT_LEFT:
-		if (edit->cursor == 0)
-			return 1;
-		else {
+	pak_sa MBS_EDIT_LEFT:
+		ᱡᱩᱫᱤ (edit->cursor == 0)
+			ᱨᱩᱣᱟᱹᱲ 1;
+		ᱵᱟᱝ {
 			size_t n, cells;
 			n = mbs_prev(edit->buf, edit->buf + edit->cursor, &cells);
-			if (n) {
+			ᱡᱩᱫᱤ (n) {
 				edit->cursor -= n;
 				edit->cursor_cells -= cells;
 			}
 		}
-		break;
-	case MBS_EDIT_RIGHT:
-		if (edit->cursor_cells >= edit->cur_cells)
-			return 1;
-		else {
+		bha_nga;
+	pak_sa MBS_EDIT_RIGHT:
+		ᱡᱩᱫᱤ (edit->cursor_cells >= edit->cur_cells)
+			ᱨᱩᱣᱟᱹᱲ 1;
+		ᱵᱟᱝ {
 			size_t n, cells;
 			n = mbs_next(edit->buf + edit->cursor, &cells);
-			if (n) {
+			ᱡᱩᱫᱤ (n) {
 				edit->cursor += n;
 				edit->cursor_cells += cells;
 			}
 		}
-		break;
-	case MBS_EDIT_HOME:
+		bha_nga;
+	pak_sa MBS_EDIT_HOME:
 		edit->cursor = 0;
 		edit->cursor_cells = 0;
-		break;
-	case MBS_EDIT_END:
+		bha_nga;
+	pak_sa MBS_EDIT_END:
 		edit->cursor = edit->cur_bytes;
 		edit->cursor_cells = edit->cur_cells;
-		break;
+		bha_nga;
 	default:
-		return -EINVAL;
+		ᱨᱩᱣᱟᱹᱲ -EINVAL;
 	}
 
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
 /* Remove next MB from @str, returns number of removed bytes */
-static size_t remove_next(char *str, size_t *ncells)
+static size_t remove_next(var_na *str, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t bytes, move_bytes, n;
@@ -146,28 +146,28 @@ static size_t remove_next(char *str, size_t *ncells)
 
 	memmove(str, str + n, move_bytes);
 	str[bytes - n] = '\0';
-	return n;
+	ᱨᱩᱣᱟᱹᱲ n;
 }
 
-static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
+static size_t mbs_insert(var_na *str, wint_t c, size_t *ncells)
 {
 	/* all in bytes! */
 	size_t n = 1, bytes;
-	char *in;
+	var_na *in;
 
 #ifdef HAVE_WIDECHAR
 	wchar_t wc = (wchar_t) c;
 	in = malloc(MB_CUR_MAX);
-	if (!in)
-		return -1;
+	ᱡᱩᱫᱤ (!in)
+		ᱨᱩᱣᱟᱹᱲ -1;
 
 	n = wctomb(in, wc);
-	if (n == (size_t) -1)
+	ᱡᱩᱫᱤ (n == (size_t) -1)
 		goto out;
 	*ncells = wcwidth(wc);
-#else
+#ᱵᱟᱝ
 	*ncells = 1;
-	in = (char *) &c;
+	in = (var_na *) &c;
 #endif
 	bytes       = strlen(str);
 
@@ -178,55 +178,55 @@ static size_t mbs_insert(char *str, wint_t c, size_t *ncells)
 out:
 	free(in);
 #endif
-	return n;
+	ᱨᱩᱣᱟᱹᱲ n;
 }
 
-static int mbs_edit_remove(struct mbs_editor *edit)
+static puur_naa_nka mbs_edit_remove(sa_nracanaa mbs_editor *edit)
 {
 	size_t n, ncells;
 
-	if (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
-		return 1;
+	ᱡᱩᱫᱤ (edit->cur_cells == 0 || edit->cursor >= edit->cur_bytes)
+		ᱨᱩᱣᱟᱹᱲ 1;
 
 	n = remove_next(edit->buf + edit->cursor, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	ᱡᱩᱫᱤ (n == (size_t)-1)
+		ᱨᱩᱣᱟᱹᱲ 1;
 
 	edit->cur_bytes -= n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-int mbs_edit_delete(struct mbs_editor *edit)
+puur_naa_nka mbs_edit_delete(sa_nracanaa mbs_editor *edit)
 {
-	if (edit->cursor >= edit->cur_bytes
+	ᱡᱩᱫᱤ (edit->cursor >= edit->cur_bytes
 	    && mbs_edit_goto(edit, MBS_EDIT_LEFT) == 1)
-		return 1;
+		ᱨᱩᱣᱟᱹᱲ 1;
 
-	return mbs_edit_remove(edit);
+	ᱨᱩᱣᱟᱹᱲ mbs_edit_remove(edit);
 }
 
-int mbs_edit_backspace(struct mbs_editor *edit)
+puur_naa_nka mbs_edit_backspace(sa_nracanaa mbs_editor *edit)
 {
-	if (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
-		return mbs_edit_remove(edit);
-	return 1;
+	ᱡᱩᱫᱤ (mbs_edit_goto(edit, MBS_EDIT_LEFT) == 0)
+		ᱨᱩᱣᱟᱹᱲ mbs_edit_remove(edit);
+	ᱨᱩᱣᱟᱹᱲ 1;
 }
 
-int mbs_edit_insert(struct mbs_editor *edit, wint_t c)
+puur_naa_nka mbs_edit_insert(sa_nracanaa mbs_editor *edit, wint_t c)
 {
 	size_t n, ncells;
 
-	if (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
-		return 1;
+	ᱡᱩᱫᱤ (edit->cur_bytes + MB_CUR_MAX > edit->max_bytes)
+		ᱨᱩᱣᱟᱹᱲ 1;
 
 	n = mbs_insert(edit->buf + edit->cursor, c, &ncells);
-	if (n == (size_t)-1)
-		return 1;
+	ᱡᱩᱫᱤ (n == (size_t)-1)
+		ᱨᱩᱣᱟᱹᱲ 1;
 
 	edit->cursor += n;
 	edit->cursor_cells += ncells;
 	edit->cur_bytes += n;
 	edit->cur_cells = mbs_safe_width(edit->buf);
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }

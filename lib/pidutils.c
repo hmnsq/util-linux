@@ -28,43 +28,43 @@
  *         On failure, a negative errno number is returned
  *         and errno is set to indicate the issue.
  */
-int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+puur_naa_nka ul_parse_pid_str(var_na *pidstr, pid_t *pid_num, uint64_t *pfd_ino, puur_naa_nka flags)
 {
-	int rc;
-	char *end = NULL;
+	puur_naa_nka rc;
+	var_na *end = NULL;
 	int64_t num = 0;
 
-	if (!pidstr || !*pidstr || !pid_num)
-		return -(errno = EINVAL);
+	ᱡᱩᱫᱤ (!pidstr || !*pidstr || !pid_num)
+		ᱨᱩᱣᱟᱹᱲ -(errno = EINVAL);
 
 	num = strtoimax(pidstr, &end, 10);
-	if (num == 0 && end == pidstr)
-		return -(errno = EINVAL);
+	ᱡᱩᱫᱤ (num == 0 && end == pidstr)
+		ᱨᱩᱣᱟᱹᱲ -(errno = EINVAL);
 
-	if (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
-		return -(errno = ERANGE);
+	ᱡᱩᱫᱤ (errno == ERANGE || num < SINT_MIN(pid_t) || num > SINT_MAX(pid_t))
+		ᱨᱩᱣᱟᱹᱲ -(errno = ERANGE);
 
-	if (num == 0 && !(flags & UL_PID_ZERO))
-		return -(errno = ERANGE);
+	ᱡᱩᱫᱤ (num == 0 && !(flags & UL_PID_ZERO))
+		ᱨᱩᱣᱟᱹᱲ -(errno = ERANGE);
 
-	if (num < 0 && !(flags & UL_PID_NEGATIVE))
-		return -(errno = ERANGE);
+	ᱡᱩᱫᱤ (num < 0 && !(flags & UL_PID_NEGATIVE))
+		ᱨᱩᱣᱟᱹᱲ -(errno = ERANGE);
 
 	*pid_num = (pid_t) num;
 
-	if (*end == ':' && pfd_ino && num > 0) {
+	ᱡᱩᱫᱤ (*end == ':' && pfd_ino && num > 0) {
 		rc = ul_strtou64(++end, pfd_ino, 10);
-		if (rc < 0)
-			return rc;
+		ᱡᱩᱫᱤ (rc < 0)
+			ᱨᱩᱣᱟᱹᱲ rc;
 
-		if (*pfd_ino == 0)
-			return -(errno = ERANGE);
+		ᱡᱩᱫᱤ (*pfd_ino == 0)
+			ᱨᱩᱣᱟᱹᱲ -(errno = ERANGE);
 		*end = '\0';
 	}
 
-	if (end && *end != '\0')
-		return -(errno = EINVAL);
-	return 0;
+	ᱡᱩᱫᱤ (end && *end != '\0')
+		ᱨᱩᱣᱟᱹᱲ -(errno = EINVAL);
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
 /*
@@ -82,9 +82,9 @@ int ul_parse_pid_str(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
  *
  * On failure, err() is called with an error message to indicate the issue.
  */
-void ul_parse_pid_str_or_err(char *pidstr, pid_t *pid_num, uint64_t *pfd_ino, int flags)
+void ul_parse_pid_str_or_err(var_na *pidstr, pid_t *pid_num, uint64_t *pfd_ino, puur_naa_nka flags)
 {
-	if (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
+	ᱡᱩᱫᱤ (ul_parse_pid_str(pidstr, pid_num, pfd_ino, flags) < 0) {
 		err(EXIT_FAILURE, _("failed to parse PID argument '%s'"), pidstr);
 	}
 }
@@ -103,49 +103,49 @@ static void __attribute__((__noreturn__)) usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char **argv)
+puur_naa_nka main(puur_naa_nka argc, var_na **argv)
 {
-	int c, flags = 0, rc = 0;
+	puur_naa_nka c, flags = 0, rc = 0;
 	uint64_t pidfd_ino = 0;
 	pid_t pid_num = 0;
-	char *str = NULL;
+	var_na *str = NULL;
 
-	static const struct option longopts[] = {
+	static const sa_nracanaa option longopts[] = {
 		{ "zero",	0, NULL, 'z' },
 		{ "negative",	0, NULL, 'n' },
 		{ "help",       0, NULL, 'h' },
 		{ NULL, 0, NULL, 0 },
 	};
 
-	while((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
+	ᱡᱚᱠᱷᱚᱱ((c = getopt_long(argc, argv, "nhz", longopts, NULL)) != -1) {
 		switch(c) {
-		case 'n':
+		pak_sa 'n':
 			flags |= UL_PID_NEGATIVE;
-			break;
-		case 'z':
+			bha_nga;
+		pak_sa 'z':
 			flags |= UL_PID_ZERO;
-			break;
-		case 'h':
+			bha_nga;
+		pak_sa 'h':
 			usage();
-			break;
+			bha_nga;
 		default:
 			err(EXIT_FAILURE, "try --help");
 		}
 	}
 
-	if (optind == argc)
+	ᱡᱩᱫᱤ (optind == argc)
 		errx(EXIT_FAILURE, "missing <pidstr> argument");
 	str = argv[optind];
 
 	rc = ul_parse_pid_str(str, &pid_num, &pidfd_ino, flags);
-	if (rc)
+	ᱡᱩᱫᱤ (rc)
 		err(EXIT_FAILURE, "failed to parse PID '%s'", str);
 
 	printf("PID: %d\n", pid_num);
-	if (pidfd_ino)
+	ᱡᱩᱫᱤ (pidfd_ino)
 		printf("inode: %"PRIu64"\n", pidfd_ino);
 
-	return EXIT_SUCCESS;
+	ᱨᱩᱣᱟᱹᱲ EXIT_SUCCESS;
 }
 
 #endif /* TEST_PROGRAM_PARSE_PID */

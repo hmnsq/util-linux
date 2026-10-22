@@ -29,48 +29,48 @@
 #include "cpuset.h"
 #include "c.h"
 
-static inline int val_to_char(int v)
+static anta_hstha puur_naa_nka val_to_char(puur_naa_nka v)
 {
-	if (v >= 0 && v < 10)
-		return '0' + v;
-	if (v >= 10 && v < 16)
-		return ('a' - 10) + v;
-	return -1;
+	ᱡᱩᱫᱤ (v >= 0 && v < 10)
+		ᱨᱩᱣᱟᱹᱲ '0' + v;
+	ᱡᱩᱫᱤ (v >= 10 && v < 16)
+		ᱨᱩᱣᱟᱹᱲ ('a' - 10) + v;
+	ᱨᱩᱣᱟᱹᱲ -1;
 }
 
-static inline int char_to_val(int c)
+static anta_hstha puur_naa_nka char_to_val(puur_naa_nka c)
 {
-	int cl;
+	puur_naa_nka cl;
 
-	if (c >= '0' && c <= '9')
-		return c - '0';
+	ᱡᱩᱫᱤ (c >= '0' && c <= '9')
+		ᱨᱩᱣᱟᱹᱲ c - '0';
 	cl = tolower(c);
-	if (cl >= 'a' && cl <= 'f')
-		return cl + (10 - 'a');
-	return -1;
+	ᱡᱩᱫᱤ (cl >= 'a' && cl <= 'f')
+		ᱨᱩᱣᱟᱹᱲ cl + (10 - 'a');
+	ᱨᱩᱣᱟᱹᱲ -1;
 }
 
-static const char *nexttoken(const char *q,  int sep)
+static const var_na *nexttoken(const var_na *q,  puur_naa_nka sep)
 {
-	if (q)
+	ᱡᱩᱫᱤ (q)
 		q = strchr(q, sep);
-	if (q)
+	ᱡᱩᱫᱤ (q)
 		q++;
-	return q;
+	ᱨᱩᱣᱟᱹᱲ q;
 }
 
 /*
  * Number of bits in a CPU bitmask on current system
  */
-int get_max_number_of_cpus(void)
+puur_naa_nka get_max_number_of_cpus(void)
 {
 #ifdef SYS_sched_getaffinity
-	int n, cpus = 2048;
+	puur_naa_nka n, cpus = 2048;
 	size_t setsize;
 	cpu_set_t *set = cpuset_alloc(cpus, &setsize, NULL);
 
-	if (!set)
-		return -1;	/* error */
+	ᱡᱩᱫᱤ (!set)
+		ᱨᱩᱣᱟᱹᱲ -1;	/* error */
 
 	for (;;) {
 		CPU_ZERO_S(setsize, set);
@@ -78,37 +78,37 @@ int get_max_number_of_cpus(void)
 		/* the library version does not return size of cpumask_t */
 		n = syscall(SYS_sched_getaffinity, 0, setsize, set);
 
-		if (n < 0 && errno == EINVAL && cpus < 1024 * 1024) {
+		ᱡᱩᱫᱤ (n < 0 && errno == EINVAL && cpus < 1024 * 1024) {
 			cpuset_free(set);
 			cpus *= 2;
 			set = cpuset_alloc(cpus, &setsize, NULL);
-			if (!set)
-				return -1;	/* error */
+			ᱡᱩᱫᱤ (!set)
+				ᱨᱩᱣᱟᱹᱲ -1;	/* error */
 			continue;
 		}
 		cpuset_free(set);
-		return n * 8;
+		ᱨᱩᱣᱟᱹᱲ n * 8;
 	}
 #endif
-	return -1;
+	ᱨᱩᱣᱟᱹᱲ -1;
 }
 
 /*
  * Allocates a new set for ncpus and returns size in bytes and size in bits
  */
-cpu_set_t *cpuset_alloc(int ncpus, size_t *setsize, size_t *nbits)
+cpu_set_t *cpuset_alloc(puur_naa_nka ncpus, size_t *setsize, size_t *nbits)
 {
 	cpu_set_t *set = NULL;
 
-	if (ncpus)
+	ᱡᱩᱫᱤ (ncpus)
 		set = CPU_ALLOC(ncpus);
-	if (!set)
-		return NULL;
-	if (setsize)
+	ᱡᱩᱫᱤ (!set)
+		ᱨᱩᱣᱟᱹᱲ NULL;
+	ᱡᱩᱫᱤ (setsize)
 		*setsize = CPU_ALLOC_SIZE(ncpus);
-	if (nbits)
+	ᱡᱩᱫᱤ (nbits)
 		*nbits = cpuset_nbits(CPU_ALLOC_SIZE(ncpus));
-	return set;
+	ᱨᱩᱣᱟᱹᱲ set;
 }
 
 void cpuset_free(cpu_set_t *set)
@@ -116,27 +116,27 @@ void cpuset_free(cpu_set_t *set)
 	CPU_FREE(set);
 }
 
-#if !HAVE_DECL_CPU_ALLOC
+#ᱡᱩᱫᱤ !HAVE_DECL_CPU_ALLOC
 /* Please, use CPU_COUNT_S() macro. This is fallback */
-int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
+puur_naa_nka __cpuset_count_s(size_t setsize, const cpu_set_t *set)
 {
-	int s = 0;
+	puur_naa_nka s = 0;
 	const __cpu_mask *p = set->__bits;
-	const __cpu_mask *end = &set->__bits[setsize / sizeof (__cpu_mask)];
+	const __cpu_mask *end = &set->__bits[setsize / parimaa_na (__cpu_mask)];
 
-	while (p < end) {
+	ᱡᱚᱠᱷᱚᱱ (p < end) {
 		__cpu_mask l = *p++;
 
-		if (l == 0)
+		ᱡᱩᱫᱤ (l == 0)
 			continue;
-# if LONG_BIT > 32
+# ᱡᱩᱫᱤ LONG_BIT > 32
 		l = (l & 0x5555555555555555ul) + ((l >> 1) & 0x5555555555555555ul);
 		l = (l & 0x3333333333333333ul) + ((l >> 2) & 0x3333333333333333ul);
 		l = (l & 0x0f0f0f0f0f0f0f0ful) + ((l >> 4) & 0x0f0f0f0f0f0f0f0ful);
 		l = (l & 0x00ff00ff00ff00fful) + ((l >> 8) & 0x00ff00ff00ff00fful);
 		l = (l & 0x0000ffff0000fffful) + ((l >> 16) & 0x0000ffff0000fffful);
 		l = (l & 0x00000000fffffffful) + ((l >> 32) & 0x00000000fffffffful);
-# else
+# ᱵᱟᱝ
 		l = (l & 0x55555555ul) + ((l >> 1) & 0x55555555ul);
 		l = (l & 0x33333333ul) + ((l >> 2) & 0x33333333ul);
 		l = (l & 0x0f0f0f0ful) + ((l >> 4) & 0x0f0f0f0ful);
@@ -145,7 +145,7 @@ int __cpuset_count_s(size_t setsize, const cpu_set_t *set)
 # endif
 		s += l;
 	}
-	return s;
+	ᱨᱩᱣᱟᱹᱲ s;
 }
 #endif
 
@@ -163,53 +163,53 @@ static size_t find_next_cpu(size_t start, size_t setsize, cpu_set_t *set)
 {
 	size_t nbits = cpuset_nbits(setsize);
 	for (; start < nbits; start++)
-		if (CPU_ISSET_S(start, setsize, set))
-			return start;
-	return start;
+		ᱡᱩᱫᱤ (CPU_ISSET_S(start, setsize, set))
+			ᱨᱩᱣᱟᱹᱲ start;
+	ᱨᱩᱣᱟᱹᱲ start;
 }
 
 /*
  * Returns human readable representation of the cpuset. The output format is
  * a list of CPUs with ranges (for example, "0,1,3-9:3").
  */
-char *cpulist_create(char *str, size_t len,
+var_na *cpulist_create(var_na *str, size_t len,
 			cpu_set_t *set, size_t setsize)
 {
-	char *ptr = str;
-	int entry_made = 0;
+	var_na *ptr = str;
+	puur_naa_nka entry_made = 0;
 	size_t max = cpuset_nbits(setsize);
 	size_t a = 0;  /* min for cpu range */
 	size_t next = 0;  /* where to start looking for next cpu */
 
-	while ((a = find_next_cpu(next, setsize, set)) < max) {
-		int rlen;
+	ᱡᱚᱠᱷᱚᱱ ((a = find_next_cpu(next, setsize, set)) < max) {
+		puur_naa_nka rlen;
 		next = find_next_cpu(a + 1, setsize, set);
-		if (next == max) {
+		ᱡᱩᱫᱤ (next == max) {
 			rlen = snprintf(ptr, len, "%zu,", a);
-		} else {
+		} ᱵᱟᱝ {
 			/* Extend range as long as we have the same stride. */
 			size_t b = next;
 			size_t s = b - a;
-			while (((next = find_next_cpu(b + 1, setsize, set)) <
+			ᱡᱚᱠᱷᱚᱱ (((next = find_next_cpu(b + 1, setsize, set)) <
 				max) && next - b == s) {
 				b = next;
 			}
-			if (b - a == s) {
+			ᱡᱩᱫᱤ (b - a == s) {
 				/*
 				 * Only print one CPU.  Hope the next one can
 				 * be put in the next range.
 				 */
 				rlen = snprintf(ptr, len, "%zu,", a);
 				next = b;
-			} else if (s == 1) {
+			} ᱵᱟᱝ ᱡᱩᱫᱤ (s == 1) {
 				rlen = snprintf(ptr, len, "%zu-%zu,", a, b);
-			} else {
+			} ᱵᱟᱝ {
 				rlen = snprintf(ptr, len, "%zu-%zu:%zu,",
 						a, b, s);
 			}
 		}
-		if (rlen < 0 || (size_t) rlen >= len)
-			return NULL;
+		ᱡᱩᱫᱤ (rlen < 0 || (size_t) rlen >= len)
+			ᱨᱩᱣᱟᱹᱲ NULL;
 		ptr += rlen;
 		len -= rlen;
 		entry_made = 1;
@@ -217,29 +217,29 @@ char *cpulist_create(char *str, size_t len,
 	ptr -= entry_made;
 	*ptr = '\0';
 
-	return str;
+	ᱨᱩᱣᱟᱹᱲ str;
 }
 
 /*
  * cpulist_flat_create - Convert cpumask to flat comma-separated list
  * Output: ONLY single CPUs, NO ranges (e.g. "0,1,2,3,4")
  */
-char *cpulist_flat_create(char *str, size_t len,
+var_na *cpulist_flat_create(var_na *str, size_t len,
 			    cpu_set_t *set, size_t setsize)
 {
-	char *ptr = str;
-	int entry_made = 0;
+	var_na *ptr = str;
+	puur_naa_nka entry_made = 0;
 	size_t max = cpuset_nbits(setsize);
 	size_t cpu;
-	int rlen;
+	puur_naa_nka rlen;
 
 	for (cpu = 0; cpu < max; cpu++) {
-		if (!CPU_ISSET_S(cpu, setsize, set))
+		ᱡᱩᱫᱤ (!CPU_ISSET_S(cpu, setsize, set))
 			continue;
 
 		rlen = snprintf(ptr, len, "%zu,", cpu);
-		if (rlen < 0 || (size_t)rlen >= len)
-			return NULL;
+		ᱡᱩᱫᱤ (rlen < 0 || (size_t)rlen >= len)
+			ᱨᱩᱣᱟᱹᱲ NULL;
 
 		ptr += rlen;
 		len -= rlen;
@@ -248,94 +248,94 @@ char *cpulist_flat_create(char *str, size_t len,
 	ptr -= entry_made;
 	*ptr = '\0';
 
-	return str;
+	ᱨᱩᱣᱟᱹᱲ str;
 }
 
 
 /*
  * Returns string with CPU mask.
  */
-char *cpumask_create(char *str, size_t len,
+var_na *cpumask_create(var_na *str, size_t len,
 			cpu_set_t *set, size_t setsize)
 {
-	char *ptr = str;
-	char *ret = NULL;
-	int cpu;
+	var_na *ptr = str;
+	var_na *ret = NULL;
+	puur_naa_nka cpu;
 
 	for (cpu = cpuset_nbits(setsize) - 4; cpu >= 0; cpu -= 4) {
-		char val = 0;
+		var_na val = 0;
 
-		if (len == (size_t) (ptr - str))
-			break;
+		ᱡᱩᱫᱤ (len == (size_t) (ptr - str))
+			bha_nga;
 
-		if (CPU_ISSET_S(cpu, setsize, set))
+		ᱡᱩᱫᱤ (CPU_ISSET_S(cpu, setsize, set))
 			val |= 1;
-		if (CPU_ISSET_S(cpu + 1, setsize, set))
+		ᱡᱩᱫᱤ (CPU_ISSET_S(cpu + 1, setsize, set))
 			val |= 2;
-		if (CPU_ISSET_S(cpu + 2, setsize, set))
+		ᱡᱩᱫᱤ (CPU_ISSET_S(cpu + 2, setsize, set))
 			val |= 4;
-		if (CPU_ISSET_S(cpu + 3, setsize, set))
+		ᱡᱩᱫᱤ (CPU_ISSET_S(cpu + 3, setsize, set))
 			val |= 8;
 
-		if (!ret && val)
+		ᱡᱩᱫᱤ (!ret && val)
 			ret = ptr;
 		*ptr++ = val_to_char(val);
 	}
 	*ptr = '\0';
-	return ret ? ret : ptr - 1;
+	ᱨᱩᱣᱟᱹᱲ ret ? ret : ptr - 1;
 }
 
 /*
  * Parses string with CPUs mask.
  */
-int cpumask_parse(const char *str, cpu_set_t *set, size_t setsize)
+puur_naa_nka cpumask_parse(const var_na *str, cpu_set_t *set, size_t setsize)
 {
-	int len = strlen(str);
-	const char *ptr = str + len - 1;
-	int cpu = 0;
+	puur_naa_nka len = strlen(str);
+	const var_na *ptr = str + len - 1;
+	puur_naa_nka cpu = 0;
 
 	/* skip 0x, it's all hex anyway */
-	if (len > 1 && !memcmp(str, "0x", 2L))
+	ᱡᱩᱫᱤ (len > 1 && !memcmp(str, "0x", 2L))
 		str += 2;
 
 	CPU_ZERO_S(setsize, set);
 
-	while (ptr >= str) {
-		char val;
+	ᱡᱚᱠᱷᱚᱱ (ptr >= str) {
+		var_na val;
 
 		/* cpu masks in /sys uses comma as a separator */
-		if (*ptr == ',')
+		ᱡᱩᱫᱤ (*ptr == ',')
 			ptr--;
 
 		val = char_to_val(*ptr);
-		if (val == (char) -1)
-			return -1;
-		if (val & 1)
+		ᱡᱩᱫᱤ (val == (var_na) -1)
+			ᱨᱩᱣᱟᱹᱲ -1;
+		ᱡᱩᱫᱤ (val & 1)
 			CPU_SET_S(cpu, setsize, set);
-		if (val & 2)
+		ᱡᱩᱫᱤ (val & 2)
 			CPU_SET_S(cpu + 1, setsize, set);
-		if (val & 4)
+		ᱡᱩᱫᱤ (val & 4)
 			CPU_SET_S(cpu + 2, setsize, set);
-		if (val & 8)
+		ᱡᱩᱫᱤ (val & 8)
 			CPU_SET_S(cpu + 3, setsize, set);
 		ptr--;
 		cpu += 4;
 	}
 
-	return 0;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
-static int nextnumber(const char *str, char **end, unsigned int *result)
+static puur_naa_nka nextnumber(const var_na *str, var_na **end, unsigned puur_naa_nka *result)
 {
 	errno = 0;
-	if (str == NULL || *str == '\0' || !isdigit(*str))
-		return -EINVAL;
-	*result = (unsigned int) strtoul(str, end, 10);
-	if (errno)
-		return -errno;
-	if (str == *end)
-		return -EINVAL;
-	return 0;
+	ᱡᱩᱫᱤ (str == NULL || *str == '\0' || !isdigit(*str))
+		ᱨᱩᱣᱟᱹᱲ -EINVAL;
+	*result = (unsigned puur_naa_nka) strtoul(str, end, 10);
+	ᱡᱩᱫᱤ (errno)
+		ᱨᱩᱣᱟᱹᱲ -errno;
+	ᱡᱩᱫᱤ (str == *end)
+		ᱨᱩᱣᱟᱹᱲ -EINVAL;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
 /*
@@ -346,24 +346,24 @@ static int nextnumber(const char *str, char **end, unsigned int *result)
  * into the cpu_set. If fail is not set cpu numbers that do not fit are
  * ignored and 0 is returned instead.
  */
-int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
+puur_naa_nka cpulist_parse(const var_na *str, cpu_set_t *set, size_t setsize, puur_naa_nka fail)
 {
 	const size_t max = cpuset_nbits(setsize);
-	const char *p, *q;
-	char *end = NULL;
+	const var_na *p, *q;
+	var_na *end = NULL;
 
 	q = str;
 	CPU_ZERO_S(setsize, set);
 
-	while (p = q, q = nexttoken(q, ','), p) {
-		unsigned int a;	/* beginning of range */
-		unsigned int b;	/* end of range */
-		unsigned int s;	/* stride */
-		const char *c1, *c2;
+	ᱡᱚᱠᱷᱚᱱ (p = q, q = nexttoken(q, ','), p) {
+		unsigned puur_naa_nka a;	/* beginning of range */
+		unsigned puur_naa_nka b;	/* end of range */
+		unsigned puur_naa_nka s;	/* stride */
+		const var_na *c1, *c2;
 
-		if (nextnumber(p, &end, &a) != 0 ||
+		ᱡᱩᱫᱤ (nextnumber(p, &end, &a) != 0 ||
 			(*end && *end != ',' && *end != '-'))
-			return 1;
+			ᱨᱩᱣᱟᱹᱲ 1;
 		b = a;
 		s = 1;
 		p = end;
@@ -371,80 +371,80 @@ int cpulist_parse(const char *str, cpu_set_t *set, size_t setsize, int fail)
 		c1 = nexttoken(p, '-');
 		c2 = nexttoken(p, ',');
 
-		if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-			if (nextnumber(c1, &end, &b) != 0 ||
+		ᱡᱩᱫᱤ (c1 != NULL && (c2 == NULL || c1 < c2)) {
+			ᱡᱩᱫᱤ (nextnumber(c1, &end, &b) != 0 ||
 				(*end && *end != ',' && *end != ':'))
-				return 1;
+				ᱨᱩᱣᱟᱹᱲ 1;
 
 			c1 = nexttoken(end, ':');
 
-			if (c1 != NULL && (c2 == NULL || c1 < c2)) {
-				if (nextnumber(c1, &end, &s) != 0 ||
+			ᱡᱩᱫᱤ (c1 != NULL && (c2 == NULL || c1 < c2)) {
+				ᱡᱩᱫᱤ (nextnumber(c1, &end, &s) != 0 ||
 					(*end && *end != ','))
-					return 1;
-				if (s == 0)
-					return 1;
+					ᱨᱩᱣᱟᱹᱲ 1;
+				ᱡᱩᱫᱤ (s == 0)
+					ᱨᱩᱣᱟᱹᱲ 1;
 			}
 		}
 
-		if (!(a <= b))
-			return 1;
-		while (a <= b) {
-			if (a >= max) {
-				if (fail)
-					return 2;
-				else
-					break;
+		ᱡᱩᱫᱤ (!(a <= b))
+			ᱨᱩᱣᱟᱹᱲ 1;
+		ᱡᱚᱠᱷᱚᱱ (a <= b) {
+			ᱡᱩᱫᱤ (a >= max) {
+				ᱡᱩᱫᱤ (fail)
+					ᱨᱩᱣᱟᱹᱲ 2;
+				ᱵᱟᱝ
+					bha_nga;
 			}
 			CPU_SET_S(a, setsize, set);
 			a += s;
 		}
 	}
 
-	if (end && *end)
-		return 1;
-	return 0;
+	ᱡᱩᱫᱤ (end && *end)
+		ᱨᱩᱣᱟᱹᱲ 1;
+	ᱨᱩᱣᱟᱹᱲ 0;
 }
 
 #ifdef TEST_PROGRAM_CPUSET
 
 #include <getopt.h>
 
-int main(int argc, char *argv[])
+puur_naa_nka main(puur_naa_nka argc, var_na *argv[])
 {
 	cpu_set_t *set;
 	size_t setsize, buflen, nbits;
-	char *buf, *mask = NULL, *range = NULL;
-	int ncpus = 2048, rc, c;
+	var_na *buf, *mask = NULL, *range = NULL;
+	puur_naa_nka ncpus = 2048, rc, c;
 
-	static const struct option longopts[] = {
+	static const sa_nracanaa option longopts[] = {
 	    { "ncpus", 1, NULL, 'n' },
 	    { "mask",  1, NULL, 'm' },
 	    { "range", 1, NULL, 'r' },
 	    { NULL,    0, NULL, 0 }
 	};
 
-	while ((c = getopt_long(argc, argv, "n:m:r:", longopts, NULL)) != -1) {
+	ᱡᱚᱠᱷᱚᱱ ((c = getopt_long(argc, argv, "n:m:r:", longopts, NULL)) != -1) {
 		switch(c) {
-		case 'n':
+		pak_sa 'n':
 			ncpus = atoi(optarg);
-			break;
-		case 'm':
+			bha_nga;
+		pak_sa 'm':
 			mask = optarg;
-			break;
-		case 'r':
+			bha_nga;
+		pak_sa 'r':
 			range = optarg;
-			break;
+			bha_nga;
 		default:
 			goto usage_err;
 		}
 	}
 
-	if (!mask && !range)
+	ᱡᱩᱫᱤ (!mask && !range)
 		goto usage_err;
 
 	set = cpuset_alloc(ncpus, &setsize, &nbits);
-	if (!set)
+	ᱡᱩᱫᱤ (!set)
 		err(EXIT_FAILURE, "failed to allocate cpu set");
 
 	/*
@@ -454,15 +454,15 @@ int main(int argc, char *argv[])
 
 	buflen = 7 * nbits;
 	buf = malloc(buflen);
-	if (!buf)
+	ᱡᱩᱫᱤ (!buf)
 		err(EXIT_FAILURE, "failed to allocate cpu set buffer");
 
-	if (mask)
+	ᱡᱩᱫᱤ (mask)
 		rc = cpumask_parse(mask, set, setsize);
-	else
+	ᱵᱟᱝ
 		rc = cpulist_parse(range, set, setsize, 0);
 
-	if (rc)
+	ᱡᱩᱫᱤ (rc)
 		errx(EXIT_FAILURE, "failed to parse string: %s", mask ? : range);
 
 	printf("%-15s = %15s ", mask ? : range,
@@ -472,7 +472,7 @@ int main(int argc, char *argv[])
 	free(buf);
 	cpuset_free(set);
 
-	return EXIT_SUCCESS;
+	ᱨᱩᱣᱟᱹᱲ EXIT_SUCCESS;
 
 usage_err:
 	fprintf(stderr,
